@@ -24,21 +24,23 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.commons.collections.map.IdentityMap;
 import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Factory for collections, being aware of JDK 1.4's extended collections
- * and Commons Collection 3.1's corresponding versions for older JDKs.
+ * Factory for collections, being aware of JDK 1.4+ extended collections
+ * and Commons Collection 3.x's corresponding versions for older JDKs.
  * Mainly for internal use within the framework.
  *
- * <p>The goal of this class is to avoid runtime dependencies on JDK 1.4
+ * <p>The goal of this class is to avoid runtime dependencies on JDK 1.4+
  * or Commons Collections 3.x, simply using the best collection implementation
- * that is available. Prefers JDK 1.4 collection implementations to Commons
- * Collections 3.x versions.
+ * that is available. Prefers JDK 1.4+ collection implementations to Commons
+ * Collections 3.x versions, falling back to JDK 1.3 collections as worst case.
  *
  * @author Juergen Hoeller
  * @since 1.1.1
@@ -53,27 +55,24 @@ public class CollectionFactory {
 	private static boolean commonsCollections3xAvailable;
 
 	static {
-		// Check whether Commons Collections 3.x is available,
-		// provided that we're not running on JDK >= 1.4 in the first place.
+		// Check whether JDK 1.4+ collections and/or
+		// Commons Collections 3.x are available.
 		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			logger.info("Using JDK 1.4 collections");
+			logger.info("JDK 1.4+ collections available");
 		}
-		else {
-			try {
-				Class.forName(COMMONS_COLLECTIONS_CLASS_NAME);
-				commonsCollections3xAvailable = true;
-				logger.info("Using Commons Collections 3.x");
-			}
-			catch (ClassNotFoundException ex) {
-				commonsCollections3xAvailable = false;
-				logger.info("Using JDK 1.3 collections");
-			}
+		try {
+			Class.forName(COMMONS_COLLECTIONS_CLASS_NAME);
+			commonsCollections3xAvailable = true;
+			logger.info("Commons Collections 3.x available");
+		}
+		catch (ClassNotFoundException ex) {
+			commonsCollections3xAvailable = false;
 		}
 	}
 
 	/**
 	 * Create a linked set if possible: that is, if running on JDK >= 1.4
-	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4
+	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * LinkedHashSet to a Commons Collections 3.x ListOrderedSet.
 	 * @param initialCapacity the initial capacity of the set
 	 * @return the new set instance
@@ -87,7 +86,7 @@ public class CollectionFactory {
 		}
 		else if (commonsCollections3xAvailable) {
 			logger.debug("Creating org.apache.commons.collections.set.ListOrderedSet");
-			return CommonsCollectionFactory.createCommonsListOrderedSet(initialCapacity);
+			return CommonsCollectionFactory.createListOrderedSet(initialCapacity);
 		}
 		else {
 			logger.debug("Falling back to java.util.HashSet for linked set");
@@ -97,7 +96,7 @@ public class CollectionFactory {
 
 	/**
 	 * Create a linked map if possible: that is, if running on JDK >= 1.4
-	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4
+	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * LinkedHashMap to a Commons Collections 3.x LinkedMap.
 	 * @param initialCapacity the initial capacity of the map
 	 * @return the new map instance
@@ -111,7 +110,7 @@ public class CollectionFactory {
 		}
 		else if (commonsCollections3xAvailable) {
 			logger.debug("Creating org.apache.commons.collections.map.LinkedMap");
-			return CommonsCollectionFactory.createCommonsLinkedMap(initialCapacity);
+			return CommonsCollectionFactory.createLinkedMap(initialCapacity);
 		}
 		else {
 			logger.debug("Falling back to java.util.HashMap for linked map");
@@ -120,8 +119,32 @@ public class CollectionFactory {
 	}
 
 	/**
-	 * Create an identity map if possible: that is, if running on JDK 1.4
-	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4
+	 * Create a linked case-insensitive map if possible: if Commons Collections
+	 * 3.x is available, a CaseInsensitiveMap with ListOrderedMap decorator will
+	 * be created. Else, a JDK 1.4+ LinkedHashMap or plain HashMap will be used.
+	 * @param initialCapacity the initial capacity of the map
+	 * @return the new map instance
+	 * @see org.apache.commons.collections.map.CaseInsensitiveMap
+	 * @see org.apache.commons.collections.map.ListOrderedMap
+	 */
+	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
+		if (commonsCollections3xAvailable) {
+			logger.debug("Creating org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap");
+			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
+		}
+		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			logger.debug("Falling back to java.util.LinkedHashMap for linked case-insensitive map");
+			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
+		}
+		else {
+			logger.debug("Falling back to java.util.HashMap for linked case-insensitive map");
+			return new HashMap(initialCapacity);
+		}
+	}
+
+	/**
+	 * Create an identity map if possible: that is, if running on JDK >= 1.4
+	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * IdentityHashMap to a Commons Collections 3.x IdentityMap.
 	 * @param initialCapacity the initial capacity of the map
 	 * @return the new map instance
@@ -135,7 +158,7 @@ public class CollectionFactory {
 		}
 		else if (commonsCollections3xAvailable) {
 			logger.debug("Creating org.apache.commons.collections.map.IdentityMap");
-			return CommonsCollectionFactory.createCommonsIdentityMap(initialCapacity);
+			return CommonsCollectionFactory.createIdentityMap(initialCapacity);
 		}
 		else {
 			logger.debug("Falling back to java.util.HashMap for identity map");
@@ -145,8 +168,8 @@ public class CollectionFactory {
 
 
 	/**
-	 * Actual creation of JDK 1.4 Collections.
-	 * In separate inner class to avoid runtime dependency on JDK 1.4.
+	 * Actual creation of JDK 1.4+ Collections.
+	 * In separate inner class to avoid runtime dependency on JDK 1.4+.
 	 */
 	private static abstract class Jdk14CollectionFactory {
 
@@ -170,16 +193,21 @@ public class CollectionFactory {
 	 */
 	private static abstract class CommonsCollectionFactory {
 
-		private static Set createCommonsListOrderedSet(int initialCapacity) {
+		private static Set createListOrderedSet(int initialCapacity) {
 			return ListOrderedSet.decorate(new HashSet(initialCapacity));
 		}
 
-		private static Map createCommonsLinkedMap(int initialCapacity) {
+		private static Map createLinkedMap(int initialCapacity) {
 			// Commons Collections does not support initial capacity of 0.
 			return new LinkedMap(initialCapacity == 0 ? 1 : initialCapacity);
 		}
 
-		private static Map createCommonsIdentityMap(int initialCapacity) {
+		private static Map createListOrderedCaseInsensitiveMap(int initialCapacity) {
+			// Commons Collections does not support initial capacity of 0.
+			return ListOrderedMap.decorate(new CaseInsensitiveMap(initialCapacity == 0 ? 1 : initialCapacity));
+		}
+
+		private static Map createIdentityMap(int initialCapacity) {
 			// Commons Collections does not support initial capacity of 0.
 			return new IdentityMap(initialCapacity == 0 ? 1 : initialCapacity);
 		}
