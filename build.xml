@@ -22,9 +22,6 @@
 
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
-			<!-- Exclude ibatis-common-2, because it conflicts with ibatis-common. -->
-			<!-- The former is not needed for building the framework, but the latter is. -->
-			<exclude name="ibatis/ibatis-common-2.jar"/>
 		</fileset>
 
 	</path>
@@ -59,10 +56,7 @@
 	</target>
 
 
-	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc.)">
-
-		<delete dir="${dist.dir}"/>
-		<delete dir="${javadocs.dir}"/>
+	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
 
 		<delete dir="${target.classes.dir}"/>
 		<delete dir="${target.testclasses.dir}"/>
@@ -71,11 +65,13 @@
 		<delete dir="${target.junit.reports.dir}"/>
 		<delete dir="${target.junit.summary.dir}"/>
 		<delete dir="${target.release.dir}"/>
-		<delete dir="${target.loadclasses.dir}"/>
 		<delete dir="${target.otherclasses.dir}"/>
 
-		<!-- just kill target dir (it's safer). No need at this point to keep it -->
+		<!-- Just kill target dir (it's safer). No need at this point to keep it. -->
 		<delete dir="${target.dir}"/>
+
+		<delete dir="${dist.dir}"/>
+		<delete dir="${javadocs.dir}"/>
 
 	</target>
 
@@ -311,15 +307,27 @@
 	</target>
 
 
-	<target name="srczip" depends="initdist" description="Create source ZIP (containing all Java sources)">
+	<target name="srczip" depends="initdist" description="Create source ZIP (containing Java sources)">
 
 		<delete file="${dist.dir}/spring-src.zip"/>
+		<delete file="${dist.dir}/spring-mock-src.zip"/>
 
 		<zip zipfile="${dist.dir}/spring-src.zip">
 			<fileset dir="${src.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
 		</zip>
+
+		<zip zipfile="${dist.dir}/spring-mock-src.zip">
+			<fileset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</zip>
+
+	</target>
+
+
+	<target name="distfiles" depends="initdist" description="Copy dtd, tld and co to dist directory">
 
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
 				todir="${dist.dir}" preservelastmodified="true"/>
@@ -332,30 +340,6 @@
 
 		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
 				todir="${dist.dir}" preservelastmodified="true"/>
-
-	</target>
-
-	<target name="sandbox-srczip" depends="initdist" description="Create sandbox source ZIP (containing all Java sources)">
-
-		<delete file="${dist.dir}/spring-sandbox-src.zip"/>
-
-		<zip zipfile="${dist.dir}/spring-sandbox-src.zip">
-			<fileset dir="${sandbox.src.dir}">
-				<include name="org/springframework/**"/>
-			</fileset>
-		</zip>
-
-	</target>
-
-	<target name="mock-srczip" depends="initdist" description="Create mock source ZIP (containing all Java sources)">
-
-		<delete file="${dist.dir}/spring-mock-src.zip"/>
-
-		<zip zipfile="${dist.dir}/spring-mock-src.zip">
-			<fileset dir="${mock.dir}">
-				<include name="org/springframework/**"/>
-			</fileset>
-		</zip>
 
 	</target>
 
@@ -442,94 +426,6 @@
 	</target>
 
 
-	<target name="release" depends="alljars,javadoc,refdoc" description="Generate release zip file">
-
-		<mkdir dir="${target.release.dir}"/>
-
-		<delete file="${target.release.dir}/${release.zip}"/>
-		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
-
-		<fileset id="main" dir=".">
-			<include name="dist/*.jar"/>
-			<include name="dist/*.dtd"/>
-			<include name="dist/*.tld"/>
-			<include name="dist/*.vm"/>
-			<include name="dist/*.ftl"/>
-			<include name="docs/**"/>
-			<exclude name="docs/reference/images/**"/>
-			<exclude name="docs/reference/src/**"/>
-			<exclude name="docs/reference/styles/**"/>
-			<exclude name="docs/reference/.cvsignore"/>
-			<exclude name="docs/reference/readme.txt"/>
-			<exclude name="docs/reference/lib/**"/>
-			<exclude name="docs/reference/html/**"/>
-			<exclude name="docs/reference/pdf/images/**"/>
-			<include name="samples/countries/**"/>
-			<include name="samples/imagedb/**"/>
-			<include name="samples/jpetstore/**"/>
-			<include name="samples/petclinic/**"/>
-			<include name="samples/tiles-example/**"/>
-			<include name="samples/webapp-minimal/**"/>
-			<include name="samples/webapp-typical/**"/>
-			<include name="mock/**"/>
-			<include name="src/**"/>
-			<include name="test/**"/>
-			<include name="*.bat"/>
-			<include name="*.txt"/>
-			<include name="*.xml"/>
-			<include name="*.properties"/>
-		</fileset>
-
-		<zip zipfile="${target.release.dir}/${release.zip}">
-			<zipfileset refid="main" prefix="${release.path}"/>
-		</zip>
-
-		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
-			<zipfileset refid="main" prefix="${release.path}"/>
-			<zipfileset dir="." prefix="${release.path}">
-				<include name="lib/*.txt"/>
-				<include name="lib/ant/**"/>
-				<include name="lib/axis/**"/>
-				<include name="lib/aopalliance/**"/>
-				<include name="lib/bsh/**"/>
-				<include name="lib/caucho/**"/>
-				<include name="lib/cglib/**"/>
-				<include name="lib/cos/**"/>
-				<include name="lib/dom4j/**"/>
-				<include name="lib/easymock/**"/>
-				<include name="lib/ehcache/**"/>
-				<include name="lib/freemarker/**"/>
-				<include name="lib/hibernate/**"/>
-				<include name="lib/hsqldb/**"/>
-				<include name="lib/ibatis/**"/>
-				<include name="lib/itext/**"/>
-				<include name="lib/j2ee/**"/>
-				<include name="lib/jakarta-commons/**"/>
-				<include name="lib/jakarta-taglibs/**"/>
-				<include name="lib/jamon/**"/>
-				<include name="lib/jasperreports/**"/>
-				<include name="lib/jdo/**"/>
-				<include name="lib/jdom/**"/>
-				<include name="lib/jotm/**"/>
-				<include name="lib/jsf/**"/>
-				<include name="lib/junit/**"/>
-				<include name="lib/log4j/**"/>
-				<include name="lib/ojb/**"/>
-				<include name="lib/oro/**"/>
-				<include name="lib/poi/**"/>
-				<include name="lib/quartz/**"/>
-				<include name="lib/struts/**"/>
-				<include name="lib/velocity/**"/>
-				<include name="lib/xdoclet/**"/>
-			</zipfileset>
-		</zip>
-
-	</target>
-
-
-	<target name="clean_release" depends="clean, release"/>
-
-
  	<target name="compiletestattr" depends="buildmock">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -611,9 +507,6 @@
 	</target>
 
 
-	<target name="clean_tests" depends="clean, tests"/>
-
-
 	<!--
 		Run test suite and generate test summary.
 		Does not halt on failure or error, in contrast to the "tests" target above.
@@ -659,6 +552,9 @@
 		</junitreport>
 
 	</target>
+
+
+	<target name="clean_tests" depends="clean, tests"/>
 
 
 	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
@@ -746,7 +642,7 @@
 	</target>
 
 
-	<target name="docclean" description="Delete temporary and distribution directories for docs">
+	<target name="doc.clean" description="Delete temporary and distribution directories for docs">
 
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html_single"/>
@@ -755,7 +651,7 @@
 	</target>
 
 
-	<target name="preparedocs" description="Extra preparation for the documentation">
+	<target name="doc.prepare" description="Extra preparation for the documentation">
 
 		<fail message="XSLT supporting lib not installed. Please see docs/reference/readme.txt for instructions.">
 			<condition>
@@ -788,7 +684,7 @@
 	</target>
 
 
-	<target name="docpdf" depends="preparedocs" description="Compile reference documentation to pdf">
+	<target name="doc.pdf" depends="doc.prepare" description="Compile reference documentation to pdf">
 
 		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
 
@@ -827,7 +723,7 @@
 	</target>
 
 
-	<target name="dochtml" depends="preparedocs" description="Compile reference documentation to chunked html">
+	<target name="doc.html" depends="doc.prepare" description="Compile reference documentation to chunked html">
 
 		<mkdir dir="${dist.ref.dir}/html/images"/>
 
@@ -852,7 +748,7 @@
 	</target>
 
 
-	<target name="dochtmlsingle" description="Compile reference documentation to single html">
+	<target name="doc.htmlsingle" description="Compile reference documentation to single html">
 
 		<mkdir dir="${dist.ref.dir}/html_single/images"/>
 
@@ -878,12 +774,115 @@
 
 	</target>
 
-	<target name="refdoc" depends="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation"/>
+
+	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf" description="Generate and copy reference documentation"/>
 
 
-	<target name="build-sandbox" description="Compile sandbox source tree java files into class files">
+	<target name="release" depends="alljars,distfiles,javadoc,doc.all" description="Generate release zip file">
 
-		<echo message="WARNING: To keep things speedy, there's no Ant-dependency on the build-target"/>
+		<mkdir dir="${target.release.dir}"/>
+
+		<delete file="${target.release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
+
+		<fileset id="main" dir=".">
+			<include name="dist/*.jar"/>
+			<include name="dist/*.dtd"/>
+			<include name="dist/*.tld"/>
+			<include name="dist/*.vm"/>
+			<include name="dist/*.ftl"/>
+			<include name="docs/**"/>
+			<exclude name="docs/reference/images/**"/>
+			<exclude name="docs/reference/src/**"/>
+			<exclude name="docs/reference/styles/**"/>
+			<exclude name="docs/reference/.cvsignore"/>
+			<exclude name="docs/reference/readme.txt"/>
+			<exclude name="docs/reference/lib/**"/>
+			<exclude name="docs/reference/html/**"/>
+			<exclude name="docs/reference/pdf/images/**"/>
+			<include name="samples/countries/**"/>
+			<include name="samples/imagedb/**"/>
+			<include name="samples/jpetstore/**"/>
+			<include name="samples/petclinic/**"/>
+			<include name="samples/tiles-example/**"/>
+			<include name="samples/webapp-minimal/**"/>
+			<include name="samples/webapp-typical/**"/>
+			<include name="mock/**"/>
+			<include name="src/**"/>
+			<include name="test/**"/>
+			<include name="*.bat"/>
+			<include name="*.txt"/>
+			<include name="*.xml"/>
+			<include name="*.properties"/>
+		</fileset>
+
+		<zip zipfile="${target.release.dir}/${release.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+		</zip>
+
+		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset dir="." prefix="${release.path}">
+				<include name="lib/*.txt"/>
+				<include name="lib/ant/**"/>
+				<include name="lib/axis/**"/>
+				<include name="lib/aopalliance/**"/>
+				<include name="lib/bsh/**"/>
+				<include name="lib/caucho/**"/>
+				<include name="lib/cglib/**"/>
+				<include name="lib/cos/**"/>
+				<include name="lib/dom4j/**"/>
+				<include name="lib/easymock/**"/>
+				<include name="lib/ehcache/**"/>
+				<include name="lib/freemarker/**"/>
+				<include name="lib/hibernate/**"/>
+				<include name="lib/hsqldb/**"/>
+				<include name="lib/ibatis/**"/>
+				<include name="lib/itext/**"/>
+				<include name="lib/j2ee/**"/>
+				<include name="lib/jakarta-commons/**"/>
+				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/jamon/**"/>
+				<include name="lib/jasperreports/**"/>
+				<include name="lib/jdo/**"/>
+				<include name="lib/jdom/**"/>
+				<include name="lib/jotm/**"/>
+				<include name="lib/jsf/**"/>
+				<include name="lib/junit/**"/>
+				<include name="lib/log4j/**"/>
+				<include name="lib/ojb/**"/>
+				<include name="lib/oro/**"/>
+				<include name="lib/poi/**"/>
+				<include name="lib/quartz/**"/>
+				<include name="lib/struts/**"/>
+				<include name="lib/velocity/**"/>
+				<include name="lib/xdoclet/**"/>
+			</zipfileset>
+		</zip>
+
+	</target>
+
+
+	<target name="clean_release" depends="clean, release"/>
+
+
+	<target name="sandbox.clean" description="Clean sandbox output dirs">
+
+		<delete dir="${sandbox.target.classes.dir}"/>
+		<delete dir="${sandbox.target.testclasses.dir}"/>
+		<delete dir="${sandbox.target.junit.reports.dir}"/>
+		<delete dir="${sandbox.target.junit.summary.dir}"/>
+
+		<!-- Just kill target dir (it's safer). No need at this point to keep it. -->
+		<delete dir="${sandbox.target.dir}"/>
+
+	</target>
+
+
+	<target name="sandbox.build" description="Compile sandbox source tree java files into class files">
+
+		<echo message="WARNING: To keep things speedy, there's no Ant dependency on the build target"/>
+
 		<mkdir dir="${sandbox.target.classes.dir}"/>
 		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
 
@@ -910,10 +909,42 @@
 	</target>
 
 
+	<target name="sandbox.jar" depends="sandbox.build,initdist" description="Create jar with sandbox classes">
+
+		<delete file="${dist.dir}/spring-sandbox.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-sandbox.jar">
+			<fileset dir="${sandbox.target.classes.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="sandbox.srczip" depends="initdist" description="Create sandbox source ZIP (containing Java sources)">
+
+		<delete file="${dist.dir}/spring-sandbox-src.zip"/>
+
+		<zip zipfile="${dist.dir}/spring-sandbox-src.zip">
+			<fileset dir="${sandbox.src.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</zip>
+
+	</target>
+
+
 	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the sandbox test tree.
 	-->
-	<target name="compileattr-sandbox-tests">
+	<target name="sandbox.compiletestattr">
 
 	 	<!-- Bring in Jakarta Commons attribute compilation -->
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -929,7 +960,7 @@
  	</target>
 
 
-	<target name="buildtests-sandbox" depends="buildtests, compileattr-sandbox-tests"
+	<target name="sandbox.buildtests" depends="sandbox.compiletestattr"
 			description="Compile test source tree Java files into class files">
 
 		<mkdir dir="${sandbox.target.testclasses.dir}"/>
@@ -964,7 +995,7 @@
 		the test.includes and (optionally) test.excludes properties through the command line, as below:
 			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
 	-->
-	<target name="tests-sandbox" depends="build-sandbox,buildtests-sandbox" description="Run tests">
+	<target name="sandbox.tests" depends="sandbox.build,sandbox.buildtests" description="Run tests">
 
 		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
 
@@ -976,7 +1007,7 @@
 			<classpath location="${sandbox.target.testclasses.dir}"/>
 			<classpath location="${sandbox.target.classes.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
-		    <classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${sandbox.test.dir}"/>
@@ -995,74 +1026,62 @@
 
 	</target>
 
-	<target name="test-sandbox-summary" depends="build-sandbox,buildtests-sandbox" description="Run tests and generate test summary">
 
-			<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+	<target name="sandbox.testsummary" depends="sandbox.build,sandbox.buildtests" description="Run tests and generate test summary">
 
-			<mkdir dir="${sandbox.reports.dir}"/>
+		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
 
-			<property name="reports.dir" value="${sandbox.reports.dir}"/>
-			<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
+		<mkdir dir="${sandbox.reports.dir}"/>
 
-			<mkdir dir="${reports.dir}"/>
-			<mkdir dir="${summary.dir}"/>
+		<property name="reports.dir" value="${sandbox.reports.dir}"/>
+		<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
 
-			<junit printsummary="yes" haltonfailure="no" haltonerror="no">
-				<jvmarg line="-Djava.awt.headless=true"/>
+		<mkdir dir="${reports.dir}"/>
+		<mkdir dir="${summary.dir}"/>
 
-				<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
-				<classpath location="${sandbox.target.testclasses.dir}"/>
-				<classpath location="${sandbox.target.classes.dir}"/>
-				<classpath location="${target.testclasses.dir}"/>
-			    <classpath location="${target.mockclasses.dir}"/>
-				<!-- Need files loaded as resources -->
-				<classpath location="${sandbox.test.dir}"/>
+		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+			<jvmarg line="-Djava.awt.headless=true"/>
 
-				<classpath refid="all-libs"/>
-				<classpath location="${target.classes.dir}"/>
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${sandbox.target.testclasses.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+				<classpath location="${target.mockclasses.dir}"/>
+			<!-- Need files loaded as resources -->
+			<classpath location="${sandbox.test.dir}"/>
 
-				<formatter type="plain" usefile="false"/>
-				<formatter type="xml"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
 
-				<batchtest fork="yes" todir="${reports.dir}">
-					<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
-				</batchtest>
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
 
-			</junit>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
 
-			<junitreport todir="${reports.dir}">
+		</junit>
 
-				<fileset dir="${reports.dir}">
-					<include name="TEST-*.xml"/>
-				</fileset>
-				<report todir="${summary.dir}"/>
+		<junitreport todir="${reports.dir}">
 
-			</junitreport>
-
-		</target>
-
-
-	<target name="sandboxjar" depends="build,build-sandbox,initdist" description="Create jar with sandbox classes">
-
-		<delete file="${dist.dir}/spring-sandbox.jar"/>
-
-		<jar jarfile="${dist.dir}/spring-sandbox.jar">
-			<fileset dir="${sandbox.target.classes.dir}">
-				<include name="META-INF/**"/>
-				<include name="org/springframework/**"/>
+			<fileset dir="${reports.dir}">
+				<include name="TEST-*.xml"/>
 			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
+			<report todir="${summary.dir}"/>
+
+		</junitreport>
 
 	</target>
 
 
-	<target name="loadjar" depends="initdist, buildtests" description="Build load test jar">
+	<target name="sandbox.clean_tests" depends="sandbox.clean, sandbox.tests"/>
 
+
+	<target name="loadjar" depends="initdist" description="Build load test jar">
+
+		<echo message="WARNING: To keep things speedy, there's no Ant dependency on the build target"/>
+
+		<delete dir="${target.loadclasses.dir}"/>
 		<mkdir dir="${target.loadclasses.dir}"/>
 
 		<javac destdir="${target.loadclasses.dir}" source="1.3" target="1.3" debug="${debug}"
@@ -1096,7 +1115,7 @@
 
 
 	<!--
-		 targets for the automated build
+		 Targets for the automated build.
 		 @author Alef Arendsen
 
 		 'mb' runs all the automated build tests and is supposed to be expanded further
@@ -1146,21 +1165,26 @@
 
 
 	<target name="mb-publish">
+
 		<tstamp>
 			<format pattern="yyyy-MM-dd" property="tstamp.servertests"/>
 		</tstamp>
+
 		<copy todir="${target.junit.reports.dir}">
 			<fileset dir="${target.dir}/autobuilds/reports">
 				<include name="*unittests_${tstamp.servertests}.xml"/>
 			</fileset>
 		</copy>
+
 		<mkdir dir="${target.junit.reports.html.dir}"/>
+
 		<junitreport todir="${target.junit.reports.html.dir}">
 			<fileset dir="${target.junit.reports.dir}">
 				<include name="*.xml"/>
 			</fileset>
 			<report format="frames" todir="${target.junit.reports.html.dir}"/>
 		</junitreport>
+
 	</target>
 
 </project>
