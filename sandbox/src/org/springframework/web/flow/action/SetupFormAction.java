@@ -38,8 +38,8 @@ import org.springframework.web.flow.MutableFlowModel;
  * 
  * Fully instantiable as is, or by a custom subclass. This action differs from a
  * standard BindAndValidate action in that it doesn't do validation (not needed
- * during form setup), is capable of form prepopulation from request
- * parameters, and has a specific <code>setupReferenceData</code> hook.
+ * during form setup), is capable of form prepopulation from request parameters,
+ * and has a specific <code>setupReferenceData</code> hook.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -67,35 +67,6 @@ public class SetupFormAction extends BindAndValidateAction {
 	// validation doesn't happen on form setup by default
 	protected boolean suppressValidation(HttpServletRequest request) {
 		return true;
-	}
-
-	/**
-	 * Exception thrown when reference data setup fails.
-	 * @author Keith Donald
-	 */
-	protected static class ReferenceDataSetupException extends RuntimeException {
-		public ReferenceDataSetupException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public ReferenceDataSetupException(Exception cause) {
-			super(cause);
-		}
-
-		public String getMessage() {
-			if (StringUtils.hasText(super.getMessage())) {
-				return super.getMessage();
-			}
-			else {
-				if (getCause() instanceof ServletRequestBindingException) {
-					return "Unable to set form reference data due to request parameter binding error - programmer error "
-							+ "likely in submitting view code or request access code; see cause for more details.";
-				}
-				else {
-					return "Unable to set supporting reference data during form setup";
-				}
-			}
-		}
 	}
 
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
@@ -162,5 +133,34 @@ public class SetupFormAction extends BindAndValidateAction {
 	protected void setupReferenceData(HttpServletRequest request, MutableFlowModel model)
 			throws ReferenceDataSetupException, ServletRequestBindingException {
 
+	}
+
+	/**
+	 * Exception thrown when reference data setup fails.
+	 * @author Keith Donald
+	 */
+	protected static class ReferenceDataSetupException extends RuntimeException {
+		public ReferenceDataSetupException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public ReferenceDataSetupException(Exception cause) {
+			super(cause);
+		}
+
+		public String getMessage() {
+			if (StringUtils.hasText(super.getMessage())) {
+				return super.getMessage();
+			}
+			else {
+				if (getCause() instanceof ServletRequestBindingException) {
+					return "Unable to set form reference data due to request parameter binding error - programmer error "
+							+ "likely in submitting view code or request access code; see cause for more details.";
+				}
+				else {
+					return "Unable to set supporting reference data during form setup";
+				}
+			}
+		}
 	}
 }
