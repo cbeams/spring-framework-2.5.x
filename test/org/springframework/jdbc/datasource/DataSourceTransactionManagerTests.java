@@ -494,7 +494,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.verify();
 	}
 
-	public void testTransactionWithIsolation() throws Exception {
+	public void testTransactionWithIsolationAndReadOnly() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -505,6 +505,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		con.getTransactionIsolation();
 		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED, 1);
 		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		conControl.setVoidCallable(1);
+		con.setReadOnly(true);
 		conControl.setVoidCallable(1);
 		con.getAutoCommit();
 		conControl.setReturnValue(true, 1);
@@ -528,6 +530,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		tt.setReadOnly(true);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1254,6 +1257,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 	}
 
 }
