@@ -20,7 +20,7 @@ import org.springframework.aop.TargetSource;
  * but at the price of a little code duplication making it implement invoke()
  * itself simplifies stack traces and produces a slight performance improvement.
  * @author Rod Johnson
- * @version $Id: SingletonTargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
+ * @version $Id: SingletonTargetSource.java,v 1.3 2003-12-02 11:52:57 johnsonr Exp $
  */
 public final class SingletonTargetSource implements TargetSource {
 
@@ -53,16 +53,6 @@ public final class SingletonTargetSource implements TargetSource {
 		return "Singleton target source (not dynamic): target=[" + target + "]";
 	}
 	
-	/**
-	 * Two invoker interceptors are equal if they have the same target or if the targets
-	 * are equal.
-	 */
-	public boolean equals(Object other) {
-		if (!(other instanceof SingletonTargetSource))
-			return false;
-		SingletonTargetSource otherII = (SingletonTargetSource) other;
-		return otherII.target == this.target || otherII.target.equals(this.target);
-	}
 
 	/**
 	 * @see org.springframework.aop.TargetSource#isStatic()
@@ -71,4 +61,18 @@ public final class SingletonTargetSource implements TargetSource {
 		return true;
 	}
 
+	/**
+	 * Two invoker interceptors are equal if they have the same target or if the targets
+	 * or the targets are equal.
+	 */
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (!(other instanceof SingletonTargetSource))
+			return false;
+		SingletonTargetSource b = (SingletonTargetSource) other;
+		if (this.target == null)
+			return b.target == null;
+		return this.target.equals(b.target);
+	}
 }
