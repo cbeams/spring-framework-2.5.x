@@ -57,6 +57,7 @@ public class JdoAccessor implements InitializingBean {
 
 	private boolean flushEager = false;
 
+
 	/**
 	 * Set the JDO PersistenceManagerFactory that should be used to create
 	 * PersistenceManagers.
@@ -123,6 +124,7 @@ public class JdoAccessor implements InitializingBean {
 		}
 	}
 
+
 	/**
 	 * Flush the given JDO persistence manager if necessary.
 	 * @param pm the current JDO PersistenceManage
@@ -130,7 +132,10 @@ public class JdoAccessor implements InitializingBean {
 	 * @throws JDOException in case of JDO flushing errors
 	 */
 	public void flushIfNecessary(PersistenceManager pm, boolean existingTransaction) throws JDOException {
-		if (this.flushEager && this.jdoDialect != null) {
+		if (this.flushEager) {
+			if (this.jdoDialect == null) {
+				throw new IllegalArgumentException("Cannot flush eagerly without a jdoDialect setting");
+			}
 			logger.debug("Eagerly flushing JDO persistence manager");
 			this.jdoDialect.flush(pm);
 		}
