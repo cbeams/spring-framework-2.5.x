@@ -7,6 +7,10 @@ distribution/website before using any of them in your own applications.
 - Ant 1.6.2 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
+* antlr/antlr-2.7.4.jar
+- ANTLR 2.7.4 (http://www.antlr.org)
+- required for running Petclinic (by Hibernate)
+
 * aopalliance/aopalliance.jar
 - AOP Alliance 1.0 (http://aopalliance.sourceforge.net)
 - required for building the framework
