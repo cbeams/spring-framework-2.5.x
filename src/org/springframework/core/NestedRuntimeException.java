@@ -32,7 +32,7 @@ import java.io.PrintWriter;
  * should preserve their stack trace, if caused by a lower-level exception.
  *
  * @author Rod Johnson
- * @version $Id: NestedRuntimeException.java,v 1.1.1.1 2003-08-14 16:20:24 trisberg Exp $
+ * @version $Id: NestedRuntimeException.java,v 1.2 2003-10-08 08:40:37 jhoeller Exp $
  */
 public abstract class NestedRuntimeException extends RuntimeException implements HasRootCause {
 
@@ -40,8 +40,7 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	private Throwable rootCause;
 
 	/**
-	 * Constructs a <code>ExceptionWrapperException</code> with the specified
-	 * detail message.
+	 * Construct a <code>ExceptionWrapperException</code> with the specified detail message.
 	 * @param msg the detail message
 	 */
 	public NestedRuntimeException(String msg) {
@@ -49,9 +48,8 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	}
 
 	/**
-	 * Constructs a <code>RemoteException</code> with the specified
-	 * detail message and nested exception.
-	 *
+	 * Construct a <code>RemoteException</code> with the specified detail message and
+	 * nested exception.
 	 * @param msg the detail message
 	 * @param ex the nested exception
 	 */
@@ -61,50 +59,48 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 	}
 
 	/**
-	 * Returns the nested cause, or null if none.
+	 * Return the nested cause, or null if none.
 	 */
 	public Throwable getRootCause() {
 		return rootCause;
 	}
 
 	/**
-	 * Returns the detail message, including the message from the nested
-	 * exception if there is one.
+	 * Return the detail message, including the message from the nested exception
+	 * if there is one.
 	 */
 	public String getMessage() {
-		if (rootCause == null)
+		if (this.rootCause == null)
 			return super.getMessage();
 		else
 			return super.getMessage() + "; nested exception is: \n\t" + rootCause.toString();
 	}
 
 	/**
-	 * Prints the composite message and the embedded stack trace to
-	 * the specified stream <code>ps</code>.
+	 * Print the composite message and the embedded stack trace to the specified stream.
 	 * @param ps the print stream
 	 */
 	public void printStackTrace(PrintStream ps) {
-		if (rootCause == null) {
+		if (this.rootCause == null) {
 			super.printStackTrace(ps);
 		}
 		else {
 			//ps.println(this);
-			rootCause.printStackTrace(ps);
+			this.rootCause.printStackTrace(ps);
 		}
 	}
 
 	/**
-	 * Prints the composite message and the embedded stack trace to
-	 * the specified print writer <code>pw</code>
+	 * Print the composite message and the embedded stack trace to the specified writer.
 	 * @param pw the print writer
 	 */
 	public void printStackTrace(PrintWriter pw) {
-		if (rootCause == null) {
+		if (this.rootCause == null) {
 			super.printStackTrace(pw);
 		}
 		else {
 			//pw.println(this);
-			rootCause.printStackTrace(pw);
+			this.rootCause.printStackTrace(pw);
 		}
 	}
 
