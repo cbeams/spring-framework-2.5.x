@@ -44,7 +44,7 @@ import org.springframework.transaction.TransactionStatus;
  *  
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.3 2004-07-02 21:19:46 johnsonr Exp $
+ * @version $Id: TransactionAspectSupport.java,v 1.4 2004-07-06 08:04:59 johnsonr Exp $
  */
 public class TransactionAspectSupport implements InitializingBean {
 	
@@ -255,7 +255,7 @@ public class TransactionAspectSupport implements InitializingBean {
 	 * Do nothing if we didn't create a transaction.
 	 * @param txInfo information about the current transaction
 	 */
-	protected void doAfterFinallyOnReturning(TransactionInfo txInfo) {
+	protected void doCommitTransactionAfterReturning(TransactionInfo txInfo) {
 		if (txInfo != null && txInfo.hasTransaction()) {			
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking commit for transaction on " + txInfo.joinpointIdentification());

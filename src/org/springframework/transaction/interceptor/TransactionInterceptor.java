@@ -32,7 +32,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionInterceptor.java,v 1.26 2004-07-06 07:53:09 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.27 2004-07-06 08:04:59 johnsonr Exp $
  * @see TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.transaction.interceptor.TransactionAspectSupport
@@ -64,7 +64,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		finally {
 			doFinally(txInfo);
 		}
-		doAfterFinallyOnReturning(txInfo);
+		doCommitTransactionAfterReturning(txInfo);
 
 		return retVal;
 	}
