@@ -60,7 +60,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.7 2003-09-24 13:41:02 beanie42 Exp $
+ * @version $Id: JdbcTemplate.java,v 1.8 2003-10-16 20:16:12 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -76,10 +76,10 @@ public class JdbcTemplate implements InitializingBean {
 	 */
 	public static final PreparedStatementSetter PREPARE_STATEMENT =
 		new PreparedStatementSetter() {
-		public void setValues(PreparedStatement ps) throws SQLException {
-				// do nothing
-	}
-	};
+			public void setValues(PreparedStatement ps) throws SQLException {
+					// do nothing
+			}
+		};
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -149,10 +149,7 @@ public class JdbcTemplate implements InitializingBean {
 	public synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
 			this.exceptionTranslator =
-				SQLExceptionTranslatorFactory
-					.getInstance()
-					.getDefaultTranslator(
-					this.dataSource);
+			    SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
 		}
 		return this.exceptionTranslator;
 	}
@@ -199,8 +196,8 @@ public class JdbcTemplate implements InitializingBean {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
-		getQueryExecutor();
 		getExceptionTranslator();
+		getQueryExecutor();
 	}
 
 	//-------------------------------------------------------------------------
@@ -259,8 +256,8 @@ public class JdbcTemplate implements InitializingBean {
 			stmt = con.createStatement();
 			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
 
-			if (logger.isInfoEnabled())
-				logger.info(
+			if (logger.isDebugEnabled())
+				logger.debug(
 					"Executing static SQL query '"
 						+ sql
 						+ "' using a java.sql.Statement");
@@ -328,8 +325,8 @@ public class JdbcTemplate implements InitializingBean {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			ps = psc.createPreparedStatement(con);
 
-			if (logger.isInfoEnabled())
-				logger.info(
+			if (logger.isDebugEnabled())
+				logger.debug(
 					"Executing SQL query using PreparedStatement: ["
 						+ psc
 						+ "]");
@@ -419,8 +416,8 @@ public class JdbcTemplate implements InitializingBean {
 	 * @throws DataAccessException if there is any problem.
 	 */
 	public int update(final String sql) throws DataAccessException {
-		if (logger.isInfoEnabled())
-			logger.info("Running SQL update '" + sql + "'");
+		if (logger.isDebugEnabled())
+			logger.debug("Running SQL update '" + sql + "'");
 
 		return update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection conn)
@@ -461,14 +458,14 @@ public class JdbcTemplate implements InitializingBean {
 			int[] retvals = new int[pscs.length];
 			for (index = 0; index < retvals.length; index++) {
 				ps = pscs[index].createPreparedStatement(con);
-				if (logger.isInfoEnabled())
-					logger.info(
+				if (logger.isDebugEnabled())
+					logger.debug(
 						"Executing SQL update using PreparedStatement: ["
 							+ pscs[index]
 							+ "]");
 				retvals[index] = ps.executeUpdate();
-				if (logger.isInfoEnabled())
-					logger.info(
+				if (logger.isDebugEnabled())
+					logger.debug(
 						"JDBCTemplate: update affected "
 							+ retvals[index]
 							+ " rows");
@@ -591,12 +588,12 @@ public class JdbcTemplate implements InitializingBean {
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			cs = csc.createCallableStatement(con);
-			if (logger.isInfoEnabled())
-				logger.info(
+			if (logger.isDebugEnabled())
+				logger.debug(
 					"Executing call using CallableStatement: [" + cs + "]");
 			boolean retval = cs.execute();
-			if (logger.isInfoEnabled())
-				logger.info("JDBCTemplate: execute returned " + retval);
+			if (logger.isDebugEnabled())
+				logger.debug("JDBCTemplate: execute returned " + retval);
 			if (retval)
 				extractReturnedResultSets(cs, declaredParameters);
 			Map retMap = extractOutputParameters(cs, declaredParameters);
@@ -619,8 +616,8 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Extract output parameters from the completed stored procedure.
-	 * @param call JDBC wrapper for the stored procedure
-	 * @param list Parameter list for the stored procedure
+	 * @param cs JDBC wrapper for the stored procedure
+	 * @param parameters parameter list for the stored procedure
 	 * @return parameters to the stored procedure
 	 */
 	private Map extractOutputParameters(CallableStatement cs, List parameters)
@@ -641,7 +638,7 @@ public class JdbcTemplate implements InitializingBean {
 									.getRowCallbackHandler())
 									.extractData(
 								(ResultSet) out);
-							logger.info(
+							logger.debug(
 								"JDBCTemplate: ResultSet returned from stored procedure was processed");
 							outParams.put(p.getName(), "ResultSet processed.");
 						} else {
@@ -672,13 +669,10 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Extract returned resultsets from the completed stored procedure.
-	 * @param call JDBC wrapper for the stored procedure
-	 * @param list Parameter list for the stored procedure
+	 * @param cs JDBC wrapper for the stored procedure
+	 * @param parameters Parameter list for the stored procedure
 	 */
-	private void extractReturnedResultSets(
-		CallableStatement cs,
-		List parameters)
-		throws SQLException {
+	private void extractReturnedResultSets(CallableStatement cs, List parameters)	throws SQLException {
 		int rsIndx = 0;
 		do {
 			SqlParameter p = null;
