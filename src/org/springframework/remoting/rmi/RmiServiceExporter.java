@@ -1,14 +1,18 @@
 package org.springframework.remoting.rmi;
 
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 
@@ -34,7 +38,7 @@ import org.springframework.remoting.support.RemoteExporter;
  * @see org.springframework.remoting.caucho.HessianServiceExporter
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
-public class RmiServiceExporter extends RemoteExporter implements InitializingBean {
+public class RmiServiceExporter extends RemoteExporter implements InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -43,6 +47,13 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 	private int servicePort = 0;  // anonymous port
 
 	private int registryPort = Registry.REGISTRY_PORT;
+
+	private RMIClientSocketFactory clientSocketFactory;
+
+	private RMIServerSocketFactory serverSocketFactory;
+
+	private Remote exportedObject;
+
 
 	/**
 	 * Set the name of the exported RMI service,
@@ -70,6 +81,26 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 	}
 
 	/**
+	 * Set a custom RMI client socket factory to use for exporting.
+	 * If the given object also implement RMIServerSocketFactory,
+	 * it will automatically be registered as server socket factory too.
+	 * @see #setServerSocketFactory
+	 * @see UnicastRemoteObject#exportObject(Remote, int, RMIClientSocketFactory, RMIServerSocketFactory)
+	 */
+	public void setClientSocketFactory(RMIClientSocketFactory clientSocketFactory) {
+		this.clientSocketFactory = clientSocketFactory;
+	}
+
+	/**
+	 * Set a custom RMI server socket factory to use for exporting.
+	 * @see #setClientSocketFactory
+	 */
+	public void setServerSocketFactory(RMIServerSocketFactory serverSocketFactory) {
+		this.serverSocketFactory = serverSocketFactory;
+	}
+
+
+	/**
 	 * Register the service as RMI object.
 	 * Creates an RMI registry on the specified port if none exists.
 	 */
@@ -78,6 +109,13 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 
 		if (this.serviceName == null) {
 			throw new IllegalArgumentException("serviceName is required");
+		}
+		if (this.clientSocketFactory instanceof RMIServerSocketFactory) {
+			this.serverSocketFactory = (RMIServerSocketFactory) this.clientSocketFactory;
+		}
+		if ((this.clientSocketFactory != null && this.serverSocketFactory == null) ||
+				(this.clientSocketFactory == null && this.serverSocketFactory != null)) {
+			throw new IllegalArgumentException("Both RMIClientSocketFactory and RMIServerSocketFactory or none required");
 		}
 
 		Registry registry = null;
@@ -94,19 +132,34 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 			registry = LocateRegistry.createRegistry(this.registryPort);
 		}
 
-		// bind wrapper to registry
-		logger.info("Binding RMI service '" + this.serviceName + "' to registry at port '" + this.registryPort + "'");
+		// determine remote object
 		if (getService() instanceof Remote) {
 			// conventional RMI service
-			Remote exportedObject = UnicastRemoteObject.exportObject((Remote) getService(), this.servicePort);
-			registry.rebind(this.serviceName, exportedObject);
+			this.exportedObject = (Remote) getService();
 		}
 		else {
 			// RMI invoker
 			logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
-			Remote wrapper = new RemoteInvocationWrapper(getProxyForService(), this.servicePort);
-			registry.rebind(this.serviceName, wrapper);
+			this.exportedObject = new RemoteInvocationWrapper(getProxyForService());
 		}
+
+		// export remote object and bind it to registry
+		logger.info("Binding RMI service '" + this.serviceName + "' to registry at port '" + this.registryPort + "'");
+		if (this.clientSocketFactory != null) {
+			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort,
+																			 this.clientSocketFactory, this.serverSocketFactory);
+		}
+		else {
+			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort);
+		}
+		registry.rebind(this.serviceName, this.exportedObject);
+	}
+
+	public void destroy() throws RemoteException, NotBoundException {
+		logger.info("Unbinding RMI service '" + this.serviceName + "' from registry at port '" + this.registryPort + "'");
+		Registry registry = LocateRegistry.getRegistry(this.registryPort);
+		registry.unbind(this.serviceName);
+		UnicastRemoteObject.unexportObject(this.exportedObject, true);
 	}
 
 }

@@ -1,9 +1,7 @@
 package org.springframework.remoting.rmi;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
+import java.lang.reflect.Method;
 
 /**
  * Server-side implementation of RemoteInvocationHandler.
@@ -11,19 +9,16 @@ import java.rmi.server.UnicastRemoteObject;
  * @author Juergen Hoeller
  * @since 14.05.2003
  */
-class RemoteInvocationWrapper extends UnicastRemoteObject implements RemoteInvocationHandler {
+class RemoteInvocationWrapper implements RemoteInvocationHandler {
 
 	private final Object wrappedObject;
 
 	/**
 	 * Create a new RemoteInvocationWrapper.
-	 * @param wrappedObject	the locally wrapped object, on which methods are invoked
-	 * @param port the port number on which the remote object receives calls
-	 * (if 0, an anonymous port is chosen)
+	 * @param wrappedObject	the locally wrapped object which remote
+	 * invocations are delegated to
 	 */
-	protected RemoteInvocationWrapper(Object wrappedObject, int port) throws RemoteException {
-		// the super() invocation will export this object as remote service
-		super(port);
+	protected RemoteInvocationWrapper(Object wrappedObject) {
 		this.wrappedObject = wrappedObject;
 	}
 
