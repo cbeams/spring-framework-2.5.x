@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms of the Apache Software
  * License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.binding.support.BeanPropertyAccessStrategy;
@@ -13,14 +13,14 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public abstract class AbstractBeanPropertyConstraint implements
-        BeanPropertyConstraint {
+public abstract class AbstractPropertyConstraint implements
+        PropertyConstraint {
     private String propertyName;
 
-    protected AbstractBeanPropertyConstraint() {
+    protected AbstractPropertyConstraint() {
     }
 
-    protected AbstractBeanPropertyConstraint(String propertyName) {
+    protected AbstractPropertyConstraint(String propertyName) {
         setPropertyName(propertyName);
     }
 

@@ -38,9 +38,9 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     private CommitTrigger commitTrigger;
 
-    private ValueChangeListener commitTriggerListener;
+    private ValueChangeListener commitTriggerHandler;
 
-    private boolean committing;
+    private ValueChangeListener wrappedModelChangeHandler;
 
     public BufferedValueModel(ValueModel wrappedModel) {
         this(wrappedModel, null);
@@ -48,21 +48,25 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     public BufferedValueModel(ValueModel wrappedModel,
             CommitTrigger commitTrigger) {
-        this.wrappedModel = wrappedModel;
-        this.wrappedModel.addValueChangeListener(new ValueChangeListener() {
-            public void valueChanged() {
-                if (logger.isDebugEnabled()) {
-                    logger
-                            .debug("[Wrapped model value has changed; new value is '"
-                                    + BufferedValueModel.this.wrappedModel
-                                            .getValue() + "']");
-                }
-                if (!committing) {
-                    onWrappedValueChanged();
-                }
-            }
-        });
+        setWrappedModel(wrappedModel);
         setCommitTrigger(commitTrigger);
+    }
+
+    protected final void setWrappedModel(ValueModel wrappedModel) {
+        this.wrappedModel = wrappedModel;
+        this.wrappedModelChangeHandler = new WrappedModelValueChangeHandler();
+        this.wrappedModel.addValueChangeListener(wrappedModelChangeHandler);
+    }
+
+    private class WrappedModelValueChangeHandler implements ValueChangeListener {
+        public void valueChanged() {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Wrapped model value has changed; new value is '"
+                        + BufferedValueModel.this.wrappedModel.getValue()
+                        + "']");
+            }
+            onWrappedValueChanged();
+        }
     }
 
     protected void onWrappedValueChanged() {
@@ -77,36 +81,33 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
-    public void setCommitTrigger(CommitTrigger commitTrigger) {
+    public final void setCommitTrigger(CommitTrigger commitTrigger) {
         if (this.commitTrigger == commitTrigger) { return; }
-        if (commitTriggerListener == null) {
-            createCommitTriggerListener();
+        if (this.commitTriggerHandler == null) {
+            this.commitTriggerHandler = new CommitTriggerHandler();
         }
         if (this.commitTrigger != null) {
-            this.commitTrigger.removeValueChangeListener(commitTriggerListener);
+            this.commitTrigger.removeValueChangeListener(commitTriggerHandler);
         }
         this.commitTrigger = commitTrigger;
-        this.commitTrigger.addValueChangeListener(commitTriggerListener);
+        this.commitTrigger.addValueChangeListener(commitTriggerHandler);
     }
 
-    private void createCommitTriggerListener() {
-        this.commitTriggerListener = new ValueChangeListener() {
-            public void valueChanged() {
-                CommitTrigger trigger = BufferedValueModel.this.commitTrigger;
-                if (logger.isDebugEnabled()) {
-                    logger
-                            .debug("[Commit trigger fired; trigger request value is '"
-                                    + trigger.getValue() + "']");
-                }
-                if (trigger.isNoOp()) { return; }
-                if (trigger.isCommit()) {
-                    commit();
-                }
-                else {
-                    revert();
-                }
+    private class CommitTriggerHandler implements ValueChangeListener {
+        public void valueChanged() {
+            if (logger.isDebugEnabled()) {
+                logger
+                        .debug("[Commit trigger fired; trigger request value is '"
+                                + commitTrigger.getValue() + "']");
             }
-        };
+            if (commitTrigger.isNoOp()) { return; }
+            if (commitTrigger.isCommit()) {
+                commit();
+            }
+            else {
+                revert();
+            }
+        }
     }
 
     public boolean isDirty() {
@@ -126,7 +127,7 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
-    public void setValue(Object value) {
+    public final void setValue(Object value) {
         if (hasChanged(this.bufferedValue, value)) {
             if (logger.isDebugEnabled()) {
                 if (value == NO_VALUE) {
@@ -147,28 +148,6 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
-    public void commit() {
-        if (hasChangeBuffered()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[Committing buffered value '" + getValue()
-                        + "' to wrapped value model " + wrappedModel + "]");
-            }
-            try {
-                committing = true;
-                doBufferedValueCommit(bufferedValue);
-                this.bufferedValue = NO_VALUE;
-            }
-            finally {
-                committing = false;
-            }
-        }
-        else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[No buffered edit to commit; nothing to do...]");
-            }
-        }
-    }
-
     public ValueModel getWrappedModel() {
         return wrappedModel;
     }
@@ -177,11 +156,37 @@ public class BufferedValueModel extends AbstractValueModel implements
         return wrappedModel.getValue();
     }
 
+    public final void commit() {
+        if (hasChangeBuffered()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Committing buffered value '" + getValue()
+                        + "' to wrapped value model " + wrappedModel + "]");
+            }
+            commitBufferedValueSilently();
+        }
+        else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[No buffered edit to commit; nothing to do...]");
+            }
+        }
+    }
+
+    private void commitBufferedValueSilently() {
+        try {
+            wrappedModel.removeValueChangeListener(wrappedModelChangeHandler);
+            doBufferedValueCommit(bufferedValue);
+            this.bufferedValue = NO_VALUE;
+        }
+        finally {
+            wrappedModel.addValueChangeListener(wrappedModelChangeHandler);
+        }
+    }
+
     protected void doBufferedValueCommit(Object bufferedValue) {
         wrappedModel.setValue(bufferedValue);
     }
 
-    private void revert() {
+    public final void revert() {
         if (logger.isDebugEnabled()) {
             logger.debug("[Reverting buffered value '" + getValue()
                     + " to value " + wrappedModel.getValue() + "]");

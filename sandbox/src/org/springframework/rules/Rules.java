@@ -23,10 +23,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.constraint.And;
-import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
 import org.springframework.rules.constraint.CompoundConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
+import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.validation.Errors;
@@ -66,30 +66,30 @@ public class Rules implements Constraint, Validator {
             Map.Entry entry = (Map.Entry)i.next();
             String propertyName = (String)entry.getKey();
             Object val = entry.getValue();
-            BeanPropertyConstraint e;
+            PropertyConstraint e;
             if (val instanceof List) {
                 And and = new And();
                 and.addAll((List)val);
-                e = new BeanPropertyValueConstraint(propertyName, and);
+                e = new PropertyValueConstraint(propertyName, and);
             }
             else {
                 Constraint p = (Constraint)val;
                 if (p instanceof CompoundConstraint) {
-                    e = new CompoundBeanPropertyExpression(
+                    e = new CompoundPropertyConstraint(
                             (CompoundConstraint)p);
                 }
-                else if (p instanceof BeanPropertyConstraint) {
-                    e = (BeanPropertyConstraint)p;
+                else if (p instanceof PropertyConstraint) {
+                    e = (PropertyConstraint)p;
                 }
                 else {
-                    e = new BeanPropertyValueConstraint(propertyName, p);
+                    e = new PropertyValueConstraint(propertyName, p);
                 }
             }
             internalSetRules(e);
         }
     }
 
-    private void internalSetRules(BeanPropertyConstraint e) {
+    private void internalSetRules(PropertyConstraint e) {
         And and = new And();
         and.add(e);
         if (logger.isDebugEnabled()) {
@@ -97,11 +97,11 @@ public class Rules implements Constraint, Validator {
                     + e.getPropertyName() + "', rules -> [" + e + "]");
         }
         propertyRules.put(e.getPropertyName(),
-                new CompoundBeanPropertyExpression(and));
+                new CompoundPropertyConstraint(and));
     }
 
-    public BeanPropertyConstraint getRules(String property) {
-        return (BeanPropertyConstraint)propertyRules.get(property);
+    public PropertyConstraint getRules(String property) {
+        return (PropertyConstraint)propertyRules.get(property);
     }
 
     public Iterator iterator() {
@@ -126,8 +126,8 @@ public class Rules implements Constraint, Validator {
      *            the bean property expression
      * @return this, to support chaining.
      */
-    public Rules add(BeanPropertyConstraint expression) {
-        CompoundBeanPropertyExpression and = (CompoundBeanPropertyExpression)propertyRules
+    public Rules add(PropertyConstraint expression) {
+        CompoundPropertyConstraint and = (CompoundPropertyConstraint)propertyRules
                 .get(expression.getPropertyName());
         if (and == null) {
             internalSetRules(expression);
@@ -147,7 +147,7 @@ public class Rules implements Constraint, Validator {
      *            The value constraint.
      */
     public void add(String propertyName, Constraint valueConstraint) {
-        add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
+        add(new PropertyValueConstraint(propertyName, valueConstraint));
     }
 
     /**
@@ -161,7 +161,7 @@ public class Rules implements Constraint, Validator {
                 .isTrue(
                         compoundPredicate instanceof CompoundConstraint,
                         "Argument must be a compound predicate composed of BeanPropertyExpression objects.");
-        add(new CompoundBeanPropertyExpression(
+        add(new CompoundPropertyConstraint(
                 (CompoundConstraint)compoundPredicate));
     }
 

@@ -23,7 +23,7 @@ import java.util.Map;
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.binding.support.BeanPropertyAccessStrategy;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
 
 /**
  * @author Keith Donald
@@ -93,7 +93,7 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
     }
 
     public void setCurrentBeanPropertyExpression(
-            BeanPropertyConstraint expression) {
+            PropertyConstraint expression) {
         this.currentProperty = expression.getPropertyName();
         this.currentPropertyValue = getPropertyValue(this.currentProperty);
         super.clear();

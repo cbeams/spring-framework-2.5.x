@@ -13,24 +13,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.springframework.rules.constraint;
+package org.springframework.rules.constraint.property;
 
 import java.util.Iterator;
 
 import org.springframework.rules.Constraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.CompoundConstraint;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.
  * 
  * @author Keith Donald
  */
-public class CompoundBeanPropertyExpression implements BeanPropertyConstraint {
+public class CompoundPropertyConstraint implements PropertyConstraint {
     private CompoundConstraint compoundPredicate;
 
     public String getPropertyName() {
-        BeanPropertyConstraint e =
-            (BeanPropertyConstraint)compoundPredicate.iterator().next();
+        PropertyConstraint e =
+            (PropertyConstraint)compoundPredicate.iterator().next();
         return e.getPropertyName();
     }
 
@@ -42,9 +42,9 @@ public class CompoundBeanPropertyExpression implements BeanPropertyConstraint {
      * Constructs a compound predicate with no initial members. It is expected
      * the client will call "add" to add individual predicates.
      */
-    public CompoundBeanPropertyExpression(CompoundConstraint compoundPredicate) {
+    public CompoundPropertyConstraint(CompoundConstraint compoundPredicate) {
         this.compoundPredicate = compoundPredicate;
-        this.compoundPredicate.validateTypeSafety(BeanPropertyConstraint.class);
+        this.compoundPredicate.validateTypeSafety(PropertyConstraint.class);
     }
 
     /**
@@ -55,7 +55,7 @@ public class CompoundBeanPropertyExpression implements BeanPropertyConstraint {
      *            the predicate to add
      * @return A reference to this, to support chaining.
      */
-    public CompoundBeanPropertyExpression add(BeanPropertyConstraint expression) {
+    public CompoundPropertyConstraint add(PropertyConstraint expression) {
         this.compoundPredicate.add(expression);
         return this;
     }

@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms of the Apache Software
  * License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.rules.Constraint;
 
@@ -11,7 +11,7 @@ import org.springframework.rules.Constraint;
  * 
  * @author Keith Donald
  */
-public interface BeanPropertyConstraint extends Constraint {
+public interface PropertyConstraint extends Constraint {
     
     /**
      * Returns the constrained property name.

@@ -19,10 +19,10 @@ import java.util.Iterator;
 
 import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.And;
-import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
 import org.springframework.rules.constraint.Or;
-import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
-import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
+import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
@@ -45,15 +45,15 @@ public class SummingVisitor implements Visitor {
         return sum;
     }
 
-    void visit(CompoundBeanPropertyExpression rule) {
+    void visit(CompoundPropertyConstraint rule) {
         visitorSupport.invokeVisit(this, rule.getPredicate());
     }
 
-    void visit(BeanPropertiesConstraint e) {
+    void visit(PropertiesConstraint e) {
         sum++;
     }
 
-    void visit(ParameterizedBeanPropertyConstraint e) {
+    void visit(ParameterizedPropertyConstraint e) {
         sum++;
     }
 

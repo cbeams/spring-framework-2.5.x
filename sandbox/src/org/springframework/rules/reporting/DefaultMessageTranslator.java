@@ -28,16 +28,16 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
-import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
 import org.springframework.rules.constraint.Not;
 import org.springframework.rules.constraint.Or;
 import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
 import org.springframework.rules.constraint.Range;
 import org.springframework.rules.constraint.StringLengthConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
-import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
+import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultObjectStyler;
@@ -72,8 +72,8 @@ public class DefaultMessageTranslator implements Visitor {
 
     public String getMessage(Constraint constraint) {
         String objectName = null;
-        if (constraint instanceof BeanPropertyConstraint) {
-            objectName = ((BeanPropertyConstraint)constraint).getPropertyName();
+        if (constraint instanceof PropertyConstraint) {
+            objectName = ((PropertyConstraint)constraint).getPropertyName();
         }
         String message = buildMessage(objectName, null, constraint, Locale.getDefault());
         return message;
@@ -135,18 +135,18 @@ public class DefaultMessageTranslator implements Visitor {
                 .toArray(new MessageSourceResolvable[0]);
     }
 
-    void visit(CompoundBeanPropertyExpression rule) {
+    void visit(CompoundPropertyConstraint rule) {
         visitorSupport.invokeVisit(this, rule.getPredicate());
     }
 
-    void visit(BeanPropertiesConstraint e) {
+    void visit(PropertiesConstraint e) {
         add(
                 getMessageCode(e.getPredicate()),
                 new Object[] { resolvableObjectName(e.getOtherPropertyName()) },
                 e.toString());
     }
 
-    void visit(ParameterizedBeanPropertyConstraint e) {
+    void visit(ParameterizedPropertyConstraint e) {
         add(getMessageCode(e.getPredicate()),
                 new Object[] { e.getParameter() }, e.toString());
     }
@@ -166,7 +166,7 @@ public class DefaultMessageTranslator implements Visitor {
                         .renderShortName(objectName));
     }
 
-    void visit(BeanPropertyValueConstraint valueConstraint) {
+    void visit(PropertyValueConstraint valueConstraint) {
         visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
     }
 

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.rules.BinaryConstraint;
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertiesConstraint extends AbstractBeanPropertyConstraint {
+public class PropertiesConstraint extends AbstractPropertyConstraint {
     private String otherPropertyName;
 
     private BinaryConstraint beanPropertyExpression;
@@ -42,7 +42,7 @@ public class BeanPropertiesConstraint extends AbstractBeanPropertyConstraint {
      * @param otherPropertyName
      *            The second property participating in the expression.
      */
-    public BeanPropertiesConstraint(String propertyName,
+    public PropertiesConstraint(String propertyName,
             BinaryConstraint beanPropertyExpression, String otherPropertyName) {
         super(propertyName);
         Assert.notNull(otherPropertyName);

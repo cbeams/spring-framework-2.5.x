@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.rules.Constraint;
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertyValueConstraint extends AbstractBeanPropertyConstraint
+public class PropertyValueConstraint extends AbstractPropertyConstraint
         implements Constraint {
     private Constraint valueConstraint;
 
@@ -38,11 +38,11 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyConstraint
      * @param valueConstraint
      *            The property value constraint (tester).
      */
-    public BeanPropertyValueConstraint(String propertyName,
+    public PropertyValueConstraint(String propertyName,
             Constraint valueConstraint) {
         super(propertyName);
         Assert.notNull(valueConstraint);
-        Assert.isTrue(!(valueConstraint instanceof BeanPropertyConstraint));
+        Assert.isTrue(!(valueConstraint instanceof PropertyConstraint));
         this.valueConstraint = valueConstraint;
     }
 

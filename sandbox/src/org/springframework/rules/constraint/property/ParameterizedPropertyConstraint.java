@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.rules.BinaryConstraint;
 import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
@@ -25,9 +25,9 @@ import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
  * 
  * @author Keith Donald
  */
-public class ParameterizedBeanPropertyConstraint implements
-        BeanPropertyConstraint {
-    private BeanPropertyValueConstraint parameterizedExpression;
+public class ParameterizedPropertyConstraint implements
+        PropertyConstraint {
+    private PropertyValueConstraint parameterizedExpression;
 
     /**
      * Creates a BeanPropertyExpressionTester.
@@ -39,11 +39,11 @@ public class ParameterizedBeanPropertyConstraint implements
      * @param parameter
      *            The constant parameter value participating in the expression.
      */
-    public ParameterizedBeanPropertyConstraint(String propertyName,
+    public ParameterizedPropertyConstraint(String propertyName,
             BinaryConstraint expression, Object parameter) {
         ParameterizedBinaryConstraint valueConstraint = new ParameterizedBinaryConstraint(
                 expression, parameter);
-        this.parameterizedExpression = new BeanPropertyValueConstraint(
+        this.parameterizedExpression = new PropertyValueConstraint(
                 propertyName, valueConstraint);
     }
 

@@ -15,11 +15,11 @@
  */
 package org.springframework.rules;
 
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
 
 /**
  * @author Keith Donald
  */
 public interface RulesProvider {
-    public BeanPropertyConstraint getRules(String propertyName);
+    public PropertyConstraint getRules(String propertyName);
 }

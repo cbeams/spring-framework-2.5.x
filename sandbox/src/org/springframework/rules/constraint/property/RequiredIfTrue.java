@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.rules.Constraint;
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * @author Seth Ladd
  * @author Keith Donald
  */
-public class RequiredIfTrue extends AbstractBeanPropertyConstraint implements
+public class RequiredIfTrue extends AbstractPropertyConstraint implements
         Constraint {
     private String propertyName;
 

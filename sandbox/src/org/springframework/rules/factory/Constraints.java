@@ -28,7 +28,6 @@ import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
-import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
 import org.springframework.rules.constraint.EqualTo;
 import org.springframework.rules.constraint.GreaterThan;
 import org.springframework.rules.constraint.GreaterThanEqualTo;
@@ -46,11 +45,12 @@ import org.springframework.rules.constraint.RelationalOperator;
 import org.springframework.rules.constraint.Required;
 import org.springframework.rules.constraint.StringLengthConstraint;
 import org.springframework.rules.constraint.Like.LikeType;
-import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
-import org.springframework.rules.constraint.bean.NegatedBeanPropertyConstraint;
-import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
+import org.springframework.rules.constraint.property.NegatedPropertyConstraint;
+import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyValueConstraint;
 
 /**
  * A factory for easing the construction and composition of predicates.
@@ -280,7 +280,7 @@ public class Constraints {
      *            the group items
      * @return The InGroup predicate.
      */
-    public BeanPropertyConstraint inGroup(String propertyName, Object[] group) {
+    public PropertyConstraint inGroup(String propertyName, Object[] group) {
         return value(propertyName, new InGroup(group));
     }
 
@@ -307,7 +307,7 @@ public class Constraints {
      *            The like string value to match
      * @return The Like predicate
      */
-    public BeanPropertyConstraint like(String property, LikeType likeType,
+    public PropertyConstraint like(String property, LikeType likeType,
             String value) {
         return value(property, new Like(likeType, value));
     }
@@ -326,7 +326,7 @@ public class Constraints {
      * 
      * @return The required predicate instance.
      */
-    public BeanPropertyConstraint required(String property) {
+    public PropertyConstraint required(String property) {
         return value(property, required());
     }
 
@@ -402,9 +402,9 @@ public class Constraints {
      *            the value constraint
      * @return The bean property expression that tests the constraint
      */
-    public BeanPropertyConstraint value(String propertyName,
+    public PropertyConstraint value(String propertyName,
             Constraint valueConstraint) {
-        return new BeanPropertyValueConstraint(propertyName, valueConstraint);
+        return new PropertyValueConstraint(propertyName, valueConstraint);
     }
 
     /**
@@ -416,7 +416,7 @@ public class Constraints {
      *            The constraints that form a all conjunction
      * @return
      */
-    public BeanPropertyConstraint all(String propertyName,
+    public PropertyConstraint all(String propertyName,
             Constraint[] constraints) {
         return value(propertyName, all(constraints));
     }
@@ -430,7 +430,7 @@ public class Constraints {
      *            The constraints that form a all disjunction
      * @return
      */
-    public BeanPropertyConstraint any(String propertyName,
+    public PropertyConstraint any(String propertyName,
             Constraint[] constraints) {
         return value(propertyName, any(constraints));
     }
@@ -442,8 +442,8 @@ public class Constraints {
      *            the expression to negate
      * @return The negated expression
      */
-    public BeanPropertyConstraint not(BeanPropertyConstraint e) {
-        return new NegatedBeanPropertyConstraint(e);
+    public PropertyConstraint not(PropertyConstraint e) {
+        return new NegatedPropertyConstraint(e);
     }
 
     /**
@@ -455,8 +455,8 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public BeanPropertyConstraint eq(String propertyName, Object propertyValue) {
-        return new ParameterizedBeanPropertyConstraint(propertyName, EqualTo
+    public PropertyConstraint eq(String propertyName, Object propertyValue) {
+        return new ParameterizedPropertyConstraint(propertyName, EqualTo
                 .instance(), propertyValue);
     }
 
@@ -469,8 +469,8 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public BeanPropertyConstraint gt(String propertyName, Object propertyValue) {
-        return new ParameterizedBeanPropertyConstraint(propertyName,
+    public PropertyConstraint gt(String propertyName, Object propertyValue) {
+        return new ParameterizedPropertyConstraint(propertyName,
                 GreaterThan.instance(), propertyValue);
     }
 
@@ -483,8 +483,8 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public BeanPropertyConstraint gte(String propertyName, Object propertyValue) {
-        return new ParameterizedBeanPropertyConstraint(propertyName,
+    public PropertyConstraint gte(String propertyName, Object propertyValue) {
+        return new ParameterizedPropertyConstraint(propertyName,
                 GreaterThanEqualTo.instance(), propertyValue);
     }
 
@@ -497,8 +497,8 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public BeanPropertyConstraint lt(String propertyName, Object propertyValue) {
-        return new ParameterizedBeanPropertyConstraint(propertyName, LessThan
+    public PropertyConstraint lt(String propertyName, Object propertyValue) {
+        return new ParameterizedPropertyConstraint(propertyName, LessThan
                 .instance(), propertyValue);
     }
 
@@ -511,8 +511,8 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public BeanPropertyConstraint lte(String propertyName, Object propertyValue) {
-        return new ParameterizedBeanPropertyConstraint(propertyName,
+    public PropertyConstraint lte(String propertyName, Object propertyValue) {
+        return new ParameterizedPropertyConstraint(propertyName,
                 LessThanEqualTo.instance(), propertyValue);
     }
 
@@ -525,9 +525,9 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public BeanPropertyConstraint gtProperty(String propertyName,
+    public PropertyConstraint gtProperty(String propertyName,
             String otherPropertyName) {
-        return new BeanPropertiesConstraint(propertyName, GreaterThan
+        return new PropertiesConstraint(propertyName, GreaterThan
                 .instance(), otherPropertyName);
     }
 
@@ -540,9 +540,9 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public BeanPropertyConstraint eqProperty(String propertyName,
+    public PropertyConstraint eqProperty(String propertyName,
             String otherPropertyName) {
-        return new BeanPropertiesConstraint(propertyName, EqualTo.instance(),
+        return new PropertiesConstraint(propertyName, EqualTo.instance(),
                 otherPropertyName);
     }
 
@@ -555,9 +555,9 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public BeanPropertyConstraint gteProperty(String propertyName,
+    public PropertyConstraint gteProperty(String propertyName,
             String otherPropertyName) {
-        return new BeanPropertiesConstraint(propertyName, GreaterThanEqualTo
+        return new PropertiesConstraint(propertyName, GreaterThanEqualTo
                 .instance(), otherPropertyName);
     }
 
@@ -570,9 +570,9 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public BeanPropertyConstraint ltProperty(String propertyName,
+    public PropertyConstraint ltProperty(String propertyName,
             String otherPropertyName) {
-        return new BeanPropertiesConstraint(propertyName, LessThan.instance(),
+        return new PropertiesConstraint(propertyName, LessThan.instance(),
                 otherPropertyName);
     }
 
@@ -585,9 +585,9 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public BeanPropertyConstraint lteProperty(String propertyName,
+    public PropertyConstraint lteProperty(String propertyName,
             String otherPropertyName) {
-        return new BeanPropertiesConstraint(propertyName, LessThanEqualTo
+        return new PropertiesConstraint(propertyName, LessThanEqualTo
                 .instance(), otherPropertyName);
     }
 
@@ -602,7 +602,7 @@ public class Constraints {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public BeanPropertyConstraint inRange(String propertyName, Comparable min,
+    public PropertyConstraint inRange(String propertyName, Comparable min,
             Comparable max) {
         Range range = new Range(min, max);
         return value(propertyName, range);
@@ -620,26 +620,26 @@ public class Constraints {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public BeanPropertyConstraint inRangeProperties(String propertyName,
+    public PropertyConstraint inRangeProperties(String propertyName,
             String minPropertyName, String maxPropertyName) {
-        BeanPropertiesConstraint min = new BeanPropertiesConstraint(
+        PropertiesConstraint min = new PropertiesConstraint(
                 propertyName, GreaterThanEqualTo.instance(), minPropertyName);
-        BeanPropertiesConstraint max = new BeanPropertiesConstraint(
+        PropertiesConstraint max = new PropertiesConstraint(
                 propertyName, LessThanEqualTo.instance(), maxPropertyName);
-        return new CompoundBeanPropertyExpression(new And(min, max));
+        return new CompoundPropertyConstraint(new And(min, max));
     }
 
-    public BeanPropertyConstraint unique(String propertyName) {
-        return new UniquePropertyValueCollectionConstraint(propertyName);
+    public PropertyConstraint unique(String propertyName) {
+        return new UniqueValuePropertyConstraint(propertyName);
     }
 
-    private static class UniquePropertyValueCollectionConstraint implements
-            BeanPropertyConstraint {
+    private static class UniqueValuePropertyConstraint implements
+            PropertyConstraint {
         private String propertyName;
 
         private Map distinctTable;
 
-        public UniquePropertyValueCollectionConstraint(String propertyName) {
+        public UniqueValuePropertyConstraint(String propertyName) {
             this.propertyName = propertyName;
         }
 

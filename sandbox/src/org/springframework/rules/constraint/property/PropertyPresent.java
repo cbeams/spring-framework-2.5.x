@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.constraint.bean;
+package org.springframework.rules.constraint.property;
 
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.rules.Constraint;
@@ -26,7 +26,7 @@ import org.springframework.rules.constraint.Required;
  * @author Keith Donald
  * @see Required
  */
-public class PropertyPresent extends AbstractBeanPropertyConstraint implements
+public class PropertyPresent extends AbstractPropertyConstraint implements
         Constraint {
     /**
      * Constructs a property present predicate for the specified property.

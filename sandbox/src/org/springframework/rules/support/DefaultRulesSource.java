@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesSource;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ToStringBuilder;
 
@@ -75,7 +75,7 @@ public class DefaultRulesSource extends Constraints implements RulesSource {
         return (Rules)rules.get(bean);
     }
 
-    public BeanPropertyConstraint getRules(Class bean, String propertyName) {
+    public PropertyConstraint getRules(Class bean, String propertyName) {
         if (logger.isDebugEnabled()) {
             logger.debug("Retrieving rules for bean '" + bean + "', property '"
                     + propertyName + "'");

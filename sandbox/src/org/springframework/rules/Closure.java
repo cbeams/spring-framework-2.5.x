@@ -16,7 +16,8 @@
 package org.springframework.rules;
 
 /**
- * A function object that evaluates one argument and returns a single result.
+ * A function object that evaluates one argument, executing a block of code. It
+ * returns a single result.
  * <p>
  * <p>
  * A unary function evaluates a single argument against some expression. For
@@ -26,7 +27,7 @@ package org.springframework.rules;
  * @author Keith Donald
  */
 public interface Closure {
-    
+
     public static final Object NULL_VALUE = new Object();
 
     /**

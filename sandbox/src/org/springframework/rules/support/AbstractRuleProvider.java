@@ -18,7 +18,7 @@ package org.springframework.rules.support;
 import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesProvider;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
 
 /**
  * @author Keith Donald
@@ -35,7 +35,7 @@ public abstract class AbstractRuleProvider extends DefaultRulesSource implements
         rules.add(property, valueConstraint);
     }
 
-    public BeanPropertyConstraint getRules(String propertyName) {
+    public PropertyConstraint getRules(String propertyName) {
         return getRules(this.getClass(), propertyName);
     }
 }

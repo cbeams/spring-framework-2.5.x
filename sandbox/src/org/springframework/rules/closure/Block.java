@@ -15,6 +15,14 @@
  */
 package org.springframework.rules.closure;
 
+/**
+ * Convenient super class for closures that encapsulate a block of executable
+ * code. Subclasses should override <code>Object call(Object)</code> for executing a block of code
+ * with a return result. Subclasses should override <code>void handle(Object)</code> for
+ * executing a block of code without a result.
+ * 
+ * @author Keith Donald
+ */
 public abstract class Block extends AbstractClosure {
     public Object call(Object argument) {
         handle(argument);

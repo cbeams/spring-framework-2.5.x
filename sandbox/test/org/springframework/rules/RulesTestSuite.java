@@ -25,10 +25,10 @@ import org.springframework.rules.constraint.Range;
 import org.springframework.rules.constraint.RelationalOperator;
 import org.springframework.rules.constraint.Required;
 import org.springframework.rules.constraint.StringLengthConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
-import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
-import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
+import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.rules.factory.Constraints;
 
 /**
@@ -247,31 +247,31 @@ public class RulesTestSuite extends TestCase {
         And p = constraints.conjunction();
         p.add(constraints.required());
         p.add(constraints.maxLength(9));
-        BeanPropertyConstraint e = new BeanPropertyValueConstraint("test", p);
+        PropertyConstraint e = new PropertyValueConstraint("test", p);
         assertTrue(e.test(new TestBean()));
 
         p = constraints.conjunction();
-        e = new BeanPropertyValueConstraint("test", p);
+        e = new PropertyValueConstraint("test", p);
         p.add(constraints.required());
         p.add(constraints.maxLength(3));
         assertFalse(e.test(new TestBean()));
     }
 
     public void testBeanPropertiesExpression() {
-        BeanPropertiesConstraint p = new BeanPropertiesConstraint("test",
+        PropertiesConstraint p = new PropertiesConstraint("test",
                 EqualTo.instance(), "confirmTest");
         assertTrue(p.test(new TestBean()));
 
-        p = new BeanPropertiesConstraint("test", EqualTo.instance(), "min");
+        p = new PropertiesConstraint("test", EqualTo.instance(), "min");
         assertFalse(p.test(new TestBean()));
     }
 
     public void testParameterizedBeanPropertyExpression() {
-        ParameterizedBeanPropertyConstraint p = new ParameterizedBeanPropertyConstraint(
+        ParameterizedPropertyConstraint p = new ParameterizedPropertyConstraint(
                 "test", EqualTo.instance(), "testValue");
         assertTrue(p.test(new TestBean()));
 
-        p = new ParameterizedBeanPropertyConstraint("test", EqualTo.instance(),
+        p = new ParameterizedPropertyConstraint("test", EqualTo.instance(),
                 "test2Value");
         assertFalse(p.test(new TestBean()));
     }
