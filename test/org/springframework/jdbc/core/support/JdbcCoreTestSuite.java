@@ -12,33 +12,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
+
 package org.springframework.jdbc.core.support;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
-import org.easymock.ArgumentsMatcher;
+import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
-import junit.framework.TestCase;
-
 /**
  * @author Alef Arendsen
  */
 public class JdbcCoreTestSuite extends TestCase {
 	
-	public void testCreatingPreparedStatementCallbackTestSuite() 
-	throws SQLException {
-		
+	public void testCreatingPreparedStatementCallbackTestSuite() throws SQLException {
 		// - return value should match
 		// - lob creator should be closed
 		// - set return value should be called
@@ -86,9 +83,7 @@ public class JdbcCoreTestSuite extends TestCase {
 		assertTrue(svc.b);
 	}
 	
-	public void testAbstractLobStreamingResultSetExtractorNoRows() 
-	throws SQLException {
-		
+	public void testAbstractLobStreamingResultSetExtractorNoRows() throws SQLException {
 		MockControl rsetControl = MockControl.createControl(ResultSet.class);
 		ResultSet rset = (ResultSet)rsetControl.getMock();
 		rset.next();
@@ -104,8 +99,7 @@ public class JdbcCoreTestSuite extends TestCase {
 		}
 	}
 	
-	public void testAbstractLobStreamingResultSetExtractorOneRow() 
-	throws SQLException {
+	public void testAbstractLobStreamingResultSetExtractorOneRow() throws SQLException {
 		MockControl rsetControl = MockControl.createControl(ResultSet.class);
 		ResultSet rset = (ResultSet)rsetControl.getMock();
 		rset.next();
@@ -121,9 +115,7 @@ public class JdbcCoreTestSuite extends TestCase {
 		rsetControl.verify();
 	}
 
-	public void testAbstractLobStreamingResultSetExtractorMultipleRows() 
-	throws SQLException {
-		
+	public void testAbstractLobStreamingResultSetExtractorMultipleRows() throws SQLException {
 		MockControl rsetControl = MockControl.createControl(ResultSet.class);
 		ResultSet rset = (ResultSet)rsetControl.getMock();
 		rset.next();
@@ -144,9 +136,7 @@ public class JdbcCoreTestSuite extends TestCase {
 		rsetControl.verify();
 	}
 	
-	public void testAbstractLobStreamingResultSetExtractorCorrectException() 
-	throws SQLException {
-		
+	public void testAbstractLobStreamingResultSetExtractorCorrectException() throws SQLException {
 		MockControl rsetControl = MockControl.createControl(ResultSet.class);
 		ResultSet rset = (ResultSet)rsetControl.getMock();
 		rset.next();
@@ -164,10 +154,8 @@ public class JdbcCoreTestSuite extends TestCase {
 	}
 	
 	private AbstractLobStreamingResultSetExtractor getResultSetExtractor(final boolean ex) {
-		AbstractLobStreamingResultSetExtractor lobRse = 
-			new AbstractLobStreamingResultSetExtractor() {
-			
-			protected void streamData(ResultSet rs) throws SQLException, IOException, DataAccessException {				
+		AbstractLobStreamingResultSetExtractor lobRse = new AbstractLobStreamingResultSetExtractor() {
+			protected void streamData(ResultSet rs) throws SQLException, IOException {
 				if (ex) {
 					throw new IOException();
 				}
