@@ -562,19 +562,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 						if (dbmd != null) {
 							if (dbmd.supportsBatchUpdates()) {
 								if (logger.isDebugEnabled()) {
-									logger.debug("Batch updates supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+									logger.debug("JDBC driver supports batch updates");
 								}
 								supportsBatchUpdates = true;
 							}
 							else {
 								if (logger.isDebugEnabled()) {
-									logger.debug("Batch Updates are not supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+									logger.debug("JDBC driver does not support batch updates");
 								}
 							}
 						}
 					}
 					catch (AbstractMethodError ame) {
-						logger.warn("Driver [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "] does not support JDBC 2.0 'supportsBatchUpdates' method");
+						logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method");
 					}
 					if (supportsBatchUpdates) {
 						for (int i = 0; i < batchSize; i++) {

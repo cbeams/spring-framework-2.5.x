@@ -69,7 +69,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	private static Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
 	/** Config used to configure this proxy */
-	private AdvisedSupport advisedSupport;
+	private AdvisedSupport advised;
 
 
 	/**
@@ -85,7 +85,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		}
-		this.advisedSupport = config;
+		this.advised = config;
 	}
 
 	public Object getProxy() {
@@ -94,10 +94,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating JDK dynamic proxy for [" +
-			    this.advisedSupport.getTargetSource().getTargetClass().getName() + "]");
+			Class targetClass = this.advised.getTargetSource().getTargetClass();
+			logger.debug("Creating JDK dynamic proxy" +
+					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
-		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advisedSupport);
+		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}
 
@@ -112,7 +113,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		Object oldProxy = null;
 		boolean setProxyContext = false;
 
-		TargetSource targetSource = this.advisedSupport.targetSource;
+		TargetSource targetSource = this.advised.targetSource;
 		Class targetClass = null;
 		Object target = null;
 
@@ -131,7 +132,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 			if (Advised.class == method.getDeclaringClass()) {
 				// service invocations on ProxyConfig with the proxy config
-				return AopUtils.invokeJoinpointUsingReflection(this.advisedSupport, method, args);
+				return AopUtils.invokeJoinpointUsingReflection(this.advised, method, args);
 			}
 
 			Object retVal = null;
@@ -143,15 +144,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				targetClass = target.getClass();
 			}
 
-			if (this.advisedSupport.exposeProxy) {
+			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;
 			}
 
 			// Get the interception chain for this method
-			List chain = this.advisedSupport.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-					this.advisedSupport, proxy, method, targetClass);
+			List chain = this.advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+					this.advised, proxy, method, targetClass);
 
 			// Check whether we have any advice. If we don't, we can fallback on
 			// direct reflective invocation of the target, and avoid creating a MethodInvocation
@@ -200,7 +201,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * Proxy uses the hash code of the TargetSource.
 	 */
 	public int hashCode() {
-		return this.advisedSupport.getTargetSource().hashCode();
+		return this.advised.getTargetSource().hashCode();
 	}
 
 	/**
@@ -233,7 +234,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 		
 		// If we get here, aopr2 is the other AopProxy.
-		return AopProxyUtils.equalsInProxy(this.advisedSupport, aopr2.advisedSupport);
+		return AopProxyUtils.equalsInProxy(this.advised, aopr2.advised);
 	}
 
 }

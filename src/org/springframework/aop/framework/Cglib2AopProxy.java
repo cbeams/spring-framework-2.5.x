@@ -126,8 +126,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating CGLIB2 proxy for [" +
-			    this.advised.getTargetSource().getTargetClass().getName() + "]");
+			Class targetClass = this.advised.getTargetSource().getTargetClass();
+			logger.debug("Creating CGLIB2 proxy" +
+					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
 
 		Enhancer enhancer = new Enhancer();
