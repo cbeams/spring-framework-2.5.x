@@ -1,5 +1,7 @@
 package org.springframework.orm.hibernate;
 
+import java.sql.SQLException;
+
 import net.sf.hibernate.JDBCException;
 
 import org.springframework.dao.UncategorizedDataAccessException;
@@ -22,6 +24,10 @@ public class HibernateJdbcException extends UncategorizedDataAccessException {
 
 	public HibernateJdbcException(String s, JDBCException ex) {
 		super(s, ex.getSQLException());
+	}
+
+	public HibernateJdbcException(String s, SQLException ex) {
+		super(s, ex);
 	}
 
 }

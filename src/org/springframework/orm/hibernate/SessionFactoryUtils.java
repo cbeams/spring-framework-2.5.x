@@ -150,7 +150,7 @@ public abstract class SessionFactoryUtils {
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {
 			// SQLException during Hibernate code used by the application
-			return new HibernateJdbcException("Exception in Hibernate data access code", (JDBCException) ex);
+			return new HibernateJdbcException("Exception on Hibernate data access", (JDBCException) ex);
 		}
 		if (ex instanceof QueryException) {
 			return new InvalidDataAccessResourceUsageException("Invalid Hibernate query", ex);
@@ -168,7 +168,7 @@ public abstract class SessionFactoryUtils {
 			return new InvalidDataAccessApiUsageException("Invalid object state", ex);
 		}
 		// fallback
-		return new HibernateSystemException("Exception in Hibernate data access code", ex);
+		return new HibernateSystemException("Exception on Hibernate data access", ex);
 	}
 
 	/**
@@ -220,6 +220,7 @@ public abstract class SessionFactoryUtils {
 	private static class SessionSynchronization implements TransactionSynchronization {
 
 		private Session session;
+		
 		private SessionFactory sessionFactory;
 
 		private SessionSynchronization(Session session, SessionFactory sessionFactory) {

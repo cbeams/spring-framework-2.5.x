@@ -1,5 +1,7 @@
 package org.springframework.orm.hibernate;
 
+import java.sql.SQLException;
+
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 
@@ -44,9 +46,10 @@ public interface HibernateCallback {
 	 * @param session active Hibernate session
 	 * @return a result object, or null if none
 	 * @throws HibernateException in case of Hibernate errors
+	 * @throws SQLException in case of errors on direct JDBC access
 	 * @see HibernateTemplate#execute
 	 * @see HibernateTransactionManager
 	 */
-	Object doInHibernate(Session session) throws HibernateException;
+	Object doInHibernate(Session session) throws HibernateException, SQLException;
 
 }

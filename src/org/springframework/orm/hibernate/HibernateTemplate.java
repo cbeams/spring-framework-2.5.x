@@ -1,6 +1,7 @@
 package org.springframework.orm.hibernate;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.type.Type;
+
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -147,6 +149,9 @@ public class HibernateTemplate extends HibernateAccessor {
 		}
 		catch (HibernateException ex) {
 			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
+		catch (SQLException ex) {
+			throw new HibernateJdbcException("Exception on direct JDBC access", ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception
