@@ -256,6 +256,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass);
+				prepareQuery(query);
 				return query.execute();
 			}
 		});
@@ -265,6 +266,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
+				prepareQuery(query);
 				return query.execute();
 			}
 		});
@@ -276,55 +278,79 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.setOrdering(ordering);
+				prepareQuery(query);
 				return query.execute();
 			}
 		});
 	}
 
-	public Collection find(final Class entityClass, final String filter, final String parameters,
-												 final Object[] values) throws DataAccessException {
+	public Collection find(
+			final Class entityClass, final String filter, final String parameters, final Object[] values)
+			throws DataAccessException {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
+				prepareQuery(query);
 				return query.executeWithArray(values);
 			}
 		});
 	}
 
-	public Collection find(final Class entityClass, final String filter, final String parameters,
-												 final Object[] values, final String ordering) throws DataAccessException {
+	public Collection find(
+			final Class entityClass, final String filter, final String parameters, final Object[] values,
+			final String ordering) throws DataAccessException {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
 				query.setOrdering(ordering);
+				prepareQuery(query);
 				return query.executeWithArray(values);
 			}
 		});
 	}
 
-	public Collection find(final Class entityClass, final String filter, final String parameters,
-												 final Map values) throws DataAccessException {
+	public Collection find(
+			final Class entityClass, final String filter, final String parameters, final Map values)
+			throws DataAccessException {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
+				prepareQuery(query);
 				return query.executeWithMap(values);
 			}
 		});
 	}
 
-	public Collection find(final Class entityClass, final String filter, final String parameters,
-												 final Map values, final String ordering) throws DataAccessException {
+	public Collection find(
+			final Class entityClass, final String filter, final String parameters, final Map values,
+			final String ordering) throws DataAccessException {
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				query.declareParameters(parameters);
 				query.setOrdering(ordering);
+				prepareQuery(query);
 				return query.executeWithMap(values);
 			}
 		});
+	}
+
+
+	/**
+	 * Prepare the given JDO query object. To be used within a JdoCallback.
+	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is a no-op.
+	 * @param query the JDO query object
+	 * @throws JDOException if the query could not be properly prepared
+	 * @see JdoCallback#doInJdo
+	 * @see PersistenceManagerFactoryUtils#applyTransactionTimeout
+	 */
+	public void prepareQuery(Query query) throws JDOException {
+		PersistenceManagerFactoryUtils.applyTransactionTimeout(
+				query, getPersistenceManagerFactory(), getJdoDialect());
 	}
 
 }

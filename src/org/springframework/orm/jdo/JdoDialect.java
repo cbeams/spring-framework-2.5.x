@@ -20,6 +20,7 @@ import java.sql.SQLException;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.jdo.Transaction;
 
 import org.springframework.dao.DataAccessException;
@@ -130,6 +131,17 @@ public interface JdoDialect {
 	 */
 	void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException;
+
+	/**
+	 * Apply the given timeout to the given JDO query object.
+	 * <p>Invoked by JdoTemplate with the remaining time of a specified
+	 * transaction timeout, if any.
+	 * @param query the JDO query object to apply the timeout to
+	 * @param timeout the timeout value to apply
+	 * @throws JDOException if thrown by JDO methods
+	 * @see JdoTemplate#prepareQuery
+	 */
+	void applyQueryTimeout(Query query, int timeout) throws JDOException;
 
 	/**
 	 * Flush the given PersistenceManager, i.e. flush all changes (that have been

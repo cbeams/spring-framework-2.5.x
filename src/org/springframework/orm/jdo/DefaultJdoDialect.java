@@ -22,7 +22,11 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.jdo.Transaction;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
@@ -39,6 +43,7 @@ import org.springframework.transaction.TransactionException;
  *
  * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
  * Returns null on <code>getJdbcConnection</code>.
+ * Ignores a given query timeout in <code>applyQueryTimeout</code>.
  * Throws a JDOUnsupportedOptionException on <code>flush</code>.
  * Delegates to PersistenceManagerFactoryUtils for exception translation.
  *
@@ -53,6 +58,8 @@ import org.springframework.transaction.TransactionException;
  * @see JdoTransactionManager#setJdoDialect
  */
 public class DefaultJdoDialect implements JdoDialect, InitializingBean {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -144,13 +151,19 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException("Standard JDO does not support custom isolation levels - " +
-																							 "use a special JdoAdapter for your JDO implementation");
+			throw new InvalidIsolationLevelException(
+					"Standard JDO does not support custom isolation levels - " +
+					"use a special JdoDialect for your JDO implementation");
 		}
 		transaction.begin();
 		return null;
 	}
 
+	/**
+	 * This implementation does nothing, as the default beginTransaction implementation
+	 * does not require any cleanup.
+	 * @see #beginTransaction
+	 */
 	public void cleanupTransaction(Object transactionData) {
 	}
 
@@ -173,6 +186,13 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	 */
 	public void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException {
+	}
+
+	/**
+	 * This implementation logs a warning that it cannot apply a query timeout.
+	 */
+	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
+		logger.info("DefaultJdoDialect does not support query timeouts: ignoring remaining transaction time");
 	}
 
 	/**

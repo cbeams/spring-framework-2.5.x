@@ -25,6 +25,7 @@ import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -109,8 +110,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
 	 */
-	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate,
-	                                                       boolean allowSynchronization)
+	public static PersistenceManager getPersistenceManager(
+			PersistenceManagerFactory pmf, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		PersistenceManagerHolder pmHolder =
@@ -120,8 +121,8 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		if (!allowCreate) {
-			throw new IllegalStateException("No JDO persistence manager bound to thread, and configuration " +
-																			"does not allow creation of new one here");
+			throw new IllegalStateException("No JDO persistence manager bound to thread, " +
+					"and configuration does not allow creation of new one here");
 		}
 
 		logger.debug("Opening JDO persistence manager");
@@ -140,6 +141,23 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 		catch (JDOException ex) {
 			throw new DataAccessResourceFailureException("Cannot get JDO persistence manager", ex);
+		}
+	}
+
+	/**
+	 * Apply the current transaction timeout, if any, to the given JDO Query object.
+	 * @param query the JDO Query object
+	 * @param pmf JDO PersistenceManagerFactory that the Query was created for
+	 * @param jdoDialect the JdoDialect to use for applying a query timeout
+	 * (must not be null)
+	 * @see JdoDialect#applyQueryTimeout
+	 */
+	public static void applyTransactionTimeout(
+			Query query, PersistenceManagerFactory pmf, JdoDialect jdoDialect) throws JDOException {
+		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
+				TransactionSynchronizationManager.getResource(pmf);
+		if (pmHolder != null && pmHolder.hasTimeout()) {
+			jdoDialect.applyQueryTimeout(query, pmHolder.getTimeToLiveInSeconds());
 		}
 	}
 
