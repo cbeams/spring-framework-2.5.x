@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.11 2004-06-25 09:42:23 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.12 2004-07-01 19:53:59 jhoeller Exp $
  */
 
 /*
@@ -48,6 +48,8 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	/** Holds value of property name. */
 	private String name;
+
+	private String[] aliases;
 
 	private ITestBean spouse;
 
@@ -125,6 +127,14 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String[] getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(String[] aliases) {
+		this.aliases = aliases;
 	}
 
 	public ITestBean getSpouse() {
