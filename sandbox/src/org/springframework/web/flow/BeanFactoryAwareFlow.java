@@ -84,13 +84,13 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 	}
 
 	protected Flow getFlow(Class flowClassName) {
-		Assert.isTrue(Flow.class.isAssignableFrom(flowClassName), "The class '" + flowClassName
+		Assert.isTrue(Flow.class.isAssignableFrom(flowClassName), "Your flow class '" + flowClassName
 				+ "' must be a subclass of '" + Flow.class.getName() + "'");
 		return (Flow)BeanFactoryUtils.beanOfTypeIncludingAncestors(getListableBeanFactory(), flowClassName);
 	}
 
 	protected ActionBean getActionBean(Class actionBeanClassName) {
-		Assert.isTrue(ActionBean.class.isAssignableFrom(actionBeanClassName), "The class '" + actionBeanClassName
+		Assert.isTrue(ActionBean.class.isAssignableFrom(actionBeanClassName), "Your action class '" + actionBeanClassName
 				+ "' must implement the '" + ActionBean.class.getName() + "' interface");
 		return (ActionBean)BeanFactoryUtils.beanOfTypeIncludingAncestors(getListableBeanFactory(), actionBeanClassName);
 	}

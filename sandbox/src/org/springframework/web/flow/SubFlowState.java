@@ -50,8 +50,8 @@ public class SubFlowState extends TransitionableState {
 		this(id, subFlow, new Transition[] { transition });
 	}
 
-	public SubFlowState(String subFlowId, Transition[] transitions) {
-		this(subFlowId, subFlowId, null, transitions);
+	public SubFlowState(String id, Transition[] transitions) {
+		this(id, id, null, transitions);
 	}
 
 	public SubFlowState(Flow subFlow, Transition[] transitions) {
@@ -84,7 +84,7 @@ public class SubFlowState extends TransitionableState {
 
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		super(id);
-		Assert.hasText(subFlowId, "The id of this subflow state is required");
+		Assert.hasText(subFlowId, "The id of thr subflow definition is required");
 		this.subFlowId = subFlowId;
 		this.attributesMapperId = attributesMapperId;
 		addAll(transitions);
@@ -96,7 +96,7 @@ public class SubFlowState extends TransitionableState {
 
 	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
 		super(id);
-		Assert.hasText(subFlowId, "The id of this subflow state is required");
+		Assert.notNull(subFlow, "The subflow definition instance is required");
 		this.subFlow = subFlow;
 		this.attributesMapper = attributesMapper;
 		addAll(transitions);
