@@ -61,7 +61,7 @@ public class FlowAction extends TemplateAction {
 		if (flowExecution != null && flowExecution.isActive()) {
 			if (form instanceof BindingActionForm) {
 				BindingActionForm bindingForm = (BindingActionForm)form;
-				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME,
+				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.FORM_OBJECT_ERRORS_ATTRIBUTE,
 						Errors.class));
 				bindingForm.setRequest(request);
 			}
