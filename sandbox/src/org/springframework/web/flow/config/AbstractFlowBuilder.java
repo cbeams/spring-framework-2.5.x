@@ -42,30 +42,29 @@ import org.springframework.web.flow.ViewState;
  * 
  * <pre>
  * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
+ *     protected String flowId() {
+ * 	       return &quot;customer.Detail&quot;;
+ * 	   }
  * 
- * 	protected String flowId() {
- * 		return &quot;customer.Detail&quot;;
- * 	}
- * 
- * public void buildStates() {
- *                  // get customer information
- *                  addActionState(&quot;getDetails&quot;,
- *                      action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                      on(success(), &quot;viewDetails&quot;));
- *                  // view customer information               
- *                  addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                      on(submit(), &quot;bindAndValidate&quot;);
- *                  // bind and validate customer information updates 
- *                  addActionState(&quot;bindAndValidate&quot;,
- *                      action(&quot;customer.Detail.bindAndValidate&quot;),
- *                      new Transition[] {
- *                          on(error(), &quot;viewDetails&quot;),
- *                          on(success(), &quot;finish&quot;)
- *                      }
- *                  // finish
- *                  addEndState(&quot;finish&quot;);
- *                }}
- * 
+ *     public void buildStates() {
+ *         // get customer information
+ *         addActionState(&quot;getDetails&quot;,
+ *             action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *             on(success(), &quot;viewDetails&quot;));
+ *         // view customer information               
+ *         addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.view&quot;,
+ *             on(submit(), &quot;bindAndValidate&quot;);
+ *         // bind and validate customer information updates 
+ *         addActionState(&quot;bindAndValidate&quot;,
+ *             action(&quot;customer.Detail.bindAndValidate&quot;),
+ *             new Transition[] {
+ *                 on(error(), &quot;viewDetails&quot;),
+ *                 on(success(), &quot;finish&quot;)
+ *             });
+ *         // finish
+ *         addEndState(&quot;finish&quot;);
+ *     }
+ * }
  * </pre>
  * 
  * What this Java-based FlowBuilder implementation does is add four states to a
@@ -78,7 +77,7 @@ import org.springframework.web.flow.ViewState;
  * <code>getDetails</code>. This action state will automatically be
  * configured with the following defaults:
  * <ol>
- * <li>An auto-wired action instance of GetCustomerDetails.class. This is he
+ * <li>An autowired action instance of GetCustomerDetails.class. This is he
  * <code>Action</code> implementation that will execute when this state is
  * entered. In this example, that <code>Action</code> will go out to the DB,
  * load the Customer, and put it in the Flow's request context.
@@ -91,7 +90,7 @@ import org.springframework.web.flow.ViewState;
  * state.)
  * </ol>
  * 
- * The second state, a view state, will be identified as <code> viewDetails</code>
+ * The second state, a view state, will be identified as <code>viewDetails</code>
  * This view state will automatically be configured with the following defaults:
  * <ol>
  * <li>A view name called <code>customer.Detail.view</code>-- this is the
