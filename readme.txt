@@ -86,21 +86,33 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~270 KB)
-- Contents: bean container, core utilities
+* "spring-core" (~65 KB)
+- Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
+
+* "spring-beans" (~205 KB)
+- Contents: JavaBeans support, bean container
+- Dependencies: spring-core, (CGLIB)
 
 * "spring-aop" (~150 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (CGLIB, Commons Attributes)
 
-* "spring-dao" (~250 KB)
-- Contents: DAO support, transaction infrastructure, JDBC support
+* "spring-dao" (~85 KB)
+- Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-context" (~150 KB)
-- Contents: application context, validation, JNDI, mail, scheduling, caching, UI support
-- Dependencies: spring-core, (spring-aop, JavaMail, Quartz, EHCache, Velocity, FreeMarker)
+* "spring-jdbc" (~175 KB)
+- Contents: JDBC support
+- Dependencies: spring-dao, (spring-beans)
+
+* "spring-context" (~100 KB)
+- Contents: application context, validation, JNDI, UI context support
+- Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
+
+* "spring-support" (~105 KB)
+- Contents: JMX support, mail support, scheduling support, caching support
+- Dependencies: spring-beans, (JMX, JavaMail, COS, Quartz, EHCache)
 
 * "spring-web" (~115 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
@@ -108,11 +120,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 * "spring-webmvc" (~190 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
-- Dependencies: spring-web, (Tiles, iText, POI, JasperReports)
+- Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
-* "spring-remoting" (~170 KB)
-- Contents: remoting, EJB, JMS, JMX
-- Dependencies: spring-core, spring-aop, (spring-web, JAX-RPC, Hessian, Burlap, EJB, JMS, JMX)
+* "spring-remoting" (~120 KB)
+- Contents: remoting support, EJB support, JMS support
+- Dependencies: spring-aop, (spring-web, JAX-RPC, Hessian, Burlap, EJB, JMS)
 
 * "spring-orm" (~105 KB)
 - Contents: iBATIS SQL Maps support, JDO support, Apache OJB support
@@ -122,12 +134,12 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.0 support
 - Dependencies: spring-dao, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1560 KB)
+* "spring" (~1575 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
 * "spring-mock" (~40 KB)
-- Contents: JNDI mocks, Servlet API mocks
+- Contents: JNDI mocks, Servlet API mocks, JUnit support
 - Dependencies: spring-core
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
