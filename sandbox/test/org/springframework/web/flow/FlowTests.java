@@ -47,11 +47,12 @@ public class FlowTests extends TestCase {
 	private void testCreateFlow(boolean listen) {
 		final String flowId = "testFlow";
 
-		String viewPersonDetailsStateId = "personDetails.view";
-		String getPersonDetailsStateId = "personDetails.get";
+		String getStateId = "personDetails.get";
+		String viewStateId = "personDetails.view";
+		String submitStateId = "personDetails.bindAndValidate";
+
 		String submitEventId = "submit";
-		String submitAction = "personDetails.bindAndValidate";
-		String finish = "finish";
+		String finishEventId = "finish";
 
 		HttpServletRequest req1 = new MockHttpServletRequest();
 		HttpServletRequest req2 = new MockHttpServletRequest();
@@ -71,39 +72,22 @@ public class FlowTests extends TestCase {
 		MockControl flowListenerMc = MockControl.createControl(FlowSessionExecutionListener.class);
 		FlowSessionExecutionListener mockListener = (FlowSessionExecutionListener)flowListenerMc.getMock();
 
-		mockListener.flowStarted(flow, fes, req1);
+		mockListener.started(fes);
 		flowListenerMc.setVoidCallable();
 
-		mockListener.flowStateTransitioned(flow, null, flow.getRequiredState(getPersonDetailsStateId), fes, req1);
+		mockListener.stateTransitioned(fes, null, flow.getRequiredState(getStateId));
 		flowListenerMc.setVoidCallable();
 
-		mockListener.flowStateTransitioned(flow, flow.getRequiredState(getPersonDetailsStateId), flow
-				.getRequiredState(viewPersonDetailsStateId), fes, req1);
+		mockListener.stateTransitioned(fes, flow.getRequiredState(getStateId), flow.getRequiredState(viewStateId));
 		flowListenerMc.setVoidCallable();
 
-		mockListener.flowEventSignaled(flow, submitEventId, flow.getRequiredState(viewPersonDetailsStateId), fes, req2);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.flowStateTransitioned(flow, flow.getRequiredState(viewPersonDetailsStateId), flow
-				.getRequiredState(submitAction), fes, req2);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.flowStateTransitioned(flow, flow.getRequiredState(submitAction), flow.getRequiredState(finish),
-				fes, req2);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.flowEventProcessed(flow, submitEventId, null, fes, req2);
-		flowListenerMc.setVoidCallable();
-
-		// NO WAY TO KNOW VALUE OF 2ND FLOW SESSION ARG AHEAD OF TIME AS ITS
-		// CREATED DURING RUN - what do I do here?
-		mockListener.flowEnded(flow, null, fes, req2);
+		mockListener.stateTransitioned(fes, flow.getRequiredState(viewStateId), flow.getRequiredState(submitStateId));
 		flowListenerMc.setVoidCallable();
 
 		flowListenerMc.replay();
 
 		if (listen) {
-			flow.setFlowLifecycleListener(mockListener);
+			flow.setFlowSessionExecutionListener(mockListener);
 		}
 
 		assertEquals(1, flow.getViewStateCount());
@@ -112,77 +96,13 @@ public class FlowTests extends TestCase {
 		ViewDescriptor vdesc = result.getStartingView();
 		fes = (FlowSessionExecutionStack)result.getFlowSessionExecutionInfo();
 
-		assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
+		assertEquals(viewStateId, vdesc.getViewName());
 		assertEquals(0, vdesc.getModel().size());
 
 		// ignoring now b/c this is failing on the above flowEnded() call that
 		// is currently untestable (that is indeed working correctly)
-		try {
-			vdesc = flow.execute(submitEventId, viewPersonDetailsStateId, fes, req2, null);
-			assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
-			assertEquals(0, vdesc.getModel().size());
-
-			flowDaoMc.verify();
-
-			if (listen) {
-				flowListenerMc.verify();
-			}
-		}
-		catch (Throwable e) {
-
-		}
-	}
-
-	public void testResume() {
-
-		boolean listen = true;
-
-		final String flowId = "testFlow";
-
-		String viewPersonDetailsStateId = "personDetails.view";
-		String getPersonDetailsStateId = "personDetails.get";
-		String getPetDetailsStateId = "petDetails.get";
-		String viewPetDetailsStateId = "petDetails.view";
-
-		String finish = "finish";
-
-		HttpServletRequest req1 = new MockHttpServletRequest();
-		HttpServletRequest req2 = new MockHttpServletRequest();
-
-		ResumingFlow flow = new ResumingFlow(flowId);
-		MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
-		FlowDao dao = (FlowDao)flowDaoMc.getMock();
-		dao.getActionBean("petDetails.get");
-		flowDaoMc.setReturnValue(new NoOpActionBean("success"));
-		flowDaoMc.replay();
-		flow.setFlowDao(dao);
-
-		FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
-
-		MockControl flowListenerMc = MockControl.createControl(FlowSessionExecutionListener.class);
-		FlowSessionExecutionListener mockListener = (FlowSessionExecutionListener)flowListenerMc.getMock();
-
-		mockListener.flowStarted(flow, fes, req1);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.flowStateTransitioned(flow, null, flow.getRequiredState(getPetDetailsStateId), fes, req1);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.flowStateTransitioned(flow, flow.getRequiredState(getPetDetailsStateId), flow
-				.getRequiredState(viewPetDetailsStateId), fes, req1);
-		flowListenerMc.setVoidCallable();
-
-		flowListenerMc.replay();
-
-		if (listen) {
-			flow.setFlowLifecycleListener(mockListener);
-		}
-
-		assertEquals(2, flow.getViewStateCount());
-
-		FlowSessionExecutionStartResult result = flow.resume(getPetDetailsStateId, req1, null, null);
-		ViewDescriptor vdesc = result.getStartingView();
-		assertEquals(viewPetDetailsStateId, vdesc.getViewName());
+		vdesc = flow.execute(submitEventId, viewStateId, fes, req2, null);
+		assertEquals(viewStateId, vdesc.getViewName());
 		assertEquals(0, vdesc.getModel().size());
 
 		flowDaoMc.verify();
@@ -204,24 +124,6 @@ public class FlowTests extends TestCase {
 			add(createGetState(PERSON_DETAILS));
 			add(createViewState(PERSON_DETAILS));
 			add(createBindAndValidateState(PERSON_DETAILS));
-			add(createFinishEndState("viewPersonDetails"));
-		}
-	};
-
-	private class ResumingFlow extends Flow {
-
-		public ResumingFlow(String id) {
-			super(id);
-			initFlow();
-		}
-
-		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS));
-			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS));
-			add(createGetState(PET_DETAILS, onSuccessView(PET_DETAILS)));
-			add(createViewState(PET_DETAILS));
-
 			add(createFinishEndState("viewPersonDetails"));
 		}
 	};
