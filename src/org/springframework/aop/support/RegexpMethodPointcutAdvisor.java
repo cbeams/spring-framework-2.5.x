@@ -17,8 +17,11 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Pointcut;
+import org.springframework.core.JdkVersion;
 
 /**
  * Convenient class for regexp method pointcuts that hold an Advice,
@@ -28,9 +31,15 @@ import org.springframework.aop.Pointcut;
  * pass-through properties. These are analogous to the pattern
  * and patterns properties of AbstractRegexpMethodPointcut.
  *
- * <p>Can delegate to any AbstractRegexpMethodPointcut subclass.
+ * <p>Can delegate to any AbstractRegexpMethodPointcut subclass,
+ * like Perl5RegexpMethodPointcut or JdkRegexpMethodPointcut.
  * To choose a specific one, either override <code>createPointcut</code>
  * or set the "perl5" flag accordingly.
+ *
+ * <p>By default, JdkRegexpMethodPointcut will be used on JDK 1.4+,
+ * falling back to Perl5RegexpMethodPointcut on JDK 1.3 (requiring
+ * Jakarta ORO on the classpath). The use of Perl5RegexpMethodPointcut
+ * can be enforced through specifying the "perl5" property.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -39,14 +48,19 @@ import org.springframework.aop.Pointcut;
  * @see #setPerl5
  * @see #createPointcut
  * @see AbstractRegexpMethodPointcut
+ * @see Perl5RegexpMethodPointcut
+ * @see JdkRegexpMethodPointcut
  */
 public class RegexpMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 
+	protected transient Log logger = LogFactory.getLog(getClass());
+
 	private String[] patterns;
 
-	private boolean perl5 = true;
+	private boolean perl5 = false;
 
 	private AbstractRegexpMethodPointcut pointcut;
+
 
 	/**
 	 * Create an empty RegexpMethodPointcutAdvisor.
@@ -114,9 +128,10 @@ public class RegexpMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 	}
 
 	/**
-	 * Set whether to use Perl5 regexp syntax. If on, Perl5RegexpMethodPointcut
-	 * will be used (delegating to Jakarta ORO); if off, the JdkRegexpMethodPointcut
-	 * (delegating to the JDK 1.4 regex package).
+	 * Set whether to enforce Perl5 regexp syntax. If on, Perl5RegexpMethodPointcut
+	 * will be used to use Perl5 syntax (delegating to Jakarta ORO).
+	 * If off, the JdkRegexpMethodPointcut will be used on JDK 1.4+, falling
+	 * back to Perl5RegexpMethodPointcut on JDK 1.3. Default is off.
 	 * <p>Alternatively, override the <code>createPointcut</code> method.
 	 * @see #createPointcut
 	 * @see Perl5RegexpMethodPointcut
@@ -138,19 +153,21 @@ public class RegexpMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 	}
 
 	/**
-	 * Create the default pointcut: a Perl5RegexpMethodPointcut.
-	 * <p>Alternatively, set the "perl5" flag.
+	 * Create the actual pointcut: by default, a Perl5RegexpMethodPointcut
+	 * will be created if Perl5 syntax is enforced or when running on JDK 1.3.
+	 * Else, a JdkRegexpMethodPointcut (JDK 1.4+) will be used.
 	 * @see #setPerl5
-	 * @see AbstractRegexpMethodPointcut
 	 * @see Perl5RegexpMethodPointcut
 	 * @see JdkRegexpMethodPointcut
 	 */
 	protected AbstractRegexpMethodPointcut createPointcut() {
-		if (this.perl5) {
+		if (this.perl5 || JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			logger.debug("Creating Perl5RegexpMethodPointcut (Jakarta ORO needs to be available)");
 			// needs Jakarta ORO on the classpath
 			return new Perl5RegexpMethodPointcut();
 		}
 		else {
+			logger.debug("Creating JdkRegexpMethodPointcut");
 			// needs to run on JDK >= 1.4
 			return new JdkRegexpMethodPointcut();
 		}
