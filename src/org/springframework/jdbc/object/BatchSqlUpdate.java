@@ -27,10 +27,18 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 /**
  * SqlUpdate subclass that performs batch update operations. Encapsulates
  * queuing up records to be updated, and adds them as a single batch once
- * the given batch size has been met.
+ * <code>flush</code> is called or the given batch size has been met.
+ *
+ * <p>Note that this class is a <b>non-thread-safe object</b>, in contrast
+ * to all other JDBC operations objects in this package. You need to create
+ * a new instance of it for each use, respectively call <code>reset</code>
+ * before reuse within the same thread.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 27.04.2004
+ * @see #flush
+ * @see #reset
  */
 public class BatchSqlUpdate extends SqlUpdate {
 
@@ -55,7 +63,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	}
 
 	/**
-	 * Constructs an update object with a given DataSource and SQL.
+	 * Construct an update object with a given DataSource and SQL.
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
 	 */
@@ -84,57 +92,39 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * @param batchSize the number of statements that will trigger
 	 * an automatic intermediate flush
 	 */
-	public BatchSqlUpdate(DataSource ds, String sql, int[] types,
-												int batchSize) {
+	public BatchSqlUpdate(DataSource ds, String sql, int[] types, int batchSize) {
 		super(ds, sql, types, batchSize);
 	}
 
 	/**
 	 * Set the number of statements that will trigger an automatic intermediate
-	 * flush. "update" invocations respectively the given statement parameters
-	 * will be queued until the batch size is met, at which it will empty the
-	 * queue and execute the batch.
+	 * flush. <code>update</code> calls respectively the given statement
+	 * parameters will be queued until the batch size is met, at which point
+	 * it will empty the queue and execute the batch.
+	 * <p>You can also flush already queued statements with an explicit
+	 * <code>flush</code> call. Note that you need to this after queueing
+	 * all parameters to guarantee that all statements have been flushed.
 	 */
 	public void setBatchSize(int batchSize) {
-			this.batchSize = batchSize;
+		this.batchSize = batchSize;
 	}
 
 	/**
-	 * Return the current number of statements respectively statement
-	 * parameters in the queue.
+	 * BatchSqlUpdate does not support BLOB or CLOB parameters.
 	 */
-	public int getQueueCount() {
-		return this.parameterQueue.size();
+	protected boolean supportsLobParameters() {
+		return false;
 	}
 
-	/**
-	 * Return the number of affected rows for all already executed statements.
-	 * Accumulates all of <code>flush</code>'s return values until
-	 * <code>clear</code> is invoked.
-	 * @return an array of the number of rows affected by each statement
-	 */
-	public int[] getRowsAffected() {
-		int[] result = new int[this.rowsAffected.size()];
-		for (int i = 0; i < this.rowsAffected.size(); i++) {
-			Integer rowCount = (Integer) this.rowsAffected.get(i);
-			result[i] = rowCount.intValue();
-		}
-		return result;
-	}
 
 	/**
-	 * Return the number of already executed statements.
-	 */
-	public int getExecutionCount() {
-		return this.rowsAffected.size();
-	}
-
-	/**
-	 * Overridden version of update that adds the given statement
+	 * Overridden version of <code>update</code> that adds the given statement
 	 * parameters to the queue rather than executing them immediately.
-	 * You need to call flush to actually execute the batch.
-	 * <p>All other update methods of the SqlUpdate base class go
+	 * All other <code>update</code> methods of the SqlUpdate base class go
 	 * through this method and will thus behave similarly.
+	 * <p>You need to call <code>flush</code> to actually execute the batch.
+	 * If the specified batch size is reached, an implicit flush will happen;
+	 * you still need to finally call <code>flush</code> to flush all statements.
 	 * @param args array of object arguments
 	 * @return the number of rows affected by the update (always -1,
 	 * meaning "not applicable", as the statement is not actually
@@ -151,6 +141,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 			}
 			flush();
 		}
+
 		return -1;
 	}
 
@@ -185,7 +176,38 @@ public class BatchSqlUpdate extends SqlUpdate {
 	}
 
 	/**
-	 * Reset the statement queue, the rows affected cache,
+	 * Return the current number of statements respectively statement
+	 * parameters in the queue.
+	 */
+	public int getQueueCount() {
+		return this.parameterQueue.size();
+	}
+
+	/**
+	 * Return the number of already executed statements.
+	 */
+	public int getExecutionCount() {
+		return this.rowsAffected.size();
+	}
+
+	/**
+	 * Return the number of affected rows for all already executed statements.
+	 * Accumulates all of <code>flush</code>'s return values until
+	 * <code>reset</code> is invoked.
+	 * @return an array of the number of rows affected by each statement
+	 * @see #reset
+	 */
+	public int[] getRowsAffected() {
+		int[] result = new int[this.rowsAffected.size()];
+		for (int i = 0; i < this.rowsAffected.size(); i++) {
+			Integer rowCount = (Integer) this.rowsAffected.get(i);
+			result[i] = rowCount.intValue();
+		}
+		return result;
+	}
+
+	/**
+	 * Reset the statement parameter queue, the rows affected cache,
 	 * and the execution count.
 	 */
 	public void reset() {
