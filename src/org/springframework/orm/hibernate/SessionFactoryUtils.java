@@ -1,5 +1,6 @@
 package org.springframework.orm.hibernate;
 
+import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
@@ -28,11 +29,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Helper class featuring methods for Hibernate session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
  *
- * <p>Used by HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
- * Can also be used directly in application code, e.g. in combination with HibernateInterceptor.
+ * <p>Used internally by HibernateTemplate, HibernateInterceptor, and
+ * HibernateTransactionManager. Can also be used directly in application code,
+ * e.g. in combination with HibernateInterceptor.
  *
- * <p>Note: This class, like all of Spring's Hibernate support, requires
- * Hibernate 2.0 (initially developed with RC1).
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -210,20 +211,22 @@ public abstract class SessionFactoryUtils {
 		}
 
 		public void beforeCommit() throws DataAccessException {
-			logger.debug("Flushing Hibernate session on transaction synchronization");
-			try {
-				this.session.flush();
-			}
-			catch (JDBCException ex) {
-				if (this.jdbcExceptionTranslator != null) {
-					throw this.jdbcExceptionTranslator.translate("SessionSynchronization", null, ex.getSQLException());
+			if (!this.session.getFlushMode().equals(FlushMode.NEVER)) {
+				logger.debug("Flushing Hibernate session on transaction synchronization");
+				try {
+					this.session.flush();
 				}
-				else {
-					throw new HibernateJdbcException(ex);
+				catch (JDBCException ex) {
+					if (this.jdbcExceptionTranslator != null) {
+						throw this.jdbcExceptionTranslator.translate("SessionSynchronization", null, ex.getSQLException());
+					}
+					else {
+						throw new HibernateJdbcException(ex);
+					}
 				}
-			}
-			catch (HibernateException ex) {
-				throw convertHibernateAccessException(ex);
+				catch (HibernateException ex) {
+					throw convertHibernateAccessException(ex);
+				}
 			}
 		}
 
