@@ -7,9 +7,6 @@ package org.springframework.web.flow.config;
  */
 public class FlowBuilderException extends RuntimeException {
 
-	public FlowBuilderException() {
-	}
-
 	public FlowBuilderException(String message) {
 		super(message);
 	}
