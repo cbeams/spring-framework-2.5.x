@@ -19,6 +19,8 @@ package org.springframework.core.io;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.springframework.util.Assert;
+
 /**
  * Default implementation of the ResourceLoader interface.
  * Used by ResourceEditor, but also suitable for standalone usage.
@@ -71,6 +73,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 
 	public Resource getResource(String location) {
+		Assert.notNull(location, "location is required");
 		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
