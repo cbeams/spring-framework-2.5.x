@@ -106,5 +106,4 @@ public abstract class AbstractFormatter implements Formatter {
 	public boolean isAllowEmpty() {
 		return allowEmpty;
 	}
-
 }

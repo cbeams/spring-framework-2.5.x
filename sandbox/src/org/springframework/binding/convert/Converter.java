@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.binding;
+package org.springframework.binding.convert;
 
 /**
  * A type converter converts objects of one type to that of another. They may
@@ -22,22 +22,14 @@ package org.springframework.binding;
  * to), as well as properly-formatted Strings back to Dates (convert from).
  * @author Keith Donald
  */
-public interface TypeConverter {
+public interface Converter {
 
 	/**
 	 * Convert the provided object argument to another type.
 	 * <p>
 	 * A typical type converter implementation is capable of converting from one
-	 * type to another and back. For example:
-	 * 
-	 * <pre>
-	 * TypeConverter converter = new NumberFormatter(Long.class);
-	 * Long number = (Long)converter.convert(&quot;12356&quot;);
-	 * String numberString = (String)converter.convert(number);
-	 * </pre>
-	 * 
-	 * @throws TypeConversionException An exception occured during the
-	 *         conversion.
+	 * type to another and back.
+	 * @throws ConversionException An exception occured during the conversion.
 	 */
-	public Object convert(Object o) throws TypeConversionException;
+	public Object convert(Object o) throws ConversionException;
 }

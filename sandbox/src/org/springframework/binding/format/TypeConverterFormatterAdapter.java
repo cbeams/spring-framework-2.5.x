@@ -15,24 +15,24 @@
  */
 package org.springframework.binding.format;
 
-import org.springframework.binding.TypeConversionException;
-import org.springframework.binding.TypeConverter;
+import org.springframework.binding.convert.ConversionException;
+import org.springframework.binding.convert.Converter;
 import org.springframework.util.closure.Closure;
 
-public class TypeConverterFormatterAdapter implements TypeConverter, Closure {
+public class TypeConverterFormatterAdapter implements Converter, Closure {
 	private Formatter formatter;
 
 	public TypeConverterFormatterAdapter(Formatter formatter) {
 		this.formatter = formatter;
 	}
 
-	public Object convert(Object o) throws TypeConversionException {
+	public Object convert(Object o) throws ConversionException {
 		if (String.class.isInstance(o)) {
 			try {
 				return formatter.parseValue((String)o);
 			}
 			catch (InvalidFormatException e) {
-				throw new TypeConversionException(o, null, e);
+				throw new ConversionException(o, null, e);
 			}
 		}
 		else {
@@ -43,5 +43,4 @@ public class TypeConverterFormatterAdapter implements TypeConverter, Closure {
 	public Object call(Object o) {
 		return convert(o);
 	}
-
 }

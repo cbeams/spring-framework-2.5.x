@@ -9,7 +9,7 @@ package org.springframework.binding.format;
  * service that pool formatters should do so in thread local storage.
  * @author Keith Donald
  */
-public interface FormatterSource {
+public interface FormatterLocator {
 	public DateFormatter getDateFormatter(String encodedFormat);
 	
 	public DateFormatter getDateFormatter();

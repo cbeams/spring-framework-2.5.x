@@ -15,7 +15,8 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
-import org.springframework.binding.TypeConverters;
+import org.springframework.binding.convert.Converter;
+import org.springframework.binding.convert.ConverterLocator;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
 import org.springframework.web.flow.Action;
@@ -36,6 +37,16 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	private static final String PERSON_DETAIL = "person.Detail";
 
+	private ConverterLocator converterLocator;
+	
+	public void setConverterLocator(ConverterLocator converterLocator) {
+		this.converterLocator = converterLocator;
+	}
+	
+	protected Converter getConverter(Class targetClass) {
+		return converterLocator.getConverter(String.class, targetClass);
+	}
+	
 	protected String flowId() {
 		return PERSON_DETAIL;
 	}
@@ -50,8 +61,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addViewState(new Transition[] { onBackFinish(), onSelect(setColleagueId) });
 
 		// set the selected collegue (chosen from the person's collegue list)
-		Action setAction = new SetAction(new Mapping("id", colleagueId, TypeConverters.instance().getTypeConverter(
-				Long.class)));
+		Action setAction = new SetAction(new Mapping("id", colleagueId, getConverter(Long.class)));
 		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
 
 		// spawn subflow to view selected collegue details
