@@ -1,7 +1,6 @@
 package org.springframework.samples.jpetstore.domain;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -28,7 +27,7 @@ public class Order implements Serializable {
   private String billZip;
   private String billCountry;
   private String courier;
-  private BigDecimal totalPrice;
+  private double totalPrice;
   private String billToFirstName;
   private String billToLastName;
   private String shipToFirstName;
@@ -90,8 +89,8 @@ public class Order implements Serializable {
   public String getCourier() { return courier; }
   public void setCourier(String courier) { this.courier = courier; }
 
-  public BigDecimal getTotalPrice() { return totalPrice; }
-  public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
+  public double getTotalPrice() { return totalPrice; }
+  public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
 
   public String getBillToFirstName() { return billToFirstName; }
   public void setBillToFirstName(String billToFirstName) { this.billToFirstName = billToFirstName; }

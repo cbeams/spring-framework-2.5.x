@@ -1,7 +1,6 @@
 package org.springframework.samples.jpetstore.domain;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 public class CartItem implements Serializable {
 
@@ -26,12 +25,12 @@ public class CartItem implements Serializable {
     this.quantity = quantity;
   }
 
-	public BigDecimal getTotalPrice() {
-		if (item != null && item.getListPrice() != null) {
-			return item.getListPrice().multiply(new BigDecimal(quantity));
+	public double getTotalPrice() {
+		if (item != null) {
+			return item.getListPrice() * quantity;
 		}
 		else {
-			return null;
+			return 0;
 		}
 	}
 

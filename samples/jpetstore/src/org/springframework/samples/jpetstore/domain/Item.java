@@ -1,7 +1,6 @@
 package org.springframework.samples.jpetstore.domain;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 
 public class Item implements Serializable {
@@ -10,8 +9,8 @@ public class Item implements Serializable {
 
   private String itemId;
   private String productId;
-  private BigDecimal listPrice;
-  private BigDecimal unitCost;
+  private double listPrice;
+  private double unitCost;
   private int supplierId;
   private String status;
   private String attribute1;
@@ -39,11 +38,11 @@ public class Item implements Serializable {
   public int getSupplierId() { return supplierId; }
   public void setSupplierId(int supplierId) { this.supplierId = supplierId; }
 
-  public BigDecimal getListPrice() { return listPrice; }
-  public void setListPrice(BigDecimal listPrice) { this.listPrice = listPrice; }
+  public double getListPrice() { return listPrice; }
+  public void setListPrice(double listPrice) { this.listPrice = listPrice; }
 
-  public BigDecimal getUnitCost() { return unitCost; }
-  public void setUnitCost(BigDecimal unitCost) { this.unitCost = unitCost; }
+  public double getUnitCost() { return unitCost; }
+  public void setUnitCost(double unitCost) { this.unitCost = unitCost; }
 
   public String getStatus() { return status; }
   public void setStatus(String status) { this.status = status; }

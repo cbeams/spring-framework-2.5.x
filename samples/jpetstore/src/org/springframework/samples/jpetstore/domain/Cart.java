@@ -1,7 +1,6 @@
 package org.springframework.samples.jpetstore.domain;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,15 +67,15 @@ public class Cart implements Serializable {
     cartItem.setQuantity(quantity);
   }
 
-  public BigDecimal getSubTotal() {
-    BigDecimal subTotal = new BigDecimal("0");
+  public double getSubTotal() {
+    double subTotal = 0;
     Iterator items = getAllCartItems();
     while (items.hasNext()) {
       CartItem cartItem = (CartItem) items.next();
       Item item = cartItem.getItem();
-      BigDecimal listPrice = item.getListPrice();
-      BigDecimal quantity = new BigDecimal(String.valueOf(cartItem.getQuantity()));
-      subTotal = subTotal.add(listPrice.multiply(quantity));
+      double listPrice = item.getListPrice();
+      int quantity = cartItem.getQuantity();
+      subTotal += listPrice * quantity;
     }
     return subTotal;
   }
