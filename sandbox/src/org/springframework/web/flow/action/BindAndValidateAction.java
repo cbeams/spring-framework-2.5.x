@@ -409,8 +409,8 @@ public class BindAndValidateAction extends AbstractAction {
 			propertyEditorRegistrar.registerCustomEditors(binder);
 		}
 		else {
-			if (logger.isInfoEnabled()) {
-				logger.info("No property editor registrar set, no custom editors to register");
+			if (logger.isDebugEnabled()) {
+				logger.debug("No property editor registrar set, no custom editors to register");
 			}
 		}
 	}

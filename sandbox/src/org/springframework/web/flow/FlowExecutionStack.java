@@ -274,14 +274,14 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			HttpServletResponse response) {
 		assertActive();
 		if (stateId == null) {
-			if (logger.isInfoEnabled()) {
+			if (logger.isDebugEnabled()) {
 				logger
-						.info("Current state id was not provided in request to signal event '"
+						.debug("Current state id was not provided in request to signal event '"
 								+ eventId
 								+ "' in flow "
 								+ getCaption()
 								+ "' - pulling current state id from session - "
-								+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
+								+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
 			}
 			stateId = getCurrentStateId();
 		}
