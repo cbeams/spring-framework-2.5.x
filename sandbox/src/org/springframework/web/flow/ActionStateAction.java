@@ -132,7 +132,7 @@ public class ActionStateAction {
 		this.state = state;
 	}
 
-	private void setTargetAction(Action action) {
+	private void setTargetAction(Action targetAction) {
 		Assert.notNull(targetAction, "The target Action instance is required");
 		this.targetAction = targetAction;
 	}
