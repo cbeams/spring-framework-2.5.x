@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -36,7 +35,8 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Simple utility methods for file and stream copying.
- * All copy methods use a block size of 4096 bytes.
+ * All copy methods use a block size of 4096 bytes,
+ * and close all affected streams when done.
  *
  * <p>Mainly for use within the framework,
  * but also useful for application code.
@@ -62,7 +62,8 @@ public abstract class FileCopyUtils {
 	 * @throws IOException in case of I/O errors
 	 */
 	public static void copy(File in, File out) throws IOException {
-		copy(new BufferedInputStream(new FileInputStream(in)), new BufferedOutputStream(new FileOutputStream(out)));
+		copy(new BufferedInputStream(new FileInputStream(in)),
+		    new BufferedOutputStream(new FileOutputStream(out)));
 	}
 
 	/**
@@ -126,16 +127,28 @@ public abstract class FileCopyUtils {
 
 	/**
 	 * Copy the contents of the given byte array to the given OutputStream.
+	 * Closes the stream when done.
 	 * @param in the byte array to copy from
 	 * @param out the OutputStream to copy to
 	 * @throws IOException in case of I/O errors
 	 */
 	public static void copy(byte[] in, OutputStream out) throws IOException {
-		copy(new ByteArrayInputStream(in), out);
+		try {
+			out.write(in);
+		}
+		finally {
+			try {
+				out.close();
+			}
+			catch (IOException ex) {
+				logger.warn("Could not close OutputStream", ex);
+			}
+		}
 	}
 
 	/**
 	 * Copy the contents of the given InputStream into a new byte array.
+	 * Closes the stream when done.
 	 * @param in the stream to copy from
 	 * @return the new byte array that has been copied to
 	 * @throws IOException in case of I/O errors
@@ -185,16 +198,28 @@ public abstract class FileCopyUtils {
 
 	/**
 	 * Copy the contents of the given String to the given output Writer.
+	 * Closes the write when done.
 	 * @param in the String to copy from
 	 * @param out the Writer to copy to
 	 * @throws IOException in case of I/O errors
 	 */
 	public static void copy(String in, Writer out) throws IOException {
-		copy(new StringReader(in), out);
+		try {
+			out.write(in);
+		}
+		finally {
+			try {
+				out.close();
+			}
+			catch (IOException ex) {
+				logger.warn("Could not close Writer", ex);
+			}
+		}
 	}
 
 	/**
 	 * Copy the contents of the given Reader into a String.
+	 * Closes the reader when done.
 	 * @param in the reader to copy from
 	 * @return the String that has been copied to
 	 * @throws IOException in case of I/O errors
