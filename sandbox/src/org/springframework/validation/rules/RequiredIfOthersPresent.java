@@ -19,8 +19,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Validates property value as 'required' if and only if some other properties are
- * also provided.
+ * Validates property value as 'required' if and only if some other properties
+ * are also provided.
  * 
  * @author Seth Ladd
  * @author Keith Donald
@@ -35,6 +35,8 @@ public class RequiredIfOthersPresent implements UnaryPredicate {
 
     public RequiredIfOthersPresent(String otherPropertyNames,
             LogicalOperator operator) {
+        Assert.notNull(otherPropertyNames);
+        Assert.notNull(operator);
         Set set = StringUtils.commaDelimitedListToSet(otherPropertyNames);
         Assert.hasElements(set);
         if (operator == LogicalOperator.AND) {
@@ -54,6 +56,7 @@ public class RequiredIfOthersPresent implements UnaryPredicate {
     }
 
     public void setPropertyName(String propertyName) {
+        Assert.notNull(propertyName);
         this.propertyName = propertyName;
     }
 
