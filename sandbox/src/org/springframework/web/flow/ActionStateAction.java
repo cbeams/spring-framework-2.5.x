@@ -67,8 +67,9 @@ public class ActionStateAction {
 	 * @param targetAction The action
 	 */
 	public ActionStateAction(ActionState state, Action targetAction) {
+		Assert.notNull(state, "The action state is required");
 		this.state = state;
-		this.targetAction = targetAction;
+		setTargetAction(targetAction);
 	}
 
 	/**
@@ -135,7 +136,7 @@ public class ActionStateAction {
 		Assert.notNull(targetAction, "The target Action instance is required");
 		this.targetAction = targetAction;
 	}
-	
+
 	private void setName(String name) {
 		if (StringUtils.hasText(name)) {
 			this.properties.put(NAME_PROPERTY, name);
@@ -211,6 +212,7 @@ public class ActionStateAction {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("action", targetAction).append("properties", properties).toString();
+		return new ToStringCreator(this).append("stateId", state.getId()).append("targetAction", targetAction).append(
+				"properties", properties).toString();
 	}
 }
