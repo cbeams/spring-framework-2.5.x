@@ -108,6 +108,15 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
         return (UnaryPredicate)predicates.get(index);
     }
     
+    public void copyInto(CompoundUnaryPredicate p) {
+        p.predicates.clear();
+        p.predicates.addAll(predicates);
+    }
+    
+    public void set(int index, UnaryPredicate predicate) {
+        predicates.set(index, predicate);
+    }
+    
     /**
      * Return an iterator over the aggregated predicates.
      * 
