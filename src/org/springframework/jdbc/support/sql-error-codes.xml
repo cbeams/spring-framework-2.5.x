@@ -12,7 +12,6 @@
 	- If this property is present, then it will be used instead of the id for
 	- looking up the error codes based on the current database.
 	-->
-
 <beans>
 
 	<bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
@@ -57,6 +56,9 @@
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>1062</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>1213</value>
 		</property>
 	</bean>
 
