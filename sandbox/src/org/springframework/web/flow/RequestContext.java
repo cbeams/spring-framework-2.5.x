@@ -21,20 +21,20 @@ import java.util.Map;
  * Central interface that allows clients to access contextual information about
  * an ongoing flow execution within the context of a client request. The term
  * <i>request</i> is used to symbolize a call into the flow system to
- * manipulate a active FlowExecution.
+ * manipulate a FlowExecution.
  * <p>
  * A new request context is created when one of the entry points on the
  * FlowExecution facade interface is invoked, either ({@link org.springframework.web.flow.FlowExecution#start(Event)}
  * to activate a new executing flow, or
  * {@link org.springframework.web.flow.FlowExecution#signalEvent(Event)}) to
- * manipulate the state of an existing executing flow.
+ * manipulate the state of an already executing flow.
  * <p>
- * This context interface is then passed around throughout request processing,
- * where it may be referenced, typically by user-implemented action code and
- * state transition criteria. The request context is disposed when a entry-point
- * call into a flow execution returns. This fact means the request context is an
- * internal artifact used within the flow system--the context object will not be
- * exposed to external client code.
+ * Once created, this context interface is passed around throughout request
+ * processing, where it may be referenced and reasoned upon, typically by
+ * user-implemented action code and state transition criteria. The request
+ * context is disposed when a entry-point call into a flow execution returns.
+ * This fact means the request context is an internal artifact used within the
+ * flow system--the context object will not be exposed to external client code.
  * <p>
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar request naming convention.
