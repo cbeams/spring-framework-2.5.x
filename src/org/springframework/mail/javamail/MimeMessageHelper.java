@@ -38,6 +38,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 
 import org.springframework.core.io.InputStreamSource;
+import org.springframework.core.io.Resource;
 
 /**
  * Helper class for easy population of a <code>javax.mail.internet.MimeMessage</code>.
@@ -88,7 +89,7 @@ public class MimeMessageHelper {
 
 
 	/**
-	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * assuming a simple text message (no multipart content).
 	 * @param mimeMessage MimeMessage to work on
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
@@ -98,7 +99,7 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * assuming a simple text message (no multipart content).
 	 * @param mimeMessage MimeMessage to work on
 	 * @param encoding the character encoding to use for the message
@@ -110,7 +111,7 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting attachments) if requested.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
@@ -125,7 +126,7 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * Create a new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting attachments) if requested.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
@@ -143,6 +144,27 @@ public class MimeMessageHelper {
 	 */
 	public final MimeMessage getMimeMessage() {
 		return mimeMessage;
+	}
+
+	/**
+	 * Return whether this helper is in multipart mode,
+	 * i.e. holds a multipart message.
+	 * @see MimeMessageHelper(MimeMessage, boolean)
+	 */
+	public final boolean isMultipart() {
+		return (this.mimeMultipart != null);
+	}
+
+	/**
+	 * Return the underlying MIME multipart object, if any
+	 * @throws IllegalStateException if this helper is not in multipart mode
+	 * @see #isMultipart
+	 */
+	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
+		if (this.mimeMultipart == null) {
+			throw new IllegalStateException("Cannot access root multipart object - not in multipart mode");
+		}
+		return this.mimeMultipart;
 	}
 
 	/**
@@ -303,6 +325,7 @@ public class MimeMessageHelper {
 		}
 	}
 
+
 	public void setText(String text) throws MessagingException {
 		setText(text, false);
 	}
@@ -317,58 +340,76 @@ public class MimeMessageHelper {
 	public void setText(final String text, boolean html) throws MessagingException {
 		MimePart partToUse = null;
 		if (this.mimeMultipart != null) {
-			MimeBodyPart bodyPart = null;
-			for (int i = 0; i < this.mimeMultipart.getCount(); i++) {
-				BodyPart bp = this.mimeMultipart.getBodyPart(i);
-				if (bp.getFileName() == null) {
-					bodyPart = (MimeBodyPart) bp;
-				}
-			}
-			if (bodyPart == null) {
-				MimeBodyPart mimeBodyPart = new MimeBodyPart();
-				this.mimeMultipart.addBodyPart(mimeBodyPart);
-				bodyPart = mimeBodyPart;
-			}
-			partToUse = bodyPart;
+			partToUse = getMainPart();
 		}
 		else {
 			partToUse = this.mimeMessage;
 		}
-		
+		setTextToMimePart(partToUse, text, html);
+	}
+
+	private MimeBodyPart getMainPart() throws MessagingException {
+		MimeBodyPart bodyPart = null;
+		for (int i = 0; i < this.mimeMultipart.getCount(); i++) {
+			BodyPart bp = this.mimeMultipart.getBodyPart(i);
+			if (bp.getFileName() == null) {
+				bodyPart = (MimeBodyPart) bp;
+			}
+		}
+		if (bodyPart == null) {
+			MimeBodyPart mimeBodyPart = new MimeBodyPart();
+			this.mimeMultipart.addBodyPart(mimeBodyPart);
+			bodyPart = mimeBodyPart;
+		}
+		return bodyPart;
+	}
+
+	private void setTextToMimePart(MimePart mimePart, final String text, boolean html) throws MessagingException {
 		if (html) {
-			// need to use a javax.activation.DataSource (!) to set a text
-			// with content type "text/html"
-			partToUse.setDataHandler(new DataHandler(
-			    new DataSource() {
-						public InputStream getInputStream() throws IOException {
-							return new ByteArrayInputStream(getEncoding() != null ? text.getBytes(getEncoding()) : text.getBytes());
-						}
-						public OutputStream getOutputStream() throws IOException {
-							throw new UnsupportedOperationException("Read-only javax.activation.DataSource");
-						}
-						public String getContentType() {
-							return "text/html";
-						}
-						public String getName() {
-							return "text";
-						}
-			    }
-			));
+			// Need to use a javax.activation.DataSource to set a text
+			// with content type "text/html"!
+			InputStreamSource isSource = new InputStreamSource() {
+				public InputStream getInputStream() throws IOException {
+					return new ByteArrayInputStream(getEncoding() != null ? text.getBytes(getEncoding()) : text.getBytes());
+				}
+			};
+			mimePart.setDataHandler(new DataHandler(createDataSource(isSource, "text/html", "text")));
 		}
 		else {
 			if (getEncoding() != null) {
-				partToUse.setText(text, getEncoding());
+				mimePart.setText(text, getEncoding());
 			}
 			else {
-				partToUse.setText(text);
+				mimePart.setText(text);
 			}
 		}
 	}
 
 
 	/**
-	 * Add an attachment to the given MimeMessage, taking the content
-	 * from a java.io.File.
+	 * Add an attachment to the MimeMessage, taking the content from a
+	 * <code>javax.activation.DataSource</code>.
+	 * <p>Note that the InputStream returned by the DataSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * getInputStream() multiple times.
+	 * @param attachmentFilename the name of the attachment as it will
+	 * appear in the mail (the content type will be determined by this)
+	 * @param dataSource the <code>javax.activation.DataSource</code> to take
+	 * the content from, determining the InputStream and the content type
+	 * @throws MessagingException in case of errors
+	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+	 * @see #addAttachment(String, java.io.File)
+	 */
+	public void addAttachment(String attachmentFilename, DataSource dataSource) throws MessagingException {
+		MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setFileName(attachmentFilename);
+		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+		getMimeMultipart().addBodyPart(mimeBodyPart);
+	}
+
+	/**
+	 * Add an attachment to the MimeMessage, taking the content from a
+	 * <code>java.io.File</code>.
 	 * <p>The content type will be determined by the name of the given
 	 * content file. Do not use this for temporary files with arbitrary
 	 * filenames (possibly ending in ".tmp" or the like)!
@@ -384,58 +425,129 @@ public class MimeMessageHelper {
 	}
 
 	/**
-	 * Add an attachment to the given MimeMessage, taking the content
-	 * from an org.springframework.core.InputStreamResource.
+	 * Add an attachment to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.io.InputStreamResource</code>.
 	 * <p>The content type will be determined by the given filename for
 	 * the attachment. Thus, any content source will be fine, including
 	 * temporary files with arbitrary filenames.
 	 * @param attachmentFilename the name of the attachment as it will
 	 * appear in the mail
 	 * @param inputStreamSource the resource to take the content from
-	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, java.io.File)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 */
-	public void addAttachment(final String attachmentFilename, final InputStreamSource inputStreamSource)
+	public void addAttachment(String attachmentFilename, InputStreamSource inputStreamSource)
 	    throws MessagingException {
-		addAttachment(attachmentFilename,
-		              new DataSource() {
-			              public InputStream getInputStream() throws IOException {
-											return inputStreamSource.getInputStream();
-										}
-										public OutputStream getOutputStream() {
-											throw new UnsupportedOperationException("Read-only javax.activation.DataSource");
-										}
-										public String getContentType() {
-											return FileTypeMap.getDefaultFileTypeMap().getContentType(attachmentFilename);
-										}
-										public String getName() {
-											return attachmentFilename;
-										}
-									});
+		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(attachmentFilename);
+		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
+		addAttachment(attachmentFilename, dataSource);
 	}
 
+
 	/**
-	 * Add an attachment to the given MimeMessage,
-	 * taking the content from a <code>javax.activation.DataSource</code>.
+	 * Add an inline element to the MimeMessage, taking the content from a
+	 * <code>javax.activation.DataSource</code>.
 	 * <p>Note that the InputStream returned by the DataSource implementation
 	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
 	 * getInputStream() multiple times.
-	 * @param attachmentFilename the name of the attachment as it will
-	 * appear in the mail (the content type will be determined by this)
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param dataSource the <code>javax.activation.DataSource</code> to take
 	 * the content from, determining the InputStream and the content type
 	 * @throws MessagingException in case of errors
 	 * @see #addAttachment(String, File)
 	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
 	 */
-	public void addAttachment(String attachmentFilename, DataSource dataSource) throws MessagingException {
-		if (this.mimeMultipart == null) {
-			throw new IllegalStateException("Cannot add attachment - not in multipart mode");
-		}
-		MimeBodyPart bodyPart = new MimeBodyPart();
-		bodyPart.setFileName(attachmentFilename);
-		bodyPart.setDataHandler(new DataHandler(dataSource));
-		this.mimeMultipart.addBodyPart(bodyPart);
+	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
+		MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+		mimeBodyPart.setHeader("Content-ID", "<" + contentId + ">");
+		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
+		getMimeMultipart().addBodyPart(mimeBodyPart);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from a
+	 * <code>java.io.File</code>.
+	 * <p>The content type will be determined by the name of the given
+	 * content file. Do not use this for temporary files with arbitrary
+	 * filenames (possibly ending in ".tmp" or the like)!
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param file the File resource to take the content from
+	 * @throws MessagingException
+	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 */
+	public void addInline(String contentId, File file) throws MessagingException {
+		addInline(contentId, new FileDataSource(file));
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.io.InputStreamResource</code>.
+	 * <p>The content type will be determined by the name of the given
+	 * content file. Do not use this for temporary files with arbitrary
+	 * filenames (possibly ending in ".tmp" or the like)!
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param resource the resource to take the content from
+	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 */
+	public void addInline(String contentId, Resource resource) throws MessagingException {
+		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(resource.getFilename());
+		addInline(contentId, createDataSource(resource, contentType, "inline"));
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.InputStreamResource</code>.
+	 * <p>Note that you can determine the content type for any given filename
+	 * via the Activation Framework's FileTypeMap utility:<br>
+	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param inputStreamSource the resource to take the content from
+	 * @param contentType the content type to use for the element
+	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
+	 * @see javax.activation.FileTypeMap#getContentType
+	 */
+	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
+	    throws MessagingException {
+		addInline(contentId, createDataSource(inputStreamSource, contentType, "inline"));
+	}
+
+
+	/**
+	 * Create an Activation Framework DataSource for the given InputStreamSource.
+	 * @param inputStreamSource the InputStreamSource (typically a Spring Resource)
+	 * @param contentType the content type
+	 * @param name the name of the DataSource
+	 * @return the Activation Framework DataSource
+	 */
+	private static DataSource createDataSource(
+	    final InputStreamSource inputStreamSource, final String contentType, final String name) {
+		return new DataSource() {
+			public InputStream getInputStream() throws IOException {
+				return inputStreamSource.getInputStream();
+			}
+			public OutputStream getOutputStream() {
+				throw new UnsupportedOperationException("Read-only javax.activation.DataSource");
+			}
+			public String getContentType() {
+				return contentType;
+			}
+			public String getName() {
+				return name;
+			}
+		};
 	}
 
 }
