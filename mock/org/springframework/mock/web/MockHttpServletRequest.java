@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -40,6 +41,8 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the HttpServletRequest interface.
@@ -242,15 +245,15 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	 * parameter name, the given values will be added to the end of the list.
 	 */
 	public void addParameter(String name, String[] values) {
-		if (!this.parameters.containsKey(name)) {
-			this.parameters.put(name, values);
+		String[] oldArr = (String[]) this.parameters.get(name);
+		if (oldArr != null) {
+			String[] newArr = new String[oldArr.length + values.length];
+			System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
+			System.arraycopy(values, 0, newArr, oldArr.length, values.length);
+			this.parameters.put(name, newArr);
 		}
 		else {
-			String[] arr = (String[]) this.parameters.get(name);
-			String[] newArr = new String[arr.length + values.length];
-			System.arraycopy(arr, 0, newArr, 0, arr.length);
-			System.arraycopy(values, 0, newArr, arr.length, values.length);
-			this.parameters.put(name, newArr);
+			this.parameters.put(name, values);
 		}
 	}
 
@@ -396,14 +399,54 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		return cookies;
 	}
 
+	/**
+	 * Add a header entry for the given name.
+	 * <p>If there was no entry for that header name before,
+	 * the value will be used as-is. In case of an existing entry,
+	 * a String array will be created, adding the given value (more
+	 * specifically, its toString representation) as further element.
+	 * <p>Multiple values can only be stored as String array,
+	 * following the Servlet spec (see <code>getHeaders</code> accessor).
+	 * As alternative to repeated <code>addHeader</code> calls for
+	 * individual elements, you can use a single call with the entire
+	 * String array as parameter.
+	 * @see #getHeaderNames
+	 * @see #getHeader
+	 * @see #getHeaders
+	 * @see #getDateHeader
+	 * @see #getIntHeader
+	 */
 	public void addHeader(String name, Object value) {
-		this.headers.put(name, value);
+		Object oldValue = this.headers.get(name);
+		if (oldValue instanceof String[]) {
+			String[] oldArray = (String[]) oldValue;
+			String[] newArray = new String[oldArray.length + 1];
+			System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
+			newArray[oldArray.length] = value.toString();
+			this.headers.put(name, newArray);
+		}
+		else if (oldValue != null) {
+			String[] newArray = new String[2];
+			newArray[0] = oldValue.toString();
+			newArray[1] = value.toString();
+			this.headers.put(name, newArray);
+		}
+		else {
+			this.headers.put(name, value);
+		}
 	}
 
 	public long getDateHeader(String name) {
 		Object value = this.headers.get(name);
-		if (value instanceof Number) {
+		if (value instanceof Date) {
+			return ((Date) value).getTime();
+		}
+		else if (value instanceof Number) {
 			return ((Number) value).longValue();
+		}
+		else if (value != null) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is neither a Date nor a Number: " + value);
 		}
 		else {
 			return -1L;
@@ -412,18 +455,29 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	public String getHeader(String name) {
 		Object value = this.headers.get(name);
-		return (value != null ? value.toString() : null);
+		if (value instanceof String[]) {
+			return StringUtils.arrayToCommaDelimitedString((String[]) value);
+		}
+		else if (value != null) {
+			return value.toString();
+		}
+		else {
+			return null;
+		}
 	}
 
 	public Enumeration getHeaders(String name) {
-		Object obj = this.headers.get(name);
-		if (obj instanceof String[]) {
-			return Collections.enumeration(Arrays.asList((String[]) obj));
+		Object value = this.headers.get(name);
+		if (value instanceof String[]) {
+			return Collections.enumeration(Arrays.asList((String[]) value));
+		}
+		else if (value != null) {
+			Vector vector = new Vector(1);
+			vector.add(value.toString());
+			return vector.elements();
 		}
 		else {
-			Vector vector = new Vector();
-			vector.add(obj.toString());
-			return vector.elements();
+			return Collections.enumeration(Collections.EMPTY_SET);
 		}
 	}
 
@@ -435,6 +489,9 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		Object value = this.headers.get(name);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
+		}
+		else if (value != null) {
+			throw new NumberFormatException("Value for header '" + name + "' is not a Number: " + value);
 		}
 		else {
 			return -1;
