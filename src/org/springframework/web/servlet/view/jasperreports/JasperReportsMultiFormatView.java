@@ -34,10 +34,10 @@ import org.springframework.util.ClassUtils;
  * Jasper Reports view class that allows for the actual rendering format to be
  * specified at runtime using a parameter contained in the model.
  *
- * <p>This view works on the concept of a discriminator key and a format key.
- * The discriminator key is used to pass the format key from your
+ * <p>This view works on the concept of a format key and a mapping key.
+ * The format key is used to pass the mapping key from your
  * <code>Controller</code> to Spring through as part of the model and the
- * format key is used to map a logical format to an actual JasperReports
+ * mapping key is used to map a logical format to an actual JasperReports
  * view class. For example you might add the following code to your
  * <code>Controller</code>:
  *
@@ -45,9 +45,9 @@ import org.springframework.util.ClassUtils;
  * Map model = new HashMap();
  * model.put("format", "pdf");</pre>
  *
- * Here <code>format</code> is the discriminator key and <code>pdf</code> is
- * the format key. When rendering a report, this class looks for a
- * model parameter under the disriminator key, which by default is
+ * Here <code>format</code> is the format key and <code>pdf</code> is
+ * the mapping key. When rendering a report, this class looks for a
+ * model parameter under the format key, which by default is
  * <code>format</code>. It then uses the value of this parameter to lookup
  * the actual <code>View</code> class to use. The default mappings for this
  * lookup are:
@@ -59,8 +59,8 @@ import org.springframework.util.ClassUtils;
  * <li><code>xls</code> - <code>JasperReportsXlsView</code></li>
  * </ul>
  *
- * <p>The discriminator key can be changed using the <code>formatKey</code>
- * property and the format key to view class mappings can be changed using the
+ * <p>The format key can be changed using the <code>formatKey</code>
+ * property and the mapping key to view class mappings can be changed using the
  * <code>formatMappings</code> property.
  *
  * @author Rob Harrop
@@ -71,7 +71,6 @@ import org.springframework.util.ClassUtils;
 public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 	public static final String DEFAULT_FORMAT_KEY = "format";
-
 
 	/**
 	 * The key of the model parameter that holds the format key.
@@ -84,7 +83,10 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 */
 	private Map formatMappings = new HashMap();
 
-
+  /**
+	 * Creates a new <code>JasperReportsMultiFormatView</code> instance
+	 * with a default set of mappings.
+	 */
 	public JasperReportsMultiFormatView() {
 		this.formatMappings.put("csv", JasperReportsCsvView.class);
 		this.formatMappings.put("html", JasperReportsHtmlView.class);
