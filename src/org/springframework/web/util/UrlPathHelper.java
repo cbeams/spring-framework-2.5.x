@@ -28,12 +28,14 @@ import org.apache.commons.logging.LogFactory;
  * Helper class for URL path matching. Provides support for URL paths
  * in ServletDispatcher includes, and support for URL decoding.
  *
- * <p>Used by AbstractUrlHandlerMapping and AbstractMethodNameResolver.
+ * <p>Used by AbstractUrlHandlerMapping, AbstractMethodNameResolver
+ * and RequestContext for path matching and/or URI determination.
  *
  * @author Juergen Hoeller
  * @since 14.01.2004
  * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping
  * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver
+ * @see org.springframework.web.servlet.support.RequestContext
  */
 public class UrlPathHelper {
 
@@ -119,11 +121,11 @@ public class UrlPathHelper {
 	 * @see #getPathWithinServletMapping
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
-		// always use full path within current servlet context?
+		// Always use full path within current servlet context?
 		if (this.alwaysUseFullPath) {
 			return getPathWithinApplication(request);
 		}
-		// else use path within current servlet mapping if applicable
+		// Else, use path within current servlet mapping if applicable
 		String rest = getPathWithinServletMapping(request);
 		if (!"".equals(rest)) {
 			return rest;
@@ -239,8 +241,8 @@ public class UrlPathHelper {
 				return URLDecoder.decode(source, enc);
 			}
 			catch (UnsupportedEncodingException ex) {
-				logger.warn("Could not decode request string [" + source +
-				            "] with encoding '" + enc + "': using platform default");
+				logger.warn("Could not decode request string [" + source + "] with encoding '" +
+				    enc + "': using platform default");
 				return URLDecoder.decode(source);
 			}
 		}
