@@ -57,7 +57,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see #setFreemarkerVariables
  * @see #setTemplateLoaderPath
  * @see #createConfiguration
- * @version $Id: FreeMarkerConfigurationFactory.java,v 1.2 2004-07-02 00:40:23 davison Exp $
+ * @version $Id: FreeMarkerConfigurationFactory.java,v 1.3 2004-07-23 08:49:16 jhoeller Exp $
  */
 public class FreeMarkerConfigurationFactory {
 
@@ -181,7 +181,7 @@ public class FreeMarkerConfigurationFactory {
 											"] to File: using SpringTemplateLoader");
 				}
 				config.setTemplateLoader(new SpringTemplateLoader(this.resourceLoader,
-											this.templateLoaderPath));
+																													this.templateLoaderPath));
 			}
 		}
 

@@ -48,6 +48,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 
 	private final String templateLoaderPath;
 
+
 	/**
 	 * Create a new SpringTemplateLoader.
 	 * @param resourceLoader the Spring ResourceLoader to use
@@ -59,23 +60,28 @@ public class SpringTemplateLoader implements TemplateLoader {
 			templateLoaderPath += "/";
 		}
 		this.templateLoaderPath = templateLoaderPath;
-		logger.info("SpringTemplateLoader for FreeMarker: using resource loader [" + this.resourceLoader +
-								"] and template loader path [" + this.templateLoaderPath + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("SpringTemplateLoader for FreeMarker: using resource loader [" + this.resourceLoader +
+									"] and template loader path [" + this.templateLoaderPath + "]");
+		}
 	}
 
 	public Object findTemplateSource(String name) throws IOException {
-	    logger.debug("Searching for resource with name [" + name + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for FreeMarker template with name [" + name + "]");
+		}
 		Resource resource = this.resourceLoader.getResource(this.templateLoaderPath + name);
 		return (resource.exists() ? resource : null);
-	}
-
-	public long getLastModified(Object templateSource) {
-		return -1;
 	}
 
 	public Reader getReader(Object templateSource, String encoding) throws IOException {
 		Resource resource = (Resource) templateSource;
 		return new InputStreamReader(resource.getInputStream(), encoding);
+	}
+
+
+	public long getLastModified(Object templateSource) {
+		return -1;
 	}
 
 	public void closeTemplateSource(Object templateSource) throws IOException {

@@ -30,17 +30,20 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.web.servlet.view.AbstractView;
  
 /**
- * Abstract superclass for PDF views, using Bruno Lowagie's
- * iText package. Application-specific view classes will extend this class.
+ * Abstract superclass for PDF views, using Bruno Lowagie's iText package.
+ * Application-specific view classes will extend this class.
  * The view will be held in such a subclass, not a template such as a JSP.
- * <br>See <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a> 
+ *
+ * <p>See
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson, pp 571-575 for an example of use of this class.
- * <br>NB: Internet Explorer requires a .pdf extension, as
+ *
+ * <p>Note: Internet Explorer requires a ".pdf" extension, as
  * it doesn't always respect the declared content type.
- * <br>Exposes page width and height as bean properties.
- * @version $Id: AbstractPdfView.java,v 1.8 2004-03-18 02:46:18 trisberg Exp $
+ *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
+ * @version $Id: AbstractPdfView.java,v 1.9 2004-07-23 08:49:18 jhoeller Exp $
  */
 public abstract class AbstractPdfView extends AbstractView {
 	
@@ -85,7 +88,7 @@ public abstract class AbstractPdfView extends AbstractView {
 
 	/**
 	 * Return a new com.lowagie.text.Document.
-	 * <br>By default return an A4 document, but the subclass can set anything else or retrieve from properties.
+	 * <p>By default return an A4 document, but the subclass can set anything else or retrieve from properties.
 	 * @return the new created Document
 	 */
 	protected Document getDocument() {
@@ -94,7 +97,7 @@ public abstract class AbstractPdfView extends AbstractView {
 
 	/**
 	 * Return the ViewerPreferences.
-	 * <br>By default return AllowPrinting and PageLayoutSinglePage, but can be subclassed.
+	 * <p>By default return AllowPrinting and PageLayoutSinglePage, but can be subclassed.
 	 * The subclass can either fix the preferences or retrieve them from the bean properties.
 	 * @return an int containing the bits information against PdfWriter definitions.
 	 */
@@ -107,9 +110,10 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * given the model.
 	 * @param request in case we need locale etc. Shouldn't look at attributes
 	 * @param response in case we need to set cookies. Shouldn't write to it.
+	 * @throws Exception any exceptiont hat occured during document building
 	 */
-	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request,
-																					 HttpServletResponse response) throws Exception;
+	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer,
+																					 HttpServletRequest request, HttpServletResponse response)
+			throws Exception;
 
 }
-

@@ -66,6 +66,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String requestContextAttribute;
 
+
 	/**
 	 * Set the view class that should be used to create views.
 	 * @param viewClass class that is assignable to InternalResourceView
@@ -116,17 +117,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	/**
 	 * Set the name of the RequestContext attribute for all views.
 	 * @param requestContextAttribute name of the RequestContext attribute
+	 * @see AbstractView#setRequestContextAttribute
 	 */
 	public void setRequestContextAttribute(String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
-	}
-
-	/**
-	 * This implementation returns just the view name,
-	 * as this ViewResolver doesn't support localized resolution.
-	 */
-	protected String getCacheKey(String viewName, Locale locale) {
-		return viewName;
 	}
 
 	protected void initApplicationContext() {
@@ -134,6 +128,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		if (this.viewClass == null) {
 			throw new IllegalArgumentException("viewClass is required");
 		}
+	}
+
+
+	/**
+	 * This implementation returns just the view name,
+	 * as this ViewResolver doesn't support localized resolution.
+	 */
+	protected String getCacheKey(String viewName, Locale locale) {
+		return viewName;
 	}
 
 	protected View loadView(String viewName, Locale locale) throws BeansException {
