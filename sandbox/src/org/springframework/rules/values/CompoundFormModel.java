@@ -114,6 +114,10 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 "Child model by name '" + childFormModelName
                         + "' already exists");
         childModel.setParent(this);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding new nested form model '" + childFormModelName
+                    + "', value=" + childModel);
+        }
         formModels.put(childFormModelName, childModel);
         return childModel;
     }
@@ -213,8 +217,10 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                     domainObjectProperty, false);
             if (valueModel != null) { return valueModel; }
         }
-        logger.warn("No value model by name '" + domainObjectProperty
-                + "' found on any nested form models... returning [null]");
+        if (logger.isInfoEnabled()) {
+            logger.info("No value model by name '" + domainObjectProperty
+                    + "' found on any nested form models... returning [null]");
+        }
         return null;
     }
 

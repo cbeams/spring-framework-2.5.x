@@ -270,6 +270,15 @@ public class DefaultFormModel implements MutableFormModel {
     }
 
     public void commit() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Commit requested for this form model: " + this);
+        }
+        if (getFormObject() == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Form object is null; nothing to commit.");
+            }
+            return;
+        }
         if (bufferChanges) {
             if (hasErrors()) { throw new IllegalStateException(
                     "Form has errors; submit not allowed."); }

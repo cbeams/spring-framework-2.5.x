@@ -58,7 +58,9 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     protected void onWrappedValueChanged() {
         if (isChangeBuffered()) {
-            logger.warn("[Losing buffered edit " + get() + "]");
+            if (logger.isInfoEnabled()) {
+                logger.info("[Losing buffered edit " + get() + "]");
+            }
             set(NO_VALUE);
         }
         else {

@@ -53,7 +53,7 @@ public class DefaultMessageTranslator implements Visitor {
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
 
     private boolean appendValue = false;
-    
+
     PropertyResults results;
 
     private List args = new ArrayList();
@@ -156,7 +156,8 @@ public class DefaultMessageTranslator implements Visitor {
 
     private MessageSourceResolvable resolvableObjectName(String objectName) {
         return new DefaultMessageSourceResolvable(new String[] { objectName },
-                null, objectName);
+                null, new DefaultBeanPropertyNameRenderer()
+                        .renderShortName(objectName));
     }
 
     void visit(BeanPropertyValueConstraint valueConstraint) {
@@ -226,7 +227,12 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     void visit(UnaryPredicate constraint) {
-        add(getMessageCode(constraint), null, constraint.toString());
+        if (constraint instanceof Range) {
+            this.args.add(handleRange((Range)constraint));
+        }
+        else {
+            add(getMessageCode(constraint), null, constraint.toString());
+        }
     }
 
     private String getMessageCode(Object o) {

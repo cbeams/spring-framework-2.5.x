@@ -37,8 +37,7 @@ import org.springframework.util.DefaultObjectStyler;
 public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
     private Map localeCache = new HashMap();
 
-    protected static final Log logger = LogFactory
-            .getLog(AbstractCodedEnumResolver.class);
+    protected final Log logger = LogFactory.getLog(getClass());
 
     public List getEnumsAsList(String type, Locale locale) {
         return Collections.unmodifiableList(new ArrayList(getEnumsAsMap(type,
@@ -74,8 +73,8 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         CodedEnum e = (CodedEnum)typeEnums.get(new Integer(12));
         CodedEnum enum = (CodedEnum)typeEnums.get(code);
         if (enum == null) {
-            logger.info("No enum found with code " + code + "; code argument class="
-                    + code.getClass());
+            logger.info("No enum found with code " + code
+                    + "; code argument class=" + code.getClass());
         }
         return enum;
     }
@@ -85,6 +84,9 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         if (m == null) {
             m = new HashMap();
             localeCache.put(locale, m);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Returning enum type map for locale " + locale);
         }
         return m;
     }

@@ -18,6 +18,8 @@ package org.springframework.enums.support;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.rules.Generator;
 import org.springframework.rules.UnaryProcedure;
@@ -65,6 +67,9 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
      * @author Keith Donald
      */
     private static class FieldValueGenerator implements Generator {
+        private static final Log logger = LogFactory
+                .getLog(FieldValueGenerator.class);
+
         private Class clazz;
 
         public FieldValueGenerator(Class clazz) {

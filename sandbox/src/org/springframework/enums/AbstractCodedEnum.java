@@ -21,6 +21,7 @@ import java.util.Comparator;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.comparators.ComparableComparator;
 import org.springframework.util.comparators.CompoundComparator;
 import org.springframework.util.comparators.NullSafeComparator;
@@ -109,7 +110,9 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     public String getType() {
-        return ClassUtils.getShortNameAsProperty(getClass());
+        String classNameAsProperty = ClassUtils.getShortNameAsProperty(getClass());
+        // unqualify inner class dot separator - leaving class name
+        return StringUtils.delimitedListToStringArray(classNameAsProperty, ".")[0];
     }
 
     public String getDefaultMessage() {
