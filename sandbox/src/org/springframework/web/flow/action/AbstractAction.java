@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
  * Base action implementation that provides a number of helper methods generally
  * useful to any controller/command action. These include:
  * <ul>
- * <li>Creating common events
+ * <li>Creating common result outcome identifiers
  * <li>Accessing request parameters and session attributes
  * <li>Accessing and exposing form objects
  * <li>Inserting action pre and post execution logic (may also be done with an
