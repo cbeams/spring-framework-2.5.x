@@ -14,18 +14,14 @@ import org.aopalliance.intercept.MethodInvocation;
  * Simple MethodInvocationFactory implementation that 
  * constructs a new MethodInvocationImpl on every call.
  * @author Rod Johnson
- * @version $Id: SimpleMethodInvocationFactory.java,v 1.1 2003-12-10 10:39:40 johnsonr Exp $
+ * @version $Id: SimpleMethodInvocationFactory.java,v 1.2 2004-03-19 17:52:49 jhoeller Exp $
  */
 public class SimpleMethodInvocationFactory implements MethodInvocationFactory {
 
-	/**
-	 * @see org.springframework.aop.framework.MethodInvocationFactory#getMethodInvocation(org.springframework.aop.framework.Advised, java.util.List, java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-	 */
 	public MethodInvocation getMethodInvocation(Object proxy, Method method, Class targetClass, Object target, Object[] args, List interceptorsAndDynamicInterceptionAdvice, AdvisedSupport advised) {
 		return new ReflectiveMethodInvocation(
 			proxy,
 			target,
-			method.getDeclaringClass(),
 			method,
 			args,
 			targetClass,

@@ -13,6 +13,7 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.aop.Advisor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: OptimizedJdkDynamicAopProxy.java,v 1.1 2004-03-18 08:00:34 johnsonr Exp $
+ * @version $Id: OptimizedJdkDynamicAopProxy.java,v 1.2 2004-03-19 17:52:49 jhoeller Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -139,7 +140,7 @@ final class OptimizedJdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			// We need to create a method invocation...
 			//invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
 			MethodInvocation invocation = 
-				new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(), method, args, targetClass, chain);
+				new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
 
 			// Proceed to the joinpoint through the interceptor chain
 			retVal = invocation.proceed();
