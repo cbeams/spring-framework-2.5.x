@@ -17,6 +17,7 @@ package org.springframework.web.flow;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.Styler;
+import org.springframework.web.flow.support.AbstractEvent;
 
 /**
  * A transitionable state that executes one or more actions when entered. If
@@ -292,7 +294,8 @@ public class ActionState extends TransitionableState {
 				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount - 1] + "' - " + "I will proceed to the next action in the chain");
+								+ eventIds[executionCount - 1] + "' - "
+								+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -399,13 +402,37 @@ public class ActionState extends TransitionableState {
 				return null;
 			}
 			if (isNamed()) {
-				// TODO wrap in another event with an appended id
-				// return new WrappingEvent(name + "." + resultEvent.getId(),
-				// resultEvent);
-				return resultEvent;
+				return new ActionNameQualifiedEvent(name, resultEvent);
 			}
 			else {
 				return resultEvent;
+			}
+		}
+
+		private static class ActionNameQualifiedEvent extends AbstractEvent {
+			private String actionName;
+			
+			private Event event;
+
+			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {
+				this.actionName = actionName;
+				this.event = resultEvent;
+			}
+
+			public String getId() {
+				return actionName + "." + event.getId();
+			}
+
+			public Object getParameter(String parameterName) {
+				return event.getParameter(parameterName);
+			}
+
+			public Map getParameters() {
+				return event.getParameters();
+			}
+
+			public String getStateId() {
+				return event.getStateId();
 			}
 		}
 
