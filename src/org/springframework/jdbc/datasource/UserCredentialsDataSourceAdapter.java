@@ -16,13 +16,8 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * An adapter for a target DataSource, applying the given user credentials to
@@ -60,9 +55,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 28.05.2004
  * @see #getConnection
  */
-public class UserCredentialsDataSourceAdapter implements DataSource, InitializingBean {
-
-	private DataSource targetDataSource;
+public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 	private String username = "";
 
@@ -70,13 +63,6 @@ public class UserCredentialsDataSourceAdapter implements DataSource, Initializin
 
 	private final ThreadLocal threadBoundCredentials = new ThreadLocal();
 
-
-	/**
-	 * Set the target DataSource that this adapter should delegate to.
-	 */
-	public void setTargetDataSource(DataSource targetDataSource) {
-		this.targetDataSource = targetDataSource;
-	}
 
 	/**
 	 * Set the username that this adapter should use for retrieving Connections.
@@ -92,12 +78,6 @@ public class UserCredentialsDataSourceAdapter implements DataSource, Initializin
 	 */
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public void afterPropertiesSet() {
-		if (this.targetDataSource == null) {
-			throw new IllegalArgumentException("targetDataSource is required");
-		}
 	}
 
 
@@ -154,31 +134,11 @@ public class UserCredentialsDataSourceAdapter implements DataSource, Initializin
 	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		if (!"".equals(username)) {
-			return this.targetDataSource.getConnection(username, password);
+			return getTargetDataSource().getConnection(username, password);
 		}
 		else {
-			return this.targetDataSource.getConnection();
+			return getTargetDataSource().getConnection();
 		}
-	}
-
-	public Connection getConnection(String username, String password) throws SQLException {
-		return this.targetDataSource.getConnection(username, password);
-	}
-
-	public int getLoginTimeout() throws SQLException {
-		return this.targetDataSource.getLoginTimeout();
-	}
-
-	public void setLoginTimeout(int seconds) throws SQLException {
-		this.targetDataSource.setLoginTimeout(seconds);
-	}
-
-	public PrintWriter getLogWriter() throws SQLException {
-		return this.targetDataSource.getLogWriter();
-	}
-
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		this.targetDataSource.setLogWriter(out);
 	}
 
 }

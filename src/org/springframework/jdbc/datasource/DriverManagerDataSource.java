@@ -45,7 +45,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
- * @version $Id: DriverManagerDataSource.java,v 1.9 2004-07-06 14:48:49 jhoeller Exp $
+ * @version $Id: DriverManagerDataSource.java,v 1.10 2004-07-22 09:45:27 jhoeller Exp $
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.apache.commons.dbcp.BasicDataSource
@@ -59,6 +59,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	private String username = "";
 
 	private String password = "";
+
 
 	/**
 	 * Constructor for bean-style configuration.
@@ -77,6 +78,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 		setUsername(username);
 		setPassword(password);
 	}
+
 
 	public void setDriverClassName(String driverClassName) throws CannotGetJdbcConnectionException {
 		this.driverClassName = driverClassName;
@@ -117,6 +119,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	public String getPassword() {
 		return password;
 	}
+
 
 	/**
 	 * This DataSource returns a new connection every time:

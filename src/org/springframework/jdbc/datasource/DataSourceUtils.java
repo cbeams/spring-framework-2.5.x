@@ -50,7 +50,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.13 2004-07-03 10:27:55 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.14 2004-07-22 09:45:27 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -136,32 +136,44 @@ public abstract class DataSourceUtils {
 	 * @return a JDBC Connection from this DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
+	 * @see #doGetConnection
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
 	public static Connection getConnection(DataSource ds, boolean allowSynchronization)
 	    throws CannotGetJdbcConnectionException {
-
-		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
-		if (conHolder != null) {
-			return conHolder.getConnection();
-		}
-
 		try {
-			Connection con = ds.getConnection();
-			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
-				logger.debug("Registering transaction synchronization for JDBC connection");
-				// use same Connection for further JDBC actions within the transaction
-				// thread object will get removed by synchronization at transaction completion
-				conHolder = new ConnectionHolder(con);
-				TransactionSynchronizationManager.bindResource(ds, conHolder);
-				TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, ds));
-			}
-			return con;
+			return doGetConnection(ds, allowSynchronization);
 		}
 		catch (SQLException ex) {
 			throw new CannotGetJdbcConnectionException("Could not get JDBC connection", ex);
 		}
+	}
+
+	/**
+	 * Actually get a JDBC Connection for the given DataSource.
+	 * Same as getConnection, but throwing the original SQLException.
+	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see #getConnection(DataSource, boolean)
+	 * @see TransactionAwareDataSourceProxy
+	 */
+	protected static Connection doGetConnection(DataSource ds, boolean allowSynchronization)
+			throws SQLException {
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		if (conHolder != null) {
+			return conHolder.getConnection();
+		}
+		Connection con = ds.getConnection();
+		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering transaction synchronization for JDBC connection");
+			// use same Connection for further JDBC actions within the transaction
+			// thread object will get removed by synchronization at transaction completion
+			conHolder = new ConnectionHolder(con);
+			TransactionSynchronizationManager.bindResource(ds, conHolder);
+			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, ds));
+		}
+		return con;
 	}
 
 	/**
@@ -256,59 +268,30 @@ public abstract class DataSourceUtils {
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void closeConnectionIfNecessary(Connection con, DataSource ds) {
+		try {
+			doCloseConnectionIfNecessary(con, ds);
+		}
+		catch (SQLException ex) {
+			logger.error("Could not close JDBC connection", ex);
+		}
+	}
+
+	/**
+	 * Actually close a JDBC Connection for the given DataSource.
+	 * Same as closeConnectionIfNecessary, but throwing the original SQLException.
+	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see #closeConnectionIfNecessary
+	 * @see TransactionAwareDataSourceProxy
+	 */
+	protected static void doCloseConnectionIfNecessary(Connection con, DataSource ds) throws SQLException {
 		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
 			return;
 		}
 		// Leave the Connection open only if the DataSource is our
 		// special data source, and it wants the Connection left open.
 		if (!(ds instanceof SmartDataSource) || ((SmartDataSource) ds).shouldClose(con)) {
-			try {
-				con.close();
-			}
-			catch (SQLException ex) {
-				logger.error("Could not close JDBC connection", ex);
-			}
-		}
-	}
-
-	/**
-	 * Wrap the given Connection with a proxy that delegates every method call to it
-	 * but suppresses close calls. This is useful for allowing application code to
-	 * handle a special framework Connection just like an ordinary DataSource Connection.
-	 * @param source original Connection
-	 * @return the wrapped Connection
-	 * @see SingleConnectionDataSource
-	 */
-	static Connection getCloseSuppressingConnectionProxy(Connection source) {
-		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-		                                           new Class[] {Connection.class},
-		                                           new CloseSuppressingInvocationHandler(source));
-	}
-
-
-	/**
-	 * Invocation handler that suppresses close calls on JDBC Connections.
-	 * @see #getCloseSuppressingConnectionProxy
-	 */
-	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
-
-		private final Connection source;
-
-		private CloseSuppressingInvocationHandler(Connection source) {
-			this.source = source;
-		}
-
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("close")) {
-				// Don't pass the call on
-				return null;
-			}
-			try {
-				return method.invoke(this.source, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			con.close();
 		}
 	}
 

@@ -16,6 +16,10 @@
 
 package org.springframework.jdbc.datasource;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -52,6 +56,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/** wrapped connection */
 	private Connection connection;
 
+
 	/**
 	 * Constructor for bean-style configuration.
 	 */
@@ -72,7 +77,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 
 	/**
 	 * Create a new SingleConnectionDataSource with a given connection.
-	 * @param source underlying source connection
+	 * @param source underlying target connection
 	 * @param suppressClose if the connection should be wrapped with a* connection that
 	 * suppresses close() calls (to allow for normal close() usage in applications that
 	 * expect a pooled connection but do not know our SmartDataSource interface).
@@ -101,6 +106,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 		return suppressClose;
 	}
 
+
 	/**
 	 * This is a single connection: Do not close it when returning to the "pool".
 	 */
@@ -121,8 +127,21 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * @param source the JDBC Connection to use
 	 */
 	protected void init(Connection source) {
-		this.connection = this.suppressClose ? DataSourceUtils.getCloseSuppressingConnectionProxy(source) : source;
+		this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(source) : source;
 	}
+
+	/**
+	 * Close the underlying connection.
+	 * The provider of this DataSource needs to care for proper shutdown.
+	 * <p>As this bean implements DisposableBean, a bean factory will
+	 * automatically invoke this on destruction of its cached singletons.
+	 */
+	public void destroy() throws SQLException {
+		if (this.connection != null) {
+			this.connection.close();
+		}
+	}
+
 
 	public Connection getConnection() throws SQLException {
 		synchronized (this) {
@@ -158,14 +177,47 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	}
 
 	/**
-	 * Close the underlying connection.
-	 * The provider of this DataSource needs to care for proper shutdown.
-	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons.
+	 * Wrap the given Connection with a proxy that delegates every method call to it
+	 * but suppresses close calls.
+	 * @param target the original Connection to wrap
+	 * @return the wrapped Connection
 	 */
-	public void destroy() throws SQLException {
-		if (this.connection != null) {
-			this.connection.close();
+	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
+		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+		                                           new Class[] {ConnectionProxy.class},
+		                                           new CloseSuppressingInvocationHandler(target));
+	}
+
+
+	/**
+	 * Invocation handler that suppresses close calls on JDBC Connections.
+	 */
+	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+
+		private static final String GET_TARGET_CONNECTION_METHOD_NAME = "getTargetConnection";
+
+		private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
+
+		private final Connection target;
+
+		private CloseSuppressingInvocationHandler(Connection target) {
+			this.target = target;
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
+				return this.target;
+			}
+			if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+				// don't pass the call on
+				return null;
+			}
+			try {
+				return method.invoke(this.target, args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
 		}
 	}
 
