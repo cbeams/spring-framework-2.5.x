@@ -8,7 +8,7 @@ import org.springframework.validation.Validator;
  * @author Juergen Hoeller
  * @since 01.12.2003
  */
-public class AccountValidator implements Validator {
+public class AccountValidator extends PetStoreAbstractValidator implements Validator {
 
 	public boolean supports(Class clazz) {
 		return Account.class.isAssignableFrom(clazz);
@@ -25,12 +25,4 @@ public class AccountValidator implements Validator {
 		rejectIfEmpty(errors, "zip", "ZIP_REQUIRED", "ZIP is required.");
 		rejectIfEmpty(errors, "country", "COUNTRY_REQUIRED", "Country is required.");
 	}
-
-	protected void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
-		Object fieldValue = errors.getFieldValue(field);
-		if (fieldValue == null || fieldValue.toString().length() == 0) {
-			errors.rejectValue(field, errorCode, defaultMessage);
-		}
-	}
-
 }
