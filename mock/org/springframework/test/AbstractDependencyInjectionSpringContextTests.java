@@ -26,6 +26,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Convenient superclass for tests depending on a Spring context.
+ * The test instance itself is populated by Dependency Injection.
+ * <br>
  * Really for integration testing, not unit testing.
  * You should <i>not</i> normally use the Spring container
  * for unit tests: simply populate your POJOs in plain JUnit tests!
@@ -181,6 +183,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 				f = findField(getClass(), this.managedVariableNames[i]);
 				// TODO what if not found?
 				bean = this.applicationContext.getBean(this.managedVariableNames[i]);
+				f.setAccessible(true);
 				f.set(this, bean);
 				logger.info("Populated " + f);
 			}

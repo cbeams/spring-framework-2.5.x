@@ -93,6 +93,11 @@ public abstract class AbstractTransactionalSpringContextTests
 		onSetUpInTransaction();
 	}
 
+	/**
+	 * Subclasses can override this method to perform any setup operations, such
+	 * as populating a database table, in the transaction created by this class.
+	 * @throws Exception simply let any exception propagate
+	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
 
@@ -113,8 +118,10 @@ public abstract class AbstractTransactionalSpringContextTests
 	}
 
 	/**
-	 * Transaction is still open.
-	 * Subclasses will typically run tests here.
+	 * Subclasses can override this method to run invariant tests here.
+	 * The transaction is still open, so any changes made in the transaction will
+	 * still be visible.
+	 * There is no need to clean up the database, as rollback will follow automatically.
 	 */
 	protected void onTearDownInTransaction() {
 	}

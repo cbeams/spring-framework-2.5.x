@@ -21,7 +21,9 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Expects a DataSource, exposes a JdbcTemplate, and provides an easy
+ * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
+ * functionality. Expects a DataSource to be defined in the Spring application context.
+ * This class exposes a JdbcTemplate and provides an easy
  * way to delete from the database in a new transaction.
  * @author Rod Johnson
  * @since 1.1.1
@@ -31,8 +33,16 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 	protected JdbcTemplate jdbcTemplate;
 
+	/**
+	 * Did this test delete any tables? If so, we forbid transaction completion,
+	 * and only allow rollback.
+	 */
 	private boolean zappedTables;
 
+	/**
+	 * Setter: DataSource is provided by Dependency Injection.
+	 * @param dataSource
+	 */
 	public void setDataSource(DataSource dataSource) {
 		// TODO what if you want to use a JdbcTemplate by preference,
 		// for a native extractor?
@@ -41,6 +51,8 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 	/**
 	 * Convenient method to delete all rows from these tables.
+	 * Calling this method will make avoidance of rollback by calling
+	 * setComplete() impossible.
 	 */
 	protected void deleteFromTables(String[] names) {
 		for (int i = 0; i < names.length; i++) {
@@ -50,6 +62,11 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 		this.zappedTables = true;
 	}
 
+	/**
+	 * Overridden to prevent the transaction committing if a number of tables have been
+	 * cleared, as a defensive measure against accidental <i>permanent</i> wiping of a database.
+	 * @see org.springframework.test.AbstractTransactionalSpringContextTests#setComplete()
+	 */
 	protected final void setComplete() {
 		if (this.zappedTables) {
 			throw new IllegalStateException("Cannot set complete after deleting tables");
