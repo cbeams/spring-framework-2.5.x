@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -44,24 +44,46 @@ import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  */
 public class MultiActionControllerTests extends TestCase {
 
-	public void testDefaultNameExtraction() throws Exception {
-		testDefaultNameExtraction("/foo.html", "foo");
-		testDefaultNameExtraction("/foo/bar.html", "bar");
-		testDefaultNameExtraction("/bugal.xyz", "bugal");
-		testDefaultNameExtraction("/x/y/z/q/foo.html", "foo");
-		testDefaultNameExtraction("qqq.q", "qqq");
+	public void testDefaultInternalPathMethodNameResolver() throws Exception {
+		doDefaultTestInternalPathMethodNameResolver("/foo.html", "foo");
+		doDefaultTestInternalPathMethodNameResolver("/foo/bar.html", "bar");
+		doDefaultTestInternalPathMethodNameResolver("/bugal.xyz", "bugal");
+		doDefaultTestInternalPathMethodNameResolver("/x/y/z/q/foo.html", "foo");
+		doDefaultTestInternalPathMethodNameResolver("qqq.q", "qqq");
 	}
 
-	public void testDefaultNameExtraction(String in, String expected) throws Exception {
+	private void doDefaultTestInternalPathMethodNameResolver(String in, String expected) throws Exception {
 		MultiActionController rc = new MultiActionController();
-		rc.setMethodNameResolver(new InternalPathMethodNameResolver());
 		HttpServletRequest request = new MockHttpServletRequest("GET", in);
 		String actual = rc.getMethodNameResolver().getHandlerMethodName(request);
-		assertTrue("input [" + in + "] should have produced [" + expected + "], not [" + actual + "]",
-		           actual.equals(expected));
+		assertEquals("Wrong method name resolved", expected, actual);
+	}
+
+	public void testCustomizedInternalPathMethodNameResolver() throws Exception {
+		doTestCustomizedInternalPathMethodNameResolver("/foo.html", "my", null, "myfoo");
+		doTestCustomizedInternalPathMethodNameResolver("/foo/bar.html", null, "Handler", "barHandler");
+		doTestCustomizedInternalPathMethodNameResolver("/Bugal.xyz", "your", "Method", "yourBugalMethod");
+	}
+
+	private void doTestCustomizedInternalPathMethodNameResolver(
+			String in, String prefix, String suffix, String expected) throws Exception {
+		MultiActionController rc = new MultiActionController();
+		InternalPathMethodNameResolver resolver = new InternalPathMethodNameResolver();
+		if (prefix != null) {
+			resolver.setPrefix(prefix);
+		}
+		if (suffix != null) {
+			resolver.setSuffix(suffix);
+		}
+		rc.setMethodNameResolver(resolver);
+		HttpServletRequest request = new MockHttpServletRequest("GET", in);
+		String actual = rc.getMethodNameResolver().getHandlerMethodName(request);
+		assertEquals("Wrong method name resolved", expected, actual);
 	}
 
 	public void testParameterMethodNameResolver() throws NoSuchRequestHandlingMethodException {
@@ -85,6 +107,59 @@ public class MultiActionControllerTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.html");
 		request.addParameter("myparam", "bar");
 		assertEquals("bar", mnr.getHandlerMethodName(request));
+	}
+
+	public void testParameterMethodNameResolverWithParamNames() throws NoSuchRequestHandlingMethodException {
+		ParameterMethodNameResolver resolver = new ParameterMethodNameResolver();
+		resolver.setDefaultMethodName("default");
+		resolver.setMethodParamNames(new String[] {"hello", "spring", "colin"});
+		Properties logicalMappings = new Properties();
+		logicalMappings.setProperty("hello", "goodbye");
+		logicalMappings.setProperty("nina", "colin");
+		resolver.setLogicalMappings(logicalMappings);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("nomatch", "whatever");
+		try {
+			resolver.getHandlerMethodName(request);
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			//expected
+		}
+
+		// verify default handler
+		request = new MockHttpServletRequest();
+		request.addParameter("this will not match anything", "whatever");
+		assertEquals("default", resolver.getHandlerMethodName(request));
+
+		// verify first resolution strategy (action=method)
+		request = new MockHttpServletRequest();
+		request.addParameter("action", "reset");
+		assertEquals("reset", resolver.getHandlerMethodName(request));
+		// this one also tests logical mapping
+		request = new MockHttpServletRequest();
+		request.addParameter("action", "nina");
+		assertEquals("colin", resolver.getHandlerMethodName(request));
+
+		// now validate second resolution strategy (parameter existence)
+		// this also tests logical mapping
+		request = new MockHttpServletRequest();
+		request.addParameter("hello", "whatever");
+		assertEquals("goodbye", resolver.getHandlerMethodName(request));
+
+		request = new MockHttpServletRequest();
+		request.addParameter("spring", "whatever");
+		assertEquals("spring", resolver.getHandlerMethodName(request));
+
+		request = new MockHttpServletRequest();
+		request.addParameter("hello", "whatever");
+		request.addParameter("spring", "whatever");
+		assertEquals("goodbye", resolver.getHandlerMethodName(request));
+
+		request = new MockHttpServletRequest();
+		request.addParameter("colin", "whatever");
+		request.addParameter("spring", "whatever");
+		assertEquals("spring", resolver.getHandlerMethodName(request));
 	}
 
 	public void testParameterMethodNameResolverWithDefaultMethodName() throws NoSuchRequestHandlingMethodException {
