@@ -5,7 +5,6 @@
 
 package org.springframework.context.support;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -65,7 +64,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -219,15 +218,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 */
 	protected Resource getResourceByPath(String path) throws IOException {
 		return new FileSystemResource(path);
-	}
-
-	/**
-	 * This implementation returns the working directory of the Java VM.
-	 * This should be appropriate for standalone implementations but can
-	 * be overridden for implementations targetted at a container.
-	 */
-	public File getResourceBase() {
-		return (new File("")).getAbsoluteFile();
 	}
 
 
