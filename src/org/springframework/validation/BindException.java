@@ -336,7 +336,12 @@ public class BindException extends Exception implements Errors {
 			PropertyEditor customEditor = getCustomEditor(fixedField);
 			if (customEditor != null) {
 				customEditor.setValue(value);
-				return customEditor.getAsText();
+				String textValue = customEditor.getAsText();
+				// If the PropertyEditor returned null, there is no appropriate
+				// text representation for this value: only use it if non-null.
+				if (textValue != null) {
+					value = textValue;
+				}
 			}
 		}
 		return value;

@@ -502,6 +502,7 @@ public class DataBinderTests extends TestCase {
 		pvs.addPropertyValue("set", new String[] {"10", "20", "30"});
 		binder.bind(pvs);
 
+		assertEquals(tb.getSet(), binder.getErrors().getFieldValue("set"));
 		assertTrue(tb.getSet() instanceof TreeSet);
 		assertEquals(3, tb.getSet().size());
 		assertTrue(tb.getSet().contains(new Integer(10)));
