@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.8 2004-03-23 22:48:38 jhoeller Exp $
+ * @version $Id: JdbcOperations.java,v 1.9 2004-04-26 23:08:14 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -48,14 +48,14 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(final StatementCallback action) throws DataAccessException;
+	Object execute(StatementCallback action) throws DataAccessException;
 
 	/**
 	 * Issue a single SQL execute, typically a DDL statement.
 	 * @param sql static SQL to execute
 	 * @throws DataAccessException if there is any problem
 	 */
-	void execute(final String sql) throws DataAccessException;
+	void execute(String sql) throws DataAccessException;
 
 	/**
 	 * Execute a query given static SQL, reading the ResultSet with a
@@ -69,7 +69,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, ResultSetExtractor)
 	 */
-	Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException;
+	Object query(String sql, ResultSetExtractor rse) throws DataAccessException;
 
 	/**
 	 * Execute a query given static SQL, reading the ResultSet on a per-row
@@ -153,7 +153,7 @@ public interface JdbcOperations {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem.
 	 */
-	int update(final String sql) throws DataAccessException;
+	int update(String sql) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -169,7 +169,8 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(PreparedStatementCreator psc, PreparedStatementCallback action);
+	Object execute(PreparedStatementCreator psc, PreparedStatementCallback action)
+			throws DataAccessException;
 
 	/**
 	 * Execute the action specified by the given action object within a JDBC
@@ -180,7 +181,8 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(final String sql, PreparedStatementCallback action);
+	Object execute(String sql, PreparedStatementCallback action)
+			throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement.
@@ -189,7 +191,8 @@ public interface JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object query(PreparedStatementCreator psc, ResultSetExtractor rse);
+	Object query(PreparedStatementCreator psc, ResultSetExtractor rse)
+			throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement, reading the ResultSet with a
@@ -199,11 +202,43 @@ public interface JdbcOperations {
 	 * If this is null, the SQL will be assumed to contain no bind parameters.
 	 * Even if there are no bind parameters, this object may be used to
 	 * set fetch size and other performance options.
-	 * @param rse object that will extract results.
+	 * @param rse object that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object query(final String sql, final PreparedStatementSetter pss, final ResultSetExtractor rse);
+	Object query(String sql, PreparedStatementSetter pss, ResultSetExtractor rse)
+			throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, reading the ResultSet on a per-row basis
+	 * with a RowCallbackHandler (potentially implementing the ResultReader
+	 * sub-interface that provides a result List).
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param rse object that will extract results
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if the query fails
+	 * @see java.sql.Types
+	 */
+	Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse)
+	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, reading the ResultSet on a per-row basis
+	 * with a RowCallbackHandler (potentially implementing the ResultReader
+	 * sub-interface that provides a result List).
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param rse object that will extract results
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if the query fails
+	 */
+	Object query(String sql, Object[] args, ResultSetExtractor rse)
+			throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement, reading the ResultSet on a per-row
@@ -215,7 +250,8 @@ public interface JdbcOperations {
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if there is any problem
 	 */
-	List query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException;
+	List query(PreparedStatementCreator psc, RowCallbackHandler rch)
+			throws DataAccessException;
 	
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -248,7 +284,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
 	 */
-	List query(String sql, final Object[] args, final int[] argTypes, RowCallbackHandler rch)
+	List query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
 	    throws DataAccessException;
 
 	/**
@@ -263,8 +299,8 @@ public interface JdbcOperations {
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
 	 */
-	List query(String sql, final Object[] args, RowCallbackHandler rch)
-	    throws DataAccessException;
+	List query(String sql, Object[] args, RowCallbackHandler rch)
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -279,7 +315,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
 	 */
-	List queryForList(String sql, final Object[] args) throws DataAccessException;
+	List queryForList(String sql, Object[] args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -295,7 +331,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
 	 */
-	Object queryForObject(String sql, final Object[] args, Class requiredType)
+	Object queryForObject(String sql, Object[] args, Class requiredType)
 	    throws DataAccessException;
 
 	/**
@@ -311,7 +347,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
 	 */
-	long queryForLong(String sql, final Object[] args) throws DataAccessException;
+	long queryForLong(String sql, Object[] args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -326,7 +362,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForInt(String)
 	 */
-	int queryForInt(String sql, final Object[] args) throws DataAccessException;
+	int queryForInt(String sql, Object[] args) throws DataAccessException;
 
 	/**
 	 * Issue an update using a PreparedStatementCreator to provide SQL and any
@@ -348,7 +384,7 @@ public interface JdbcOperations {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException;
+	int update(String sql, PreparedStatementSetter pss) throws DataAccessException;
 	
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
@@ -358,7 +394,7 @@ public interface JdbcOperations {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException;
+	int update(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
@@ -368,7 +404,7 @@ public interface JdbcOperations {
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int update(String sql, final Object[] args) throws DataAccessException;
+	int update(String sql, Object[] args) throws DataAccessException;
 
 	/**
 	 * Issue multiple updates on a single PreparedStatement, using JDBC 2.0
@@ -382,7 +418,8 @@ public interface JdbcOperations {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
+	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss)
+			throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -398,7 +435,8 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(CallableStatementCreator csc, CallableStatementCallback action);
+	Object execute(CallableStatementCreator csc, CallableStatementCallback action)
+			throws DataAccessException;
 
 	/**
 	 * Execute the action specified by the given action object within a JDBC
@@ -409,7 +447,8 @@ public interface JdbcOperations {
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
-	Object execute(final String callString, CallableStatementCallback action);
+	Object execute(String callString, CallableStatementCallback action)
+			throws DataAccessException;
 
 	/**
 	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any
@@ -418,6 +457,7 @@ public interface JdbcOperations {
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException;
+	Map call(CallableStatementCreator csc, List declaredParameters)
+			throws DataAccessException;
 	
 }

@@ -78,7 +78,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.38 2004-04-22 07:42:03 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.39 2004-04-26 23:08:15 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.datasource
@@ -350,6 +350,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
+	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse) {
+		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
+	}
+
+	public Object query(String sql, Object[] args, ResultSetExtractor rse) {
+		return query(sql, new ArgPreparedStatementSetter(args), rse);
+	}
+
 	public List query(PreparedStatementCreator psc, RowCallbackHandler rch)
 			throws DataAccessException {
 		return (List) query(psc, new RowCallbackHandlerResultSetExtractor(rch));
@@ -362,60 +370,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	public List query(String sql, final Object[] args, final int[] argTypes, RowCallbackHandler rch)
 			throws DataAccessException {
-		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-				(args != null && args.length != argTypes.length)) {
-			throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
-		}
-		return query(sql, new PreparedStatementSetter() {
-			public void setValues(PreparedStatement ps) throws SQLException {
-				if (args != null) {
-					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i + 1, args[i], argTypes[i]);
-					}
-				}
-			}
-		}, rch);
+		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
 	public List query(String sql, final Object[] args, RowCallbackHandler rch)
 			throws DataAccessException {
-		return query(sql, new PreparedStatementSetter() {
-			public void setValues(PreparedStatement ps) throws SQLException {
-				if (args != null) {
-					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i + 1, args[i]);
-					}
-				}
-			}
-		}, rch);
+		return query(sql, new ArgPreparedStatementSetter(args), rch);
 	}
 
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
 		return (List) query(sql,
-				new PreparedStatementSetter() {
-					public void setValues(PreparedStatement ps) throws SQLException {
-						if (args != null) {
-							for (int i = 0; i < args.length; i++) {
-								ps.setObject(i + 1, args[i]);
-							}
-						}
-					}
-				},
+				new ArgPreparedStatementSetter(args),
 				new ListResultSetExtractor());
 	}
 
-	public Object queryForObject(String sql, final Object[] args, Class requiredType)
+	public Object queryForObject(String sql, Object[] args, Class requiredType)
 			throws DataAccessException {
 		return query(sql,
-				new PreparedStatementSetter() {
-					public void setValues(PreparedStatement ps) throws SQLException {
-						if (args != null) {
-							for (int i = 0; i < args.length; i++) {
-								ps.setObject(i + 1, args[i]);
-							}
-						}
-					}
-				},
+				new ArgPreparedStatementSetter(args),
 				new ObjectResultSetExtractor(requiredType));
 	}
 
@@ -457,27 +429,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int update(String sql, final Object[] args, final int[] argTypes) throws DataAccessException {
-		return update(sql, new PreparedStatementSetter() {
-			public void setValues(PreparedStatement ps) throws SQLException {
-				if (args != null) {
-					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i + 1, args[i], argTypes[i]);
-					}
-				}
-			}
-		});
+		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
 	}
 
 	public int update(String sql, final Object[] args) throws DataAccessException {
-		return update(sql, new PreparedStatementSetter() {
-			public void setValues(PreparedStatement ps) throws SQLException {
-				if (args != null) {
-					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i + 1, args[i]);
-					}
-				}
-			}
-		});
+		return update(sql, new ArgPreparedStatementSetter(args));
 	}
 
 	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
@@ -662,7 +618,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 			}
 			else {
-				logger.warn("ResultSet returned from stored procedure but a corresponding SqlReturnResultSet parameter was not declared");
+				logger.warn("ResultSet returned from stored procedure but a corresponding " +
+										"SqlReturnResultSet parameter was not declared");
 			}
 			rsIndex++;
 		}
@@ -676,7 +633,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @param warning warning from current statement. May be null,
 	 * in which case this method does nothing.
 	 */
-	protected void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
+	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
 		if (warning != null) {
 			if (this.ignoreWarnings) {
 				logger.warn("SQLWarning ignored: " + warning);
@@ -693,7 +650,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @return the SQL string, or null
 	 * @see SqlProvider
 	 */
-	protected String getSql(Object sqlProvider) {
+	private String getSql(Object sqlProvider) {
 		if (sqlProvider instanceof SqlProvider) {
 			return ((SqlProvider) sqlProvider).getSql();
 		}
@@ -706,7 +663,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
 	 */
-	protected static final class SimplePreparedStatementCreator
+	private static class SimplePreparedStatementCreator
 			implements PreparedStatementCreator, SqlProvider {
 
 		private final String sql;
@@ -728,7 +685,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/**
 	 * Simple adapter for CallableStatementCreator, allowing to use a plain SQL statement.
 	 */
-	protected static final class SimpleCallableStatementCreator
+	private static class SimpleCallableStatementCreator
 			implements CallableStatementCreator, SqlProvider {
 
 		private final String callString;
@@ -749,11 +706,62 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	/**
+	 * Simple adapter for PreparedStatementSetter that applies
+	 * a given array of arguments.
+	 */
+	private static class ArgPreparedStatementSetter implements PreparedStatementSetter {
+
+		private final Object[] args;
+
+		public ArgPreparedStatementSetter(Object[] args) {
+			this.args = args;
+		}
+
+		public void setValues(PreparedStatement ps) throws SQLException {
+			if (this.args != null) {
+				for (int i = 0; i < this.args.length; i++) {
+					ps.setObject(i + 1, this.args[i]);
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Simple adapter for PreparedStatementSetter that applies
+	 * given arrays of arguments and JDBC argument types.
+	 */
+	private static class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
+
+		private final Object[] args;
+
+		private final int[] argTypes;
+
+		public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
+			if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
+					(args != null && args.length != argTypes.length)) {
+				throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
+			}
+			this.args = args;
+			this.argTypes = argTypes;
+		}
+
+		public void setValues(PreparedStatement ps) throws SQLException {
+			if (this.args != null) {
+				for (int i = 0; i < this.args.length; i++) {
+					ps.setObject(i + 1, this.args[i], this.argTypes[i]);
+				}
+			}
+		}
+	}
+
+
+	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
 	 * <p>Uses a regular ResultSet, so we have to be careful when using it:
 	 * We don't use it for navigating since this could lead to unpredictable consequences.
 	 */
-	protected static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
+	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
 		private final RowCallbackHandler rch;
 
@@ -778,7 +786,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/**
 	 * ResultSetExtractor implementation that returns an ArrayList of HashMaps.
 	 */
-	protected static final class ListResultSetExtractor implements ResultSetExtractor {
+	private static class ListResultSetExtractor implements ResultSetExtractor {
 
 		public Object extractData(ResultSet rs) throws SQLException {
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -799,7 +807,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	/**
 	 * ResultSetExtractor implementation that returns single result object.
 	 */
-	protected static final class ObjectResultSetExtractor implements ResultSetExtractor {
+	private static class ObjectResultSetExtractor implements ResultSetExtractor {
 
 		private final Class requiredType;
 
