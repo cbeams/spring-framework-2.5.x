@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,7 +45,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.object.SqlLobValueCloser;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.48 2004-06-16 16:18:25 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.49 2004-06-28 07:17:26 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -108,6 +108,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * statements used for query processing.
 	 */
 	private int fetchSize = 0;
+
 
 	/**
 	 * Construct a new JdbcTemplate for bean usage.
@@ -163,21 +164,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Set fetchSize value.  This is important for processing large resultsets.  
-	 * Setting this higher than the default value will increase processing speed 
-	 * at the cost of memory consumption.
-	 * 
-	 * Default is 0 meaning that no change to the driver's default setting will be made.
+	 * Set the fetch size for this JdbcTemplate. This is important for processing
+	 * large ResultSets. Setting this higher than the default value will increase
+	 * processing speed at the cost of memory consumption.
+	 * <p>Default is 0, indicating to use the driver's default.
 	 */
 	public void setFetchSize(int fetchSize) {
 		this.fetchSize = fetchSize;
 	}
 
 	/**
-	 * Return the value used for fetchSize.  This method returns the fetchSize
-	 * specified for the JdbcTemplate, not the fetchSize used by the JDBC driver.
-	 * 
-	 * Default is 0.
+	 * Return the current fetch size specified for this JdbcTemplate.
 	 */
 	public int getFetchSize() {
 		return fetchSize;
@@ -339,6 +336,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 																							 getSql(psc), ex);
 		}
 		finally {
+			if (psc instanceof ParameterDisposer) {
+				((ParameterDisposer) psc).cleanupParameters();
+			}
 			JdbcUtils.closeStatement(ps);
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
@@ -368,13 +368,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 		return execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
-				if (pss != null) {
-					pss.setValues(ps);
-				}
 				ResultSet rs = null;
 				try {
-					if (getFetchSize() > 0)
+					if (pss != null) {
+						pss.setValues(ps);
+					}
+					if (getFetchSize() > 0) {
 						ps.setFetchSize(getFetchSize());
+					}
 					rs = ps.executeQuery();
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -384,6 +385,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 				finally {
 					JdbcUtils.closeResultSet(rs);
+					if (pss instanceof ParameterDisposer) {
+						((ParameterDisposer) pss).cleanupParameters();
+					}
 				}
 			}
 		});
@@ -452,24 +456,29 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
-	protected int update(final PreparedStatementCreator psc, final PreparedStatementSetter pss) throws DataAccessException {
+	protected int update(final PreparedStatementCreator psc, final PreparedStatementSetter pss)
+			throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL update" + (sql != null ? " [" + sql  + "]" : ""));
 		}
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
-				if (pss != null) {
-					pss.setValues(ps);
+				try {
+					if (pss != null) {
+						pss.setValues(ps);
+					}
+					int rows = ps.executeUpdate();
+					if (logger.isDebugEnabled()) {
+						logger.debug("SQL update affected " + rows + " rows");
+					}
+					return new Integer(rows);
 				}
-				int rows = ps.executeUpdate();
-				if (logger.isDebugEnabled()) {
-					logger.debug("SQL update affected " + rows + " rows");
+				finally {
+					if (pss instanceof ParameterDisposer) {
+						((ParameterDisposer) pss).cleanupParameters();
+					}
 				}
-				if (psc instanceof SqlLobValueCloser) {
-					((SqlLobValueCloser) psc).closeLobValues();
-				}
-				return new Integer(rows);
 			}
 		});
 		return result.intValue();
@@ -499,20 +508,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int batchSize = pss.getBatchSize();
 				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
-				if (dbmd != null && dbmd.supportsBatchUpdates()) {
-					for (int i = 0; i < batchSize; i++) {
-						pss.setValues(ps, i);
-						ps.addBatch();
+				try {
+					if (dbmd != null && dbmd.supportsBatchUpdates()) {
+						for (int i = 0; i < batchSize; i++) {
+							pss.setValues(ps, i);
+							ps.addBatch();
+						}
+						return ps.executeBatch();
 					}
-					return ps.executeBatch();
+					else {
+						int[] rowsAffected = new int[batchSize];
+						for (int i = 0; i < batchSize; i++) {
+							pss.setValues(ps, i);
+							rowsAffected[i] = ps.executeUpdate();
+						}
+						return rowsAffected;
+					}
 				}
-				else {
-					int[] rowsAffected = new int[batchSize];
-					for (int i = 0; i < batchSize; i++) {
-						pss.setValues(ps, i);
-						rowsAffected[i] = ps.executeUpdate();
+				finally {
+					if (pss instanceof ParameterDisposer) {
+						((ParameterDisposer) pss).cleanupParameters();
 					}
-					return rowsAffected;
 				}
 			}
 		});
@@ -539,8 +555,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			cs = csc.createCallableStatement(conToUse);
 			DataSourceUtils.applyTransactionTimeout(cs, getDataSource());
 			CallableStatement csToUse = cs;
-			if (nativeJdbcExtractor != null) {
-				csToUse = nativeJdbcExtractor.getNativeCallableStatement(cs);
+			if (this.nativeJdbcExtractor != null) {
+				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
 			}
 			Object result = action.doInCallableStatement(csToUse);
 			SQLWarning warning = cs.getWarnings();
@@ -552,6 +568,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 																							 getSql(csc), ex);
 		}
 		finally {
+			if (csc instanceof ParameterDisposer) {
+				((ParameterDisposer) csc).cleanupParameters();
+			}
 			JdbcUtils.closeStatement(cs);
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
@@ -761,7 +780,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * Simple adapter for PreparedStatementSetter that applies
 	 * a given array of arguments.
 	 */
-	private static class ArgPreparedStatementSetter implements PreparedStatementSetter {
+	private static class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
 		private final Object[] args;
 
@@ -772,9 +791,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		public void setValues(PreparedStatement ps) throws SQLException {
 			if (this.args != null) {
 				for (int i = 0; i < this.args.length; i++) {
-					ps.setObject(i + 1, this.args[i]);
+					StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, null, this.args[i]);
 				}
 			}
+		}
+
+		public void cleanupParameters() {
+			StatementCreatorUtils.cleanupParameters(Arrays.asList(this.args));
 		}
 	}
 
@@ -783,7 +806,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * Simple adapter for PreparedStatementSetter that applies
 	 * given arrays of arguments and JDBC argument types.
 	 */
-	private static class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
+	private static class ArgTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
 		private final Object[] args;
 
@@ -801,9 +824,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		public void setValues(PreparedStatement ps) throws SQLException {
 			if (this.args != null) {
 				for (int i = 0; i < this.args.length; i++) {
-					ps.setObject(i + 1, this.args[i], this.argTypes[i]);
+					StatementCreatorUtils.setParameterValue(ps, i + 1, this.argTypes[i], null, this.args[i]);
 				}
 			}
+		}
+
+		public void cleanupParameters() {
+			StatementCreatorUtils.cleanupParameters(Arrays.asList(this.args));
 		}
 	}
 

@@ -26,15 +26,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.object.SqlLobValueCloser;
-import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.13 2004-06-09 17:46:27 trisberg Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.14 2004-06-28 07:17:26 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory {
 
@@ -143,7 +141,7 @@ public class PreparedStatementCreatorFactory {
 	 * PreparedStatementCreator implementation returned by this class.
 	 */
 	private class PreparedStatementCreatorImpl
-			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, SqlLobValueCloser {
+			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, ParameterDisposer {
 
 		private final List parameters;
 		
@@ -178,23 +176,16 @@ public class PreparedStatementCreatorFactory {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
 				int sqlColIndx = i + 1;
-				JdbcUtils.setParameterValue(ps, sqlColIndx, declaredParameter, in);
+				StatementCreatorUtils.setParameterValue(ps, sqlColIndx, declaredParameter, in);
 			}
 		}
 		
-		public void closeLobValues() {
-			if (parameters != null) {
-				for (int i = 0; i < parameters.size(); i++ ) {
-					Object inValue = parameters.get(i);
-					if (inValue instanceof SqlLobValue) {
-						((SqlLobValue)inValue).closeLobCreator();
-					}
-				}
-			}
-		}
-
 		public String getSql() {
 			return sql;
+		}
+
+		public void cleanupParameters() {
+			StatementCreatorUtils.cleanupParameters(this.parameters);
 		}
 
 		public String toString() {

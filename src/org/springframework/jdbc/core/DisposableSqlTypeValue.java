@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.object;
+package org.springframework.jdbc.core;
 
 /**
- * Interface to be implemented by objects that can close resources allocated
- * by SqlLobValues.
- *
- * <p>Typically implemented by prepared statement creators that support LOB values
- * as parameters.
- *
- * @author Thomas Risberg
- * @since 09.06.2004
+ * Subinterface of SqlTypeValue that adds a cleanup callback,
+ * to be invoked after the value has been set and the corresponding
+ * statement has been executed.
+ * @author Juergen Hoeller
+ * @since 27.06.2004
+ * @see org.springframework.jdbc.core.support.SqlLobValue
  */
-public interface SqlLobValueCloser {
+public interface DisposableSqlTypeValue extends SqlTypeValue {
 
 	/**
-	 * Close the SqlLobValues.
+	 * Clean up resources held by this type value,
+	 * for example the LobCreator in case of a SqlLobValue.
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
 	 */
-	public void closeLobValues();
+	void cleanup();
 
 }

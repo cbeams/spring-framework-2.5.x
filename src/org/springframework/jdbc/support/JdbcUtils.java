@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,23 +26,17 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.core.SqlLobValue;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.lob.DefaultLobHandler;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
- * Utility methods for SQL statements.
+ * Generic utility methods for working with JDBC.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.13 2004-06-25 05:01:54 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.14 2004-06-28 07:17:31 jhoeller Exp $
  */
 public class JdbcUtils {
 
@@ -154,108 +147,6 @@ public class JdbcUtils {
 			}
 		}
 		return count;
-	}
-
-	/**
-	 * Set the value for a parameter.  The method used is based on the SQL Type of the parameter and 
-	 * we can handle complex types like Arrays and LOBs.
-	 * 
-	 * @param ps the prepared statement or callable statement
-	 * @param sqlColIndx index of the column we are setting
-	 * @param declaredParameter the parameter as it is declared including type
-	 * @param inValue the value to set
-	 * @throws SQLException
-	 */
-	public static void setParameterValue(PreparedStatement ps, int sqlColIndx, SqlParameter declaredParameter, Object inValue) throws SQLException {
-	    if (logger.isDebugEnabled()) {
-	        logger.debug("Setting SQL statement parameter value; columnIndex=" + sqlColIndx +
-	                ", parameter value='" + inValue + "', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") + ", sqlType=" + declaredParameter.getSqlType());
-	    }
-	    LobHandler lh;
-		// input parameters must be supplied
-		if (inValue == null && declaredParameter.getTypeName() != null) {
-			ps.setNull(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
-		}
-		else
-			if (inValue != null) {
-				switch (declaredParameter.getSqlType()) {
-					case Types.VARCHAR:
-						ps.setString(sqlColIndx, inValue.toString());
-						break;
-					case Types.BLOB:
-						if (inValue instanceof SqlLobValue) {
-							lh = ((SqlLobValue) inValue).getLobHandler();
-							if (lh == null)
-								lh = new DefaultLobHandler();
-							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);
-							switch (((SqlLobValue) inValue).getType()) {
-								case SqlLobValue.STREAM:
-									lc.setBlobAsBinaryStream(ps, sqlColIndx,((SqlLobValue) inValue).getStream(), ((SqlLobValue) inValue).getLength());
-									break;
-								case SqlLobValue.BYTES:
-									lc.setBlobAsBytes(ps, sqlColIndx,((SqlLobValue) inValue).getBytes());
-									break;
-							}
-						}
-						else {
-							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
-						}
-						break;
-					case Types.CLOB:
-						if (inValue instanceof SqlLobValue) {
-							lh = ((SqlLobValue) inValue).getLobHandler();
-							if (lh == null)
-								lh = new DefaultLobHandler();
-							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);
-							switch (((SqlLobValue) inValue).getType()) {
-								case SqlLobValue.STREAM:
-									lc.setClobAsAsciiStream(ps, sqlColIndx,((SqlLobValue) inValue).getStream(), ((SqlLobValue) inValue).getLength());
-									break;
-								case SqlLobValue.READER:
-									lc.setClobAsCharacterStream(ps, sqlColIndx,((SqlLobValue) inValue).getReader(), ((SqlLobValue) inValue).getLength());
-									break;
-								case SqlLobValue.STRING:
-									lc.setClobAsString(ps, sqlColIndx,((SqlLobValue) inValue).getString());
-									break;
-							}
-						}
-						else {
-								ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
-						}
-						break;
-					default:
-						if (inValue instanceof SqlTypeValue) {
-							((SqlTypeValue)inValue).setTypeValue(ps.getConnection(), ps, sqlColIndx, declaredParameter.getSqlType());
-						}
-						else {
-							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
-						}
-						break;
-				}
-			}
-			else {
-				ps.setNull(sqlColIndx, declaredParameter.getSqlType());
-			}
-	}
-
-	/**
-	 * Close any LobCreators on any of the parameters passed to an execute method.
-	 * Classes using PreparedStatements or CallableStatements should invoke this method 
-	 * after every update()/execute() method invokation.
-	 * @param parameters parameters supplied. May be null.
-	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
-	 */
-	public static void cleanupParameters(Object[] parameters) {
-		
-		if (parameters != null) {
-			for (int i = 0; i < parameters.length; i++ ) {
-				Object inValue = parameters[i];
-				if (inValue instanceof SqlLobValue) {
-					((SqlLobValue)inValue).closeLobCreator();
-				}
-			}
-		}
-
 	}
 
 	/**

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Helper class that can efficiently create multiple CallableStatementCreator
@@ -114,7 +113,8 @@ public class CallableStatementCreatorFactory {
 	/**
 	 * CallableStatementCreator implementation returned by this class.
 	 */
-	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider {
+	private class CallableStatementCreatorImpl
+			implements CallableStatementCreator, SqlProvider, ParameterDisposer {
 
 		private final ParameterMapper inParameterMapper;
 
@@ -122,7 +122,7 @@ public class CallableStatementCreatorFactory {
 
 		/**
 		 * Create a new CallableStatementCreatorImpl.
-		 * @param inParams list of SqlParameter objects. May not be null
+		 * @param inParams list of SqlParameter objects. May not be null.
 		 */
 		public CallableStatementCreatorImpl(Map inParams) {
 			this.inParameterMapper = null;
@@ -170,7 +170,7 @@ public class CallableStatementCreatorFactory {
 				// the value may still be null
 				Object inValue = this.inParameters.get(declaredParameter.getName());
 				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
-					JdbcUtils.setParameterValue(cs, sqlColIndx, declaredParameter, inValue);
+					StatementCreatorUtils.setParameterValue(cs, sqlColIndx, declaredParameter, inValue);
 				}
 				else {
 					// It's an output parameter. Skip SqlReturnResultSet parameters
@@ -197,6 +197,10 @@ public class CallableStatementCreatorFactory {
 
 		public String getSql() {
 			return callString;
+		}
+
+		public void cleanupParameters() {
+			StatementCreatorUtils.cleanupParameters(this.inParameters.values());
 		}
 
 		public String toString() {

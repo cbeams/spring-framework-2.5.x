@@ -16,17 +16,17 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * An abstract class to be used for setting values for more complex database specific 
- * Types not supported by the standard setObject method. Implementations extending this 
- * class perform the actual work of setting the actual values.  They must implement the 
- * callback method setTypeValue which can throw SQLExceptions that will be caught and 
- * translated by the calling code.  This callback method has access to the connection if 
- * that should be needed to create any database specific objects.
+ * Interface to be implemented for setting values for more complex database specific
+ * types not supported by the standard setObject method. Implementations perform the
+ * actual work of setting the actual values. They must implement the callback method
+ * <code>setTypeValue</code> which can throw SQLExceptions that will be caught and
+ * translated by the calling code. This callback method has access to the underlying
+ * Connection via the given statement object, if that should be needed to create any
+ * database-specific objects.
  *
  * <p>A usage example from a StoredProcedure:
  *
@@ -36,58 +36,46 @@ import java.sql.SQLException;
  * ...
  * 
  * Map in = new HashMap();
- * in.put("myarray", new SqlTypeValue(value) {
- *     public void setTypeValue(Connection con,  PreparedStatement ps, int parameterIndex, int sqlType)  throws SQLException {
- *	       oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor("NUMBERS", con);
- *	       oracle.sql.ARRAY nums = new oracle.sql.ARRAY(desc, con, seats);
- *	       ps.setObject(parameterIndex, nums, sqlType);
- *     }
+ * in.put("myarray", new SqlTypeValue() {
+ *   public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException {
+ *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor("NUMBERS", ps.getConnection());
+ *	   oracle.sql.ARRAY nums = new oracle.sql.ARRAY(desc, ps.getConnection(), seats);
+ *	   ps.setObject(paramIndex, nums, sqlType);
+ *   }
  * });
  * Map out = execute(in);
  * </pre>
  *
- * @author trisberg
+ * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 24.06.2004
+ * @see java.sql.Types
+ * @see java.sql.PreparedStatement#setObject
+ * @see JdbcTemplate#update(String, Object[], int[])
+ * @see org.springframework.jdbc.object.SqlUpdate#update(Object[])
+ * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
  */
-public abstract class SqlTypeValue {
-	private Object value;
-	
-	/**
-	 * Create a new type value as a JavaBean
-	 * @param sql SQL to execute
-	 * @param types int array of JDBC types
-	 */
-	public SqlTypeValue() {
-	}
+public interface SqlTypeValue {
 
 	/**
-	 * Create a new type value passing in a value
-	 * @param value The value we will set
+	 * Constant that indicates an unknown (respectively unspecified) SQL type.
+	 * Passed into setTypeValue if the original operation method does not specify
+	 * a SQL type.
+	 * @see java.sql.Types
+	 * @see JdbcOperations#update(String, Object[])
 	 */
-	public SqlTypeValue(Object value) {
-		this.value = value;
-	}
-	
-	/**
-	* @param con JDBC connection. 
-	* @param ps PreparedStatement. 
-	* @param parameterIndex the index for the column we need to set the value. 
-	* @param sqlType SQL Type of the parameter we are setting. 
-	* @throws SQLException if a SQLException is encountered setting
-	* parameter values (that is, there's no need to catch SQLException)
-	*/
-	public abstract void setTypeValue(Connection con, PreparedStatement ps, int parameterIndex, int sqlType) throws SQLException;
+	int TYPE_UNKNOWN = Integer.MIN_VALUE;
 
 	/**
-	 * @return Returns the value.
+	 * Set the type value on the given PreparedStatement.
+	 * @param ps the PreparedStatement to work on
+	 * @param paramIndex the index of the parameter for which we need to set the value
+	 * @param sqlType SQL type of the parameter we are setting
+	 * @throws SQLException if a SQLException is encountered setting
+	 * parameter values (that is, there's no need to catch SQLException)
+	 * @see java.sql.Types
+	 * @see java.sql.PreparedStatement#setObject
 	 */
-	public Object getValue() {
-		return value;
-	}
-	/**
-	 * @param value The value to set.
-	 */
-	public void setValue(Object value) {
-		this.value = value;
-	}
+	void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType) throws SQLException;
+
 }
