@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -49,19 +50,6 @@ public class Transition implements Serializable {
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	/**
-	 * Event matching criteria that matches on any event.
-	 */
-	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
-		public boolean test(Object o) {
-			return true;
-		}
-
-		public String toString() {
-			return WILDCARD_EVENT_ID;
-		}
-	};
-
-	/**
 	 * The criteria that determines whether or not this criteria handles a given
 	 * event. The event is identified by a String identifier.
 	 */
@@ -70,12 +58,12 @@ public class Transition implements Serializable {
 	/**
 	 * The source state that owns this transition.
 	 */
-	private TransitionableState sourceState;
+	private transient TransitionableState sourceState;
 
 	/**
 	 * The target state that this transition should transition to when executed.
 	 */
-	private AbstractState targetState;
+	private transient AbstractState targetState;
 
 	/**
 	 * The state id for the target state; needed to lazily resolve the target
@@ -168,7 +156,7 @@ public class Transition implements Serializable {
 		else {
 			//implementation note: this inner class is not a class constant
 			//because we need the eventId
-			return new Constraint() {
+			return new AbstractConstraint() {
 				public boolean test(Object argument) {
 					return eventId.equals(argument);
 				}
@@ -229,6 +217,19 @@ public class Transition implements Serializable {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
 	}
+
+	/**
+	 * Event matching criteria that matches on any event.
+	 */
+	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
+		public boolean test(Object o) {
+			return true;
+		}
+
+		public String toString() {
+			return WILDCARD_EVENT_ID;
+		}
+	};
 
 	public String toString() {
 		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", targetStateId)

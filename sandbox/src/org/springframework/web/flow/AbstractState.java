@@ -49,7 +49,7 @@ public abstract class AbstractState implements Serializable {
 	/**
 	 * The state's owning flow.
 	 */
-	private Flow flow;
+	private transient Flow flow;
 
 	/**
 	 * The state identifier, unique to the owning flow.
