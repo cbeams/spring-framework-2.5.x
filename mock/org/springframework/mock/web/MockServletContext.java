@@ -16,6 +16,7 @@
 
 package org.springframework.mock.web;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -35,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.mock.web.MockRequestDispatcher;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the ServletContext interface.
@@ -51,6 +52,8 @@ import org.springframework.mock.web.MockRequestDispatcher;
  */
 public class MockServletContext implements ServletContext {
 
+	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final String resourceBasePath;
@@ -63,11 +66,10 @@ public class MockServletContext implements ServletContext {
 
 
 	/**
-	 * Create new MockServletContext that won't be able to load resources.
+	 * Create new MockServletContext that is not able to load resources.
 	 */
 	public MockServletContext() {
-		this.resourceBasePath = null;
-		this.resourceLoader = null;
+		this(null, null);
 	}
 
 	/**
@@ -77,18 +79,23 @@ public class MockServletContext implements ServletContext {
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext(String resourceBasePath) {
-		this.resourceBasePath = resourceBasePath;
-		this.resourceLoader = new DefaultResourceLoader();
+		this(resourceBasePath, new DefaultResourceLoader());
 	}
 
 	/**
 	 * Create new MockServletContext that's able to load resources.
-	 * @param warRoot the WAR root directory (should not end with a /)
+	 * @param resourceBasePath the WAR root directory (should not end with a /)
 	 * @param resourceLoader the ResourceLoader to use
 	 */
-	public MockServletContext(String warRoot, ResourceLoader resourceLoader) {
-		this.resourceBasePath = warRoot;
+	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
+		this.resourceBasePath = resourceBasePath;
 		this.resourceLoader = resourceLoader;
+
+		// use JVM temp dir as ServletContext temp dir
+		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
+		if (tempDir != null) {
+			this.attributes.put(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File(tempDir));
+		}
 	}
 
 	protected String getResourceLocation(String path) {
