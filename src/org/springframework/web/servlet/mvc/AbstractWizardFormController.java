@@ -266,21 +266,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the current page number.
-	 * Mainly useful for page-specific onBindAndValidate implementations,
-	 * as methods like validatePage explicitly feature a page parameter.
-	 * @throws IllegalStateException if the page attribute isn't in the session
-	 * anymore, i.e. when called after processFormSubmission.
-	 */
-	protected final int getCurrentPage(HttpServletRequest request) throws IllegalStateException {
-		Integer pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
-		if (pageAttr == null) {
-			throw new IllegalStateException("Page attribute isn't in session anymore - called after processFormSubmission?");
-		}
-		return pageAttr.intValue();
-	}
-
-	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
 	 * <p>Default implementation for wizard form controllers simply shows the initial page
@@ -334,6 +319,24 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		
 		// show current page again
 		return showPage(request, errors, currentPage);
+	}
+
+	/**
+	 * Return the current page number. Used by processFormSubmission.
+	 * Can also be called by page-specific onBindAndValidate implementations,
+	 * as methods like validatePage explicitly feature a page parameter.
+	 * <p>The default implementation checks the page session attribute.
+	 * Subclasses can override this for customized target page determination.
+	 * @throws IllegalStateException if the page attribute isn't in the session
+	 * anymore, i.e. when called after processFormSubmission.
+	 * @see #getPageSessionAttributeName
+	 */
+	protected int getCurrentPage(HttpServletRequest request) throws IllegalStateException {
+		Integer pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
+		if (pageAttr == null) {
+			throw new IllegalStateException("Page attribute isn't in session anymore - called after processFormSubmission?");
+		}
+		return pageAttr.intValue();
 	}
 
 	/**
