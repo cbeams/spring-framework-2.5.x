@@ -26,10 +26,67 @@
 
     <sect2 id="ejb-access-concepts">
       <title>Concepts</title>
+
+      <para>To invoke a method on a local or remote stateless session bean,
+      client code must normaly perform a JNDI lookup to obtain the (local or
+      remote) EJB Home object, then use a 'create' method call on that object
+      to obtain the actual (local or remote) EJB object. One or more methods
+      are then invoked on the EJB.</para>
+
+      <para>To avoid repeated low-level code, many EJB applications use the
+      Service Locator and Business Delegate patterns. These are better than
+      spraying JNDI lookups throughout client code, but their usual
+      implementations have significant disadvantages. For example:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Typically code using EJBs depends on Service Locator or
+          Business Delegate singletons, making it hard to test</para>
+        </listitem>
+
+        <listitem>
+          <para>In the case of the Service Locator pattern used without a
+          Business Delegate, application code still ends up having to invoke
+          the create() method on an EJB home, and deal with the resulting
+          exceptions. Thus it remains tied to the EJB API and the complexity
+          of the EJB programming model.</para>
+        </listitem>
+
+        <listitem>
+          <para>Implementing the Business Delegate pattern typically results
+          in significant code duplication, where we have to write numerous
+          methods that simply call the same method on the EJB.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>The Spring approach is to allow the creation and use of codeless
+      business delegates. You do not need to write another Service Locator,
+      another JNDI lookup, or duplicate methods in a hand-coded Business
+      Delegate unless you’re adding real value.</para>
     </sect2>
 
     <sect2 id="ejb-access-local">
       <title>Accessing local SLSBs</title>
+
+      <para>Assume that we have a web controller that uses a local EJB. We’ll
+      follow best practice and use the EJB Business Methods Interface pattern,
+      so that the EJB’s local interface extends a non EJB-specific business
+      methods interface. (One of the main reasons to do this is to ensure that
+      synchronization between method signatures in local interface and bean
+      implementation class is automatic.) Let’s call this business methods
+      interface MyComponent. Of course we’ll also need to implement the local
+      home interface and provide a bean implementation class that implements
+      SessionBean and the MyComponent business methods interface. With Spring
+      EJB access, the only Java coding we’ll need to do to hook up our web
+      tier controller to the EJB implementation is to expose a setter method
+      of type MyComponent on our controller. This will save the reference as
+      an instance variable like this: </para>
+
+      <programlisting>private MyComponent myComponent;
+
+public void setMyComponent(MyComponent myComponent) {
+  this.myComponent = myComponent;
+}</programlisting>
     </sect2>
 
     <sect2 id="ejb-access-remote">
