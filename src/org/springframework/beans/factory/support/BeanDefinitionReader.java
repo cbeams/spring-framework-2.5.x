@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -71,16 +71,16 @@ public interface BeanDefinitionReader {
 	 * Load bean definitions from the specified resource.
 	 * @param resource the resource descriptor
 	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(Resource resource) throws BeansException;
+	int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException;
 
 	/**
 	 * Load bean definitions from the specified resources.
 	 * @param resources the resource descriptors
 	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
+	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(Resource[] resources) throws BeansException;
+	int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException;
 
 }
