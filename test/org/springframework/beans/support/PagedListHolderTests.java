@@ -73,7 +73,7 @@ public class PagedListHolderTests extends TestCase {
 		assertTrue("First page", holder.isFirstPage());
 		assertFalse("Last page", holder.isLastPage());
 		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct first element", holder.getLastElementOnPage() == 1);
+		assertTrue("Correct last element", holder.getLastElementOnPage() == 1);
 		assertTrue("Correct page list size", holder.getPageList().size() == 2);
 		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb1);
 		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb2);
@@ -83,7 +83,7 @@ public class PagedListHolderTests extends TestCase {
 		assertFalse("First page", holder.isFirstPage());
 		assertTrue("Last page", holder.isLastPage());
 		assertTrue("Correct first element", holder.getFirstElementOnPage() == 2);
-		assertTrue("Correct first element", holder.getLastElementOnPage() == 2);
+		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
 		assertTrue("Correct page list size", holder.getPageList().size() == 1);
 		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb3);
 
@@ -94,7 +94,17 @@ public class PagedListHolderTests extends TestCase {
 		assertTrue("First page", holder.isFirstPage());
 		assertTrue("Last page", holder.isLastPage());
 		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct first element", holder.getLastElementOnPage() == 2);
+		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
+
+		holder.setPage(1);
+		holder.setPageSize(2);
+		assertTrue("Correct number of pages", holder.getNrOfPages() == 2);
+		assertTrue("Correct page size", holder.getPageSize() == 2);
+		assertTrue("Correct page number", holder.getPage() == 1);
+		assertFalse("First page", holder.isFirstPage());
+		assertTrue("Last page", holder.isLastPage());
+		assertTrue("Correct first element", holder.getFirstElementOnPage() == 2);
+		assertTrue("Correct last element", holder.getLastElementOnPage() == 2);
 
 		holder.setPageSize(2);
 		holder.setPage(1);
@@ -109,7 +119,7 @@ public class PagedListHolderTests extends TestCase {
 		assertTrue("First page", holder.isFirstPage());
 		assertFalse("Last page", holder.isLastPage());
 		assertTrue("Correct first element", holder.getFirstElementOnPage() == 0);
-		assertTrue("Correct first element", holder.getLastElementOnPage() == 1);
+		assertTrue("Correct last element", holder.getLastElementOnPage() == 1);
 		assertTrue("Correct page list size", holder.getPageList().size() == 2);
 		assertTrue("Correct page list contents", holder.getPageList().get(0) == tb3);
 		assertTrue("Correct page list contents", holder.getPageList().get(1) == tb1);

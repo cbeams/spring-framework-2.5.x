@@ -56,6 +56,7 @@ public class PagedListHolder implements Serializable {
 
 	public static final int DEFAULT_MAX_LINKED_PAGES = 10;
 
+
 	private List source;
 
 	private Date refreshDate;
@@ -67,6 +68,8 @@ public class PagedListHolder implements Serializable {
 	private int pageSize = DEFAULT_PAGE_SIZE;
 
 	private int page = 0;
+
+	private boolean newPageSet;
 
 	private int maxLinkedPages = DEFAULT_MAX_LINKED_PAGES;
 
@@ -135,7 +138,9 @@ public class PagedListHolder implements Serializable {
 	public void setPageSize(int pageSize) {
 		if (pageSize != this.pageSize) {
 			this.pageSize = pageSize;
-			this.page = 0;
+			if (!this.newPageSet) {
+				this.page = 0;
+			}
 		}
 	}
 
@@ -151,11 +156,8 @@ public class PagedListHolder implements Serializable {
 	 * Page numbering starts with 0.
 	 */
 	public void setPage(int page) {
-		if (page >= this.getNrOfPages() ) {
-			this.page = this.getNrOfPages() - 1;
-		} else {
-			this.page = page;
-		}
+		this.page = page;
+		this.newPageSet = true;
 	}
 
 	/**
@@ -163,7 +165,11 @@ public class PagedListHolder implements Serializable {
 	 * Page numbering starts with 0.
 	 */
 	public int getPage() {
-		return page;
+		this.newPageSet = false;
+		if (this.page >= getNrOfPages()) {
+			this.page = getNrOfPages() - 1;
+		}
+		return this.page;
 	}
 
 	/**
@@ -185,7 +191,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the number of pages for the current source list.
 	 */
 	public int getNrOfPages() {
-		float nrOfPages = (float) this.source.size() / this.pageSize;
+		float nrOfPages = (float) getSource().size() / getPageSize();
 		return (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages);
 	}
 
@@ -193,14 +199,14 @@ public class PagedListHolder implements Serializable {
 	 * Return if the current page is the first one.
 	 */
 	public boolean isFirstPage() {
-		return this.page == 0;
+		return getPage() == 0;
 	}
 
 	/**
 	 * Return if the current page is the last one.
 	 */
 	public boolean isLastPage() {
-		return this.page == getNrOfPages() -1;
+		return getPage() == getNrOfPages() -1;
 	}
 
 	/**
@@ -227,7 +233,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the total number of elements in the source list.
 	 */
 	public int getNrOfElements() {
-		return this.source.size();
+		return getSource().size();
 	}
 
 	/**
@@ -235,7 +241,7 @@ public class PagedListHolder implements Serializable {
 	 * Element numbering starts with 0.
 	 */
 	public int getFirstElementOnPage() {
-		return (this.pageSize * this.page);
+		return (getPageSize() * getPage());
 	}
 
 	/**
@@ -243,29 +249,29 @@ public class PagedListHolder implements Serializable {
 	 * Element numbering starts with 0.
 	 */
 	public int getLastElementOnPage() {
-		int endIndex = this.pageSize * (this.page + 1);
-		return (endIndex > this.source.size() ? this.source.size() : endIndex) -1;
+		int endIndex = getPageSize() * (getPage() + 1);
+		return (endIndex > getSource().size() ? getSource().size() : endIndex) -1;
 	}
 
 	/**
 	 * Return a sub-list representing the current page.
 	 */
 	public List getPageList() {
-		return this.source.subList(getFirstElementOnPage(), getLastElementOnPage() +1);
+		return getSource().subList(getFirstElementOnPage(), getLastElementOnPage() +1);
 	}
 
 	/**
 	 * Return the first page to which create a link around the current page.
 	 */
 	public int getFirstLinkedPage() {
-		return Math.max(0, this.getPage() - (this.maxLinkedPages /2));
+		return Math.max(0, this.getPage() - (getMaxLinkedPages() /2));
 	}
 
 	/**
 	 * Return the last page to which create a link around the current page.
 	 */
 	public int getLastLinkedPage() {
-		return Math.min(getFirstLinkedPage() + this.maxLinkedPages -1, this.getNrOfPages() -1);
+		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, this.getNrOfPages() -1);
 	}
 
 
@@ -275,7 +281,7 @@ public class PagedListHolder implements Serializable {
 	 */
 	public void resort() {
 		if (this.sort != null && !"".equals(this.sort.getProperty()) && !this.sort.equals(this.sortUsed)) {
-			PropertyComparator.sort(this.source, this.sort);
+			PropertyComparator.sort(getSource(), this.sort);
 			this.sortUsed = new MutableSortDefinition(this.sort);
 			setPage(0);
 		}
