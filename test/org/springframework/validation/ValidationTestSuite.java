@@ -109,10 +109,19 @@ public class ValidationTestSuite extends TestCase {
 				return getValue().toString().substring(7);
 			}
 		});
+		binder.registerCustomEditor(TestBean.class, "spouse", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean(text, 0));
+			}
+			public String getAsText() {
+				return ((TestBean) getValue()).getName();
+			}
+		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
 		pvs.addPropertyValue(new PropertyValue("touchy", "m.y"));
+		pvs.addPropertyValue(new PropertyValue("spouse", "Kerry"));
 		binder.bind(pvs);
 
 		try {
@@ -144,6 +153,10 @@ public class ValidationTestSuite extends TestCase {
 			assertEquals("m.y", binder.getErrors().getFieldValue("touchy"));
 			assertEquals("m.y", binder.getErrors().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
+
+			assertTrue("Does not have spouse errors", !be.hasFieldErrors("spouse"));
+			assertEquals("Kerry", binder.getErrors().getFieldValue("spouse"));
+			assertNotNull(tb.getSpouse());
 		}
 	}
 
