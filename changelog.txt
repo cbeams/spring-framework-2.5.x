@@ -3,20 +3,30 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (18.3.2005)
+Changes in version 1.2 RC1 (21.3.2005)
 --------------------------------------
 
 Overall
 * removed all deprecated classes and methods whose deprecation dated back to Spring <= 1.1 final
+* added AOP Alliance interfaces to spring-aop.jar and spring.jar, avoiding the need for aopalliance.jar on the classpath
 * repackaged spring-context.jar as spring-context.jar (without remoting) and spring-remoting.jar (with EJB, JMS, JMX)
+* repackaged spring-orm.jar as spring-orm.jar (without Hibernate) and spring-hibernate.jar (with Hibernate2/3 support)
 
 Package org.springframework.aop
 * deprecated AopUtils' "getAllInterfaces(ForClass)AsList" methods in favor of "getAllInterfaces(ForClass)AsSet"
 * removed deprecated RegexpMethodPointcut class: use Perl5RegexpMethodPointcut or JdkRegexpMethodPointcut instead
+* reworked AbstractAutoProxyCreator to check for custom TargetSourceCreator before instantiation of target bean
+* reworked TargetSourceCreator mechanism to work with bean class rather than bean instance (non-backwards-compatible)
+* reworked AbstractPrototypeBasedTargetSourceCreator into AbstractBeanFactoryBasedTargetSourceCreator
+* added LazyInitTargetSourceCreator, automatically creating a LazyInitTargetSource for each bean marked as "lazy-init"
 
 Package org.springframework.beans
+* added InstantiationAwareBeanPostProcessor extension of BeanPostProcessor interface, intercepting before instantiation
 * PropertyOverrideConfigurer does not log invalid keys at WARN level in case of "ignoreInvalidKeys" (only at DEBUG)
 * XmlBeanDefinitionReader offers an "errorHandler" property and uses the factored-out SimpleSaxErrorHandler as default
+
+Package org.springframework.core
+* PathMatchingResourcePatternResolver collects resource entries in a Set and normalizes paths (to avoid double entries)
 
 Package org.springframework.jdbc
 * LazyConnectionDataSourceProxy handles "toString", "equals" and "hashCode" itself (avoiding to fetch target Connection)
