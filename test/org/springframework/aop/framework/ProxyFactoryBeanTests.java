@@ -27,6 +27,7 @@ import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.TimeStamped;
@@ -37,7 +38,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.12 2003-12-02 22:28:10 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.13 2003-12-08 11:24:20 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -66,6 +67,47 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
 	}
 	
+	public void testGetObjectTypeWithDirectTarget() {
+		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
+		BeanFactory bf = new XmlBeanFactory(is);
+		
+		// We have a counting before advice here
+		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean("countingBeforeAdvice");
+		assertEquals(0, cba.getCalls());
+	
+		ITestBean tb = (ITestBean) bf.getBean("directTarget");
+		assertTrue(tb.getName().equals("Adam"));
+		assertEquals(1, cba.getCalls());
+		
+		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&directTarget");
+		assertEquals("Has correct object type", TestBean.class, pfb.getObjectType());
+	}
+	
+	public void testGetObjectTypeWithTargetViaTargetSource() {
+		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
+		BeanFactory bf = new XmlBeanFactory(is);
+
+		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
+		assertTrue(tb.getName().equals("Adam"));
+		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
+		assertEquals("Has correct object type", TestBean.class, pfb.getObjectType());
+	}
+	
+	public void testGetObjectTypeWithNoTargetOrTargetSource() {
+		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
+		BeanFactory bf = new XmlBeanFactory(is);
+
+		ITestBean tb = (ITestBean) bf.getBean("noTarget");
+		try {
+			tb.getName();
+			fail();
+		}
+		catch (UnsupportedOperationException ex) {
+			assertEquals("getName", ex.getMessage());
+		}
+		FactoryBean pfb = (ProxyFactoryBean) bf.getBean("&noTarget");
+		assertNull("Has null object type", pfb.getObjectType());
+	}
 	
 	/**
 	 * The instances are equal, but do not have object identity.
@@ -353,6 +395,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(PointcutForVoid.methodNames.get(0).equals("setAge"));
 		assertTrue(PointcutForVoid.methodNames.get(1).equals("setName"));
 	}
+	
 	
 	
 	// These two fail the whole bean factory
