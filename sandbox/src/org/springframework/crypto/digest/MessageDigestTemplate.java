@@ -2,7 +2,6 @@ package org.springframework.crypto.digest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.io.UnsupportedEncodingException;
