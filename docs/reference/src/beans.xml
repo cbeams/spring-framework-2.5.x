@@ -738,7 +738,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             &lt;set&gt;
                 &lt;value&gt;just some string&lt;/value&gt;
                 &lt;ref bean="myDataSource"&lt;/ref&gt;
-            &lt;/map&gt;
+            &lt;/set&gt;
         &lt;/property&gt;
 
     &lt;/bean&gt;
