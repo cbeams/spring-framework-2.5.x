@@ -240,10 +240,8 @@
       well.</para>
 
       <para>Using the XmlBeanFactory you can specify your bean class as
-      follows: <programlisting>
-&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
-&lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt;
-				</programlisting></para>
+      follows: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
+&lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt;                </programlisting></para>
     </sect2>
 
     <sect2 id="beans-beanname">
@@ -280,10 +278,8 @@
       <literal>exampleBean</literal> is created each and every time a client
       asks the BeanFactory for this bean, while
       <literal>yetAnotherExample</literal> is only created one, a reference is
-      returned each time a request for this bean is done. <programlisting>
-&lt;bean id="exampleBean" class="examples.ExampleBean" singleton="false"/&gt;
-&lt;bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/&gt;
-				</programlisting></para>
+      returned each time a request for this bean is done. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean" singleton="false"/&gt;
+&lt;bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/&gt;</programlisting></para>
     </sect2>
   </sect1>
 
@@ -377,67 +373,61 @@
       <para>First, an example of using the BeanFactory for setter-based
       dependency injection. Below, there's a small part of an XML file
       specifying bean definition. Also, you can find the actual bean itself,
-      having the appropriate setters declared. <programlisting>
-&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-	&lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
-	&lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
-	&lt;property name="integerProperty"&gt;1&lt;/property&gt;
+      having the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+    &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
+    &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
+    &lt;property name="integerProperty"&gt;1&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
-&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;
-				</programlisting> <programlisting>
-public class ExampleBean {
-	
-	private AnotherBean beanOne;
-	private YetAnotherBean beanTwo;
-	private int i;
-	
-	public void setBeanOne(AnotherBean beanOne) {
-		this.beanOne = beanOne;
-	}
-	
-	public void setBeanTwo(YetAnotherBean beanTwo) {
-		this.beanTwo = beanTwo;
-	}
-	
-	public void setIntegerProperty(int i) {
-		this.i = i;
-	}	
-}
-				</programlisting> As you can see, setters have been declared to match
-      against the properties specified in the XML file. (The properties from
-      the XML file, directly relate to the <literal>PropertyValues</literal>
-      object from the <literal>RootBeanDefinition</literal>)</para>
+&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
+      <programlisting>public class ExampleBean {
+    
+    private AnotherBean beanOne;
+    private YetAnotherBean beanTwo;
+    private int i;
+    
+    public void setBeanOne(AnotherBean beanOne) {
+        this.beanOne = beanOne;
+    }
+    
+    public void setBeanTwo(YetAnotherBean beanTwo) {
+        this.beanTwo = beanTwo;
+    }
+    
+    public void setIntegerProperty(int i) {
+        this.i = i;
+    }    
+}</programlisting> As you can see, setters have been declared to match against
+      the properties specified in the XML file. (The properties from the XML
+      file, directly relate to the <literal>PropertyValues</literal> object
+      from the <literal>RootBeanDefinition</literal>)</para>
 
       <para>Then, an example of using the BeanFactory for IoC type 3 (using
       constructors). Below you can find a snippet from an XML configuration
       file that specifies constructor arguments and the actual bean,
-      specifying the constructor <programlisting>	
-&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-	&lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
-	&lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-	&lt;constructor-arg&gt;1&lt;/constructor-arg&gt;
+      specifying the constructor <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+    &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;1&lt;/constructor-arg&gt;
 &lt;/bean&gt;
 
 &lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
-&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;
-				</programlisting> <programlisting>
-public class ExampleBean {
+&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
+      <programlisting>public class ExampleBean {
 
-	private AnotherBean beanOne;
-	private YetAnotherBean beanTwo;
-	private int i;
-	
-	public ExampleBean(AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
-		this.beanOne = anotherBean;
-		this.beanTwo = yetAnotherBean;
-		this.i = i;
-	}
-}
-				</programlisting> As you can see, the constructor arguments specified in
-      the bean definition will be used to pass in as arguments to the
-      constructor of the <literal>ExampleBean</literal>.</para>
+    private AnotherBean beanOne;
+    private YetAnotherBean beanTwo;
+    private int i;
+    
+    public ExampleBean(AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
+        this.beanOne = anotherBean;
+        this.beanTwo = yetAnotherBean;
+        this.i = i;
+    }
+}</programlisting> As you can see, the constructor arguments specified in the
+      bean definition will be used to pass in as arguments to the constructor
+      of the <literal>ExampleBean</literal>.</para>
     </sect2>
 
     <sect2 id="beans-factory-nullvalues">
@@ -445,16 +435,13 @@ public class ExampleBean {
 
       <para>Spring treats empty arguments for properties and the like as empty
       Strings. Consider the following code examples if you need to set
-      <emphasis>null</emphasis>-values. <programlisting>
-&lt;bean class="ExampleBean"&gt;
-	&lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting> results in <literal>exampleBean.setEmail("");</literal>
-      as opposed to <programlisting>
-&lt;bean class="ExampleBean"&gt;
-	&lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting> which will result in:
+      <emphasis>null</emphasis>-values. <programlisting>&lt;bean class="ExampleBean"&gt;
+    &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;        </programlisting> results in
+      <literal>exampleBean.setEmail("");</literal> as opposed to
+      <programlisting>&lt;bean class="ExampleBean"&gt;
+    &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
+&lt;/bean&gt;        </programlisting> which will result in:
       <literal>exampleBean.setEmail(<emphasis>null</emphasis>)</literal>.</para>
     </sect2>
 
@@ -470,13 +457,11 @@ public class ExampleBean {
       something else needing preparation, you can use the
       <literal>depends-on</literal>-tag, which will ensure all beans you're
       mentioning there, will get initialized before their actually set on the
-      bean. For example: <programlisting>
-&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
-	&lt;property name="manager"&gt;&lt;ref local="manager"/&gt;
+      bean. For example: <programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
+    &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;
 &lt;/bean&gt;
 
-&lt;bean id="manager" class="ManagerBean"/&gt;
-				</programlisting></para>
+&lt;bean id="manager" class="ManagerBean"/&gt;</programlisting></para>
     </sect2>
 
     <sect2 id="beans-factory-autowire">
@@ -658,23 +643,19 @@ public class ExampleBean {
         store (may it be XML, properties-files or a
         database).</emphasis></para>
 
-        <para><programlisting>
-&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;
+        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;
 
 public class ExampleBean {
-	public void init() {
-		// do some initialization work
-	}
-}
-					</programlisting> Is exactly the same as: <programlisting>
-&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
+    public void init() {
+        // do some initialization work
+    }
+}</programlisting> Is exactly the same as: <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
 
 public class AnotherExampleBean implements InitializingBean {
-	public void afterPropertiesSet() {
-		// do some initialization work
-	}
-}
-					</programlisting></para>
+    public void afterPropertiesSet() {
+        // do some initialization work
+    }
+}</programlisting></para>
       </sect3>
 
       <sect3 id="beans-factory-lifecycle-disposablebean">
@@ -703,23 +684,19 @@ public class AnotherExampleBean implements InitializingBean {
         information about this feature, see the next
         section)</emphasis></para>
 
-        <para><programlisting>
-&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup()"/&gt;
+        <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup()"/&gt;
 
 public class ExampleBean {
-	public void cleanup() {
-		// do some destruction work (like closing connection)
-	}
-}
-					</programlisting> Is exactly the same as: <programlisting>
-&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
+    public void cleanup() {
+        // do some destruction work (like closing connection)
+    }
+}</programlisting> Is exactly the same as: <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
 
 public class AnotherExampleBean implements DisposableBean {
-	public void destroy() {
-		// do some destruction work
-	}
-}
-					</programlisting></para>
+    public void destroy() {
+        // do some destruction work
+    }
+}</programlisting></para>
       </sect3>
     </sect2>
 
@@ -800,10 +777,8 @@ public class AnotherExampleBean implements DisposableBean {
     BeanFactory enables you to read bean definitions and access them using the
     bean factory. When just using the BeanFactory you would create one and
     read in some bean definitions in the XML format as follows:
-    <programlisting>
-InputStream is = new FileInputStream("beans.xml");
-XmlBeanFactory factory = new XmlBeanFactory(is);
-				</programlisting></para>
+    <programlisting>InputStream is = new FileInputStream("beans.xml");
+XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
 
     <para>Basically that's all there is to it. Using
     <literal>getBean(String)</literal> you can retrieve instances of your
@@ -894,31 +869,25 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
       we will apply a <literal>PropertyPlaceholderConfigurer</literal> to the
       BeanFactory which will replace some properties of the datasource:</para>
 
-      <programlisting>
-&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-	&lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
-	&lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
-	&lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
-	&lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting>
+      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
 
-      <programlisting>
-jdbc.driverClassName=org.hsqldb.jdbcDriver
+      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
-jdbc.password=root
-				</programlisting>
+jdbc.password=root</programlisting>
 
-      <programlisting>
-XmlBeanFactory factory = new XmlBeanFactory(new FileInputStream("beans.xml"));
+      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileInputStream("beans.xml"));
 
 Properties props = new Properties();
 props.load(new FileInputStream("jdbc.properties"));
 
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer(props);
-cfg.postProcessBeanFactory(factory);
-				</programlisting>
+cfg.postProcessBeanFactory(factory);</programlisting>
 
       <para>The <literal>PropertyPlaceHolderConfigurer</literal> does not only
       look for properties in the properties file you're defining, but also
@@ -1003,60 +972,85 @@ cfg.postProcessBeanFactory(factory);
     <quote>destroy-method</quote> attribute, to avoid the need for
     BasicDataSource to implement any Spring interface (in this case that would
     be <literal>DisposableBean</literal> mentioned earlier in the section
-    about lifecycle features). <programlisting> &lt;beans&gt; &lt;bean
-    id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
-    destroy-method="close"&gt; &lt;!-- results in a setDriverClassName(String)
-    call --&gt; &lt;property name="driverClassName"&gt;
-    &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt; &lt;/property&gt;
-    &lt;property name="url"&gt;
-    &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
-    &lt;/property&gt; &lt;property name="username"&gt;
-    &lt;value&gt;root&lt;/value&gt; &lt;/property&gt; &lt;/bean&gt;
-    &lt;/beans&gt; </programlisting> Just as an destruction method is
-    specified using the <literal>destroy-method</literal> attribute, we could
-    specify a initialization method using the <literal>init-method</literal>
-    attribute. </para> <para> To specify properties and collaborators in XML
-    files you have to use nested &lt;property&gt; elements. You have already
-    seen the setting of 'primitive' properties in the example about, the
-    setting of collaborators is done using the nested
-    <literal>&lt;ref&gt;</literal> element. <programlisting> &lt;beans&gt; ...
-    &lt;bean id="exampleDataAccessObject"
-    class="example.ExampleDataAccessObject"&gt; &lt;!-- results in a
-    setDataSource(BasicDataSource) call --&gt; &lt;property
-    name="dataSource"&gt; &lt;ref bean="myDataSource"/&gt; &lt;/property&gt;
-    &lt;/bean&gt; &lt;/beans&gt; </programlisting> As you can see below, we're
-    using the Commons DBCP datasource from the previous example here as a
-    collaborator and we're specifying if using a &lt;ref bean&gt; element.
-    References exist in three types that specify whether or not to search the
-    collaborator in the same XML file or in some other XML file (multiple XML
-    files is covered further along): <itemizedlist spacing="compact">
-    <listitem> <para><literal>bean</literal>: tries to find the collaborator
-    in either the same XML file or in some other XML file that has also been
-    specified </para> </listitem> <listitem> <para><literal>local</literal>:
-    tries to find the collaborator in the current XML file. This attribute is
-    an <literal>XML IDREF</literal> so it <emphasis>has</emphasis> to exist,
-    otherwise validation will fail </para> </listitem> <listitem>
-    <para><literal>external</literal>: explicitly states to find the bean in
-    another XML file and does not search in the current XML file </para>
-    </listitem> </itemizedlist> </para> <para> There's a couple of
-    possibilities for specifying more complex properties such as lists,
-    properties object and maps. The following examples show this behavior:
-    <programlisting> &lt;beans&gt; ... &lt;bean id="moreComplexObject"
-    class="example.ComplexObject"&gt; &lt;!-- results in a
-    setPeople(java.util.Properties) call --&gt; &lt;property name="people"&gt;
-    &lt;props&gt; &lt;prop key="HaaryPotter"&gt;The magic
-    property&lt;/prop&gt; &lt;prop key="JerrySeinfeld"&gt;The funny
-    property&lt;/prop&gt; &lt;/props&gt; &lt;/property&gt; &lt;!-- results in
-    a setSomeList(java.util.List) call --&gt; &lt;property name="someList"&gt;
-    &lt;list&gt; &lt;value&gt;a list element followed by a
-    reference&lt;/value&gt; &lt;ref bean="myDataSource"/&gt; &lt;/list&gt;
-    &lt;/property&gt; &lt;!-- results in a setSomeMap(java.util.Map) call
-    --&gt; &lt;property name="someMap"&gt; &lt;map&gt; &lt;entry key="yup an
-    entry"&gt; &lt;value&gt;just some string&lt;/value&gt; &lt;/entry&gt;
-    &lt;entry key="yup a ref"&gt; &lt;ref bean="myDataSource&lt;/ref&gt;
-    &lt;/entry&gt; &lt;/map&gt; &lt;/property&gt; &lt;/bean&gt; &lt;/beans&gt;
-    </programlisting> </para> <para> <emphasis>Note that the value of a Map
-    entry can also again be a list or another map.</emphasis> </para></sect2>
+    about lifecycle features). <programlisting format="linespecific"
+    xml:space="preserve">&lt;beans&gt;
+    &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        &lt;!-- results in a setDriverClassName(String) call --&gt;
+        &lt;property name="driverClassName"&gt;
+            &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="url"&gt;
+            &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="username"&gt;
+            &lt;value&gt;root&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt; </programlisting> Just as an destruction method is specified
+    using the <literal>destroy-method</literal> attribute, we could specify a
+    initialization method using the <literal>init-method</literal> attribute.
+    </para> <para> To specify properties and collaborators in XML files you
+    have to use nested &lt;property&gt; elements. You have already seen the
+    setting of 'primitive' properties in the example about, the setting of
+    collaborators is done using the nested <literal>&lt;ref&gt;</literal>
+    element. <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+    ...
+    &lt;bean id="exampleDataAccessObject" class="example.ExampleDataAccessObject"&gt;
+        &lt;!-- results in a setDataSource(BasicDataSource) call --&gt;
+        &lt;property name="dataSource"&gt;
+            &lt;ref bean="myDataSource"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt; </programlisting> As you can see below, we're using the Commons
+    DBCP datasource from the previous example here as a collaborator and we're
+    specifying if using a &lt;ref bean&gt; element. References exist in three
+    types that specify whether or not to search the collaborator in the same
+    XML file or in some other XML file (multiple XML files is covered further
+    along): <itemizedlist
+    spacing="compact"><listitem><para><literal>bean</literal>: tries to find
+    the collaborator in either the same XML file or in some other XML file
+    that has also been
+    specified</para></listitem><listitem><para><literal>local</literal>: tries
+    to find the collaborator in the current XML file. This attribute is an
+    <literal>XML IDREF</literal> so it <emphasis>has</emphasis> to exist,
+    otherwise validation will fail
+    </para></listitem><listitem><para><literal>external</literal>: explicitly
+    states to find the bean in another XML file and does not search in the
+    current XML file </para></listitem></itemizedlist></para><para> There's a
+    couple of possibilities for specifying more complex properties such as
+    lists, properties object and maps. The following examples show this
+    behavior: <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+    ...
+    &lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
+        &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
+        &lt;property name="people"&gt;
+            &lt;props&gt;
+                &lt;prop key="HaaryPotter"&gt;The magic property&lt;/prop&gt;
+                &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+        &lt;!-- results in a setSomeList(java.util.List) call --&gt;
+        &lt;property name="someList"&gt;
+            &lt;list&gt;
+                &lt;value&gt;a list element followed by a reference&lt;/value&gt;
+                &lt;ref bean="myDataSource"/&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;!-- results in a setSomeMap(java.util.Map) call --&gt;
+        &lt;property name="someMap"&gt;
+            &lt;map&gt;
+                &lt;entry key="yup an entry"&gt;
+                    &lt;value&gt;just some string&lt;/value&gt;
+                &lt;/entry&gt;
+                &lt;entry key="yup a ref"&gt;
+                    &lt;ref bean="myDataSource"&lt;/ref&gt;
+                &lt;/entry&gt;
+            &lt;/map&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;</programlisting></para><para> <emphasis>Note that the value of
+    a Map entry can also again be a list or another map.</emphasis>
+    </para></sect2>
   </sect1>
 
   <sect1 id="context-introduction">
@@ -1182,20 +1176,18 @@ cfg.postProcessBeanFactory(factory);
       messaging. The StaticMessageSource is hardly ever used and provides
       programmatic ways to add messages to the source. The
       ResourceBundleMessageSource is more interesting and is the one we will
-      provides an example for: <programlisting>
-&lt;beans&gt;
-	&lt;bean id="messageSource" 
-			class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-		&lt;property name="baseNames"&gt;
-			&lt;list&gt;
-				&lt;value&gt;format&lt;/value&gt;
-				&lt;value&gt;exceptions&lt;/value&gt;
-				&lt;value&gt;windows&lt;/value&gt;
-			&lt;/list&gt;
-		&lt;/property&gt;
-	&lt;/bean&gt;
-&lt;/beans&gt;
-				</programlisting></para>
+      provides an example for: <programlisting>&lt;beans&gt;
+    &lt;bean id="messageSource" 
+            class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
+        &lt;property name="baseNames"&gt;
+            &lt;list&gt;
+                &lt;value&gt;format&lt;/value&gt;
+                &lt;value&gt;exceptions&lt;/value&gt;
+                &lt;value&gt;windows&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt; </programlisting></para>
 
       <para>This assumes you have three resource bundles defined on your
       classpath called <literal>format</literal>,
@@ -1265,64 +1257,60 @@ cfg.postProcessBeanFactory(factory);
       <para>Implementing custom events can be done as well. All you need to do
       is call the <literal>publishEvent()</literal> method on the
       ApplicationContext and you're done. Let's have a look at an example.
-      First, the ApplicationContext: <programlisting>
-&lt;bean id="emailer" class="example.EmailBean"&gt;
-	&lt;property name="blackList"&gt;
-		&lt;list&gt;
-			&lt;value&gt;black@list.org&lt;/value&gt;
-			&lt;value&gt;white@list.org&lt;/value&gt;
-			&lt;value&gt;john@doe.org&lt;/value&gt;
-		&lt;/list&gt;
-	&lt;/property&gt;
+      First, the ApplicationContext: <programlisting>&lt;bean id="emailer" class="example.EmailBean"&gt;
+    &lt;property name="blackList"&gt;
+        &lt;list&gt;
+            &lt;value&gt;black@list.org&lt;/value&gt;
+            &lt;value&gt;white@list.org&lt;/value&gt;
+            &lt;value&gt;john@doe.org&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="blackListListener" class="example.BlackListNotifier"&gt;
-	&lt;property name="notificationAddress"&gt;
-		&lt;value&gt;spam@list.org&lt;/value&gt;
-	&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting> and then, the actual beans: <programlisting>
-public class EmailBean implements ApplicationContextAware {
+    &lt;property name="notificationAddress"&gt;
+        &lt;value&gt;spam@list.org&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting> and then, the actual beans: <programlisting>public class EmailBean implements ApplicationContextAware {
 
-	/** the blacklist */
-	private List blackList;
-	
-	public void setBlackList(List blackList) {
-		this.blackList = blackList;
-	}
-	
-	public void setApplicationContext(ApplicationContext ctx) {
-		this.ctx = ctx;
-	}
-	
-	public void sendEmail(String address, String text) {
-		if (blackList.contains(address)) {
-			BlackListEvent evt = new BlackListEvent(address, text);
-			ctx.publishEvent(evt);
-			return;
-		}
-		// send email
-	}
+    /** the blacklist */
+    private List blackList;
+    
+    public void setBlackList(List blackList) {
+        this.blackList = blackList;
+    }
+    
+    public void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
+    
+    public void sendEmail(String address, String text) {
+        if (blackList.contains(address)) {
+            BlackListEvent evt = new BlackListEvent(address, text);
+            ctx.publishEvent(evt);
+            return;
+        }
+        // send email
+    }
 }
 
 public class BlackListNotifier implement ApplicationListener {
 
-	/** notification address */
-	private String notificationAddress;
-	
-	public void setNotificationAddress(String notificationAddress) {
-		this.notificationAddress = notificationAddress;
-	}
+    /** notification address */
+    private String notificationAddress;
+    
+    public void setNotificationAddress(String notificationAddress) {
+        this.notificationAddress = notificationAddress;
+    }
 
-	public void onApplicationEvent(ApplicationEvent evt) {
-		if (evt instanceof BlackListEvent) {
-			// notify appropriate person
-		}
-	}
-}
-			</programlisting> Of course, this behavior could be more cleanly
-      implemented maybe, by using AOP features, but just to illustrate the
-      basic behavior, this should do.</para>
+    public void onApplicationEvent(ApplicationEvent evt) {
+        if (evt instanceof BlackListEvent) {
+            // notify appropriate person
+        }
+    }
+}</programlisting> Of course, this behavior could be more cleanly implemented
+      maybe, by using AOP features, but just to illustrate the basic behavior,
+      this should do.</para>
     </sect2>
 
     <sect2 id="context-functionality-resources">
@@ -1435,64 +1423,55 @@ public class BlackListNotifier implement ApplicationListener {
     <literal>CustomEditorConfigurer</literal>, which is a special kind of
     <literal>BeanFactoryPostProcessor</literal> (more about those can be found
     in <xref linkend="beans-factory-customizing" />). Consider the following
-    code samples: <programlisting>
-public class ExoticType {
+    code samples: <programlisting>public class ExoticType {
 
-	private String name;
-	
-	public ExoticType(String name) {
-		this.name = name;
-	}
+    private String name;
+    
+    public ExoticType(String name) {
+        this.name = name;
+    }
 }
 
 public class DependsOnExoticType {
-	
-	private ExoticType type;
+    
+    private ExoticType type;
 
-	public void setType(ExoticType type) {
-		this.type = type;
-	}
-}
-				</programlisting> Wiring this up should be done something like this:
-    <programlisting>
-&lt;bean id="sample" class="example.DependsOnExoticType"&gt;
-	&lt;property name="type"&gt;&lt;value&gt;exoticTypeTwo&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting> When you want to do this, you would need to create a
-    PropertyEditor and wire it up using the
-    <literal>CustomEditorConfigurer</literal>: <programlisting>
-public class ExoticTypeEditor extends PropertyEditorSupport {
+    public void setType(ExoticType type) {
+        this.type = type;
+    }
+}</programlisting> Wiring this up should be done something like this:
+    <programlisting>&lt;bean id="sample" class="example.DependsOnExoticType"&gt;
+    &lt;property name="type"&gt;&lt;value&gt;exoticTypeTwo&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting> When you want to do this, you would need to
+    create a PropertyEditor and wire it up using the
+    <literal>CustomEditorConfigurer</literal>: <programlisting>public class ExoticTypeEditor extends PropertyEditorSupport {
 
-	private String format;
+    private String format;
 
-	public void setWhatever(String format) {
-		this.format = format
-	
-	public void setAsText(String text) {
-		if (format != null &amp;&amp; format.equals("upperCase")) {
-			text = text.toUpperCase();
-		}
-		ExoticType type = new ExoticType(text);
-		setValue(type);
-	}
-}					
-				</programlisting> To actually register it, do the following:
-    <programlisting>
-&lt;bean id="customEditorConfigurer" 
-	class="org.springframework.bean.factory.config.CustomEditorConfigurer&gt;
-	&lt;property name="customEditors"&gt;
-		&lt;map&gt;
-			&lt;entry key="example.ExoticType"&gt;
-				&lt;bean class="example.ExoticTypeEditor"&gt;
-					&lt;property name="format"&gt;
-						&lt;value&gt;upperCase&lt;/value&gt;
-					&lt;/property&gt;
-				&lt;/bean&gt;
-			&lt;/entry&gt;
-		&lt;/map&gt;
-	&lt;/property&gt;
-&lt;/bean&gt;
-				</programlisting></para>
+    public void setWhatever(String format) {
+        this.format = format
+    
+    public void setAsText(String text) {
+        if (format != null &amp;&amp; format.equals("upperCase")) {
+            text = text.toUpperCase();
+        }
+        ExoticType type = new ExoticType(text);
+        setValue(type);
+    }
+}</programlisting> To actually register it, do the following: <programlisting>&lt;bean id="customEditorConfigurer" 
+    class="org.springframework.bean.factory.config.CustomEditorConfigurer"&gt;
+    &lt;property name="customEditors"&gt;
+        &lt;map&gt;
+            &lt;entry key="example.ExoticType"&gt;
+                &lt;bean class="example.ExoticTypeEditor"&gt;
+                    &lt;property name="format"&gt;
+                        &lt;value&gt;upperCase&lt;/value&gt;
+                    &lt;/property&gt;
+                &lt;/bean&gt;
+            &lt;/entry&gt;
+        &lt;/map&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
 
     <para>Besides using the <literal>CustomEditorConfigurer</literal>, you can
     also register custom editors programmatically if you need. This might come
@@ -1583,27 +1562,22 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     <literal>ContextLoaderServlet</literal>.</para>
 
     <para>You can register an ApplicationContext using the
-    <literal>ContextLoaderListener</literal> as follows: <programlisting>
-&lt;context-param&gt;
-	&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-	&lt;param-value&gt;/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml&lt;/param-value&gt;
+    <literal>ContextLoaderListener</literal> as follows: <programlisting>&lt;context-param&gt;
+    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/daoContext.xml /WEB-INF/applicationContext.xml&lt;/param-value&gt;
 &lt;/context-param&gt;
 
 &lt;listener&gt;
-	&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 
 &lt;!-- OR USE THE CONTEXTLOADERSERVLET INSTEAD OF THE LISTENER
 &lt;servlet&gt;
-	&lt;servlet-name&gt;context&lt;/servlet-name&gt;
-	&lt;servlet-class&gt;org.springframework.web.context.ContextLoaderServlet&lt;/servlet-class&gt;
-	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;servlet-name&gt;context&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.context.ContextLoaderServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
---&gt;
-
-
-
-			</programlisting> The listener inspects the
+--&gt;</programlisting> The listener inspects the
     <literal>contextConfigLocation</literal> parameter. If it doesn't exist,
     it'll use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
     When it <emphasis>does</emphasis> exist, it'll separate the String using
@@ -1673,8 +1647,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
       respective JavaDocs, available at <ulink
       url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html</ulink>
       and <ulink
-      url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html</ulink>.
-      </para>
+      url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html</ulink>.</para>
 
       <para>As mentioned in the chapter on EJBs, the Spring convenience base
       classes for EJBs normally use a non-singleton
