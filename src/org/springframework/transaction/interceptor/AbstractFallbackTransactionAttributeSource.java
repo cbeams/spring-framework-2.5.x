@@ -44,18 +44,20 @@ import org.springframework.aop.support.AopUtils;
  * of the cost of evaluating rollback rules.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @since 1.1
  */
 public abstract class AbstractFallbackTransactionAttributeSource implements TransactionAttributeSource {
-	
-	protected final Log logger = LogFactory.getLog(getClass());
 	
 	/**
 	 * Canonical value held in cache to indicate no transaction attribute was
 	 * found for this method, and we don't need to look again
 	 */
-	private final static Object NULL_TX_ATTRIBUTE = new Object();
+	private final static Object NULL_TRANSACTION_ATTRIBUTE = new Object();
 	
 	
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	/**
 	 * Cache of TransactionAttributes, keyed by Method and target class
 	 */
@@ -72,12 +74,12 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 */
 	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// First, see if we have a cached value
-		Object cacheKey = cacheKey(method, targetClass);
-		Object cached = cache.get(cacheKey);
+		Object cacheKey = getCacheKey(method, targetClass);
+		Object cached = this.cache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
 			// or an actual transaction attribute
-			if (cached == NULL_TX_ATTRIBUTE) {
+			if (cached == NULL_TRANSACTION_ATTRIBUTE) {
 				return null;
 			}
 			else {
@@ -89,24 +91,27 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache
 			if (txAtt == null) {
-				cache.put(cacheKey, NULL_TX_ATTRIBUTE);
+				this.cache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
-				cache.put(cacheKey, txAtt);
+				this.cache.put(cacheKey, txAtt);
 			}
 			return txAtt;
 		}
 	}
-	
-	private Object cacheKey(Method method, Class targetClass) {
-		// Class may be null, method can't
-	    // Must not produce same key for overloaded methods
-	    // Must produce same key for different instances of the same method
-	    
-	    // TODO this works fine, but could consider making it faster in future:
-	    // Method.toString() is relatively (although not disastrously) slow
-		return targetClass + "" 
-				+ method;
+
+	/**
+	 * Determine a cache key for the given method and target class.
+	 * Must not produce same key for overloaded methods.
+	 * Must produce same key for different instances of the same method.
+	 * @param method the method
+	 * @param targetClass the target class (may be null)
+	 * @return the cache key
+	 */
+	protected Object getCacheKey(Method method, Class targetClass) {
+		// TODO this works fine, but could consider making it faster in future:
+		// Method.toString() is relatively (although not disastrously) slow.
+		return targetClass + "." + method;
 	}
 	
 	/**
@@ -119,22 +124,25 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		// is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 		
-		// First try is the method in the target class
+		// First try is the method in the target class.
 		TransactionAttribute txAtt = findTransactionAttribute(findAllAttributes(specificMethod));
-		if (txAtt != null)
+		if (txAtt != null) {
 			return txAtt;
-		
-		// Second try is the transaction attribute on the target class
+		}
+
+		// Second try is the transaction attribute on the target class.
 		txAtt = findTransactionAttribute(findAllAttributes(specificMethod.getDeclaringClass()));
-		if (txAtt != null)
+		if (txAtt != null) {
 			return txAtt;
-		
+		}
+
 		if (specificMethod != method ) {
-			// Fallback is to look at the original method
+			// Fallback is to look at the original method.
 			txAtt = findTransactionAttribute(findAllAttributes(method));
-			if (txAtt != null)
+			if (txAtt != null) {
 				return txAtt;
-			// Last fallback is the class of the original method
+			}
+			// Last fallback is the class of the original method.
 			return findTransactionAttribute(findAllAttributes(method.getDeclaringClass()));
 		}
 		return null;
@@ -161,11 +169,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Return the transaction attribute, given this set of attributes
 	 * attached to a method or class.
-	 * Protected rather than private as subclasses may want to customize
+	 * <p>Protected rather than private as subclasses may want to customize
 	 * how this is done: for example, returning a TransactionAttribute
 	 * affected by the values of other attributes.
-	 * This implementation takes into account RollbackRuleAttributes, if
-	 * the TransactionAttribute is a RuleBasedTransactionAttribute.
+	 * <p>This implementation takes into account RollbackRuleAttributes,
+	 * if the TransactionAttribute is a RuleBasedTransactionAttribute.
 	 * Return null if it's not transactional. 
 	 * @param atts attributes attached to a method or class. May
 	 * be null, in which case a null TransactionAttribute will be returned.
@@ -178,7 +186,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 
 		TransactionAttribute txAttribute = null;
-		// Check there is a transaction attribute.
+
+		// Check whether there is a transaction attribute.
 		for (Iterator itr = atts.iterator(); itr.hasNext() && txAttribute == null; ) {
 			Object att = itr.next();
 			if (att instanceof TransactionAttribute) {
@@ -186,6 +195,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 		}
 
+		// Check if we have a RuleBasedTransactionAttribute.
 		if (txAttribute instanceof RuleBasedTransactionAttribute) {
 			RuleBasedTransactionAttribute rbta = (RuleBasedTransactionAttribute) txAttribute;
 			// We really want value: bit of a hack.
@@ -194,7 +204,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 				Object att = it.next();
 				if (att instanceof RollbackRuleAttribute) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Found RollbackRule: " + att);
+						logger.debug("Found rollback rule: " + att);
 					}
 					rollbackRules.add(att);
 				}
