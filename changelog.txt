@@ -1,17 +1,17 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.49 2003-11-24 20:41:20 johnsonr Exp $
+$Id: changelog.txt,v 1.50 2003-11-25 11:08:31 jhoeller Exp $
 
 
-Changes in version 1.0 M3 (23.11.2003)
+Changes in version 1.0 M3 (25.11.2003)
 --------------------------------------
 
 Package org.springframework.aop
 * major AOP API changes: see changes-M2-M3.txt for further details
 * added "targetClass" argument to StaticMethodPointcut.applies()
+* CGLIB proxies support introductions now
 * can force CGLIB proxying using new "proxyTargetClass" property on DefaultProxyConfig
-* CGLIB proxies support introductions
-* org.springframework.aop.interceptor.ApartmentInvokerInterceptor renamed ThreadLocalInvokerInterceptor
+* introduced various invoker interceptors like Prototype-, CommonsPooling-, and ThreadLocalInvokerInterceptor
 
 Package org.springframework.beans
 * fixed empty-value-on-primitive-property check in BeanWrapperImpl to allow a custom editor to modify the value first
@@ -38,7 +38,7 @@ Package org.springframework.beans
 * added ConstructorArgumentValues support to RootBeanDefinition, for resolving arguments to specific beans or values
 * added autowire="constructor" mode for PicoContainer-style Type 3 IoC, resolving constructor arguments by type
 * made "id" attribute of "bean" tag in XML bean definition format optional, using the first given name as primary name
-* allow for "bean" tags with neither "id" nor "name", using the bean class name as implicit id (PicoContainer-style) 
+* allow for "bean" tags with neither "id" nor "name", using the bean class name as implicit id (PicoContainer-style)
 * added "lazy-init" attribute to "bean" tag in XML bean definition format, default being "false"
 * added "depends-on" attribute to "bean" tag in XML format, expressing initialization dependencies on other beans
 * added "constructor-arg" tag to "bean" tag in XML format, analogous to "property" tag, with optional "index" attribute
@@ -69,9 +69,9 @@ Package org.springframework.mail
 Package org.springframework.orm
 * added setter methods for data access templates to HibernateDaoSupport/JdoDaoSupport
 * added convenience methods for resource opening/closing to HibernateDaoSupport/JdoDaoSupport
-* made LocalSessionFactoryBean and LocalPersistenceManagerFactoryBean methods non-final
 * reworked HibernateAccessor/HibernateTemplate/HibernateInterceptor flush handling
 * throw HibernateObjectRetrievalFailedException on Hibernate's ObjectDeletedException
+* added "mappingResourceJars" property to LocalSessionFactoryBean, allowing to load mapping resources from jar files
 * added "jdbcExceptionTranslator" property to HibernateTemplate, allowing to set a SQLExceptionTranslator for SQL ex's
 * added "jdbcExceptionTranslator" property to HibernateTransactionManager, applied to flushing failures on commit
 * added "jdbcExceptionTranslator" parameter to SessionFactoryUtils.getSession, applied to transaction synchronizations
@@ -101,6 +101,8 @@ Package org.springframework.ui
 * reworked VelocityEngineFactory to allow VelocityEngineFactoryBean to run outside of application context
 
 Package org.springframework.util
+* reworked ClassLoaderUtils' "getResourceAsStream" to load from the class path root with or without leading slash
+* "PagedListHolder" and its contained "MutableSortDefinition" implement Serializable now, for distributed sessions
 * added convenience methods "previousPage" and "nextPage" to PagedListHolder
 
 Package org.springframework.web
