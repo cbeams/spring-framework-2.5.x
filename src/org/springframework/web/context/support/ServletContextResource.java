@@ -25,6 +25,7 @@ import java.net.URL;
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Resource implementation for ServletContext resources,
@@ -98,8 +99,41 @@ public class ServletContextResource extends AbstractResource {
 		return new File(realPath);
 	}
 
+	public Resource createRelative(String relativePath) throws IOException {
+		int packageIndex = this.path.indexOf('/');
+		if (packageIndex != -1) {
+			String packagePath = this.path.substring(0, packageIndex);
+			if (!relativePath.startsWith("/")) {
+				packagePath += "/";
+			}
+			return new ServletContextResource(this.servletContext, packagePath + relativePath);
+		}
+		else {
+			return new ServletContextResource(this.servletContext, relativePath);
+		}
+	}
+
+	public String getFilename() {
+		return new File(this.path).getName();
+	}
+
 	public String getDescription() {
 		return "resource [" + this.path + "] of ServletContext";
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof ServletContextResource) {
+			ServletContextResource otherRes = (ServletContextResource) obj;
+			return (this.servletContext.equals(otherRes.servletContext) && this.path.equals(otherRes.path));
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return this.path.hashCode();
 	}
 
 }

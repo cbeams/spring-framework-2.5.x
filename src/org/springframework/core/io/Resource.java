@@ -61,6 +61,20 @@ public interface Resource extends InputStreamSource {
 	File getFile() throws IOException;
 
 	/**
+	 * Create a resource relative to this resource.
+	 * @param relativePath the relative path (relative to this resource)
+	 * @return the resource handle for the relative resource
+	 * @throws IOException if the relative resource cannot be determined
+	 */
+	Resource createRelative(String relativePath) throws IOException;
+
+	/**
+	 * Return a filename for this resource, i.e. typically the last
+	 * part of the path: for example, "myfile.txt".
+	 */
+	String getFilename();
+
+	/**
 	 * Return a description for this resource,
 	 * to be used for error output when working with the resource.
 	 * <p>Implementations are also encouraged to return this value

@@ -72,8 +72,28 @@ public class UrlResource extends AbstractResource {
 		}
 	}
 
+	public Resource createRelative(String relativePath) throws MalformedURLException {
+		if (relativePath.startsWith("/")) {
+			relativePath = relativePath.substring(1);
+		}
+		return new UrlResource(new URL(this.url, relativePath));
+	}
+
+	public String getFilename() {
+		return new File(this.url.getFile()).getName();
+	}
+
 	public String getDescription() {
 		return "URL [" + this.url + "]";
+	}
+
+	public boolean equals(Object obj) {
+		return (obj == this ||
+		    (obj instanceof UrlResource && this.url.equals(((UrlResource) obj).url)));
+	}
+
+	public int hashCode() {
+		return this.url.hashCode();
 	}
 
 }

@@ -84,6 +84,22 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation throws a FileNotFoundException, assuming
+	 * that relative resources cannot be created for this resource.
+	 */
+	public Resource createRelative(String relativePath) throws IOException {
+		throw new FileNotFoundException("Cannot create a relative resource for " + getDescription());
+	}
+
+	/**
+	 * This implementation always throws IllegalStateException,
+	 * assuming that the resource does not carry a filename.
+	 */
+	public String getFilename() throws IllegalStateException {
+		throw new IllegalStateException(getDescription() + " does not carry a filename");
+	}
+
+	/**
 	 * This implementation returns the description of this resource.
 	 * @see #getDescription
 	 */
@@ -96,7 +112,8 @@ public abstract class AbstractResource implements Resource {
 	 * @see #getDescription
 	 */
 	public boolean equals(Object obj) {
-		return (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription()));
+		return (obj == this ||
+		    (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
 	}
 
 	/**

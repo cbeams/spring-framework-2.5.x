@@ -65,8 +65,31 @@ public class FileSystemResource extends AbstractResource {
 		return file;
 	}
 
+	public Resource createRelative(String relativePath) {
+		File parent = this.file.getParentFile();
+		if (parent != null) {
+			return new FileSystemResource(new File(parent, relativePath));
+		}
+		else {
+			return new FileSystemResource(relativePath);
+		}
+	}
+
+	public String getFilename() {
+		return this.file.getName();
+	}
+
 	public String getDescription() {
 		return "file [" + this.file.getAbsolutePath() + "]";
+	}
+
+	public boolean equals(Object obj) {
+		return (obj == this ||
+		    (obj instanceof FileSystemResource && this.file.equals(((FileSystemResource) obj).file)));
+	}
+
+	public int hashCode() {
+		return this.file.hashCode();
 	}
 
 }

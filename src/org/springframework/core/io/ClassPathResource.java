@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * Resource implementation for class path resources.
  * Uses either the Thread context class loader or a given
@@ -111,8 +113,41 @@ public class ClassPathResource extends AbstractResource {
 		return new File(URLDecoder.decode(url.getFile()));
 	}
 
+	public Resource createRelative(String relativePath) {
+		int packageIndex = this.path.indexOf('/');
+		if (packageIndex != -1) {
+			String packagePath = this.path.substring(0, packageIndex);
+			if (!relativePath.startsWith("/")) {
+				packagePath += "/";
+			}
+			return new ClassPathResource(packagePath + relativePath);
+		}
+		else {
+			return new ClassPathResource(relativePath);
+		}
+	}
+
+	public String getFilename() {
+		return new File(this.path).getName();
+	}
+
 	public String getDescription() {
 		return "class path resource [" + this.path + "]";
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof ClassPathResource) {
+			ClassPathResource otherRes = (ClassPathResource) obj;
+			return (this.path.equals(otherRes.path) && ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return this.path.hashCode();
 	}
 
 }
