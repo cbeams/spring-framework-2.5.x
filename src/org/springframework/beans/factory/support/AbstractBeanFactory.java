@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.25 2003-11-25 13:01:33 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.26 2003-11-26 09:57:24 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -788,7 +788,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * the value must be placed in a list.
 	 */
 	private Object resolveValueIfNecessary(String beanName, String argName, Object value) throws BeansException {
-		// NWe must check each PropertyValue to see whether it
+		// We must check each PropertyValue to see whether it
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
 		if (value instanceof RuntimeBeanReference) {
@@ -820,7 +820,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	private Object resolveReference(String beanName, String argName, RuntimeBeanReference ref) throws BeansException {
 		try {
 			// Try to resolve bean reference
-			logger.debug("Resolving reference from " + argName + " in bean '" +
+			logger.debug("Resolving reference from '" + argName + "' in bean '" +
 			             beanName + "' to bean '" + ref.getBeanName() + "'");
 			Object bean = getBean(ref.getBeanName());
 			// Create a new PropertyValue object holding the bean reference
@@ -828,40 +828,32 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		catch (BeansException ex) {
 			throw new FatalBeanException("Can't resolve reference to bean '" + ref.getBeanName() +
-																	 "' while setting " + argName + " on bean '" + beanName + "'", ex);
+																	 "' while setting '" + argName + "' on bean '" + beanName + "'", ex);
 		}
-	}
-
-	/**
-	 * For each element in the ManagedMap, resolve references if necessary.
-	 * Allow ManagedLists as map entries.
-	 */
-	private ManagedMap resolveManagedMap(String beanName, String argName, ManagedMap mm) throws BeansException {
-		Iterator keys = mm.keySet().iterator();
-		while (keys.hasNext()) {
-			Object key = keys.next();
-			Object value = mm.get(key);
-			if (value instanceof RuntimeBeanReference) {
-				mm.put(key, resolveReference(beanName, argName, (RuntimeBeanReference) value));
-			}
-			else if (value instanceof ManagedList) {
-				// An entry may be a ManagedList, in which case we may need to resolve references
-				mm.put(key, resolveManagedList(beanName, argName, (ManagedList) value));
-			}
-		}	// for each key in the managed map
-		return mm;
 	}
 
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private ManagedList resolveManagedList(String beanName, String argName, ManagedList ml) throws BeansException {
-		for (int j = 0; j < ml.size(); j++) {
-			if (ml.get(j) instanceof RuntimeBeanReference) {
-				ml.set(j, resolveReference(beanName, argName, (RuntimeBeanReference) ml.get(j)));
-			}
+	private List resolveManagedList(String beanName, String argName, ManagedList ml) throws BeansException {
+		List resolved = new ArrayList();
+		for (int i = 0; i < ml.size(); i++) {
+			resolved.add(resolveValueIfNecessary(beanName, argName + "[" + i + "]", ml.get(i)));
 		}
-		return ml;
+		return resolved;
+	}
+
+	/**
+	 * For each element in the ManagedMap, resolve reference if necessary.
+	 */
+	private Map resolveManagedMap(String beanName, String argName, ManagedMap mm) throws BeansException {
+		Map resolved = new HashMap();
+		Iterator keys = mm.keySet().iterator();
+		while (keys.hasNext()) {
+			Object key = keys.next();
+			resolved.put(key, resolveValueIfNecessary(beanName, argName + "[" + key + "]", mm.get(key)));
+		}
+		return resolved;
 	}
 
 	/**

@@ -30,7 +30,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.20 2003-11-22 15:53:50 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.21 2003-11-26 09:58:12 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -220,9 +220,34 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(friends.size() == 2);
 
 		assertTrue("First friend must be jen, not " + friends.get(0),
-			friends.get(0).equals(jen));
-		assertTrue(friends.get(1).equals(dave));
+			friends.get(0) == jen);
+		assertTrue(friends.get(1) == dave);
 		// Should be ordered
+	}
+
+	public void testRefSubelementsBuildCollectionWithPrototypes() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+
+		TestBean jen = (TestBean) xbf.getBean("pJenny");
+		TestBean dave = (TestBean) xbf.getBean("pDavid");
+		TestBean rod = (TestBean) xbf.getBean("pRod");
+		List friends = (List) rod.getFriends();
+		assertTrue(friends.size() == 2);
+		assertTrue("First friend must be jen, not " + friends.get(0),
+			friends.get(0).toString().equals(jen.toString()));
+		assertTrue("Jen not same instance", friends.get(0) != jen);
+		assertTrue(friends.get(1).toString().equals(dave.toString()));
+		assertTrue("Dave not same instance", friends.get(1) != dave);
+
+		TestBean rod2 = (TestBean) xbf.getBean("pRod");
+		List friends2 = (List) rod2.getFriends();
+		assertTrue(friends2.size() == 2);
+		assertTrue("First friend must be jen, not " + friends2.get(0),
+			friends2.get(0).toString().equals(jen.toString()));
+		assertTrue("Jen not same instance", friends2.get(0) != friends.get(0));
+		assertTrue(friends2.get(1).toString().equals(dave.toString()));
+		assertTrue("Dave not same instance", friends2.get(1) != friends.get(1));
 	}
 
 	public void testRefSubelementsBuildCollectionFromSingleElement() throws Exception {
@@ -320,7 +345,25 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(hasMap.getMap().size() == 2);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
-		assertTrue(hasMap.getMap().get("jenny").equals(jenny));
+		assertTrue(hasMap.getMap().get("jenny") == jenny);
+	}
+
+	public void testMapWithLiteralsAndPrototypeReferences() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+
+		TestBean jenny = (TestBean) xbf.getBean("pJenny");
+		HasMap hasMap = (HasMap) xbf.getBean("pMixedMap");
+		assertTrue(hasMap.getMap().size() == 2);
+		assertTrue(hasMap.getMap().get("foo").equals("bar"));
+		assertTrue(hasMap.getMap().get("jenny").toString().equals(jenny.toString()));
+		assertTrue("Not same instance", hasMap.getMap().get("jenny") != jenny);
+
+		HasMap hasMap2 = (HasMap) xbf.getBean("pMixedMap");
+		assertTrue(hasMap2.getMap().size() == 2);
+		assertTrue(hasMap2.getMap().get("foo").equals("bar"));
+		assertTrue(hasMap2.getMap().get("jenny").toString().equals(jenny.toString()));
+		assertTrue("Not same instance", hasMap2.getMap().get("jenny") != hasMap.getMap().get("jenny"));
 	}
 
 	public void testMapWithLiteralsReferencesAndList() throws Exception {

@@ -29,6 +29,31 @@
 		</property>
 	</bean>
 	
+	<bean id="pJenny" class="org.springframework.beans.TestBean" singleton="false">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse">
+		<!-- Could use id and href -->
+			<ref local="david"/>
+		</property>
+	</bean>
+
+	<bean id="pDavid" class="org.springframework.beans.TestBean" singleton="false">
+		<property name="name"><value>David</value></property>
+		<property name="age"><value>27</value></property>
+	</bean>
+
+	<bean id="pRod" class="org.springframework.beans.TestBean" singleton="false">
+		<property name="name"><value>Rod</value></property>
+		<property name="age"><value>32</value></property>
+		<property name="friends">
+			<list>
+				<ref local="pJenny"/>
+				<ref local="pDavid"/>
+			</list>
+		</property>
+	</bean>
+
 	<!--
 		Try setting a collection property to a single value
 	-->
@@ -101,7 +126,16 @@
 		</property>
 	</bean>
 	
-	<bean id="mixedMapWithList" class="org.springframework.beans.factory.HasMap">	
+	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" singleton="false">
+		<property name="map">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="jenny"><ref local="pJenny"/></entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="mixedMapWithList" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>
 				<entry key="foo"><value>bar</value></entry>
