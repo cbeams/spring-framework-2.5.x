@@ -5,11 +5,14 @@
 
 package org.springframework.apptests.petclinic;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.apptests.AbstractTestCase;
+import org.springframework.jdbc.core.*;
 
 import com.meterware.httpunit.*;
 
@@ -24,13 +27,14 @@ import com.meterware.httpunit.*;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.2 2003-12-22 00:38:43 davison Exp $
+ * @version $Id: AllTests.java,v 1.3 2004-01-05 00:27:44 davison Exp $
  */
 public class AllTests extends AbstractTestCase {
 
 	private WebConversation wc;
 	private WebResponse resp;
 	private WebForm form;
+	
 	
     /**
      * Constructor for AllTests.
@@ -135,7 +139,13 @@ public class AllTests extends AbstractTestCase {
 			resp = form.submit();
 			owner = resp.getTables()[0].asText();
 			assertTrue("Phone number not updated as expected", owner[3][1].indexOf("9471555806") > -1);
-
+			
+			// check backend update
+			jdbcTemplate.query("SELECT * FROM OWNERS WHERE ID=2", new RowCallbackHandler() {
+				public void processRow(ResultSet rs) throws SQLException {
+					assertEquals("Expected phone number for Betty Davis to be amended in DB table", rs.getString("TELEPHONE"), "9471555806");
+				}
+			});
 		
 		} catch (Exception e) {
 			fail("Exception: " + e);
@@ -176,6 +186,13 @@ public class AllTests extends AbstractTestCase {
 			assertTrue(resp.getForms().length > 1);
 			html = resp.getText();
 			assertTrue(html.indexOf("Sybil") > -1);
+			
+			// check backend update
+			jdbcTemplate.query("SELECT * FROM PETS WHERE ID=2", new RowCallbackHandler() {
+				public void processRow(ResultSet rs) throws SQLException {
+					assertEquals("Expected pet name to be amended in DB table", rs.getString("NAME"), "Sybil");
+				}
+			});
 		
 		} catch (Exception e) {
 			fail("Exception: " + e);
@@ -208,6 +225,14 @@ public class AllTests extends AbstractTestCase {
 		
 			html = resp.getText();
 			assertTrue(html.indexOf("test pet visit") > -1);
+			
+			// check backend update : use ResultSetExtractor for control over 0 rows returned
+			jdbcTemplate.doWithResultSetFromStaticQuery("SELECT * FROM VISITS WHERE PET_ID=2", new ResultSetExtractor() {
+				public void extractData(ResultSet rs) throws SQLException {
+					assertTrue("No visits found for pet with id=2", rs.next());
+					assertEquals("Expected test pet visit to be in DB table", rs.getString("DESCRIPTION"), "test pet visit");
+				}
+			 });			
 	
 		} catch (Exception e) {
 			fail("Exception: " + e);

@@ -6,11 +6,14 @@
 package org.springframework.apptests.jpetstore;
 
 
-import org.springframework.apptests.AbstractTestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import com.meterware.httpunit.*;
+import org.springframework.apptests.AbstractTestCase;
+
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebForm;
+import com.meterware.httpunit.WebResponse;
 
 
 
@@ -23,7 +26,7 @@ import com.meterware.httpunit.*;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.3 2004-01-01 13:44:21 davison Exp $
+ * @version $Id: AllTests.java,v 1.4 2004-01-05 00:27:44 davison Exp $
  */
 public class AllTests extends AbstractTestCase {
 
@@ -31,16 +34,14 @@ public class AllTests extends AbstractTestCase {
 	private WebResponse resp;
 	private WebForm form;
 	
-	private ClassPathXmlApplicationContext ctx;
-	private JdbcTemplate jdbcTemplate;
-	
+		
     /**
      * Constructor for AllTests.
      * @param arg0
      */
     public AllTests(String arg0) {
         super(arg0);  
-		wc = new WebConversation();      
+		wc = new WebConversation();
     }
     
     /**
@@ -135,15 +136,44 @@ public class AllTests extends AbstractTestCase {
 			// finish up
 			resp = wc.getResponse( shopRoot + "newOrder.do?_finish=true");
 			html = resp.getText();
-			assertTrue("Expected order number confirmation", html.indexOf("Order #1000") > -1 );
+			assertTrue("Expected order number confirmation for order 1000", html.indexOf("Order #1000") > -1 );
 			
-			//TODO verify database tables look as expected
+			//verify database tables look as expected
+			jdbcTemplate.query("SELECT * FROM ORDERS", new org.springframework.jdbc.core.RowCallbackHandler() {
+				int count = 0;
+				public void processRow(ResultSet rs) throws SQLException {
+					if (++count == 1) {
+						assertEquals("Expected order #1000 in ORDERS table", rs.getInt("ORDERID"), 1000);
+						assertEquals("Expected j2ee as USERID in ORDERS table", rs.getString("USERID"), "j2ee");
+					}
+				}
+			});
 			
+			jdbcTemplate.query("SELECT * FROM INVENTORY WHERE ITEMID='EST-4'", new org.springframework.jdbc.core.RowCallbackHandler() {
+				public void processRow(ResultSet rs) throws SQLException {
+					assertEquals("Expected inventory for EST-4 to be 9998", rs.getInt("QTY"), 9998);
+				}
+			});
 						
 		} catch (Exception e) {
 			fail("Exception: " + e);
 		}
     }
     
-
+	/**
+	 * search
+	 */
+	public void testSearch() {
+		try {
+			resp = wc.getResponse( testServer + "/jpetstore/" );
+			form = resp.getForms()[0];
+			form.setParameter("keyword", "koi");
+			resp = form.submit();
+			String[][] srchList = resp.getTables()[2].asText();
+			assertEquals("Expected to find koi in search results", "Koi", srchList[1][2]);
+	                
+		} catch (Exception e) {
+			fail("Exception: " + e);
+		}
+	}
 }

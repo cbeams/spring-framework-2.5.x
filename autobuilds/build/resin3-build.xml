@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: resin3-build.xml,v 1.2 2003-12-30 02:17:55 davison Exp $
+	$Id: resin3-build.xml,v 1.3 2004-01-05 00:29:25 davison Exp $
 -->
 <project name="autobuilds-resin3" basedir="." default="usage">
 
@@ -75,7 +75,7 @@ autobuilds directory for information.
 	-->
 	<target name="deploy" depends="extract-server">
 		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
-			<fileset dir="${spring.root.dir}/samples/${target.app}/dist">
+			<fileset dir="${spring.samples.dir}/${target.app}/dist">
 				<include name="*" />
 				<exclude name="**/autobuild*" />
 			</fileset>
@@ -119,18 +119,8 @@ autobuilds directory for information.
 		<echo message="##  ----------------------------------------------------------------" />
 		<echo message="##  Stopping server ${target.server}" />
 		<echo message="##  ----------------------------------------------------------------" />
-		<java 
-			classname="com.caucho.server.resin.Resin"
-			output="${reports.dir}/${target.server}_server.log"
-			fork="true"
-			dir="${servers.install.dir}/${appserver.distname}">
 		
-			<jvmarg value="-Dresin.home=${servers.install.dir}/${appserver.distname}" />
-      		<jvmarg value="-Djava.util.logging.manager=com.caucho.log.LogManagerImpl" />
-      		
-      		<classpath refid="server-classpath" />
-      		
-      	</java>
+		<echo message="Unable to automatically stop resin servers.  Please Ctrl-C in the command window that started the build"/>
 	</target>
 	
 </project>

@@ -9,13 +9,17 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.3 2003-12-24 20:18:21 davison Exp $
+	$Id: build.xml,v 1.4 2004-01-05 00:29:25 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
+	
 	<!-- autobuilds properties - these should not need amending -->
 	<property name="autobuilds.dir" value=".." />
 	<property name="spring.root.dir" value="../.." />
+	<property name="spring.samples.dir" value="${spring.root.dir}/samples"/>
+	<property name="spring.lib.dir" value="${spring.root.dir}/lib"/>
+	<property name="spring.dist.dir" value="${spring.root.dir}/dist"/>
 	<property name="target.root.dir" value="${spring.root.dir}/target/autobuilds" />
 	<property name="servers.conf.dir" value="${autobuilds.dir}/conf/servers" />
 	<property name="servers.install.dir" value="${target.root.dir}/server-installs" />
@@ -23,7 +27,6 @@
 	<property name="bin.dir" value="${target.root.dir}/classes" />
 	<property name="reports.dir" value="${target.root.dir}/reports" />
 	<property name="dev.mail.list" value="springframework-developer@lists.sourceforge.net" />
-	<property name="autobuilds.server.port" value="13084" />
 	
 	<!-- build.properties is local per user -->
 	<property file="build.properties"/>
@@ -33,23 +36,21 @@
 	<!--
 	**************************************************************************
 	
-	the following properties should all be in a local build.properties in
+	the following properties may all be in a local build.properties in
 	the same directory as this file where their values will take precedence.
 	
 	**************************************************************************
 	-->
 
 	<!-- 
-		rsh program to use when accessing Spring's CVS 
-		repository - usually ssh 
+		rsh program to use when accessing Spring's CVS repository - usually ssh 
 	-->
 	<property name="cvs.rsh" value="ssh" />
 	
 	<!-- 
-		how long to give the app server after starting it before 
-		running the tests (seconds)
+		how long to give the app server after starting it before running the tests (seconds)
 	-->
-	<property name="server.timewait" value="15" />
+	<property name="autobuilds.server.timewait" value="15" />
 	
 	<!-- 
 		directory where the server tarballs are stored locally.  If the relevant 
@@ -75,6 +76,20 @@
 	<property name="resin3.tarball" value="resin-3.0.4.tar.gz" />
 	
 	<!--
+		server ports
+	-->
+	<property name="autobuilds.server.http.port" value="13084" />
+	<property name="autobuilds.server.hsql.port" value="9001"/>
+	
+	<!--
+		jdbc properties.  The driver must be in Ant's classpath ($ANT_HOME/lib)
+	-->
+	<property name="autobuilds.jdbc.driver" value="org.hsqldb.jdbcDriver"/>
+	<property name="autobuilds.jdbc.url" value="jdbc:hsqldb:hsql://localhost:9001"/>
+	<property name="autobuilds.jdbc.username" value="sa"/>
+	<property name="autobuilds.jdbc.password" value=""/>
+	
+	<!--
 	**************************************************************************
 	-->
 	
@@ -87,14 +102,26 @@
 	-->
 	<path id="test-classpath">
 		<!-- spring.jar will be built as part of any autobuilds build -->
-		<fileset dir="${spring.root.dir}/dist">
+		<fileset dir="${spring.dist.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
-		<fileset dir="${spring.root.dir}/lib">
+		<fileset dir="${spring.lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
 	
+	
+	<!--
+		init
+	-->
+	<target name="init">
+		<tstamp>		
+	        <format property="TODAY_UK" pattern="yyyy-MM-dd" locale="en"/>
+	    </tstamp>
+	    
+	    <property name="autobuilds.unittest.outfile" value="${target.app}_${target.server}_unittests_${TODAY_UK}"/>
+		
+	</target>
 	
 	
 	<!--
@@ -102,34 +129,33 @@
 		
 		output the available targets in this build file
 	-->
-	<target name="usage">		
+	<target name="usage" depends="init">		
         <echo>
 Spring Framework
 -----------------------------------------------------------------------------
 
 ${ant.file}
 	
-autobuilds build file - automatic deployment and testing 
-of Spring sample applications.
+autobuilds build file - automatic deployment and testing of Spring sample 
+applications.
 
 This build file should be called from a shell script that sets the correct
 command line parameters (properties) for this build to operate as designed.
+See the script 'autobuild' or 'autobuild.bat' for info.
 
 -----------------------------------------------------------------------------
         	
-Usage (available targets):
-
-main            --> kick off the main autobuild.  Expects properties 
-                    target.app and target.server to have been set on the 
-                    command line or in build.properties file.
+Usage (targets that can be run outside of the scripts):
                     
 spring-update   --> do a CVS update of the Spring source tree (only).  This 
                     target expects that a CVS checkout has already been 
                     performed of the Spring project and a property called
                     cvs.update must be set.
-        	                    
-realclean       --> delete ALL server installations AND downloads
-                    delete all build products
+                    
+clean           --> remove all build products and server installs, but leave
+                    logs and test reports intact.
+                    
+realclean       --> delete ALL build products and sandbox.
 
 =============================================================================
         </echo>
@@ -143,37 +169,31 @@ realclean       --> delete ALL server installations AND downloads
 		
 		workflow task for autobuilds
 	-->
-	<target name="main" depends="setup,taskdefs">
-		<tstamp>		
-            <format property="TODAY_UK" pattern="" locale="en"/>
-        </tstamp>
+	<target name="main" depends="setup,taskdefs,init">
+		
 		<echo message="     #  ----------------------------------------------------------------" />
 		<echo message="     #" />
 		<echo message="     #  Spring Autobuilds - automatic application deployment and testing" />			
 		<echo message="     # " />
-		<echo message="     #  This build is starting with the following properties set:" />
-		<echo message="     # " />
-		<echoproperties />
-		<echo message="     # " />
+		<echo message="     #  target application: ${target.app}" />
+		<echo message="     #  target server: ${target.server}" />
 		<echo message="     #  ----------------------------------------------------------------" />
 		
 		<antcall target="spring-update" />
-		
 		<ant dir="${spring.root.dir}" target="build" inheritall="false" />
 		<ant dir="${spring.root.dir}" target="fulljar" inheritall="false" />
-		
-		<ant dir="${spring.root.dir}/samples/${target.app}" target="dist" inheritall="false" />
+		<ant dir="${spring.samples.dir}/${target.app}" target="dist" inheritall="false" />
 		
 		<ant dir="." antfile="${target.server}-build.xml" target="deploy" />
 		
-		<ant dir="${spring.root.dir}/samples/${target.app}" target="clean" inheritall="false" />	
+		<ant dir="${spring.samples.dir}/${target.app}" target="clean" inheritall="false" />	
 		
 		<parallel>
 			<antcall target="start-hsql" />
 			<ant dir="." antfile="${target.server}-build.xml" target="start-server" />
 			<sequential>
-				<echo message="waiting ${server.timewait} seconds for server to warmup..."/>
-				<sleep seconds="${server.timewait}"/>
+				<echo message="waiting ${autobuilds.server.timewait} seconds for server to warmup..."/>
+				<sleep seconds="${autobuilds.server.timewait}"/>
 				
 				<antcall target="tests"/>
 				
@@ -182,6 +202,8 @@ realclean       --> delete ALL server installations AND downloads
 			</sequential>
 		</parallel>
 		
+		<!-- see if the junit tests failed -->
+		<antcall target="testchecks" />
 	</target>
 	
 	
@@ -227,7 +249,7 @@ realclean       --> delete ALL server installations AND downloads
 		compile classes used in the deployment and testing
 	-->
 	<target name="build">
-		<javac srcdir="${src.dir}" destdir="${bin.dir}">
+		<javac  srcdir="${src.dir}" destdir="${bin.dir}">
 			<classpath refid="test-classpath"/>
 		</javac>
 	</target>
@@ -241,18 +263,8 @@ realclean       --> delete ALL server installations AND downloads
 	-->
 	<target name="taskdefs" depends="build">
 		<taskdef 
-			name="spring-runtests" 
-			classname="org.springframework.autobuilds.ant.AppTestLauncher"
-			classpath="${bin.dir}">
-			
-			<classpath refid="test-classpath"/>
-			<classpath path="${bin.dir}" />
-		</taskdef>
-			
-		<taskdef 
 			name="spring-killhsql" 
-			classname="org.springframework.autobuilds.ant.HsqlShutdown"
-			classpath="${bin.dir}">
+			classname="org.springframework.autobuilds.ant.HsqlShutdown">
 			
 			<classpath refid="test-classpath"/>
 			<classpath path="${bin.dir}" />
@@ -271,11 +283,11 @@ realclean       --> delete ALL server installations AND downloads
 		<echo message="#  Starting HSQLDB" />
 		<echo message="#  ----------------------------------------------------------------" />		
 		<copy todir="${target.root.dir}" overwrite="true">
-			<fileset dir="${spring.root.dir}/samples/${target.app}/db">
+			<fileset dir="${spring.samples.dir}/${target.app}/db">
 				<include name="**/${target.app}.*" />
 			</fileset>
 		</copy>
-		
+				
 		<java 
 			classname="org.hsqldb.Server"
 			output="${reports.dir}/hsqldb.log"
@@ -286,7 +298,7 @@ realclean       --> delete ALL server installations AND downloads
 			<arg value="${target.app}"/>
 			
       		<classpath>
-      			<fileset dir="${spring.root.dir}/lib/hsqldb">
+      			<fileset dir="${spring.lib.dir}/hsqldb">
       				<include name="**/*.jar" />
       			</fileset>
    			</classpath>      		
@@ -304,7 +316,25 @@ realclean       --> delete ALL server installations AND downloads
 		<echo message="#  ----------------------------------------------------------------" />
 		<echo message="#  Starting unit tests for ${target.app}" />
 		<echo message="#  ----------------------------------------------------------------" />
-		<spring-runtests application="${target.app}" port="${autobuilds.server.port}"/>
+		<!--
+		<spring-runtests 
+			application="${target.app}" 
+			port="${autobuilds.server.http.port}"/>
+		-->
+		<junit 
+			failureproperty="junit.failure"
+			printsummary="true"
+			errorproperty="junit.failure"
+		>
+			<formatter type="xml" />
+			<test 
+				name="org.springframework.apptests.${target.app}.AllTests"
+				todir="${reports.dir}"
+				outfile="${autobuilds.unittest.outfile}"
+			/>
+			<classpath refid="test-classpath"/>
+			<classpath path="${bin.dir}" />
+		</junit>
 	</target>
 	
 	
@@ -319,8 +349,9 @@ realclean       --> delete ALL server installations AND downloads
 		<echo message="#  Stopping HSQLDB" />
 		<echo message="#  ----------------------------------------------------------------" />	
 		<spring-killhsql
-			host="localhost"
-			port="9001"
+			url="${autobuilds.jdbc.url}"
+			user="${autobuilds.jdbc.username}"
+			password="${autobuilds.jdbc.password}"	
 		/>
 	</target>
 	
@@ -338,12 +369,44 @@ realclean       --> delete ALL server installations AND downloads
 	
 	
 	<!--
+		testchecks
+		
+		see if the unit tests failed or errored and take appropriate action
+	-->
+	<target name="testchecks" if="junit.failure">
+		<mail 
+			from="autobuilds@springframework.org"
+			tolist="darren@davison.uk.net"
+			mailhost="bacall.davison.uk.net"
+			subject="Spring Autobuilds Failure Report"
+		>
+			<fileset dir="${reports.dir}">
+				<include name="**/${autobuilds.unittest.outfile}*"/>
+			</fileset>
+		</mail>
+	</target>
+	
+	<!--
 		clean
 		
-		removes all classes, server installs and reports
+		empties all classes, server installs
 	-->
 	<target name="clean">
-		<delete dir="${target.root.dir}" />
+		<delete dir="${bin.dir}" />
+		<delete dir="${servers.install.dir}" />
+		<delete dir="${target.root.dir}/hsqldb" />
+		<antcall target="setup"/>
 	</target>	
+	
+	
+	
+	<!--
+		realclean
+		
+		removes autobuilds sandbox entirely
+	-->
+	<target name="realclean">
+		<delete dir="${target.root.dir}" />
+	</target>
 	
 </project>

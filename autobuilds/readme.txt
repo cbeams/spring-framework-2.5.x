@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.3 2004-01-01 13:44:35 davison Exp $
+ * @version $Id: readme.txt,v 1.4 2004-01-05 00:29:03 davison Exp $
  */
 
 
@@ -224,7 +224,10 @@ dependencies..
     [ii]  appname.properties
     [iii] appname.data
 
-    see petclinic or jpetstore for examples of this.
+    see SpringStore for examples of this.
+    
+5)  a file called .autobuilds must exist in the root of the sample app
+
 
 Having satisfied these dependencies, application support can be added to the
 autobuilds scripts.  If the sample app uses HSQL, it will need to be added as
@@ -271,10 +274,8 @@ or if you'd like to see something moved up this list.
 Items near the top are likely to be imminent.
 
  - jboss3 / wls8 server builds added
- - httpunit tests for countries / tiles-example completed
  - make anonymous cvs work
  - http downloads implemented
- - skip tests if class not available
  - email options for build logs;
    - configurable address/server
    - one or all logs, or just a unit test summary
