@@ -56,7 +56,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	private static final long serialVersionUID = 3258688806151469104L;
 
-	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
+	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	/**
 	 * The unique, random machine-generated flow execution identifier.

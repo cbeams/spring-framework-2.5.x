@@ -64,7 +64,7 @@ public class FlowSession implements MutableFlowModel, Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
-	protected final Log logger = LogFactory.getLog(FlowSession.class);
+	protected static final Log logger = LogFactory.getLog(FlowSession.class);
 
 	/**
 	 * The flow definition (a singleton)
