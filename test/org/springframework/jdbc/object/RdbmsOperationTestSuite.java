@@ -27,8 +27,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import com.mockobjects.sql.MockDataSource;
-
 /**
  * @author Trevor D. Cook
  */
@@ -39,36 +37,36 @@ public class RdbmsOperationTestSuite extends TestCase {
 		try {
 			operation.compile();
 			fail("Shouldn't allow compiling without sql statement");
- 
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
 
 	public void testSetTypeAfterCompile() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
-		operation.setDataSource(new MockDataSource());
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
 		try {
 			operation.setTypes(new int[] {Types.INTEGER });
 			fail("Shouldn't allow setting parameters after compile");
-
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
 
 	public void testDeclareParameterAfterCompile() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
-		operation.setDataSource(new MockDataSource());
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.compile();
 		try {
 			operation.declareParameter(new SqlParameter(Types.INTEGER));
 			fail("Shouldn't allow setting parameters after compile");
- 
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
@@ -78,16 +76,15 @@ public class RdbmsOperationTestSuite extends TestCase {
 		operation.setSql("select * from mytable");
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
-			operation.validateParameters((Object[]) null);
+			operation.validateParameters(null);
 			fail("Shouldn't validate without enough parameters"); 
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
-	
-	
+
 	public void testOperationConfiguredViaJdbcTemplateMustGetDataSource() throws Exception {
-		JdbcTemplate t = new JdbcTemplate();
 		try {
 			TestRdbmsOperation operation = new TestRdbmsOperation();
 			operation.setSql("foo");
@@ -107,14 +104,15 @@ public class RdbmsOperationTestSuite extends TestCase {
 		try {
 			operation.validateParameters(new Object[] { new Integer(1), new Integer(2) });
 			fail("Shouldn't validate with too many parameters"); 
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
 
 	public void testCompileTwice() {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
-		operation.setDataSource(new MockDataSource());
+		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("select * from mytable");
 		operation.setTypes(null);
 		operation.compile();

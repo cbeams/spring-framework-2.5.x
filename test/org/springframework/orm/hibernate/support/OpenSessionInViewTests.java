@@ -17,17 +17,12 @@
 package org.springframework.orm.hibernate.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.mockobjects.servlet.MockFilterConfig;
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
@@ -35,6 +30,7 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import org.easymock.MockControl;
 
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -177,22 +173,9 @@ public class OpenSessionInViewTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockFilterConfig filterConfig = new MockFilterConfig() {
-			public Enumeration getInitParameterNames() {
-				return Collections.enumeration(new ArrayList());
-			}
-		};
-		filterConfig.setupGetServletContext(wac.getServletContext());
-
-		MockFilterConfig filterConfig2 = new MockFilterConfig() {
-			public Enumeration getInitParameterNames() {
-				return Collections.enumeration(Arrays.asList(new String[] {"sessionFactoryBeanName"}));
-			}
-			public String getInitParameter(String s) {
-				return ("sessionFactoryBeanName".equals(s) ? "mySessionFactory" : null);
-			}
-		};
-		filterConfig2.setupGetServletContext(wac.getServletContext());
+		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
+		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
+		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
