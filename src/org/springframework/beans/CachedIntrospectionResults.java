@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * Class to cache PropertyDescriptor information for a Java class.
  * Package-visible; not used by application code.
@@ -27,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 final class CachedIntrospectionResults {
 
@@ -79,19 +78,20 @@ final class CachedIntrospectionResults {
 	 */
 	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
-			logger.debug("Getting BeanInfo for class '" + clazz.getName() + "'");
+			logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
 			beanInfo = Introspector.getBeanInfo(clazz);
 
-			logger.debug("Caching PropertyDescriptors for class '" + clazz.getName() + "'");
+			logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
 			propertyDescriptorMap = new HashMap();
 			// This call is slow so we do it once
 			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
-				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() + "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
+				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
+										 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
 				propertyDescriptorMap.put(pds[i].getName(), pds[i]);
 			}
 
-			logger.debug("Caching MethodDescriptors for class '" + clazz.getName() + "'");
+			logger.debug("Caching MethodDescriptors for class [" + clazz.getName() + "]");
 			methodDescriptorMap = new HashMap();
 			// This call is slow so we do it once
 			MethodDescriptor[] mds = beanInfo.getMethodDescriptors();
@@ -101,7 +101,7 @@ final class CachedIntrospectionResults {
 			}
 		}
 		catch (IntrospectionException ex) {
-			throw new FatalBeanException("Cannot get BeanInfo for object of class '" + clazz.getName() + "'", ex);
+			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + clazz.getName() + "]", ex);
 		}
 	}
 
