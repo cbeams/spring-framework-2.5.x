@@ -9,6 +9,8 @@ Changes in version 1.1 final (16.8.2004)
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
 * fixed "getBeansOfType" check (as used by autowiring) and "isSingleton" for parent bean definitions without class
+* removed "getMethodOverrides" method from BeanDefinition interface, to avoid cyclic package dependencies
+* moved BeanDefinitionHolder class from factory.support to factory.config, to avoid cyclic package dependencies
 * CustomEditorConfigurer and ClassEditor delegate to same ClassUtils.forName method, understanding array class names
 * added FieldRetrievingFactoryBean, for retrieving static fields (and also non-static field values of target objects)
 * factory methods no longer only static: an instance method can be called on a bean named by the factory-bean attribute
