@@ -17,9 +17,8 @@
 package org.springframework.web.context.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -67,7 +66,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @see ServletContextResource
 	 * @see javax.servlet.ServletContext#getResourcePaths
 	 */
-	protected List doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
+	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
 		if (rootDirResource instanceof ServletContextResource) {
 			ServletContextResource scResource = (ServletContextResource) rootDirResource;
 			ServletContext sc = scResource.getServletContext();
@@ -75,7 +74,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 				// Only try the following on Servlet containers >= 2.3:
 				// ServletContext.getResourcePaths is not available before that version.
 				String fullPattern = scResource.getPath() + subPattern;
-				List result = new ArrayList();
+				Set result = new HashSet();
 				doRetrieveMatchingServletContextResources(sc, fullPattern, scResource.getPath(), result);
 				return result;
 			}
@@ -85,18 +84,19 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 
 	/**
 	 * Recursively retrieve ServletContextResources that match the given pattern,
-	 * adding them to the given result list.
+	 * adding them to the given result set.
 	 * @param servletContext the ServletContext to work on
 	 * @param fullPattern the pattern to match against,
 	 * with preprended root directory path
 	 * @param dir the current directory
-	 * @param result the list of matching files to add to
+	 * @param result the Set of matching Resources to add to
 	 * @throws IOException if directory contents could not be retrieved
 	 * @see ServletContextResource
 	 * @see javax.servlet.ServletContext#getResourcePaths
 	 */
 	protected void doRetrieveMatchingServletContextResources(
-			ServletContext servletContext, String fullPattern, String dir, List result) throws IOException {
+			ServletContext servletContext, String fullPattern, String dir, Set result) throws IOException {
+
 		Set candidates = servletContext.getResourcePaths(dir);
 		if (candidates != null) {
 			boolean dirDepthNotFixed = (fullPattern.indexOf("**") != -1);

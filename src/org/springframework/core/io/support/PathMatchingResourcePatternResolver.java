@@ -21,11 +21,10 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -197,14 +196,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		ClassLoader cl = this.classLoader;
 		if (cl == null) {
-			// no class loader specified -> use thread context class loader
+			// No class loader specified -> use thread context class loader.
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		Enumeration resourceUrls = cl.getResources(path);
-		List result = new ArrayList();
+		Set result = new HashSet();
 		while (resourceUrls.hasMoreElements()) {
 			URL url = (URL) resourceUrls.nextElement();
-			result.add(new UrlResource(url));
+			// Use normalized path to avoid multiple entries pointing to the same resource.
+			result.add(new UrlResource(StringUtils.cleanPath(url.toString())));
 		}
 		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}
@@ -224,7 +224,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
 		Resource[] rootDirResources = getResources(rootDirPath);
-		List result = new ArrayList();
+		Set result = new HashSet();
 		for (int i = 0; i < rootDirResources.length; i++) {
 			Resource rootDirResource = rootDirResources[i];
 			if ("jar".equals(rootDirResource.getURL().getProtocol())) {
@@ -272,12 +272,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * via the Ant-style PathMatcher utility.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return the List of matching Resource instances
+	 * @return the Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected List doFindPathMatchingJarResources(Resource rootDirResource, String subPattern) throws IOException {
+	protected Set doFindPathMatchingJarResources(Resource rootDirResource, String subPattern) throws IOException {
 		URLConnection con = rootDirResource.getURL().openConnection();
 		if (!(con instanceof JarURLConnection)) {
 			throw new IOException("Cannot perform jar file search for [" + rootDirResource +
@@ -291,7 +291,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		String rootEntryPath = jarCon.getJarEntry().getName();
 		String jarFileUrlPrefix = "jar:" + jarFileUrl.toExternalForm() + "!/";
-		List result = new LinkedList();
+		Set result = new HashSet();
 		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = (JarEntry) entries.nextElement();
 			String entryPath = entry.getName();
@@ -308,18 +308,18 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * via the Ant-style PathMatcher utility.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return the List of matching Resource instances
+	 * @return the Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
 	 * @see #retrieveMatchingFiles
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected List doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
+	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
 		File rootDir = rootDirResource.getFile().getAbsoluteFile();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
-		List matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-		List result = new ArrayList(matchingFiles.size());
+		Set matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
+		Set result = new HashSet(matchingFiles.size());
 		for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
 			File file = (File) it.next();
 			result.add(new FileSystemResource(file));
@@ -333,10 +333,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param rootDir the directory to start from
 	 * @param pattern the pattern to match against,
 	 * relative to the root directory
-	 * @return the List of matching File instances
+	 * @return the Set of matching File instances
 	 * @throws IOException if directory contents could not be retrieved
 	 */
-	protected List retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
+	protected Set retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
 		if (!rootDir.isDirectory()) {
 			throw new IllegalArgumentException("'rootDir' parameter [" + rootDir + "] does not denote a directory");
 		}
@@ -345,7 +345,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			fullPattern += "/";
 		}
 		fullPattern = fullPattern + StringUtils.replace(pattern, File.separator, "/");
-		List result = new LinkedList();
+		Set result = new HashSet();
 		doRetrieveMatchingFiles(fullPattern, rootDir, result);
 		return result;
 	}
@@ -356,10 +356,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param fullPattern the pattern to match against,
 	 * with preprended root directory path
 	 * @param dir the current directory
-	 * @param result the list of matching files to add to
+	 * @param result the Set of matching File instances to add to
 	 * @throws IOException if directory contents could not be retrieved
 	 */
-	protected void doRetrieveMatchingFiles(String fullPattern, File dir, List result) throws IOException {
+	protected void doRetrieveMatchingFiles(String fullPattern, File dir, Set result) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching directory [" + dir.getAbsolutePath() +
 					"] for files matching pattern [" + fullPattern + "]");
