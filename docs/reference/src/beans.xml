@@ -1247,7 +1247,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
       provides an example for: <programlisting>&lt;beans&gt;
     &lt;bean id="messageSource" 
             class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-        &lt;property name="baseNames"&gt;
+        &lt;property name="basenames"&gt;
             &lt;list&gt;
                 &lt;value&gt;format&lt;/value&gt;
                 &lt;value&gt;exceptions&lt;/value&gt;
