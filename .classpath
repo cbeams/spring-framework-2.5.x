@@ -4,7 +4,7 @@
 	<classpathentry output="target/test-classes" kind="src" path="test"/>
 	<classpathentry output="target/load-classes" kind="src" path="load"/>
 	<classpathentry kind="src" path="samples/countries/src"/>
-	<classpathentry kind="src" path="samples/petclinic/src"/>
+	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
