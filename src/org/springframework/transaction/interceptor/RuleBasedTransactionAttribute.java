@@ -8,6 +8,7 @@ package org.springframework.transaction.interceptor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * The TransactionAttributeEditor property editor creates objects
  * of this class.
  * @since 09-Apr-2003
- * @version $Id: RuleBasedTransactionAttribute.java,v 1.1.1.1 2003-08-14 16:20:40 trisberg Exp $
+ * @version $Id: RuleBasedTransactionAttribute.java,v 1.2 2003-08-18 16:22:09 jhoeller Exp $
  * @author Rod Johnson
  */
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
@@ -61,16 +62,12 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 		int deepest = Integer.MAX_VALUE;
 
 		if (this.rollbackRules != null) {
-			for (Iterator iter = this.rollbackRules.iterator(); iter.hasNext();) {
-				Object next = iter.next();
-				// Ignore elements of unknown type
-				if (next instanceof RollbackRuleAttribute) {
-					RollbackRuleAttribute rule = (RollbackRuleAttribute) next;
-					int depth = rule.getDepth(t);
-					if (depth >= 0 && depth < deepest) {
-						deepest = depth;
-						winner = rule;
-					}
+			for (Iterator it = this.rollbackRules.iterator(); it.hasNext();) {
+				RollbackRuleAttribute rule = (RollbackRuleAttribute) it.next();
+				int depth = rule.getDepth(t);
+				if (depth >= 0 && depth < deepest) {
+					deepest = depth;
+					winner = rule;
 				}
 			}
 		}
@@ -84,6 +81,21 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 		}
 			
 		return !(winner instanceof NoRollbackRuleAttribute);
+	}
+
+	public String toString() {
+		StringBuffer result = getDefinitionDescription();
+		TreeSet rules = new TreeSet();
+		for (Iterator it = rollbackRules.iterator(); it.hasNext();) {
+			RollbackRuleAttribute rule = (RollbackRuleAttribute) it.next();
+			String sign = (rule instanceof NoRollbackRuleAttribute) ? COMMIT_RULE_PREFIX : ROLLBACK_RULE_PREFIX;
+			rules.add(sign + rule.getExceptionName());
+		}
+		for (Iterator it = rules.iterator(); it.hasNext();) {
+			result.append(',');
+			result.append(it.next());
+		}
+		return result.toString();
 	}
 
 }
