@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.35 2004-08-17 16:57:01 colins Exp $
+	$Id: spring-beans.dtd,v 1.36 2004-08-17 21:46:27 jhoeller Exp $
 -->
 
 
@@ -252,9 +252,11 @@
 
 <!--
 	Bean definitions can specify zero or more constructor arguments.
-	They correspond to either a specific index of the constructor argument list
-	or are supposed to be matched generically by type.
 	This is an alternative to "autowire constructor".
+	Arguments correspond to either a specific index of the constructor argument
+	list or are supposed to be matched generically by type.
+	Note: A single generic argument value will just be used once, rather than
+	potentially matched multiple times (as of Spring 1.1).
 	constructor-arg elements are also used in conjunction with the factory-method
 	element to construct beans using static or instance factory methods.
 -->
