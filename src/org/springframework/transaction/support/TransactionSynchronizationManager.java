@@ -134,12 +134,13 @@ public abstract class TransactionSynchronizationManager {
 			resources.set(map);
 		}
 		if (map.containsKey(key)) {
-			throw new IllegalStateException("Already a value for key [" + key + "] bound to thread");
+			throw new IllegalStateException("Already value [" + map.get(key) + "] for key [" + key +
+					"] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
 		map.put(key, value);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound value [" + value + "] for key [" + key + "] to thread [" +
-									 Thread.currentThread().getName() + "]");
+					Thread.currentThread().getName() + "]");
 		}
 	}
 
@@ -152,7 +153,8 @@ public abstract class TransactionSynchronizationManager {
 	public static Object unbindResource(Object key) throws IllegalStateException {
 		Map map = (Map) resources.get();
 		if (map == null || !map.containsKey(key)) {
-			throw new IllegalStateException("No value for key [" + key + "] bound to thread");
+			throw new IllegalStateException(
+					"No value for key [" + key + "] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
 		Object value = map.remove(key);
 		// remove entire ThreadLocal if empty
@@ -161,7 +163,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" +
-									 Thread.currentThread().getName() + "]");
+					Thread.currentThread().getName() + "]");
 		}
 		return value;
 	}
