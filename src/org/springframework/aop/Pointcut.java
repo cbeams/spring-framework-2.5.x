@@ -5,20 +5,14 @@
  
 package org.springframework.aop;
 
-
-
 /**
- * Core Spring pointcut abstraction.
- * A pointcut is composed of ClassFilters and MethodMatchers.
- * Both these basic terms and a Pointcut itself can be combined to build
- * up combinations.
- * 
+ * Core Spring pointcut abstraction. A pointcut is composed of ClassFilters and MethodMatchers.
+ * Both these basic terms and a Pointcut itself can be combined to build up combinations.
  * @author Rod Johnson
- * @version $Id: Pointcut.java,v 1.1 2003-11-11 18:31:51 johnsonr Exp $
+ * @version $Id: Pointcut.java,v 1.2 2003-11-21 22:45:09 jhoeller Exp $
  */
 public interface Pointcut {
 
-	
 	ClassFilter getClassFilter();
 	
 	MethodMatcher getMethodMatcher();
@@ -27,15 +21,18 @@ public interface Pointcut {
 	
 	
 	/**
-	 * Canonical instance that matches everything
+	 * Canonical instance that matches everything.
 	 */
-	public static final Pointcut TRUE = new Pointcut() {
+	Pointcut TRUE = new Pointcut() {
+
 		public ClassFilter getClassFilter() {
 			return ClassFilter.TRUE;
 		}
+
 		public MethodMatcher getMethodMatcher() {
 			return MethodMatcher.TRUE;
 		}
+
 		public String toString() {
 			return "Pointcut.TRUE";
 		}

@@ -10,29 +10,23 @@ import java.lang.reflect.Method;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
-
 /**
  * Static methods useful for manipulating pointcuts.
- * 
  * @author Rod Johnson
- * @version $Id: Pointcuts.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: Pointcuts.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public abstract class Pointcuts {
-	
 	
 	public static Pointcut union(Pointcut a, Pointcut b) {
 		return new ComposablePointcut(a.getClassFilter(), a.getMethodMatcher()).union(b);
 	}
+	
 	public static Pointcut intersection(Pointcut a, Pointcut b) {
 		return new ComposablePointcut(a.getClassFilter(), a.getMethodMatcher()).intersection(b);
 	}
 	
 	/**
-	 * Perform the least expense check for a match
-	 * @param m
-	 * @param targetClass
-	 * @param arguments
-	 * @return
+	 * Perform the least expense check for a match.
 	 */
 	public static boolean matches(Pointcut pc, Method m, Class targetClass, Object[] arguments) {
 		if (pc == Pointcut.TRUE) {
@@ -49,14 +43,10 @@ public abstract class Pointcuts {
 		}
 		return false;
 	}
-	/**
-	 * @param pointcut
-	 * @param pointcut2
-	 * @return
-	 */
+
 	public static boolean equals(Pointcut a, Pointcut b) {
 		return a.getClassFilter() == b.getClassFilter() &&
 				a.getMethodMatcher() == b.getMethodMatcher();
 	}
-}
 
+}

@@ -21,7 +21,7 @@ public class SQLWarningException extends UncategorizedDataAccessException {
 
 	/**
 	 * Constructor for ConnectionFactoryException.
-	 * @param s message
+	 * @param mesg message
 	 * @param ex JDBC warning
 	 */
 	public SQLWarningException(String mesg, SQLWarning ex) {
@@ -30,11 +30,9 @@ public class SQLWarningException extends UncategorizedDataAccessException {
 	
 	/**
 	 * Return the SQLWarning.
-	 * @return the SQLWarning
 	 */
 	public SQLWarning SQLWarning() {
 		return (SQLWarning) getRootCause();
 	}
-
 
 }

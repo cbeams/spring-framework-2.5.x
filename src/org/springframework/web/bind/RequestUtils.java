@@ -9,10 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Parameter extraction methods.
- * This class supports an approach distinct from data binding,
- * in which parameters of specific types are required.
- * This is very useful for simple submissions.
+ * Parameter extraction methods, for an approach distinct from data binding, in which
+ * parameters of specific types are required. This is very useful for simple submissions.
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
@@ -23,7 +21,6 @@ public abstract class RequestUtils {
 	 * Throw a ServletException if the given HTTP request method should be rejected.
 	 * @param request request to check
 	 * @param method method (such as "GET") which should be rejected
-	 * @param method to reject
 	 */
 	public static void rejectRequestMethod(HttpServletRequest request, String method) throws ServletException {
 		if (request.getMethod().equals(method))

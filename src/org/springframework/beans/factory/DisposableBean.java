@@ -12,7 +12,7 @@ package org.springframework.beans.factory;
  * is supposed to dispose all of its singletons on close.
  * @author Juergen Hoeller
  * @since 12.08.2003
- * @see org.springframework.context.ApplicationContext#close
+ * @see org.springframework.context.config.ConfigurableApplicationContext#close
  */
 public interface DisposableBean {
 

@@ -20,19 +20,16 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
 
 /**
  * Helper class featuring methods for Hibernate session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
- * Supports synchronization with JTA transactions via JtaTransactionManager,
- * to allow for proper transactional handling of the JVM-level cache.
  *
- * <p>Used by HibernateTemplate, HibernateInterceptor, and
- * HibernateTransactionManager. Can also be used directly in application
- * code, e.g. in combination with HibernateInterceptor.
+ * <p>Used by HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
+ * Can also be used directly in application code, e.g. in combination with HibernateInterceptor.
  *
  * <p>Note: This class, like all of Spring's Hibernate support, requires
  * Hibernate 2.0 (initially developed with RC1).
@@ -70,6 +67,8 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given factory. Is aware of a respective Session
 	 * bound to the current thread, for example when using HibernateTransactionManager.
 	 * Will always create a new Session else.
+	 * <p>Supports synchronization with JTA transactions via TransactionSynchronizationManager,
+	 * to allow for proper transactional handling of the JVM-level cache.
 	 * <p>Supports setting a Session-level Hibernate entity interceptor that allows
 	 * to inspect and change property values before writing to and reading from the
 	 * database. Such an interceptor can also be set at the SessionFactory level,
@@ -79,6 +78,7 @@ public abstract class SessionFactoryUtils {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
 																	 SQLExceptionTranslator jdbcExceptionTranslator)

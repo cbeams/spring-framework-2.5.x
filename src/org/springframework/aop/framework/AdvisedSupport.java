@@ -15,12 +15,13 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyInterceptor;
-import org.springframework.aop.support.*;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,11 +31,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>This class frees subclasses of the housekeeping of Interceptors
  * and Advisors, but doesn't actually implement AOP proxies.
- * @see org.springframework.aop.framework.AopProxy
- * @see org.springframework.aop.framework.ProxyConfig
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.3 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.4 2003-11-21 22:45:29 jhoeller Exp $
+ * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport implements Advised {
 
@@ -92,10 +92,6 @@ public class AdvisedSupport implements Advised {
 		setMethodInvocationFactory(new HashMapCachingMethodInvocationFactory());
 	}
 	
-	
-	/**
-	 * 
-	 */
 	public AdvisedSupport(MethodInvocationFactory methodInvocationFactory) {
 		setMethodInvocationFactory(methodInvocationFactory);
 	}
@@ -103,8 +99,7 @@ public class AdvisedSupport implements Advised {
 	public void setMethodInvocationFactory(MethodInvocationFactory methodInvocationFactory) {
 		this.methodInvocationFactory = methodInvocationFactory;
 	}
-	
-	
+
 	/**
 	 * Call this method on a new instance created by the no-arg consructor
 	 * to create an independent copy of the configuration
@@ -126,7 +121,7 @@ public class AdvisedSupport implements Advised {
 	}
 
 	/**
-	 * Creates a DefaultProxyConfig with the given parameters.
+	 * Create a DefaultProxyConfig with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 * @param exposeInvocation whether the AopContext class will be
 	 * usable by target objects
@@ -137,7 +132,7 @@ public class AdvisedSupport implements Advised {
 	}
 
 	/**
-	 * Sets whether the AopContext class will be usable by target objects.
+	 * Set whether the AopContext class will be usable by target objects.
 	 * @param exposeInvocation The exposeInvocation to set
 	 */
 	public final void setExposeInvocation(boolean exposeInvocation) {
@@ -145,7 +140,7 @@ public class AdvisedSupport implements Advised {
 	}
 
 	/**
-	 * Returns whether the AopContext class will be usable by target objects.
+	 * Return whether the AopContext class will be usable by target objects.
 	 */
 	public boolean getExposeInvocation() {
 		return exposeInvocation;
@@ -159,9 +154,6 @@ public class AdvisedSupport implements Advised {
 		this.exposeProxy = exposeProxy;
 	}
 	
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#getProxyTargetClass()
-	 */
 	public boolean getProxyTargetClass() {
 		return this.proxyTargetClass;
 	}
@@ -175,25 +167,17 @@ public class AdvisedSupport implements Advised {
 		this.proxyTargetClass = proxyTargetClass;
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#addInterceptor(org.aopalliance.intercept.Interceptor)
-	 */
 	public void addInterceptor(Interceptor interceptor) {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
 		addInterceptor(pos, interceptor);
 	}
 	
-	
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#isInterfaceProxied(java.lang.Class)
-	 */
 	public boolean isInterfaceProxied(Class intf) {
 		return this.interfaces.contains(intf);
 	}
 
 	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#addInterceptor(int, org.aopalliance.intercept.Interceptor)
-	 * Cannot add IntroductionIntercptors this way
+	 * Cannot add IntroductionInterceptors this way.
 	 */
 	public void addInterceptor(int pos, Interceptor interceptor) {
 		if (!(interceptor instanceof MethodInterceptor)) {
@@ -204,7 +188,6 @@ public class AdvisedSupport implements Advised {
 		}
 		addAdvisor(pos, new DefaultInterceptionAroundAdvisor(interceptor));
 	}
-
 
 	// TODO what about removing a ProxyInterceptor?
 	public final boolean removeInterceptor(Interceptor interceptor) {
@@ -258,16 +241,11 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * Remove a proxied interface.
 	 * Does nothing if it isn't proxied.
-	 * @param intf
-	 * @return boolean
 	 */
 	public boolean removeInterface(Class intf) {
 		return this.interfaces.remove(intf);
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#getProxiedInterfaces()
-	 */
 	public final Class[] getProxiedInterfaces() {
 		//return (Class[]) this.interfaces.toArray();
 		Class[] classes = new Class[this.interfaces.size()];
@@ -279,11 +257,9 @@ public class AdvisedSupport implements Advised {
 		return classes;
 	}
 
-
 	public Object getTarget() {
 		return this.target;
 	}
-	
 
 	public void addAdvisor(int pos, InterceptionAroundAdvisor advice) throws AopConfigException {
 		if (advice.getInterceptor() instanceof ProxyInterceptor) {
@@ -299,7 +275,6 @@ public class AdvisedSupport implements Advised {
 		updateAdvisorsArray();
 		adviceChanged();
 	}
-	
 	
 	public void addAdvisor(int pos, InterceptionIntroductionAdvisor advice) throws AopConfigException {
 		// Check interfaces before changing anything in object state
@@ -320,10 +295,6 @@ public class AdvisedSupport implements Advised {
 		addAdviceInternal(pos, advice);
 	}
 
-
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#addAdvisor(int, org.springframework.aop.Advisor)
-	 */
 	public void addAdvisor(int pos, Advisor advice) {
 		if (advice instanceof InterceptionAroundAdvisor) {
 			addAdvisor(pos, (InterceptionAroundAdvisor) advice);
@@ -336,9 +307,6 @@ public class AdvisedSupport implements Advised {
 		}
 	}
 	
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#addAdvisor(org.springframework.aop.Advisor)
-	 */
 	public void addAdvisor(Advisor advice) {
 		int pos = this.advisors.size();
 		addAdvisor(pos, advice);
@@ -352,10 +320,6 @@ public class AdvisedSupport implements Advised {
 		this.advisorsArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
 	
-	
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#getAdvices()
-	 */
 	public Advisor[] getAdvisors() {
 		return this.advisorsArray;
 	}
@@ -363,11 +327,10 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * TODO comments WHAT IF IT'S AN INTRODUCTION OR PROXY?
 	 * Replace the given pointcut
-	 * @param pc1 pointcut to replace
-	 * @param pc2 pointcut to replace it with
-	 * @return boolean whether it was replaced. If the pointcut
-	 * wasn't found in the list of pointcuts, this method
-	 * returns false and does nothing.
+	 * @param a pointcut to replace
+	 * @param b pointcut to replace it with
+	 * @return whether it was replaced. If the pointcut wasn't found in the
+	 * list of pointcuts, this method returns false and does nothing.
 	 */
 	public final boolean replaceAdvice(Advisor a, Advisor b) {
 		if (!this.advisors.contains(a))
@@ -381,8 +344,7 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * Is this interceptor included in any pointcut?
 	 * @param mi interceptor to check inclusion of
-	 * @return boolean whether this interceptor instance could be
-	 * run in an invocation.
+	 * @return whether this interceptor instance could be run in an invocation
 	 */
 	public final boolean interceptorIncluded(Interceptor mi) {
 		if (this.advisors.size() == 0)
@@ -398,8 +360,7 @@ public class AdvisedSupport implements Advised {
 	/**
 	 * Count interceptors of the given class
 	 * @param interceptorClass class of the interceptor to check
-	 * @return int the count of the interceptors of this class or
-	 * subclasses
+	 * @return the count of the interceptors of this class or subclasses
 	 */
 	public final int countInterceptorsOfType(Class interceptorClass) {
 		if (this.advisors.size() == 0)
@@ -412,7 +373,6 @@ public class AdvisedSupport implements Advised {
 		}
 		return count;
 	}
-	
 	
 	/**
 	 * Invoked when advice has changed.
@@ -429,11 +389,9 @@ public class AdvisedSupport implements Advised {
 		this.methodInvocationFactory.refresh(this);
 	}
 
-	
 	/**
 	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
 	 * create an AOP proxy with this as an argument.
-	 * @return
 	 */
 	protected synchronized AopProxy createAopProxy() {
 		if (!isActive) {
@@ -450,22 +408,25 @@ public class AdvisedSupport implements Advised {
 	}
 	
 	/**
-	 * Subclasses can call this to check whether any AOP proxies have been created yet
+	 * Subclasses can call this to check whether any AOP proxies have been created yet.
 	 */
 	protected final boolean isActive() {
 		return isActive;
 	}
 	
 	/**
-	 * Return the MethodInvocationFactory associated with this ProxyConfig
-	 * @return
+	 * Return the MethodInvocationFactory associated with this ProxyConfig.
 	 */
 	protected MethodInvocationFactory getMethodInvocationFactory() {
 		return this.methodInvocationFactory;
 	}
 
+	public String toProxyConfigString() {
+		return toString();
+	}
+
 	/**
-	 * For debugging/diagnostic use
+	 * For debugging/diagnostic use.
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
@@ -476,11 +437,5 @@ public class AdvisedSupport implements Advised {
 		sb.append("methodInvocationFactory=" + this.methodInvocationFactory);
 		return sb.toString();
 	}
-	
-	/**
-	 * @see org.springframework.aop.framework.ProxyConfig#toProxyConfigString()
-	 */
-	public String toProxyConfigString() {
-		return toString();
-	}
+
 }

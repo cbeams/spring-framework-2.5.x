@@ -17,7 +17,7 @@ import org.springframework.aop.framework.AopConfigException;
  * Simple IntroductionAdvice implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: SimpleIntroductionAdvice.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: SimpleIntroductionAdvice.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class SimpleIntroductionAdvice implements InterceptionIntroductionAdvisor, ClassFilter {
 	
@@ -35,7 +35,7 @@ public class SimpleIntroductionAdvice implements InterceptionIntroductionAdvisor
 	}
 	
 	/**
-	 * Wrap this interceptor and introduce all interfaces	
+	 * Wrap this interceptor and introduce all interfaces.
 	 */
 	public SimpleIntroductionAdvice(DelegatingIntroductionInterceptor dii) {
 		this((IntroductionInterceptor) dii);
@@ -49,37 +49,24 @@ public class SimpleIntroductionAdvice implements InterceptionIntroductionAdvisor
 		this.interfaces.add(intf);
 	}
 
-	/**
-	 * @see org.springframework.aop.IntroductionAdvice#getClassFilter()
-	 */
 	public ClassFilter getClassFilter() {
 		return this;
 	}
 
-	/**
-	 * @see org.springframework.aop.IntroductionAdvice#getIntroductionInterceptor()
-	 */
 	public IntroductionInterceptor getIntroductionInterceptor() {
 		return interceptor;
 	}
 
-	/**
-	 * @see org.springframework.aop.IntroductionAdvice#getInterfaces()
-	 */
 	public Class[] getInterfaces() {
 		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
-	/**
-	 * @see org.springframework.aop.ClassFilter#matches(java.lang.Class)
-	 */
 	public boolean matches(Class clazz) {
 		return true;
 	}
 
 	/**
-	 * Default for an introduction is per-instance interception
-	 * @see org.springframework.aop.Advice#isPerInstance()
+	 * Default for an introduction is per-instance interception.
 	 */
 	public boolean isPerInstance() {
 		return true;

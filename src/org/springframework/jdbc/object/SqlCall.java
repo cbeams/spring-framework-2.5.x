@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SqlCall.java,v 1.3 2003-11-17 23:21:42 trisberg Exp $
+ * @version $Id: SqlCall.java,v 1.4 2003-11-21 22:45:30 jhoeller Exp $
  */
 public abstract class SqlCall extends RdbmsOperation {
 
@@ -76,7 +76,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with this parameters.
-	 * @param params parameters. May be null.
+	 * @param inParams parameters. May be null.
 	 */
 	protected final CallableStatementCreator newCallableStatementCreator(Map inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
@@ -85,7 +85,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with the parameters returned from this ParameterMapper.
-	 * @param paramMapper parametermapper. May not be null.
+	 * @param inParamMapper parametermapper. May not be null.
 	 */
 	protected final CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);

@@ -14,25 +14,25 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
+
 import org.springframework.aop.ClassFilter;
 
-
 /**
- * Perl5 regular expression pointcut bean.
- * JavaBean properties are:
+ * Perl5 regular expression pointcut bean. JavaBean properties are:
  * <li>pattern: Perl5 regular expression for the fully-qualified method names to match
  * <li>interceptor: interceptor to invoke if the pointcut matches
- * Matching is based purely on method name. 
- * <br>
- * Note: the regular expression must be a match. For example,
+ * Matching is based purely on method name.
+ *
+ * <p>Note: the regular expression must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
- * <p>
- * Currently using Jakarta ORO regular expression library.
+ *
+ * <p>Currently using Jakarta ORO regular expression library.
  * Does not require J2SE 1.4, although it runs under 1.4.
+ *
  * @author Rod Johnson
  * @since July 22, 2003
- * @version $Id: RegexpMethodPointcut.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: RegexpMethodPointcut.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter { 
 	
@@ -68,14 +68,12 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	}
 
 	/**
-	 * Try to match the regular expression against
-	 * the fully qualified name of the method's declaring class, plus the
-	 * name of the method. Note that the declaring class is that class
-	 * that originally declared the method, not necessarily the class
-	 * that's currently exposing it.
-	 * For example, <code>java.lang.Object.hashCode</code> matches
+	 * Try to match the regular expression against the fully qualified name
+	 * of the method's declaring class, plus the name of the method.
+	 * Note that the declaring class is that class that originally declared
+	 * the method, not necessarily the class that's currently exposing it.
+	 * <p>For example, <code>java.lang.Object.hashCode</code> matches
 	 * any subclass of object's hashCode() method.
-	 * @see org.springframework.aop.framework.StaticMethodPointcut#applies(java.lang.reflect.Method, org.aopalliance.intercept.AttributeRegistry)
 	 */
 	public boolean matches(Method m, Class targetClass) { 
 		// TODO use target class here?
@@ -86,18 +84,11 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 		return matched;
 	}
 
-	/**
-	 * @see org.springframework.aop.ClassFilter#matches(java.lang.Class)
-	 */
 	public boolean matches(Class clazz) {
 		// TODO do with regexp
 		return true;
 	}
 	
-
-	/**
-	 * @see org.springframework.aop.Pointcut#getClassFilter()
-	 */
 	public ClassFilter getClassFilter() {
 		return this;
 	}

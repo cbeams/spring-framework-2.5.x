@@ -2,16 +2,15 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.Pointcut;
-
 
 /**
  * Default InterceptionAdvice implementation that
  * is a JavaBean taking Pointcut and Interceptor.
- * 
  * @author Rod Johnson
- * @version $Id: DefaultInterceptionAroundAdvisor.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: DefaultInterceptionAroundAdvisor.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class DefaultInterceptionAroundAdvisor implements InterceptionAroundAdvisor {
 	
@@ -22,7 +21,6 @@ public class DefaultInterceptionAroundAdvisor implements InterceptionAroundAdvis
 	private boolean isPerInstance = false;
 	
 	public DefaultInterceptionAroundAdvisor() {
-		
 	}
 	
 	public DefaultInterceptionAroundAdvisor(Pointcut pointcut, Interceptor interceptor) {
@@ -35,49 +33,32 @@ public class DefaultInterceptionAroundAdvisor implements InterceptionAroundAdvis
 	}
 	
 	/**
-	 * If no pointcut is supplied, the advice will always fire
-	 * @param interceptor
+	 * If no pointcut is supplied, the advice will always fire.
 	 */
 	public DefaultInterceptionAroundAdvisor(Interceptor interceptor) {
 		this(Pointcut.TRUE, interceptor);
 	}
 
-	/**
-	 * @param interceptor
-	 */
 	public void setInterceptor(Interceptor interceptor) {
 		this.interceptor = interceptor;
 	}
 
-	/**
-	 * @param pointcut
-	 */
 	public void setPointcut(Pointcut pointcut) {
 		this.pointcut = pointcut;
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.Advice#getInterceptor()
-	 */
 	public Interceptor getInterceptor() {
 		return this.interceptor;
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.Advice#getPointcut()
-	 */
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
 	
-	/**
-	 * @see org.springframework.aop.Advice#isPerInstance()
-	 */
 	public boolean isPerInstance() {
 		return this.isPerInstance;
 	}
 
-	
 	public String toString() {
 		return getClass().getName() + ": interceptor=(" + interceptor + 
 				"); Pointcut=(" + pointcut + "); perInstance=" + this.isPerInstance;

@@ -9,21 +9,17 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
-
 /**
  * Convenient class for building up pointcuts.
- * 
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: ComposablePointcut.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: ComposablePointcut.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class ComposablePointcut implements Pointcut {
 	
 	private ClassFilter classFilter;
 	
 	private MethodMatcher methodMatcher;
-	
-	// Convenient constructors also
 	
 	public ComposablePointcut() {
 		this.classFilter =  ClassFilter.TRUE;
@@ -35,21 +31,6 @@ public class ComposablePointcut implements Pointcut {
 		this.methodMatcher = methodMatcher;
 	}
 	
-	/**
-	 * @see org.springframework.aop.pointcut.Pointcut#getClassFilter()
-	 */
-	public ClassFilter getClassFilter() {
-		return this.classFilter;
-	}
-
-	/**
-	 * @see org.springframework.aop.pointcut.Pointcut#getMethodMatcher()
-	 */
-	public MethodMatcher getMethodMatcher() {
-		return this.methodMatcher;
-	}
-
-
 	public ComposablePointcut union(ClassFilter filter) {
 		this.classFilter = ClassFilters.union(this.classFilter, filter);
 		return this;
@@ -81,6 +62,14 @@ public class ComposablePointcut implements Pointcut {
 		this.classFilter = ClassFilters.intersection(this.classFilter, other.getClassFilter());
 		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other.getMethodMatcher());
 		return this;
+	}
+
+	public ClassFilter getClassFilter() {
+		return this.classFilter;
+	}
+
+	public MethodMatcher getMethodMatcher() {
+		return this.methodMatcher;
 	}
 
 }

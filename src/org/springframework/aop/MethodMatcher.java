@@ -8,29 +8,28 @@ package org.springframework.aop;
 import java.lang.reflect.Method;
 
 /**
- * Part of a Pointcut. Checks whether the target method is eligible
- * for advice. <br>
- * A MethodMatcher may be evaluated <b>statically</b> or at <b>runtime</b> (dynamically).
+ * Part of a Pointcut. Checks whether the target method is eligible for advice.
+ *
+ * <p>A MethodMatcher may be evaluated <b>statically</b> or at <b>runtime</b> (dynamically).
  * Static matching involves method and (possibly) method attributes. Dynamic matching
  * also makes arguments for a particular call available, and any effects of running
  * previous advice applying to the joinpoint.
- * <br>
- * If an implementation returns false in its isRuntime() method, evaluation can be performed
+ *
+ * <p>If an implementation returns false in its isRuntime() method, evaluation can be performed
  * statically, and the result will be the same for all invocations of this method,
  * whatever their arguments. If the isRuntime() method returns false, the 3-arg matches()
  * method will never be invoked.
- * <br>
- * If an implementation returns true in its 2-arg matches() method, and
- * its isRuntime() method returns true, the 3-argument matches()
- * method will be invoked <i>immediately before each potential execution of the related advice</i>,
- * to decide whether the advice should run. All previous advice, such as earlier interceptors
- * in an interceptor chain, will have run, so any state changes they have produced in parameters
- * or ThreadLocal state, will be available at the time of evaluation.
- * <br>
+ *
+ * <p>If an implementation returns true in its 2-arg matches() method, and its isRuntime()
+ * method returns true, the 3-argument matches() method will be invoked <i>immediately before
+ * each potential execution of the related advice</i>, to decide whether the advice should run.
+ * All previous advice, such as earlier interceptors in an interceptor chain, will have run,
+ * so any state changes they have produced in parameters or ThreadLocal state, will be
+ * available at the time of evaluation.
  * 
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: MethodMatcher.java,v 1.2 2003-11-17 11:17:25 johnsonr Exp $
+ * @version $Id: MethodMatcher.java,v 1.3 2003-11-21 22:45:09 jhoeller Exp $
  */
 public interface MethodMatcher {
 	
@@ -74,9 +73,10 @@ public interface MethodMatcher {
 	
 	
 	/**
-	 * Canonical instance that matches all methods
+	 * Canonical instance that matches all methods.
 	 */
-	public static final MethodMatcher TRUE = new MethodMatcher() {
+	MethodMatcher TRUE = new MethodMatcher() {
+
 		public boolean isRuntime() {
 			return false;
 		}

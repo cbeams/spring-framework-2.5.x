@@ -4,17 +4,15 @@ package org.springframework.aop.support;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.Interceptor;
-import org.springframework.aop.*;
-import org.springframework.aop.InterceptionAroundAdvisor;
 
+import org.springframework.aop.InterceptionAroundAdvisor;
+import org.springframework.aop.Pointcut;
 
 /**
- * Convenient superclass for static method pointcuts that hold an IntroductionInterceptor, making them
- * an Advice.
- * <br>Analogous to the old Spring StaticMethodPointcut.
- * 
+ * Convenient superclass for static method pointcuts that hold an IntroductionInterceptor,
+ * making them an Advice. nalogous to the old Spring StaticMethodPointcut.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAroundAdvisor.java,v 1.1 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: StaticMethodMatcherPointcutAroundAdvisor.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMethodMatcherPointcut implements InterceptionAroundAdvisor {
 
@@ -24,18 +22,13 @@ public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMet
 	
 	protected StaticMethodMatcherPointcutAroundAdvisor() {
 	}
-	
-	
+
 	protected StaticMethodMatcherPointcutAroundAdvisor(Interceptor interceptor) {
 		this.interceptor = interceptor;
 	}
 
-	/**
-	 * @see org.springframework.aop.pointcut.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
-	 */
 	public abstract boolean matches(Method m, Class targetClass);
-	
-	
+
 	public void setInterceptor(Interceptor interceptor) {
 		this.interceptor = interceptor;
 	}
@@ -44,25 +37,14 @@ public abstract class StaticMethodMatcherPointcutAroundAdvisor extends StaticMet
 		this.isPerInstance = isPerInstance;
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.InterceptionAdvice#getInterceptor()
-	 */
 	public Interceptor getInterceptor() {
 		return interceptor;
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.Advice#getPointcut()
-	 */
 	public final Pointcut getPointcut() {
 		return this;
 	}
 
-	
-
-	/**
-	 * @see org.springframework.aop.Advice#isPerInstance()
-	 */
 	public boolean isPerInstance() {
 		return this.isPerInstance;
 	}

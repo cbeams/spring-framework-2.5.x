@@ -16,11 +16,10 @@ import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.8 2003-11-14 09:20:18 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.9 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -61,30 +60,25 @@ public class MethodInvocationImpl implements MethodInvocation {
 	
 	/**
 	 * Construct a new MethodInvocation with given arguments
-	 * @param interceptorsAndDynamicInterceptionAdvice interceptors that should be applied,
+	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
 	 * along with any InterceptorAndDynamicMethodMatchers that need evaluation at runtime.
 	 * MethodMatchers included in this struct must already have been found to have matched as far
-	 * as was possibly statically.<br>
-	 * Passing an array might be about 10% faster, but would complicate the code. And it would
-	 * work only for static pointcuts.
+	 * as was possibly statically. Passing an array might be about 10% faster, but would complicate
+	 * the code. And it would work only for static pointcuts.
 	 */
 	public MethodInvocationImpl(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
-					Class targetClass,
-					List interceptorsAndDynamicMethodMatchers) {			
-						
+					Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		populate(proxy, target, targetInterface, m, arguments,
 				targetClass, interceptorsAndDynamicMethodMatchers);
 	}
 	
 	protected MethodInvocationImpl() {
 	}
-	
-	protected void populate(Object proxy, Object target, 
+
+	protected void populate(Object proxy, Object target,
 						Class targetInterface, Method m, Object[] arguments,
-						Class targetClass,
-						List interceptorsAndDynamicMethodMatchers) {			
-					
+						Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		this.proxy = proxy;
 		this.target = target;
 		this.targetInterface = targetInterface;

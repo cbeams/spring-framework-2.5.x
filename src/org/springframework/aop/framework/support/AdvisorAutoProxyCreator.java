@@ -19,7 +19,7 @@ import org.springframework.beans.factory.support.BeanFactoryUtils;
  * advices in the current BeanFactory. This class is completely generic; it contains
  * no special code to handle any particular aspects, such as pooling aspects.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreator.java,v 1.1 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreator.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator implements BeanFactoryAware {
 
@@ -43,7 +43,7 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator implements
 	}
 	
 	/**
-	 * @return the owning ListableBeanFactory
+	 * Return the owning ListableBeanFactory
 	 */
 	protected final ListableBeanFactory getBeanFactory() {
 		return this.owningFactory;
@@ -101,9 +101,7 @@ public class AdvisorAutoProxyCreator extends AbstractAutoProxyCreator implements
 	}
 
 	/**
-	 * Sort based on ordering
-	 * @param l
-	 * @return
+	 * Sort based on ordering.
 	 */
 	protected List sortAdvisors(List l) {
 		// TODO implement this

@@ -10,32 +10,23 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: HashMapCachingMethodInvocationFactory.java,v 1.2 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: HashMapCachingMethodInvocationFactory.java,v 1.3 2003-11-21 22:45:29 jhoeller Exp $
  */
 public class HashMapCachingMethodInvocationFactory extends MethodInvocationFactorySupport {
 	
-	
 	private HashMap methodCache = new HashMap();
 	
-	public HashMapCachingMethodInvocationFactory() {
-	}
-
-	/**
-	 * @see org.springframework.aop.framework.MethodInvocationFactory#refresh(org.springframework.aop.framework.ProxyConfig)
-	 */
 	public void refresh(Advised pc) {
 		super.refresh(pc);
-		methodCache.clear();
+		this.methodCache.clear();
 	}
 	
 	protected List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
-		
-		List cached = (List) methodCache.get(method);
+		List cached = (List) this.methodCache.get(method);
 		if (cached == null) {
-			cached = MethodInvocationFactorySupport.GetInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
-			methodCache.put(method, cached);
+			cached = super.getInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+			this.methodCache.put(method, cached);
 		}
 		return cached;
 	}

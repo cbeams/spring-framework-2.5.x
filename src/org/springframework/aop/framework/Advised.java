@@ -6,18 +6,21 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 
 /**
  * Interface to be implemented by classes that hold the configuration
  * of a factory of AOP proxies. This configuration includes
  * the Interceptors and Advisors, and the proxied interfaces.
+ *
  * <p>Any AOP proxy obtained from Spring can be cast to this interface to allow
  * manipulation of its AOP advice.
- * @see org.springframework.aop.framework.AdvisedSupport
+ *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.3 2003-11-20 11:05:14 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.4 2003-11-21 22:45:29 jhoeller Exp $
+ * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
 	
@@ -39,7 +42,7 @@ public interface Advised {
 	boolean getExposeProxy();
 	
 	/**
-	 * Return the Advisors applying to this proxy
+	 * Return the Advisors applying to this proxy.
 	 * @return a list of Advisors applying to this proxy. Cannot return null,
 	 * but may return the empty array.
 	 */
@@ -60,17 +63,15 @@ public interface Advised {
 	boolean isInterfaceProxied(Class intf);
 	
 	/**
-	 * 
 	 * Add the given interceptor to the tail of the advice (interceptor) chain.
 	 * This will be wrapped in a DefaultInterceptionAroundAdvisor with a pointcut
 	 * that always applies, and returned from the getAdvisors() method in this
 	 * wrapped form.
 	 * @param interceptor to add to the tail of the chain
-	 * @see addInterceptor(int, Interceptor)
+	 * @see #addInterceptor(int, Interceptor)
 	 */
 	void addInterceptor(Interceptor interceptor);
-	
-	
+
 	/**
 	 * Add an interceptor at the specified position in the interceptor chain.
 	 * @param pos index from 0 (head)

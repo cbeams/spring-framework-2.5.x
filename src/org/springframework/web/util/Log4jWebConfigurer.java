@@ -14,7 +14,7 @@ import org.springframework.util.Log4jConfigurer;
  * <li>"log4jConfigLocation": name of the Log4J config file (relative to the web
  * application root directory, e.g. "WEB-INF/log4j.properties");
  * <li>"log4jRefreshInterval": interval between config file refresh* checks, in
- * milliseconds. If unspecified, a value of {@link Log4jConfigurer.DEFAULT_REFRESH_INTERVAL}
+ * milliseconds. If unspecified, a value of {@link Log4jConfigurer#DEFAULT_REFRESH_INTERVAL}
  * will be used.
  * </ul>
  *

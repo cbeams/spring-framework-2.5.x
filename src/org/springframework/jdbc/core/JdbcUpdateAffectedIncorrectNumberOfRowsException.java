@@ -1,4 +1,3 @@
-
 package org.springframework.jdbc.core;
 
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
@@ -17,16 +16,11 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	/** Number of rows that actually were affected */
 	private final int actual;
 
-	/**
-	 * Constructor for JdbcUpdateAffectedIncorrectNumberOfRowsException.
-	 * @param s message
-	 */
 	public JdbcUpdateAffectedIncorrectNumberOfRowsException(String sql, int expected, int actual) {
 		super("SQL update '" + sql + "' affected " + actual + " rows, not " + expected + ", as expected");
 		this.expected = expected;
 		this.actual = actual;
 	}
-
 
 	public int getExpectedRowsAffected() {
 		return expected;
@@ -36,9 +30,6 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 		return actual;
 	}
 
-	/**
-	 * @see IncorrectUpdateSemanticsDataAccessException#getDataWasUpdated()
-	 */
 	public boolean getDataWasUpdated() {
 		return getActualRowsAffected() > 0;
 	}

@@ -25,7 +25,7 @@ import org.springframework.aop.framework.MethodInvocationImpl;
  * from on a simple object reference, obtained from a pool or
  * held in a ThreadLocal. 
  * @author Rod Johnson
- * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.3 2003-11-11 18:31:53 johnsonr Exp $
+ * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.4 2003-11-21 22:45:29 jhoeller Exp $
  */
 public abstract class AbstractReflectionInvokerInterceptor implements MethodInterceptor, ProxyInterceptor {
 	
@@ -36,7 +36,6 @@ public abstract class AbstractReflectionInvokerInterceptor implements MethodInte
 	 * Subclasses must implement this method to return the
 	 * target to use during an invocation.
 	 * @return the target object that will be invoked reflectively
-	 * @see org.springframework.aop.framework.ProxyInterceptor#getTarget()
 	 */
 	public abstract Object getTarget();
 
