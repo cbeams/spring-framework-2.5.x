@@ -134,7 +134,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		Enhancer enhancer = new Enhancer();
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
-            
+
             if(AopUtils.isCglibProxyClass(rootClass)) {
                 enhancer.setSuperclass(rootClass.getSuperclass());
             } else {
@@ -191,7 +191,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	private Callback[] getCallbacks(Class rootClass) throws Exception {
 		// parameters used for optimisation choices
-		boolean exposeProxy = this.advised.getExposeProxy();
+		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isFrozen = this.advised.isFrozen();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
 
@@ -462,19 +462,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 		public Object loadObject() {
 			return target;
-		}
-	}
-
-
-	/**
-	 * Dispatcher for a dynamic target. Dispatchers are much faster than
-	 * interceptors. This will be used whenever it can be determined that a
-	 * method definitely does not return "this"
-	 */
-	private class DynamicDispatcher implements Dispatcher, Serializable {
-
-		public Object loadObject() throws Exception {
-			return advised.getTargetSource().getTarget();
 		}
 	}
 
@@ -777,7 +764,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			    this.advised, null, method, targetClass);
 
 			boolean haveAdvice = !chain.isEmpty();
-			boolean exposeProxy = this.advised.getExposeProxy();
+			boolean exposeProxy = this.advised.isExposeProxy();
 			boolean isStatic = this.advised.getTargetSource().isStatic();
 			boolean isFrozen = this.advised.isFrozen();
 
@@ -878,7 +865,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				return false;
 			}
 
-			if (this.advised.getExposeProxy() != otherCallbackFilter.advised.getExposeProxy()) {
+			if (this.advised.isExposeProxy() != otherCallbackFilter.advised.isExposeProxy()) {
 				return false;
 			}
 

@@ -83,6 +83,14 @@ public class ProxyConfig implements Serializable {
 	/**
 	 * Return whether to proxy the target class directly as well as any interfaces.
 	 */
+	public boolean isProxyTargetClass() {
+		return this.proxyTargetClass;
+	}
+
+	/**
+	 * @deprecated in favor of <code>isProxyTargetClass</code>
+	 * @see #isProxyTargetClass
+	 */
 	public boolean getProxyTargetClass() {
 		return this.proxyTargetClass;
 	}
@@ -114,6 +122,14 @@ public class ProxyConfig implements Serializable {
 	/**
 	 * Return whether proxies should perform aggressive optimizations.
 	 */
+	public boolean isOptimize() {
+		return this.optimize;
+	}
+
+	/**
+	 * @deprecated in favor of <code>isOptimize</code>
+	 * @see #isOptimize
+	 */
 	public boolean getOptimize() {
 		return this.optimize;
 	}
@@ -132,6 +148,14 @@ public class ProxyConfig implements Serializable {
 	/**
 	 * Return whether the AOP proxy will expose the AOP proxy for
 	 * each invocation.
+	 */
+	public boolean isExposeProxy() {
+		return this.exposeProxy;
+	}
+
+	/**
+	 * @deprecated in favor of <code>isExposeProxy</code>
+	 * @see #isExposeProxy
 	 */
 	public boolean getExposeProxy() {
 		return this.exposeProxy;
@@ -184,6 +208,14 @@ public class ProxyConfig implements Serializable {
 	/**
 	 * Return whether proxies created by this configuration should be
 	 * prevented from being cast to Advised.
+	 */
+	public boolean isOpaque() {
+		return opaque;
+	}
+
+	/**
+	 * @deprecated in favor of <code>isOpaque</code>
+	 * @see #isOpaque
 	 */
 	public boolean getOpaque() {
 		return opaque;

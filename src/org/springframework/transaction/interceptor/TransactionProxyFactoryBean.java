@@ -225,7 +225,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		if (this.proxyInterfaces != null) {
 			proxyFactory.setInterfaces(this.proxyInterfaces);
 		}
-		else if (!getProxyTargetClass()) {
+		else if (!isProxyTargetClass()) {
 			if (this.target instanceof TargetSource) {
 				throw new AopConfigException("Either 'proxyInterfaces' or 'proxyTargetClass' is required " +
 				                             "when using a TargetSource as 'target");

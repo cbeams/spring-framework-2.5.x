@@ -136,7 +136,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	public void setTargetSource(TargetSource targetSource) {
-		if (isActive() && getOptimize()) {
+		if (isActive() && isOptimize()) {
 			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has its own target");
 		}
 		this.targetSource = targetSource;

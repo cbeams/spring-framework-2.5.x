@@ -58,9 +58,9 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate t = new JdbcTemplate(mockDataSource);
 		assertTrue("datasource ok", t.getDataSource() == mockDataSource);
-		assertTrue("ignores warnings by default", t.getIgnoreWarnings());
+		assertTrue("ignores warnings by default", t.isIgnoreWarnings());
 		t.setIgnoreWarnings(false);
-		assertTrue("can set NOT to ignore warnings", !t.getIgnoreWarnings());
+		assertTrue("can set NOT to ignore warnings", !t.isIgnoreWarnings());
 	}
 
 	public void testCannotRunStaticSqlWithBindParameters() throws Exception {

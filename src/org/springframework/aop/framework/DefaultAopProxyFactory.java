@@ -42,12 +42,8 @@ package org.springframework.aop.framework;
 public class DefaultAopProxyFactory implements AopProxyFactory {
 
 	public AopProxy createAopProxy(AdvisedSupport advisedSupport) throws AopConfigException {
-		boolean useCglib =
-		    advisedSupport.getOptimize() ||
-		    advisedSupport.getProxyTargetClass() ||
-		    advisedSupport.getProxiedInterfaces().length == 0;
-
-		if (useCglib) {
+		if (advisedSupport.isOptimize() || advisedSupport.isProxyTargetClass() ||
+		    advisedSupport.getProxiedInterfaces().length == 0) {
 			return CglibProxyFactory.createCglibProxy(advisedSupport);
 		}
 		else {

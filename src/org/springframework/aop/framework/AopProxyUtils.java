@@ -37,7 +37,7 @@ public abstract class AopProxyUtils {
 
 		int lengthFromConfig = proxiedInterfacesOnConfig.length;
 		int addedInterfaces = 0;
-		if (!advised.getOpaque() && !advised.isInterfaceProxied(Advised.class)) {
+		if (!advised.isOpaque() && !advised.isInterfaceProxied(Advised.class)) {
 			// We need to add Advised
 			addedInterfaces = 1;
 		}

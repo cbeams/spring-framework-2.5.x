@@ -153,8 +153,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	/**
-	 * Return whether or not we ignore SQLWarnings.
-	 * Default is true.
+	 * Return whether or not we ignore SQLWarnings. Default is true.
+	 */
+	public boolean isIgnoreWarnings() {
+		return ignoreWarnings;
+	}
+
+	/**
+	 * Return whether or not we ignore SQLWarnings. Default is true.
+	 * @deprecated in favor of <code>isIgnoreWarnings</code>
+	 * @see #isIgnoreWarnings
 	 */
 	public boolean getIgnoreWarnings() {
 		return ignoreWarnings;

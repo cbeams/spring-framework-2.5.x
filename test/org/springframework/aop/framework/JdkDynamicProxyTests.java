@@ -19,6 +19,7 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
+
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.IOther;
@@ -33,7 +34,7 @@ import org.springframework.beans.TestBean;
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	protected Object createProxy(AdvisedSupport as) {
-		assertFalse("Not forcible CGLIB", as.getProxyTargetClass());
+		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());
 		Object proxy = as.createAopProxy().getProxy();
 		assertTrue("Should be a JDK proxy: " + proxy.getClass(), AopUtils.isJdkDynamicProxy(proxy));
 		return proxy;

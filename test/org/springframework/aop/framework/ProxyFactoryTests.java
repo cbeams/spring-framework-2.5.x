@@ -17,9 +17,8 @@
 package org.springframework.aop.framework;
 
 import junit.framework.TestCase;
-
-import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.NopInterceptor;
@@ -29,7 +28,6 @@ import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.util.StringUtils;
 
 /**
  * Also tests AdvisedSupport superclass.
@@ -239,12 +237,12 @@ public class ProxyFactoryTests extends TestCase {
 		factory.addAdvice(0, di);
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertTrue(factory.adviceIncluded(di));
-		assertTrue(!factory.interceptorIncluded(diUnused));
-		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 1);
+		assertTrue(!factory.adviceIncluded(diUnused));
+		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 1);
 		assertTrue(factory.countAdvicesOfType(TransactionInterceptor.class) == 0);
 	
 		factory.addAdvice(0, diUnused);
-		assertTrue(factory.interceptorIncluded(diUnused));
+		assertTrue(factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);
 	}
 

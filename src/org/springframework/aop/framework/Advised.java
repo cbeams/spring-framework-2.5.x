@@ -27,22 +27,17 @@ import org.springframework.aop.ThrowsAdvice;
 
 /**
  * Interface to be implemented by classes that hold the configuration
- * of a factory of AOP proxies. This configuration includes
- * the Interceptors and other advice, and Advisors, and the proxied interfaces.
+ * of a factory of AOP proxies. This configuration includes the
+ * Interceptors and other advice, and Advisors, and the proxied interfaces.
  *
- * <p>Any AOP proxy obtained from Spring can be cast to this interface to allow
- * manipulation of its AOP advice.
+ * <p>Any AOP proxy obtained from Spring can be cast to this interface to
+ * allow manipulation of its AOP advice.
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
-	
-	/**
-	 * Return the TargetSource used by this Advised object.
-	 */
-	TargetSource getTargetSource();
 	
 	/**
 	 * Change the TargetSource used by this Advised object.
@@ -52,14 +47,10 @@ public interface Advised {
 	void setTargetSource(TargetSource targetSource);
 	
 	/**
-	 * Return whether the factory should expose the proxy as a ThreadLocal.
-	 * This can be necessary if a target object needs to invoke a method on itself
-	 * benefitting from advice. (If it invokes a method on <code>this</code> no advice
-	 * will apply.) Getting the proxy is analogous to an EJB calling getEJBObject().
-	 * @see AopContext
+	 * Return the TargetSource used by this Advised object.
 	 */
-	boolean getExposeProxy();
-	
+	TargetSource getTargetSource();
+
 	/**
 	 * Set whether the proxy should be exposed by the AOP framework as a
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
@@ -70,11 +61,32 @@ public interface Advised {
 	void setExposeProxy(boolean exposeProxy);
 	
 	/**
+	 * Return whether the factory should expose the proxy as a ThreadLocal.
+	 * This can be necessary if a target object needs to invoke a method on itself
+	 * benefitting from advice. (If it invokes a method on <code>this</code> no advice
+	 * will apply.) Getting the proxy is analogous to an EJB calling getEJBObject().
+	 * @see AopContext
+	 */
+	boolean isExposeProxy();
+
+	/**
+	 * @deprecated in favor of <code>isExposeProxy</code>
+	 * @see #isExposeProxy
+	 */
+	boolean getExposeProxy();
+
+	/**
 	 * Should we proxy the target class as well as any interfaces?
 	 * Can use this to force CGLIB proxying.
 	 */
+	boolean isProxyTargetClass();
+
+	/**
+	 * @deprecated in favor of <code>isProxyTargetClass</code>
+	 * @see #isProxyTargetClass
+	 */
 	boolean getProxyTargetClass();
-	
+
 	/**
 	 * Return the Advisors applying to this proxy.
 	 * @return a list of Advisors applying to this proxy.

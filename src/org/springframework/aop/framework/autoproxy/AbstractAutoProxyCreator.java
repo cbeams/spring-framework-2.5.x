@@ -244,7 +244,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			// copy our properties (proxyTargetClass) inherited from ProxyConfig
 			proxyFactory.copyFrom(this);
 
-			if (!getProxyTargetClass()) {
+			if (!isProxyTargetClass()) {
 				// Must allow for introductions; can't just set interfaces to
 				// the target's interfaces only.
 				Class[] targetsInterfaces = AopUtils.getAllInterfaces(bean);
