@@ -25,6 +25,7 @@ import java.net.URL;
  * instead of using a String property.
  * @author Juergen Hoeller
  * @since 15.12.2003
+ * @see java.net.URL
  */
 public class URLEditor extends PropertyEditorSupport {
 

@@ -21,9 +21,12 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Properties editor for String[] type. Strings must be in CSV format.
- * This property editor is automatically registered by BeanWrapperImpl.
+ * Editor for String arrays. Strings must be in CSV format.
+ *
+ * <p>This property editor is automatically registered by BeanWrapperImpl.
+ *
  * @author Rod Johnson
+ * @see org.springframework.util.StringUtils#commaDelimitedListToStringArray
  * @see org.springframework.beans.BeanWrapperImpl
  */
 public class StringArrayPropertyEditor extends PropertyEditorSupport {
