@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -56,7 +57,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private PrintWriter writer;
 
-	private int contentLength;
+	private int contentLength = 0;
 
 	private String contentType;
 
@@ -64,7 +65,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean committed;
 
-	private Locale locale;
+	private Locale locale = Locale.getDefault();
 
 
 	//---------------------------------------------------------------------
@@ -153,12 +154,27 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void flushBuffer() {
+		if (this.committed) {
+			throw new IllegalStateException("Cannot flush buffer - response is already committed");
+		}
+		if (this.outputStream != null) {
+			try {
+				this.outputStream.flush();
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
+			}
+		}
 		if (this.writer != null) {
 			this.writer.flush();
 		}
+		this.committed = true;
 	}
 
 	public void resetBuffer() {
+		if (this.committed) {
+			throw new IllegalStateException("Cannot reset buffer - response is already committed");
+		}
 		this.content.reset();
 	}
 
@@ -172,6 +188,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public void reset() {
 		resetBuffer();
+		this.characterEncoding = null;
+		this.contentLength = 0;
+		this.contentType = null;
+		this.locale = null;
+		this.cookies.clear();
+		this.headers.clear();
+		this.status = HttpServletResponse.SC_OK;
+		this.errorMessage = null;
 	}
 
 	public void setLocale(Locale locale) {

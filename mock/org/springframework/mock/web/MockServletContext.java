@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -173,6 +172,9 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public RequestDispatcher getRequestDispatcher(String path) {
+		if (!path.startsWith("/")) {
+			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
+		}
 		return new MockRequestDispatcher(path);
 	}
 

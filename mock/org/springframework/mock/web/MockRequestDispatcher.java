@@ -23,8 +23,6 @@ import javax.servlet.ServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.mock.web.MockHttpServletResponse;
-
 /**
  * Mock implementation of the RequestDispatcher interface.
  *
@@ -45,11 +43,16 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	}
 
 	public void forward(ServletRequest servletRequest, ServletResponse servletResponse) {
+		if (servletResponse.isCommitted()) {
+			throw new IllegalStateException("Cannot perform forward - response is already committed");
+		}
 		if (!(servletResponse instanceof MockHttpServletResponse)) {
 			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 		}
 		((MockHttpServletResponse) servletResponse).setForwardedUrl(this.url);
-		logger.info("RequestDispatcher: forwarding to URL [" + this.url + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("MockRequestDispatcher: forwarding to URL [" + this.url + "]");
+		}
 	}
 
 	public void include(ServletRequest servletRequest, ServletResponse servletResponse) {
@@ -57,7 +60,9 @@ public class MockRequestDispatcher implements RequestDispatcher {
 			throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 		}
 		((MockHttpServletResponse) servletResponse).setIncludedUrl(this.url);
-		logger.info("RequestDispatcher: including URL [" + this.url + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("MockRequestDispatcher: including URL [" + this.url + "]");
+		}
 	}
 
 }

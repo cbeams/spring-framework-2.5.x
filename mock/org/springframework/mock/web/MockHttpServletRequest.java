@@ -356,8 +356,8 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		return secure;
 	}
 
-	public RequestDispatcher getRequestDispatcher(String url) {
-		return this.servletContext.getRequestDispatcher(url);
+	public RequestDispatcher getRequestDispatcher(String path) {
+		return new MockRequestDispatcher(path);
 	}
 
 	public String getRealPath(String path) {
