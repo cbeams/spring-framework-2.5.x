@@ -63,7 +63,7 @@
       know-how and tools, both for existing projects and for new ones.
       Concretely, there are not only a large number of books and tools for
       Struts but also a lot of developers that have experience with it. Thus,
-      if you can live with Struts' architectural flaws, it can still be a
+      if you can live with Struts's architectural flaws, it can still be a
       viable choice for the web layer. The same applies to WebWork and other
       web frameworks.</para>
 
@@ -341,7 +341,7 @@
         </listitem>
       </orderedlist></para>
 
-    <para>Exception that might be thrown during processing of the request get
+    <para>Exceptions that might be thrown during processing of the request get
     picked up by any of the handlerexception resolvers that are declared in
     the WebApplicationContext. Using those exception resolvers you can define
     custom behavior in case such exceptions get thrown.</para>
@@ -350,7 +350,7 @@
     <emphasis>last-modification-date</emphasis>, as specified by the Servlet
     API. The process of determining the last modification date for a specific
     request, is simple. The DispatcherServlet will first of all lookup an
-    appropriate handler mapping and test is the handler that matched
+    appropriate handler mapping and test if the handler that matched
     <emphasis>implements the interface
     <literal>LastModified</literal></emphasis> and if so, the value the of
     <literal>long getLastModified(request)</literal> is returned to the
@@ -448,8 +448,8 @@
     <sect2 id="mvc-controller-abstractcontroller">
       <title>AbstractController and WebContentGenerator</title>
 
-      <para>Of course, jsut a controller interface isn't enough. To provide a
-      basic infrastructure, all Spring's Controller inherit from
+      <para>Of course, just a controller interface isn't enough. To provide a
+      basic infrastructure, all of Spring's Controllers inherit from
       AbstractController, a class offering caching support and for instance
       the setting of the mimetype.</para>
 
@@ -568,17 +568,16 @@ public class SampleController extends AbstractController {
     </sect2>
 
     <sect2 id="mvc-controller-othersimplecontrollers">
-      <title>Other simple controller</title>
+      <title>Other simple controllers</title>
 
       <para>Besides the AbstractController - which you could of course extend,
       although a more concrete controller might offer you more functionality -
-      there are a couple of other simple controllers that might easy the pain
+      there are a couple of other simple controllers that might ease the pain
       of developing simple MVC applications. The
       <literal>ParameterizableViewController</literal> basically is the same
       as the one in the example above, except for the fact that you can
       specify its view name that it'll be returning in the
-      webapplicationcontext (ahhh, no need to hard-code the viewname). The
-      viewname you</para>
+      webapplicationcontext (ahhh, no need to hard-code the viewname).</para>
 
       <para>The <literal>FileNameViewController</literal> inspects the URL and
       retrieves the filename of the file request (the filename of
@@ -745,7 +744,7 @@ public class SampleDelegate {
       part of the Spring MVC package. Command controllers provide a way to
       interact with dataobjects and dynamically bind parameters from the
       <literal>HttpServletRequest</literal> to the dataobject you're
-      specifying. This compares to Struts actionforms, where in Spring, you
+      specifying. This compares to Struts's actionforms, where in Spring, you
       don't have to implement any interface of superclasses to do databinding.
       First, let's examine what command controllers available, just to get
       clear picture of what you can do with them: <itemizedlist
@@ -755,7 +754,7 @@ public class SampleDelegate {
             controller you can use to create your own command controller,
             capable of binding request parameters to a data object you're
             specifying. This class does not offer form functionality, it does
-            however, offer validation features and let's you specify in the
+            however, offer validation features and lets you specify in the
             controller itself what to do with the dataobject that has been
             filled with the parameters from the request.</para>
           </listitem>
@@ -829,13 +828,13 @@ public class SampleDelegate {
 
       <para>A very simple, but very powerful handlermapping is the
       <literal>BeanNameUrlHandlerMapping</literal>, which maps incoming
-      Http-requests to names of beans, defined in the webapplicationcontext.
+      HTTP requests to names of beans, defined in the webapplicationcontext.
       Let's say we want to enable a user to insert an account and we've
       already provided an appropriate FormController (see <xref
       linkend="mvc-controller-command" /> for more information on Command- and
-      FormControllers) and an JSP view (or Velocity template) that renders the
+      FormControllers) and a JSP view (or Velocity template) that renders the
       form. When using the BeanNameUrlHandlerMapping, we could map the
-      Http-request with URL
+      HTTP request with URL
       <literal>http://samples.com/editaccount.form</literal> to the
       appropriate FormController as follows: <programlisting>&lt;beans&gt;
     &lt;bean id="handlerMapping" 
@@ -933,8 +932,8 @@ public class SampleDelegate {
       Also, all requests for a resource beginning with
       <literal>view</literal>, ending with <literal>.html</literal>, in the
       directory <literal>ex</literal>, will be rerouted to that specific
-      controller. Furtermore, two mappings have been defined that will match
-      with the <literal>editAccountFormController</literal></para>
+      controller. Furthermore, two mappings have been defined that will match
+      with the <literal>editAccountFormController</literal>.</para>
     </sect2>
 
     <sect2 id="mvc-handlermapping-interceptor">
@@ -953,7 +952,7 @@ public class SampleDelegate {
       that will be called <emphasis>after</emphasis> the handler is executed,
       and one that is called <emphasis>after the complete request has
       finished</emphasis>. Those three methods should provide you with enough
-      flexibility to do all kinds of pre- and postprocessing.</para>
+      flexibility to do all kinds of pre- and post-processing.</para>
 
       <para>The <literal>preHandle</literal> method has a boolean return
       value. Using this value, you can tweak the behavior of the execution
