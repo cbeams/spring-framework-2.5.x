@@ -17,8 +17,8 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditorSupport;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Locale;
 
 import junit.framework.TestCase;
 
@@ -26,6 +26,7 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
  * @author Rod Johnson
@@ -408,6 +409,32 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
 		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[5]);
+	}
+
+	public void testBindingErrors() {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", "32x"));
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+		FieldError ageError = errors.getFieldError("age");
+		assertEquals("typeMismatch", ageError.getCode());
+
+		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+		messageSource.setBasename("org.springframework.validation.messages1");
+		String msg = messageSource.getMessage(ageError, Locale.getDefault());
+		assertEquals("Field age did not have correct type", msg);
+
+		messageSource = new ResourceBundleMessageSource();
+		messageSource.setBasename("org.springframework.validation.messages2");
+		msg = messageSource.getMessage(ageError, Locale.getDefault());
+		assertEquals("Field Age did not have correct type", msg);
+
+		messageSource = new ResourceBundleMessageSource();
+		messageSource.setBasename("org.springframework.validation.messages3");
+		msg = messageSource.getMessage(ageError, Locale.getDefault());
+		assertEquals("Field Person Age did not have correct type", msg);
 	}
 
 

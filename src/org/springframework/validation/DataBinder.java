@@ -26,6 +26,7 @@ import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 /**
  * Binder that allows for binding property values to a target object.
@@ -43,7 +44,7 @@ import org.springframework.beans.PropertyValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.14 2004-04-03 11:51:20 aarendsen Exp $
+ * @version $Id: DataBinder.java,v 1.15 2004-05-22 12:43:28 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -207,10 +208,11 @@ public class DataBinder {
 				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
 				if (pv == null || "".equals(pv.getValue()) || pv.getValue() == null) {
 					// create field error with code "required"
+					String field = this.requiredFields[i];
 					this.errors.addError(
-							new FieldError(this.errors.getObjectName(), this.requiredFields[i], "", true,
-														 this.errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, this.requiredFields[i]),
-														 new Object[] {this.requiredFields[i]}, "Field '" + this.requiredFields[i] + "' is required"));
+							new FieldError(this.errors.getObjectName(), field, "", true,
+														 this.errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, field),
+														 getArgumentsForBindingError(field), "Field '" + field + "' is required"));
 				}
 			}
 		}
@@ -227,7 +229,7 @@ public class DataBinder {
 				this.errors.addError(
 						new FieldError(this.errors.getObjectName(), field, exs[i].getPropertyChangeEvent().getNewValue(), true,
 													 this.errors.resolveMessageCodes(exs[i].getErrorCode(), field),
-													 new Object[] {field}, exs[i].getLocalizedMessage()));
+													 getArgumentsForBindingError(field), exs[i].getLocalizedMessage()));
 			}
 		}
 	}
@@ -255,6 +257,22 @@ public class DataBinder {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Return FieldError arguments for a binding error on the given field.
+	 * Invoked for each missing required fields and each type mismatch.
+	 * <p>Default implementation returns a DefaultMessageSourceResolvable
+	 * with "objectName.field" and "field" as codes.
+	 * @param field the field that caused the binding error
+	 * @return the Object array that represents the FieldError arguments
+	 * @see FieldError#getArguments
+	 * @see org.springframework.context.support.DefaultMessageSourceResolvable
+	 */
+	protected Object[] getArgumentsForBindingError(String field) {
+		return new Object[] {
+			new DefaultMessageSourceResolvable(new String[] {getObjectName() + "." + field, field}, null, field)
+		};
 	}
 
 	/**
