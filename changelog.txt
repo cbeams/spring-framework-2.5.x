@@ -1,15 +1,14 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.150 2004-05-27 09:18:53 jhoeller Exp $
+$Id: changelog.txt,v 1.151 2004-05-27 17:16:51 jhoeller Exp $
 
 
-Changes in version 1.0.2 (27.5.2004)
+Changes in version 1.0.2 (28.5.2004)
 ------------------------------------
 
 Package org.springframework.aop
 * fixed AbstractAutoProxyCreator to not check singleton status for inner beans, avoiding NoSuchBeanDefinitionException
-* reworked GlobalAdvisorAdapterRegistry to hold and return a DefaultAdvisorAdapterRegistry
-* reworked GlobalAdvisorAdapterRegistry to hold the singleton in a WeakReference, for proper garbage collection
+* reworked GlobalAdvisorAdapterRegistry to hold and return a DefaultAdvisorAdapterRegistry in a WeakReference
 * added "advisorAdapterRegistry" property to ProxyFactoryBean and co, with global AdvisorAdapterRegistry as default
 * removed unused MethodInvocationFactory interface and the corresponding bean property in the AdvisedSupport class
 
@@ -43,7 +42,6 @@ Package org.springframework.context
 * ResourceEntityResolver URL-decodes systemId to allow for proper matching with unencoded system root URL in any case
 
 Package org.springframework.core
-* reworked Constants and ConstantException to hold class name rather than Class object
 * revised all usage of Constants hold a member variable rather than a class variable, for proper garbage collection
 * reworked ResourceEditor to take ResourceLoader argument in overloaded constructor
 * added ResourcePatternResolver strategy interface, for resolving a location pattern into Resource objects
@@ -60,10 +58,10 @@ Package org.springframework.ejb
 Package org.springframework.jdbc
 * reworked SQLErrorCodesFactory to hold the singleton in a WeakReference, for proper garbage collection
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
-* added "query(sql, args, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
-* added "query(sql, args, argTypes, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
-* changed JdbcTemplate queryForList to return List of LinkedHashMap if JDK version >1.3 (to preserve column order)
+* added "query(sql, args, resultSetExtractor)"-style methods to JdbcOperations interface and JdbcTemplate class
+* changed JdbcTemplate's "queryForList" to return List of LinkedHashMap if JDK version >1.3 (to preserve column order)
 * refactored SqlParameter's inner ResultReaderStoredProcImpl class into reusable RowMapperResultReader adapter
+* JdbcTemplate's "call" method and the StoredProcedure class support ResultSetExtractors for out parameters
 * added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
 * added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
 * added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
@@ -92,6 +90,7 @@ Package org.springframework.remoting
 
 Package org.springframework.samples
 * changed JPetStore's Axis namespace to "urn:JPetStore" (also made namespace configurable at client side)
+* reworked DefaultImageDatabase's "getImages" implementation to work with RowMapper rather than MappingSqlQuery
 * reworked DefaultImageDatabase's "streamImage" implementation to leverage AbstractLobStreamingResultSetExtractor
 * reworked DefaultImageDatabase's "storeImage" implementation to leverage AbstractLobCreatingPreparedStatementCallback
 
