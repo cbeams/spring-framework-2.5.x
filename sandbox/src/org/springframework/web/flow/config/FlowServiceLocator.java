@@ -34,7 +34,7 @@ public interface FlowServiceLocator {
 	/**
 	 * @param actionBeanId
 	 * @return
-	 * @throws NoSuchActionBeanException
+	 * @throws NoSuchActionException
 	 */
 	public Action getActionBean(String actionBeanId) throws FlowServiceLookupException;
 
@@ -51,6 +51,15 @@ public interface FlowServiceLocator {
 	 * @throws FlowServiceLookupException
 	 */
 	public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException;
+
+	/**
+	 * @param flowDefinitionId
+	 * @param requiredFlowBuilderImplementationClass
+	 * @return
+	 * @throws FlowServiceLookupException
+	 */
+	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
+			throws FlowServiceLookupException;
 
 	/**
 	 * @param flowDefinitionImplementationClass

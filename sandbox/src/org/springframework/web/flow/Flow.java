@@ -307,7 +307,7 @@ public class Flow implements Serializable {
 	 * @return The states iterator
 	 */
 	public Iterator statesIterator() {
-		return this.statesIterator();
+		return this.states.iterator();
 	}
 
 	/**

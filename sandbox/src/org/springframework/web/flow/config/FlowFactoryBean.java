@@ -35,6 +35,24 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 		Assert.state(flowBuilder != null, "The flow builder is required to assemble the flow produced by this factory");
 	}
 
+	/**
+	 * Does this factory bean build the specified FlowBuilder implementation?
+	 * @param requiredBuilderImplementationClass The builder implementation
+	 * @return true if yes, false otherwise
+	 */
+	public boolean buildsWith(Class requiredBuilderImplementationClass) throws IllegalArgumentException {
+		if (!FlowBuilder.class.isAssignableFrom(requiredBuilderImplementationClass)) {
+			throw new IllegalArgumentException("The flow builder implementation class '"
+					+ requiredBuilderImplementationClass + "' you provided to this method does not implement the '"
+					+ FlowBuilder.class.getName() + "' interface");
+		}
+		return getFlowBuilder().getClass().equals(requiredBuilderImplementationClass);
+	}
+
+	protected FlowBuilder getFlowBuilder() {
+		return this.flowBuilder;
+	}
+	
 	public Object getObject() throws Exception {
 		return getFlow();
 	}

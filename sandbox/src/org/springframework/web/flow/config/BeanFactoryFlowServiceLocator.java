@@ -37,7 +37,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			return (Action)getBeanFactory().getBean(actionBeanId, Action.class);
 		}
 		catch (BeansException e) {
-			throw new NoSuchActionBeanException(actionBeanId, e);
+			throw new NoSuchActionException(actionBeanId, e);
 		}
 	}
 
@@ -51,7 +51,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionBeanImplementationClass);
 		}
 		catch (BeansException e) {
-			throw new NoSuchActionBeanException(actionBeanImplementationClass, e);
+			throw new NoSuchActionException(actionBeanImplementationClass, e);
 		}
 	}
 
@@ -64,11 +64,32 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
+	public Flow getFlow(String flowDefinitionId, Class requiredBuilderImplementationClass)
+			throws FlowServiceLookupException {
+		try {
+			String flowFactoryBeanId = "&" + flowDefinitionId;
+			FlowFactoryBean factoryBean = (FlowFactoryBean)getBeanFactory().getBean(flowFactoryBeanId,
+					FlowFactoryBean.class);
+			if (factoryBean.buildsWith(requiredBuilderImplementationClass)) {
+				return factoryBean.getFlow();
+			}
+			else {
+				throw new NoSuchFlowDefinitionException(flowDefinitionId, new IllegalStateException(
+						"The flow factory must produce flows using FlowBuilder of type '"
+								+ requiredBuilderImplementationClass + "' but it doesn't"));
+			}
+		}
+		catch (BeansException e) {
+			throw new NoSuchFlowDefinitionException(flowDefinitionId, e);
+		}
+	}
+
 	public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException {
 		try {
 			if (!Flow.class.isAssignableFrom(flowDefinitionImplementationClass)) {
-				throw new IllegalArgumentException("Your flow definition implementation '"
-						+ flowDefinitionImplementationClass + "' must be a subclass of '" + Flow.class.getName() + "'");
+				throw new IllegalArgumentException("The flow definition implementation  '"
+						+ flowDefinitionImplementationClass + "' you wish to retrieve must be a subclass of '"
+						+ Flow.class.getName() + "'");
 			}
 			return (Flow)BeanFactoryUtils.beanOfType(getListableBeanFactory(), flowDefinitionImplementationClass);
 		}

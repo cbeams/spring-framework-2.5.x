@@ -6,12 +6,12 @@ package org.springframework.web.flow.config;
 /**
  * @author Keith Donald
  */
-public class NoSuchActionBeanException extends FlowServiceLookupException {
-	private NoSuchActionBeanException(String actionBeanId) {
+public class NoSuchActionException extends FlowServiceLookupException {
+	private NoSuchActionException(String actionBeanId) {
 		super(actionBeanId);
 	}
 
-	private NoSuchActionBeanException(Class actionBeanImplementationClass) {
+	private NoSuchActionException(Class actionBeanImplementationClass) {
 		super(actionBeanImplementationClass);
 	}
 
@@ -19,7 +19,7 @@ public class NoSuchActionBeanException extends FlowServiceLookupException {
 	 * @param serviceId
 	 * @param cause
 	 */
-	public NoSuchActionBeanException(String serviceId, Throwable cause) {
+	public NoSuchActionException(String serviceId, Throwable cause) {
 		super(serviceId, cause);
 	}
 
@@ -27,7 +27,7 @@ public class NoSuchActionBeanException extends FlowServiceLookupException {
 	 * @param serviceImplementationClass
 	 * @param cause
 	 */
-	public NoSuchActionBeanException(Class serviceImplementationClass, Throwable cause) {
+	public NoSuchActionException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
 	}
 

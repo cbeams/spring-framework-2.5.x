@@ -73,13 +73,17 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	protected Flow getFlow() {
 		return flow;
 	}
-	
+
 	protected void addSubFlowState(String id, String subFlowId, Transition[] transitions) {
 		addSubFlowState(id, spawnFlow(subFlowId), transitions);
 	}
 
 	protected void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
 		new SubFlowState(flow, id, subFlow, transitions);
+	}
+
+	protected void addSubFlowState(String id, Class flowBuilderImplementation, Transition[] transitions) {
+		new SubFlowState(flow, id, spawnFlow(id, flowBuilderImplementation), transitions);
 	}
 
 	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId,
@@ -93,6 +97,12 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
 
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
+			FlowAttributesMapper attributesMapper, String subFlowDefaultFinishStateId) {
+		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
+				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
+	}
+
 	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperId), transitions);
 	}
@@ -102,25 +112,61 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		new SubFlowState(flow, id, subFlow, attributesMapper, transitions);
 	}
 
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowAttributesMapper attributesMapper,
+			Transition[] transitions) {
+		new SubFlowState(flow, id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, transitions);
+	}
+
 	// flow config factory methods
-
-	protected Flow spawnFlow(Class flowImplementationClass) {
-		return getFlowServiceLocator().getFlow(flowImplementationClass);
-	}
-
-	protected Flow spawnFlow(String flowId) {
-		return getFlowServiceLocator().getFlow(flowId);
-	}
 
 	protected FlowServiceLocator getFlowServiceLocator() {
 		return flowServiceLocator;
 	}
 
-	protected Action executeAction(String actionBeanName) throws NoSuchActionBeanException {
+	/**
+	 * Request that the flow with the specified flowId be spawned as a subflow
+	 * when the sub flow state is entered.
+	 * @param flowId The flow definition id
+	 * @return The flow to be used as a subflow, this should be passed to a
+	 *         addSubFlowState call^
+	 */
+	protected Flow spawnFlow(String flowId) {
+		return getFlowServiceLocator().getFlow(flowId);
+	}
+
+	/**
+	 * Request that the flow with the specified flowId and built by the
+	 * specified flow builder implementation be spawned as a subflow when the
+	 * sub flow state is entered.
+	 * @param flowId The flow definition id
+	 * @param flowBuilderImplementationClass Ther required FlowBuilder
+	 *        implementation
+	 * @return The flow to be used as a subflow, this should be passed to a
+	 *         addSubFlowState call
+	 */
+	protected Flow spawnFlow(String flowId, Class flowBuilderImplementationClass) {
+		return getFlowServiceLocator().getFlow(flowId, flowBuilderImplementationClass);
+	}
+
+	/**
+	 * Request that the action with the specified name be executed when the
+	 * action state being built is entered.
+	 * @param actionBeanName The action name
+	 * @return The action
+	 * @throws NoSuchActionException
+	 */
+	protected Action executeAction(String actionBeanName) throws NoSuchActionException {
 		return getFlowServiceLocator().getActionBean(actionBeanName);
 	}
 
-	protected Action[] executeActions(String[] actionBeanNames) throws NoSuchActionBeanException {
+	/**
+	 * Request that the actions with the specified name be executed in the order
+	 * specified when the action state being built is entered.
+	 * @param actionBeanNames The action names
+	 * @return The actions
+	 * @throws NoSuchActionException
+	 */
+	protected Action[] executeActions(String[] actionBeanNames) throws NoSuchActionException {
 		Action[] actionBeans = new Action[actionBeanNames.length];
 		for (int i = 0; i < actionBeanNames.length; i++) {
 			actionBeans[i] = getFlowServiceLocator().getActionBean(actionBeanNames[i]);
@@ -128,11 +174,27 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return actionBeans;
 	}
 
+	/**
+	 * Request that the actions with the specified implementation be executed
+	 * when the action state being built is entered.
+	 * @param actionBeanImplementationClass The action implementation, must be
+	 *        unique
+	 * @return The actions The action
+	 * @throws NoSuchActionException
+	 */
 	protected Action executeAction(Class actionBeanImplementationClass) {
 		return getFlowServiceLocator().getActionBean(actionBeanImplementationClass);
 	}
 
-	protected Action[] executeActions(Class[] actionBeanImplementationClasses) throws NoSuchActionBeanException {
+	/**
+	 * Request that the actions with the specified implementations be executed
+	 * in the order specified when the action state being built is entered.
+	 * @param actionBeanImplementationClasses The action implementations, must
+	 *        be unique
+	 * @return The actions The actions
+	 * @throws NoSuchActionException
+	 */
+	protected Action[] executeActions(Class[] actionBeanImplementationClasses) throws NoSuchActionException {
 		Action[] actionBeans = new Action[actionBeanImplementationClasses.length];
 		for (int i = 0; i < actionBeanImplementationClasses.length; i++) {
 			actionBeans[i] = getFlowServiceLocator().getActionBean(actionBeanImplementationClasses[i]);
@@ -140,10 +202,24 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return actionBeans;
 	}
 
+	/**
+	 * Request that the attribute mapper with the specified name prefix be used
+	 * to map attributes between a parent flow and a spawning subflow when the
+	 * subflow state being constructed is entered.
+	 * @param attributesMapperBeanNamePrefix The attribute mapper prefix
+	 * @return The attributes mapper
+	 */
 	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix) {
 		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
 	}
 
+	/**
+	 * Request that the attribute mapper of the specified implementation be used
+	 * to map attributes between a parent flow and a spawning subflow when the
+	 * subflow state being constructed is entered.
+	 * @param flowAttributesMapperImplementationClass
+	 * @return The attributes mapper
+	 */
 	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass) {
 		return getFlowServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
 	}
