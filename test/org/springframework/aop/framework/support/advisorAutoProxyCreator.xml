@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	Common bean definitions for EnterpriseServices
+	tests.
+-->
+<beans>
+
+	<bean id="auto_txPP"
+		class="org.springframework.aop.framework.support.AdvisorAutoProxyCreator">
+	</bean>
+
+
+	<bean id="auto_txManager"
+		class="org.springframework.transaction.CountingTxManager">
+	</bean>
+	
+	<bean id="tas" class="org.springframework.transaction.interceptor.PropertiesTransactionAttributeSource">
+		<property name="properties">
+			<props>
+				<prop key="set*">PROPAGATION_REQUIRED</prop>
+				<prop key="rollbackOnly">PROPAGATION_REQUIRED</prop>
+				<prop key="echoException">PROPAGATION_REQUIRED,+javax.servlet.ServletException,-java.lang.Exception</prop>
+			</props>
+		</property>
+	</bean>
+	
+	
+	<bean id="auto_txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"><ref local="auto_txManager"/></property>
+		<property name="transactionAttributeSource"><ref local="tas"/></property>
+	</bean>
+	
+	
+	<bean id="auto_txAdvice"
+		autowire="constructor"
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor">
+	</bean>
+	
+	
+	<bean id="test"
+		class="org.springframework.beans.TestBean">
+		<property name="age"><value>4</value></property>
+	</bean>
+	
+	<bean id="noSetters"
+		class="org.springframework.aop.framework.support.NoSetters">
+
+	</bean>
+	
+	<bean id="rollback"
+		class="org.springframework.aop.framework.support.Rollback">
+
+	</bean>
+	
+
+</beans>		
+	
+	
