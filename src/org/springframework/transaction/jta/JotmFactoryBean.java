@@ -28,6 +28,7 @@ import org.springframework.beans.factory.FactoryBean;
  * &lt;/bean&gt;<br>
  * <br>
  * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;<br>
+ * &nbsp;&nbsp;&lt;property name="transactionManager"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
  * &nbsp;&nbsp;&lt;property name="driverName"&gt;...&lt;/property&gt;<br>
  * &nbsp;&nbsp;&lt;property name="url"&gt;...&lt;/property&gt;<br>
  * &lt;/bean&gt;<br>
@@ -43,8 +44,9 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * @author Juergen Hoeller
  * @since 21.01.2004
+ * @see JtaTransactionManager#setUserTransaction
  * @see JtaTransactionManager#setTransactionManager
- * @see org.objectweb.jotm.Current#getTransactionManager
+ * @see org.objectweb.jotm.Current
  */
 public class JotmFactoryBean implements FactoryBean {
 
