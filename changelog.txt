@@ -98,18 +98,21 @@ Package org.springframework.validation
 * DataBinder logs a warning when suppressing a non-allowed field (i.e. a field not specified in "allowedFields")
 
 Package org.springframework.web
+* added convenience methods to RequestUtils for extracting and converting request parameters that are arrays
 * added ServletContextResourcePatternResolver, to find matching resources within a web app even in an unexpanded WAR
 * fixed UrlPathHelper to check for request URIs that do not start with the application's context path (rather unusual)
 * fixed FrameworkServlet to use "doGet"/"doPost"/"doHead" etc, to reenable proper LastModified support in controllers
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * DispatcherServlet caches chosen HandlerExecutionChain in "getLastModified", for reuse in "doService"
+* added "addAllObjects" method to ModelAndView, for adding model objects in bulk (equivalent to getModel().putAll)
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
 * added "autowireMode(Name)" and "dependencyCheck" properties (for autowired handlers) to AbstractPathMapHandlerMapping
+* RedirectView just prepends context path if URL starts with a slash (in case of "contextRelative"=true)
+* UrlBasedViewResolver supports a "redirect:" prefix now, for convenient redirects through special view names
+* added "redirectContextRelative" and "redirectHttp10Compatible" flags to UrlBasedViewResolver, applying to "redirect:"
 * added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
 * added "springMessage"/"springMessageText" macros for Velocity and "message"/"messageText" macros for FreeMarker
 * fixed AbstractExcelView to not hold the HSSFWorkbook instance in an instance variable (avoiding concurrency issues)
-* added convenience methods to RequestUtils for extracting and converting request parameters that are arrays
-* ModelAndView now allows model objects to be added in bulk, via the introduced "addAllObjects" method
 
 
 Changes in version 1.1.1 (30.9.2004)
