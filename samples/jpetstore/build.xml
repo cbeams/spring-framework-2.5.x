@@ -165,18 +165,11 @@
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="images/**"/>
-			<include name="WEB-INF/dataAccessContext*.xml"/>
-			<include name="WEB-INF/applicationContext.xml"/>
-			<include name="WEB-INF/petstore-servlet.xml"/>
-			<include name="WEB-INF/sql-map-config.xml"/>
-			<include name="WEB-INF/struts-config.xml"/>
-			<include name="WEB-INF/caucho-servlet.xml"/>
-			<include name="WEB-INF/server-config.wsdd"/>
-			<include name="WEB-INF/*.properties"/>
+			<include name="WEB-INF/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
-		    <include name="WEB-INF/classes/**"/>
-		    <include name="WEB-INF/log/**"/>
+			<include name="WEB-INF/classes/**"/>
+			<include name="WEB-INF/log/**"/>
 			<exclude name="**/.*"/>
 		</war>
 

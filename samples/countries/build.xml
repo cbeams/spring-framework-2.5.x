@@ -133,10 +133,8 @@
 			<include name="docs/**"/>
 			<include name="images/**"/>
 			<include name="themes/**"/>
-			<include name="WEB-INF/applicationContext.xml"/>
-			<include name="WEB-INF/countries-servlet.xml"/>
-			<include name="WEB-INF/jboss-web.xml"/>
-			<include name="WEB-INF/classes/*.properties"/>
+			<include name="WEB-INF/*.*"/>
+			<include name="WEB-INF/classes/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/views/**"/>
 			<exclude name="**/.*"/>
