@@ -38,7 +38,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * ApplicationContext specific features are needed in the bean reference definition
  * itself.</p>
  *
- * <p><strong>Note: </strong>This class uses <strong>beanRefContext.xml</strong>
+ * <p><strong>Note: </strong>This class uses <strong>classpath*:beanRefContext.xml</strong>
  * as the default name for the bean factory reference definition. It is not possible
  * nor legal to share definitions with SingletonBeanFactoryLocator at the same time.
  * 
