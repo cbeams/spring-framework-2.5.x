@@ -20,4 +20,4 @@
 </TABLE>
 <P>
 <BR>
-<A href="<c:url value="welcome.htm"/>">Home</A>
+<A href="<c:url value="/welcome.htm"/>">Home</A>

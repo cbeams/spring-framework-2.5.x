@@ -5,7 +5,7 @@
 <TABLE border="true">
   <TH>
     <H3>Owner:</H3>        
-    <FORM method=GET action="<c:url value="editOwner.htm"/>">
+    <FORM method=GET action="<c:url value="/editOwner.htm"/>">
       <INPUT type="hidden" name="ownerId" value="<c:out value="${model.owner.id}"/>"/>
       <INPUT type="submit" value="Edit Owner"/>
     </FORM>
@@ -29,7 +29,7 @@
   <TABLE border="true">
     <TH>
       <H3>Pet:</H3>
-      <FORM method=GET action="<c:url value="editPet.htm"/>">
+      <FORM method=GET action="<c:url value="/editPet.htm"/>">
         <INPUT type="hidden" name="petId" value="<c:out value="${pet.id}"/>"/>
         <INPUT type="submit" value="Edit Pet"/>
       </FORM>
@@ -48,7 +48,7 @@
   <TABLE border="true">
     <TH>
       <H3>Visits:</H3>
-      <FORM method=GET action="<c:url value="addVisit.htm"/>">
+      <FORM method=GET action="<c:url value="/addVisit.htm"/>">
         <INPUT type="hidden" name="petId" value="<c:out value="${pet.id}"/>"/>
         <INPUT type="submit" value="Add Visit"/>
       </FORM>
@@ -69,11 +69,11 @@
   <BR>
 </c:forEach>
 <P>
-<FORM method=GET action="<c:url value="addPet.htm"/>">
+<FORM method=GET action="<c:url value="/addPet.htm"/>">
   <INPUT type="hidden" name="ownerId" value="<c:out value="${model.owner.id}"/>"/>
   <INPUT type="submit" value="Add Pet"/>
 </FORM>
 <P>
 <BR>
-<A href="<c:url value="welcome.htm"/>">Home</A>
+<A href="<c:url value="/welcome.htm"/>">Home</A>
   

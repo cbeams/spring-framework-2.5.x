@@ -7,7 +7,7 @@
   <c:forEach var="owner" items="${selections}">
     <TR>
       <TD>
-        <FORM method=POST action="<c:url value="owner.htm"/>">
+        <FORM method="POST" action="<c:url value="/owner.htm"/>">
           <INPUT type="hidden" name="ownerId" value="<c:out value="${owner.id}"/>"/>
           <INPUT type="submit" value="<c:out value="${owner.firstName}"/> <c:out value="${owner.lastName}"/>"/>
         </FORM>
@@ -25,4 +25,4 @@
 </TABLE>
 <P>
 <BR>
-<A href="<c:url value="welcome.htm"/>">Home</A>
+<A href="<c:url value="/welcome.htm"/>">Home</A>

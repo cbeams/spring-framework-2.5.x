@@ -14,7 +14,7 @@
 </FORM>
 <P>
 <BR>
-<A href="<c:url value="addOwner.htm"/>">Add Owner</A>
+<A href="<c:url value="/addOwner.htm"/>">Add Owner</A>
 <P>
 <BR>
-<A href="<c:url value="welcome.htm"/>">Home</A>
+<A href="<c:url value="/welcome.htm"/>">Home</A>
