@@ -123,7 +123,12 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public void setAttribute(String name, Object value) {
-		this.attributes.put(name, value);
+		if (value != null) {
+			this.attributes.put(name, value);
+		}
+		else {
+			this.attributes.remove(name);
+		}
 	}
 
 	public void putValue(String name, Object value) {

@@ -242,7 +242,12 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public void setAttribute(String name, Object value) {
-		this.attributes.put(name, value);
+		if (value != null) {
+			this.attributes.put(name, value);
+		}
+		else {
+			this.attributes.remove(name);
+		}
 	}
 
 	public void removeAttribute(String name) {
