@@ -70,7 +70,8 @@ public abstract class GenericFilterBean implements Filter {
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
-	 * and must be supplied as a config parameter.
+	 * and must be supplied as a config parameter. This should be called
+	 * from the constructor of a subclass
 	 * @param property name of the required property
 	 */
 	protected final void addRequiredProperty(String property) {
