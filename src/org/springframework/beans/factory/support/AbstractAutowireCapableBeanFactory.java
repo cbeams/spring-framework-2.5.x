@@ -52,6 +52,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -74,7 +75,7 @@ import org.springframework.core.JdkVersion;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13.02.2004
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.29 2004-08-02 13:44:56 johnsonr Exp $
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.30 2004-08-02 15:40:34 jhoeller Exp $
  * @see #findMatchingBeans
  * @see DefaultListableBeanFactory
  */

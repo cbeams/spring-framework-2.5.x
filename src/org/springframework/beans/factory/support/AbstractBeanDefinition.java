@@ -34,7 +34,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.20 2004-08-02 13:44:56 johnsonr Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.21 2004-08-02 15:40:35 jhoeller Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -253,7 +253,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return method overrides for the bean, if any.
+	 * Return information about methods to be overridden by the IoC
+	 * container. This will be empty if there are no method overrides.
+	 * Never returns null.
 	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;

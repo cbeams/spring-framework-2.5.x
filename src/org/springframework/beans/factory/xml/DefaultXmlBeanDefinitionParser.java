@@ -36,10 +36,10 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.33 2004-08-02 13:46:13 johnsonr Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.34 2004-08-02 15:40:36 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 

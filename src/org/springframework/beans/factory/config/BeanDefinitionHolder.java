@@ -1,4 +1,4 @@
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  *
  * @author Juergen Hoeller
  * @since 29.04.2004
- * @see AbstractAutowireCapableBeanFactory#resolveValueIfNecessary
+ * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#resolveValueIfNecessary
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser#parseBeanDefinition
  * @see org.springframework.beans.factory.BeanNameAware
  */
