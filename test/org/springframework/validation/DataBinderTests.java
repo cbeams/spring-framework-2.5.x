@@ -761,6 +761,24 @@ public class DataBinderTests extends TestCase {
 		assertEquals("Field Person Age did not have correct type", msg);
 	}
 
+	public void testAddAllErrors() {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", "32x"));
+		binder.bind(pvs);
+		Errors errors = binder.getErrors();
+
+		BindException errors2 = new BindException(rod, "person");
+		errors.rejectValue("name", "badName");
+		errors.addAllErrors(errors2);
+
+		FieldError ageError = errors.getFieldError("age");
+		assertEquals("typeMismatch", ageError.getCode());
+		FieldError nameError = errors.getFieldError("name");
+		assertEquals("badName", nameError.getCode());
+	}
+
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");

@@ -197,22 +197,46 @@ public class BindException extends Exception implements Errors {
 		addError(fe);
 	}
 
-	protected String[] resolveMessageCodes(String errorCode) {
+	/**
+	 * Resolve the given error code into message codes.
+	 * Calls the MessageCodesResolver with appropriate parameters.
+	 * @param errorCode the error code to resolve into message codes
+	 * @return the resolved message codes
+	 * @see #setMessageCodesResolver
+	 */
+	public String[] resolveMessageCodes(String errorCode) {
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
 	}
 
-	protected String[] resolveMessageCodes(String errorCode, String field) {
+	/**
+	 * Resolve the given error code into message codes for the given field.
+	 * Calls the MessageCodesResolver with appropriate parameters.
+	 * @param errorCode the error code to resolve into message codes
+	 * @param field the field to resolve message codes for
+	 * @return the resolved message codes
+	 * @see #setMessageCodesResolver
+	 */
+	public String[] resolveMessageCodes(String errorCode, String field) {
 		String fixedField = fixedField(field);
 		Class fieldType = getBeanWrapper().getPropertyType(fixedField);
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName(), fixedField, fieldType);
 	}
 
 	/**
-	 * Add a FieldError to the errors list.
-	 * Intended to be used by subclasses like DataBinder.
+	 * Add an ObjectError or FieldError to the errors list.
+	 * <p>Intended to be used by subclasses like DataBinder,
+	 * or by cooperating strategies like a BindingErrorProcessor.
+	 * @see ObjectError
+	 * @see FieldError
+	 * @see DataBinder
+	 * @see BindingErrorProcessor
 	 */
-	protected void addError(ObjectError error) {
+	public void addError(ObjectError error) {
 		this.errors.add(error);
+	}
+
+	public void addAllErrors(Errors errors) {
+		this.errors.addAll(errors.getAllErrors());
 	}
 
 

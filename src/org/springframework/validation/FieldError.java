@@ -47,8 +47,9 @@ public class FieldError extends ObjectError {
 	 * @param arguments the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
-	public FieldError(String objectName, String field, Object rejectedValue, boolean bindingFailure,
-										String[] codes, Object[] arguments, String defaultMessage) {
+	public FieldError(
+			String objectName, String field, Object rejectedValue, boolean bindingFailure,
+			String[] codes, Object[] arguments, String defaultMessage) {
 		super(objectName, codes, arguments, defaultMessage);
 		this.field = field;
 		this.rejectedValue = rejectedValue;
@@ -79,7 +80,7 @@ public class FieldError extends ObjectError {
 
 	public String toString() {
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
-				"': rejectedValue=[" + this.rejectedValue + "]; " + resolvableToString();
+				"': rejected value [" + this.rejectedValue + "]; " + resolvableToString();
 	}
 
 }

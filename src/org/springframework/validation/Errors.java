@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.validation;
 
@@ -22,9 +22,9 @@ import org.springframework.beans.PropertyAccessor;
 
 /**
  * Interface to be implemented by objects that can store and expose
- * information about data binding errors.
+ * information about data binding errors for a specific object.
  *
- * <p>Field names can be properties of the given object (e.g. "name"
+ * <p>Field names can be properties of the target object (e.g. "name"
  * when binding to a customer object), or nested fields in case of
  * subobjects (e.g. "address.street"). Supports subtree navigation
  * via setNestedPath, e.g. an AddressValidator validates "address",
@@ -35,6 +35,8 @@ import org.springframework.beans.PropertyAccessor;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setNestedPath
+ * @see BindException
+ * @see DataBinder
  */
 public interface Errors {
 
@@ -137,6 +139,18 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 */
 	void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage);
+
+	/**
+	 * Add all errors from the given <code>Errors</code> instance to this
+	 * <code>Errors</code> instance. Convenience method to avoid repeated
+	 * <code>reject</code> calls for merging an <code>Errors</code> instance
+	 * into another <code>Errors</code> instance.
+	 * <p>Note that the passed-in <code>Errors</code> instance is supposed
+	 * to refer to the same target object, or at least contain compatible errors
+	 * that apply to the target object of this <code>Errors</code> instance.
+	 * @param errors the <code>Errors</code> instance to merge in
+	 */
+	void addAllErrors(Errors errors);
 
 
 	/**

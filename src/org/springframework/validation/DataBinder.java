@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.validation;
 
@@ -32,7 +32,6 @@ import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -73,26 +72,21 @@ import org.springframework.util.StringUtils;
  * <p>This generic data binder can be used in any sort of environment.
  * It is heavily used by Spring's web binding features, via the subclass
  * ServletRequestDataBinder.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
  * @see #setMessageCodesResolver
- * @see #setPropertyAccessExceptionProcessor
- * @see #setRequiredFieldErrorProcessor
+ * @see #setBindingErrorProcessor
  * @see #bind
  * @see #getErrors
  * @see DefaultMessageCodesResolver
- * @see DefaultRequiredFieldErrorProcessor
- * @see DefaultPropertyAccessExceptionProcessor
+ * @see DefaultBindingErrorProcessor
  * @see org.springframework.context.MessageSource
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class DataBinder {
-
-
 
 	/**
 	 * Error code that a type mismatch error (i.e. a property value not
@@ -124,12 +118,10 @@ public class DataBinder {
 
 	private String[] requiredFields;
 
-    private PropertyAccessExceptionProcessor propertyAccessExceptionProcessor;
-
-    private RequiredFieldErrorProcessor requiredFieldErrorProcessor;
+	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
 
-    /**
+	/**
 	 * Create a new DataBinder instance.
 	 * @param target target object to bind onto
 	 * @param objectName name of the target object
@@ -286,13 +278,13 @@ public class DataBinder {
 		this.errors.setMessageCodesResolver(messageCodesResolver);
 	}
 
-    public void setPropertyAccessExceptionProcessor(PropertyAccessExceptionProcessor propertyAccessExceptionProcessor) {
-        this.propertyAccessExceptionProcessor = propertyAccessExceptionProcessor;
-    }
-
-    public void setRequiredFieldErrorProcessor(RequiredFieldErrorProcessor requiredFieldErrorProcessor) {
-        this.requiredFieldErrorProcessor = requiredFieldErrorProcessor;
-    }
+	/**
+	 * Set the strategy to use for processing binding errors, that is,
+	 * required field errors and <code>PropertyAccessException</code>s.
+	 */
+	public void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
+		this.bindingErrorProcessor = bindingErrorProcessor;
+	}
 
 
 	/**
@@ -308,17 +300,17 @@ public class DataBinder {
 	 * @param pvs property values to bind.
 	 */
 	public void bind(PropertyValues pvs) {
-		// check for fields to bind
+		// Check for fields to bind.
 		List allowedFieldsList = (this.allowedFields != null) ? Arrays.asList(this.allowedFields) : null;
 		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues) ?
-		    (MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
+				(MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
 		PropertyValue[] pvArray = pvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
 				mpvs.removePropertyValue(pvArray[i]);
 				if (logger.isWarnEnabled()) {
-					logger.warn("Field [" + pvArray[i] +  "] has been removed from PropertyValues " +
+					logger.warn("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
 							allowedFieldsList);
 				}
@@ -326,34 +318,28 @@ public class DataBinder {
 		}
 		pvs = mpvs;
 
-		// check for missing fields
+		// Check for missing fields.
 		if (this.requiredFields != null) {
 			for (int i = 0; i < this.requiredFields.length; i++) {
 				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
 				if (pv == null || pv.getValue() == null ||
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
-					// use error processor to create errors (use the default one if no processor is set)
-                    if (this.requiredFieldErrorProcessor == null) {
-                        this.requiredFieldErrorProcessor = new DefaultRequiredFieldErrorProcessor();
-                    }
+					// Use bind error processor to create FieldError.
 					String field = this.requiredFields[i];
-                    this.requiredFieldErrorProcessor.processRequiredFieldError(field, this.errors);
+					this.bindingErrorProcessor.processMissingFieldError(field, this.errors);
 				}
 			}
 		}
 
 		try {
-			// bind request parameters onto target object
+			// Bind request parameters onto target object.
 			this.errors.getBeanWrapper().setPropertyValues(pvs, this.ignoreUnknownFields);
 		}
 		catch (PropertyAccessExceptionsException ex) {
-            // use property access exception processor to create errors (use the default one if no processor is set)
-            if (propertyAccessExceptionProcessor == null) {
-                this.propertyAccessExceptionProcessor = new DefaultPropertyAccessExceptionProcessor();
-            }
+			// Use bind error processor to create FieldErrors.
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
 			for (int i = 0; i < exs.length; i++) {
-				this.propertyAccessExceptionProcessor.processPropertyAccessException(exs[i], this.errors);
+				this.bindingErrorProcessor.processPropertyAccessException(exs[i], this.errors);
 			}
 		}
 	}
@@ -381,24 +367,6 @@ public class DataBinder {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Return FieldError arguments for a binding error on the given field.
-	 * Invoked for each missing required fields and each type mismatch.
-	 * <p>Default implementation returns a DefaultMessageSourceResolvable
-	 * with "objectName.field" and "field" as codes.
-	 * @param field the field that caused the binding error
-	 * @return the Object array that represents the FieldError arguments
-	 * @see FieldError#getArguments
-	 * @see org.springframework.context.support.DefaultMessageSourceResolvable
-     * @deprecated left here for backward compatibility reasons. will be removed post 1.3
-	 */
-	protected Object[] getArgumentsForBindingError(String field) {
-		return new Object[] {
-				new DefaultMessageSourceResolvable(new String[] {getObjectName() + Errors.NESTED_PATH_SEPARATOR + field, field},
-				null, field)
-		};
 	}
 
 	/**

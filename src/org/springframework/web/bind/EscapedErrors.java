@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.bind;
 
@@ -104,6 +104,10 @@ public class EscapedErrors implements Errors {
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
+	public void addAllErrors(Errors errors) {
+		this.source.addAllErrors(errors);
+	}
+
 
 	public boolean hasErrors() {
 		return this.source.hasErrors();
@@ -165,8 +169,9 @@ public class EscapedErrors implements Errors {
 				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
 			}
 			return new FieldError(
-					fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
-					fieldError.getCodes(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+					fieldError.getObjectName(), fieldError.getField(), value,
+					fieldError.isBindingFailure(), fieldError.getCodes(),
+					fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
 		return new ObjectError(
 				source.getObjectName(), source.getCodes(), source.getArguments(),
