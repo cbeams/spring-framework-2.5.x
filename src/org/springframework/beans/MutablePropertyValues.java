@@ -19,7 +19,6 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +96,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * references are independent, although it can't deep copy objects currently
 	 * referenced by individual PropertyValue objects.
 	 * @param source the PropertyValues to copy
+	 * @return this object to allow creating objects, adding multiple PropertyValues
+	 * in a single statement
 	 */
-	public void addPropertyValues(PropertyValues source) {
+	public MutablePropertyValues addPropertyValues(PropertyValues source) {
 		if (source != null) {
 			PropertyValue[] pvs = source.getPropertyValues();
 			for (int i = 0; i < pvs.length; i++) {
@@ -106,14 +107,17 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 			recache();
 		}
+		return this;
 	}
 
 	/**
 	 * Add all property values from the given Map.
 	 * @param source Map with property values keyed by property name,
 	 * which must be a String
+	 * @return this object to allow creating objects, adding multiple PropertyValues
+	 * in a single statement
 	 */
-	public void addPropertyValues(Map source) {
+	public MutablePropertyValues addPropertyValues(Map source) {
 		if (source != null) {
 			Iterator it = source.keySet().iterator();
 			while (it.hasNext()) {
@@ -122,23 +126,27 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 			recache();
 		}
+		return this;
 	}
 
 	/**
 	 * Add a PropertyValue object, replacing any existing one
 	 * for the respective property.
 	 * @param pv PropertyValue object to add
+	 * @return this object to allow creating objects, adding multiple PropertyValues
+	 * in a single statement
 	 */
-	public void addPropertyValue(PropertyValue pv) {
+	public MutablePropertyValues addPropertyValue(PropertyValue pv) {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
 			PropertyValue currentPv = (PropertyValue) this.propertyValueList.get(i);
 			if (currentPv.getName().equals(pv.getName())) {
 				setPropertyValueAt(pv, i);
-				return;
+				return this;
 			}
 		}
 		this.propertyValueList.add(pv);
 		recache();
+		return this;
 	}
 
 	/**
