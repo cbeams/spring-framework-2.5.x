@@ -237,6 +237,14 @@
          <version>1.4</version>
       </dependency>
       <dependency>
+         <id>commons-attributes-api</id>
+         <version>SNAPSHOT</version>
+      </dependency>
+      <dependency>
+         <id>commons-attributes-compiler</id>
+         <version>SNAPSHOT</version>
+      </dependency>
+      <dependency>
          <id>commons-beanutils</id>
          <version>1.6</version>
       </dependency>
