@@ -55,7 +55,7 @@ public class FlowSession implements Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
-	protected static final Log logger = LogFactory.getLog(FlowSession.class);
+	protected final Log logger = LogFactory.getLog(FlowSession.class);
 
 	/**
 	 * The flow definition (a singleton).
@@ -126,7 +126,7 @@ public class FlowSession implements Serializable {
 	 * Set the status of this flow session.
 	 * @param status the new status to set
 	 */
-	public void setStatus(FlowSessionStatus status) {
+	protected void setStatus(FlowSessionStatus status) {
 		Assert.notNull(status);
 		this.status = status;
 	}

@@ -376,7 +376,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	public boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
+	protected boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
 		String tokenValue = (String)getLastEvent().getParameter(tokenParameterName);
 		return isTokenValid(tokenName, tokenValue, clear);
 	}
@@ -397,7 +397,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	private boolean isTokenValid(String tokenName, String tokenValue, boolean clear) {
+	protected boolean isTokenValid(String tokenName, String tokenValue, boolean clear) {
 		if (!StringUtils.hasText(tokenValue)) {
 			return false;
 		}
