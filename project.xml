@@ -359,6 +359,11 @@
          <version>1.02b</version>
       </dependency>
        <dependency>
+         <groupId>jasperreports</groupId>
+         <artifactId>jasperreports</artifactId>
+         <version>0.6.2</version>
+      </dependency>
+       <dependency>
          <id>jdom</id>
          <version>b9</version>
       </dependency>
