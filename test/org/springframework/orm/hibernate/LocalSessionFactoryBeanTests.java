@@ -1,28 +1,28 @@
 package org.springframework.orm.hibernate;
 
-import java.util.Properties;
-import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
+import java.util.Properties;
+import java.util.Set;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
-import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.MappingException;
+import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.cfg.Configuration;
 import net.sf.hibernate.cfg.Environment;
 import net.sf.hibernate.connection.UserSuppliedConnectionProvider;
-
 import org.easymock.MockControl;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.FileSystemResource;
+
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
@@ -57,6 +57,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 																					"/org/springframework/beans/factory/xml/child.xml"});
 		sfb.setDataSource(ds);
 		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
 		assertEquals("addResource", invocations.get(0));
 		assertEquals("addResource", invocations.get(1));
 		assertEquals("newSessionFactory", invocations.get(2));
@@ -85,6 +86,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 																							 new FileSystemResource("mapping2.hbm.jar")});
 		sfb.setDataSource(ds);
 		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
 		assertTrue(invocations.contains("addResource mapping.hbm.jar"));
 		assertTrue(invocations.contains("addResource mapping2.hbm.jar"));
 		assertTrue(invocations.contains("newSessionFactory"));
@@ -122,6 +124,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		prop.setProperty("myProperty", "myValue");
 		sfb.setHibernateProperties(prop);
 		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
 		assertTrue(invocations.contains("addResource"));
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
@@ -141,6 +144,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		prop.setProperty("myProperty", "myValue");
 		sfb.setHibernateProperties(prop);
 		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 

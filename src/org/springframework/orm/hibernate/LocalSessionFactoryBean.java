@@ -115,6 +115,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private boolean schemaUpdate = false;
 
+	private Configuration configuration;
+
 	private SessionFactory sessionFactory;
 
 
@@ -332,6 +334,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 		// build SessionFactory instance
 		logger.info("Building new Hibernate SessionFactory");
+		this.configuration = config;
 		this.sessionFactory = newSessionFactory(config);
 
 		if (this.jtaTransactionManager != null) {
@@ -372,8 +375,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom post-processing
-	 * of the Configuration object after the default initialization took place.
+	 * To be implemented by subclasses that want to to perform custom
+	 * post-processing of the Configuration object after this FactoryBean
+	 * performed its default initialization.
 	 * @param config the current Configuration object
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
@@ -416,10 +420,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		template.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection conn = session.connection();
-					DatabaseMetadata metadata = new DatabaseMetadata(conn, dialect);
+					Connection con = session.connection();
+					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 					String[] sql = config.generateSchemaUpdateScript(dialect, metadata);
-					Statement stmt = conn.createStatement();
+					Statement stmt = con.createStatement();
 					try {
 						for (int i = 0; i < sql.length; i++) {
 							logger.debug("Executing schema update statement: " + sql[i]);
@@ -433,6 +437,15 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				}
 			}
 		);
+	}
+
+
+	/**
+	 * Return the Configuration object used to build the SessionFactory.
+	 * Allows access to configuration metadata stored there (rarely needed).
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 
 	/**
