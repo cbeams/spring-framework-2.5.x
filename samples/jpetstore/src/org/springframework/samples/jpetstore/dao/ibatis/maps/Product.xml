@@ -10,23 +10,23 @@
   </cache-model>
 
   <result-map name="result" class="org.springframework.samples.jpetstore.domain.Product">
-    <property name="productId" column="PRODUCTID" columnIndex="1"/>
-    <property name="name" column="NAME" columnIndex="2"/>
-    <property name="description" column="DESCN" columnIndex="3"/>
-    <property name="categoryId" column="CATEGORY" columnIndex="4"/>
+    <property name="productId" column="productid" columnIndex="1"/>
+    <property name="name" column="name" columnIndex="2"/>
+    <property name="description" column="descn" columnIndex="3"/>
+    <property name="categoryId" column="category" columnIndex="4"/>
   </result-map>
 
   <mapped-statement name="getProduct" result-map="result">
-    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT where PRODUCTID = #value#
+    select productid, name, descn, category from product where productid = #value#
   </mapped-statement>
 
   <mapped-statement name="getProductListByCategory" result-map="result">
-    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT where CATEGORY = #value#
+    select productid, name, descn, category from product where category = #value#
   </mapped-statement>
 
   <dynamic-mapped-statement name="searchProductList" result-map="result">
-    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT
-    <dynamic prepend="WHERE">
+    select productid, name, descn, category from product
+    <dynamic prepend="where">
       <iterate property="keywordList" open="(" close=")" conjunction="OR">
         lower(name) like #keywordList[]# OR lower(category) like #keywordList[]# OR lower(descn) like #keywordList[]#
       </iterate>

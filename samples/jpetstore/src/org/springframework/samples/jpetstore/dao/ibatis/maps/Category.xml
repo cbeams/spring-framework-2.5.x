@@ -10,17 +10,17 @@
   </cache-model>
 
   <result-map name="result" class="org.springframework.samples.jpetstore.domain.Category">
-    <property name="categoryId" column="CATID" columnIndex="1"/>
-    <property name="name" column="NAME" columnIndex="2"/>
-    <property name="description" column="DESCN" columnIndex="3"/>
+    <property name="categoryId" column="catid" columnIndex="1"/>
+    <property name="name" column="name" columnIndex="2"/>
+    <property name="description" column="descn" columnIndex="3"/>
   </result-map>
 
   <mapped-statement name="getCategory" result-map="result">
-    select CATID, NAME, DESCN from CATEGORY where CATID = #value#
+    select catid, name, descn from category where catid = #value#
   </mapped-statement>
 
   <mapped-statement name="getCategoryList" result-map="result">
-    select CATID, NAME, DESCN from CATEGORY
+    select catid, name, descn from category
   </mapped-statement>
 
 </sql-map>

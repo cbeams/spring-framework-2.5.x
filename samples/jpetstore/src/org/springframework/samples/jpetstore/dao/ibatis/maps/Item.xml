@@ -15,62 +15,62 @@
   </cache-model>
 
   <result-map name="result" class="org.springframework.samples.jpetstore.domain.Item">
-    <property name="itemId" column="ITEMID" columnIndex="1"/>
-    <property name="listPrice" column="LISTPRICE" columnIndex="2"/>
-    <property name="unitCost" column="UNITCOST" columnIndex="3"/>
-    <property name="supplierId" column="SUPPLIER" columnIndex="4"/>
-    <property name="productId" column="PRODUCTID" columnIndex="5"/>
-    <property name="product.productId" column="PRODUCTID" columnIndex="5"/>
-    <property name="product.name" column="NAME" columnIndex="6"/>
-    <property name="product.description" column="DESCN" columnIndex="7"/>
-    <property name="product.categoryId" column="CATEGORY" columnIndex="8"/>
-    <property name="status" column="STATUS" columnIndex="9"/>
-    <property name="attribute1" column="ATTR1" columnIndex="10"/>
-    <property name="attribute2" column="ATTR2" columnIndex="11"/>
-    <property name="attribute3" column="ATTR3" columnIndex="12"/>
-    <property name="attribute4" column="ATTR4" columnIndex="13"/>
-    <property name="attribute5" column="ATTR5" columnIndex="14"/>
+    <property name="itemId" column="itemid" columnIndex="1"/>
+    <property name="listPrice" column="listprice" columnIndex="2"/>
+    <property name="unitCost" column="unitcost" columnIndex="3"/>
+    <property name="supplierId" column="supplier" columnIndex="4"/>
+    <property name="productId" column="productid" columnIndex="5"/>
+    <property name="product.productId" column="productid" columnIndex="5"/>
+    <property name="product.name" column="name" columnIndex="6"/>
+    <property name="product.description" column="descn" columnIndex="7"/>
+    <property name="product.categoryId" column="category" columnIndex="8"/>
+    <property name="status" column="status" columnIndex="9"/>
+    <property name="attribute1" column="attr1" columnIndex="10"/>
+    <property name="attribute2" column="attr2" columnIndex="11"/>
+    <property name="attribute3" column="attr3" columnIndex="12"/>
+    <property name="attribute4" column="attr4" columnIndex="13"/>
+    <property name="attribute5" column="attr5" columnIndex="14"/>
   </result-map>
 
   <result-map name="result-with-quantity" class="org.springframework.samples.jpetstore.domain.Item">
-    <property name="itemId" column="ITEMID" columnIndex="1"/>
-    <property name="listPrice" column="LISTPRICE" columnIndex="2"/>
-    <property name="unitCost" column="UNITCOST" columnIndex="3"/>
-    <property name="supplierId" column="SUPPLIER" columnIndex="4"/>
-    <property name="productId" column="PRODUCTID" columnIndex="5"/>
-    <property name="product.productId" column="PRODUCTID" columnIndex="5"/>
-    <property name="product.name" column="NAME" columnIndex="6"/>
-    <property name="product.description" column="DESCN" columnIndex="7"/>
-    <property name="product.categoryId" column="CATEGORY" columnIndex="8"/>
-    <property name="status" column="STATUS" columnIndex="9"/>
-    <property name="attribute1" column="ATTR1" columnIndex="10"/>
-    <property name="attribute2" column="ATTR2" columnIndex="11"/>
-    <property name="attribute3" column="ATTR3" columnIndex="12"/>
-    <property name="attribute4" column="ATTR4" columnIndex="13"/>
-    <property name="attribute5" column="ATTR5" columnIndex="14"/>
-    <property name="quantity" column="QTY" columnIndex="15"/>
+    <property name="itemId" column="itemid" columnIndex="1"/>
+    <property name="listPrice" column="listprice" columnIndex="2"/>
+    <property name="unitCost" column="unitcost" columnIndex="3"/>
+    <property name="supplierId" column="supplier" columnIndex="4"/>
+    <property name="productId" column="productid" columnIndex="5"/>
+    <property name="product.productId" column="productid" columnIndex="5"/>
+    <property name="product.name" column="name" columnIndex="6"/>
+    <property name="product.description" column="descn" columnIndex="7"/>
+    <property name="product.categoryId" column="category" columnIndex="8"/>
+    <property name="status" column="status" columnIndex="9"/>
+    <property name="attribute1" column="attr1" columnIndex="10"/>
+    <property name="attribute2" column="attr2" columnIndex="11"/>
+    <property name="attribute3" column="attr3" columnIndex="12"/>
+    <property name="attribute4" column="attr4" columnIndex="13"/>
+    <property name="attribute5" column="attr5" columnIndex="14"/>
+    <property name="quantity" column="qty" columnIndex="15"/>
   </result-map>
 
   <mapped-statement name="getItemListByProduct" result-map="result">
     select
-      ITEMID, LISTPRICE, UNITCOST, SUPPLIER, I.PRODUCTID, NAME,
-      DESCN, CATEGORY, STATUS, ATTR1, ATTR2, ATTR3, ATTR4, ATTR5
-    from ITEM I, PRODUCT P where P.PRODUCTID = I.PRODUCTID and I.PRODUCTID = #value#
+      itemid, listprice, unitcost, supplier, i.productid, name,
+      descn, category, status, attr1, attr2, attr3, attr4, attr5
+    from item i, product p where p.productid = i.productid and i.productid = #value#
   </mapped-statement>
 
   <mapped-statement name="getItem" result-map="result-with-quantity">
     select
-      I.ITEMID, LISTPRICE, UNITCOST, SUPPLIER, I.PRODUCTID, NAME,
-      DESCN, CATEGORY, STATUS, ATTR1, ATTR2, ATTR3, ATTR4, ATTR5, QTY
-    from ITEM I, INVENTORY V, PRODUCT P where P.PRODUCTID = I.PRODUCTID and I.ITEMID = V.ITEMID and I.ITEMID = #value#
+      i.itemid, listprice, unitcost, supplier, i.productid, name,
+      descn, category, status, attr1, attr2, attr3, attr4, attr5, qty
+    from item i, inventory v, product p where p.productid = i.productid and i.itemid = v.itemid and i.itemid = #value#
   </mapped-statement>
 
   <mapped-statement name="getInventoryQuantity" result-class="java.lang.Integer">
-    select QTY as value from INVENTORY where ITEMID = #value#
+    select qty as value from inventory where itemid = #value#
   </mapped-statement>
 
   <mapped-statement name="updateInventoryQuantity">
-    update INVENTORY set QTY = QTY - #increment# where ITEMID = #itemId#
+    update inventory set qty = qty - #increment# where itemid = #itemid#
   </mapped-statement>
 
 </sql-map>

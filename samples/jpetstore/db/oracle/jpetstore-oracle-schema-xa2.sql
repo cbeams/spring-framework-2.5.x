@@ -5,7 +5,6 @@ drop table lineitem;
 drop table orderstatus;
 drop table orders;
 
-
 create table orders (
       orderid int not null,
       userid varchar(80) not null,

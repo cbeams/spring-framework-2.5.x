@@ -15,11 +15,11 @@
   </mapped-statement>
 
   <mapped-statement name="getSequence" result-map="result">
-    select name, nextid from SEQUENCE where NAME = #name#
+    select name, nextid from sequence where name = #name#
   </mapped-statement>
 
   <mapped-statement name="updateSequence">
-    update SEQUENCE set NEXTID = #nextId# where NAME = #name#
+    update sequence set nextid = #nextid# where name = #name#
   </mapped-statement>
 
 </sql-map>

@@ -194,12 +194,10 @@ create table lineitem (
 
 grant all on lineitem to public;
 
-CREATE TABLE sequence
-(
-    name               varchar(30)  not null,
-    nextid             int          not null,
+create table sequence (
+    name varchar(30) not null,
+    nextid int not null,
     constraint pk_sequence primary key (name)
 );
 
 grant all on sequence to public;
-

@@ -7,19 +7,19 @@
 <sql-map name="LineItem">
 
   <result-map name="result" class="org.springframework.samples.jpetstore.domain.LineItem">
-    <property name="orderId" column="ORDERID" columnIndex="1"/>
-    <property name="lineNumber" column="LINENUM" columnIndex="2"/>
-    <property name="itemId" column="ITEMID" columnIndex="3"/>
-    <property name="quantity" column="QUANTITY" columnIndex="4"/>
-    <property name="unitPrice" column="UNITPRICE" columnIndex="5"/>
+    <property name="orderId" column="orderid" columnIndex="1"/>
+    <property name="lineNumber" column="linenum" columnIndex="2"/>
+    <property name="itemId" column="itemid" columnIndex="3"/>
+    <property name="quantity" column="quantity" columnIndex="4"/>
+    <property name="unitPrice" column="unitprice" columnIndex="5"/>
   </result-map>
 
   <mapped-statement name="getLineItemsByOrderId" result-map="result">
-    select ORDERID, LINENUM, ITEMID, QUANTITY, UNITPRICE from LINEITEM where ORDERID = #value#
+    select orderid, linenum, itemid, quantity, unitprice from lineitem where orderid = #value#
   </mapped-statement>
 
   <mapped-statement name="insertLineItem">
-    insert into LINEITEM (ORDERID, LINENUM, ITEMID, QUANTITY, UNITPRICE) values (#orderId#, #lineNumber#, #itemId#, #quantity#, #unitPrice#)
+    insert into lineitem (orderid, linenum, itemid, quantity, unitprice) values (#orderId#, #lineNumber#, #itemId#, #quantity#, #unitPrice#)
   </mapped-statement>
 
 </sql-map>

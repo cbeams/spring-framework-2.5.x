@@ -1,7 +1,7 @@
-USE jpetstore;
+use jpetstore;
 
-CREATE TABLE IF NOT EXISTS supplier (
-   suppid int NOT NULL, 
+create table if not exists supplier (
+   suppid int not null, 
     name varchar(80) null,
     status varchar(2) not null,
     addr1 varchar(80) null,
@@ -10,26 +10,26 @@ CREATE TABLE IF NOT EXISTS supplier (
     state varchar(80) null,
     zip varchar(5) null,
     phone varchar(80) null,  
-PRIMARY KEY (suppid)) 
-TYPE=INNODB 
-MIN_ROWS=0 
-MAX_ROWS=1000 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Cadastro de Fornecedores';
+primary key (suppid)) 
+type=innodb 
+min_rows=0 
+max_rows=1000 
+pack_keys=default 
+row_format=default 
+comment='cadastro de fornecedores';
 
-CREATE TABLE IF NOT EXISTS signon (
+create table if not exists signon (
     username varchar(25) not null,
     password varchar(25)  not null,  
-PRIMARY KEY (username)) 
-TYPE=INNODB 
-MIN_ROWS=0 
-MAX_ROWS=1000  
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Cadastro de usuários';
+primary key (username)) 
+type=innodb 
+min_rows=0 
+max_rows=1000  
+pack_keys=default 
+row_format=default 
+comment='cadastro de usuários';
 
-CREATE TABLE IF NOT EXISTS account (
+create table if not exists account (
     userid varchar(80) not null,
     email varchar(80) not null,
     firstname varchar(80) not null,
@@ -42,36 +42,36 @@ CREATE TABLE IF NOT EXISTS account (
     zip varchar(20) not null,
     country varchar(20) not null,
     phone varchar(80) not null,
-PRIMARY KEY (userid) )
-TYPE=INNODB
-MIN_ROWS=0 
-MAX_ROWS=1000  
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Cadastro de Contas';
+primary key (userid) )
+type=innodb
+min_rows=0 
+max_rows=1000  
+pack_keys=default 
+row_format=default 
+comment='cadastro de contas';
 
-CREATE TABLE IF NOT EXISTS profile (
+create table if not exists profile (
     userid varchar(80) not null,
     langpref varchar(80) not null,
     favcategory varchar(30),
     mylistopt bool,
     banneropt bool,
-PRIMARY KEY (userid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Cadastro de Perfis';
+primary key (userid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='cadastro de perfis';
 
-CREATE TABLE IF NOT EXISTS bannerdata (
+create table if not exists bannerdata (
     favcategory varchar(80) not null,
     bannername varchar(255)  null, 
-PRIMARY KEY (favcategory))
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Banner Data';
+primary key (favcategory))
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='banner data';
 
-CREATE TABLE IF NOT EXISTS orders (
+create table if not exists orders (
       orderid int not null,
       userid varchar(80) not null,
       orderdate date not null,
@@ -97,71 +97,71 @@ CREATE TABLE IF NOT EXISTS orders (
       exprdate varchar(7) not null,
       cardtype varchar(80) not null,
       locale varchar(80) not null,
-PRIMARY KEY (orderid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Cadastro de pedidos';
+primary key (orderid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='cadastro de pedidos';
 
-CREATE TABLE IF NOT EXISTS orderstatus (
+create table if not exists orderstatus (
       orderid int not null,
       linenum int not null,
       timestamp date not null,
       status varchar(2) not null,
-PRIMARY KEY (orderid, linenum) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Status de pedidos';
+primary key (orderid, linenum) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='status de pedidos';
 
-CREATE TABLE IF NOT EXISTS lineitem (
+create table if not exists lineitem (
       orderid int not null,
       linenum int not null,
       itemid varchar(10) not null,
       quantity int not null,
       unitprice decimal(10,2) not null,
-PRIMARY KEY (orderid, linenum) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Line Item';
+primary key (orderid, linenum) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='line item';
 
-CREATE TABLE IF NOT EXISTS category (
+create table if not exists category (
 	catid varchar(10) not null,
 	name varchar(80) null,
 	descn varchar(255) null,
-PRIMARY KEY (catid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Categorias';
+primary key (catid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='categorias';
 
-CREATE TABLE IF NOT EXISTS product (
+create table if not exists product (
     productid varchar(10) not null,
     category varchar(10) not null,
     name varchar(80) null,
     descn varchar(255) null,
-PRIMARY KEY (productid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Categorias';
+primary key (productid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='categorias';
 
-ALTER TABLE product 
-	ADD INDEX productCat(category);
+alter table product 
+	add index productcat(category);
 
-ALTER TABLE product 
-	ADD INDEX productName(name);
+alter table product 
+	add index productname(name);
 
-ALTER TABLE category 
-	ADD INDEX ixCategoryProduct(catid);
+alter table category 
+	add index ixcategoryproduct(catid);
 
-ALTER TABLE product  ADD FOREIGN KEY (category) 
-         REFERENCES category(catid) 
-         ON DELETE RESTRICT 
-         ON UPDATE RESTRICT;
+alter table product  add foreign key (category) 
+         references category(catid) 
+         on delete restrict 
+         on update restrict;
 
-CREATE TABLE IF NOT EXISTS item (
+create table if not exists item (
     itemid varchar(10) not null,
     productid varchar(10) not null,
     listprice decimal(10,2) null,
@@ -173,39 +173,39 @@ CREATE TABLE IF NOT EXISTS item (
     attr3 varchar(80) null,
     attr4 varchar(80) null,
     attr5 varchar(80) null,
-PRIMARY KEY (itemid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Itens';
+primary key (itemid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='itens';
 
-ALTER TABLE item 
-	ADD INDEX itemProd(productid);
+alter table item 
+	add index itemprod(productid);
 
-ALTER TABLE item ADD FOREIGN KEY (productid) 
-         REFERENCES product(productid) 
-         ON DELETE RESTRICT 
-         ON UPDATE RESTRICT;
+alter table item add foreign key (productid) 
+         references product(productid) 
+         on delete restrict 
+         on update restrict;
 
-ALTER TABLE item ADD FOREIGN KEY (supplier) 
-         REFERENCES supplier(suppid) 
-         ON DELETE RESTRICT 
-         ON UPDATE RESTRICT;
+alter table item add foreign key (supplier) 
+         references supplier(suppid) 
+         on delete restrict 
+         on update restrict;
 
-CREATE TABLE IF NOT EXISTS inventory (
+create table if not exists inventory (
     itemid varchar(10) not null,
     qty int not null,
-PRIMARY KEY (itemid) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Inventory';
+primary key (itemid) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='inventory';
 
-CREATE TABLE IF NOT EXISTS sequence (
+create table if not exists sequence (
     name               varchar(30)  not null,
     nextid             int          not null,
-PRIMARY KEY (name) )
-TYPE=INNODB 
-PACK_KEYS=DEFAULT 
-ROW_FORMAT=DEFAULT 
-COMMENT='Inventory';
+primary key (name) )
+type=innodb 
+pack_keys=default 
+row_format=default 
+comment='inventory';

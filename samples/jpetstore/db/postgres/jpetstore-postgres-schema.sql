@@ -31,7 +31,7 @@ create table supplier (
 
 create table signon (
     username varchar(25) not null,
-    password varchar(25)  not null,
+    password varchar(25) not null,
     constraint pk_signon primary key (username)
 );
 
@@ -40,7 +40,7 @@ create table account (
     email varchar(80) not null,
     firstname varchar(80) not null,
     lastname varchar(80) not null,
-    status varchar(2)  null,
+    status varchar(2) null,
     addr1 varchar(80) not null,
     addr2 varchar(40) null,
     city varchar(80) not  null,
@@ -159,9 +159,8 @@ create table inventory (
     constraint pk_inventory primary key (itemid)
 );
 
-CREATE TABLE sequence
-(
-    name               varchar(30)  not null,
-    nextid             int          not null,
+create table sequence (
+    name varchar(30) not null,
+    nextid int not null,
     constraint pk_sequence primary key (name)
 );
