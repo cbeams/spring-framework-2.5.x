@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="beans">
-  <title>Beans and the ApplicationContext</title>
+  <title>Beans, BeanFactory and the ApplicationContext</title>
 
   <sect1 id="beans-introduction">
     <title>Introduction</title>
@@ -23,8 +23,8 @@
 
     <para>In short, the <literal>BeanFactory</literal> provides the
     configuration framework and basic functionality, while the
-    <literal>ApplicationContext</literal> adds adds additional capabilities to
-    it, some of them more J2EE and enterprise-centric.</para>
+    <literal>ApplicationContext</literal> adds enhanced capabilities to it,
+    some of them more J2EE and enterprise-centric.</para>
 
     <para>This chapter is roughly divided into two parts, the first part
     covering the basic principles that apply to both the BeanFactory and the
@@ -227,8 +227,13 @@
       <para>All of the features described in <xref
       linkend="beans-definition" /> will be configurable for each of your
       beans using one of the out-of-the-box BeanFactory implementations. In
-      the example below we will use the most popular BeanFactory to illustrate
-      the behavior, the <literal>XmlBeanFactory</literal>.</para>
+      general, because <literal>XmlBeanFactory</literal> is the most powerful
+      and most used BeanFactory implementation (including its supersets, the
+      XML variants of the ApplicationContext), the following text will often
+      describe BeanFactory and BeanDefinition capabilities and configuration
+      aspects, in terms of the explicit <literal>XmlBeanFactory</literal>
+      elements and attributes which are applicable to that
+      functionality.</para>
     </sect2>
 
     <sect2 id="beans-factory-class">
@@ -476,17 +481,17 @@
           </listitem>
 
           <listitem>
-            <para>Each property or constructor argument which is a value must
-            be able to be converted from whatever format it was specified in,
-            to the actual type of that property or constructor argument. By
-            default Spring can convert a value supplied in string format to
-            all built-in types, such as <literal>int</literal>,
-            <literal>Long</literal>, <literal>String</literal>,
-            <literal>boolean</literal>, etc. Additionally, when talking about
-            the XML based BeanFactory variants (including the
-            ApplicationContext variants), these have built-in support for
-            defining Lists, Maps, Sets, and Properties collection types.
-            Additionally, Spring uses JavaBeans
+            <para><anchor id="???" />Each property or constructor argument
+            which is a value must be able to be converted from whatever format
+            it was specified in, to the actual type of that property or
+            constructor argument. By default Spring can convert a value
+            supplied in string format to all built-in types, such as
+            <literal>int</literal>, <literal>Long</literal>,
+            <literal>String</literal>, <literal>boolean</literal>, etc.
+            Additionally, when talking about the XML based BeanFactory
+            variants (including the ApplicationContext variants), these have
+            built-in support for defining Lists, Maps, Sets, and Properties
+            collection types. Additionally, Spring uses JavaBeans
             <classname>PropertyEditor</classname> definitions to be able to
             convert string values to other, arbitrary types. (You can provide
             the BeanFactory with your own <literal>PropertyEditor</literal>
@@ -543,9 +548,10 @@
       <para>Some examples:</para>
 
       <para>First, an example of using the BeanFactory for setter-based
-      dependency injection. Below is a small part of an XML file specifying
-      some bean definitions. Following is the code for the actual main bean
-      itself, showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+      dependency injection. Below is a small part of an
+      <literal>XmlBeanFactory</literal> config file specifying some bean
+      definitions. Following is the code for the actual main bean itself,
+      showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
     &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
     &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
     &lt;property name="integerProperty"&gt;1&lt;/property&gt;
@@ -642,10 +648,39 @@
       is.</para>
     </sect2>
 
-    <sect2 id="beans-factory-nullvalues">
-      <title>Setting <emphasis>null</emphasis> values</title>
+    <sect2 id="beans-factory-properties-detailed">
+      <title>Bean properties and constructor arguments detailed</title>
 
-      <para>Spring treats empty arguments for properties and the like as empty
+      <para>As mentioned in the previous section, bean properties and
+      constructor arguments can be defined as either references to other
+      managed beans (collaborators), or values defined inline. The
+      <literal>XmlBeanFactory</literal> supports a number of subelement types
+      within its <literal>property</literal> and
+      <literal>constructor-arg</literal> elements for this purpose.</para>
+
+      <para>The <literal>value</literal> element specifies a property or
+      constructor argument as a human-readable string representation. As
+      mentioned in detail <link
+      linkend="beans-factory-collaborators-propertyeditor">previously</link>,
+      JavaBeans PropertyEditors are used to convert these string values from a
+      <literal>java.lang.String</literal> to the actual property or argument
+      type.<programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+    &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+        &lt;!-- results in a setDriverClassName(String) call --&gt;
+        &lt;property name="driverClassName"&gt;
+            &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="url"&gt;
+            &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="username"&gt;
+            &lt;value&gt;root&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt; </programlisting></para>
+
+      <para>The <literal>null</literal> element is used to handle null values.
+      Spring treats empty arguments for properties and the like as empty
       Strings. The following XmlBeanFactory configuration: <programlisting>&lt;bean class="ExampleBean"&gt;
     &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>results in the email property being set
@@ -656,6 +691,144 @@
     &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
 &lt;/bean&gt;        </programlisting>is equivalent to the java code:
       <literal>exampleBean.setEmail(<emphasis>null</emphasis>)</literal>.</para>
+
+      <para>The <literal>list</literal>, <literal>set</literal>,
+      <literal>map</literal>, and <literal>props</literal> elements allow
+      properties and arguments of Java type <literal>List</literal>,
+      <literal>Set</literal>, <literal>Map</literal>, and
+      <literal>Properties</literal>, respectively, to be defined and
+      set.<programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+    ...
+    &lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
+        &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
+        &lt;property name="people"&gt;
+            &lt;props&gt;
+                &lt;prop key="HaaryPotter"&gt;The magic property&lt;/prop&gt;
+                &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+        &lt;!-- results in a setSomeList(java.util.List) call --&gt;
+        &lt;property name="someList"&gt;
+            &lt;list&gt;
+                &lt;value&gt;a list element followed by a reference&lt;/value&gt;
+                &lt;ref bean="myDataSource"/&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;!-- results in a setSomeMap(java.util.Map) call --&gt;
+        &lt;property name="someMap"&gt;
+            &lt;map&gt;
+                &lt;entry key="yup an entry"&gt;
+                    &lt;value&gt;just some string&lt;/value&gt;
+                &lt;/entry&gt;
+                &lt;entry key="yup a ref"&gt;
+                    &lt;ref bean="myDataSource"&lt;/ref&gt;
+                &lt;/entry&gt;
+            &lt;/map&gt;
+        &lt;/property&gt;
+        &lt;!-- results in a setSomeSet(java.util.Set) call --&gt;
+        &lt;property name="someSet"&gt;
+            &lt;set&gt;
+                &lt;value&gt;just some string&lt;/value&gt;
+                &lt;ref bean="myDataSource"&lt;/ref&gt;
+            &lt;/map&gt;
+        &lt;/property&gt;
+
+    &lt;/bean&gt;
+&lt;/beans&gt;</programlisting></para>
+
+      <para><emphasis>Note that the value of a Map entry, or a set value, can
+      also again be any of the elements:</emphasis><programlisting>(bean | ref | idref | list | set | map | props | value | null)</programlisting></para>
+
+      <para>A <literal>bean</literal> element inside the
+      <literal>property</literal> element is used to define a bean value
+      inline, instead of referring to a bean defined elsewhere in the
+      BeanFactory. The inline bean definition does not have any
+      <programlisting>&lt;bean id="outer" class="..."&gt;
+    &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
+    &lt;property name="target"&gt;
+        &lt;bean class="com.mycompany.PersonImpl"&gt;
+            &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
+            &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
+        &lt;/bean&gt;
+   &lt;/property&gt;
+&lt;/bean&gt;</programlisting>An idref element is simply a shorthand and
+      error-proof way to set a property to the String <emphasis>id</emphasis>
+      or <emphasis>name</emphasis> of another bean in the
+      container.<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
+&lt;/bean&gt;
+&lt;bean id="theClientBean" class="..."&gt;
+    &lt;property name="targetName"&gt;
+        &lt;idref bean="theTargetBean"/&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>This is exactly equivalent at runtime to the
+      following fragment:<programlisting>&lt;bean id="theTargetBean" class="..."&gt;
+&lt;/bean&gt;
+&lt;bean id="theClientBean" class="..."&gt;
+    &lt;property name="targetName"&gt;
+        &lt;value&gt;theTargetBean&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>The main reason the first form is preferrable to
+      the second is that using the <literal>idref</literal> tag will allow
+      Spring to validate at deployment time that the other bean actually
+      exists. In the second variation, the class who's
+      <emphasis>targetName</emphasis> property is forced to do its own
+      validation, and that will only happen when that class is actually
+      instantiated by Spring, possibly long after the container is actually
+      deployed.</para>
+
+      <para>Additionally, if the bean being referred to is in the same actual
+      XML file, and the bean name is the bean <emphasis>id</emphasis>, the
+      <literal>local</literal> attribute may be used, which will allow the XML
+      parser itself to validate the bean name even earlier, at XML document
+      parse time.<programlisting>    &lt;property name="targetName"&gt;
+        &lt;idref local="theTargetBean"/&gt;
+    &lt;/property&gt;</programlisting></para>
+
+      <para>The <literal>ref</literal> element is the final element allowed
+      inside a <literal>property</literal> definition element. It is used to
+      set the value of the specified property to be a reference to another
+      bean managed by the container, a collaborator, so to speak. As mentioned
+      in a previous section, the referred-to bean is considered to be a
+      dependency of the bean who's property is being set, and will be
+      initialized on demand as needed (if it is a singleton bean it may have
+      already been initialized by the container) before the property is set.
+      All references are ultimately just a reference to another object, but
+      there are 3 variations on how the id/name of the other object may be
+      specified, which determines how scoping anf validation is
+      handled.</para>
+
+      <para>Specifying the target bean by using the <literal>bean</literal>
+      attribute of the <literal>ref</literal> tag is the most general form,
+      and will allow creating a reference to any bean in the same
+      BeanFactory/ApplicationContext (whether or not in the same XML file), or
+      parent BeanFactory/ApplicationContext. The value of the
+      <literal>bean</literal> attribute may be ther same as either the
+      <literal>id</literal> attribute of the target bean, or one of the values
+      in the <literal>name</literal> attribute of the target
+      bean.<programlisting>    &lt;ref bean="someBean"/&gt;</programlisting></para>
+
+      <para>Specifying the target bean by using the <literal>local</literal>
+      attribute leverages the ability of the XML parser to validate XML id
+      references within the same file. The value of the
+      <literal>local</literal> attribute must be the same as the
+      <literal>id</literal> attribute of the target bean. The XML parser will
+      issue an error if no matching element is found in the same file. As
+      such, using the local variant is the best choice (in order to know about
+      errors are early as possible) if the target bean is in the same XML
+      file.<programlisting>    &lt;ref local="someBean"/&gt;</programlisting></para>
+
+      <para>Specifying the target bean by using the <literal>parent</literal>
+      attribute allows a reference to be created to a bean which is in a
+      parent BeanFactory (or ApplicationContext) of the current BeanFactory
+      (or ApplicationContext). The value of the <literal>parent</literal>
+      attribute may be ther same as either the <literal>id</literal> attribute
+      of the target bean, or one of the values in the <literal>name</literal>
+      attribute of the target bean, and the target bean must be in a parent
+      BeanFactory or ApplicationContext to the current one. The main use of
+      this bean reference variant is when there is a need to wrap an existing
+      bean in a parent context with some sort of proxy (which may have the
+      same name as the parent), and needs the original object so it may wrap
+      it. <programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
     </sect2>
 
     <sect2 id="beans-factory-method-injection">
@@ -831,16 +1004,20 @@ public class ReplacementComputeValue implements MethodReplacer {
     <sect2 id="beans-factory-autowire">
       <title>Autowiring collaborators</title>
 
-      <para>Spring has autowire capabilities, which means it's possible to
+      <para>A BeanFactory is able to <emphasis>autowire</emphasis>
+      relationships between collaborating beans. This means it's possible to
       automatically let Spring resolve collaborators (other beans) for your
-      bean by inspecting the BeanFactory/ApplicationContext. The autowiring
-      functionality has four modes. Autowiring is specified
+      bean by inspecting the contents of the BeanFactory. The autowiring
+      functionality has five modes. Autowiring is specified
       <emphasis>per</emphasis> bean and can thus be enabled for some beans,
       while other beans won't be autowired. Using autowiring, it is possible
       to reduce or eliminate the need to specify properties or constructor
-      arguments<footnote>
+      arguments, saving a significant amount of typing.<footnote>
           <para>See <xref linkend="beans-factory-collaborators" /></para>
-        </footnote> <table frame="all">
+        </footnote>In an XmlBeanFactory, the autowire mode for a bean
+      definition is specified by using the <literal>autowire</literal>
+      attribute of the bean element. The following values are allowed.<table
+          frame="all">
           <title>Autowiring modes</title>
 
           <tgroup cols="2">
@@ -860,42 +1037,68 @@ public class ReplacementComputeValue implements MethodReplacer {
               <row>
                 <entry>no</entry>
 
-                <entry>No autowiring at all. This is the default value and
-                it's discouraged to change this for large applications, since
-                specifying your collaborators yourself gives you a feeling of
-                what you're actually doing and is a great way of somewhat
-                documenting the structure of your system</entry>
+                <entry>No autowiring at all. Bean references must be defined
+                via a <literal>ref</literal> element. This is the default
+                value and changing this is discouraged for larger deployments,
+                since explicitely specifying collaborators gives greater
+                control and clarity. To some extent, it is a form of
+                documentation about the structure of a system. </entry>
               </row>
 
               <row>
                 <entry>byName</entry>
 
-                <entry>This option will inspect the BeanFactory and look for a
-                bean named exactly the same as the property which needs to be
-                autowired. So in case you have a collaborator on a
-                BeanDefinition Cat which is called dog (so you have a
-                setDog(Dog) method), Spring will look for a BeanDefinition
-                named <literal>dog</literal> and use this as the
-                collaborator</entry>
+                <entry>Autowiring by property name. This option will inspect
+                the BeanFactory and look for a bean named exactly the same as
+                the property which needs to be autowired. For example, if you
+                have a bean definition which is set to autowire by name, and
+                it contains a <emphasis>master</emphasis> property (that is,
+                it has a <emphasis>setMaster</emphasis>(...) method), Spring
+                will look for a bean definition named master, and use it to
+                set the property.</entry>
               </row>
 
               <row>
                 <entry>byType</entry>
 
-                <entry>This option can be found in some other IoC containers
-                as well and gives you the ability to resolve collaborators by
-                type instead of by name. Suppose you have a BeanDefinition
-                with a collaborator typed <literal>DataSource</literal>,
-                Spring will search the entire bean factory for a bean
-                definition of type DataSource and use it as the collaborator.
-                <emphasis>If 0 (zero) or more than 1 (one) bean definitions of
-                the desired type exist in the BeanFactory, a failure will be
-                reported and you won't be able to use autowiring for that
-                specific bean</emphasis></entry>
+                <entry>Allows a property to be autowired if there is exactly
+                one bean of the property type in the BeanFactory. If there is
+                more than one, a fatal exception is thrown, and this indicates
+                that you may not use <emphasis>byType</emphasis> autowiring
+                for that bean. If there are no matching beans, nothing
+                happens; the property is not set. If this is not desirable,
+                setting the <literal>dependency-check="objects"</literal>
+                attribute value specifies that an error should be thrown in
+                this case.</entry>
+              </row>
+
+              <row>
+                <entry>constructor</entry>
+
+                <entry>This is analogous to <emphasis>byType</emphasis>, but
+                applies to constructor arguments. If there isn't exactly one
+                bean of the constructor argument type in the bean factory, a
+                fatal error is raised.</entry>
+              </row>
+
+              <row>
+                <entry>autodetect</entry>
+
+                <entry>Chooses <emphasis>constructor</emphasis> or
+                <emphasis>byType</emphasis> through introspection of the bean
+                class. If a default constructor is found, byType gets
+                applied.</entry>
               </row>
             </tbody>
           </tgroup>
-        </table><emphasis>Note: as has already been mentioned, for larger
+        </table></para>
+
+      <para>Note that explicit dependencies, i.e. <literal>property</literal>
+      and <literal>constructor-arg</literal> elements, always override
+      autowiring. Autowire behaviour can be combined with dependency checking,
+      which will be performed after all autowiring has been completed.</para>
+
+      <para><emphasis>Note: as has already been mentioned, for larger
       applications, it is discouraged to use autowiring because it removes the
       transparency and the structure from your collaborating
       classes.</emphasis></para>
@@ -904,13 +1107,23 @@ public class ReplacementComputeValue implements MethodReplacer {
     <sect2 id="beans-factory-dependencies">
       <title>Checking for dependencies</title>
 
-      <para>Spring also has the capability of checking required dependencies
-      on your beans. This feature might come in handy when certain properties
-      really need to be set and when you can't provide default values (which
-      is an often used approach). Dependency checking can be done in three
-      different ways. Dependency checking can also be enabled and disabled per
-      bean, just as the autowiring functionality. The default is to
-      <emphasis>not</emphasis> check dependencies. <table frame="all">
+      <para>Spring has the ability to try to check for the existence of
+      unresolved dependencies of a bean deployed into the BeanFactory. These
+      are JavaBeans properties of the bean, which do not have actual values
+      set for them in the bean definition, or alternately provided
+      automatically by the autowiring feature.</para>
+
+      <para>This feature is sometimes useful when you want to ensure that all
+      properties (or all properties of a certain type) are set on a bean. Of
+      course, in many cases a bean class will have default values for many
+      properties, or some properties do not apply to all usage scenarios, so
+      this feature is of limited use. Dependency checking can also be enabled
+      and disabled per bean, just as with the autowiring functionality. The
+      default is to <emphasis>not</emphasis> check dependencies. Dependency
+      checking can be handled in serveral different modes. In an
+      XmlBeanFactory, this is specified via the
+      <literal>dependency-check</literal> attribute in a bean definition,
+      which may have the following values.<table frame="all">
           <title>Dependency checking modes</title>
 
           <tgroup cols="2">
@@ -928,17 +1141,25 @@ public class ReplacementComputeValue implements MethodReplacer {
 
             <tbody>
               <row>
+                <entry>none</entry>
+
+                <entry>No dependency checking. Properties of the bean which
+                have no value specified for them are simply not set.</entry>
+              </row>
+
+              <row>
                 <entry>simple</entry>
 
-                <entry>Dependency checking is done for primitive types and
-                collections (this means everything except
-                collaborators)</entry>
+                <entry>Dependency checking is performed for primitive types
+                and collections (everything except collaborators, i.e. other
+                beans)</entry>
               </row>
 
               <row>
                 <entry>object</entry>
 
-                <entry>Dependency checking is done for collaborators</entry>
+                <entry>Dependency checking is performed for
+                collaborators</entry>
               </row>
 
               <row>
@@ -959,13 +1180,14 @@ public class ReplacementComputeValue implements MethodReplacer {
     <sect2 id="beans-factory-lifecycle">
       <title>Lifecycle interfaces</title>
 
-      <para>Spring provides a couple of marker interfaces to change the
-      behavior of your bean in the BeanFactory. They include
+      <para>Spring provides several marker interfaces to change the behavior
+      of your bean in the BeanFactory. They include
       <literal>InitializingBean</literal> and
-      <literal>DisposableBean</literal>. Implementing those will result in the
-      BeanFactory calling <literal>afterPropertiesSet()</literal> for the
-      former and <literal>destroy()</literal> for the latter to allow you to
-      do things upon initialization and destruction.</para>
+      <literal>DisposableBean</literal>. Implementing these interfaces will
+      result in the BeanFactory calling
+      <literal>afterPropertiesSet()</literal> for the former and
+      <literal>destroy()</literal> for the latter to allow the bean to perform
+      certain actions upon initialization and destruction.</para>
 
       <para>Internally, Spring uses <literal>BeanPostProcessors</literal> to
       process any marker interfaces it can find and call the appropriate
@@ -983,28 +1205,28 @@ public class ReplacementComputeValue implements MethodReplacer {
       <sect3 id="beans-factory-lifecycle-initializingbean">
         <title>InitializingBean / <literal>init-method</literal></title>
 
-        <para>The
+        <para>Implementing the
         <literal>org.springframework.beans.factory.InitializingBean</literal>
-        gives you the ability the do initialization work after all necessary
-        properties on a bean are set by the BeanFactory. The InitializingBean
-        interface specifies exactly one method: <itemizedlist
-            spacing="compact">
-            <listitem>
-              <para><literal>void afterPropertiesSet()</literal>: called after
-              all properties have been set by the BeanFactory. This method
-              enables you to do checking to see if all necessary properties
-              have been set correctly, or to perform further initialization
-              work. You can throw <emphasis>any</emphasis> exception to
-              indicate misconfiguration, initialization failures,
-              etcetera</para>
-            </listitem>
-          </itemizedlist></para>
+        allows a bean to perform initialization work after all necessary
+        properties on the bean are set by the BeanFactory. The
+        InitializingBean interface specifies exactly one
+        method:<programlisting>    * Invoked by a BeanFactory after it has set all bean properties supplied
+    * (and satisfied BeanFactoryAware and ApplicationContextAware).
+    * &lt;p&gt;This method allows the bean instance to perform initialization only
+    * possible when all bean properties have been set and to throw an
+    * exception in the event of misconfiguration.
+    * @throws Exception in the event of misconfiguration (such
+    * as failure to set an essential property) or if initialization fails.
+    */
+    void afterPropertiesSet() throws Exception;</programlisting></para>
 
         <para><emphasis>Note: generally, the use of the
-        <literal>InitializingBean</literal> can be avoided (and by some people
-        is discouraged). The beans package provides support for a generic
-        init-method, given to the beandefinition in the beanconfiguration
-        store (be it XML, properties-files or a database).</emphasis></para>
+        <literal>InitializingBean</literal> marker interface can be avoided
+        (and is discouraged since it unecessarilly couples the code to
+        Spring). A bean definition provides support for a generic
+        initialization method to be specified. In the case of the
+        XmlBeanFactory, this is done via the <literal>init-method</literal>
+        attribute. For example, the following definition:</emphasis></para>
 
         <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;
 
@@ -1012,40 +1234,38 @@ public class ExampleBean {
     public void init() {
         // do some initialization work
     }
-}</programlisting> Is exactly the same as: <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
+}</programlisting>Is exactly the same as: <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;
 
 public class AnotherExampleBean implements InitializingBean {
     public void afterPropertiesSet() {
         // do some initialization work
     }
-}</programlisting></para>
+}</programlisting>but does not couple the code to Spring.</para>
       </sect3>
 
       <sect3 id="beans-factory-lifecycle-disposablebean">
         <title>DisposableBean / <literal>destroy-method</literal></title>
 
-        <para>The
+        <para>Implementing the
         <literal>org.springframework.beans.factory.DisposableBean</literal>
-        interface provides you with the ability to get a callback when a
-        BeanFactory is destroyed. The DisposableBean interface specifies one
-        method: <itemizedlist spacing="compact">
-            <listitem>
-              <para><literal>void destroy()</literal>: called on destruction
-              of the BeanFactory. This allows you to release any resources you
-              are keeping in this bean (like database connections). You can
-              throw an exception here, however, it will not stop the
-              destruction of the bean factory - It will only get
-              logged.</para>
-            </listitem>
-          </itemizedlist></para>
+        interface allows a bean to get a callback when the BeanFactory
+        containing it is destroyed. The DisposableBean interface specifies one
+        method: <programlisting>    /**
+    * Invoked by a BeanFactory on destruction of a singleton.
+    * @throws Exception in case of shutdown errors.
+    * Exceptions will get logged but not rethrown to allow
+    * other beans to release their resources too.
+    */
+    void destroy() throws Exception;
+</programlisting></para>
 
         <para><emphasis>Note: generally, the use of the
-        <literal>DisposableBean</literal> can be avoided (and by some people
-        is discouraged). The beans package provides support for a generic
-        destroy-method, given to the beandefinition in the beanconfiguration
-        store (may it be XML, properties-files or a database). For more
-        information about this feature, see the next
-        section)</emphasis></para>
+        <literal>DisposableBean</literal> marker interface can be avoided (and
+        is discouraged since it unecessarilly couples the code to Spring). A
+        bean definition provides support for a generic destroy method to be
+        specified. In the case of the XmlBeanFactory, this is done via the
+        <literal>destroy-method</literal> attribute. For example, the
+        following definition: </emphasis></para>
 
         <para><programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;
 
@@ -1059,17 +1279,18 @@ public class AnotherExampleBean implements DisposableBean {
     public void destroy() {
         // do some destruction work
     }
-}</programlisting></para>
+}</programlisting>but does not couple the code to Spring.</para>
 
-        <para><emphasis>Note: when deploying a bean in the prototype mode, the
-        lifecycle of the bean changes slightly. By definition, Spring can not
-        manage the complete lifecycle of a non-singleton/prototype bean, since
-        after it is created, it is given to the client and the container does
-        not keep track of it at all any longer. You can think of Spring's role
-        when talking about a non-singleton/prototype bean as a replacement for
-        the 'new' operator. Any lifecycle aspects past that point have to be
-        handled by the client. The lifecycle of a bean in the BeanFactory is
-        further described in <xref
+        <para><emphasis>Important note: when deploying a bean in the prototype
+        mode, the lifecycle of the bean changes slightly. By definition,
+        Spring can not manage the complete lifecycle of a
+        non-singleton/prototype bean, since after it is created, it is given
+        to the client and the container does not keep track of it at all any
+        longer. You can think of Spring's role when talking about a
+        non-singleton/prototype bean as a replacement for the 'new' operator.
+        Any lifecycle aspects past that point have to be handled by the
+        client. The lifecycle of a bean in the BeanFactory is further
+        described in <xref
         linkend="beans-factory-lifecycle" /></emphasis></para>
       </sect3>
     </sect2>
@@ -1080,35 +1301,46 @@ public class AnotherExampleBean implements DisposableBean {
       <sect3 id="beans-factory-aware-beanfactoryaware">
         <title>BeanFactoryAware</title>
 
-        <para>The
+        <para>A class which implements the
         <literal>org.springframework.beans.factory.BeanFactoryAware</literal>
-        interface gives you the ability to get a reference to the BeanFactory
-        that manages the bean that implements the BeanFactoryAware interface.
-        This feature allows implementation of beans that look up their
-        collaborators in the BeanFactory. The interface specifies one method:
-        <itemizedlist spacing="compact">
-            <listitem>
-              <para><literal>void setBeanFactory(BeanFactory)</literal>:
-              method that will be called <emphasis>after the initialization
-              methods</emphasis> (<literal>afterPropertiesSet</literal> and
-              the init-method).</para>
-            </listitem>
-          </itemizedlist></para>
+        interface is provided with a reference to the BeanFactory that created
+        it, when it is created by that BeanFactory.<programlisting>public interface BeanFactoryAware {
+   /**
+    * Callback that supplies the owning factory to a bean instance.
+    * &lt;p&gt;Invoked after population of normal bean properties but before an init
+    * callback like InitializingBean's afterPropertiesSet or a custom init-method.
+    * @param beanFactory owning BeanFactory (may not be null).
+    * The bean can immediately call methods on the factory.
+    * @throws BeansException in case of initialization errors
+    * @see BeanInitializationException
+    */
+    void setBeanFactory(BeanFactory beanFactory) throws BeansException;
+}</programlisting></para>
+
+        <para>This allows beans to manipulate the BeanFactory that created
+        them programmatically, through the
+        <literal>org.springframework.beans.factory.BeanFactory</literal>
+        interface, or by casting the reference to a known subclass of this
+        which exposes additional functionality. Primarilly this would consist
+        of programmatic retrieval of other beans. While there are cases when
+        this capability is useful, it shold generally be avoided, since it
+        couples the code to Spring, and does not follow the Inversion of
+        Control style, where collaborators are provided to beans as
+        properties.</para>
       </sect3>
 
       <sect3 id="beans-factory-aware-beannameaware">
         <title>BeanNameAware</title>
 
-        <para>The
+        <para>If a bean implements the
         <literal>org.springframework.beans.factory.BeanNameAware</literal>
-        interface gives you the ability to let the BeanFactory set the name of
-        the bean on the bean itself. In case you need to know what your name
-        is, implement this interface <itemizedlist spacing="compact">
-            <listitem>
-              <para><literal>void setBeanName(String)</literal>: method which
-              will be called to let the bean know what its name is</para>
-            </listitem>
-          </itemizedlist></para>
+        interface and is deployed in a BeanFactory, the BeanFactory will call
+        the bean through this interface to inform the bean of the
+        <emphasis>id</emphasis> it was deployed under. The callback will be
+        Invoked after population of normal bean properties but before an init
+        callback like <literal>InitializingBean</literal>'s
+        <emphasis>afterPropertiesSet</emphasis> or a custom
+        init-method.</para>
       </sect3>
     </sect2>
 
@@ -1146,12 +1378,12 @@ public class AnotherExampleBean implements DisposableBean {
   <sect1 id="beans-factory-client">
     <title>Interacting with the BeanFactory</title>
 
-    <para>Basically the BeanFactory is nothing more than an advanced factory
-    capable of maintaining a registry of different beans and their
-    dependencies. The BeanFactory enables you to read bean definitions and
-    access them using the bean factory. When using just the BeanFactory you
-    would create one and read in some bean definitions in the XML format as
-    follows: <programlisting>InputStream is = new FileInputStream("beans.xml");
+    <para>Essentially, the BeanFactory is nothing more than the interface for
+    an advanced factory capable of maintaining a registry of different beans
+    and their dependencies. The BeanFactory enables you to read bean
+    definitions and access them using the bean factory. When using just the
+    BeanFactory you would create one and read in some bean definitions in the
+    XML format as follows: <programlisting>InputStream is = new FileInputStream("beans.xml");
 XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
 
     <para>Basically that's all there is to it. Using
@@ -1293,12 +1525,6 @@ cfg.postProcessBeanFactory(factory);</programlisting>
     </sect2>
   </sect1>
 
-  <sect1 id="beans-factory-diagrams">
-    <title>Lifecycle of a bean in the BeanFactory</title>
-
-    <para>This chapter will be re-written soon.</para>
-  </sect1>
-
   <sect1 id="beans-factoryimpl">
     <title>BeanFactory structure and implementations (WIP)</title>
 
@@ -1342,106 +1568,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
     you're writing to specify beans in order to make things a bit more easy.
     The DTD is quite well documented so you should find everything you need in
     there as well. Here we will discuss the format shortly and provide some
-    examples. </para> <para> The root of a Spring XML bean definition document
-    is a <literal>&lt;beans&gt;</literal> element. The
-    <literal>&lt;beans&gt;</literal> element contains one or more
-    <literal>&lt;bean&gt;</literal> definitions. We normally specify the class
-    and properties of each bean definition. We must also specify the id, which
-    will be the name that we'll use this bean with in our code (see a previous
-    section about <link linkend="beans-factory-client">clients
-    interacting</link> with the BeanFactory for more information. An
-    initialization method as described earlier as well the destruction method
-    can be specified as attributes of the <literal>&lt;bean&gt;</literal>
-    element. The autowiring functionality as well as the de dependency
-    checking can also be specified using attributes of the same element.
-    Furthermore properties and collaborators can be specified using nested
-    <literal>&lt;property&gt;</literal> elements. In the following example, we
-    use a BasicDataSource from the Jakarta Commons DBCP project. This class
-    (like many other existing classes) can easily be used in a Spring bean
-    factory, as it offers JavaBean-style configuration. The close method that
-    needs to be called on shutdown can be registered via Spring's
-    <quote>destroy-method</quote> attribute, to avoid the need for
-    BasicDataSource to implement any Spring interface (in this case that would
-    be <literal>DisposableBean</literal> mentioned earlier in the section
-    about lifecycle features). <programlisting format="linespecific"
-    xml:space="preserve">&lt;beans&gt;
-    &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-        &lt;!-- results in a setDriverClassName(String) call --&gt;
-        &lt;property name="driverClassName"&gt;
-            &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
-        &lt;/property&gt;
-        &lt;property name="url"&gt;
-            &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
-        &lt;/property&gt;
-        &lt;property name="username"&gt;
-            &lt;value&gt;root&lt;/value&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt; </programlisting> Just as an destruction method is specified
-    using the <literal>destroy-method</literal> attribute, we could specify a
-    initialization method using the <literal>init-method</literal> attribute.
-    </para> <para> To specify properties and collaborators in XML files you
-    have to use nested &lt;property&gt; elements. You have already seen the
-    setting of 'primitive' properties in the example about, the setting of
-    collaborators is done using the nested <literal>&lt;ref&gt;</literal>
-    element. <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-    ...
-    &lt;bean id="exampleDataAccessObject" class="example.ExampleDataAccessObject"&gt;
-        &lt;!-- results in a setDataSource(BasicDataSource) call --&gt;
-        &lt;property name="dataSource"&gt;
-            &lt;ref bean="myDataSource"/&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt; </programlisting> As you can see below, we're using the Commons
-    DBCP datasource from the previous example here as a collaborator and we're
-    specifying if using a &lt;ref bean&gt; element. References exist in three
-    types that specify whether or not to search the collaborator in the same
-    XML file or in some other XML file (multiple XML files is covered further
-    along): <itemizedlist
-    spacing="compact"><listitem><para><literal>bean</literal>: tries to find
-    the collaborator in either the same XML file or in some other XML file
-    that has also been
-    specified</para></listitem><listitem><para><literal>local</literal>: tries
-    to find the collaborator in the current XML file. This attribute is an
-    <literal>XML IDREF</literal> so it <emphasis>has</emphasis> to exist,
-    otherwise validation will fail
-    </para></listitem><listitem><para><literal>external</literal>: explicitly
-    states to find the bean in another XML file and does not search in the
-    current XML file </para></listitem></itemizedlist></para><para> There's a
-    couple of possibilities for specifying more complex properties such as
-    lists, properties object and maps. The following examples show this
-    behavior: <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
-    ...
-    &lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
-        &lt;!-- results in a setPeople(java.util.Properties) call --&gt;
-        &lt;property name="people"&gt;
-            &lt;props&gt;
-                &lt;prop key="HaaryPotter"&gt;The magic property&lt;/prop&gt;
-                &lt;prop key="JerrySeinfeld"&gt;The funny property&lt;/prop&gt;
-            &lt;/props&gt;
-        &lt;/property&gt;
-        &lt;!-- results in a setSomeList(java.util.List) call --&gt;
-        &lt;property name="someList"&gt;
-            &lt;list&gt;
-                &lt;value&gt;a list element followed by a reference&lt;/value&gt;
-                &lt;ref bean="myDataSource"/&gt;
-            &lt;/list&gt;
-        &lt;/property&gt;
-        &lt;!-- results in a setSomeMap(java.util.Map) call --&gt;
-        &lt;property name="someMap"&gt;
-            &lt;map&gt;
-                &lt;entry key="yup an entry"&gt;
-                    &lt;value&gt;just some string&lt;/value&gt;
-                &lt;/entry&gt;
-                &lt;entry key="yup a ref"&gt;
-                    &lt;ref bean="myDataSource"&lt;/ref&gt;
-                &lt;/entry&gt;
-            &lt;/map&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;</programlisting></para><para> <emphasis>Note that the value of
-    a Map entry can also again be a list or another map.</emphasis>
-    </para></sect2>
+    examples. </para></sect2>
   </sect1>
 
   <sect1 id="context-introduction">
