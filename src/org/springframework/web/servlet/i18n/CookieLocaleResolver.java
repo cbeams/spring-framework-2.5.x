@@ -17,12 +17,15 @@
 package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
-import java.util.StringTokenizer;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -56,6 +59,8 @@ public class CookieLocaleResolver implements LocaleResolver {
 
 	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String cookieName = DEFAULT_COOKIE_NAME;
 
@@ -110,56 +115,48 @@ public class CookieLocaleResolver implements LocaleResolver {
 
 
 	public Locale resolveLocale(HttpServletRequest request) {
-		// check locale for preparsed resp. preset locale
+		// Check locale for pre-parsed or preset locale.
 		Locale locale = (Locale) request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME);
-		if (locale != null)
+		if (locale != null) {
 			return locale;
+		}
 
-		// retrieve cookie value
+		// Retrieve and parse cookie value.
 		Cookie cookie = WebUtils.getCookie(request, getCookieName());
-
 		if (cookie != null) {
-			// parse cookie value
-			String language = "";
-			String country = "";
-			String variant = "";
-
-			StringTokenizer tokenizer = new StringTokenizer(cookie.getValue());
-			if (tokenizer.hasMoreTokens())
-				language = tokenizer.nextToken();
-			if (tokenizer.hasMoreTokens())
-				country = tokenizer.nextToken();
-			if (tokenizer.hasMoreTokens())
-				variant = tokenizer.nextToken();
-
-			// evaluate results
-			if (language != null) {
-				locale = new Locale(language, country, variant);
+			locale = StringUtils.parseLocaleString(cookie.getValue());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale + "'");
+			}
+			if (locale != null) {
 				request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
 				return locale;
 			}
 		}
 
-		// fallback
+		// Fall back to accept-header locale.
 		return request.getLocale();
 	}
 
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		Cookie cookie = null;
 		if (locale != null) {
-			// set request attribute and add cookie
+			// Set request attribute and add cookie.
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
-			cookie = new Cookie(getCookieName(), locale.getLanguage() + " " + locale.getCountry() +
-			                                     " " + locale.getVariant());
+			cookie = new Cookie(getCookieName(), locale.toString());
 			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(getCookieMaxAge());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Set cookie for locale '" + locale + "'");
+			}
 		}
 		else {
-			// set request attribute to fallback locale and remove cookie
+			// Set request attribute to fallback locale and remove cookie.
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, request.getLocale());
 			cookie = new Cookie(getCookieName(), "");
 			cookie.setPath(getCookiePath());
 			cookie.setMaxAge(0);
+			logger.debug("Removed locale cookie");
 		}
 		response.addCookie(cookie);
 	}
