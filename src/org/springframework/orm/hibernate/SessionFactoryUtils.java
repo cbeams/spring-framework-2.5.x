@@ -294,7 +294,7 @@ public abstract class SessionFactoryUtils {
 				return sessionHolder.getSession();
 			}
 			else {
-				// no Spring transaction management active -> try JTA transaction synchronization
+				// No Spring transaction management active -> try JTA transaction synchronization.
 				Session session = getJtaSynchronizedSession(
 				    sessionHolder, sessionFactory, jdbcExceptionTranslator, allowSynchronization);
 				if (session != null) {
@@ -326,7 +326,7 @@ public abstract class SessionFactoryUtils {
 					TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 				}
 				else {
-					// no Spring transaction management active -> try JTA transaction synchronization
+					// No Spring transaction management active -> try JTA transaction synchronization.
 					registerJtaSynchronization(session, sessionFactory, jdbcExceptionTranslator, sessionHolder);
 				}
 			}
@@ -759,7 +759,16 @@ public abstract class SessionFactoryUtils {
 				Session session = this.sessionHolder.removeSession(this.jtaTransaction);
 				if (session != null) {
 					if (this.sessionHolder.isEmpty()) {
-						TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+						// No Sessions for JTA transactions bound anymore -> could remove it.
+						if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
+							// Explicit check necessary because of remote transaction propagation:
+							// The synchronization callbacks will execute in a different thread
+							// in such a scenario, as they're triggered by a remote server.
+							// The best we can do is to leave the SessionHolder bound to the
+							// thread that originally performed the data access. It will be
+							// reused when a new data access operation starts on that thread.
+							TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+						}
 					}
 					// Do not close a pre-bound Session. In that case, we'll find the
 					// transaction-specific Session the same as the default Session.
