@@ -19,7 +19,7 @@ package org.springframework.web.bind;
 import java.util.Arrays;
 
 import org.springframework.beans.AbstractPropertyValuesTests;
-import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 
 /**

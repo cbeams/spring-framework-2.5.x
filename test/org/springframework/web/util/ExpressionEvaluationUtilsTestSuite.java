@@ -16,30 +16,18 @@
 
 package org.springframework.web.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.jsp.PageContext;
 
+import com.mockobjects.servlet.MockPageContext;
 import junit.framework.TestCase;
 
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockPageContext;
-import org.springframework.web.mock.MockServlet;
-import org.springframework.web.mock.MockServletConfig;
-import org.springframework.web.mock.MockServletContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-/**
- * @author alef
-
- */
 public class ExpressionEvaluationUtilsTestSuite extends TestCase {
-
-	/**
-	 * Constructor for ExpressionEvaluationUtilsTestSuite.
-	 * @param arg0
-	 */
-	public ExpressionEvaluationUtilsTestSuite(String name) {
-		super(name);
-	}
 
 	public void testIsExpressionLanguage() {
 		// should be true
@@ -61,75 +49,69 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		// ok, tested enough ;-)
 	}
 
-	public void testEvaluate() 
-	throws Exception {
+	public void testEvaluate() throws Exception {
 		PageContext ctx = getMockPageContext();
 		
 		ctx.setAttribute("bla", "blie");
 		String expr = "${bla}";
 		
-		Object o = 
-			ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
+		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
 		assertEquals(o, "blie");
 		
-		assertEquals(new String("test"), ExpressionEvaluationUtils.evaluate(
-			"test", "test", Float.class, ctx));
+		assertEquals(new String("test"),
+		             ExpressionEvaluationUtils.evaluate("test", "test", Float.class, ctx));
 	}
 
-	public void testEvaluateString() 
-	throws Exception {
+	public void testEvaluateString() throws Exception {
 		PageContext ctx = getMockPageContext();
 		
-		ctx.setAttribute("bla", "blie", PageContext.REQUEST_SCOPE);
+		ctx.setAttribute("bla", "blie");
 		String expr = "${bla}";
-		Object o = 
-			ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
+		Object o = ExpressionEvaluationUtils.evaluateString("test", expr, ctx);
 		assertEquals(o, "blie");
 		
 		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "blie", ctx));
 	}
 
-	public void testEvaluateInteger() 
-	throws Exception {
+	public void testEvaluateInteger() throws Exception {
 		PageContext ctx = getMockPageContext();
 		
-		ctx.setAttribute("bla", new Integer(1), PageContext.REQUEST_SCOPE);
+		ctx.setAttribute("bla", new Integer(1));
 		String expr = "${bla}";
 		
-		int i = 
-			ExpressionEvaluationUtils.evaluateInteger("test", expr, ctx);
+		int i = ExpressionEvaluationUtils.evaluateInteger("test", expr, ctx);
 		assertEquals(i, 1);
 		
 		assertEquals(21, ExpressionEvaluationUtils.evaluateInteger("test", "21", ctx));
 	}
 
-	public void testEvaluateBoolean() 
-	throws Exception {
+	public void testEvaluateBoolean() throws Exception {
 		PageContext ctx = getMockPageContext();
 		
-		ctx.setAttribute("bla", new Boolean(true), PageContext.REQUEST_SCOPE);
+		ctx.setAttribute("bla", new Boolean(true));
 		String expr = "${bla}";
 		
-		boolean b = 
-			ExpressionEvaluationUtils.evaluateBoolean("test", expr, ctx);
+		boolean b = ExpressionEvaluationUtils.evaluateBoolean("test", expr, ctx);
 		assertEquals(b, true);
 		
 		assertEquals(true, ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
 	}
 	
-	private MockPageContext getMockPageContext() 
-	throws Exception {
-		MockServletContext servletContext = new MockServletContext();				
-		MockServletConfig servletConfig = new MockServletConfig(servletContext, "servlet");		
-		MockServlet servlet = new MockServlet();
-		servlet.init(servletConfig);
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, 
+	private PageContext getMockPageContext() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(null,
 			"POST", "http://www.springframework.org");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		MockPageContext pageContext = new MockPageContext();
-		pageContext.initialize(servlet, request, response, "nope", false, 4096, true);
+		MockPageContext pageContext = new MockPageContext() {
+			private Map attributes = new HashMap();
+			public void setAttribute(String s, Object o) {
+				attributes.put(s, o);
+			}
+			public Object findAttribute(String s) {
+				return this.attributes.get(s);
+			}
+		};
+		pageContext.initialize(null, request, response, "nope", false, 4096, true);
 		return pageContext;		
 	}
-	
 
 }

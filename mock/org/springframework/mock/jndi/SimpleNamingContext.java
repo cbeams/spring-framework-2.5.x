@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jndi.support;
+package org.springframework.mock.jndi;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see SimpleNamingContextBuilder
+ * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.springframework.jndi.JndiTemplate#createInitialContext
  */
 public class SimpleNamingContext implements Context {
@@ -102,7 +102,7 @@ public class SimpleNamingContext implements Context {
 	 * Look up the object with the given name.
 	 * Note: Not intended for direct use by applications.
 	 * Will be used by any standard InitialContext JNDI lookups.
-	 * @throws NameNotFoundException if the object could not be found
+	 * @throws javax.naming.NameNotFoundException if the object could not be found
 	 */
 	public Object lookup(String pname) throws NameNotFoundException {
 		String name = root + pname;
@@ -136,7 +136,7 @@ public class SimpleNamingContext implements Context {
 	 * Note: Not intended for direct use by applications
 	 * if setting up a JVM-level JNDI environment.
 	 * Use SimpleNamingContextBuilder to set up JNDI bindings then.
-	 * @see SimpleNamingContextBuilder#bind
+	 * @see org.springframework.mock.jndi.SimpleNamingContextBuilder#bind
 	 */
 	public void bind(String name, Object obj) {
 		logger.info("Static JNDI binding: [" + root + name + "] = [" + obj + "]");

@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jndi.support;
+package org.springframework.mock.jndi;
 
 import javax.naming.NamingException;
 
@@ -25,7 +25,7 @@ import org.springframework.jndi.JndiTemplate;
  * a given object. Very useful for testing. Effectively a mock object.
  * @author Rod Johnson
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @version $Id: ExpectedLookupTemplate.java,v 1.4 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: ExpectedLookupTemplate.java,v 1.1 2004-04-28 18:31:30 jhoeller Exp $
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 

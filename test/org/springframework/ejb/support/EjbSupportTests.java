@@ -35,14 +35,14 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.jndi.support.SimpleNamingContextBuilder;
+import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 /**
  * Most of the value of the tests here is in being forced
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.11 2004-03-18 03:01:38 trisberg Exp $
+ * @version $Id: EjbSupportTests.java,v 1.12 2004-04-28 18:31:35 jhoeller Exp $
  */
 public class EjbSupportTests extends TestCase {
 

@@ -26,13 +26,13 @@ import junit.framework.TestCase;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
 /**
  * @author Rod Johnson
- * @version $Id: PathMapHandlerMappingTests.java,v 1.3 2004-03-18 03:01:39 trisberg Exp $
+ * @version $Id: PathMapHandlerMappingTests.java,v 1.4 2004-04-28 18:31:44 jhoeller Exp $
  */
 public class PathMapHandlerMappingTests extends TestCase {
 	

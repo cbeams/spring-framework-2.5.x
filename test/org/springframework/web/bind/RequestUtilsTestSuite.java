@@ -18,7 +18,7 @@ package org.springframework.web.bind;
 
 import junit.framework.TestCase;
 
-import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Juergen Hoeller

@@ -33,8 +33,8 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jndi.support.SimpleNamingContext;
-import org.springframework.jndi.support.SimpleNamingContextBuilder;
+import org.springframework.mock.jndi.SimpleNamingContext;
+import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 /**
  * @author Juergen Hoeller

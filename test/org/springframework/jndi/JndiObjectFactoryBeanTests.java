@@ -21,7 +21,7 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
-import org.springframework.jndi.support.ExpectedLookupTemplate;
+import org.springframework.mock.jndi.ExpectedLookupTemplate;
 
 /**
  * @author Rod Johnson

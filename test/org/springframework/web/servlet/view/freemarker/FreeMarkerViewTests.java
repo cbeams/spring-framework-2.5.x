@@ -32,12 +32,11 @@ import freemarker.template.TemplateException;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * @author Juergen Hoeller

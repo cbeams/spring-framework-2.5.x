@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.0.1 (April 2004)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 1.0.2 (May 2004)
+----------------------------------------------
 http://www.springframework.org
 
 
@@ -93,7 +93,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~160 KB)
+* "spring-context" (~155 KB)
 - Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
@@ -113,9 +113,13 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~960 KB)
-- Contents: all of the above
+* "spring" (~955 KB)
+- Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
+
+* "spring-mock" (~25 KB)
+- Contents: JNDI mocks, Servlet API mocks
+- Dependencies: spring-core
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
 Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,

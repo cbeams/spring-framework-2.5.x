@@ -22,12 +22,12 @@ import java.util.Date;
 
 import javax.servlet.jsp.JspException;
 
+import com.mockobjects.servlet.MockPageContext;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-
-import com.mockobjects.servlet.MockPageContext;
 
 /**
  * @author Juergen Hoeller

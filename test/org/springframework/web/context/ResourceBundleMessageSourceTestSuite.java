@@ -23,9 +23,9 @@ import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 
 /**

@@ -18,9 +18,9 @@ package org.springframework.web.servlet;
 
 import junit.framework.TestCase;
 
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockServletContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.theme.CookieThemeResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;

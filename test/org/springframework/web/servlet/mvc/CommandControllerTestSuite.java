@@ -32,13 +32,13 @@ import junit.framework.TestCase;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockHttpSession;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -132,7 +132,7 @@ public class CommandControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setRequireSession(true);
 		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
-		request.setSession(new MockHttpSession());
+		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 	}
@@ -143,7 +143,8 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		System.out.println(response.getHeader("Expires"));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
 		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
 	}
 
@@ -165,7 +166,7 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
 		assertTrue("No cache control", response.getHeader("Cache-Control") == null);
 	}
 
@@ -254,7 +255,7 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals("" + 1L));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
 		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
 	}
 

@@ -35,13 +35,13 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import org.easymock.MockControl;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.orm.hibernate.HibernateAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockServletContext;
 
 /**
  * @author Juergen Hoeller

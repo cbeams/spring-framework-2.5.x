@@ -31,8 +31,8 @@ import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.mock.MockServletContext;
 
 /**
  * @author Rod Johnson

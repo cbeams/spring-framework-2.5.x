@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.jndi.support.SimpleNamingContext;
+import org.springframework.mock.jndi.SimpleNamingContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jndi.support;
+package org.springframework.mock.jndi;
 
 import java.util.Hashtable;
 
@@ -26,6 +26,8 @@ import javax.naming.spi.NamingManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.mock.jndi.SimpleNamingContext;
 
 /**
  * Simple implementation of a JNDI naming context builder.
@@ -70,10 +72,10 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @see #bind
  * @see #activate
- * @see SimpleNamingContext
+ * @see org.springframework.mock.jndi.SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @version $Id: SimpleNamingContextBuilder.java,v 1.2 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: SimpleNamingContextBuilder.java,v 1.1 2004-04-28 18:31:30 jhoeller Exp $
  */
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 	
@@ -122,7 +124,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * Note that once this has been done, new InitialContext() will always return
 	 * a context from this factory. Use the emptyActivatedContextBuilder() static
 	 * method to get an empty context (for example, in test methods).
-	 * @throws IllegalStateException if there's already a naming context builder
+	 * @throws java.lang.IllegalStateException if there's already a naming context builder
 	 * registered with the JNDI NamingManager
 	 */
 	public void activate() throws IllegalStateException, NamingException {

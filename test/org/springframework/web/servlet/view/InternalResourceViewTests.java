@@ -26,9 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockRequestDispatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -89,7 +89,7 @@ public class InternalResourceViewTests extends TestCase {
 		
 		// Can now try multiple tests
 		v.render(model, request, response);
-		assertEquals(url, response.forwarded);
+		assertEquals(url, response.getForwardedUrl());
 		wacControl.verify();
 		reqControl.verify();
 	}
@@ -128,43 +128,9 @@ public class InternalResourceViewTests extends TestCase {
 
 		// Can now try multiple tests
 		v.render(model, request, response);
-		assertEquals(url, response.included);
+		assertEquals(url, response.getIncludedUrl());
 		wacControl.verify();
 		reqControl.verify();
 	}
-
-	// TODO IO exception
-	
-	// TODO return null RequestDispatcher
-	
-	/*
-	public void testRequestDispatcherThrowsIOException() throws Exception {
-		HashMap model = new HashMap();
-		model.put("foo", "bar");
-			
-		MockControl mc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.replay();
-			
-		String url = "forward-to";
-			
-		MockHttpServletRequest request = new MockHttpServletRequest(new MockServletContext(), "GET", "some-url");
-			
-			
-		// unused
-		MockHttpServletResponse response = new MockHttpServletResponse();
-			
-		InternalResourceView v = new InternalResourceView();
-		v.setUrl(url);
-		v.setApplicationContext(wac);
-			
-		// Can now try multiple tests
-		v.render(model, request, response);
-		
-		assertTrue(request.getAttribute("foo").equals(model.get("foo")));
-			
-		mc.verify();
-	}
-	*/
 
 }

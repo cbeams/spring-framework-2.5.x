@@ -30,16 +30,16 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.mock.MockHttpSession;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
+import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
 
 /**
  * @author Rod Johnson
@@ -173,7 +173,7 @@ public class MultiActionControllerTestSuite extends TestCase {
 	public void testInvokesCorrectMethodWithSession() throws Exception {
 		TestMaController mc = new TestMaController();
 		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/inSession.html");
-		request.setSession(new MockHttpSession());
+		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("Invoked inSession method", mc.wasInvoked("inSession"));
@@ -219,7 +219,7 @@ public class MultiActionControllerTestSuite extends TestCase {
 		request.addParameter("name", "rod");
 		request.addParameter("age", "32");
 
-		request.setSession(new MockHttpSession());
+		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("Invoked commandInSession method", mc.wasInvoked("commandInSession"));

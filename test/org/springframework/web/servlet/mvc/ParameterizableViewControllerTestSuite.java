@@ -19,13 +19,13 @@ package org.springframework.web.servlet.mvc;
 
 import junit.framework.TestCase;
 
-import org.springframework.web.mock.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Rod Johnson
  * @since March 2, 2003
- * @version $Id: ParameterizableViewControllerTestSuite.java,v 1.3 2004-03-18 03:01:19 trisberg Exp $
+ * @version $Id: ParameterizableViewControllerTestSuite.java,v 1.4 2004-04-28 18:31:46 jhoeller Exp $
  */
 public class ParameterizableViewControllerTestSuite extends TestCase {
 

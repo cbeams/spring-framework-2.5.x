@@ -28,8 +28,8 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.View;
 
 /**

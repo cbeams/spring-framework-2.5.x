@@ -24,10 +24,10 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockServletContext;
 
 /**
  * @author Juergen Hoeller

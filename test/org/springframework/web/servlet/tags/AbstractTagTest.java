@@ -22,18 +22,17 @@ import java.util.Map;
 
 import javax.servlet.jsp.PageContext;
 
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockServletContext;
-import org.springframework.web.servlet.SimpleWebApplicationContext;
+import com.mockobjects.servlet.MockPageContext;
+import junit.framework.TestCase;
+
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.SimpleWebApplicationContext;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
-
-import junit.framework.TestCase;
-
-import com.mockobjects.servlet.MockPageContext;
 
 /**
  * Abstract test for testing tags (provides createPageContext)

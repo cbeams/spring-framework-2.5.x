@@ -20,7 +20,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.web.mock.MockServletContext;
+import org.springframework.mock.web.MockServletContext;
 
 /**
  * @author Juergen Hoeller

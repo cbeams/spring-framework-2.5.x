@@ -21,7 +21,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.web.mock.MockServletContext;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 /**

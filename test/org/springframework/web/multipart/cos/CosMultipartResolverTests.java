@@ -24,9 +24,9 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.util.WebUtils;
 

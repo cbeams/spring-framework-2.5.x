@@ -27,14 +27,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.mock.MockHttpServletResponse;
-
 import com.mockobjects.servlet.MockHttpServletRequest;
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+
+import org.springframework.context.ApplicationContextException;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Tests for AbstractView. Not called AbstractViewTests as

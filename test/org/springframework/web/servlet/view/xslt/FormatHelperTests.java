@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
-
 import org.w3c.dom.Element;
 
 /**
@@ -28,7 +27,7 @@ import org.w3c.dom.Element;
  * @author Rod Johnson
  * @author Darren Davison
  * @since 26-Jul-2003
- * @version $Id: FormatHelperTests.java,v 1.7 2004-03-18 03:01:40 trisberg Exp $
+ * @version $Id: FormatHelperTests.java,v 1.8 2004-04-28 18:31:54 jhoeller Exp $
  */
 public class FormatHelperTests extends TestCase {
 
