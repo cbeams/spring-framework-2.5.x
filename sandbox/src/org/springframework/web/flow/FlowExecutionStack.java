@@ -722,7 +722,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		this.lastEventId = (String)in.readObject();
 		this.lastEventTimestamp = in.readLong();
 		this.executingFlowSessions = (Stack)in.readObject();
-		
 	}
 
 	/**
