@@ -26,9 +26,6 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteInvocation;
@@ -69,9 +66,8 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  */
-public class RmiServiceExporter extends RemoteInvocationBasedExporter implements InitializingBean, DisposableBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public class RmiServiceExporter extends RemoteInvocationBasedExporter
+		implements InitializingBean, DisposableBean {
 
 	private String serviceName;
 
@@ -135,9 +131,8 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter implements
 	 * Register the service as RMI object.
 	 * Creates an RMI registry on the specified port if none exists.
 	 */
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-
+	public void afterPropertiesSet() throws RemoteException {
+		checkService();
 		if (this.serviceName == null) {
 			throw new IllegalArgumentException("serviceName is required");
 		}
@@ -149,34 +144,8 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter implements
 			throw new IllegalArgumentException("Both RMIClientSocketFactory and RMIServerSocketFactory or none required");
 		}
 
-		Registry registry = null;
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for RMI registry at port '" + this.registryPort + "'");
-		}
-		try {
-			// retrieve registry
-			registry = LocateRegistry.getRegistry(this.registryPort);
-			registry.list();
-		}
-		catch (RemoteException ex) {
-			logger.debug("RMI registry access threw exception", ex);
-			logger.warn("Could not detect RMI registry - creating new one");
-			// assume no registry found -> create new one
-			registry = LocateRegistry.createRegistry(this.registryPort);
-		}
-
-		// determine remote object
-		if (getService() instanceof Remote && Remote.class.isAssignableFrom(getServiceInterface())) {
-			// conventional RMI service
-			this.exportedObject = (Remote) getService();
-		}
-		else {
-			// RMI invoker
-			if (logger.isInfoEnabled()) {
-				logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
-			}
-			this.exportedObject = new RmiInvocationWrapper(getProxyForService(), this);
-		}
+		Registry registry = getRegistry(this.registryPort);
+		this.exportedObject = getObjectToExport();
 
 		// export remote object and bind it to registry
 		if (logger.isInfoEnabled()) {
@@ -184,14 +153,61 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter implements
 					"' to registry at port '" + this.registryPort + "'");
 		}
 		if (this.clientSocketFactory != null) {
-			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort,
-																			 this.clientSocketFactory, this.serverSocketFactory);
+			UnicastRemoteObject.exportObject(
+					this.exportedObject, this.servicePort, this.clientSocketFactory, this.serverSocketFactory);
 		}
 		else {
 			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort);
 		}
 		registry.rebind(this.serviceName, this.exportedObject);
 	}
+
+	/**
+	 * Locate or create the RMI registry for this exporter.
+	 * @param registryPort the registry port to use
+	 * @return the RMI registry
+	 * @throws RemoteException if the registry couldn't be located or created
+	 */
+	protected Registry getRegistry(int registryPort) throws RemoteException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Looking for RMI registry at port '" + registryPort + "'");
+		}
+		Registry registry;
+		try {
+			// retrieve registry
+			registry = LocateRegistry.getRegistry(registryPort);
+			registry.list();
+		}
+		catch (RemoteException ex) {
+			logger.debug("RMI registry access threw exception", ex);
+			logger.warn("Could not detect RMI registry - creating new one");
+			// assume no registry found -> create new one
+			registry = LocateRegistry.createRegistry(registryPort);
+		}
+		return registry;
+	}
+
+	/**
+	 * Determine the object to export: either the service object itself
+	 * or a RmiInvocationWrapper in case of a non-RMI service object.
+	 * @return the RMI object to export
+	 */
+	protected Remote getObjectToExport() {
+		// determine remote object
+		if (getService() instanceof Remote &&
+				((getServiceInterface() == null) || Remote.class.isAssignableFrom(getServiceInterface()))) {
+			// conventional RMI service
+			return (Remote) getService();
+		}
+		else {
+			// RMI invoker
+			if (logger.isInfoEnabled()) {
+				logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
+			}
+			return new RmiInvocationWrapper(getProxyForService(), this);
+		}
+	}
+
 
 	/**
 	 * Redefined here to be visible to RmiInvocationWrapper.
@@ -202,6 +218,10 @@ public class RmiServiceExporter extends RemoteInvocationBasedExporter implements
 		return super.invoke(invocation, targetObject);
 	}
 
+
+	/**
+	 * Unbind the RMI service from the registry at bean factory shutdown.
+	 */
 	public void destroy() throws RemoteException, NotBoundException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service '" + this.serviceName +
