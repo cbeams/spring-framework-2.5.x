@@ -199,10 +199,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
 		}
-		this.applicationEventMulticaster.multicastEvent(event);
+		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {
 			this.parent.publishEvent(event);
 		}
+	}
+
+	/**
+	 * Return the internal MessageSource used by the context.
+	 * @return the internal MessageSource (never null)
+	 * @throws IllegalStateException if the context has not been initialized yet
+	 */
+	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
+		if (this.applicationEventMulticaster == null) {
+			throw new IllegalStateException("ApplicationEventMulticaster not initialized - " +
+					"call 'refresh' before multicasting events via the context: " + this);
+		}
+		return this.applicationEventMulticaster;
 	}
 
 
@@ -395,7 +408,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private void refreshListeners() throws BeansException {
 		logger.info("Refreshing listeners");
 		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
-		logger.debug("Found " + listeners.size() + " listeners in bean factory");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found " + listeners.size() + " listeners in bean factory");
+		}
 		for (Iterator it = listeners.iterator(); it.hasNext();) {
 			ApplicationListener listener = (ApplicationListener) it.next();
 			addListener(listener);
@@ -411,7 +426,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param listener the listener to register
 	 */
 	protected void addListener(ApplicationListener listener) {
-		this.applicationEventMulticaster.addApplicationListener(listener);
+		getApplicationEventMulticaster().addApplicationListener(listener);
 	}
 
 	/**
@@ -422,15 +437,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			logger.info("Closing application context [" + getDisplayName() + "]");
 		}
 
+		// publish corresponding event
+		publishEvent(new ContextClosedEvent(this));
+
 		// Destroy all cached singletons in this context,
 		// invoking DisposableBean.destroy and/or "destroy-method".
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory != null) {
 			beanFactory.destroySingletons();
 		}
-
-		// publish corresponding event
-		publishEvent(new ContextClosedEvent(this));
 	}
 
 
@@ -517,15 +532,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
-		return this.messageSource.getMessage(code, args, defaultMessage, locale);
+		return getMessageSource().getMessage(code, args, defaultMessage, locale);
 	}
 
 	public String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, args, locale);
+		return getMessageSource().getMessage(code, args, locale);
 	}
 
 	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-		return this.messageSource.getMessage(resolvable, locale);
+		return getMessageSource().getMessage(resolvable, locale);
+	}
+
+	/**
+	 * Return the internal MessageSource used by the context.
+	 * @return the internal MessageSource (never null)
+	 * @throws IllegalStateException if the context has not been initialized yet
+	 */
+	private MessageSource getMessageSource() throws IllegalStateException {
+		if (this.messageSource == null) {
+			throw new IllegalStateException("MessageSource not initialized - " +
+					"call 'refresh' before accessing messages via the context: " + this);
+		}
+		return this.messageSource;
 	}
 
 	/**
@@ -573,13 +601,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName());
 		sb.append(": ");
-		sb.append("displayName=[").append(this.displayName).append("]; ");
-		sb.append("startup date=[").append(new Date(this.startupTime)).append("]; ");
+		sb.append("display name [").append(this.displayName).append("]; ");
+		sb.append("startup date [").append(new Date(this.startupTime)).append("]; ");
 		if (this.parent == null) {
-			sb.append("root of ApplicationContext hierarchy");
+			sb.append("root of context hierarchy");
 		}
 		else {
-			sb.append("parent=[").append(this.parent).append(']');
+			sb.append("child of [").append(this.parent).append(']');
 		}
 		return sb.toString();
 	}
