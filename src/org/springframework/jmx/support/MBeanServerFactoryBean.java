@@ -116,8 +116,13 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	}
 
 
+	/**
+	 * Unregisters the <code>MBeanServer</code> instance, if necessary.
+	 */
 	public void destroy() {
-		MBeanServerFactory.releaseMBeanServer(this.server);
+		if (this.registerWithFactory) {
+			MBeanServerFactory.releaseMBeanServer(this.server);
+		}
 	}
 
 }

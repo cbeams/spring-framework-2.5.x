@@ -50,7 +50,6 @@ public class MBeanExporterTests extends TestCase {
 		}
 		finally {
 			server.unregisterMBean(new ObjectName(OBJECT_NAME));
-			MBeanServerFactory.releaseMBeanServer(server);
 		}
 	}
 
