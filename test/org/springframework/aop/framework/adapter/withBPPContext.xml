@@ -2,19 +2,18 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+
 	<bean id="testBeanTarget" class="org.springframework.beans.TestBean"/>
 	
 	<bean id="simpleBeforeAdvice" class="org.springframework.aop.SimpleBeforeAdviceImpl"/>
 	
-	<bean id="simpleBeforeAdviceAdvisor"
-		class="org.springframework.aop.support.DefaultPointcutAdvisor">
+	<bean id="simpleBeforeAdviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<constructor-arg><ref local="simpleBeforeAdvice"/></constructor-arg>
-   	</bean>
+	</bean>
    	
-   	<bean id="testBean"
-  		class="org.springframework.aop.framework.ProxyFactoryBean">
-     	<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>
-     	<property name="interceptorNames"><value>simpleBeforeAdviceAdvisor,testBeanTarget</value></property>
+	<bean id="testBean" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>
+		<property name="interceptorNames"><value>simpleBeforeAdviceAdvisor,testBeanTarget</value></property>
 	</bean>
 	
 	<bean id="testAdvisorAdapter" class="org.springframework.aop.SimpleBeforeAdviceAdapter"/>
