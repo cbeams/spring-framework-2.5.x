@@ -28,15 +28,16 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -775,6 +776,23 @@ public class DataBinderTests extends TestCase {
 		tb.getList().set(1, tb1);
 		assertEquals(tb2.getName(), binder.getErrors().getFieldValue("list[0].name"));
 		assertEquals(tb1.getName(), binder.getErrors().getFieldValue("list[1].name"));
+	}
+
+	public void testRejectWithoutDefaultMessage() throws Exception {
+		TestBean tb = new TestBean();
+		tb.setName("myName");
+		tb.setAge(99);
+
+		BindException ex = new BindException(tb, "tb");
+		ex.reject("invalid");
+		ex.rejectValue("age", "invalidField");
+
+		StaticMessageSource ms = new StaticMessageSource();
+		ms.addMessage("invalid", Locale.US, "general error");
+		ms.addMessage("invalidField", Locale.US, "invalid field");
+
+		assertEquals("general error", ms.getMessage(ex.getGlobalError(), Locale.US));
+		assertEquals("invalid field", ms.getMessage(ex.getFieldError("age"), Locale.US));
 	}
 
 	public void testBindExceptionSerializable() throws Exception {

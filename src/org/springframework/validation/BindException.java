@@ -168,12 +168,20 @@ public class BindException extends Exception implements Errors {
 	}
 
 
+	public void reject(String errorCode) {
+		reject(errorCode, null, null);
+	}
+
 	public void reject(String errorCode, String defaultMessage) {
 		reject(errorCode, null, defaultMessage);
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
 		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
+	}
+
+	public void rejectValue(String field, String errorCode) {
+		rejectValue(field, errorCode, null, null);
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {

@@ -80,12 +80,20 @@ public class EscapedErrors implements Errors {
 	}
 
 
+	public void reject(String errorCode) {
+		this.source.reject(errorCode);
+	}
+
 	public void reject(String errorCode, String defaultMessage) {
 		this.source.reject(errorCode, defaultMessage);
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
 		this.source.reject(errorCode, errorArgs, defaultMessage);
+	}
+
+	public void rejectValue(String field, String errorCode) {
+		this.source.rejectValue(field, errorCode);
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {

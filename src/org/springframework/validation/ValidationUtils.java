@@ -75,6 +75,20 @@ public abstract class ValidationUtils {
 	 * @param errors Errors instance to register errors on
 	 * @param field the field name to check
 	 * @param errorCode error code, interpretable as message key
+	 */
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode) {
+		rejectIfEmpty(errors, field, errorCode, null, null);
+	}
+
+	/**
+	 * Reject the given field with the given error code and message
+	 * if the value is empty.
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
@@ -100,6 +114,20 @@ public abstract class ValidationUtils {
 		if (value == null || !StringUtils.hasLength(value.toString())) {
 			errors.rejectValue(field, errorCode, errorArgs, defaultMessage);
 		}
+	}
+
+	/**
+	 * Reject the given field with the given error code and message
+	 * if the value is empty or just contains whitespace.
+	 * <p>The object to validate does not have to be passed in,
+	 * as the Errors instance allows to check field values
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors Errors instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode error code, interpretable as message key
+	 */
+	public static void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode) {
+		rejectIfEmptyOrWhitespace(errors, field, errorCode, null, null);
 	}
 
 	/**

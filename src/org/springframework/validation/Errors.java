@@ -94,6 +94,12 @@ public interface Errors {
 	/**
 	 * Reject the current object, using the given error description.
 	 * @param errorCode error code, interpretable as message key
+	 */
+	void reject(String errorCode);
+
+	/**
+	 * Reject the current object, using the given error description.
+	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
 	 */
 	void reject(String errorCode, String defaultMessage);
@@ -106,6 +112,13 @@ public interface Errors {
 	 * @param defaultMessage fallback default message
 	 */
 	void reject(String errorCode, Object[] errorArgs, String defaultMessage);
+
+	/**
+	 * Reject the given field of the current object, using the given error description.
+	 * @param field the field name
+	 * @param errorCode error code, interpretable as message key
+	 */
+	void rejectValue(String field, String errorCode);
 
 	/**
 	 * Reject the given field of the current object, using the given error description.
