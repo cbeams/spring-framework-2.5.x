@@ -1163,8 +1163,16 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       can use the ResourceBundleViewResolver: <programlisting>&lt;bean id="viewResolver"
       class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
     &lt;property name="baseName"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="defaultParentView"&gt;&lt;value&gt;parentView&lt;/value&gt;&lt;/property
+    &lt;property name="defaultParentView"&gt;&lt;value&gt;parentView&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
+	<para>
+		The ResourceBundleViewResolver inspects the ResourceBundle identified by the basename
+		and for each view it is supposed to resolve, it uses the value of the property
+		<literal>[viewname].class</literal> as the view class and the value of the property
+		<literal>[viewname].url</literal> as the view url. As you can see, you can identify a 
+		parent view, from which all view in the properties file sort of extend. This way you
+		can specify a default view class for instance.
+	</para>
 	<para>
 		<emphasis>A note on caching:</emphasis> subclasses of <literal>AbstractCachingViewResolver</literal>
 		cache view instances they've resolved. This greatly improves performance when using
