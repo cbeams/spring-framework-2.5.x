@@ -93,7 +93,8 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView handle(HttpServletRequest request, HttpServletResponse response,
-	                                       Object command, BindException errors) throws Exception;
+	protected abstract ModelAndView handle(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
+			throws Exception;
 
 }

@@ -323,8 +323,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #showForm(HttpServletRequest, BindException, String)
 	 * @see SimpleFormController#setFormView
 	 */
-	protected abstract ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
-	                                         BindException errors) throws Exception;
+	protected abstract ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors) throws Exception;
 
 	/**
 	 * Prepare model and view for the given form, including reference and errors.
@@ -356,8 +356,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return the prepared form view
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName,
-	                                      Map controlModel) throws Exception {
+	protected final ModelAndView showForm(
+			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
 		if (isSessionForm()) {
 			request.getSession().setAttribute(getFormSessionAttributeName(), errors.getTarget());
 		}
@@ -461,8 +461,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,	HttpServletResponse response,
-	                                                      Object command, BindException errors)
+	protected abstract ModelAndView processFormSubmission(
+			HttpServletRequest request,	HttpServletResponse response, Object command, BindException errors)
 			throws Exception;
 
 }
