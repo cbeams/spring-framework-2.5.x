@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessExceptionsException;
@@ -44,7 +45,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.16 2004-06-11 23:39:29 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.17 2004-06-21 16:34:43 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -103,6 +104,14 @@ public class DataBinder {
 	 */
 	public BindException getErrors() {
 		return errors;
+	}
+
+	/**
+	 * Return the underlying BeanWrapper of the Errors object.
+	 * To be used by binder subclasses that need bean property checks.
+	 */
+	protected BeanWrapper getBeanWrapper() {
+		return this.errors.getBeanWrapper();
 	}
 
 	/**

@@ -21,28 +21,74 @@ import java.util.Map;
 
 import javax.servlet.ServletRequest;
 
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
- * Use this class to perform manual data binding from servlet request
- * parameters to JavaBeans, including support for multipart files.
+ * Special binder to perform data binding from servlet request parameters
+ * to JavaBeans, including support for multipart files.
+ *
+ * <p>Used by Spring web MVC's BaseCommandController and MultiActionController.
+ * Note that BaseCommandController and its subclasses allow for easy customization
+ * of the binder instances that they use, for example registering custom editors.
+ *
+ * <p>Can also be used for manual data binding in custom web controllers.
+ * Simply instantiate a ServletRequestDataBinder for each binding process,
+ * and invoke <code>bind</code> with the current ServletRequest as argument.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #bind(javax.servlet.ServletRequest)
+ * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
+ * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
  */
 public class ServletRequestDataBinder extends DataBinder {
 
+	/**
+	 * Prefix that checkbox marker parameters start with, followed
+	 * by the field name: e.g. "_checkbox.subscribeToNewsletter"
+	 * for a field "subscribeToNewsletter".
+	 */
+	public static final String CHECKBOX_MARKER_PREFIX = "_checkbox.";
+
+	private boolean resetEmptyCheckboxFields = true;
+
 	private boolean bindEmptyMultipartFiles = true;
+
 
 	/**
 	 * Create a new DataBinder instance.
 	 * @param target target object to bind onto
-	 * @param name name of the target object
+	 * @param objectName objectName of the target object
 	 */
-	public ServletRequestDataBinder(Object target, String name) {
-		super(target, name);
+	public ServletRequestDataBinder(Object target, String objectName) {
+		super(target, objectName);
+	}
+
+	/**
+	 * Set whether to automatically reset empty checkbox fields that are marked
+	 * through "_checkbox.FIELD" parameters. Default is true.
+	 * <p>HTML checkboxes only send a value when they're checked, so it is not
+	 * possible to detect that a formerly checked box has just been unchecked,
+	 * at least not with standard HTML means.
+	 * <p>One way to address this is to look for a checkbox parameter value if
+	 * you know that the checkbox has been visible in the form, resetting the
+	 * checkbox if no value found. In Spring web MVC, this typically happens
+	 * in a custom <code>onBind</code> implementation.
+	 * <p>This auto-reset mechanism addresses this deficiency, provided
+	 * that a marker parameter is sent for each checkbox field, like
+	 * "_checkbox.subscribeToNewsletter" for a "subscribeToNewsletter" field.
+	 * As the marker parameter is sent in any case, the data binder can detect
+	 * an empty checkbox field and automatically reset its value.
+	 * @see #CHECKBOX_MARKER_PREFIX
+	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
+	 */
+	public void setResetEmptyCheckboxFields(boolean resetEmptyCheckboxFields) {
+		this.resetEmptyCheckboxFields = resetEmptyCheckboxFields;
 	}
 
 	/**
@@ -55,6 +101,7 @@ public class ServletRequestDataBinder extends DataBinder {
 	public void setBindEmptyMultipartFiles(boolean bindEmptyMultipartFiles) {
 		this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
 	}
+
 
 	/**
 	 * Bind the parameters of the given request to this binder's target,
@@ -75,6 +122,32 @@ public class ServletRequestDataBinder extends DataBinder {
 	public void bind(ServletRequest request) {
 		// bind normal HTTP parameters
 		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
+
+		// check for special checkbox markers
+		if (this.resetEmptyCheckboxFields) {
+			PropertyValue[] pvArray = pvs.getPropertyValues();
+			for (int i = 0; i < pvArray.length; i++) {
+				PropertyValue pv = pvArray[i];
+				if (pv.getName().startsWith(CHECKBOX_MARKER_PREFIX)) {
+					String field = pv.getName().substring(CHECKBOX_MARKER_PREFIX.length());
+					if (!pvs.contains(field)) {
+						try {
+							Class type = getBeanWrapper().getPropertyType(field);
+							// special check for boolean property
+							if (type != null && boolean.class.equals(type) || Boolean.class.equals(type)) {
+								pvs.addPropertyValue(field, Boolean.FALSE);
+							}
+							else {
+								pvs.addPropertyValue(field, null);
+							}
+						}
+						catch (InvalidPropertyException ex) {
+							// ignore if no matching property
+						}
+					}
+				}
+			}
+		}
 
 		// bind multipart files
 		if (request instanceof MultipartHttpServletRequest) {
