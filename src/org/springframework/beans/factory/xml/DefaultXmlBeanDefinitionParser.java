@@ -70,56 +70,58 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	public static final String TRUE_VALUE = "true";
 	public static final String DEFAULT_VALUE = "default";
+	public static final String DESCRIPTION_ELEMENT = "description";
+
+	public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
+	public static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
+	public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
+	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
+
+	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
+	public static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
+	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
 
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 
 	public static final String BEAN_ELEMENT = "bean";
-	public static final String DESCRIPTION_ELEMENT = "description";
-	public static final String CLASS_ATTRIBUTE = "class";
-	public static final String PARENT_ATTRIBUTE = "parent";
 	public static final String ID_ATTRIBUTE = "id";
 	public static final String NAME_ATTRIBUTE = "name";
+	public static final String PARENT_ATTRIBUTE = "parent";
+
+	public static final String CLASS_ATTRIBUTE = "class";
 	public static final String SINGLETON_ATTRIBUTE = "singleton";
+	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+	public static final String AUTOWIRE_ATTRIBUTE = "autowire";
+	public static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 	public static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 	public static final String INIT_METHOD_ATTRIBUTE = "init-method";
 	public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
+	public static final String FACTORY_METHOD_ATTRIBUTE = "factory-method";
+
 	public static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
 	public static final String INDEX_ATTRIBUTE = "index";
 	public static final String TYPE_ATTRIBUTE = "type";
 	public static final String PROPERTY_ELEMENT = "property";
+	public static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
+
 	public static final String REF_ELEMENT = "ref";
 	public static final String IDREF_ELEMENT = "idref";
 	public static final String BEAN_REF_ATTRIBUTE = "bean";
 	public static final String LOCAL_REF_ATTRIBUTE = "local";
 	public static final String PARENT_REF_ATTRIBUTE = "parent";
+	
 	public static final String LIST_ELEMENT = "list";
 	public static final String SET_ELEMENT = "set";
 	public static final String MAP_ELEMENT = "map";
-	public static final String KEY_ATTRIBUTE = "key";
 	public static final String ENTRY_ELEMENT = "entry";
-	public static final String VALUE_ELEMENT = "value";
-	public static final String NULL_ELEMENT = "null";
+	public static final String KEY_ATTRIBUTE = "key";
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
+	public static final String VALUE_ELEMENT = "value";
+	public static final String NULL_ELEMENT = "null";
 
-	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
-	
-	public static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
-	
-	public static final String FACTORY_METHOD_ATTRIBUTE = "factory-method";
-
-	public static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
-	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
-	public static final String DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE = "simple";
-	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
-
-	public static final String AUTOWIRE_ATTRIBUTE = "autowire";
-	public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
-	public static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
-	public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
-	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -185,6 +187,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return defaultAutowire;
 	}
 
+	protected Resource getResource() {
+		return resource;
+	}
+
 
 	/**
 	 * Parse a "bean" element and register it with the bean factory.
@@ -212,19 +218,19 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
-		if (nameAttr != null && !"".equals(nameAttr)) {
+		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
-		if (id == null || "".equals(id) && !aliases.isEmpty()) {
+		if (!StringUtils.hasLength(id) && !aliases.isEmpty()) {
 			id = (String) aliases.remove(0);
 			logger.debug("No XML 'id' specified - using '" + id + "' as ID and " + aliases + " as aliases");
 		}
 
 		BeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
-		if (id == null || "".equals(id)) {
+		if (!StringUtils.hasLength(id)) {
 			if (beanDefinition instanceof RootBeanDefinition) {
 				id = ((RootBeanDefinition) beanDefinition).getBeanClassName();
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
@@ -391,13 +397,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		Object val = getPropertyValue(ele, beanName);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
-		if (!"".equals(indexAttr)) {
+		if (StringUtils.hasLength(indexAttr)) {
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
 					throw new BeanDefinitionStoreException(this.resource, beanName, "'index' cannot be lower than 0");
 				}
-				if (!"".equals(typeAttr)) {
+				if (StringUtils.hasLength(typeAttr)) {
 					cargs.addIndexedArgumentValue(index, val, typeAttr);
 				}
 				else {
@@ -410,7 +416,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		else {
-			if (!"".equals(typeAttr)) {
+			if (StringUtils.hasLength(typeAttr)) {
 				cargs.addGenericArgumentValue(val, typeAttr);
 			}
 			else {
@@ -425,7 +431,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected void parsePropertyElement(String beanName, MutablePropertyValues pvs, Element ele)
 			throws DOMException {
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
-		if ("".equals(propertyName)) {
+		if (!StringUtils.hasLength(propertyName)) {
 			throw new BeanDefinitionStoreException(this.resource, beanName,
 																						 "Tag 'property' must have a 'name' attribute");
 		}
@@ -471,13 +477,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// a generic reference to any name of any bean
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
-			if ("".equals(beanRef)) {
+			if (!StringUtils.hasLength(beanRef)) {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if ("".equals(beanRef)) {
+				if (!StringUtils.hasLength(beanRef)) {
 					// a reference to the id of another bean in the same XML file
 					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
-					if ("".equals(beanRef)) {
+					if (!StringUtils.hasLength(beanRef)) {
 						throw new BeanDefinitionStoreException(this.resource, beanName,
 																									 "'bean', 'local' or 'parent' is required for a reference");
 					}
@@ -489,10 +495,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
 			// a generic reference to any name of any bean
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
-			if ("".equals(beanRef)) {
+			if (!StringUtils.hasLength(beanRef)) {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if ("".equals(beanRef)) {
+				if (!StringUtils.hasLength(beanRef)) {
 					throw new BeanDefinitionStoreException(this.resource, beanName,
 																								 "Either 'bean' or 'local' is required for an idref");
 				}

@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.29 2004-06-23 21:16:02 johnsonr Exp $
+	$Id: spring-beans.dtd,v 1.30 2004-06-25 13:05:31 jhoeller Exp $
 -->
 
 
@@ -90,16 +90,28 @@
 <!ATTLIST bean name CDATA #IMPLIED>
 
 <!--
-	Each bean definition must specify the FQN of the class,
-	or the name of the parent bean from which the class can be worked out.
+  Optionally specify a parent bean definition.
 
-	Note that a child bean definition that references a parent will just
-	add respectively override property values and be able to change the
-	singleton status. It will inherit all of the parent's other parameters
-	like lazy initialization or autowire settings.
+  Will use the bean class of the parent if none specified, but can
+  also override it. In the latter case, the child bean class must be
+  compatible with the parent, i.e. accept the parent's property values
+  and constructor argument values, if any.
+
+  A child bean definition will inherit constructor argument values,
+  property values and method overrides from the parent, with the option
+  to add new values. If init method, destroy method and/or static factory
+  method are specified, they will override the corresponding parent settings.
+
+  The remaining settings will <i>always</i> be taken from the child definition:
+  depends on, autowire mode, dependency check, singleton, lazy init.
+-->
+<!ATTLIST bean parent CDATA #IMPLIED>
+
+<!--
+	Each bean definition must specify the fully qualified name of the class,
+	except if it pure serves as parent for child bean definitions.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
-<!ATTLIST bean parent CDATA #IMPLIED>
 
 <!--
 	Is this bean a "singleton" (one shared instance, which will
@@ -263,6 +275,29 @@
 <!ATTLIST property name CDATA #REQUIRED>
 
 <!--
+	A lookup method causes the IoC container to override the given method and return
+	the bean with the name given in the bean attribute. This is a form of Method Injection.
+	It's particularly useful as an alternative to implementing the BeanFactoryAware
+	interface, in order to be able to make getBean() calls for non-singleton instances
+	at runtime. In this case, Method Injection is a less invasive alternative.
+-->
+<!ELEMENT lookup-method EMPTY>
+
+<!--
+	Name of a lookup method. This method should take no arguments.
+-->
+<!ATTLIST lookup-method name CDATA #IMPLIED>
+
+<!--
+	Name of the bean in the current or ancestor factories that the lookup method
+	should resolve to. Often this bean will be a prototype, in which case the
+	lookup method will return a distinct instance on every invocation. This
+	is useful for single-threaded objects.
+-->
+<!ATTLIST lookup-method bean CDATA #IMPLIED>
+
+
+<!--
 	Defines a reference to another bean in this factory or an external
 	factory (parent or included factory).
 -->
@@ -299,29 +334,6 @@
 -->
 <!ATTLIST idref bean CDATA #IMPLIED>
 <!ATTLIST idref local IDREF #IMPLIED>
-
-<!--
-	A lookup method causes the IoC container to override the given method and return
-	the bean with the name given in the bean attribute. This is a form of Method Injection.
-	It's particularly useful as an alternative to implementing the BeanFactoryAware
-	interface, in order to be able to make getBean() calls for non-singleton instances
-	at runtime. In this case, Method Injection is a less invasive alternative.
--->
-<!ELEMENT lookup-method EMPTY>
-
-<!--
-	Name of a lookup method. This method should take no arguments.
--->
-<!ATTLIST lookup-method name CDATA #IMPLIED>
-
-<!--
-	Name of the bean in the current or ancestor factories that the lookup method
-	should resolve to. Often this bean will be a prototype, in which case the
-	lookup method will return a distinct instance on every invocation. This
-	is useful for single-threaded objects.
--->
-<!ATTLIST lookup-method bean CDATA #IMPLIED>
-
 
 <!--
 	A list can contain multiple inner bean, ref, collection, or value elements.
