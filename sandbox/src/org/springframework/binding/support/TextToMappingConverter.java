@@ -20,6 +20,10 @@ import org.springframework.binding.convert.support.AbstractConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+/**
+ * Converts a text-encoded representation of a <code>Mapping</code> object to a valid instance.
+ * @author Keith Donald
+ */
 public class TextToMappingConverter extends AbstractConverter {
 
 	private ConversionService conversionService;
@@ -29,15 +33,15 @@ public class TextToMappingConverter extends AbstractConverter {
 	}
 
 	/**
-	 * Set the type converter registry
-	 * @param registry the registry
+	 * Set the type conversion service
+	 * @param conversionService the service
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	protected ConversionService getConversionService() {
-		Assert.notNull(this.conversionService, "The converterLocator property was request but is not set");
+		Assert.notNull(this.conversionService, "The converterService property was requested but is not set");
 		return this.conversionService;
 	}
 
@@ -51,7 +55,7 @@ public class TextToMappingConverter extends AbstractConverter {
 
 	protected Object doConvert(Object source, Class targetClass) throws Exception {
 		//format: <sourceAttributeName>[,class][->targetAttributeName[,class]]
-		String[] sourceTarget = StringUtils.delimitedListToStringArray((String)source, "->");
+		String[] sourceTarget = StringUtils.delimitedListToStringArray((String) source, "->");
 		if (sourceTarget.length == 1) {
 			// just target mapping info is specified
 			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[0]);
@@ -59,7 +63,7 @@ public class TextToMappingConverter extends AbstractConverter {
 			String targetAttributeName = targetMappingInfo[0];
 			Class targetAttributeClass = null;
 			if (targetMappingInfo.length == 2) {
-				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+				targetAttributeClass = (Class) getConversionService().getConversionExecutor(String.class, Class.class)
 						.call(targetMappingInfo[1]);
 			}
 			if (targetAttributeClass != null) {
@@ -76,14 +80,14 @@ public class TextToMappingConverter extends AbstractConverter {
 			String sourceAttributeName = sourceMappingInfo[0];
 			Class sourceAttributeClass = String.class;
 			if (sourceMappingInfo.length == 2) {
-				sourceAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+				sourceAttributeClass = (Class) getConversionService().getConversionExecutor(String.class, Class.class)
 						.call(sourceMappingInfo[1]);
 			}
 			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[1]);
 			String targetAttributeName = targetMappingInfo[0];
 			Class targetAttributeClass = String.class;
 			if (targetMappingInfo.length == 2) {
-				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+				targetAttributeClass = (Class) getConversionService().getConversionExecutor(String.class, Class.class)
 						.call(targetMappingInfo[1]);
 			}
 			if (!sourceAttributeClass.equals(targetAttributeClass)) {

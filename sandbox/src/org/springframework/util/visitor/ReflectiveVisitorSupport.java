@@ -184,9 +184,9 @@ public final class ReflectiveVisitorSupport {
 	 * method will be called directly on the visitor based on the class of the
 	 * argument.
 	 * 
-	 * @param visitor, The visitor encapsulating the logic to process the
+	 * @param visitor The visitor encapsulating the logic to process the
 	 *        argument
-	 * @param argument, The argument to dispatch, or a instanceof Vistable
+	 * @param argument The argument to dispatch, or a instanceof Vistable
 	 * @throws IllegalArgumentException if the visitor parameter is null
 	 */
 	public final Object invokeVisit(Visitor visitor, Object argument) {

@@ -57,8 +57,8 @@ public class Algorithms {
 	 * Returns true if any elements in the given collection meet the specified
 	 * predicate condition.
 	 * 
-	 * @param collection
-	 * @param constraint
+	 * @param collection the collection 
+	 * @param constraint the iterator
 	 * @return true or false
 	 */
 	public boolean anyTrue(Collection collection, Constraint constraint) {
@@ -69,8 +69,8 @@ public class Algorithms {
 	 * Returns true if any elements in the given collection meet the specified
 	 * predicate condition.
 	 * 
-	 * @param collection
-	 * @param constraint
+	 * @param it the iterator
+	 * @param constraint the constraint
 	 * @return true or false
 	 */
 	public boolean anyTrue(Iterator it, Constraint constraint) {
