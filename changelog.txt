@@ -10,7 +10,7 @@ Package org.springframework.aop
 * ProxyFactoryBean returns full target class as object type in case of a singleton
 * reworked AbstractPrototypeBasedTargetSource's target class check to look for bean class on BeanDefinition first
 * deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favour of "getObjectCount"/"getHitCount" etc
-* renamed Jdk14RegexpMethodPointcut to JdkRegexpMethodPointcut
+* renamed Jdk14RegexpMethodPointcut to JdkRegexpMethodPointcut, for consistent class naming throughout the framework
 
 Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
@@ -63,11 +63,12 @@ Package org.springframework.mail
 Package org.springframework.remoting
 * added RemoteConnectFailureException and RemoteLookupFailureException as specialized RemoteAccessException subclasses
 * changed RemoteInvocationResult's exception holder to Throwable, to also transport errors thrown during reflection
-* added "cacheRmiProxy" flag to RmiClientInterceptor, to be turned off for creating the RMI proxy on each invocation
 * factored out RMI invocation logic into RmiClientInterceptorUtils, handling both RMI and non-RMI service interfaces
-* added "lookupRmiProxyOnStartup", "cacheRmiProxy" and "refreshRmiProxyOnConnectFailure" flags to RmiClientInterceptor
+* renamed RmiClientInterceptor's "createRmiProxy" and "getRmiProxy" methods to "lookupStub" respectively "getStub"
+* added "lookupStubOnStartup", "cacheStub" and "refreshStubOnConnectFailure" flags to RmiClientInterceptor
 * added JndiRmiServiceExporter, for exposing PortableRemoteObject RMI services to JNDI (e.g. RMI-IIOP resp. CORBA)
 * added JndiRmiClientInterceptor and JndiRmiProxyFactoryBean, for fetching PortableRemoteObject RMI services from JNDI
+* redesigned JaxRpcPortClientInterceptor's "postProcessPortProxy(Remote)" method as "postProcessPortStub(Stub)"
 
 Package org.springframework.validation
 * fixed BindException to apply "getAsText" of a custom PropertyEditor even in case of a null value
