@@ -56,7 +56,7 @@ import org.springframework.orm.hibernate.HibernateTemplate;
  * </p>
  * 
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTxEJB.java,v 1.1 2004-07-14 22:55:07 colins Exp $
+ * @version $Id: CmtJtaNoSpringTxEJB.java,v 1.2 2004-07-16 01:47:28 colins Exp $
  */
 public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 		implements
@@ -64,7 +64,7 @@ public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 			CmtJtaNoSpringTx {
 
 	// --- statics
-	public static final String SESSION_FACTORY_ID = "sessionFactory";
+	public static final String SESSION_FACTORY_ID = "hibSessionFactory";
 
 	protected static final Log logger = LogFactory
 			.getLog(CmtJtaNoSpringTxEJB.class);

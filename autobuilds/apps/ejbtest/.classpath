@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="target/classes" kind="src" path="src/java"/>
+	<classpathentry output="target/test-classes" kind="src" path="src/test"/>
 	<classpathentry output="target/cactus-classes" kind="src" path="src/test-cactus"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="SPRING_BASE/lib/aopalliance/aopalliance.jar"/>
@@ -14,5 +15,17 @@
 	<classpathentry kind="var" path="SPRING_BASE/lib/junit/junit.jar"/>
 	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/servlet.jar"/>
 	<classpathentry kind="var" path="SPRING_BASE/lib/hibernate/hibernate2.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/autobuilds/lib/junit-addons/junit-addons-1.4.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-dbcp.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-collections.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/jakarta-commons/commons-pool.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/xerces/xercesImpl.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/xml-apis.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/j2ee/jta.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/dom4j/dom4j.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/hibernate/ehcache.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/hibernate/odmg.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/cglib/cglib-full-2.0.2.jar"/>
+	<classpathentry kind="var" path="SPRING_BASE/lib/hsqldb/hsqldb.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

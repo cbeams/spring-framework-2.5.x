@@ -31,25 +31,48 @@
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>java:DefaultDS</value></property>
+		<property name="jndiName"><value>java:ejbtestDS</value></property>
 	</bean>
 
 	<!-- Hibernate SessionFactory -->
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+	<bean id="hibSessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="mappingResources">
-			<value>ejbtest.hbm.xml</value>
+      <list>
+  			<value>ejbtest.hbm.xml</value>
+        <value>org/springframework/autobuilds/ejbtest/domain/User1.hbm.xml</value>
+		  </list>
 		</property>
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
 				<prop key="hibernate.transaction.manager_lookup_class">net.sf.hibernate.transaction.JBossTransactionManagerLookup</prop>
+        <prop key="hibernate.show_sql">true</prop>
 			</props>
 		</property>
 	</bean>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+  
+  <!-- ========================= PERSISTENCE DEFINITIONS ========================= -->
+  
+  <bean id="root-mapper" class="org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate.MapperImpl">
+    <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
+  </bean>
+  
+  <bean id="mapperFactory" class="org.springframework.autobuilds.ejbtest.dbutil.mapper.hibernate.MapperFactoryImpl">
+    <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
+    <property name="rootMapper"><ref bean="root-mapper"/></property>
+    <property name="mappers">
+      <list>
+      	<!--list>
+      	  <ref bean="userMapper"/>
+      	  <value>com.whatever.User1Mapper</value>
+      	</list-->
+      </list>
+    </property>
+  </bean>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
   

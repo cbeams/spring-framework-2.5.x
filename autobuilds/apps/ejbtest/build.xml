@@ -53,6 +53,7 @@
   -->
   <property name="src.dir" location="src"/>
   <property name="src.java.dir" location="${src.dir}/java"/>
+  <property name="src.test.dir" location="${src.dir}/java"/>
   <property name="src.cactus.dir" location="${src.dir}/test-cactus"/>
   <property name="src.webapp.dir" location="${src.dir}/webapp"/>
   <property name="src.ejb.dir" location="${src.dir}/ejb"/>
@@ -67,12 +68,10 @@
   -->
   <!-- Destination locations for the build -->
   <property name="target.dir" location="target"/>
-  <property name="target.classes.java.dir"
-      location="${target.dir}/classes"/>
-  <property name="target.classes.cactus.dir"
-      location="${target.dir}/cactus-classes"/>
-  <property name="target.testreports.dir"
-      location="${target.dir}/test-reports"/>
+  <property name="target.classes.java.dir" location="${target.dir}/classes"/>
+  <property name="target.classes.test.dir" location="${target.dir}/test-classes"/>
+  <property name="target.classes.cactus.dir" location="${target.dir}/cactus-classes"/>
+  <property name="target.testreports.dir" location="${target.dir}/test-reports"/>
 
   <!-- Distribution directory, i.e. where the expanded distibutable files
        are located -->
@@ -84,26 +83,52 @@
      ========================================================================
   -->
 
+  <property name="aopalliance.jar"
+      location="${spring.root}/lib/aopalliance/aopalliance.jar"/>
   <property name="aspectjrt.jar"
       location="../../lib/aspectj/aspectjrt-1.1.1.jar"/>
   <property name="cactus.jar"
       location="../../lib/cactus/cactus-1.6.1.jar"/>
   <property name="cactus.ant.jar"
       location="../../lib/cactus/cactus-ant-1.6.1.jar"/>
+  <property name="cglib-full.jar"
+      location="${spring.root}/lib/cglib/cglib-full-2.0.2.jar"/>
+  <property name="commons-collections.jar"
+      location="${spring.root}/lib/jakarta-commons/commons-collections.jar"/>
+  <property name="commons-logging.jar"
+      location="${spring.root}/lib/jakarta-commons/commons-logging.jar"/>
   <property name="commons.httpclient.jar"
       location="../../lib/jakarta-commons/commons-httpclient-2.0.jar"/>
   <property name="commons.logging.jar"
       location="${spring.root}/lib/jakarta-commons/commons-logging.jar"/>
+  <property name="commons-pool.jar"
+      location="${spring.root}/lib/jakarta-commons/commons-pool.jar"/>
+  <property name="dbcp.jar"
+      location="${spring.root}/lib/jakarta-commons/commons-dbcp.jar"/>
+  <property name="dom4j.jar"
+      location="${spring.root}/lib/dom4j/dom4j.jar"/>
   <property name="ejb.jar"
       location="${spring.root}/lib/j2ee/ejb.jar"/>
+  <property name="ehcache.jar"
+      location="${spring.root}/lib/hibernate/ehcache.jar"/>
   <property name="hibernate.jar"
       location="${spring.root}/lib/hibernate/hibernate2.jar"/>
+  <property name="hsqldb.jar"
+      location="${spring.root}/lib/hsqldb/hsqldb.jar"/>
   <property name="junit.jar"
       location="${spring.root}/lib/junit/junit-3.8.1.jar"/>
+  <property name="junit-addons.jar"
+      location="../../lib/junit-addons/junit-addons-1.4.jar"/>
+  <property name="odmg.jar"
+      location="${spring.root}/lib/hibernate/odmg.jar"/>
   <property name="servlet.jar"
       location="${spring.root}/lib/j2ee/servlet.jar"/>
   <property name="spring.jar"
       location="${spring.root}/dist/spring.jar"/>
+  <property name="xercesImpl.jar"
+      location="${spring.root}/lib/xerces/xercesImpl.jar"/>
+  <property name="xml-apis.jar"
+      location="${spring.root}/lib/j2ee/xml-apis.jar"/>
 
   <!-- Libraries required for the sample project -->
   <path id="project.classpath">
@@ -123,6 +148,7 @@
     <pathelement location="${commons.httpclient.jar}"/>
     <pathelement location="${commons.logging.jar}"/>
     <pathelement location="${junit.jar}"/>
+    <pathelement location="${junit-addons.jar}"/>
     <pathelement location="${commons.logging.jar}"/>
   </path>
 
@@ -148,6 +174,14 @@
   <target name="compile.java" depends="init">
 
     <mkdir dir="${target.classes.java.dir}"/>
+
+    <!-- copy everything from the source dir, except java files. Do not filter. -->
+	<copy todir="${target.classes.java.dir}">
+      <fileset dir="${src.java.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
     <javac destdir="${target.classes.java.dir}"
         deprecation="${deprecation}" optimize="${optimize}">
       <src path="${src.java.dir}"/>
@@ -159,7 +193,29 @@
   </target>
 
   <!-- Compiles the Cactus test sources -->
-  <target name="compile.cactus" depends="compile.java">
+  <target name="compile.test" depends="compile.java">
+
+    <mkdir dir="${target.classes.test.dir}"/>
+
+    <!-- copy everything from the source dir, except java files. Do not filter. -->
+	<copy todir="${target.classes.test.dir}">
+      <fileset dir="${src.test.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
+    <javac destdir="${target.classes.test.dir}"
+        deprecation="${deprecation}" optimize="${optimize}" debug="${debug}">
+      <src path="${src.test.dir}"/>
+      <classpath>
+        <path refid="project.classpath"/>
+      </classpath>
+    </javac>
+
+  </target>
+
+  <!-- Compiles the Cactus test sources -->
+  <target name="compile.cactus" depends="compile.test">
 
     <mkdir dir="${target.classes.cactus.dir}"/>
     <javac destdir="${target.classes.cactus.dir}"
@@ -173,7 +229,7 @@
 
   </target>
 
-  <target name="compile" depends="compile.java, compile.cactus"
+  <target name="compile" depends="compile.java, compile.test, compile.cactus"
       description="Compile the sources"/>
 
   <!--
@@ -181,7 +237,7 @@
        Create the runtime ejb-jar file.
      ========================================================================
   -->
-  <target name="ejb" depends="compile.java"
+  <target name="ejb" depends="compile"
       description="Generate the runtime ejb-jar">
 
     <!-- ATM, only support containers which do not need an ejb compilation
@@ -220,27 +276,15 @@
         appxml="${src.application.dir}/application.xml">
       <fileset file="${target.dir}/${project.name.file}-ejb.jar"/>
       <fileset file="${spring.jar}"/>
-      <fileset dir="${spring.root}/lib/aopalliance">
-        <include name="aopalliance.jar"/>
-      </fileset>
-      <fileset dir="${spring.root}/lib/cglib">
-        <include name="cglib-full-2.0.2.jar"/>
-      </fileset>
-      <fileset dir="${spring.root}/lib/dom4j">
-        <include name="dom4j.jar"/>
-      </fileset>
-      <fileset dir="${spring.root}/lib/jakarta-commons">
-        <include name="commons-collections.jar"/>
-        <include name="commons-logging.jar"/>
-      </fileset>
-      <fileset dir="${spring.root}/lib/hibernate">
-        <include name="ehcache.jar"/>
-        <include name="hibernate2.jar"/>
-      	<include name="odmg.jar"/>
-      </fileset>
-      <fileset dir="${spring.root}/lib/hsqldb">
-        <include name="hsqldb.jar"/>
-      </fileset>
+      <fileset file="${aopalliance.jar}"/>
+      <fileset file="${cglib-full.jar}"/>
+      <fileset file="${commons-collections.jar}"/>
+      <fileset file="${commons-logging.jar}"/>
+      <fileset file="${dom4j.jar}"/>
+      <fileset file="${ehcache.jar}"/>
+      <fileset file="${hibernate.jar}"/>
+      <fileset file="${hsqldb.jar}"/>
+      <fileset file="${odmg.jar}"/>
     </ear>
 
   </target>
@@ -250,7 +294,7 @@
        Generate the distributable files
      ========================================================================
   -->
-  <target name="dist" depends="clean, ear, test.war"
+  <target name="dist" depends="ear, test.ear"
       description="Generate the distributable files">
 
     <copy file="${target.dir}/${project.name.file}-cactified.ear"
@@ -277,7 +321,7 @@
        "cactus.home.[container name]" has been defined.
      ========================================================================
   -->
-  <target name="test.prepare" depends="ear, test.war">
+  <target name="test.prepare" depends="init">
   
     <!-- Prepare the directories for the JUnit reports -->
     <mkdir dir="${target.testreports.dir}"/>
@@ -287,7 +331,7 @@
 
   </target>
 
-  <target name="test.war" depends="compile.cactus">
+  <target name="test.ear" depends="compile.cactus">
 
     <!-- Cactify the web-app archive -->
     <cactifywar srcfile="${target.dir}/${project.name.file}.war"
@@ -308,7 +352,7 @@
         
   </target>
 
-  <target name="test" depends="test.prepare"
+  <target name="test" depends="init, test.prepare"
       description="Run the tests on the defined containers">
 
     <!-- Run the tests -->
