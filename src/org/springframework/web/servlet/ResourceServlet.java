@@ -120,7 +120,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * <p>If specifying multiple URLs, they will be included one by one
 	 * to build the response. If last-modified determination is active,
 	 * the newest timestamp among those files will be used.
-	 * @see #applyLastModified
+	 * @see #setApplyLastModified
 	 */
 	public void setDefaultUrl(String defaultUrl) {
 		this.defaultUrl = defaultUrl;

@@ -40,7 +40,7 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.17 2004-07-27 16:15:08 johnsonr Exp $
+ * @version $Id: StringUtils.java,v 1.18 2004-07-28 09:40:21 jhoeller Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
@@ -307,7 +307,6 @@ public abstract class StringUtils {
 	 * String. E.g. useful for toString() implementations.
 	 * @param c Collection to display
 	 * @param delim delimiter to use (probably a ",")
-	 * @param prefix string to start each element with
 	 */
 	public static String collectionToDelimitedString(Collection c, String delim) {
 		return collectionToDelimitedString(c, delim, "", "");

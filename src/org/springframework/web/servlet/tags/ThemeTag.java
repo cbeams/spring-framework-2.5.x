@@ -39,7 +39,7 @@ import org.springframework.ui.context.Theme;
  * @see #setText
  * @see #setHtmlEscape
  * @see HtmlEscapeTag#setDefaultHtmlEscape
- * @see HtmlEscapeTag#HTML_ESCAPE_CONTEXT_PARAM
+ * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
 public class ThemeTag extends MessageTag {
 

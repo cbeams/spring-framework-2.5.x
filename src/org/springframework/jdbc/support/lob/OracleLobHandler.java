@@ -414,7 +414,6 @@ public class OracleLobHandler implements LobHandler {
 
 	/**
 	 * Internal callback interface for use with createLob.
-	 * @see OracleLobCreator#createLob
 	 */
 	protected static interface LobCallback {
 

@@ -53,7 +53,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.13 2004-07-12 03:29:52 trisberg Exp $
+ * @version $Id: RdbmsOperation.java,v 1.14 2004-07-28 09:40:00 jhoeller Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -134,7 +134,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * updatable ResultSets.
 	 */
 	protected void setUpdatableResults(boolean updatableResults) {
-		if (compiled) {
+		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException("The updateableResults flag must be set before the operation is compiled");
 		}
 		this.updatableResults = updatableResults;
@@ -148,33 +148,32 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Set to indicate prepared statements should be capable of returning
-	 * auto generated keys.
-	 * @param returnGeneratedKeys Set to true to be able to retrieve the 
-	 * generated keys.
+	 * Set whether prepared statements should be capable of returning
+	 * auto-generated keys.
 	 */
 	public void setReturnGeneratedKeys(boolean returnGeneratedKeys) {
-		if (compiled) {
-			throw new InvalidDataAccessApiUsageException("The returnGeneratedKeys flag must be set before the operation is compiled");
+		if (isCompiled()) {
+			throw new InvalidDataAccessApiUsageException("The returnGeneratedKeys flag must be set " +
+																									 "before the operation is compiled");
 		}
 		this.returnGeneratedKeys = returnGeneratedKeys;
 	}
 
 	/**
 	 * Return whether statements should be capable of returning
-	 * auto generated keys.
+	 * auto-generated keys.
 	 */
 	protected boolean isReturnGeneratedKeys() {
 		return returnGeneratedKeys;
 	}
 
 	/**
-	 * Set the column names of the auto generated keys.
-	 * @param name The names of the columns for the auto generated keys 
+	 * Set the column names of the auto-generated keys.
 	 */
 	public void setGeneratedKeysColumnNames(String[] names) {
-		if (compiled) {
-			throw new InvalidDataAccessApiUsageException("The column names for the generated keys must be set before the operation is compiled");
+		if (isCompiled()) {
+			throw new InvalidDataAccessApiUsageException("The column names for the generated keys must be set " +
+																									 "before the operation is compiled");
 		}
 		this.generatedKeysColumnNames = names;
 	}
@@ -212,7 +211,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
 	 */
 	public void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
-		if (this.compiled) {
+		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
 		}
 		if (types != null) {
@@ -230,7 +229,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * and hence cannot be configured further
 	 */
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {
-		if (this.compiled) {
+		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
 		}
 		this.declaredParameters.add(param);
