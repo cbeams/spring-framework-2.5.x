@@ -5,6 +5,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.beans.PropertyDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -27,7 +28,6 @@ import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -62,7 +62,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.13 2003-11-05 11:28:15 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.14 2003-11-07 09:09:06 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -208,8 +208,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		return bean;
 	}
 
-	public boolean isSingleton(String pname) throws NoSuchBeanDefinitionException {
-		String name = transformedBeanName(pname);
+	public boolean isSingleton(String beanName) throws NoSuchBeanDefinitionException {
+		String name = transformedBeanName(beanName);
 		try {
 			return getMergedBeanDefinition(name).isSingleton();
 		}
@@ -221,8 +221,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 	}
 
-	public String[] getAliases(String pname) {
-		String name = transformedBeanName(pname);
+	public String[] getAliases(String beanName) {
+		String name = transformedBeanName(beanName);
 		List aliases = new ArrayList();
 		for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
@@ -242,14 +242,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * Get a singleton instance of this bean name. Note that this method shouldn't
 	 * be called too often: Callers should keep hold of instances. Hence, the whole
 	 * method is synchronized here.
-	 * TODO: There probably isn't any need for this to be synchronized,
-	 * at least not if we pre-instantiate singletons.
-	 * @param pname name that may include factory dereference prefix
+	 * @param beanName name that may include factory dereference prefix
 	 */
-	private synchronized Object getSharedInstance(String pname, RootBeanDefinition mergedBeanDefinition)
+	private synchronized Object getSharedInstance(String beanName, RootBeanDefinition mergedBeanDefinition)
 			throws BeansException {
 		// Get rid of the dereference prefix if there is one
-		String name = transformedBeanName(pname);
+		String name = transformedBeanName(beanName);
 
 		Object beanInstance = this.singletonCache.get(name);
 		if (beanInstance == null) {
@@ -266,7 +264,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory
-		if (isFactoryDereference(pname) && !(beanInstance instanceof FactoryBean)) {
+		if (isFactoryDereference(beanName) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(name, beanInstance);
 		}
 
@@ -275,7 +273,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		// create a bean instance, unless the caller actually wants
 		// a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
-			if (!isFactoryDereference(pname)) {
+			if (!isFactoryDereference(beanName)) {
 				// Configure and return new bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
 				logger.debug("Bean with name '" + name + "' is a factory bean");
@@ -319,37 +317,37 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * Return a BeanWrapper object for a new instance of this bean.
 	 * First look up BeanDefinition for the given bean name.
 	 * Uses recursion to support instance "inheritance".
-	 * @param name name of the bean. Must be unique in the BeanFactory
+	 * @param beanName name of the bean. Must be unique in the BeanFactory
 	 * @return a new instance of this bean
 	 */
-	private Object createBean(String name, RootBeanDefinition mergedBeanDefinition) throws BeansException {
-		logger.debug("Creating instance of bean '" + name + "' with merged definition [" + mergedBeanDefinition + "]");
+	private Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+		logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
 		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		Object bean = instanceWrapper.getWrappedInstance();
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware
 		if (mergedBeanDefinition.isSingleton()) {
-			this.singletonCache.put(name, bean);
+			this.singletonCache.put(beanName, bean);
 		}
 
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
-			autowireByName(name, mergedBeanDefinition, instanceWrapper);
+			autowireByName(beanName, mergedBeanDefinition, instanceWrapper);
 		}
 
 		// Add further property values based on autowire by type if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
-			autowireByType(name, mergedBeanDefinition, instanceWrapper);
+			autowireByType(beanName, mergedBeanDefinition, instanceWrapper);
 		}
 				
 		// We can apply dependency checks regardless of autowiring
-		dependencyCheck(name, mergedBeanDefinition, instanceWrapper);
+		dependencyCheck(beanName, mergedBeanDefinition, instanceWrapper);
 
-		applyPropertyValues(name, instanceWrapper, mergedBeanDefinition.getPropertyValues(), name);
+		applyPropertyValues(beanName, instanceWrapper, mergedBeanDefinition.getPropertyValues());
 
-		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
+		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, instanceWrapper);
 
-		return applyBeanPostProcessors(bean, name);
+		return applyBeanPostProcessors(bean, beanName);
 	}
 
 	/**
@@ -446,11 +444,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * Apply the given property values, resolving any runtime references
 	 * to other beans in this bean factory.
 	 * Must use deep copy, so we don't permanently modify this property
+	 * @param beanName bean name passed for better exception information
 	 * @param bw BeanWrapper wrapping the target object
 	 * @param pvs new property values
-	 * @param name bean name passed for better exception information
 	 */
-	private void applyPropertyValues(String beanName, BeanWrapper bw, PropertyValues pvs, String name) throws BeansException {
+	private void applyPropertyValues(String beanName, BeanWrapper bw, PropertyValues pvs) throws BeansException {
 		if (pvs == null)
 			return;
 
@@ -469,7 +467,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		catch (FatalBeanException ex) {
 			// Improve the message by showing the context
-			throw new FatalBeanException("Error setting property on bean '" + name + "'", ex);
+			throw new FatalBeanException("Error setting property on bean '" + beanName + "'", ex);
 		}
 	}
 
