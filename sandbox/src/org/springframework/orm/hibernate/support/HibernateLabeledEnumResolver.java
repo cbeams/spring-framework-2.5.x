@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.enums.support.hibernate;
+package org.springframework.orm.hibernate.support;
 
 import java.io.Serializable;
 import java.util.Collection;
