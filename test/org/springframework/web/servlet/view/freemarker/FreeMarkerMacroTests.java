@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.velocity;
+package org.springframework.web.servlet.view.freemarker;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -26,11 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.context.Context;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -43,13 +40,16 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+
 /**
  * @author Darren Davison
- * @since 18.06.2004
+ * @since 25.01.2005
  */
-public class VelocityMacroTests extends TestCase {
+public class FreeMarkerMacroTests extends TestCase {
 
-	private final String templateName = "test.vm";
+	private final String templateName = "test.ftl";
 
 	private StaticWebApplicationContext wac;
 
@@ -57,20 +57,20 @@ public class VelocityMacroTests extends TestCase {
 
 	private HttpServletResponse expectedResponse;
 
-
+    private FreeMarkerConfigurer fc;
+    
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 
-		final Template expectedTemplate = new Template();
-		VelocityConfig vc = new VelocityConfig() {
-			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine(templateName, expectedTemplate);
-			}
-		};
-		wac.getDefaultListableBeanFactory().registerSingleton("velocityConfigurer", vc);
+		//final Template expectedTemplate = new Template();
+		fc = new FreeMarkerConfigurer();
+        fc.setConfiguration(fc.createConfiguration());
+        fc.setPreferFileSystemAccess(false);
+        
+		wac.getDefaultListableBeanFactory().registerSingleton("freeMarkerConfigurer", fc);
 		wac.refresh();
-
+        
 		request = new MockHttpServletRequest();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -79,45 +79,45 @@ public class VelocityMacroTests extends TestCase {
 	}
 
 	public void testExposeSpringMacroHelpers() throws Exception {
-		VelocityView vv = new VelocityView() {
-			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
-				assertTrue(context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
-				RequestContext rc = (RequestContext) context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
-				BindStatus status = rc.getBindStatus("tb.name");
-				assertEquals("name", status.getExpression());
-				assertEquals("juergen", status.getValue());
-			}
+		FreeMarkerView fv = new FreeMarkerView() {
+            protected void processTemplate(Template template, Map model, HttpServletResponse response) {
+                assertTrue(model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
+                RequestContext rc = (RequestContext) model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
+                BindStatus status = rc.getBindStatus("tb.name");
+                assertEquals("name", status.getExpression());
+                assertEquals("juergen", status.getValue());
+            }
 		};
-		vv.setUrl(templateName);
-		vv.setApplicationContext(wac);
-		vv.setExposeSpringMacroHelpers(true);
+		fv.setUrl(templateName);        
+		fv.setApplicationContext(wac);
+		fv.setExposeSpringMacroHelpers(true);
 
 		Map model = new HashMap();
 		model.put("tb", new TestBean("juergen", 99));
-		vv.render(model, request, expectedResponse);
+		fv.render(model, request, expectedResponse);
 	}
 
 	public void testSpringMacroRequestContextAttributeUsed() {
 		final String helperTool = "wrongType";
 
-		VelocityView vv = new VelocityView() {
-			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
+        FreeMarkerView fv = new FreeMarkerView() {
+			protected void processTemplate(Template template, Map model, HttpServletResponse response) {
 				fail();
 			}
 		};
-		vv.setUrl(templateName);
-		vv.setApplicationContext(wac);
-		vv.setExposeSpringMacroHelpers(true);
+		fv.setUrl(templateName);
+		fv.setApplicationContext(wac);
+		fv.setExposeSpringMacroHelpers(true);
 
 		Map model = new HashMap();
-		model.put(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
+		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
-			vv.render(model, request, expectedResponse);
+			fv.render(model, request, expectedResponse);
 		}
 		catch (Exception ex) {
 			assertTrue(ex instanceof ServletException);
-			assertTrue(ex.getMessage().indexOf(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) > -1);
+			assertTrue(ex.getMessage().indexOf(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) > -1);
 		}
 	}
 	
@@ -138,21 +138,18 @@ public class VelocityMacroTests extends TestCase {
 	    names.put("Fred", "Fred Bloggs");
 	    
 	    try {
-	        VelocityConfigurer vc = new VelocityConfigurer();
-	        vc.setPreferFileSystemAccess(false);
-	        VelocityEngine ve = vc.createVelocityEngine();
-		    VelocityContext context = new VelocityContext();
-		    context.put("command", tb);
-		    context.put("springMacroRequestContext", rc);
-		    context.put("nameOptionMap", names);
+            Configuration config = fc.getConfiguration();
+            Map model = new HashMap();
+            model.put("command", tb);
+            model.put("springMacroRequestContext", rc);
+            model.put("nameOptionMap", names);
 		    
 		    StringWriter sw = new StringWriter();
-		    ve.mergeTemplate(
-		        "org/springframework/web/servlet/view/velocity/test.vm", "UTF-8", context, sw
-		    );
+            Template t = config.getTemplate("test.ftl");
+            t.process(model, sw);
+            
 		    // tokenize output and ignore whitespace
 		    String output = sw.getBuffer().toString();
-		    
 		    String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
 		    
 		    //for (int i=0; i<tokens.length; i++) System.out.println(tokens[i]);
@@ -163,8 +160,8 @@ public class VelocityMacroTests extends TestCase {
 			    if (tokens[i].equals("MESSAGE")) assertEquals("Howdy Mundo", tokens[i+1]);
 			    if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i+1]);
 			    if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i+1]);
-			    if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" >", tokens[i+1]);
-			    if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i+1]);
+			    if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\"      >", tokens[i+1]);
+			    if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\"     >", tokens[i+1]);
 			    if (tokens[i].equals("FORM3")) assertEquals("<textarea name=\"name\" >Darren</textarea>", tokens[i+1]);
 			    if (tokens[i].equals("FORM4")) assertEquals("<textarea name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i+1]);
 			    //TODO verify remaining output (fix whitespace)
