@@ -47,6 +47,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	/** Map from theme name to Theme instance */
 	private Map themes = new HashMap();
 
+
 	public void setParentThemeSource(ThemeSource parent) {
 		this.parentThemeSource = parent;
 		Iterator it = this.themes.values().iterator();
@@ -69,6 +70,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 		this.basenamePrefix = (basenamePrefix != null) ? basenamePrefix : "";
 	}
 
+
 	public Theme getTheme(String themeName) {
 		if (themeName == null) {
 			return null;
@@ -76,11 +78,13 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 		Theme theme = (Theme) this.themes.get(themeName);
 		if (theme == null) {
 			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-			logger.info("Theme created: name=" + themeName + ", baseName=" + this.basenamePrefix + themeName);
 			messageSource.setBasename(this.basenamePrefix + themeName);
 			theme = new SimpleTheme(themeName, messageSource);
 			initParent(theme);
 			this.themes.put(themeName, theme);
+			if (logger.isInfoEnabled()) {
+				logger.info("Theme created: name '" + themeName + "', basename [" + this.basenamePrefix + themeName + "]");
+			}
 		}
 		return theme;
 	}

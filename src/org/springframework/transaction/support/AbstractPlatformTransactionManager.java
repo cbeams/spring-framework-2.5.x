@@ -202,7 +202,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		if (isExistingTransaction(transaction)) {
 			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
-				throw new IllegalTransactionStateException("Transaction propagation 'never' but existing transaction found");
+				throw new IllegalTransactionStateException(
+						"Transaction propagation 'never' but existing transaction found");
 			}
 			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
 				if (debugEnabled) {
@@ -210,8 +211,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				Object suspendedResources = suspend(transaction);
 				boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
-				return newTransactionStatus(null, false, newSynchronization,
-				                            definition.isReadOnly(), debugEnabled, suspendedResources);
+				return newTransactionStatus(
+						null, false, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
 			}
 			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
 				if (debugEnabled) {
@@ -220,8 +221,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				Object suspendedResources = suspend(transaction);
 				doBegin(transaction, definition);
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				return newTransactionStatus(transaction, true, newSynchronization,
-				                            definition.isReadOnly(), debugEnabled, suspendedResources);
+				return newTransactionStatus(
+						transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
 			}
 			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 				if (!isNestedTransactionAllowed()) {
@@ -233,8 +234,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					logger.debug("Creating nested transaction");
 				}
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = newTransactionStatus(transaction, true, newSynchronization,
-																															 definition.isReadOnly(), debugEnabled, null);
+				DefaultTransactionStatus status = newTransactionStatus(
+						transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 				if (useSavepointForNestedTransaction()) {
 					status.createAndHoldSavepoint();
 				}
@@ -248,8 +249,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					logger.debug("Participating in existing transaction");
 				}
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				return newTransactionStatus(transaction, false, newSynchronization,
-				                            definition.isReadOnly(), debugEnabled, null);
+				return newTransactionStatus(
+						transaction, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 			}
 		}
 
@@ -257,7 +258,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
 		}
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
-			throw new IllegalTransactionStateException("Transaction propagation 'mandatory' but no existing transaction found");
+			throw new IllegalTransactionStateException(
+					"Transaction propagation 'mandatory' but no existing transaction found");
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
@@ -268,14 +270,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			doBegin(transaction, definition);
 			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-			return newTransactionStatus(transaction, true, newSynchronization,
-			                            definition.isReadOnly(), debugEnabled, null);
+			return newTransactionStatus(
+					transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 		}
 		else {
 			// "empty" (-> no) transaction
 			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
-			return newTransactionStatus(null, false, newSynchronization,
-			                            definition.isReadOnly(), debugEnabled, null);
+			return newTransactionStatus(
+					null, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 		}
 	}
 
@@ -283,16 +285,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Create a new TransactionStatus for the given arguments,
 	 * initializing transaction synchronization if appropriate.
 	 */
-	private DefaultTransactionStatus newTransactionStatus(Object transaction, boolean newTransaction,
-																												boolean newSynchronization, boolean readOnly,
-																												boolean debug, Object suspendedResources) {
+	private DefaultTransactionStatus newTransactionStatus(
+			Object transaction, boolean newTransaction, boolean newSynchronization,
+			boolean readOnly, boolean debug, Object suspendedResources) {
+
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
 		if (actualNewSynchronization) {
 			TransactionSynchronizationManager.initSynchronization();
 		}
-		return new DefaultTransactionStatus(transaction, newTransaction, actualNewSynchronization,
-		                                    readOnly, debug, suspendedResources);
+		return new DefaultTransactionStatus(
+				transaction, newTransaction, actualNewSynchronization, readOnly, debug, suspendedResources);
 	}
 
 	/**

@@ -65,7 +65,7 @@ public abstract class UiApplicationContextUtils {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			logger.info("No ThemeSource found for [" + context.getDisplayName() +
-									"]: using ResourceBundleThemeSource");
+					"]: using ResourceBundleThemeSource");
 			themeSource = new ResourceBundleThemeSource();
 		}
 		return themeSource;

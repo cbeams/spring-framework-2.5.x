@@ -272,11 +272,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Set the LobHandler to be used by the SessionFactory.
-	 * Will be exposed at config time for Type implementations.
+	 * Will be exposed at config time for UserType implementations.
 	 * @see #getConfigTimeLobHandler
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
 	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
-	 * @see net.sf.hibernate.type.Type
+	 * @see net.sf.hibernate.UserType
 	 */
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
