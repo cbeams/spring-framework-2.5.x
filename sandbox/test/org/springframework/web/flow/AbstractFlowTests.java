@@ -40,7 +40,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	private Flow flow;
 
-	protected FlowSessionExecution flowSessionExecution;
+	protected FlowExecution flowSessionExecution;
 
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "Flow is required for this test");
@@ -56,7 +56,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flowSessionExecution.getCurrentStateId();
 	}
 
-	protected FlowSessionExecution getFlowSessionExecution() {
+	protected FlowExecution getFlowSessionExecution() {
 		return flowSessionExecution;
 	}
 
@@ -93,7 +93,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));
 	}
 
-	protected String generateUniqueFlowSessionId(FlowSessionExecutionStack stack) {
+	protected String generateUniqueFlowSessionId(FlowExecutionStack stack) {
 		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
 	}
 
@@ -106,8 +106,8 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	}
 
 	protected ViewDescriptor startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
-		FlowSessionExecutionStartResult result = getEventProcessor().start(request, response, input);
-		this.flowSessionExecution = (FlowSessionExecution)result.getFlowSessionExecutionInfo();
+		FlowExecutionStartResult result = getEventProcessor().start(request, response, input);
+		this.flowSessionExecution = (FlowExecution)result.getFlowExecutionInfo();
 		return result.getStartingView();
 	}
 

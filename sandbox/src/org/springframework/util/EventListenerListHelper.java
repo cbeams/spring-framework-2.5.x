@@ -160,7 +160,7 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 	public void run(Closure closure) {
 		forEach(closure);
 	}
-	
+
 	public boolean anyTrue(Constraint constraint) {
 		if (listeners != EMPTY_OBJECT_ARRAY) {
 			Object[] listenersCopy = listeners;
@@ -272,6 +272,15 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 				System.arraycopy(listeners, 0, tmp, 0, listenersLength);
 				listeners = tmp;
 			}
+		}
+	}
+
+	/**
+	 * @param listeners
+	 */
+	public void addAll(Object[] listeners) {
+		for (int i = 0; i < listeners.length; i++) {
+			add(listeners[i]);
 		}
 	}
 
@@ -418,4 +427,5 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 		return new ToStringCreator(this).append("listenerClass", listenerClass).append("listeners", listeners)
 				.toString();
 	}
+
 }
