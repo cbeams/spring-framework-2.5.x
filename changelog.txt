@@ -1,10 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.22 2003-09-17 01:19:24 trisberg Exp $
+$Id: changelog.txt,v 1.23 2003-09-19 17:59:34 johnsonr Exp $
 
 Changes in version 1.0 M2 (XX.XX.2003)
 -------------------------------------
+* added build scripts and directory structure to minimal web application
+skeleton to allow use as a kickstart for user projects
 * added suport for returning result sets from a stored procedure.
 * added support for sending email in the org.springframework.mail package. 
 Provided JavaMail implementation, but underlying API is a pluggable strategy
