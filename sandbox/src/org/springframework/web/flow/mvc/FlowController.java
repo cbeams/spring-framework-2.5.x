@@ -73,6 +73,9 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		//web flows need a session!
+		setRequireSession(true);
+		
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
 		this.manager = new HttpFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
 	}
