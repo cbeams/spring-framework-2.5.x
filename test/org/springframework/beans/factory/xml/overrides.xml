@@ -2,13 +2,21 @@
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	
-	<!-- TODO better checks: is the method name valid? are there no 
-		args for a lookup? (is this appropriate, or just warn?)
-	-->
 
 	<bean id="overrideOneMethod" 
 		class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		
+		<lookup-method name="getPrototypeDependency" bean="jenny" />
+		
+		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		
+	</bean>
+	
+	<!--
+		Test that overrides work on an inherited method
+	-->
+	<bean id="overrideInheritedMethod" 
+		class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
 		
 		<lookup-method name="getPrototypeDependency" bean="jenny" />
 		

@@ -19,13 +19,18 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.ITestBean;
 
 /**
- * 
+ * Bean testing the ability to use both lookup method overrides
+ * and constructor injection.
+ * There is also a property ("setterString") to be set via
+ * Setter Injection.
  * @author Rod Johnson
- * @version $Id: ConstructorInjectedOverrides.java,v 1.1 2004-06-23 21:17:45 johnsonr Exp $
+ * @version $Id: ConstructorInjectedOverrides.java,v 1.2 2004-06-25 09:10:43 johnsonr Exp $
  */
 public abstract class ConstructorInjectedOverrides {
 	
 	private ITestBean tb;
+	
+	private String setterString;
 	
 	public ConstructorInjectedOverrides(ITestBean tb) {
 		this.tb = tb;
@@ -34,7 +39,20 @@ public abstract class ConstructorInjectedOverrides {
 	public ITestBean getTestBean() {
 		return this.tb;
 	}
-	
-	public abstract DummyBo createDummyBo();
 
+	
+	protected abstract FactoryMethods createFactoryMethods();
+
+	/**
+	 * @return Returns the setterString.
+	 */
+	public String getSetterString() {
+		return setterString;
+	}
+	/**
+	 * @param setterString The setterString to set.
+	 */
+	public void setSetterString(String setterString) {
+		this.setterString = setterString;
+	}
 }

@@ -7,14 +7,9 @@
 		class="org.springframework.beans.factory.xml.ConstructorInjectedOverrides"
 		autowire="autodetect">
 		
-		<!--
-			We combine a setter method with constructor
-			autowiring
-		-->
-		<property name="setterString"><value>from property element</value></property>
-		
-		<lookup-method name="createFactoryMethods" bean="factoryMethods" />		
-		
+		<!-- No such lookup method -->
+		<lookup-method name="bogusMethod" bean="dummyBo" />
+	
 	</bean>
 	
 	

@@ -18,24 +18,26 @@ package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.TestBean;
 
-// TODO constructor on diff class
 
 /**
  * Test class for Spring's ability to create
  * objects using static factory methods, rather
  * than constructors. 
  * @author Rod Johnson
- * @version $Id: FactoryMethods.java,v 1.1 2004-06-23 21:17:46 johnsonr Exp $
+ * @version $Id: FactoryMethods.java,v 1.2 2004-06-25 09:10:44 johnsonr Exp $
  */
 public class FactoryMethods {
-	
-	public static FactoryMethods newInstance(TestBean tb) {
-		return new FactoryMethods(tb, "default", 0);
-	}
 	
 	public static FactoryMethods defaultInstance() {
 		TestBean tb = new TestBean();
 		tb.setName("defaultInstance");
+		return new FactoryMethods(tb, "default", 0);
+	}
+	
+	/**
+	 * Note that overloaded methods are supported
+	 */
+	public static FactoryMethods newInstance(TestBean tb) {
 		return new FactoryMethods(tb, "default", 0);
 	}
 	

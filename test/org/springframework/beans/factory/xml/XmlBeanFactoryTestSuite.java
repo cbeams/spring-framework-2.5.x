@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.49 2004-06-24 14:33:18 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.50 2004-06-25 09:10:43 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1085,63 +1085,80 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals("test", writer.toString());
 	}
 	
-	public void testLookupOverrideOneMethodWithSetterInjection() {
+	public void testLookupOverrideMethodsWithSetterInjection() {
+		testLookupOverrideMethodsWithSetterInjection("overrideOneMethod");
+		// Should work identically on subclass definition, in which lookup
+		// methods are inherited
+		testLookupOverrideMethodsWithSetterInjection("overrideInheritedMethod");
+	}
+	
+	private void testLookupOverrideMethodsWithSetterInjection(String beanName) {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
-		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean(beanName);
 		TestBean jenny1 = oom.getPrototypeDependency();
 		assertEquals("Jenny", jenny1.getName()); 
 		TestBean jenny2 = oom.getPrototypeDependency();
 		assertEquals("Jenny", jenny2.getName());
 		assertNotSame(jenny1, jenny2); 
 		
-		// Check unadvised behaviour
-		String str = "woierowijeiowiej";
-		assertEquals(str, oom.echo(str));
+		// Check that the bean can invoke the overriden method on itself
+		// This differs from Spring's AOP support, which has
+		// a distinct notion of a "target" object, meaning that the
+		// target needs explicit knowledge of AOP proxying to invoke
+		// an advised method on itself
+		TestBean jenny3 = oom.invokesOverridenMethodOnSelf();
+		assertEquals("Jenny", jenny3.getName());
+		assertNotSame(jenny1, jenny3); 
 		
-		/*
 		// Now try protected method, and singleton
 		TestBean dave1 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave1.getName()); 
 		TestBean dave2 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave2.getName());
 		assertSame(dave1, dave2); 
-		
-		// Now test replace
-		String s = "this is not a palindrome";
-		String reverse = new StringBuffer(s).reverse().toString();
-		assertEquals("Should have overridden to reverse, not echo", reverse, oom.replaceMe(s));
-		*/
 	}
 	
-	// TODO make this work: depends on CGLIB supporting
-	// constructor arguments
 	public void testLookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
-		try {
-			ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
-			fail("Not yet supported");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof UnsupportedOperationException);
-		}
 		
-		/*
+		ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
+		
+		// Check that the setter was invoked...
+		// We should be able to combine Constructor and
+		// Setter Injection
+		assertEquals("Setter string was set", "from property element", cio.getSetterString());
+		
+		// Jenny is a singleton
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertSame(jenny, cio.getTestBean());
 		assertSame(jenny, cio.getTestBean());
-		DummyBo bo1 = cio.createDummyBo();
-		assertNotNull(bo1);
-		DummyBo bo2 = cio.createDummyBo();
-		assertNotNull(bo2);
-		assertNotSame(bo1, bo2);
-		*/
+		FactoryMethods fm1 = cio.createFactoryMethods();
+		FactoryMethods fm2 = cio.createFactoryMethods();
+		assertNotSame("FactoryMethods reference is to a prototype", fm1, fm2);
+		assertSame("The two prototypes hold the same singleton reference",
+				fm1.getTestBean(), fm2.getTestBean());
 	}
+	
+	public void testRejectsOverrideOfBogusMethodName() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		try {
+			reader.loadBeanDefinitions(new ClassPathResource("invalidOverridesNoSuchMethod.xml", getClass()));
+			fail("Shouldn't allow override of bogus method");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// Check that the bogus method name was included in the error message
+			assertTrue("Bogus method name correctly reported", ex.getMessage().indexOf("bogusMethod") != -1);
+		}
+	}
+				
 	
 	public void testFactoryMethodsSingletonOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
