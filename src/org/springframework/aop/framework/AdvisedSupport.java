@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.10 2003-12-01 15:40:46 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.11 2003-12-01 18:28:24 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -141,6 +141,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 	
 	public void setTargetSource(TargetSource ts) {
+		if (isActive() && getEnableCglibSubclassOptimizations()) {
+			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has it's own target");
+		}
 		this.targetSource = ts;
 	}
 	
@@ -186,6 +189,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param other DefaultProxyConfig to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
+		copyFrom(other);
 		this.exposeInvocation = other.exposeInvocation;
 		this.targetSource = other.targetSource;
 		this.exposeProxy = other.exposeProxy;
@@ -454,10 +458,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (!isActive) {
 			activate();
 		}
-		// TODO
-		boolean useCglib = getProxyTargetClass() || this.interfaces.isEmpty();
+		boolean useCglib = getEnableCglibSubclassOptimizations() || getProxyTargetClass() || this.interfaces.isEmpty();
 		if (useCglib) {
-			return new Cglib1AopProxy(this);
+			return getEnableCglibSubclassOptimizations() ? (AopProxy)
+					new OptimizedCglib1AopProxy(this) : 
+					new Cglib1AopProxy(this);
 		}
 		else {
 			return new JdkDynamicAopProxy(this);

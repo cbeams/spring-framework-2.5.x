@@ -17,25 +17,28 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Spring implementation of AOP Alliance MethodInvocation interface 
+ * Spring implementation of AOP Alliance MethodInvocation interface .
+ * Invokes target using reflection. Subclasses can override the 
+ * invokeJoinpoint() method to change this behaviour, so this is a useful
+ * base class for MethodInvocation implementations.
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.11 2003-12-01 15:40:46 johnsonr Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.1 2003-12-01 18:28:24 johnsonr Exp $
  */
-public class MethodInvocationImpl implements MethodInvocation {
+public class ReflectiveMethodInvocation implements MethodInvocation {
 	
 	/**  
 	 * Interface this invocation is against.
 	 * May not be the same as the method's declaring interface. 
 	 */
-	private Class targetInterface;
+	protected Class targetInterface;
 
-	private Method method;
+	protected Method method;
 	
-	private Object[] arguments;
+	protected Object[] arguments;
 	
-	private Object target;
+	protected Object target;
 	
-	private Object proxy;
+	protected Object proxy;
 	
 	/** 
 	 * Interceptors and any InterceptionAdvice that needs dynamic checks.
@@ -68,14 +71,14 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * as was possibly statically. Passing an array might be about 10% faster, but would complicate
 	 * the code. And it would work only for static pointcuts.
 	 */
-	public MethodInvocationImpl(Object proxy, Object target, 
+	public ReflectiveMethodInvocation(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
 					Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		populate(proxy, target, targetInterface, m, arguments,
 				targetClass, interceptorsAndDynamicMethodMatchers);
 	}
 	
-	protected MethodInvocationImpl() {
+	protected ReflectiveMethodInvocation() {
 	}
 
 	protected void populate(Object proxy, Object target,
@@ -198,7 +201,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 		
 		if (this.currentInterceptor == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			exhausted = true;
-			return AopProxyUtils.invokeJoinpointUsingReflection(target, method, arguments);
+			return invokeJoinpoint();
 		}
 		
 		// We begin with -1 and increment early
@@ -222,6 +225,10 @@ public class MethodInvocationImpl implements MethodInvocation {
 			// been evaluated statically before this object was constructed
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
+	}
+	
+	protected Object invokeJoinpoint() throws Throwable {
+		return AopProxyUtils.invokeJoinpointUsingReflection(target, method, arguments);
 	}
 
 

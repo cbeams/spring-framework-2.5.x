@@ -28,7 +28,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.1 2003-12-01 13:16:06 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.2 2003-12-01 18:28:09 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -128,6 +128,30 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			assertTrue(proxy == AopContext.currentProxy());
 			return ret;
 		}
+	}
+	
+	/**
+	 * Simple test that if we set values we can get them out again
+	 *
+	 */
+	public void testValuesStick() {
+		int age1 = 33;
+		int age2 = 37;
+		String name = "tony";
+	
+		TestBean target1 = new TestBean();
+		target1.setAge(age1);
+		ProxyFactory pf1 = new ProxyFactory(target1);
+		pf1.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
+		pf1.addAdvisor(new SimpleIntroductionAdvice(new TimestampIntroductionInterceptor()));
+		ITestBean tb = (ITestBean) target1;
+		
+		assertEquals(age1, tb.getAge());
+		tb.setAge(age2);
+		assertEquals(age2, tb.getAge());
+		assertNull(tb.getName());
+		tb.setName(name);
+		assertEquals(name, tb.getName());
 	}
 	
 	/**
@@ -241,22 +265,24 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	public void testTargetCanGetProxy() {
 		NopInterceptor di = new NopInterceptor();
-		INeedsToSeeProxy et = new TargetChecker();
-		ProxyFactory pf1 = new ProxyFactory(et);
-		pf1.setExposeProxy(true);
-		assertTrue(pf1.getExposeProxy());
+		INeedsToSeeProxy target = new TargetChecker();
+		ProxyFactory proxyFactory = new ProxyFactory(target);
+		proxyFactory.setExposeProxy(true);
+		assertTrue(proxyFactory.getExposeProxy());
 	
-		pf1.addInterceptor(0, di);
-		INeedsToSeeProxy proxied = (INeedsToSeeProxy) createProxy(pf1);
+		proxyFactory.addInterceptor(0, di);
+		INeedsToSeeProxy proxied = (INeedsToSeeProxy) createProxy(proxyFactory);
 		assertEquals(0, di.getCount());
-		assertEquals(0, et.getCount());
+		assertEquals(0, target.getCount());
 		proxied.incrementViaThis();
-		assertEquals("Increment happened", 1, et.getCount());
+		assertEquals("Increment happened", 1, target.getCount());
+		
 		assertEquals("Only one invocation via AOP as use of this wasn't proxied", 1, di.getCount());
-	
-		proxied.incrementViaProxy();
-		assertEquals("Increment happened", 2, et.getCount());
-		assertEquals("Two more invocations via AOP as the first call was reentrant through the proxy", 3, di.getCount());
+		// 1 invocation
+		assertEquals("Increment happened", 1, proxied.getCount());
+		proxied.incrementViaProxy(); // 2 invoocations
+		assertEquals("Increment happened", 2, target.getCount());
+		assertEquals("3 more invocations via AOP as the first call was reentrant through the proxy", 4, di.getCount());
 	}
 
 			
@@ -814,10 +840,10 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 	
 	
-	private static class TestDynamicPointcutAdvice extends DynamicMethodMatcherPointcutAroundAdvisor {
+	protected static class TestDynamicPointcutAdvice extends DynamicMethodMatcherPointcutAroundAdvisor {
 		
 		private String pattern;
-		private int count;
+		public int count;
 		
 		public TestDynamicPointcutAdvice(MethodInterceptor mi, String pattern) {
 			super(mi);
@@ -833,7 +859,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 	
-	private static class TestDynamicPointcutForSettersOnly extends TestDynamicPointcutAdvice {
+	protected static class TestDynamicPointcutForSettersOnly extends TestDynamicPointcutAdvice {
 		public TestDynamicPointcutForSettersOnly(MethodInterceptor mi, String pattern) {
 			super(mi, pattern);
 		}
@@ -843,7 +869,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 	
-	private static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAroundAdvisor {
+	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAroundAdvisor {
 		
 		private String pattern;
 		private int count;

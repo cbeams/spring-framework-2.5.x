@@ -17,7 +17,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.2 2003-12-01 15:40:15 johnsonr Exp $
+ * @version $Id: CglibProxyTests.java,v 1.3 2003-12-01 18:28:09 johnsonr Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 	
@@ -64,9 +64,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			AopProxy aop = createAopProxy(pc);
 			aop.getProxy();
 			fail("Shouldn't allow no target with CGLIB proxy");
-			// TODO fix
 		} 
-		catch (IllegalArgumentException ex) {
+		catch (AopConfigException ex) {
 			// Ok
 		}
 	}
