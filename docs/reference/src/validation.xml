@@ -287,7 +287,11 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 overridden by registering custom instance of it as custom
                 editor.</entry>
               </row>
-
+              <row>
+                <entry><literal>CustomCollectionEdit</literal></entry>
+                <entry>Property editor for Collections, converting any source Collection
+                to a given target Collection type.</entry>
+              </row>
               <row>
                 <entry><literal>CustomDateEditor</literal></entry>
 
