@@ -39,8 +39,7 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  */
 public class CodedEnumUserType implements UserType {
-    private static final Log logger = LogFactory
-            .getLog(CodedEnumUserType.class);
+    private final Log logger = LogFactory.getLog(getClass());
 
     private String enumType;
 
@@ -48,22 +47,13 @@ public class CodedEnumUserType implements UserType {
 
     private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
 
-    private NullableType persistentType;
+    private NullableType codePersistentType;
 
     protected CodedEnumUserType(Class enumClass) {
         Assert.notNull(enumClass);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
-        setPersistentTypeFromEnumClass(enumClass);
-    }
-
-    protected CodedEnumUserType(Class enumClass, String enumType) {
-        Assert.notNull(enumClass);
-        Assert.notNull(enumType);
-        Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
-        this.enumClass = enumClass;
-        this.enumType = enumType;
-        setPersistentTypeFromEnumClass(enumClass);
+        initCodePersistentType(enumClass);
     }
 
     protected CodedEnumUserType(Class enumClass, NullableType persistentType) {
@@ -71,7 +61,7 @@ public class CodedEnumUserType implements UserType {
         Assert.notNull(persistentType);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
-        this.persistentType = persistentType;
+        setCodePersistentType(persistentType);
     }
 
     protected CodedEnumUserType(Class enumClass, String enumType,
@@ -80,32 +70,39 @@ public class CodedEnumUserType implements UserType {
         Assert.notNull(persistentType);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
-        this.enumType = enumType;
-        this.persistentType = persistentType;
+        setEnumType(enumType);
+        setCodePersistentType(persistentType);
     }
 
-    private void setPersistentTypeFromEnumClass(Class enumClass) {
+    protected void initCodePersistentType(Class enumClass) {
         if (ShortCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.persistentType = Hibernate.SHORT;
+            setCodePersistentType(Hibernate.SHORT);
         }
         else if (LetterCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.persistentType = Hibernate.CHARACTER;
+            setCodePersistentType(Hibernate.CHARACTER);
         }
         else if (StringCodedEnum.class.isAssignableFrom(enumClass)) {
-            this.persistentType = Hibernate.STRING;
-        }
-        else {
-            throw new IllegalArgumentException(
-                    "Unable to determine enum sql type.");
+            setCodePersistentType(Hibernate.STRING);
         }
     }
 
-    public void setResolver(CodedEnumResolver resolver) {
+    protected void setCodePersistentType(NullableType persistentType) {
+        this.codePersistentType = persistentType;
+    }
+
+    protected void setEnumType(String enumType) {
+        this.enumType = enumType;
+    }
+
+    public void setEnumResolver(CodedEnumResolver resolver) {
+        if (resolver == null) {
+            resolver = StaticCodedEnumResolver.instance();
+        }
         this.enumResolver = resolver;
     }
 
     public int[] sqlTypes() {
-        return persistentType.sqlTypes(null);
+        return codePersistentType.sqlTypes(null);
     }
 
     public Class returnedClass() {
@@ -119,10 +116,15 @@ public class CodedEnumUserType implements UserType {
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
             throws HibernateException, SQLException {
         Object code;
-        if (persistentType == Hibernate.SHORT) {
+        Assert.notNull(codePersistentType,
+                "The enum code's persistent type must be set");
+        if (codePersistentType == Hibernate.SHORT) {
             code = Hibernate.SHORT.nullSafeGet(rs, names[0]);
         }
-        else if (persistentType == Hibernate.CHARACTER) {
+        else if (codePersistentType == Hibernate.INTEGER) {
+            code = Hibernate.INTEGER.nullSafeGet(rs, names[0]);
+        }
+        else if (codePersistentType == Hibernate.CHARACTER) {
             code = Hibernate.CHARACTER.nullSafeGet(rs, names[0]);
         }
         else {
@@ -149,7 +151,8 @@ public class CodedEnumUserType implements UserType {
         CodedEnum enum = (CodedEnum)value;
         if (enum != null) {
             Object code = enum.getCode();
-            // for some reason some characters don't map well, convert to string instead...
+            // for some reason some characters don't map well, convert to string
+            // instead...
             if (code instanceof Character) {
                 stmt.setString(index, ((Character)code).toString());
             }
