@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  * than any servlets that access the root web application context.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
- * Servlet API 2.4 or higher in favour of ContextLoaderListener.</i><br>
+ * Servlet API 2.4 or higher, in favor of ContextLoaderListener.</i><br>
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior. If you
  * use such a container, this servlet can be replaced with ContextLoaderListener.
@@ -43,12 +43,13 @@ import javax.servlet.http.HttpServletResponse;
  * <li>Jetty 4.x
  * <li>Resin 2.1.8+
  * <li>Orion 2.0.2+
+ * <li>BEA WebLogic 8.1 SP3
  * </ul>
  * For working with any of them, ContextLoaderListener is recommended.
  *
  * <p>Servlet 2.3 containers known <i>not</i> to work with bootstrap listeners are:
  * <ul>
- * <li>BEA WebLogic up to 8.1
+ * <li>BEA WebLogic up to 8.1 SP2
  * <li>IBM WebSphere 5.x
  * <li>Oracle OC4J 9.0.3
  * </ul>
@@ -108,8 +109,9 @@ public class ContextLoaderServlet extends HttpServlet {
 	 * listener is much more appropriate for initialization work ;-)
 	 */
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		getServletContext().log("Attempt to call service method on ContextLoaderServlet as [" +
-		                        request.getRequestURI() + "] was ignored");
+		getServletContext().log(
+				"Attempt to call service method on ContextLoaderServlet as [" +
+				request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
