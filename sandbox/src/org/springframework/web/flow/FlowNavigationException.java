@@ -20,33 +20,33 @@ package org.springframework.web.flow;
  */
 public abstract class FlowNavigationException extends FlowException {
 
-    private Flow flow;
+	private Flow flow;
 
-    public FlowNavigationException(Flow flow) {
-        super();
-        setFlow(flow);
-    }
+	public FlowNavigationException(Flow flow) {
+		super();
+		setFlow(flow);
+	}
 
-    public FlowNavigationException(Flow flow, String message) {
-        super(message);
-        setFlow(flow);
-    }
-    
-    public FlowNavigationException(Flow flow, String message, Throwable cause) {
-        super(message, cause);
-        setFlow(flow);
-    }
-    
-    public FlowNavigationException(Flow flow, Throwable cause) {
-        super(cause);
-        setFlow(flow);
-    }
-    
-    private void setFlow(Flow flow) {
-        this.flow = flow;
-    }
-    
-    protected Flow getFlow() {
-        return flow;
-    }
+	public FlowNavigationException(Flow flow, String message) {
+		super(message);
+		setFlow(flow);
+	}
+
+	public FlowNavigationException(Flow flow, String message, Throwable cause) {
+		super(message, cause);
+		setFlow(flow);
+	}
+
+	public FlowNavigationException(Flow flow, Throwable cause) {
+		super(cause);
+		setFlow(flow);
+	}
+
+	private void setFlow(Flow flow) {
+		this.flow = flow;
+	}
+
+	protected Flow getFlow() {
+		return flow;
+	}
 }

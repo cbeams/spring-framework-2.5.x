@@ -29,40 +29,40 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class Transition implements Serializable {
-    private static final Log logger = LogFactory.getLog(Transition.class);
+	private static final Log logger = LogFactory.getLog(Transition.class);
 
-    private String id;
+	private String id;
 
-    private String toState;
+	private String toState;
 
-    public Transition(String id, String toState) {
-        Assert.notNull(id, "The id is required");
-        Assert.notNull(toState, "The state is required");
-        this.id = id;
-        this.toState = toState;
-    }
+	public Transition(String id, String toState) {
+		Assert.notNull(id, "The id is required");
+		Assert.notNull(toState, "The state is required");
+		this.id = id;
+		this.toState = toState;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public String getToState() {
-        return toState;
-    }
+	public String getToState() {
+		return toState;
+	}
 
-    public ViewDescriptor execute(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Executing transition from state '" + sessionExecutionStack.getCurrentStateId()
-                    + "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
-        }
-        ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecutionStack, request,
-                response);
-        return descriptor;
+	public ViewDescriptor execute(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing transition from state '" + sessionExecutionStack.getCurrentStateId()
+					+ "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
+		}
+		ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecutionStack, request,
+				response);
+		return descriptor;
 
-    }
+	}
 
-    public String toString() {
-        return new ToStringCreator(this).append("id", id).append("toState", toState).toString();
-    }
+	public String toString() {
+		return new ToStringCreator(this).append("id", id).append("toState", toState).toString();
+	}
 }

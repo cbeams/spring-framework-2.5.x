@@ -21,19 +21,19 @@ import org.apache.struts.action.ActionMapping;
  * @author Keith Donald
  */
 public class FlowActionMapping extends ActionMapping {
-    private String flowId;
+	private String flowId;
 
-    /**
-     * @return Returns the flowId.
-     */
-    public String getFlowId() {
-        return flowId;
-    }
+	/**
+	 * @return Returns the flowId.
+	 */
+	public String getFlowId() {
+		return flowId;
+	}
 
-    /**
-     * @param flowId The flowId to set.
-     */
-    public void setFlowId(String flowId) {
-        this.flowId = flowId;
-    }
+	/**
+	 * @param flowId The flowId to set.
+	 */
+	public void setFlowId(String flowId) {
+		this.flowId = flowId;
+	}
 }

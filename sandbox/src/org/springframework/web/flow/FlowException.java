@@ -20,19 +20,19 @@ package org.springframework.web.flow;
  */
 public abstract class FlowException extends RuntimeException {
 
-    protected FlowException() {
-        super();
-    }
-    
-    public FlowException(String message) {
-        super(message);
-    }
-    
-    public FlowException(String message, Throwable cause) {
-        super(message, cause);
-    }
-    
-    public FlowException(Throwable cause) {
-        super(cause);
-    }
+	protected FlowException() {
+		super();
+	}
+
+	public FlowException(String message) {
+		super(message);
+	}
+
+	public FlowException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public FlowException(Throwable cause) {
+		super(cause);
+	}
 }

@@ -24,37 +24,37 @@ import java.util.Iterator;
  */
 public class NoSuchFlowStateException extends FlowNavigationException {
 
-    private String stateId;
+	private String stateId;
 
-    /**
-     * @param flow
-     * @param message
-     */
-    public NoSuchFlowStateException(Flow flow, String stateId) {
-        super(flow);
-        this.stateId = stateId;
-    }
+	/**
+	 * @param flow
+	 * @param message
+	 */
+	public NoSuchFlowStateException(Flow flow, String stateId) {
+		super(flow);
+		this.stateId = stateId;
+	}
 
-    /**
-     * @param flow
-     * @param message
-     * @param cause
-     */
-    public NoSuchFlowStateException(Flow flow, String stateId, Throwable cause) {
-        super(flow, cause);
-        this.stateId = stateId;
-    }
+	/**
+	 * @param flow
+	 * @param message
+	 * @param cause
+	 */
+	public NoSuchFlowStateException(Flow flow, String stateId, Throwable cause) {
+		super(flow, cause);
+		this.stateId = stateId;
+	}
 
-    public String getMessage() {
-        Iterator it = getFlow().statesIterator();
-        StringBuffer statesStrBuffer = new StringBuffer(512);
-        while (it.hasNext()) {
-            statesStrBuffer.append(((AbstractState)it.next()).getId());
-            if (it.hasNext()) {
-                statesStrBuffer.append(", ");
-            }
-        }
-        return "No state with state id '" + stateId + "' exists for flow '" + getFlow().getId()
-                + "' -- valid states are '[" + statesStrBuffer.toString() + "]' -- programmer error?";
-    }
+	public String getMessage() {
+		Iterator it = getFlow().statesIterator();
+		StringBuffer statesStrBuffer = new StringBuffer(512);
+		while (it.hasNext()) {
+			statesStrBuffer.append(((AbstractState)it.next()).getId());
+			if (it.hasNext()) {
+				statesStrBuffer.append(", ");
+			}
+		}
+		return "No state with state id '" + stateId + "' exists for flow '" + getFlow().getId()
+				+ "' -- valid states are '[" + statesStrBuffer.toString() + "]' -- programmer error?";
+	}
 }

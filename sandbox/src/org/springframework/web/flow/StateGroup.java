@@ -30,48 +30,48 @@ import org.springframework.util.closure.support.Algorithms;
  * @author Keith Donald
  */
 public class StateGroup implements Serializable {
-    private String id;
+	private String id;
 
-    private Set states = new LinkedHashSet(6);
+	private Set states = new LinkedHashSet(6);
 
-    public StateGroup(String id) {
-        Assert.hasText("The state group is required");
-        this.id = id;
-    }
+	public StateGroup(String id) {
+		Assert.hasText("The state group is required");
+		this.id = id;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public boolean add(AbstractState state) {
-        return states.add(states);
-    }
+	public boolean add(AbstractState state) {
+		return states.add(states);
+	}
 
-    public boolean addAll(AbstractState[] states) {
-        return this.states.addAll(Arrays.asList(states));
-    }
+	public boolean addAll(AbstractState[] states) {
+		return this.states.addAll(Arrays.asList(states));
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof StateGroup)) {
-            return false;
-        }
-        StateGroup g = (StateGroup)o;
-        return id.equals(g.id);
-    }
+	public boolean equals(Object o) {
+		if (!(o instanceof StateGroup)) {
+			return false;
+		}
+		StateGroup g = (StateGroup)o;
+		return id.equals(g.id);
+	}
 
-    public int hashCode() {
-        return id.hashCode();
-    }
+	public int hashCode() {
+		return id.hashCode();
+	}
 
-    public Iterator iterator() {
-        return states.iterator();
-    }
+	public Iterator iterator() {
+		return states.iterator();
+	}
 
-    public AbstractState findFirst(Constraint constraint) {
-        return (AbstractState)Algorithms.instance().findFirst(states, constraint);
-    }
+	public AbstractState findFirst(Constraint constraint) {
+		return (AbstractState)Algorithms.instance().findFirst(states, constraint);
+	}
 
-    public String toString() {
-        return new ToStringCreator(this).append("id", id).append("states", states).toString();
-    }
+	public String toString() {
+		return new ToStringCreator(this).append("id", id).append("states", states).toString();
+	}
 }

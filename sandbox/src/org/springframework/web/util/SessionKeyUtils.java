@@ -22,11 +22,11 @@ import org.apache.commons.codec.digest.DigestUtils;
  * @author Keith Donald
  */
 public class SessionKeyUtils {
-    public static String generateMD5SessionKey(String input, boolean asBase64) {
-        if (!asBase64) {
-            return DigestUtils.md5Hex(input);
-        }
-        byte[] encoded = Base64.encodeBase64(DigestUtils.md5(input));
-        return new String(encoded);
-    }
+	public static String generateMD5SessionKey(String input, boolean asBase64) {
+		if (!asBase64) {
+			return DigestUtils.md5Hex(input);
+		}
+		byte[] encoded = Base64.encodeBase64(DigestUtils.md5(input));
+		return new String(encoded);
+	}
 }

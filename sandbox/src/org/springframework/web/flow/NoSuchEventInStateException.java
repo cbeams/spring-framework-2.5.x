@@ -24,25 +24,25 @@ import org.springframework.util.DefaultObjectStyler;
  */
 public class NoSuchEventInStateException extends FlowNavigationException {
 
-    private TransitionableState state;
+	private TransitionableState state;
 
-    private String eventId;
+	private String eventId;
 
-    public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId) {
-        super(flow);
-        this.state = state;
-        this.eventId = eventId;
-    }
+	public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId) {
+		super(flow);
+		this.state = state;
+		this.eventId = eventId;
+	}
 
-    public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId, Throwable cause) {
-        super(flow, cause);
-        this.state = state;
-        this.eventId = eventId;
-    }
+	public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId, Throwable cause) {
+		super(flow, cause);
+		this.state = state;
+		this.eventId = eventId;
+	}
 
-    public String getMessage() {
-        return "No such transition for event '" + eventId + "' in state '" + state.getId() + "' in flow '"
-                + getFlow().getId() + "' -- valid transitions are " + DefaultObjectStyler.call(state.getTransitions())
-                + " -- programmer error?";
-    }
+	public String getMessage() {
+		return "No such transition for event '" + eventId + "' in state '" + state.getId() + "' in flow '"
+				+ getFlow().getId() + "' -- valid transitions are " + DefaultObjectStyler.call(state.getTransitions())
+				+ " -- programmer error?";
+	}
 }

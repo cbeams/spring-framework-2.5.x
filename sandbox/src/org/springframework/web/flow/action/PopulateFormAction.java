@@ -32,58 +32,58 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  */
 public class PopulateFormAction extends BindAndValidateAction {
 
-    private boolean prepopulateFromRequestParameters;
+	private boolean prepopulateFromRequestParameters;
 
-    public void setPrepopulateFromRequest(boolean prepopulate) {
-        this.prepopulateFromRequestParameters = prepopulate;
-    }
+	public void setPrepopulateFromRequest(boolean prepopulate) {
+		this.prepopulateFromRequestParameters = prepopulate;
+	}
 
-    protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-            MutableAttributesAccessor model) throws RuntimeException {
+	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+			MutableAttributesAccessor model) throws RuntimeException {
 
-        Object formObject = loadRequiredFormObject(request, model);
+		Object formObject = loadRequiredFormObject(request, model);
 
-        ServletRequestDataBinder binder = createBinder(request, formObject, model);
+		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 
-        if (prepopulateFromRequestParameters) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Prepopulating backing form object from request parameters");
-            }
-            binder.bind(request);
-        }
+		if (prepopulateFromRequestParameters) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Prepopulating backing form object from request parameters");
+			}
+			binder.bind(request);
+		}
 
-        exportErrors(binder.getErrors(), model);
+		exportErrors(binder.getErrors(), model);
 
-        // placeholders indicating attributes on forms that have not been
-        // mapped to dynamic fields on backing objects - for use during
-        // development only
-        model.setAttribute("_notMapped", "!NOT MAPPED!");
-        model.setAttribute("_notMappedItems", createNotMappedEnumSet());
-        populateFormReferenceData(request, model);
-        return binder.getErrors().hasErrors() ? error() : success();
-    }
+		// placeholders indicating attributes on forms that have not been
+		// mapped to dynamic fields on backing objects - for use during
+		// development only
+		model.setAttribute("_notMapped", "!NOT MAPPED!");
+		model.setAttribute("_notMappedItems", createNotMappedEnumSet());
+		populateFormReferenceData(request, model);
+		return binder.getErrors().hasErrors() ? error() : success();
+	}
 
-    private Set createNotMappedEnumSet() {
-        Set notMapped = new HashSet();
-        notMapped.add(new NotMappedEnum(1));
-        notMapped.add(new NotMappedEnum(2));
-        notMapped.add(new NotMappedEnum(3));
-        return notMapped;
-    }
+	private Set createNotMappedEnumSet() {
+		Set notMapped = new HashSet();
+		notMapped.add(new NotMappedEnum(1));
+		notMapped.add(new NotMappedEnum(2));
+		notMapped.add(new NotMappedEnum(3));
+		return notMapped;
+	}
 
-    private static final class NotMappedEnum extends ShortCodedEnum {
-        public NotMappedEnum(int code) {
-            super(code, "!NOT MAPPED!");
-        }
-    }
+	private static final class NotMappedEnum extends ShortCodedEnum {
+		public NotMappedEnum(int code) {
+			super(code, "!NOT MAPPED!");
+		}
+	}
 
-    /**
-     * Template method to be implemented by subclasses
-     * @param request current HTTP request
-     * @param model the flow model
-     */
-    protected void populateFormReferenceData(HttpServletRequest request, MutableAttributesAccessor model) {
+	/**
+	 * Template method to be implemented by subclasses
+	 * @param request current HTTP request
+	 * @param model the flow model
+	 */
+	protected void populateFormReferenceData(HttpServletRequest request, MutableAttributesAccessor model) {
 
-    }
+	}
 
 }

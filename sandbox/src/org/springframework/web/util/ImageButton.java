@@ -26,43 +26,43 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class ImageButton implements Serializable {
-    private int x = -1;
+	private int x = -1;
 
-    private int y = -1;
+	private int y = -1;
 
-    public boolean isSet() {
-        return !(x == -1 && y == -1);
-    }
+	public boolean isSet() {
+		return !(x == -1 && y == -1);
+	}
 
-    /**
-     * @return Returns the x.
-     */
-    public int getX() {
-        return x;
-    }
+	/**
+	 * @return Returns the x.
+	 */
+	public int getX() {
+		return x;
+	}
 
-    /**
-     * @param x The x to set.
-     */
-    public void setX(int x) {
-        this.x = x;
-    }
+	/**
+	 * @param x The x to set.
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
 
-    /**
-     * @return Returns the y.
-     */
-    public int getY() {
-        return y;
-    }
+	/**
+	 * @return Returns the y.
+	 */
+	public int getY() {
+		return y;
+	}
 
-    /**
-     * @param y The y to set.
-     */
-    public void setY(int y) {
-        this.y = y;
-    }
-    
-    public String toString() {
-        return new ToStringCreator(this).appendProperties().toString();
-    }
+	/**
+	 * @param y The y to set.
+	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	public String toString() {
+		return new ToStringCreator(this).appendProperties().toString();
+	}
 }

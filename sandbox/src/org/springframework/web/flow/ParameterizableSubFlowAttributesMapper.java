@@ -83,200 +83,201 @@ import org.springframework.util.Assert;
  */
 public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributesMapper, Serializable {
 
-    protected final Log logger = LogFactory.getLog(getClass());;
+	protected final Log logger = LogFactory.getLog(getClass());;
 
-    private Map toMappings = Collections.EMPTY_MAP;
+	private Map toMappings = Collections.EMPTY_MAP;
 
-    private Map fromMappings = Collections.EMPTY_MAP;
+	private Map fromMappings = Collections.EMPTY_MAP;
 
-    /**
-     * Set the mappings that will be executed when mapping model data <i>to </i>
-     * a sub flow. All keys in given list will be mapped.
-     */
-    public void setToMappingsList(List toMappingsList) {
-        this.toMappings = new HashMap(toMappingsList.size());
-        putListMappings(this.toMappings, toMappingsList);
-    }
-    
-    private void putListMappings(Map map, List mappingsList) {
-        Iterator it = mappingsList.iterator();
-        while (it.hasNext()) {
-            Object key = it.next();
-            if (key instanceof List) {
-                putListMappings(map, (List)key);
-            } else {
-                Assert.isInstanceOf(String.class, key);
-                map.put(key, key);
-            }
-        }
-    }
+	/**
+	 * Set the mappings that will be executed when mapping model data <i>to </i>
+	 * a sub flow. All keys in given list will be mapped.
+	 */
+	public void setToMappingsList(List toMappingsList) {
+		this.toMappings = new HashMap(toMappingsList.size());
+		putListMappings(this.toMappings, toMappingsList);
+	}
 
-    /**
-     * Set the mappings that will be executed when mapping model data <i>to </i>
-     * the sub flow. The keys are the names in the parent flow model, the
-     * corresponding values are the names in the sub flow model.
-     */
-    public void setToMappingsMap(Map toMappings) {
-        this.toMappings = new HashMap(toMappings);
-    }
+	private void putListMappings(Map map, List mappingsList) {
+		Iterator it = mappingsList.iterator();
+		while (it.hasNext()) {
+			Object key = it.next();
+			if (key instanceof List) {
+				putListMappings(map, (List)key);
+			}
+			else {
+				Assert.isInstanceOf(String.class, key);
+				map.put(key, key);
+			}
+		}
+	}
 
-    public void setToMappingsMaps(Map[] toMappings) {
-        this.toMappings = new HashMap();
-        for (int i = 0; i < toMappings.length; i++) {
-            this.toMappings.putAll(toMappings[i]);
-        }
-    }
+	/**
+	 * Set the mappings that will be executed when mapping model data <i>to </i>
+	 * the sub flow. The keys are the names in the parent flow model, the
+	 * corresponding values are the names in the sub flow model.
+	 */
+	public void setToMappingsMap(Map toMappings) {
+		this.toMappings = new HashMap(toMappings);
+	}
 
-    /**
-     * Set the mappings that will be executed when mapping model data <i>from
-     * </i> the sub flow. All keys in given list will be mapped.
-     */
-    public void setFromMappingsList(List fromMappingsList) {
-        this.fromMappings = new HashMap(fromMappingsList.size());
-        putListMappings(this.fromMappings, fromMappingsList);
-    }
+	public void setToMappingsMaps(Map[] toMappings) {
+		this.toMappings = new HashMap();
+		for (int i = 0; i < toMappings.length; i++) {
+			this.toMappings.putAll(toMappings[i]);
+		}
+	}
 
-    /**
-     * Set the mappings that will be executed when mapping model data <i>from
-     * </i> a sub flow. The keys are the names in the sub flow model, the
-     * corresponding values are the names in the parent flow model.
-     */
-    public void setFromMappingsMap(Map fromMappings) {
-        this.fromMappings = new HashMap(fromMappings);
-    }
+	/**
+	 * Set the mappings that will be executed when mapping model data <i>from
+	 * </i> the sub flow. All keys in given list will be mapped.
+	 */
+	public void setFromMappingsList(List fromMappingsList) {
+		this.fromMappings = new HashMap(fromMappingsList.size());
+		putListMappings(this.fromMappings, fromMappingsList);
+	}
 
-    public void setFromMappingsMaps(Map[] fromMappings) {
-        this.fromMappings = new HashMap();
-        for (int i = 0; i < fromMappings.length; i++) {
-            this.fromMappings.putAll(fromMappings[i]);
-        }
-    }
+	/**
+	 * Set the mappings that will be executed when mapping model data <i>from
+	 * </i> a sub flow. The keys are the names in the sub flow model, the
+	 * corresponding values are the names in the parent flow model.
+	 */
+	public void setFromMappingsMap(Map fromMappings) {
+		this.fromMappings = new HashMap(fromMappings);
+	}
 
-    public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes) {
-        Map subFlowAttributes = new HashMap();
-        map(parentFlowAttributes, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
-        return Collections.unmodifiableMap(subFlowAttributes);
-    }
+	public void setFromMappingsMaps(Map[] fromMappings) {
+		this.fromMappings = new HashMap();
+		for (int i = 0; i < fromMappings.length; i++) {
+			this.fromMappings.putAll(fromMappings[i]);
+		}
+	}
 
-    public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,
-            MutableAttributesAccessor parentFlowAttributes) {
-        map(subFlowAttributes, parentFlowAttributes, fromMappings);
-    }
+	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes) {
+		Map subFlowAttributes = new HashMap();
+		map(parentFlowAttributes, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
+		return Collections.unmodifiableMap(subFlowAttributes);
+	}
 
-    /**
-     * Map data from one map to another map using specified mappings.
-     */
-    protected void map(AttributesAccessor from, MutableAttributesAccessor to, Map mappings) {
-        if (mappings != null) {
-            Iterator fromNames = mappings.keySet().iterator();
-            while (fromNames.hasNext()) {
-                //get source value
-                String fromName = (String)fromNames.next();
-                int idx = fromName.indexOf('.');
-                Object fromValue;
-                if (idx != -1) {
-                    //fromName is something like "beanName.propName"
-                    String beanName = fromName.substring(0, idx);
-                    String propName = fromName.substring(idx + 1);
+	public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,
+			MutableAttributesAccessor parentFlowAttributes) {
+		map(subFlowAttributes, parentFlowAttributes, fromMappings);
+	}
 
-                    BeanWrapper bw = createBeanWrapper(from.getAttribute(beanName));
-                    fromValue = bw.getPropertyValue(propName);
-                }
-                else {
-                    fromValue = from.getAttribute(fromName);
-                    if (fromValue == null) {
-                        if (logger.isInfoEnabled()) {
-                            logger
-                                    .info("No value exists for attribute '"
-                                            + fromName
-                                            + "' in the from model map - thus, I will map a null value - this may not be an error, but it could be a typo?");
-                        }
-                    }
-                }
+	/**
+	 * Map data from one map to another map using specified mappings.
+	 */
+	protected void map(AttributesAccessor from, MutableAttributesAccessor to, Map mappings) {
+		if (mappings != null) {
+			Iterator fromNames = mappings.keySet().iterator();
+			while (fromNames.hasNext()) {
+				//get source value
+				String fromName = (String)fromNames.next();
+				int idx = fromName.indexOf('.');
+				Object fromValue;
+				if (idx != -1) {
+					//fromName is something like "beanName.propName"
+					String beanName = fromName.substring(0, idx);
+					String propName = fromName.substring(idx + 1);
 
-                //set target value
-                String toName = (String)mappings.get(fromName);
-                idx = toName.indexOf('.');
-                if (idx != -1) {
-                    //toName is something like "beanName.propName"
-                    String beanName = toName.substring(0, idx);
-                    String propName = toName.substring(idx + 1);
+					BeanWrapper bw = createBeanWrapper(from.getAttribute(beanName));
+					fromValue = bw.getPropertyValue(propName);
+				}
+				else {
+					fromValue = from.getAttribute(fromName);
+					if (fromValue == null) {
+						if (logger.isInfoEnabled()) {
+							logger
+									.info("No value exists for attribute '"
+											+ fromName
+											+ "' in the from model map - thus, I will map a null value - this may not be an error, but it could be a typo?");
+						}
+					}
+				}
 
-                    BeanWrapper bw = createBeanWrapper(to.getAttribute(beanName));
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Mapping bean property attribute from path '" + fromName + "' to path '" + toName
-                                + "' with value '" + fromValue + "'");
-                    }
-                    bw.setPropertyValue(propName, fromValue);
-                }
-                else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Mapping attribute from name '" + fromName + "' to name '" + toName
-                                + "' with value '" + fromValue + "'");
-                    }
-                    to.setAttribute(toName, fromValue);
-                }
-            }
-        }
-    }
+				//set target value
+				String toName = (String)mappings.get(fromName);
+				idx = toName.indexOf('.');
+				if (idx != -1) {
+					//toName is something like "beanName.propName"
+					String beanName = toName.substring(0, idx);
+					String propName = toName.substring(idx + 1);
 
-    /**
-     * <p>
-     * Create a new bean wrapper wrapping given object. Can be redefined in
-     * subclasses in case special property editors need to be registered or when
-     * other similar tuning is required.
-     */
-    protected BeanWrapper createBeanWrapper(Object obj) {
-        return new BeanWrapperImpl(obj);
-    }
+					BeanWrapper bw = createBeanWrapper(to.getAttribute(beanName));
+					if (logger.isDebugEnabled()) {
+						logger.debug("Mapping bean property attribute from path '" + fromName + "' to path '" + toName
+								+ "' with value '" + fromValue + "'");
+					}
+					bw.setPropertyValue(propName, fromValue);
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Mapping attribute from name '" + fromName + "' to name '" + toName
+								+ "' with value '" + fromValue + "'");
+					}
+					to.setAttribute(toName, fromValue);
+				}
+			}
+		}
+	}
 
-    private static class MapAttributesAccessorAdapter implements MutableAttributesAccessor {
-        private Map map;
+	/**
+	 * <p>
+	 * Create a new bean wrapper wrapping given object. Can be redefined in
+	 * subclasses in case special property editors need to be registered or when
+	 * other similar tuning is required.
+	 */
+	protected BeanWrapper createBeanWrapper(Object obj) {
+		return new BeanWrapperImpl(obj);
+	}
 
-        public MapAttributesAccessorAdapter(Map map) {
-            this.map = map;
-        }
+	private static class MapAttributesAccessorAdapter implements MutableAttributesAccessor {
+		private Map map;
 
-        public Object getAttribute(String attributeName) {
-            return map.get(attributeName);
-        }
+		public MapAttributesAccessorAdapter(Map map) {
+			this.map = map;
+		}
 
-        public boolean containsAttribute(String attributeName) {
-            return map.containsKey(attributeName);
-        }
+		public Object getAttribute(String attributeName) {
+			return map.get(attributeName);
+		}
 
-        public Object getAttribute(String attributeName, Class requiredType) {
-            throw new UnsupportedOperationException();
-        }
+		public boolean containsAttribute(String attributeName) {
+			return map.containsKey(attributeName);
+		}
 
-        public Object getRequiredAttribute(String attributeName) {
-            throw new UnsupportedOperationException();
-        }
+		public Object getAttribute(String attributeName, Class requiredType) {
+			throw new UnsupportedOperationException();
+		}
 
-        public Collection attributeEntries() {
-            throw new UnsupportedOperationException();
-        }
+		public Object getRequiredAttribute(String attributeName) {
+			throw new UnsupportedOperationException();
+		}
 
-        public Collection attributeNames() {
-            throw new UnsupportedOperationException();
-        }
+		public Collection attributeEntries() {
+			throw new UnsupportedOperationException();
+		}
 
-        public Collection attributeValues() {
-            throw new UnsupportedOperationException();
-        }
+		public Collection attributeNames() {
+			throw new UnsupportedOperationException();
+		}
 
-        public Object getRequiredAttribute(String attributeName, Class requiredType) {
-            throw new UnsupportedOperationException();
-        }
+		public Collection attributeValues() {
+			throw new UnsupportedOperationException();
+		}
 
-        public void setAttribute(String attributeName, Object attributeValue) {
-            map.put(attributeName, attributeValue);
-        }
+		public Object getRequiredAttribute(String attributeName, Class requiredType) {
+			throw new UnsupportedOperationException();
+		}
 
-        public void setAttributes(Map attributes) {
-            throw new UnsupportedOperationException();
-        }
+		public void setAttribute(String attributeName, Object attributeValue) {
+			map.put(attributeName, attributeValue);
+		}
 
-    }
+		public void setAttributes(Map attributes) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
 
 }

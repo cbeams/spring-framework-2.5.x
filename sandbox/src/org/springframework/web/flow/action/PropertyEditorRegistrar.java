@@ -18,10 +18,9 @@ package org.springframework.web.flow.action;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.flow.AttributesAccessor;
 
-
 /**
  * @author Keith Donald
  */
 public interface PropertyEditorRegistrar {
-    public void registerCustomEditors(DataBinder dataBinder, AttributesAccessor model);
+	public void registerCustomEditors(DataBinder dataBinder, AttributesAccessor model);
 }

@@ -29,27 +29,27 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  */
 public abstract class DependencyInjectedAction extends TemplateAction {
 
-    /**
-     * Save the web application context and set properties by dependency
-     * injection. Any Setter methods will be populated
-     */
-    public void setServlet(ActionServlet actionServlet) {
-        super.setServlet(actionServlet);
+	/**
+	 * Save the web application context and set properties by dependency
+	 * injection. Any Setter methods will be populated
+	 */
+	public void setServlet(ActionServlet actionServlet) {
+		super.setServlet(actionServlet);
 
-        // ActionServlet may be null when an application is closed
-        // down before reload, especially in WebLogic
-        if (actionServlet != null) {
-            Assert.state((getWebApplicationContext() instanceof ConfigurableWebApplicationContext),
-                    "Cannot use this Action except with a ConfigurableWebApplicationContext");
+		// ActionServlet may be null when an application is closed
+		// down before reload, especially in WebLogic
+		if (actionServlet != null) {
+			Assert.state((getWebApplicationContext() instanceof ConfigurableWebApplicationContext),
+					"Cannot use this Action except with a ConfigurableWebApplicationContext");
 
-            // Now we can autowire ourselves
-            ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext)getWebApplicationContext();
-            AutowireCapableBeanFactory acbf = cwac.getBeanFactory();
+			// Now we can autowire ourselves
+			ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext)getWebApplicationContext();
+			AutowireCapableBeanFactory acbf = cwac.getBeanFactory();
 
-            // We can't perform dependency checking because of the inherited
-            // setServlet method (this method)
-            acbf.autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
-        }
-    }
+			// We can't perform dependency checking because of the inherited
+			// setServlet method (this method)
+			acbf.autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
+		}
+	}
 
 }

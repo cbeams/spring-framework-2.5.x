@@ -22,6 +22,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author Keith Donald
  */
 public interface ActionBean {
-    public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
-            MutableAttributesAccessor model) throws RuntimeException;
+	public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+			MutableAttributesAccessor model) throws RuntimeException;
 }

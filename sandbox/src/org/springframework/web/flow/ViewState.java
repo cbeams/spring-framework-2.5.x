@@ -28,72 +28,72 @@ import org.springframework.util.ToStringCreator;
  */
 public class ViewState extends TransitionableState {
 
-    protected static final String VIEW_SUFFIX = "View";
+	protected static final String VIEW_SUFFIX = "View";
 
-    /**
-     * The logical name of the view.
-     */
-    private String viewName;
+	/**
+	 * The logical name of the view.
+	 */
+	private String viewName;
 
-    public ViewState(String id, Transition transition) {
-        this(id, new Transition[] { transition });
-    }
+	public ViewState(String id, Transition transition) {
+		this(id, new Transition[] { transition });
+	}
 
-    public ViewState(String id, Transition[] transitions) {
-        this(id, id, transitions);
-    }
+	public ViewState(String id, Transition[] transitions) {
+		this(id, id, transitions);
+	}
 
-    public ViewState(String id, String viewName) {
-        super(id);
-        setViewName(viewName);
-    }
+	public ViewState(String id, String viewName) {
+		super(id);
+		setViewName(viewName);
+	}
 
-    public ViewState(String id, String viewName, Transition transition) {
-        super(id);
-        setViewName(viewName);
-        add(transition);
-    }
+	public ViewState(String id, String viewName, Transition transition) {
+		super(id);
+		setViewName(viewName);
+		add(transition);
+	}
 
-    public ViewState(String id, String viewName, Transition[] transitions) {
-        super(id);
-        setViewName(viewName);
-        addAll(transitions);
-    }
+	public ViewState(String id, String viewName, Transition[] transitions) {
+		super(id);
+		setViewName(viewName);
+		addAll(transitions);
+	}
 
-    public String getViewName() {
-        return viewName;
-    }
+	public String getViewName() {
+		return viewName;
+	}
 
-    public void setViewName(String viewName) {
-        this.viewName = viewName;
-    }
+	public void setViewName(String viewName) {
+		this.viewName = viewName;
+	}
 
-    public boolean isViewState() {
-        return true;
-    }
+	public boolean isViewState() {
+		return true;
+	}
 
-    /**
-     * Return a view descriptor pointing requesting front controllers to a
-     * logical view resource to be displayed. The descriptor also contains a
-     * model map needed when the view is rendered, for populating dynamic
-     * content.
-     * 
-     * @param flow The flow definition associated with the executing flow
-     *        session
-     * @param sessionExecutionStack The session execution stack, tracking the
-     *        current active flow session
-     * @param request The client http request
-     * @param response The server http response
-     * @return A view descriptor containing model and view information needed to
-     *         render the results of the event execution.
-     */
-    protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) {
-        return new ViewDescriptor(viewName, sessionExecutionStack.getAttributes());
-    }
+	/**
+	 * Return a view descriptor pointing requesting front controllers to a
+	 * logical view resource to be displayed. The descriptor also contains a
+	 * model map needed when the view is rendered, for populating dynamic
+	 * content.
+	 * 
+	 * @param flow The flow definition associated with the executing flow
+	 *        session
+	 * @param sessionExecutionStack The session execution stack, tracking the
+	 *        current active flow session
+	 * @param request The client http request
+	 * @param response The server http response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the event execution.
+	 */
+	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) {
+		return new ViewDescriptor(viewName, sessionExecutionStack.getAttributes());
+	}
 
-    public String toString() {
-        return super.toString() + new ToStringCreator(this).append("viewName", viewName).toString();
-    }
+	public String toString() {
+		return super.toString() + new ToStringCreator(this).append("viewName", viewName).toString();
+	}
 
 }

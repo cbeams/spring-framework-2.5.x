@@ -21,14 +21,14 @@ package org.springframework.web.flow;
  * @author Keith Donald
  */
 public class NoSuchFlowSessionException extends FlowException {
-    private String flowSessionId;
+	private String flowSessionId;
 
-    public NoSuchFlowSessionException(String flowSessionId, Throwable cause) {
-        super(cause);
-        this.flowSessionId = flowSessionId;
-    }
+	public NoSuchFlowSessionException(String flowSessionId, Throwable cause) {
+		super(cause);
+		this.flowSessionId = flowSessionId;
+	}
 
-    public String getMessage() {
-        return "No flow session could be found with id '" + flowSessionId + "' - perhaps the flow has ended?";
-    }
+	public String getMessage() {
+		return "No flow session could be found with id '" + flowSessionId + "' - perhaps the flow has ended?";
+	}
 }

@@ -34,96 +34,96 @@ import org.springframework.util.ToStringCreator;
  */
 public abstract class AbstractState implements Serializable {
 
-    protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
-    private String id;
+	private String id;
 
-    public AbstractState(String id) {
-        Assert.hasText(id, "The state must have a valid identifier");
-        this.id = id;
-    }
+	public AbstractState(String id) {
+		Assert.hasText(id, "The state must have a valid identifier");
+		this.id = id;
+	}
 
-    public boolean isTransitionable() {
-        return false;
-    }
+	public boolean isTransitionable() {
+		return false;
+	}
 
-    public boolean isViewState() {
-        return false;
-    }
+	public boolean isViewState() {
+		return false;
+	}
 
-    public boolean isActionState() {
-        return false;
-    }
+	public boolean isActionState() {
+		return false;
+	}
 
-    public boolean isSubFlowState() {
-        return false;
-    }
+	public boolean isSubFlowState() {
+		return false;
+	}
 
-    public boolean isEndState() {
-        return false;
-    }
+	public boolean isEndState() {
+		return false;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof AbstractState)) {
-            return false;
-        }
-        AbstractState s = (AbstractState)o;
-        return id.equals(s.id);
-    }
+	public boolean equals(Object o) {
+		if (!(o instanceof AbstractState)) {
+			return false;
+		}
+		AbstractState s = (AbstractState)o;
+		return id.equals(s.id);
+	}
 
-    public int hashCode() {
-        return id.hashCode();
-    }
+	public int hashCode() {
+		return id.hashCode();
+	}
 
-    /**
-     * Requesting entering of this state for the active (currently executing)
-     * flow session.
-     * @param flow The flow definition associated with the executing flow
-     *        session
-     * @param sessionExecutionStack The session execution stack, tracking the
-     *        current active flow session
-     * @param request The client http request
-     * @param response The server http response
-     * @return A view descriptor containing model and view information needed to
-     *         render the results of the event execution.
-     */
-    public final ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) {
-        AbstractState oldState = null;
-        if (sessionExecutionStack.getCurrentStateId() != null) {
-            oldState = flow.getRequiredState(sessionExecutionStack.getCurrentStateId());
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
-        }
-        sessionExecutionStack.setCurrentState(getId());
-        // Publish state transition event if necessary
-        if (flow.getFlowLifecycleListener() != null) {
-            flow.getFlowLifecycleListener().flowStateTransitioned(flow, oldState, this, sessionExecutionStack, request);
-        }
-        return doEnterState(flow, sessionExecutionStack, request, response);
-    }
+	/**
+	 * Requesting entering of this state for the active (currently executing)
+	 * flow session.
+	 * @param flow The flow definition associated with the executing flow
+	 *        session
+	 * @param sessionExecutionStack The session execution stack, tracking the
+	 *        current active flow session
+	 * @param request The client http request
+	 * @param response The server http response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the event execution.
+	 */
+	public final ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) {
+		AbstractState oldState = null;
+		if (sessionExecutionStack.getCurrentStateId() != null) {
+			oldState = flow.getRequiredState(sessionExecutionStack.getCurrentStateId());
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
+		}
+		sessionExecutionStack.setCurrentState(getId());
+		// Publish state transition event if necessary
+		if (flow.getFlowLifecycleListener() != null) {
+			flow.getFlowLifecycleListener().flowStateTransitioned(flow, oldState, this, sessionExecutionStack, request);
+		}
+		return doEnterState(flow, sessionExecutionStack, request, response);
+	}
 
-    /**
-     * Hook method to do any processing as a result of entering this state.
-     * @param flow The flow definition associated with the executing flow
-     *        session
-     * @param sessionExecutionStack The session execution stack, tracking the
-     *        current active flow session
-     * @param request The client http request
-     * @param response The server http response
-     * @return A view descriptor containing model and view information needed to
-     *         render the results of the event execution.
-     */
-    protected abstract ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response);
+	/**
+	 * Hook method to do any processing as a result of entering this state.
+	 * @param flow The flow definition associated with the executing flow
+	 *        session
+	 * @param sessionExecutionStack The session execution stack, tracking the
+	 *        current active flow session
+	 * @param request The client http request
+	 * @param response The server http response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the event execution.
+	 */
+	protected abstract ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response);
 
-    public String toString() {
-        return new ToStringCreator(this).append("id", id).toString();
-    }
+	public String toString() {
+		return new ToStringCreator(this).append("id", id).toString();
+	}
 
 }

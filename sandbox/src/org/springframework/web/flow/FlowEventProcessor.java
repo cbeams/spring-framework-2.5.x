@@ -40,40 +40,43 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface FlowEventProcessor {
 
-    /**
-     * Start a new session for this flow. This will cause the flow session to
-     * enter its start state.
-     * 
-     * @param sessionExecutionStack The session execution stack, tracking any
-     *        suspended parent flows that spawned this flow (as a subflow)
-     * @param request the client http request
-     * @param response the server http response
-     * @param input optional input attributes to be passed to the new flow session,
-     *        placed in 'flow scope'
-     * @return A view descriptor containing model and view information needed to
-     *         render the results of the start event execution.
-     * @throws IllegalStateException if the event processor has not been
-     *         configured with a valid start state.
-     */
-    public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-            HttpServletResponse response, Map input) throws IllegalStateException;
+	/**
+	 * Start a new session for this flow. This will cause the flow session to
+	 * enter its start state.
+	 * 
+	 * @param sessionExecutionStack The session execution stack, tracking any
+	 *        suspended parent flows that spawned this flow (as a subflow)
+	 * @param request the client http request
+	 * @param response the server http response
+	 * @param input optional input attributes to be passed to the new flow
+	 *        session, placed in 'flow scope'
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the start event execution.
+	 * @throws IllegalStateException if the event processor has not been
+	 *         configured with a valid start state.
+	 */
+	public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
+			HttpServletResponse response, Map input) throws IllegalStateException;
 
-    /**
-     * Execute the event identified by <code>eventId</code> in the state
-     * identified by <code>stateId</code>
-     * 
-     * @param eventId The id of the event to execute (e.g 'submit', 'next', 'back')
-     * @param stateId The id of the state to execute this event in (e.g 'viewDetails')
-     * @param sessionExecutionStack The session execution stack, tracking any
-     *        suspended parent flows that spawned this flow (as a subflow)
-     * @param request the client http request
-     * @param response the server http response
-     * @return A view descriptor containing model and view information needed to
-     *         render the results of the event execution.
-     * @throws FlowNavigationException if the <code>eventId</code> is not a valid event for
-     *         the state identified by <code>stateId</code>, or if the <code>stateId</code>
-     *         does not map to a valid flow state.
-     */
-    public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
+	/**
+	 * Execute the event identified by <code>eventId</code> in the state
+	 * identified by <code>stateId</code>
+	 * 
+	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
+	 *        'back')
+	 * @param stateId The id of the state to execute this event in (e.g
+	 *        'viewDetails')
+	 * @param sessionExecutionStack The session execution stack, tracking any
+	 *        suspended parent flows that spawned this flow (as a subflow)
+	 * @param request the client http request
+	 * @param response the server http response
+	 * @return A view descriptor containing model and view information needed to
+	 *         render the results of the event execution.
+	 * @throws FlowNavigationException if the <code>eventId</code> is not a
+	 *         valid event for the state identified by <code>stateId</code>,
+	 *         or if the <code>stateId</code> does not map to a valid flow
+	 *         state.
+	 */
+	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 }

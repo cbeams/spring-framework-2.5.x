@@ -24,19 +24,19 @@ import java.util.Collection;
  * @author Keith Donald
  */
 public interface AttributesAccessor {
-    public Object getAttribute(String attributeName);
+	public Object getAttribute(String attributeName);
 
-    public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException;
+	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException;
 
-    public Object getRequiredAttribute(String attributeName) throws IllegalStateException;
+	public Object getRequiredAttribute(String attributeName) throws IllegalStateException;
 
-    public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException;
+	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException;
 
-    public boolean containsAttribute(String attributeName);
-    
-    public Collection attributeNames();
-    
-    public Collection attributeEntries();
-    
-    public Collection attributeValues();
+	public boolean containsAttribute(String attributeName);
+
+	public Collection attributeNames();
+
+	public Collection attributeEntries();
+
+	public Collection attributeValues();
 }

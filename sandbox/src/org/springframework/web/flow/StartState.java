@@ -30,30 +30,30 @@ import org.springframework.util.DefaultObjectStyler;
  * @author Keith Donald
  */
 public class StartState implements Serializable {
-    private static final Log logger = LogFactory.getLog(StartState.class);
+	private static final Log logger = LogFactory.getLog(StartState.class);
 
-    private TransitionableState state;
+	private TransitionableState state;
 
-    public StartState(TransitionableState state) {
-        Assert.notNull(state, "The start state is required");
-        this.state = state;
-    }
+	public StartState(TransitionableState state) {
+		Assert.notNull(state, "The start state is required");
+		this.state = state;
+	}
 
-    protected TransitionableState getState() {
-        return state;
-    }
+	protected TransitionableState getState() {
+		return state;
+	}
 
-    public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-            HttpServletResponse response, Map inputAttributes) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getState()
-                    + "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
-        }
-        sessionExecutionStack.push(flow.createSession(inputAttributes));
-        if (flow.isLifecycleListenerSet()) {
-            flow.getLifecycleListener().flowStarted(flow, sessionExecutionStack, request);
-        }
-        return getState().enter(flow, sessionExecutionStack, request, response);
-    }
+	public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getState()
+					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
+		}
+		sessionExecutionStack.push(flow.createSession(inputAttributes));
+		if (flow.isLifecycleListenerSet()) {
+			flow.getLifecycleListener().flowStarted(flow, sessionExecutionStack, request);
+		}
+		return getState().enter(flow, sessionExecutionStack, request, response);
+	}
 
 }

@@ -30,91 +30,91 @@ import org.springframework.util.Assert;
  */
 public class ActionState extends TransitionableState {
 
-    private Set actionBeanNames;
+	private Set actionBeanNames;
 
-    private boolean updateAction;
+	private boolean updateAction;
 
-    public ActionState(String id, Transition transition) {
-        super(id, transition);
-        setBeanName(buildActionBeanName(id));
-    }
+	public ActionState(String id, Transition transition) {
+		super(id, transition);
+		setBeanName(buildActionBeanName(id));
+	}
 
-    public ActionState(String id, Transition[] transitions) {
-        super(id, transitions);
-        setBeanName(buildActionBeanName(id));
-    }
+	public ActionState(String id, Transition[] transitions) {
+		super(id, transitions);
+		setBeanName(buildActionBeanName(id));
+	}
 
-    public ActionState(String id, String beanName, Transition transition) {
-        super(id, transition);
-        setBeanName(beanName);
-    }
+	public ActionState(String id, String beanName, Transition transition) {
+		super(id, transition);
+		setBeanName(beanName);
+	}
 
-    public ActionState(String id, String beanName, Transition[] transitions) {
-        super(id, transitions);
-        setBeanName(beanName);
-    }
+	public ActionState(String id, String beanName, Transition[] transitions) {
+		super(id, transitions);
+		setBeanName(beanName);
+	}
 
-    public boolean isActionState() {
-        return true;
-    }
+	public boolean isActionState() {
+		return true;
+	}
 
-    public void setBeanName(String beanName) {
-        Assert.hasText(beanName, "The action bean name is required");
-        this.actionBeanNames = new HashSet(1);
-        this.actionBeanNames.add(beanName);
-    }
+	public void setBeanName(String beanName) {
+		Assert.hasText(beanName, "The action bean name is required");
+		this.actionBeanNames = new HashSet(1);
+		this.actionBeanNames.add(beanName);
+	}
 
-    protected String buildActionBeanName(String stateId) {
-    	// do nothing, subclasses may override
-        return stateId;
-    }
+	protected String buildActionBeanName(String stateId) {
+		// do nothing, subclasses may override
+		return stateId;
+	}
 
-    public void setBeanNames(String[] beanNames) {
-        this.actionBeanNames = new HashSet(Arrays.asList(beanNames));
-    }
+	public void setBeanNames(String[] beanNames) {
+		this.actionBeanNames = new HashSet(Arrays.asList(beanNames));
+	}
 
-    protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
-            HttpServletRequest request, HttpServletResponse response) {
-        Iterator it = actionBeanNames.iterator();
-        while (it.hasNext()) {
-            String beanName = (String)it.next();
-            ActionBean bean = (ActionBean)flow.getFlowDao().getActionBean(beanName);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Executing action bean with name '" + beanName + "'");
-            }
-            ActionBeanEvent event = bean.execute(request, response, sessionExecutionStack);
-            if (triggersTransition(event, flow)) {
-                return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
-            }
-            else {
-                if (event != null && logger.isWarnEnabled()) {
-                    logger.warn("Event '" + event + "' returned by action bean " + bean
-                            + "' does not map to a valid state transition for action state '" + getId() + "' in flow '"
-                            + flow.getId() + "'");
-                }
-            }
-        }
-        throw new IllegalStateException(
-                "No valid event was signaled by the action bean(s) associated with action state '" + getId()
-                        + "' of flow '" + flow.getId() + "' - programmer error?");
-    }
+	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response) {
+		Iterator it = actionBeanNames.iterator();
+		while (it.hasNext()) {
+			String beanName = (String)it.next();
+			ActionBean bean = (ActionBean)flow.getFlowDao().getActionBean(beanName);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing action bean with name '" + beanName + "'");
+			}
+			ActionBeanEvent event = bean.execute(request, response, sessionExecutionStack);
+			if (triggersTransition(event, flow)) {
+				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
+			}
+			else {
+				if (event != null && logger.isWarnEnabled()) {
+					logger.warn("Event '" + event + "' returned by action bean " + bean
+							+ "' does not map to a valid state transition for action state '" + getId() + "' in flow '"
+							+ flow.getId() + "'");
+				}
+			}
+		}
+		throw new IllegalStateException(
+				"No valid event was signaled by the action bean(s) associated with action state '" + getId()
+						+ "' of flow '" + flow.getId() + "' - programmer error?");
+	}
 
-    protected boolean triggersTransition(ActionBeanEvent event, Flow flow) {
-        return getTransition(event, flow) != null;
-    }
+	protected boolean triggersTransition(ActionBeanEvent event, Flow flow) {
+		return getTransition(event, flow) != null;
+	}
 
-    protected Transition getTransition(ActionBeanEvent event, Flow flow) {
-        if (event == null) {
-            return null;
-        }
-        return getTransition(event.getId(), flow);
-    }
+	protected Transition getTransition(ActionBeanEvent event, Flow flow) {
+		if (event == null) {
+			return null;
+		}
+		return getTransition(event.getId(), flow);
+	}
 
-    public boolean isUpdateAction() {
-        return updateAction;
-    }
+	public boolean isUpdateAction() {
+		return updateAction;
+	}
 
-    public void setUpdateAction(boolean updateAction) {
-        this.updateAction = updateAction;
-    }
+	public void setUpdateAction(boolean updateAction) {
+		this.updateAction = updateAction;
+	}
 }
