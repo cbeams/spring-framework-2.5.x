@@ -51,12 +51,7 @@ public class LineItem implements Serializable {
   }
 
 	public double getTotalPrice() {
-		if (item != null) {
-			return item.getListPrice() * quantity;
-		}
-		else {
-			return 0;
-		}
+		return this.unitPrice * this.quantity;
 	}
 
 }
