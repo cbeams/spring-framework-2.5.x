@@ -13,6 +13,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jms.support.DefaultJmsAdmin;
+import org.springframework.jms.support.JmsAdmin;
 import org.springframework.jndi.JndiTemplate;
 
 /**
@@ -33,11 +35,14 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	
 	private int _sessionAcknowledgeMode =  Session.AUTO_ACKNOWLEDGE;
 	
+	private JmsAdmin _jmsAdmin;
+	
+	
 	//TODO this should maybe be done better...see AbstractJndiLocator
 	private final JndiTemplate _jndiTemplate = new JndiTemplate();
     
     protected final Log logger = LogFactory.getLog(getClass());
-	
+    
 	/**
 	 * Set the JNDI environment to use for the JNDI lookup.
 	 * Creates a JndiTemplate with the given environment settings.
@@ -91,6 +96,14 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 		if (_cf == null) {
 			throw new IllegalArgumentException("ConnectionFactory is required");
 		}
+		if (_jmsAdmin == null)
+		{
+			logger.info("Using DefaultJmsAdmin implementation");
+			DefaultJmsAdmin admin = new DefaultJmsAdmin();
+			//TODO bad smell....
+			admin.setJmsSender(this);
+			setJmsAdmin(admin);
+		}
 	}
 
     /**
@@ -136,5 +149,19 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 public void setSessionTransacted(boolean txMode) {
 		_sessionTransacted = txMode;
 	 }
+
+	/**
+	 * @{inheritDoc}
+	 */
+	public JmsAdmin getJmsAdmin() {
+		return _jmsAdmin;
+	}
+
+	/**
+	 * @{inheritDoc}
+	 */
+	public void setJmsAdmin(JmsAdmin admin) {
+		_jmsAdmin = admin;
+	}
 
 }

@@ -248,4 +248,31 @@ public class JmsSender102 extends AbstractJmsSender
         
     }
 
+	/* (non-Javadoc)
+	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.SessionCallback)
+	 */
+	public void execute(SessionCallback action) throws JmsException {
+		throw new RuntimeException("not yet impl.");
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.TopicSessionCallback)
+	 */
+	public void execute(TopicSessionCallback action) throws JmsException {
+		throw new RuntimeException("not yet impl.");
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.jms.JmsSender#execute(org.springframework.jms.QueueSessionCallback)
+	 */
+	public void execute(QueueSessionCallback action) throws JmsException {
+		throw new RuntimeException("not yet impl.");
+		// TODO Auto-generated method stub
+		
+	}
+
 }
