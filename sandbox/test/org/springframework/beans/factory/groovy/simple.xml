@@ -36,6 +36,14 @@
 		<!-- Depends on dynamic hello -->
 		<property name="hello"><ref local="property"></ref></property>
 	</bean>
+	
+	<bean id="bad"
+		class="org.springframework.beans.factory.groovy.GroovyFactory"
+		factory-method="staticObject"
+		singleton="false"
+	>
+		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/Bad.groovy</value></constructor-arg>
+	</bean>
 
 	
 </beans>

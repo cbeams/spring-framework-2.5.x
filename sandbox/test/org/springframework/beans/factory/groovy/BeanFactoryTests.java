@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.groovy;
 
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.script.CompilationException;
 import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -24,13 +26,24 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.2 2004-08-01 15:42:01 johnsonr Exp $
+ * @version $Id: BeanFactoryTests.java,v 1.3 2004-08-02 08:57:58 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	
 	private static final String SIMPLE_XML = "/org/springframework/beans/factory/groovy/simple.xml";
 	
-	// TODO syntax errors test Bad.groovy
+	public void testBadGroovySyntax() {
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
+		try {
+			ac.getBean("bad");
+			fail();
+		}
+		catch (BeanCreationException ex) {
+			// Ok
+			//ex.printStackTrace();
+			//assertTrue(ex.getCause() instanceof CompilationException);
+		}
+	}
 	
 	public void testSimple() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
@@ -42,6 +55,7 @@ public class BeanFactoryTests extends TestCase {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
 		Hello hello = (Hello) ac.getBean("property");
 		assertEquals("hello world property", hello.sayHello());
+		System.out.println(((DynamicScript) hello).getResourceString() );
 	}
 	
 	public void testDependencyOnReloadedGroovyBean() throws Exception {
