@@ -224,8 +224,8 @@ public class VelocityView extends AbstractTemplateView {
 
 		exposeHelpers(model, request);
 
-		// create context from model
-		Context velocityContext = new VelocityContext(model);
+		// create Velocity Context from model
+		Context velocityContext = createVelocityContext(model);
 		exposeHelpers(velocityContext, request);
 
 		if (this.velocityFormatterAttribute != null) {
@@ -269,6 +269,19 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see #renderMergedTemplateModel
 	 */
 	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+	}
+
+	/**
+	 * Create a Velocity Context instance for the given model.
+	 * <p>Default implementation creates an instance of Velocity's
+	 * VelocityContext implementation class.
+	 * @param model the model Map, containing the model attributes
+	 * to be exposed to the view
+	 * @return the Velocity Context
+	 * @see org.apache.velocity.VelocityContext
+	 */
+	protected Context createVelocityContext(Map model) {
+		return new VelocityContext(model);
 	}
 
 	/**
