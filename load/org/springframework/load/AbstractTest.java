@@ -10,6 +10,7 @@
 package org.springframework.load;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -40,11 +41,11 @@ public abstract class AbstractTest implements Test {
 	
 	private int nbPasses;
 
-	private StopWatch runningTimer = new StopWatch();
+	private StopWatch runningTimer;
 	
-	private StopWatch pauseTimer = new StopWatch();
+	private StopWatch pauseTimer;
 	
-	private StopWatch elapsedTimer = new StopWatch();
+	private StopWatch elapsedTimer;
 
 	/**
 	 * List of failures encountered by this test so far
@@ -86,7 +87,15 @@ public abstract class AbstractTest implements Test {
 	 * be invoked by the managing AbstractTestSuite.
 	 */
 	protected AbstractTest() {
-		testFailedExceptions = new ArrayList(nbPasses);
+		testFailedExceptions = new LinkedList();
+		runningTimer = new StopWatch();
+		runningTimer.setKeepTaskList(false);
+	
+		pauseTimer = new StopWatch();
+		pauseTimer.setKeepTaskList(false);
+	
+		elapsedTimer = new StopWatch();
+		elapsedTimer.setKeepTaskList(false);
 	}
 	
 	
@@ -263,11 +272,11 @@ public abstract class AbstractTest implements Test {
 	 * @see java.lang.Runnable#run()
 	 */
 	public final void run() {
-		elapsedTimer.start("run");
+		elapsedTimer.start(null);//"run");
 		for (int i = 0; i < getPasses(); i++) {
 			try {
 				pause();
-				runningTimer.start("run");
+				runningTimer.start(null);//"run");
 				runPass(i);
 			}
 			catch (AbortTestException ex) {
@@ -358,6 +367,7 @@ public abstract class AbstractTest implements Test {
 	 * or a TestAssertionFailure
 	 */
 	protected void onTestPassFailed(Exception ex) {
+		ex.printStackTrace();
 	}
 
 
@@ -370,7 +380,7 @@ public abstract class AbstractTest implements Test {
 	private void pause() {
 		if (this.maxPause > 0L) {
 			try {
-				pauseTimer.start("pause");
+				pauseTimer.start(null);//"pause");
 				long p = Math.abs(rand.nextLong() % this.maxPause);
 				Thread.sleep(p);
 			}
