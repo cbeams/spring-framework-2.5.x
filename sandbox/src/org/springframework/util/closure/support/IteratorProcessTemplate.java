@@ -18,15 +18,11 @@ package org.springframework.util.closure.support;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.util.closure.Closure;
-
 /**
- * Simple process template that captures the workflow required to iterate over a
- * collection of elements.
- * 
+ * Simple process template that iterates over elements.
  * @author Keith Donald
  */
-public class IteratorProcessTemplate extends AbstractProcessTemplate {
+public class IteratorProcessTemplate extends AbstractLocalProcessTemplateWorkflow {
 	private Iterator it;
 
 	public IteratorProcessTemplate(Collection collection) {
@@ -37,9 +33,11 @@ public class IteratorProcessTemplate extends AbstractProcessTemplate {
 		this.it = it;
 	}
 
-	public void run(Closure elementCallback) {
-		while (it.hasNext()) {
-			elementCallback.call(it.next());
-		}
+	protected boolean hasMoreWork() {
+		return it.hasNext();
+	}
+
+	protected Object doWork() {
+		return it.next();
 	}
 }

@@ -90,7 +90,6 @@ public interface ProcessTemplate {
 	/**
 	 * Execute the template with the specific closure callback for the insertion
 	 * of custom processing code.
-	 * 
 	 * @param templateCallback The procedure callback.
 	 */
 	public void run(Closure templateCallback);
