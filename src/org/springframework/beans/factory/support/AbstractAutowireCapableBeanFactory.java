@@ -56,6 +56,13 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
 
+	static {
+		// Eagerly load the DisposableBean class to avoid weird classloader
+		// issues on EJB shutdown within WebLogic 8.1's EJB container.
+		// (Reported by Andreas Senft.)
+		DisposableBean.class.getName();
+	}
+
 	/**
 	 * Set that holds all inner beans created by this factory that implement
 	 * the DisposableBean interface, to be destroyed on destroySingletons.
