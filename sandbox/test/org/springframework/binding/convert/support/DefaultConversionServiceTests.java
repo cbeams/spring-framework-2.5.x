@@ -7,9 +7,9 @@ import java.util.HashMap;
 
 import junit.framework.TestCase;
 
-import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.Converter;
+import org.springframework.binding.support.Mapping;
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 
 /**
@@ -76,7 +76,7 @@ public class DefaultConversionServiceTests extends TestCase {
 			MyEnum myEnum = (MyEnum)executor.execute("My Invalid Label");
 			fail("Should have failed");
 		}
-		catch (ConversionException e) {
+		catch (IllegalArgumentException e) {
 		}
 	}
 
@@ -87,6 +87,16 @@ public class DefaultConversionServiceTests extends TestCase {
 		ConversionExecutor executor = service.getConversionExecutor(String.class, MyEnum.class);
 		MyEnum myEnum = (MyEnum)executor.execute("My Label 1");
 		assertEquals(MyEnum.ONE, myEnum);
+	}
+
+	public void testValidMappingConversion() {
+		DefaultConversionService service = new DefaultConversionService();
+		service.afterPropertiesSet();
+		ConversionExecutor executor = service.getConversionExecutor(String.class, Mapping.class);
+		Mapping mapping = (Mapping)executor.execute("id");
+		mapping = (Mapping)executor.execute("id->id");
+		mapping = (Mapping)executor.execute("id->collegueId,java.lang.Long");
+		mapping = (Mapping)executor.execute("id,java.lang.String->collegueId,java.lang.Long");
 	}
 
 	public static class MyEnum extends ShortCodedLabeledEnum {
