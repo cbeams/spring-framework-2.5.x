@@ -22,6 +22,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -31,7 +33,6 @@ import org.springframework.util.MethodInvoker;
 public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testGetObject() throws Exception {
-
 		// singleton, non-static
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
@@ -84,20 +85,18 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.afterPropertiesSet();
 		assertTrue(MethodInvokingFactoryBean.VOID.equals(mcfb.getObject()));
 
-		// now see if we can match methods with arguments that have supertype
-		// arguments
-		TestClass1._staticField1 = 0;
+		// now see if we can match methods with arguments that have supertype arguments
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
 		// should pass
 		mcfb.afterPropertiesSet();
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method with wrong number of args");
@@ -106,21 +105,19 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 			// expected
 		}
 
-		// now ideally we would fail on improper argument types, but
-		// unfortunately
-		// our algorithm is too stupid, so we are just going to check that in
-		// fact
+		// Now ideally we would fail on improper argument types, but unfortunately
+		// our algorithm is too stupid, so we are just going to check that in fact
 		// we match improper argument types, and then fail on the actual call.
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[]{"1", "2", "3"});
+		mcfb.setArguments(new Object[] {"1", "2", "3"});
 		try {
 			mcfb.afterPropertiesSet();
 			Object x = mcfb.getObject();
 			fail("Should have failed on getObject with mismatched argument types");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (TypeMismatchException ex) {
 			// expected
 		}
 
@@ -128,7 +125,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method when shouldn't have matched");
@@ -136,7 +133,6 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		catch (NoSuchMethodException ex) {
 			// expected
 		}
-
 	}
 
 	public void testGetObjectType() throws Exception {
@@ -173,7 +169,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		try {
 			mcfb.afterPropertiesSet();
 		}
-		catch (IllegalArgumentException ex) {
+		catch (TypeMismatchException ex) {
 			// expected
 		}
 	}
@@ -190,6 +186,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
+
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(this);
 		mcfb.setTargetMethod("whatever");
@@ -249,6 +246,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 
 		// static method
+		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("staticMethod1");
@@ -264,15 +262,27 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 	public void testInvokeWithNullArgument() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetClass(getClass());
+		methodInvoker.setTargetClass(TestClass1.class);
 		methodInvoker.setTargetMethod("nullArgument");
 		methodInvoker.setArguments(new Object[] {null});
 		methodInvoker.prepare();
 		methodInvoker.invoke();
 	}
 
+	public void testInvokeWithIntArgument() throws Exception {
+		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(TestClass1.class);
+		methodInvoker.setTargetMethod("intArgument");
+		methodInvoker.setArguments(new Object[] {new Integer(5)});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
 
-	public static void nullArgument(Object arg) {
+		methodInvoker = new ArgumentConvertingMethodInvoker();
+		methodInvoker.setTargetClass(TestClass1.class);
+		methodInvoker.setTargetMethod("intArgument");
+		methodInvoker.setArguments(new Object[] {"5"});
+		methodInvoker.prepare();
+		methodInvoker.invoke();
 	}
 
 
@@ -292,6 +302,12 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 
 		public static void voidRetvalMethod() {
+		}
+
+		public static void nullArgument(Object arg) {
+		}
+
+		public static void intArgument(int arg) {
 		}
 
 		public static void supertypes(Collection c, List l, String s) {

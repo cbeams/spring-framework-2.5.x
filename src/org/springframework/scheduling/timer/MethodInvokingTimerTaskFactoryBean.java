@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.util.MethodInvoker;
  * @since 19.02.2004
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
-public class MethodInvokingTimerTaskFactoryBean extends MethodInvoker
+public class MethodInvokingTimerTaskFactoryBean extends ArgumentConvertingMethodInvoker
 		implements FactoryBean, InitializingBean {
 
 	private TimerTask timerTask;

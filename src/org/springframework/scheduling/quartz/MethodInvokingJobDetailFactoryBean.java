@@ -28,6 +28,7 @@ import org.quartz.Scheduler;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -48,7 +49,7 @@ import org.springframework.util.MethodInvoker;
  * @since 18.02.2004
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
-public class MethodInvokingJobDetailFactoryBean extends MethodInvoker
+public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
     implements FactoryBean, BeanNameAware, InitializingBean {
 
 	private String name;
