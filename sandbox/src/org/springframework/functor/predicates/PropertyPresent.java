@@ -18,11 +18,13 @@ package org.springframework.functor.predicates;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.functor.UnaryPredicate;
+import org.springframework.util.Assert;
 
 public class PropertyPresent implements UnaryPredicate {
     private String propertyName;
 
     public PropertyPresent(String propertyName) {
+        Assert.notNull(propertyName);
         this.propertyName = propertyName;
     }
 
