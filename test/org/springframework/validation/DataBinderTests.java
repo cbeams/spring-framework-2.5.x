@@ -32,8 +32,9 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.SerializablePerson;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.StringUtils;
@@ -262,6 +263,25 @@ public class DataBinderTests extends TestCase {
 		assertEquals("required", ex.getFieldError("name").getCode());
 		assertEquals("required", ex.getFieldError("date").getCode());
 		assertEquals("required", ex.getFieldError("spouse.name").getCode());
+	}
+
+	public void testBindingWithNestedObjectCreation() throws Exception {
+		TestBean tb = new TestBean();
+
+		DataBinder binder = new DataBinder(tb, "person");
+		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new TestBean());
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("spouse", "someValue"));
+		pvs.addPropertyValue(new PropertyValue("spouse.name", "test"));
+		binder.bind(pvs);
+
+		assertNotNull(tb.getSpouse());
+		assertEquals("test", tb.getSpouse().getName());
 	}
 
 	public void testCustomEditorForSingleProperty() {

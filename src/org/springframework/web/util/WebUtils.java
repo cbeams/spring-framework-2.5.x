@@ -18,9 +18,9 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -307,13 +307,13 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
 	public static Map getParametersStartingWith(ServletRequest request, String prefix) {
-		Enumeration en = request.getParameterNames();
-		Map params = new HashMap();
+		Enumeration paramNames = request.getParameterNames();
+		Map params = new TreeMap();
 		if (prefix == null) {
 			prefix = "";
 		}
-		while (en != null && en.hasMoreElements()) {
-			String paramName = (String) en.nextElement();
+		while (paramNames != null && paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
 			if ("".equals(prefix) || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
