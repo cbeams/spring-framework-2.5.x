@@ -756,6 +756,18 @@ public class Flow implements FlowEventProcessor, Serializable {
 	// lifecycle event publishers
 
 	/**
+	 * @param sessionExecutionStack
+	 * @param request
+	 */
+	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
+			}
+		});
+	}
+	
+	/**
 	 * @param eventId
 	 * @param fromState
 	 * @param sessionExecution
@@ -793,22 +805,13 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing state transition event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
 				((FlowLifecycleListener)o).flowStateTransitioned(Flow.this, oldState, newState, sessionExecution,
 						request);
-			}
-		});
-	}
-
-	/**
-	 * @param sessionExecutionStack
-	 * @param request
-	 */
-	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
 			}
 		});
 	}

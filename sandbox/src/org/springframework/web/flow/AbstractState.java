@@ -103,8 +103,6 @@ public abstract class AbstractState implements Serializable {
 			logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
 		}
 		sessionExecution.setCurrentStateId(getId());
-
-		// Publish state transition event if necessary
 		flow.fireStateTransitioned(oldState, this, sessionExecution, request);
 		ViewDescriptor viewDescriptor = doEnterState(flow, sessionExecution, request, response);
 		return viewDescriptor;
