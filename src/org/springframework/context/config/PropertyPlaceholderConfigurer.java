@@ -1,5 +1,9 @@
 package org.springframework.context.config;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.PropertyValue;
@@ -10,7 +14,7 @@ import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
  * A property resource configurer that resolves placeholders in bean property values of
  * context definitions. It <i>pulls</i> values from a properties file into bean definitions.
  *
- * <p>The default placeholder syntax follows the JSP EL respectively Log4J style:<br><br>
+ * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:<br><br>
  * <code>
  * &nbsp;&nbsp;${...}
  * </code>
@@ -79,26 +83,62 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 				for (int j = 0; j < pvs.getPropertyValues().length; j++) {
 					PropertyValue pv = pvs.getPropertyValues()[j];
 					if (pv.getValue() instanceof String) {
-						String strVal = ((String) pv.getValue());
-						int startIndex = strVal.indexOf(this.placeholderPrefix);
-						int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
-						if (startIndex != -1 && endIndex != -1) {
-							String placeholder = strVal.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-							String propValue = prop.getProperty(placeholder);
-							if (propValue != null) {
-								String newVal = strVal.substring(0, startIndex) + propValue + strVal.substring(endIndex+1);
-								beanFactory.overridePropertyValue(beanName, new PropertyValue(pv.getName(), newVal));
-								logger.debug("Resolving placeholder " + placeholder + " to [" + propValue + "]");
-								logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newVal + "]");
+						String strVal = (String) pv.getValue();
+						String newStrVal = parseValue(prop, strVal);
+						if (!newStrVal.equals(strVal)) {
+							beanFactory.overridePropertyValue(beanName, new PropertyValue(pv.getName(), newStrVal));
+							logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
+						}
+					}
+					else if (pv.getValue() instanceof List) {
+						List listVal = (List) pv.getValue();
+						for (int k = 0; k < listVal.size(); k++) {
+							Object elem = listVal.get(k);
+							if (elem instanceof String) {
+								String strVal = (String) elem;
+								String newStrVal = parseValue(prop, strVal);
+								if (!newStrVal.equals(strVal)) {
+									listVal.set(k, newStrVal);
+									logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
+								}
 							}
-							else {
-								logger.debug("Could not resolve placeholder " + placeholder);
+						}
+					}
+					else if (pv.getValue() instanceof Map) {
+						Map mapVal = (Map) pv.getValue();
+						for (Iterator it = new HashMap(mapVal).keySet().iterator(); it.hasNext();) {
+							Object key = it.next();
+							Object elem = mapVal.get(key);
+							if (elem instanceof String) {
+								String strVal = (String) elem;
+								String newStrVal = parseValue(prop, strVal);
+								if (!newStrVal.equals(strVal)) {
+									mapVal.put(key, newStrVal);
+									logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	protected String parseValue(Properties prop, String strVal) {
+		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
+		if (startIndex != -1 && endIndex != -1) {
+			String placeholder = strVal.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+			String propValue = prop.getProperty(placeholder);
+			if (propValue != null) {
+				logger.debug("Resolving placeholder " + placeholder + " to [" + propValue + "]");
+				return strVal.substring(0, startIndex) + propValue + strVal.substring(endIndex+1);
+			}
+			else {
+				logger.debug("Could not resolve placeholder " + placeholder);
+			}
+		}
+		return strVal;
 	}
 
 }
