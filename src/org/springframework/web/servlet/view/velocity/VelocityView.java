@@ -30,6 +30,7 @@ import org.apache.velocity.io.VelocityWriter;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.util.SimplePool;
 
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
@@ -58,7 +59,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.10 2003-11-06 17:44:35 johnsonr Exp $
+ * @version $Id: VelocityView.java,v 1.11 2003-11-13 11:31:03 jhoeller Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -141,22 +142,20 @@ public class VelocityView extends AbstractView {
 		if (this.templateName == null) {
 			throw new ApplicationContextException("Must set templateName property on VelocityView");
 		}
-
-		Map configs = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(),
-											VelocityConfiguration.class, true, true);
-		if (configs.size() == 1) {
-			// We need exactly one VelocityConfiguration bean
-			VelocityConfiguration vconfig = (VelocityConfiguration) configs.values().iterator().next();
+		try {
+			VelocityConfiguration vconfig = (VelocityConfiguration)
+					BeanFactoryUtils.beanOfTypeIncludingAncestors(getWebApplicationContext(),
+					                                              VelocityConfiguration.class, true, true);
 			this.velocityEngine = vconfig.getVelocityEngine();
 		}
-		else {
-			throw new ApplicationContextException("Must define a VelocityConfiguration bean in this web application context " +
-			                                      "(may be inherited): VelocityConfigurer is the usual implementation. " +
-			                                      "This bean may be given any name.");
+		catch (BeanDefinitionStoreException ex) {
+			throw new ApplicationContextException("Must define a single VelocityConfiguration bean in this web application " +
+			                                      "context (may be inherited): VelocityConfigurer is the usual implementation. " +
+			                                      "This bean may be given any name.", ex);
 		}
 
 		// TODO remove this dependence on RuntimeSingleton
-		encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
+		this.encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
 
 		// Check that we can get the template, even if we might subsequently get it again
 		loadTemplate();
@@ -166,24 +165,24 @@ public class VelocityView extends AbstractView {
 	 * Load the Velocity template that is to be cached in this class.
 	 */
 	private void loadTemplate() throws ApplicationContextException {
-		String mesg = "Velocity resource loader is: [" + this.velocityEngine.getProperty("class.resource.loader.class") + "]; ";
+		String msg = "Velocity resource loader is: [" + this.velocityEngine.getProperty("class.resource.loader.class") + "]; ";
 		try {
 			this.velocityTemplate = this.velocityEngine.getTemplate(this.templateName);
 		}
 		catch (ResourceNotFoundException ex) {
-			mesg += "Can't load Velocity template '" + this.templateName + "': is it on the classpath, under /WEB-INF/classes?";
-			logger.error(mesg, ex);
-			throw new ApplicationContextException(mesg, ex);
+			msg += "Can't load Velocity template '" + this.templateName + "': is it on the classpath, under /WEB-INF/classes?";
+			logger.error(msg, ex);
+			throw new ApplicationContextException(msg, ex);
 		} 
 		catch (ParseErrorException ex) {
-			mesg += "Error parsing Velocity template '" + this.templateName + "'";
-			logger.error(mesg, ex);
-			throw new ApplicationContextException(mesg, ex);
+			msg += "Error parsing Velocity template '" + this.templateName + "'";
+			logger.error(msg, ex);
+			throw new ApplicationContextException(msg, ex);
 		} 
 		catch (Exception ex) {
-			mesg += "Unexpected error getting Velocity template '" + this.templateName + "'";
-			logger.error(mesg, ex);
-			throw new ApplicationContextException(mesg, ex);
+			msg += "Unexpected error getting Velocity template '" + this.templateName + "'";
+			logger.error(msg, ex);
+			throw new ApplicationContextException(msg, ex);
 		}
 	}
 	

@@ -12,8 +12,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * Convenience methods operating on bean factories.
@@ -23,7 +26,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * hierarchy a bean factory may participate in.
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtils.java,v 1.3 2003-11-04 23:10:02 jhoeller Exp $
+ * @version $Id: BeanFactoryUtils.java,v 1.4 2003-11-13 11:31:01 jhoeller Exp $
  */
 public abstract class BeanFactoryUtils {
 	
@@ -33,8 +36,7 @@ public abstract class BeanFactoryUtils {
 	 * Beans that are "overridden" (specified in a descendant factory
 	 * with the same name) are counted only once.
 	 * @param lbf
-	 * @return int count of beans including those defined in ancestor
-	 * factories
+	 * @return int count of beans including those defined in ancestor factories
 	 */
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
@@ -80,17 +82,18 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return all beans of the given type or subtypes, also picking
-	 * up beans defined in ancestor bean factories if the current
-	 * bean factory is a HierarchicalBeanFactory.
+	 * Return all beans of the given type or subtypes, also picking up beans defined in
+	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
+	 * The return list will only contain beans of this type.
 	 * Useful convenience method when we don't care about bean names.
 	 * @param lbf the bean factory
-	 * @param type type of bean to match. The return list will only
-	 * contain beans of this type.
+	 * @param type type of bean to match
 	 * @return the Map of bean instances, or an empty Map if none
+	 * @throws BeansException if the beans could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type,
-																									boolean includePrototypes, boolean includeFactoryBeans) {
+																									boolean includePrototypes, boolean includeFactoryBeans)
+	    throws BeansException {
 		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -107,6 +110,28 @@ public abstract class BeanFactoryUtils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Return a single bean of the given type or subtypes, also picking up beans defined
+	 * in ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
+	 * Useful convenience method when we expect a single bean and don't care about the bean name.
+	 * @param lbf the bean factory
+	 * @param type type of bean to match
+	 * @return the Map of bean instances, or an empty Map if none
+	 * @throws BeanDefinitionStoreException if 0 or more than 1 beans of the given type were found
+	 * @throws BeansException if the bean could not be created
+	 */
+	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type,
+	                                                  boolean includePrototypes, boolean includeFactoryBeans)
+	    throws BeansException {
+		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includePrototypes, includeFactoryBeans);
+		if (beansOfType.size() == 1) {
+			return beansOfType.values().iterator().next();
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+		}
 	}
 
 }
