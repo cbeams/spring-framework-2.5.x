@@ -9,7 +9,7 @@
 	</view-state>
 
 	<action-state id="bindAndValidate">
-		<action bean="person.Search.criteria.bindAndValidate"/>
+		<action bean="person.Search.criteria.formAction"/>
 		<transition on="success" to="executeQuery"/>
 		<transition on="error" to="criteria.view"/>
 	</action-state>
