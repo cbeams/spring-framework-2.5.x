@@ -9,7 +9,7 @@
     making it easy to work with data access technologies like JDBC, Hibernate
     or JDO in a standardized way. This allows you to switch between them
     fairly easily and it also allows you to code without worrying about
-    catching exceptions that are specific to each tecnology. </para>
+    catching exceptions that are specific to each technology.</para>
   </sect1>
 
   <sect1 id="dao-exceptions">
@@ -44,8 +44,8 @@
     unchecked, they can simply get thrown too, sacrificing generic DAO
     abstraction in terms of exceptions though.</para>
 
-    <para>The exception hierarchy that Spring uses is oulined in the following
-    graph:</para>
+    <para>The exception hierarchy that Spring uses is outlined in the
+    following graph:</para>
 
     <mediaobject>
       <imageobject>
@@ -57,11 +57,11 @@
   </sect1>
 
   <sect1>
-    <title>Consistent Abstract Classes for DAO Support </title>
+    <title>Consistent Abstract Classes for DAO Support</title>
 
     <para>To make it easier to work with a variety of data access technologies
     like JDBC, JDO and Hibernate in a consistent way, Spring provides a set of
-    abtract DAO classes that you can extend. These abstract classes has
+    abstract DAO classes that you can extend. These abstract classes has
     methods for setting the data source and any other configuration settings
     that are specific to the technology you currently are using.</para>
 
@@ -80,7 +80,7 @@
         providing a HibernateTemplate based on it to subclasses. Can
         alternatively be initialized directly via a HibernateTemplate, to
         reuse the latter's settings like SessionFactory, flush mode, exception
-        translator, etc. </para>
+        translator, etc.</para>
       </listitem>
 
       <listitem>

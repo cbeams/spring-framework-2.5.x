@@ -33,7 +33,7 @@
     <literal>org.springframework.jdbc.core</literal> package.</para>
 
     <para>Finally the <literal>org.springframework.jdbc.support</literal>
-    package is where you find the <literal>SQLException</literal> transalation
+    package is where you find the <literal>SQLException</literal> translation
     functionality and some utility classes.</para>
 
     <para>Exceptions thrown during JDBC processing are translated to
@@ -42,7 +42,7 @@
     not need to implement JDBC or RDBMS-specific error handling. All
     translated exceptions are unchecked giving you the option of catching the
     exceptions that you can recover from while allowing other exceptions to be
-    propageted to the caller.</para>
+    propagated to the caller.</para>
   </sect1>
 
   <sect1 id="jdbc-core">
@@ -57,8 +57,8 @@
       This helps to avoid common errors like forgetting to always close the
       connection. It executes the core JDBC workflow like statement creation
       and execution, leaving application code to provide SQL and extract
-      results. This class executes SQL queries, update statments or stored
-      procedure calls, initating iteration over ResultSets and extraction of
+      results. This class executes SQL queries, update statements or stored
+      procedure calls, imitating iteration over ResultSets and extraction of
       returned parameter values. It also catches JDBC exceptions and
       translates them to the generic, more informative, exception hierarchy
       defined in the <literal>org.springframework.dao</literal>
@@ -94,7 +94,7 @@
       factory. It allows a container or a framework to hide connection pooling
       and transaction management issues from the application code. As a
       developer, you don't need to know any details about how to connect to
-      the database, that is the responibility for the administrator that sets
+      the database, that is the responsibility for the administrator that sets
       up the datasource. You will most likely have to fulfil both roles while
       you are developing and testing you code though, but you will not
       necessarily have to know how the production data source is
@@ -312,7 +312,7 @@ public class RunAQuery {
       thread-bound connections, e.g. for use with
       DataSourceTransactionManager.</para>
 
-      <para>Note: The getDataSourceFromJndi methods are targetted at
+      <para>Note: The getDataSourceFromJndi methods are targeted at
       applications that do not use a BeanFactory resp. an ApplicationContext.
       With the latter, it is preferable to preconfigure your beans or even
       <literal><literal>JdbcTemplate</literal></literal> instances in the
@@ -423,8 +423,8 @@ public class RunAQuery {
     contains the classes that allow you to access the database in a more
     object oriented manner. You can execute queries and get the results back
     as a list containing business objects with the relational column data
-    mapped to the properties of the business obejct. You can also execute
-    stored procedures and run update, delete and insert statemente.</para>
+    mapped to the properties of the business object. You can also execute
+    stored procedures and run update, delete and insert statements.</para>
 
     <sect2 id="jdbc-SqlQuery">
       <title>SqlQuery</title>
@@ -433,8 +433,8 @@ public class RunAQuery {
       must implement the newResultReader() method to provide an object that
       can save the results while iterating over the ResultSet. This class is
       rarely used directly since the <literal>MappingSqlQuery</literal>, that
-      extends this class, provides a much more covenient inplementation for
-      mapping rows to java classes. Other implementations that extend
+      extends this class, provides a much more convenient implementation for
+      mapping rows to Java classes. Other implementations that extend
       <literal>SqlQuery</literal> are
       <literal>MappingSqlQueryWithParameters</literal> and
       <literal>UpdatableSqlQuery</literal>.</para>
@@ -474,12 +474,12 @@ public class RunAQuery {
       we call the constructor on the superclass with the
       <literal>DataSource</literal> and the SQL that should be executed to
       retrieve the rows for this query. This SQL will be used to create a
-      <literal>PreparedStatement</literal> so it may contain placeholders for
+      <literal>PreparedStatement</literal> so it may contain place holders for
       any parameters to be passed in during execution. Each parameter must be
       declared using the <literal>declareParameter</literal> method passing in
       an <literal>SqlParameter</literal>. The <literal>SqlParameter</literal>
       takes a name and the JDBC type as defined in
-      <literal>java.sql.Types</literal>. After all paramaters have been
+      <literal>java.sql.Types</literal>. After all parameters have been
       defined we call the <literal>compile</literal> method so the statement
       can be prepared and later be executed.</para>
 
