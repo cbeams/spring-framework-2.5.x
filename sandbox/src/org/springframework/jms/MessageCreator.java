@@ -31,7 +31,7 @@ public interface MessageCreator {
 	 * @throws The JMS Checked Exception.  Do not catch it, it will be
 	 * handled correctly by the JmsSender.
 	 */
-	public abstract Message createMessage(Session session) throws JMSException;
+	public Message createMessage(Session session) throws JMSException;
 
 
 }
