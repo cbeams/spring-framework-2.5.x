@@ -13,7 +13,6 @@ import javax.xml.rpc.Service;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.Stub;
 
-import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -27,7 +26,7 @@ import org.springframework.remoting.RemoteAccessException;
  * for example looked up via JndiObjectFactoryBean.
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the
- * "username", "password", "endpointAddress", and "maintainSession" properties.
+ * "username", "password", "endpointAddress" and "maintainSession" properties.
  *
  * @author Juergen Hoeller
  * @since 15.12.2003
@@ -282,8 +281,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 				throw targetException;
 			}
 		}
-		catch (Throwable t) {
-			throw new AspectException("Failed to invoke JAX-RPC service [" + this.portQName + "]", t);
+		catch (RuntimeException ex) {
+			throw new RemoteAccessException("Failed to invoke JAX-RPC service [" + this.portQName + "]", ex);
 		}
 	}
 
