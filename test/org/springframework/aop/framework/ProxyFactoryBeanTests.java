@@ -20,13 +20,13 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
+import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
-import org.springframework.aop.support.ThrowsAdviceInterceptorTests;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -41,7 +41,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.15 2003-12-11 13:22:34 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.16 2003-12-11 14:52:29 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	

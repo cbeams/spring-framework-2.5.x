@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.support;
+package org.springframework.aop.framework.adapter;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -22,7 +22,7 @@ import org.springframework.aop.framework.MethodCounter;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.5 2003-12-11 09:18:57 johnsonr Exp $
+ * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.1 2003-12-11 14:52:55 johnsonr Exp $
  */
 public class ThrowsAdviceInterceptorTests extends TestCase {
 

@@ -14,15 +14,11 @@ import java.util.Map;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.ThrowsAdvice;
+import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.framework.support.AopUtils;
-import org.springframework.aop.support.DefaultBeforeAdvisor;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
-import org.springframework.aop.support.DefaultThrowsAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -66,7 +62,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.16 2003-12-11 13:22:45 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.17 2003-12-11 14:53:13 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -291,26 +287,21 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * Return Advisor or TargetSource
 	 */
 	private Object namedBeanToAdvisorOrTargetSource(Object next) {
-		if (next instanceof Advisor) {
-			return (Advisor) next;
+		try {
+			Advisor adv = GlobalAdvisorAdapterRegistry.getInstance().wrap(next);
+			return adv;
 		}
-		else if (next instanceof MethodInterceptor) {
-			return new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
-		}
-		else if (next instanceof MethodBeforeAdvice) {
-			return new DefaultBeforeAdvisor((MethodBeforeAdvice) next);
-		}
-		else if (next instanceof ThrowsAdvice) {
-			return new DefaultThrowsAdvisor((ThrowsAdvice) next);
-		}
-		else if (next instanceof TargetSource) {
-			return (TargetSource) next;
-		}
-		else {
-			// It's not a pointcut or interceptor.
-			// It's a bean that needs an invoker around it.
-			return new SingletonTargetSource(next);
-			//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
+		catch (UnknownAdviceTypeException ex) {
+			// TODO consider checking that it's the last in the list?
+			if (next instanceof TargetSource) {
+				return (TargetSource) next;
+			}
+			else {
+				// It's not a pointcut or interceptor.
+				// It's a bean that needs an invoker around it.
+				return new SingletonTargetSource(next);
+				//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
+			}
 		}
 	}
 

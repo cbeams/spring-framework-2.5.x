@@ -21,6 +21,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.ThrowsAdvisor;
+import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
@@ -28,7 +29,6 @@ import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutThrowsAdvisor;
-import org.springframework.aop.support.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -38,7 +38,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.12 2003-12-11 09:01:26 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.13 2003-12-11 14:52:29 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	

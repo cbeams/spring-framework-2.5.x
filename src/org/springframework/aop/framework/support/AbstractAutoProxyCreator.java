@@ -5,15 +5,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -40,7 +39,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.20 2003-12-10 20:29:29 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.21 2003-12-11 14:53:13 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, Ordered {
 
@@ -138,19 +137,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			}
 			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
-				Object interceptorOrAdvice = it.next();
-				if (interceptorOrAdvice instanceof Advisor) {
-					//System.err.println("Found advice " + interceptorOrAdvice);
-					proxyFactory.addAdvisor((Advisor) interceptorOrAdvice);
-				}
-				else if (interceptorOrAdvice instanceof Interceptor) {
-					//System.err.println("Found interceptor " + interceptorOrAdvice);
-					proxyFactory.addInterceptor((Interceptor) interceptorOrAdvice);
-				}
-				else if (interceptorOrAdvice instanceof MethodBeforeAdvice) {
-					//System.err.println("Found interceptor " + interceptorOrAdvice);
-					proxyFactory.addBeforeAdvice((MethodBeforeAdvice) interceptorOrAdvice);
-				}
+				Advisor advisor = GlobalAdvisorAdapterRegistry.getInstance().wrap(it.next());
+				proxyFactory.addAdvisor(advisor);
 			}
 			proxyFactory.setTargetSource(getTargetSource(bean, name));
 			
