@@ -13,20 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.autobuilds.ejbtest.simple;
 
-
 /**
- * <p>Business interface for a simple EJB test.</p>
- * 
- * @author colin sampaleanu
- * @version $Id: SimpleService.java,v 1.2 2004-07-15 00:07:56 colins Exp $
+ * A POJO implementation of SimpleService
  */
-public interface SimpleService {
+public class SimpleServiceImpl implements SimpleService {
 
-	public String echo(String input);
-	
-	public String echo2(String input);
+	/* (non-Javadoc)
+	 * @see org.springframework.autobuilds.ejbtest.simple.SimpleService#echo(java.lang.String)
+	 */
+	public String echo(String input) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.autobuilds.ejbtest.simple.SimpleService#echo2(java.lang.String)
+	 */
+	public String echo2(String input) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

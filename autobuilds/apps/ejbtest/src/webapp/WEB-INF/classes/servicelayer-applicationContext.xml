@@ -52,6 +52,9 @@
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+  
+	<bean id="simpleService" class="org.springframework.autobuilds.ejbtest.simple.SimpleServiceImpl">
+	</bean>
 
 	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">

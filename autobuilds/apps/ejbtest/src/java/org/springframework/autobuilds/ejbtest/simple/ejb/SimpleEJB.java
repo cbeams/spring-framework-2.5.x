@@ -43,13 +43,14 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
  * and then XDoclet will not generate its own.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleEJB.java,v 1.2 2004-07-14 23:44:09 colins Exp $
+ * @version $Id: SimpleEJB.java,v 1.3 2004-07-15 00:09:41 colins Exp $
  */
 public class SimpleEJB extends AbstractStatelessSessionBean
 		implements SimpleService {
 
 	// --- statics
 	public static final String SESSION_FACTORY_ID = "sessionFactory";
+	public static final String POJO_SERVICE_ID = "simpleService";
 
 	protected static final Log logger = LogFactory
 			.getLog(SimpleEJB.class);
@@ -83,8 +84,10 @@ public class SimpleEJB extends AbstractStatelessSessionBean
 	 * @see org.springframework.ejb.support.AbstractStatelessSessionBean#onEjbCreate()
 	 */
 	protected void onEjbCreate() throws CreateException {
-		sessionFactory = (SessionFactory) getBeanFactory().getBean(
-				SESSION_FACTORY_ID);
+		// if we were delegating to a pojo service object on every ejb method, then we would
+		// probably want to get the pojo service object here, as a class field. For the purpose
+		// of the test we will only get it when needed
+		//simpleService = (SimpleService) getBeanFactory().getBean(POJO_SERVICE_ID);
 	}
 
 	/*
@@ -94,6 +97,16 @@ public class SimpleEJB extends AbstractStatelessSessionBean
 	 */
 	public String echo(String input) {
 		return "hello " + input;
+	}
+
+	/* 
+	 * An example of how an EJB method can delegate to a POJO object to provide
+	 * the service. If every method were delegating, you would probably want to
+	 * get the POJO instance in the onEjbCreateMethod
+	 */
+	public String echo2(String input) {
+		SimpleService simpleService = (SimpleService) getBeanFactory().getBean(POJO_SERVICE_ID);
+		return simpleService.echo2(input);
 	}
 
 }
