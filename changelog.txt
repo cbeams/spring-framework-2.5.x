@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.4 (14.1.2005)
+Changes in version 1.1.4 (16.1.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -18,16 +18,19 @@ Package org.springframework.beans
 * fixed AbstractFactoryBean's "afterPropertiesSet" implementation to avoid singleton creation in case of a prototype
 * added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
 * added ServiceLocatorFactoryBean, allowing to map custom service locator interface methods to BeanFactory.getBean calls
+* added "containsSingleton" method to ConfigurableBeanFactory, checking the singleton cache for a specific bean name
 * added "getSingletonCount" method to AbstractBeanFactory, returning the number of objects in the singleton cache
 * AbstractBeanFactory ignores BeanCreationExceptions on FactoryBean type checks, avoiding certain autowiring failures
 * fixed AbstractAutowireCapableBeanFactory to avoid potential NPE in case of chained factory-methods with factory-bean
 * fixed AbstractAutowireCapableBeanFactory to correctly destroy original bean objects if wrapped by a BeanPostProcessor
+* reworked AbstractAutowireCapableBeanFactory to allow for multiple disposable inner beans of the same name
 * changed DefaultListableBeanFactory's "getBeansOfType" to ignore beans that cause BeanCreationExceptions on "getType"
 * DefaultListableBeanFactory's "getBeansOfType" returns its result as linked map (if on JDK 1.4 or Commons Collections)
 * added "factoryBean" argument to InstantiationStrategy's "instantiate" method for a factory method (required for above)
 * XML bean definition DTD allows "lookup-method" and "replaced-method" in arbitrary order
 
 Package org.springframework.context
+* fixed AbstractApplicationContext to ignore "applicationEventMulticaster" bean in parent context (-> only local bean)
 * added protected "getDefaultLocale" method to MessageSourceAccessor, to allow to use a thread-bound user locale
 
 Package org.springframework.core
@@ -69,6 +72,7 @@ Package org.springframework.remoting
 * added JaxRpcServicePostProcessor interface, intended for reusable custom type mappings etc for a JAX-RPC service
 * added "servicePostProcessors" property to LocalJaxRpcServiceFactory and subclasses (incl. JaxRpcPortProxyFactoryBean)
 * reworked JaxRpcPortClientInterceptor to work with JAX-RPC dynamic calls when not given an RMI port interface
+* JaxRpcPortClientInterceptor returns its own proxy description on "toString" (to avoid "toString" failure on Axis)
 * added "proxyFactory" property to HessianClientInterceptor/FactoryBean, for passing in a HessianProxyFactory instance
 * added "proxyFactory" property to BurlapClientInterceptor/FactoryBean, for passing in a BurlapProxyFactory instance
 
@@ -91,15 +95,20 @@ Package org.springframework.validation
 * made BindException serializable, provided that the contained target object is serializable
 
 Package org.springframework.web
+* added "exposeRequestAttributes" method to WebUtils, exposing a given java.util.Map as request attributes
 * ContextLoader can optionally load a (shared) parent application context to the root web application context
 * added ServletContextFactoryBean, exposing the ServletContext for bean references (alternative to ServletContextAware)
 * added ServletContextAttributeFactoryBean, exposing an existing ServletContext attribute for bean references
 * added ServletContextAttributeExporter, taking Spring-defined objects and exposing them as ServletContext attributes
 * added ServletContextPropertyPlaceholderConfigurer, a subclass that falls back to web.xml context-param entries
 * changed HttpServletBean and GenericFilterBean to ignore unknown init-params that do not correspond to bean properties
+* added "publishEvents" init-param to FrameworkServlet, allowing to turn off the publishing of RequestHandledEvents
 * fixed DispatcherServlet to copy attribute names before iterating over them to restore original values after include
 * added overloaded "getFormSessionAttributeName" method with HttpServletRequest argument to AbstractFormController
 * added overloaded "getPageSessionAttributeName" method with HttpServletRequest argument to AbstractWizardFormController
+* RequestContext works outside DispatcherServlet too, falling back to root WebApplicationContext and JSTL/request locale
+* added JspAwareRequestContext as subclass of RequestContext, populated from JSP PageContext (and aware of page scope)
+* Spring JSP tags work outside DispatcherServlet too, falling back to root WebApplicationContext and JSTL/request locale
 * AbstractJasperReportsView sets content length header for IE when writing to the OutputStream (like AbstractPdfView)
 
 
