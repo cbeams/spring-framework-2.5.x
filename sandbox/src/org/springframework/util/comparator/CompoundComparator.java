@@ -160,7 +160,7 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     public void flip(int index) {
-        getSortDefinition(index).flip();
+        getSortDefinition(index).flipOrder();
     }
 
     /**

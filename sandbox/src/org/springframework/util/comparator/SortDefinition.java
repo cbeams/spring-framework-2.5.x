@@ -84,7 +84,7 @@ public class SortDefinition implements Comparator, Serializable {
         return 0;
     }
 
-    public void flip() {
+    public void flipOrder() {
         this.order = SortOrder.flip(order);
     }
 
