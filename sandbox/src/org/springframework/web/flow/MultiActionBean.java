@@ -55,7 +55,7 @@ public class MultiActionBean extends AbstractActionBean {
 	protected Method getHandlerMethod(String eventHandlerMethodName) throws NoSuchMethodException,
 			IllegalAccessException {
 		return getDelegate().getClass().getMethod(eventHandlerMethodName,
-				new Class[] { HttpServletRequest.class, HttpServletResponse.class, AttributesAccessor.class });
+				new Class[] { HttpServletRequest.class, HttpServletResponse.class, MutableAttributesAccessor.class });
 	}
 
 	protected Object getDelegate() {
