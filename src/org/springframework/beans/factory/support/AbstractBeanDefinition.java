@@ -505,11 +505,12 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public void validate() throws BeanDefinitionValidationException {
 		if (this.lazyInit && !this.singleton) {
-			throw new BeanDefinitionValidationException("Lazy initialization is applicable only to singleton beans");
+			throw new BeanDefinitionValidationException(
+					"Lazy initialization is only applicable to singleton beans");
 		}
 
 		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
-			throw new  BeanDefinitionValidationException(
+			throw new BeanDefinitionValidationException(
 			    "Cannot combine static factory method with method overrides: " +
 			    "the static factory method must create the instance");
 		}
