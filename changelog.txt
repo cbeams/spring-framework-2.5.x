@@ -7,16 +7,34 @@ Changes in version 1.1.5 (28.2.2005)
 ------------------------------------
 
 Documentation
-* Moved Tapestry integration content to a separate chapter ("Integrating with other web frameworks")
+* moved Tapestry integration content to a separate chapter ("Integrating with other web frameworks")
 
 Package org.springframework.aop
 * adapted AdvisedSupport to keep the order of proxy interfaces, to create JDK proxy with specified order of interfaces
 
+Package org.springframework.beans
+* renamed FactoryBeanCircularReferenceException to FactoryBeanNotInitializedException, reflecting general causes
+
 Package org.springframework.context
 * AbstractApplicationContext uses new DelegatingMessageSource as placeholder, to avoid StaticMessageSource side effects
 
+Package org.springframework.core
+* fixed FileSystemResource's "createRelative" to correctly apply a given relative path when starting from a directory
+
+Package org.springframework.jdbc
+* added "maxRows" bean property to JdbcTemplate, allowing to specify the maximum number of rows to be fetched
+* added "fetchSize" and "maxRows" bean properties to RdbmsOperation, passing the values to the internal JdbcTemplate
+
+Package org.springframework.mock
+* fixed MockHttpServletRequest to create a new HttpSession if the previous session has been invalidated
+* fixed MockHttpServletResponse to use "ISO-8859-1" as default character encoding
+
 Package org.springframework.orm
+* reworked SqlMapClientTemplate to execute calls directly on SqlMapClient in case of TransactionAwareDataSourceProxy
 * fixed AbstractLobType for Hibernate, cleaning up in afterCompletion if necessary (for HibernateTransactionManager)
+
+Package org.springframework.transaction
+* MethodMap/NameMatchTransactionAttributeSource automatically convert String values to TransactionAttribute instances
 
 Package org.springframework.util
 * fixed DefaultPropertiesPersister to correctly handle empty property values when reading with specific encoding
@@ -26,6 +44,8 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added "searchAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving stringified attribute values
+* DispatcherServlet does not override "doHead" anymore, leveraging HttpServlet's default "HEAD" handling via "doGet"
+* added "HEAD" to WebContentGenerator's default set of supported methods (in addition to "GET" and "POST")
 
 
 Changes in version 1.1.4 (31.1.2005)
@@ -418,7 +438,7 @@ Package org.springframework.beans
 * removed "getDependentBeanNames" hook and implementation from AbstractAutowireCapable/DefaultListableBeanFactory
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
-* modified SingletonBeanFactoryLocator to work in environments where classloader resources are not on file system
+* modified SingletonBeanFactoryLocator to work in environments where class loader resources are not on file system
 
 Package org.springframework.cache
 * added explicit support for EHCache via EhCacheManagerFactoryBean and EhCacheFactoryBean in the "ehcache" subpackage
