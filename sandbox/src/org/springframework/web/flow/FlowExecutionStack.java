@@ -30,13 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
+import org.springframework.web.flow.support.RandomGUID;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.SessionKeyUtils;
 
 /**
  * Default implementation of FlowExecution that uses a stack-based data
@@ -61,7 +60,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	public FlowExecutionStack(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
-		this.id = SessionKeyUtils.generateMD5SessionKey(ObjectUtils.getIdentityHexString(this), true);
+		this.id = new RandomGUID().toString();
 		this.rootFlow = rootFlow;
 	}
 

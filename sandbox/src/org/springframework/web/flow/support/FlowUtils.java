@@ -17,11 +17,9 @@ package org.springframework.web.flow.support;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.util.SessionKeyUtils;
 
 /**
  * Utility class providing convenience methods for the Flow system.
@@ -74,7 +72,7 @@ public class FlowUtils {
      * @param tokenName the key used to save the token in the model map
      */
     public static void saveToken(MutableAttributesAccessor model, String tokenName) {
-		String token=SessionKeyUtils.generateMD5SessionKey(ObjectUtils.getIdentityHexString(model), true);
+		String token=new RandomGUID().toString();
     	synchronized (model) {
     		model.setAttribute(tokenName, token);
     	}
