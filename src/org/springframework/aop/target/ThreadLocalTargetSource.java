@@ -25,11 +25,9 @@ import org.springframework.beans.factory.DisposableBean;
  * for example, if one caller makes repeated calls on the AOP proxy.
  *
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
- * We can't get at the ThreadLocals there, but we can use a layer of indirection
- * to clear the references they hold.
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.4 2003-12-14 16:43:37 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.5 2003-12-14 23:02:23 johnsonr Exp $
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
@@ -38,25 +36,13 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	 * thread. Unlike most ThreadLocals, which are static, this variable
 	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
-	private ThreadLocal holders = new ThreadLocal();
-	
-	/**
-	 * Level of indirection so that we can clear the references out of
-	 * the ThreadLocals without actually clearing the ThreadLocals.
-	 */
-	private static class Holder {
-		private Holder(Object target) {
-			this.target = target;
-		}
-		public Object target;
-	}
-
+	private ThreadLocal targetInThread = new ThreadLocal();
 
 	/**
-	 * Set of managed holders, enabling us to keep track
+	 * Set of managed targets, enabling us to keep track
 	 * of the targets we've created.
 	 */
-	private Set holderSet = new HashSet();
+	private Set targetSet = new HashSet();
 	
 	private int invocations;
 	
@@ -70,20 +56,20 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	 */
 	public Object getTarget() {
 		++invocations;
-		Holder targetHolder = (Holder) holders.get();
-		if (targetHolder == null || targetHolder.target == null) {
+		Object target = targetInThread.get();
+		if (target == null) {
 			logger.info("No target for apartment prototype '" + getTargetBeanName() + 
 					"' found in thread: creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			// Associate target with thread local
-			targetHolder = new Holder(newPrototypeInstance());
-			holders.set(targetHolder);
-			this.holderSet.add(targetHolder);
+			target = newPrototypeInstance();
+			targetInThread.set(target);
+			targetSet.add(target);
 		}
 		else {
 			++hits;
 		}
 		
-		return targetHolder.target;
+		return target;
 	}
 	
 	/**
@@ -94,27 +80,29 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	}
 
 	/**
-	 * We can't get at the ThreadLocals, but we can clear
-	 * their holders.
+	 * Dispose of targets if necessary;
+	 * clear ThreadLocal.
 	 * @see org.springframework.beans.factory.DisposableBean#destroy()
 	 */
 	public void destroy() {
 		logger.info("Destroying ThreadLocal bindings");
-		for (Iterator itr = this.holderSet.iterator(); itr.hasNext(); ) {
-			Holder holder = (Holder) itr.next();
-			if (holder.target instanceof DisposableBean) {
+		for (Iterator itr = this.targetSet.iterator(); itr.hasNext(); ) {
+			Object target = itr.next();
+			if (target instanceof DisposableBean) {
 				try {
-					((DisposableBean) holder.target).destroy();
+					((DisposableBean) target).destroy();
 				}
 				catch (Exception ex) {
 					// Do nothing
-					logger.warn("Thread-bound target of class '" + holder.target.getClass() + 
+					logger.warn("Thread-bound target of class '" + target.getClass() + 
 							"' threw exception from destroy() method", ex);
 				}
 			}
-			holder.target = null;
 		}
-		this.holderSet.clear();
+		this.targetSet.clear();
+		
+		// Clear ThreadLocal
+		this.targetInThread = null;
 	}
 
 	public int getInvocations() {
@@ -126,7 +114,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	}
 
 	public int getObjects() {
-		return holderSet.size();
+		return targetSet.size();
 	}
 
 	/**
