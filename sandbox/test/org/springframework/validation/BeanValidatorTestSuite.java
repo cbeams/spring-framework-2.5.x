@@ -53,8 +53,7 @@ public class BeanValidatorTestSuite extends TestCase {
         assertEquals("lastName", validator.getPropertyName());
         MessageSourceResolvable[] hints = validator.getTypingHints(null);
         System.out.println(hints.length);
-        System.out.println(
-            new SpringValueStyler().styleValue(hints));
+        System.out.println(new SpringValueStyler().styleValue(hints));
 
         assertNull(
             support.getPropertyDescriptor(beanInfo, "firstName").getValue(
