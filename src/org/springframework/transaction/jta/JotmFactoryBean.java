@@ -50,6 +50,8 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource" destroy-method="shutdown"&gt;
  *   &lt;property name="dataSource"&gt;&lt;ref local="innerDataSource"/&gt;&lt;/property&gt;
+ *   &lt;property name="user"&gt;...&lt;/property&gt;
+ *   &lt;property name="password"&gt;...&lt;/property&gt;
  *   &lt;property name="maxSize"&gt;...&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
