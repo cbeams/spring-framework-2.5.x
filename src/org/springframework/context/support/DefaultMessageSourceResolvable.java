@@ -11,9 +11,9 @@ import org.springframework.util.StringUtils;
  * messages from a MessageSource.
  * @author Tony Falabella
  * @author Juergen Hoeller
- * @version $Id: MessageSourceResolvableImpl.java,v 1.2 2004-02-04 18:44:07 jhoeller Exp $
+ * @version $Id: DefaultMessageSourceResolvable.java,v 1.1 2004-02-13 17:42:57 jhoeller Exp $
  */
-public class MessageSourceResolvableImpl implements MessageSourceResolvable, Serializable {
+public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
   private final String[] codes;
 
@@ -21,29 +21,29 @@ public class MessageSourceResolvableImpl implements MessageSourceResolvable, Ser
 
 	private final String defaultMessage;
 
-  /**
-   * Create a new instance, using multiple codes and a
-   * default message.
-   * @see MessageSourceResolvable#getCodes
-   */
-	public MessageSourceResolvableImpl(String[] codes, Object[] arguments, String defaultMessage) {
-    this.codes = codes;
-    this.arguments = arguments;
-    this.defaultMessage = defaultMessage;
-  }
-
 	/**
 	 * Create a new instance, using multiple codes.
 	 * @see MessageSourceResolvable#getCodes
 	 */
-  public MessageSourceResolvableImpl(String[] codes, Object[] arguments) {
+  public DefaultMessageSourceResolvable(String[] codes, Object[] arguments) {
     this(codes, arguments, null);
   }
 
 	/**
+	 * Create a new instance, using multiple codes and a
+	 * default message.
+	 * @see MessageSourceResolvable#getCodes
+	 */
+	public DefaultMessageSourceResolvable(String[] codes, Object[] arguments, String defaultMessage) {
+	  this.codes = codes;
+	  this.arguments = arguments;
+	  this.defaultMessage = defaultMessage;
+	}
+
+	/**
 	 * Copy constructor: Create a new instance from another resolvable.
 	 */
-  public MessageSourceResolvableImpl(MessageSourceResolvable resolvable) {
+  public DefaultMessageSourceResolvable(MessageSourceResolvable resolvable) {
     this(resolvable.getCodes(), resolvable.getArguments(), resolvable.getDefaultMessage());
   }
 

@@ -173,7 +173,7 @@ public class StaticMessageSourceTestSuite
 	public void testMessageSourceResolvable() {
 		// first code valid
 		String[] codes1 = new String[] {"message.format.example3", "message.format.example2"};
-		MessageSourceResolvable resolvable1 = new MessageSourceResolvableImpl(codes1, null, "default");
+		MessageSourceResolvable resolvable1 = new DefaultMessageSourceResolvable(codes1, null, "default");
 		try {
 			System.out.println(sac.getMessage(resolvable1, Locale.US));
 			assertTrue("correct message retrieved", MSG_TXT3_US.equals(sac.getMessage(resolvable1, Locale.US)));
@@ -184,7 +184,7 @@ public class StaticMessageSourceTestSuite
 
 		// only second code valid
 		String[] codes2 = new String[] {"message.format.example99", "message.format.example2"};
-		MessageSourceResolvable resolvable2 = new MessageSourceResolvableImpl(codes2, null, "default");
+		MessageSourceResolvable resolvable2 = new DefaultMessageSourceResolvable(codes2, null, "default");
 		try {
 			assertTrue("correct message retrieved", MSG_TXT2_US.equals(sac.getMessage(resolvable2, Locale.US)));
 		}
@@ -194,7 +194,7 @@ public class StaticMessageSourceTestSuite
 
 		// no code valid, but default given
 		String[] codes3 = new String[] {"message.format.example99", "message.format.example98"};
-		MessageSourceResolvable resolvable3 = new MessageSourceResolvableImpl(codes3, null, "default");
+		MessageSourceResolvable resolvable3 = new DefaultMessageSourceResolvable(codes3, null, "default");
 		try {
 			assertTrue("correct message retrieved", "default".equals(sac.getMessage(resolvable3, Locale.US)));
 		}
@@ -204,7 +204,7 @@ public class StaticMessageSourceTestSuite
 
 		// no code valid, no default
 		String[] codes4 = new String[] {"message.format.example99", "message.format.example98"};
-		MessageSourceResolvable resolvable4 = new MessageSourceResolvableImpl(codes4, null);
+		MessageSourceResolvable resolvable4 = new DefaultMessageSourceResolvable(codes4, null);
 		try {
 			sac.getMessage(resolvable4, Locale.US);
 			fail("Should have thrown NoSuchMessagException");

@@ -1,6 +1,6 @@
 package org.springframework.validation;
 
-import org.springframework.context.support.MessageSourceResolvableImpl;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 /**
  * Encapsulates an object error, i.e. a global reason for rejection.
@@ -11,9 +11,16 @@ import org.springframework.context.support.MessageSourceResolvableImpl;
  * @since 10.03.2003
  * @see FieldError
  */
-public class ObjectError extends MessageSourceResolvableImpl {
+public class ObjectError extends DefaultMessageSourceResolvable {
 
   private final String objectName;
+
+	/**
+	 * Create a new ObjectError instance, using a default code.
+	 */
+	public ObjectError(String objectName, String code, Object[] args, String defaultMessage) {
+	  this(objectName, new String[] {code}, args, defaultMessage);
+	}
 
   /**
    * Create a new ObjectError instance, using multiple codes.
@@ -24,13 +31,6 @@ public class ObjectError extends MessageSourceResolvableImpl {
     super(codes, args, defaultMessage);
     this.objectName = objectName;
   }
-
-	/**
-	 * Create a new ObjectError instance, using a default code.
-	 */
-	public ObjectError(String objectName, String code, Object[] args, String defaultMessage) {
-	  this(objectName, new String[] {code}, args, defaultMessage);
-	}
 
   public String getObjectName() {
     return objectName;

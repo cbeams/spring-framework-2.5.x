@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.support.MessageSourceResolvableImpl;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $RevisionId$
  */
 public class DispatcherServletTestSuite extends TestCase {
 
@@ -75,7 +74,7 @@ public class DispatcherServletTestSuite extends TestCase {
 
 		simpleDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "form".equals(response.forwarded));
-		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
+		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"}, null);
 		RequestContext rc = new RequestContext(request);
 
 		assertTrue("hasn't RequestContext attribute", request.getAttribute("rc") == null);
@@ -125,7 +124,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		complexDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "myform.jsp".equals(response.forwarded));
 		assertTrue("has RequestContext attribute", request.getAttribute("rc") != null);
-		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
+		DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"}, null);
 
 		RequestContext rc = (RequestContext) request.getAttribute("rc");
 		assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());
