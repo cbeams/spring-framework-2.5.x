@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -31,9 +32,9 @@ import javax.sql.DataSource;
  *
  * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
  * transactions, for example managed by DataSourceTransactionManager.
- * getConnection calls and close calls on returned Connections will behave properly
- * within a transaction, i.e. always work on the transactional Connection.
- * If not within a transaction, normal DataSource behavior applies.
+ * <code>getConnection</code> calls and <code>close<code> calls on returned Connections
+ * will behave properly within a transaction, i.e. always work on the transactional
+ * Connection. If not within a transaction, normal DataSource behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JDBC API and still
  * participate in Spring-managed transactions, similar to JDBC code in a J2EE/JTA
@@ -41,15 +42,25 @@ import javax.sql.DataSource;
  * JDBC operation objects to get transaction participation even without a proxy for
  * the target DataSource, avoiding the need to define such a proxy in the first place.
  *
+ * <p>As a further effect, using a transaction-aware DataSource will apply
+ * remaining transaction timeouts to all created JDBC Statements.
+ * This means that all operations performed by the SqlMapClient will
+ * automatically participate in Spring-managed transaction timeouts.
+ *
  * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections to
  * handle close calls on them properly. Therefore, the returned Connections cannot
- * be cast to a native JDBC Connection type like OracleConnection, respectively to
- * a connection pool implementation type.
+ * be cast to a native JDBC Connection type like OracleConnection, or to a
+ * connection pool implementation type. Use a corresponding NativeJdbcExtractor
+ * to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see javax.sql.DataSource#getConnection
+ * @see java.sql.Connection#close
  * @see DataSourceUtils#doGetConnection
  * @see DataSourceUtils#doCloseConnectionIfNecessary
+ * @see DataSourceUtils#applyTransactionTimeout
+ * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
@@ -109,23 +120,38 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 		private final DataSource dataSource;
 
-		private TransactionAwareInvocationHandler(Connection target, DataSource dataSource) {
+		public TransactionAwareInvocationHandler(Connection target, DataSource dataSource) {
 			this.target = target;
 			this.dataSource = dataSource;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Invocation on ConnectionProxy interface coming in...
+
+			// Handle getTargetConnection method: return underlying connection.
 			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
 				return this.target;
 			}
+
+			// Handle close method: only close if not within a transaction.
 			if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
 				if (this.dataSource != null) {
 					DataSourceUtils.doCloseConnectionIfNecessary(this.target, this.dataSource);
 				}
 				return null;
 			}
+
+			// Invoke method on target connection.
 			try {
-				return method.invoke(this.target, args);
+				Object retVal = method.invoke(this.target, args);
+
+				// If return value is a Statement, apply transaction timeout.
+				// Applies to createStatement, prepareStatement, prepareCall.
+				if (retVal instanceof Statement) {
+					DataSourceUtils.applyTransactionTimeout((Statement) retVal, this.dataSource);
+				}
+
+				return retVal;
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
