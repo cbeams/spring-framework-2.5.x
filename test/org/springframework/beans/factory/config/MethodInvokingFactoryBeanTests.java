@@ -9,9 +9,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Tests MethodInvokingFactoryBean
- * 
- * @author colin sampaleanu
+ * @author Colin Sampaleanu
  * @since 2003-11-21
  * @version $Id: MethodInvokingFactoryBeanTests.java,v 1.1 2003/11/22 00:45:34
  *          colins Exp $
