@@ -46,10 +46,13 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 	}
 
+	/**
+	 * Process the given key as 'beanName.property' entry.
+	 */
 	protected void processKey(ListableBeanFactoryImpl factory, String key, String value) throws BeansException {
 		int dotIndex = key.indexOf('.');
 		if (dotIndex == -1) {
-			throw new FatalBeanException("Invalid key (expected 'beanName.property')");
+			throw new FatalBeanException("Invalid key [" + key + "]: expected 'beanName.property'");
 		}
 		String beanName = key.substring(0, dotIndex);
 		String beanProperty = key.substring(dotIndex+1);

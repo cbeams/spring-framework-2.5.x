@@ -70,24 +70,25 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		Properties prop = new Properties();
 
 		if (this.location != null) {
-			logger.info("Loading properties '" + this.location + "'");
+			logger.info("Loading properties file [" + this.location + "]");
 			try {
 				prop.load(getApplicationContext().getResourceAsStream(this.location));
 			}
 			catch (IOException ex) {
-				logger.warn("Could not load properties '" + this.location + "': " + ex.getMessage());
+				logger.warn("Could not load properties [" + this.location + "]: " + ex.getMessage());
 			}
 		}
 
 		if (this.properties != null) {
 			if (logger.isDebugEnabled())
-				logger.debug("Applying directly specified properties: [" + this.properties + "]");
+				logger.debug("Applying directly specified properties [" + this.properties + "]");
 			prop.putAll(this.properties);
 		}
 
 		if (this.location != null || this.properties != null) {
 			processProperties(beanFactory, prop);
-		} else {
+		}
+		else {
 			logger.warn("No property resource location specified");
 		}
 	}
