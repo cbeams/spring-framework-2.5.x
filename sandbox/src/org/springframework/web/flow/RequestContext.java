@@ -18,19 +18,23 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
- * Interface used by an ongoing flow execution request to access contextual
- * information. The term <i>request</i> is used to symbolize a call into the
- * flow system via a flow execution. The request context also acts as a "request
- * scope" data model.
+ * Central interface that allows clients to access contextual information about
+ * an ongoing flow execution within the context of a client request. The term
+ * <i>request</i> is used to symbolize a call into the flow system to
+ * manipulate a active FlowExecution.
  * <p>
- * A flow execution request, and its associated request context begin their
- * lifecycle when one of the entry points of a flow execution is invoked ({@link org.springframework.web.flow.FlowExecution#start(Event)}
- * or {@link org.springframework.web.flow.FlowExecution#signalEvent(Event)}).
- * This context interface is then used throughout request processing, e.g. when
- * invoking actions. The flow execution request and request context end their
- * lifecycle when the call into the flow execution returns. This also implies
- * that the request context is an internal artefact of the flow system: it will
- * not be exposed to external client code.
+ * A new request context is created when one of the entry points on the
+ * FlowExecution facade interface is invoked, either ({@link org.springframework.web.flow.FlowExecution#start(Event)}
+ * to activate a new executing flow, or
+ * {@link org.springframework.web.flow.FlowExecution#signalEvent(Event)}) to
+ * manipulate the state of an existing executing flow.
+ * <p>
+ * This context interface is then passed around throughout request processing,
+ * where it may be referenced, typically by user-implemented action code and
+ * state transition criteria. The request context is disposed when a entry-point
+ * call into a flow execution returns. This fact means the request context is an
+ * internal artifact used within the flow system--the context object will not be
+ * exposed to external client code.
  * <p>
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar request naming convention.
