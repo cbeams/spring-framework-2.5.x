@@ -27,7 +27,7 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.6 2004-02-21 15:24:53 davison Exp $
+ * @version $Id: AllTests.java,v 1.7 2004-05-27 04:04:41 davison Exp $
  */
 public class AllTests extends AbstractTestCase {
 
@@ -55,6 +55,21 @@ public class AllTests extends AbstractTestCase {
 			resp = wc.getResponse( testServer + "/jpetstore/" );
             String title = resp.getTitle();
             assertEquals(title, "JPetStore Demo");
+                        
+        } catch (Exception e) {
+			fail("Exception: " + e);
+        }
+    }
+    
+    /**
+     * help page - chk freemarker config
+     */
+    public void testHelpPage() {
+		try {
+			wc = new WebConversation();
+			resp = wc.getResponse( testServer + "/jpetstore/shop/help.do?param=freemarker" );
+            String html = resp.getText();
+            assertTrue("Expected parameter to be echoed in freemarker view", html.indexOf("Parameter: freemarker") > -1);
                         
         } catch (Exception e) {
 			fail("Exception: " + e);
