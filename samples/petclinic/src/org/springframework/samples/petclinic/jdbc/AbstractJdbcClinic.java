@@ -1,8 +1,3 @@
-/*
- * AbstractJdbcClinic.java
- *
- */
-
 package org.springframework.samples.petclinic.jdbc;
 
 import java.sql.ResultSet;
@@ -19,14 +14,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.object.MappingSqlQuery;
 import org.springframework.jdbc.object.SqlUpdate;
+import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Entity;
-import org.springframework.samples.petclinic.NoSuchEntityException;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
@@ -179,7 +175,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 	// START of Clinic implementation section *******************************
 
-	public List getVets() {
+	public List getVets() throws DataAccessException {
 		// establish the Map of all vets
 		List vets = vetsQuery.execute();
 
@@ -202,31 +198,31 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		return vets;
 	}
 
-	public List getPetTypes() {
+	public List getPetTypes() throws DataAccessException {
 		return petTypesQuery.execute();
 	}
 
 	/** Method loads owners plus pets and visits if not already loaded */
-	public List findOwners(String lastName) {
+	public List findOwners(String lastName) throws DataAccessException {
 		List owners = ownersByNameQuery.execute(lastName + "%");
 		loadOwnersPetsAndVisits(owners);
 		return owners;
 	}
 
 	/** Method loads an owner plus pets and visits if not already loaded */
-	public Owner loadOwner(long id) throws NoSuchEntityException {
+	public Owner loadOwner(long id)  throws DataAccessException {
 		Owner owner = (Owner) ownerQuery.findObject(id);
 		if (owner == null) {
-			throw new NoSuchEntityException(Owner.class, id);
+			throw new ObjectRetrievalFailureException(Owner.class, new Long(id));
 		}
 		loadPetsAndVisits(owner);
 		return owner;
 	}
 
-	public Pet loadPet(long id) throws NoSuchEntityException {
+	public Pet loadPet(long id) throws DataAccessException {
 		JdbcPet pet = (JdbcPet) petQuery.findObject(id);
 		if (pet == null) {
-			throw new NoSuchEntityException(Pet.class, id);
+			throw new ObjectRetrievalFailureException(Pet.class, new Long(id));
 		}
 		Owner owner = loadOwner(pet.getOwnerId());
 		owner.addPet(pet);
@@ -234,7 +230,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		return pet;
 	}
 
-	public void storeOwner(Owner owner) {
+	public void storeOwner(Owner owner) throws DataAccessException {
 		if (owner.isNew()) {
 			ownerInsert.insert(owner);
 		}
@@ -243,7 +239,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-	public void storePet(Pet pet) {
+	public void storePet(Pet pet) throws DataAccessException {
 		if (pet.isNew()) {
 			petInsert.insert(pet);
 		}
@@ -252,7 +248,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-	public void storeVisit(Visit visit) {
+	public void storeVisit(Visit visit) throws DataAccessException {
 		if (visit.isNew()) {
 			visitInsert.insert(visit);
 		}

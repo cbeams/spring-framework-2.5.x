@@ -2,61 +2,73 @@ package org.springframework.samples.petclinic;
 
 import java.util.List;
 
+import org.springframework.dao.DataAccessException;
+
 /**
- *  The high-level Petclinic business interface.
+ * The high-level Petclinic business interface.
+ * Basically a data access object, as Petclinic
+ * doesn't have dedicated business logic.
  *
- *  @author  Ken Krebs
+ * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public interface Clinic {
 
 	/**
-	 * Method to retrieve all <code>Vet</code>s from the datastore.
+	 * Retrieve all <code>Vet</code>s from the datastore.
 	 * @return a <code>List</code> of <code>Vet</code>s.
 	 */
-	public List getVets();
+	public List getVets() throws DataAccessException;
 
 	/**
-	 * Method to retrieve all <code>PetType</code>s from the datastore.
+	 * Retrieve all <code>PetType</code>s from the datastore.
 	 * @return a <code>List</code> of <code>PetType</code>s.
 	 */
-	public List getPetTypes();
+	public List getPetTypes() throws DataAccessException;
 
 	/**
-	 * Method to retrieve <code>Owner</code>s from the datastore by last name.
+	 * Retrieve <code>Owner</code>s from the datastore by last name,
+	 * returning all owners whose last name <i>starts</i> with the given name.
 	 * @param lastName Value to search for.
 	 * @return a <code>List</code> of matching <code>Owner</code>s.
 	 */
-	public List findOwners(String lastName);
+	public List findOwners(String lastName) throws DataAccessException;
 
 	/**
-	 * Method to retrieve an <code>Owner</code> from the datastore by id.
+	 * Retrieve an <code>Owner</code> from the datastore by id.
 	 * @param id Value to search for.
 	 * @return the <code>Owner</code> if found.
 	 */
-	public Owner loadOwner(long id) throws NoSuchEntityException;
+	public Owner loadOwner(long id) throws DataAccessException;
 
 	/**
-	 * Method to retrieve a <code>Pet</code> from the datastore by id.
+	 * Retrieve a <code>Pet</code> from the datastore by id.
 	 * @param id Value to search for.
 	 * @return the <code>Pet</code> if found.
 	 */
-	public Pet loadPet(long id) throws NoSuchEntityException;
+	public Pet loadPet(long id) throws DataAccessException;
 
 	/**
-	 * Method to add a new <code>Owner</code> to the datastore.
+	 * Save an <code>Owner</code> to the datastore,
+	 * either inserting or updating it.
 	 * @param owner to add.
+	 * @see Entity#isNew
 	 */
-	public void storeOwner(Owner owner);
+	public void storeOwner(Owner owner) throws DataAccessException;
 
 	/**
-	 * Method to add a new <code>Pet</code> to the datastore.
+	 * Save a <code>Pet</code> to the datastore,
+	 * either inserting or updating it.
 	 * @param pet to add.
+	 * @see Entity#isNew
 	 */
-	public void storePet(Pet pet);
+	public void storePet(Pet pet) throws DataAccessException;
 
 	/**
-	 * Method to add a new <code>Visit</code> to the datastore.
+	 * Save a <code>Visit</code> to the datastore,
+	 * either inserting or updating it.
 	 * @param visit to add.
+	 * @see Entity#isNew
 	 */
 	public void storeVisit(Visit visit);
 
