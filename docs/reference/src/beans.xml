@@ -360,8 +360,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
     </sect2>
 
     <sect2 id="beans-beanname">
-      <title>The bean identifiers (<literal>id</literal> and
-      <literal>name</literal>)</title>
+      <title>The bean identifiers (<literal>id</literal> and <literal>name</literal>)</title>
 
       <para>Every bean has one or more ids (also called identifiers, or names;
       these terms refer to the same thing). These ids must be unique within
@@ -432,8 +431,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
   </sect1>
 
   <sect1 id="beans-dependencies">
-    <title>Properties, collaborators, autowiring and dependency
-    checking</title>
+    <title>Properties, collaborators, autowiring and dependency checking</title>
 
     <sect2 id="beans-factory-collaborators">
       <title>Setting bean properties and collaborators</title>
@@ -2180,8 +2178,7 @@ public class BlackListNotifier implement ApplicationListener {
     added for customizing behaviour of beans and the container.</para>
 
     <sect2 id="beans-context-applicationcontextaware">
-      <title><literal>ApplicationContextAware</literal> marker
-      interface</title>
+      <title><literal>ApplicationContextAware</literal> marker interface</title>
 
       <para>All marker interfaces available with BeanFactories still work. The
       ApplicationContext does add one extra marker interface which beans may
@@ -2307,8 +2304,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1>
-    <title>Setting a bean property as the result of a method
-    invocation</title>
+    <title>Setting a bean property as the result of a method invocation</title>
 
     <para>It is sometimes necessary to set a property on a bean, as the result
     of a method call on another bean in the container, or a static method call
@@ -2465,8 +2461,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     are loaded only as needed, and loaded only once.</para>
 
     <sect2>
-      <title>Using SingletonBeanFactoryLocator and
-      ContextSingletonBeanFactoryLocator</title>
+      <title>Using SingletonBeanFactoryLocator and ContextSingletonBeanFactoryLocator</title>
 
       <para>You can see a detailed example of using <literal><ulink
       url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>

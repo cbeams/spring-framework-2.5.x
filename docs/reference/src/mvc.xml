@@ -860,7 +860,62 @@ public class SampleDelegate {
     also on a specific state of the session associated with the
     request.</para>
 
-    <para>Let's examine the handler mappings that Spring provides.</para>
+	<para>This section describes two of Spring's most often used handler mapping.
+	They both extend the <literal>AbstractHandlerMapping</literal> and share the following
+	properties
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para><literal>interceptors</literal>: the list of interceptors to use. 
+				<literal>HandlerInterceptor</literal>s are discussed further ahead</para>
+			</listitem>
+			<listitem>
+				<para><literal>defaultHandler</literal>: the default handler to use,
+					when this handler mapping does not result in a matching handler</para>
+			</listitem>
+			<listitem>
+				<para><literal>order</literal>: based on the value of the order property (see
+					the <literal>org.springframework.core.Ordered</literal> interface),
+					Spring will sort all handler mapping available in the context and 
+					apply them in them one after the other.
+				</para>			
+			</listitem>
+			<listitem>
+				<para><literal>alwaysUseFullPath</literal>: based on this setting, 
+					Spring will either use the full path within the current servlet 
+					context (if set to <literal>true</literal>) or the path within the current servlet
+					mapping (<literal>false</literal>, the default value). If for example a servlet is mapped using
+					<literal>/testing/*</literal> and you've set the <literal>alwaysUseFullPath</literal> property
+					to true, <literal>/testing/viewPage.html</literal> will match, whereas <literal>/viewPage.html</literal>
+					will only match if you leave the default value (false) in place 
+					(<emphasis>Note: this property is only available for the
+						<literal>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</literal> and its subclasses</emphasis>)</para>
+			</listitem>
+			<listitem>
+				<para><literal>urlPathHelper</literal>: using this property, you can
+				tweak the UrlPathHelper used when inspecting URLs. Normally, you shouldn't have to change the default value.
+				(<emphasis>Note: this property is only available for the
+				<literal>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</literal> and its subclasses</emphasis>)
+				</para>
+			</listitem>
+			<listitem>
+				<para><literal>urlDecode</literal>: the default value for this property is <literal>false</literal>. The
+					HttpServletRequest returns request URLs and URIs that are <emphasis>not</emphasis> decoded. If you
+					do want them to be decoded before a HandlerMapping will use them to find an appropriate handler, you
+					have to set this to true (this requires JDK 1.4 however). Uses either the encoding specified by the
+					request or the default ISO-8859-1 encoding scheme.
+					(<emphasis>Note: this property is only available for the
+					<literal>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</literal> and its subclasses</emphasis>)
+				</para>			
+			</listitem>
+			<listitem>
+				<para><literal>lazyInitHandlers</literal>: allows for lazy initialization of <emphasis>singleton</emphasis> handlers
+					(prototype handlers are always lazily initialized). Default value is <literal>false</literal>
+					(<emphasis>Note: this property is only available for the
+					<literal>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</literal> and its subclasses</emphasis>)
+				</para>
+			</listitem>
+		</itemizedlist>
+	</para>
 
     <sect2 id="mvc-handlermapping-beanname">
       <title><literal>BeanNameUrlHandlerMapping</literal></title>

@@ -201,8 +201,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
     </sect2>
 
     <sect2 id="beans-beans-conversion">
-      <title>Built-in <literal>PropertyEditors</literal>, converting
-      types</title>
+      <title>Built-in <literal>PropertyEditors</literal>, converting types</title>
 
       <para>Spring heavily uses the concept of
       <literal>PropertyEditors</literal>. Sometimes it might be handy to be
