@@ -2496,7 +2496,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     specified by setting the <literal>args</literal> property.</para>
   </sect1>
 
-  <sect1 id="context-create">
+  <sect1 id="context-import">
     <title>Importing Bean Definitions from One File Into Another</title>
 
     <para>It's often useful to split up container defintions into multiple XML
