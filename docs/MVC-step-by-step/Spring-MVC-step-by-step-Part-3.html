@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030828;22292300">
+	<META NAME="CHANGED" CONTENT="20030923;22182900">
 	<STYLE>
 	<!--
 		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
@@ -456,11 +456,11 @@ public class PriceIncreaseValidator implements Validator {
 
     public void validate(Object obj, Errors errors) {
         PriceIncrease pi = (PriceIncrease) obj;
-        logger.info(&quot;Validating with &quot; + pi + &quot;: &quot; + pi.getPercentage());
         if (pi == null) {
             errors.rejectValue(&quot;percentage&quot;, &quot;error.not-specified&quot;, null, &quot;Value required.&quot;);
         }
         else {
+            logger.info(&quot;Validating with &quot; + pi + &quot;: &quot; + pi.getPercentage());
             if (pi.getPercentage() &gt; maxPercentage) {
                 errors.rejectValue(&quot;percentage&quot;, &quot;error.too-high&quot;, 
                     new Object[] {new Integer(maxPercentage)}, &quot;Value too high.&quot;);
