@@ -1,10 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.55 2003-12-04 08:46:11 jhoeller Exp $
+$Id: changelog.txt,v 1.56 2003-12-05 13:06:51 johnsonr Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
 --------------------------------------
+* (AOP) Introduced before advice, in addition to interception around advice.
+* InvokerInterceptor and ProxyInterceptor interface replaced by TargetSource interface.
 * dissolved event propagation support in BeanWrapper and DataBinder
 * added "autowireExistingBean" method to BeanFactory interface
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
