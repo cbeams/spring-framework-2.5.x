@@ -17,12 +17,13 @@
 package org.springframework.beans.factory.script;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.dynamic.DynamicObject;
 import org.springframework.beans.factory.dynamic.ExpirableObject;
 
 
 /**
- * 
+ * Interface to be implemented by threadsafe objects that can create
+ * multiple object instances based on a single script location,
+ * such as a beanshell or Groovy file location.
  * @author Rod Johnson
  */
 public interface Script extends ExpirableObject {
@@ -33,15 +34,25 @@ public interface Script extends ExpirableObject {
 	 */
 	String getResourceString(); 
 	
+	/**
+	 * Create an instance of the object represented by the script.
+	 * Should use the latest version of the script resource,
+	 * which may have changed.
+	 * @return
+	 * @throws BeansException
+	 */
 	Object createObject() throws BeansException;
 	
 	/** 
-	 * Empty
-	 * never return null
+	 * Return the interfaces implemented by the script.
+	 * May return the empty interface; never returns null.
 	 */
 	Class[] getInterfaces();
 	
+	/**
+	 * Add an interface that the script will implement.
+	 * @param intf
+	 */
 	void addInterface(Class intf);
-	
 
 }
