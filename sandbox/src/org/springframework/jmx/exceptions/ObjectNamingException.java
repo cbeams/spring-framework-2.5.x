@@ -12,28 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.exceptions;
+
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * @author Rob Harrop
  */
-public class ObjectNamingException extends RuntimeException {
+public class ObjectNamingException extends NestedRuntimeException {
 
-    public ObjectNamingException() {
-        super();
-    }
-    
-    public ObjectNamingException(String msg) {
-        super(msg);
-    }
-    
-    public ObjectNamingException(Throwable rootCause) {
-        super(rootCause);
-    }
-    
-    public ObjectNamingException(String msg, Throwable rootCause) {
-        super(msg, rootCause);
-    }
-    
+	public ObjectNamingException(String msg) {
+		super(msg);
+	}
+
+	public ObjectNamingException(String msg, Throwable rootCause) {
+		super(msg, rootCause);
+	}
+
 }

@@ -12,30 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.exceptions;
+
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * @author Rob Harrop
  */
-public class ProxyCreationException extends RuntimeException {
+public class ProxyCreationException extends NestedRuntimeException {
 
-    public ProxyCreationException(String msg) {
-        super(msg);
-    }
+	public ProxyCreationException(String msg) {
+		super(msg);
+	}
 
-    public ProxyCreationException() {
-        super();
+	public ProxyCreationException(String msg, Throwable throwable) {
+		super(msg, throwable);
 
-    }
-
-    public ProxyCreationException(String msg, Throwable throwable) {
-        super(msg, throwable);
-
-    }
-
-    public ProxyCreationException(Throwable throwable) {
-        super(throwable);
-
-    }
+	}
 }

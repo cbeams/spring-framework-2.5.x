@@ -3,30 +3,19 @@
  */
 package org.springframework.jmx;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  */
-public class InvalidInvocationException extends RuntimeException {
+public class InvalidInvocationException extends NestedRuntimeException {
 
-    /**
-     * 
-     */
-    public InvalidInvocationException() {
-        super();
-    }
-
+   
     /**
      * @param arg0
      */
     public InvalidInvocationException(String msg) {
         super(msg);
-    }
-
-    /**
-     * @param arg0
-     */
-    public InvalidInvocationException(Throwable rootCause) {
-        super(rootCause);
     }
 
     /**

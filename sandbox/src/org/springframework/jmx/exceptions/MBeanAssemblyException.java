@@ -15,30 +15,19 @@
  */ 
 package org.springframework.jmx.exceptions;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author Rob Harrop
  */
-public class MBeanAssemblyException extends RuntimeException {
+public class MBeanAssemblyException extends NestedRuntimeException {
 
-    /**
-     * 
-     */
-    public MBeanAssemblyException() {
-        super();
-    }
-
+  
     /**
      * @param arg0
      */
     public MBeanAssemblyException(String msg) {
         super(msg);
-    }
-
-    /**
-     * @param arg0
-     */
-    public MBeanAssemblyException(Throwable rootCause) {
-        super(rootCause);
     }
 
     /**

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.metadata.support;
 
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
@@ -22,33 +22,19 @@ import org.springframework.jmx.exceptions.MBeanAssemblyException;
  */
 public class InvalidMetadataException extends MBeanAssemblyException {
 
-    /**
-     * 
-     */
-    public InvalidMetadataException() {
-        super();
-    }
+	/**
+	 * @param msg
+	 */
+	public InvalidMetadataException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * @param msg
-     */
-    public InvalidMetadataException(String msg) {
-        super(msg);
-    }
-
-    /**
-     * @param rootCause
-     */
-    public InvalidMetadataException(Throwable rootCause) {
-        super(rootCause);
-    }
-
-    /**
-     * @param msg
-     * @param rootCause
-     */
-    public InvalidMetadataException(String msg, Throwable rootCause) {
-        super(msg, rootCause);
-    }
+	/**
+	 * @param msg
+	 * @param rootCause
+	 */
+	public InvalidMetadataException(String msg, Throwable rootCause) {
+		super(msg, rootCause);
+	}
 
 }

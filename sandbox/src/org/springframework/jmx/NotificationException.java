@@ -3,31 +3,17 @@
  */
 package org.springframework.jmx;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  */
-public class NotificationException extends RuntimeException {
-
-    /**
-     * 
-     */
-    public NotificationException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+public class NotificationException extends NestedRuntimeException {
 
     /**
      * @param arg0
      */
     public NotificationException(String arg0) {
-        super(arg0);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param arg0
-     */
-    public NotificationException(Throwable arg0) {
         super(arg0);
         // TODO Auto-generated constructor stub
     }

@@ -3,42 +3,23 @@
  */
 package org.springframework.jmx.exceptions;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  */
-public class MethodNameTooShortException extends RuntimeException {
+public class MethodNameTooShortException extends NestedRuntimeException {
 
-    /**
-     * 
-     */
-    public MethodNameTooShortException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	public MethodNameTooShortException(String arg0) {
+		super(arg0);
+	}
 
-    /**
-     * @param arg0
-     */
-    public MethodNameTooShortException(String arg0) {
-        super(arg0);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param arg0
-     */
-    public MethodNameTooShortException(Throwable arg0) {
-        super(arg0);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param arg0
-     * @param arg1
-     */
-    public MethodNameTooShortException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param arg0
+	 * @param arg1
+	 */
+	public MethodNameTooShortException(String arg0, Throwable arg1) {
+		super(arg0, arg1);
+	}
 
 }

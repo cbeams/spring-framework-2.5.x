@@ -15,32 +15,18 @@
  */ 
 package org.springframework.jmx.exceptions;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author Rob Harrop
  */
-public class MBeanServerNotFoundException extends RuntimeException {
-
-    /**
-     * 
-     */
-    public MBeanServerNotFoundException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+public class MBeanServerNotFoundException extends NestedRuntimeException {
 
     /**
      * @param arg0
      */
     public MBeanServerNotFoundException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param arg0
-     */
-    public MBeanServerNotFoundException(Throwable rootCause) {
-        super(rootCause);
         // TODO Auto-generated constructor stub
     }
 
