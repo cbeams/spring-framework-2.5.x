@@ -52,7 +52,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.6 2003-10-10 13:59:46 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.7 2003-10-16 18:56:11 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -220,13 +220,13 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
 		Object beanInstance = this.singletonCache.get(name);
 		if (beanInstance == null) {
-			logger.info("Creating shared instance of singleton bean '" + name + "'");
+			logger.info("Creating shared instance of singleton bean [" + name + "]");
 			beanInstance = createBean(name, true);
 			this.singletonCache.put(name, beanInstance);
 		}
 		else {
 			if (logger.isDebugEnabled())
-				logger.debug("Returning cached instance of singleton bean '" + name + "'");
+				logger.debug("Returning cached instance of singleton bean [" + name + "]");
 		}
 
 		// Don't let calling code try to dereference the
@@ -243,14 +243,14 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			if (!isFactoryDereference(pname)) {
 				// Configure and return new bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
-				logger.debug("Bean with name '" + name + "' is a factory bean");
+				logger.debug("Bean with name [" + name + "] is a factory bean");
 				beanInstance = factory.getObject();
 
 				// Set pass-through properties
 				if (factory instanceof PropertyValuesProviderFactoryBean) {
 					PropertyValues pvs = ((PropertyValuesProviderFactoryBean) factory).getPropertyValues(name);
 					if (pvs != null) {
-						logger.debug("Applying pass-through properties to bean with name '" + name + "'");
+						logger.debug("Applying pass-through properties to bean with name [" + name + "]");
 						new BeanWrapperImpl(beanInstance).setPropertyValues(pvs);
 					}
 				}
@@ -259,7 +259,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			}
 			else {
 				// The user wants the factory itself
-				logger.debug("Calling code asked for BeanFactory instance for name '" + name + "'");
+				logger.debug("Calling code asked for BeanFactory instance for name [" + name + "]");
 			}
 		}	// if we're dealing with a factory bean
 
@@ -278,7 +278,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 */
 	private Object createBean(String name, boolean singleton) throws BeansException {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(name);
-		logger.debug("Creating instance of bean '" + name + "' with merged definition [" + mergedBeanDefinition + "]");
+		logger.debug("Creating instance of bean [" + name + "] with merged definition [" + mergedBeanDefinition + "]");
 		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		Object bean = instanceWrapper.getWrappedInstance();
 
@@ -435,7 +435,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * Resolve a reference to another bean in the factory.
 	 * @param name included for diagnostics
 	 */
-	private Object resolveReference(String name, RuntimeBeanReference ref) {
+	private Object resolveReference(String name, RuntimeBeanReference ref) throws BeansException {
 		try {
 			// Try to resolve bean reference
 			logger.debug("Resolving reference from bean [" + name + "] to bean [" + ref.getBeanName() + "]");
@@ -452,7 +452,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * For each element in the ManagedMap, resolve references if necessary.
 	 * Allow ManagedLists as map entries.
 	 */
-	private ManagedMap resolveManagedMap(String name, ManagedMap mm) {
+	private ManagedMap resolveManagedMap(String name, ManagedMap mm) throws BeansException {
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
@@ -472,7 +472,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private ManagedList resolveManagedList(String name, ManagedList l) {
+	private ManagedList resolveManagedList(String name, ManagedList l) throws BeansException {
 		for (int j = 0; j < l.size(); j++) {
 			if (l.get(j) instanceof RuntimeBeanReference) {
 				l.set(j, resolveReference(name, (RuntimeBeanReference) l.get(j)));
@@ -482,7 +482,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	}
 	
 	private Object managedListToArray(BeanWrapper bw, PropertyValue pv, Object val, Class componentType, List l)
-	    throws NegativeArraySizeException, BeansException, BeanDefinitionStoreException {
+	    throws NegativeArraySizeException, BeansException {
 		try {
 			Object[] arr = (Object[]) Array.newInstance(componentType, l.size());
 			for (int i = 0; i < l.size(); i++) {
@@ -510,23 +510,23 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	    throws BeansException {
 
 		if (bean instanceof InitializingBean) {
-			logger.debug("Calling afterPropertiesSet() on bean with name '" + name + "'");
+			logger.debug("Calling afterPropertiesSet() on bean with name [" + name + "]");
 			try {
 				((InitializingBean) bean).afterPropertiesSet();
 			}
 			catch (Exception ex) {
-				throw new FatalBeanException("afterPropertiesSet() on bean with name '" + name + "' threw an exception", ex);
+				throw new FatalBeanException("afterPropertiesSet() on bean with name [" + name + "] threw an exception", ex);
 			}
 		}
 		
 		if (rbd.getInitMethodName() != null) {
-			logger.debug("Calling custom init method '" + rbd.getInitMethodName() + "' on bean with name '" + name + "'");
+			logger.debug("Calling custom init method [" + rbd.getInitMethodName() + "] on bean with name [" + name + "]");
 			bw.invoke(rbd.getInitMethodName(), null);
 			// Can throw MethodInvocationException
 		}
 
 		if (bean instanceof BeanFactoryAware) {
-			logger.debug("Calling setBeanFactory() on BeanFactoryAware bean with name '" + name + "'");
+			logger.debug("Calling setBeanFactory() on BeanFactoryAware bean with name [" + name + "]");
 			try {
 				((BeanFactoryAware) bean).setBeanFactory(this);
 			}
@@ -534,7 +534,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 				throw ex;
 			}
 			catch (Exception ex) {
-				throw new FatalBeanException("setBeanFactory() on bean with name '" + name + "' threw an exception", ex);
+				throw new FatalBeanException("setBeanFactory() on bean with name [" + name + "] threw an exception", ex);
 			}
 		}
 	}
@@ -563,14 +563,14 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			if (this.parentBeanFactory != null) {
 				if (!(this.parentBeanFactory instanceof AbstractBeanFactory))
 					throw new BeanDefinitionStoreException("Parent bean factory must be of type AbstractBeanFactory to support inheritance from a parent bean definition: " +
-							"offending bean name is '" + name + "'", null);
+							"offending bean name is [" + name + "]", null);
 				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(name);
 			}
 			else {
 				throw ex;
 			}
 		}
-		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + name + "' is neither a RootBeanDefinition or ChildBeanDefinition");
+		throw new FatalBeanException("Shouldn't happen: BeanDefinition for [" + name + "] is neither a RootBeanDefinition or ChildBeanDefinition");
 	}
 	
 	/**
@@ -591,8 +591,13 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @param name name of the bean
 	 * @param alias alias that will behave the same as the bean names
 	 */
-	public final void registerAlias(String name, String alias) {
-		logger.debug("Creating alias '" + alias + "' for bean with name '" + name + "'");
+	public final void registerAlias(String name, String alias) throws BeansException {
+		logger.debug("Creating alias [" + alias + "] for bean with name [" + name + "]");
+		Object registeredName = this.aliasMap.get(alias);
+		if (registeredName != null) {
+			throw new FatalBeanException("Cannot register alias [" + alias + "] for bean name [" + name +
+			                             "]: it's already registered for bean name [" + registeredName + "]");
+		}
 		this.aliasMap.put(alias, name);
 	}
 
@@ -609,17 +614,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			RootBeanDefinition bd = getMergedBeanDefinition(name);
 
 			if (bean instanceof DisposableBean) {
-				logger.debug("Calling destroy() on bean with name '" + name + "'");
+				logger.debug("Calling destroy() on bean with name [" + name + "]");
 				try {
 					((DisposableBean) bean).destroy();
 				}
 				catch (Exception ex) {
-					logger.error("destroy() on bean with name '" + name + "' threw an exception", ex);
+					logger.error("destroy() on bean with name [" + name + "] threw an exception", ex);
 				}
 			}
 
 			if (bd.getDestroyMethodName() != null) {
-				logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() + "' on bean with name '" + name + "'");
+				logger.debug("Calling custom destroy method [" + bd.getDestroyMethodName() +
+				             "] on bean with name [" + name + "]");
 				BeanWrapper bw = new BeanWrapperImpl(bean);
 				try {
 					bw.invoke(bd.getDestroyMethodName(), null);
