@@ -66,6 +66,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
      * @see #setConnectionFactory
      */
     public JmsTemplate102() {
+		createDefaultJmsAdmin();
     }
     
     /**
@@ -75,6 +76,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
     public JmsTemplate102(ConnectionFactory cf)
     {
     	setConnectionFactory(cf);
+		createDefaultJmsAdmin();
     	afterPropertiesSet();
     }
 

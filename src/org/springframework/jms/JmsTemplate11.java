@@ -36,7 +36,7 @@ import javax.jms.Session;
  * {@link AbstractJmsTemplate#setPubSubDomain(boolean) setPubSubDomain}.
  * 
  * 
- * @version $Id: JmsTemplate11.java,v 1.6 2004-07-15 16:10:05 markpollack Exp $
+ * @version $Id: JmsTemplate11.java,v 1.7 2004-07-19 01:33:42 markpollack Exp $
  * @author Mark Pollack
  */
 public class JmsTemplate11 extends AbstractJmsTemplate {
@@ -49,6 +49,7 @@ public class JmsTemplate11 extends AbstractJmsTemplate {
      * @see #setConnectionFactory
      */
     public JmsTemplate11() {
+        createDefaultJmsAdmin();
     }
 
     /**
@@ -57,6 +58,7 @@ public class JmsTemplate11 extends AbstractJmsTemplate {
      */
     public JmsTemplate11(ConnectionFactory cf) {
         setConnectionFactory(cf);
+        createDefaultJmsAdmin();
         afterPropertiesSet();
     }
 

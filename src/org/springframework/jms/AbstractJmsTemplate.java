@@ -140,15 +140,12 @@ public abstract class AbstractJmsTemplate
         if (cf == null) {
             throw new IllegalArgumentException("ConnectionFactory is required");
         }
-        if (jmsAdmin == null) {
-            logger.info("Using DefaultJmsAdmin implementation");
-            //TODO This should be a singleton......since it has a cache of
-            //dynamic jms destinations.  
-            DefaultJmsAdmin admin = new DefaultJmsAdmin();
-            //TODO bad smell....
-            admin.setJmsTemplate(this);
-            setJmsAdmin(admin);
-        }
+    }
+
+    protected void createDefaultJmsAdmin() {
+        DefaultJmsAdmin admin = new DefaultJmsAdmin();
+        admin.setJmsTemplate(this);
+        setJmsAdmin(admin);
     }
 
     /**

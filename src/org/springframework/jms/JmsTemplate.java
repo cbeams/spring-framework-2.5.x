@@ -183,6 +183,8 @@ public interface JmsTemplate {
 	 */
 	void setJndiEnvironment(Properties jndiEnvironment);
 	
+	
+	
 	/**
 	 * Set the connection factory used for sending messages.
 	 * @param c the connection factory.
