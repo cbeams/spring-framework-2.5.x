@@ -16,12 +16,12 @@
 
 package org.springframework.web.multipart.support;
 
-import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
-public class ByteArrayMultipartFileEditor extends PropertyEditorSupport {
+public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -44,6 +44,17 @@ public class ByteArrayMultipartFileEditor extends PropertyEditorSupport {
 				throw new IllegalArgumentException("Cannot read contents of multipart file: " + ex.getMessage());
 			}
 		}
+		else if (value instanceof byte[]) {
+			super.setValue(value);
+		}
+		else {
+			super.setValue(value != null ? value.toString().getBytes() : null);
+		}
+	}
+
+	public String getAsText() {
+		byte[] value = (byte[]) getValue();
+		return (value != null ? new String(value) : "");
 	}
 
 }

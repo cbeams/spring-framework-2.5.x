@@ -51,18 +51,25 @@ public class StringMultipartFileEditor extends PropertyEditorSupport {
 		this.charsetName = charsetName;
 	}
 
+	public void setAsText(String text) {
+		setValue(text);
+	}
+
 	public void setValue(Object value) {
 		if (value instanceof MultipartFile) {
 			MultipartFile multipartFile = (MultipartFile) value;
 			try {
 				super.setValue(this.charsetName != null ?
-											 new String(multipartFile.getBytes(), this.charsetName) :
-											 new String(multipartFile.getBytes()));
+						new String(multipartFile.getBytes(), this.charsetName) :
+						new String(multipartFile.getBytes()));
 			}
 			catch (IOException ex) {
 				logger.error("Cannot read contents of multipart file", ex);
 				throw new IllegalArgumentException("Cannot read contents of multipart file: " + ex.getMessage());
 			}
+		}
+		else {
+			super.setValue(value);
 		}
 	}
 
