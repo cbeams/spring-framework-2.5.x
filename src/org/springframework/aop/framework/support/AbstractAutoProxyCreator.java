@@ -15,8 +15,7 @@ import org.springframework.aop.framework.InvokerInterceptor;
 import org.springframework.aop.framework.MethodPointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.BeanPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 
 /**
@@ -40,7 +39,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.10 2003-10-27 16:09:09 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.11 2003-11-04 23:26:20 jhoeller Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -116,7 +115,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * identified as one to proxy by the subclass.
 	 * @see #getInterceptorsAndPointcutsForBean
 	 */
-	public Object postProcessBean(Object bean, String name, RootBeanDefinition definition) throws BeansException {
+	public Object postProcessBean(Object bean, String name) throws BeansException {
 		
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
@@ -124,11 +123,11 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass()) 
 			) {
-			logger.debug("Did not attempt to autoproxy autoproxy infrastructure class '" + bean.getClass() + "'");
+			logger.debug("Did not attempt to autoproxy infrastructure class '" + bean.getClass() + "'");
 			return bean;
 		}
 		
-		Object[] specificInterceptors = getInterceptorsAndPointcutsForBean(bean, name, definition);
+		Object[] specificInterceptors = getInterceptorsAndPointcutsForBean(bean, name);
 		if (specificInterceptors != null) {
 			List allInterceptors = new ArrayList();
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -156,7 +155,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 					proxyFactory.addInterceptor((Interceptor) interceptor);
 				}
 			}
-			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name, definition));
+			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
 			if (this.proxyInterfacesOnly) {
 				// Must allow for introductions; can't just set interfaces to
 				// the target's interfaces only
@@ -182,11 +181,10 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * such as a pooling interceptor.
 	 * @param bean bean to intercept
 	 * @param beanName name of the bean
-	 * @param definition bean definition for the bean
 	 * @return an invoker interceptor wrapping this bean.
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
-	protected Interceptor createInvokerInterceptor(Object bean, String beanName, RootBeanDefinition definition) {
+	protected Interceptor createInvokerInterceptor(Object bean, String beanName) {
 		return new InvokerInterceptor(bean);
 	}
 
@@ -195,7 +193,6 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * and what additional interceptors and pointcuts to apply.
 	 * @param bean the new bean instance
 	 * @param name the name of the bean
-	 * @param definition the definition that the bean was created with
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
 	 * or null if no proxy at all, not even with the common interceptors.
@@ -205,8 +202,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndPointcutsForBean(Object bean, String name,
-	                                                               RootBeanDefinition definition)
+	protected abstract Object[] getInterceptorsAndPointcutsForBean(Object bean, String name)
 	    throws BeansException;
 
 }

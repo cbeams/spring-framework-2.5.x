@@ -55,7 +55,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.5 2003-11-04 21:37:56 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.6 2003-11-04 23:26:07 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
@@ -216,8 +216,8 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 	 * Add all global interceptors and pointcuts.
 	 */
 	private void addGlobalInterceptorsAndPointcuts(ListableBeanFactory beanFactory, String prefix) {
-		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(MethodPointcut.class, beanFactory);
-		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(Interceptor.class, beanFactory);
+		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, MethodPointcut.class);
+		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Interceptor.class);
 		List beans = new ArrayList(globalPointcutNames.length + globalInterceptorNames.length);
 		Map names = new HashMap();
 		for (int i = 0; i < globalPointcutNames.length; i++) {

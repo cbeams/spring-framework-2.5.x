@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.beans.factory.support.RootBeanDefinition;
-
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
  * A name can specify a prefix to match by ending with "*".
@@ -29,8 +27,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	/**
 	 * Identify as bean to proxy if the name is in the configured list of names.
 	 */
-	protected Object[] getInterceptorsAndPointcutsForBean(Object bean, String name,
-	                                                      RootBeanDefinition definition) {
+	protected Object[] getInterceptorsAndPointcutsForBean(Object bean, String name) {
 		if (this.beanNames != null) {
 			if (this.beanNames.contains(name)) {
 				return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
