@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+
+	<!-- Local HSQL DataSource that works in any environment -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
+		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
+		<property name="username"><value>sa</value></property>
+		<property name="password"><value></value></property>
+	</bean>
+
+	<!-- JNDI DataSource for J2EE environments -->
+	<!-- either for a combined database, or for the item reference database -->
+	<!--
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	  	<property name="jndiName"><value>jdbc/myds1</value></property>
+	</bean>
+	-->
+
+	<!-- additional JNDI DataSource for J2EE environments -->
+	<!-- for the order database in the distributed case, to be referenced from "orderDao" below -->
+	<!--
+	<bean id="orderDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	  	<property name="jndiName"><value>jdbc/myds2</value></property>
+	</bean>
+	-->
+
+	<!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource"><ref local="dataSource"/></property>
+	</bean>
+
+	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
+	<!-- optional for a combined database, necessary for distributed databases -->
+	<!--
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+	-->
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean">
+		<property name="configLocation"><value>sql-map-config.xml</value></property>
+	</bean>
+
+	<!-- ========================= DAO DEFINITIONS: IBATIS IMPLEMENTATIONS ========================= -->
+
+	<bean id="sequenceDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapSequenceDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+	</bean>
+
+	<bean id="accountDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+	</bean>
+
+	<bean id="categoryDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapCategoryDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+	</bean>
+
+	<bean id="productDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapProductDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+	</bean>
+
+	<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapItemDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+	</bean>
+
+	<!-- can either reference a combined database, or the order database in the distributed case -->
+	<bean id="orderDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapOrderDao">
+		<property name="dataSource"><ref local="dataSource"/></property>
+		<!--
+		<property name="dataSource"><ref local="orderDataSource"/></property>
+		-->
+		<property name="sqlMap"><ref local="sqlMap"/></property>
+		<property name="sequenceDao"><ref local="sequenceDao"/></property>
+	</bean>
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
+	<bean id="accountValidator" class="org.springframework.samples.jpetstore.domain.logic.AccountValidator"/>
+
+	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
+	<bean id="orderValidator" class="org.springframework.samples.jpetstore.domain.logic.OrderValidator"/>
+
+	<!-- JPetStore primary business object: default implementation -->
+	<bean id="petStoreTarget" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
+		<property name="accountDao"><ref local="accountDao"/></property>
+		<property name="categoryDao"><ref local="categoryDao"/></property>
+		<property name="productDao"><ref local="productDao"/></property>
+		<property name="itemDao"><ref local="itemDao"/></property>
+		<property name="orderDao"><ref local="orderDao"/></property>
+	</bean>
+
+	<!-- Transactional proxy for the JPetStore primary business object -->
+	<bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref local="petStoreTarget"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="insert*">PROPAGATION_REQUIRED</prop>
+				<prop key="update*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

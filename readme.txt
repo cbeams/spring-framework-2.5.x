@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 1.0 M3 (November 2003)
+THE SPRING FRAMEWORK, release 1.0 M4 (December 2003)
 ----------------------------------------------------
 http://www.springframework.org
 
@@ -68,6 +68,7 @@ Latest info is available at the public website: http://www.springframework.org
 Project info at the SourceForge site: http://sourceforge.net/projects/springframework
 
 This product includes software developed by the Apache Software Foundation (http://www.apache.org).
+This product includes software developed by Clinton Begin (http://www.ibatis.com).
 
 
 3. DISTRIBUTION JAR FILES
@@ -119,6 +120,7 @@ Documentation can be found in the "docs" directory:
 
 Documented sample applications and skeletons can be found in "samples":
 * "countries"
+* "jpetstore"
 * "petclinic"
 * "tiles-example"
 * "webapp-minimal"
@@ -127,6 +129,11 @@ Documented sample applications and skeletons can be found in "samples":
 Release 1.0 M2 introduced a reworked version of Petclinic, now featuring alternative DAO implementations and
 application configurations for JDBC and Hibernate, on HSQL and MySQL. The default Petclinic configuration is
 Hibernate on HSQL; to be able to build and run it, the Spring distribution comes with Hibernate jar files now.
+
+Release 1.0 M4 introduced the Spring JPetStore, an adapted version of Clinton Begin's JPetStore (as available
+at http://www.ibatis.com). It leverages Spring's new support for the iBATIS Database Layer to improve the
+original JPetStore in terms of internal structure and wiring. On top of a Spring-managed middle tier, it offers
+two alternative web tier implementations: one on Spring's web MVC plus JSTL, and one on Struts 1.1 plus JSTL.
 
 "Expert One-on-One J2EE Design and Development" discusses many of Spring's design ideas in detail.
 Note: The code examples in the book refer to the original framework version that came with the book.

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql-map
+    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sql-map name="Account">
+
+  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Account">
+    <property name="username" column="USERID" columnIndex="1"/>
+    <property name="email" column="EMAIL" columnIndex="2"/>
+    <property name="firstName" column="FIRSTNAME" columnIndex="3"/>
+    <property name="lastName" column="LASTNAME" columnIndex="4"/>
+    <property name="status" column="STATUS" columnIndex="5"/>
+    <property name="address1" column="ADDR1" columnIndex="6"/>
+    <property name="address2" column="ADDR2" columnIndex="7"/>
+    <property name="city" column="CITY" columnIndex="8"/>
+    <property name="state" column="STATE" columnIndex="9"/>
+    <property name="zip" column="ZIP" columnIndex="10"/>
+    <property name="country" column="COUNTRY" columnIndex="11"/>
+    <property name="phone" column="PHONE" columnIndex="12"/>
+    <property name="languagePreference" column="LANGPREF" columnIndex="13"/>
+    <property name="favouriteCategoryId" column="FAVCATEGORY" columnIndex="14"/>
+    <property name="listOption" column="MYLISTOPT" columnIndex="15"/>
+    <property name="bannerOption" column="BANNEROPT" columnIndex="16"/>
+    <property name="bannerName" column="BANNERNAME" columnIndex="17"/>
+  </result-map>
+
+  <mapped-statement name="getAccountByUsername" result-map="result">
+    select
+          SIGNON.USERNAME as USERID,
+          ACCOUNT.EMAIL,
+          ACCOUNT.FIRSTNAME,
+          ACCOUNT.LASTNAME,
+          ACCOUNT.STATUS,
+          ACCOUNT.ADDR1,
+          ACCOUNT.ADDR2,
+          ACCOUNT.CITY,
+          ACCOUNT.STATE,
+          ACCOUNT.ZIP,
+          ACCOUNT.COUNTRY,
+          ACCOUNT.PHONE,
+          PROFILE.LANGPREF,
+          PROFILE.FAVCATEGORY,
+          PROFILE.MYLISTOPT,
+          PROFILE.BANNEROPT,
+          BANNERDATA.BANNERNAME
+    from ACCOUNT, PROFILE, SIGNON, BANNERDATA
+    where ACCOUNT.USERID = #value#
+      and SIGNON.USERNAME = ACCOUNT.USERID
+      and PROFILE.USERID = ACCOUNT.USERID
+      and PROFILE.FAVCATEGORY = BANNERDATA.FAVCATEGORY
+  </mapped-statement>
+
+  <mapped-statement name="getAccountByUsernameAndPassword" result-map="result">
+    select
+      SIGNON.USERNAME as USERID,
+      ACCOUNT.EMAIL,
+      ACCOUNT.FIRSTNAME,
+      ACCOUNT.LASTNAME,
+      ACCOUNT.STATUS,
+      ACCOUNT.ADDR1,
+      ACCOUNT.ADDR2,
+      ACCOUNT.CITY,
+      ACCOUNT.STATE,
+      ACCOUNT.ZIP,
+      ACCOUNT.COUNTRY,
+      ACCOUNT.PHONE,
+      PROFILE.LANGPREF,
+      PROFILE.FAVCATEGORY,
+      PROFILE.MYLISTOPT,
+      PROFILE.BANNEROPT,
+      BANNERDATA.BANNERNAME
+    from ACCOUNT, PROFILE, SIGNON, BANNERDATA
+    where ACCOUNT.USERID = #username#
+      and SIGNON.PASSWORD = #password#
+      and SIGNON.USERNAME = ACCOUNT.USERID
+      and PROFILE.USERID = ACCOUNT.USERID
+      and PROFILE.FAVCATEGORY = BANNERDATA.FAVCATEGORY
+  </mapped-statement>
+
+  <mapped-statement name="getUsernameList" result-class="java.lang.String">
+    select USERNAME as value from SIGNON
+  </mapped-statement>
+
+  <mapped-statement name="updateAccount">
+    update ACCOUNT set EMAIL = #email#, FIRSTNAME = #firstName#, LASTNAME = #lastName#, STATUS = #status#, ADDR1 = #address1#,  ADDR2 = #address2:VARCHAR#,  CITY = #city#, STATE = #state#, ZIP = #zip#, COUNTRY = #country#,PHONE = #phone# where USERID = #username#
+  </mapped-statement>
+
+  <mapped-statement name="insertAccount">
+    insert into ACCOUNT (EMAIL, FIRSTNAME, LASTNAME, STATUS, ADDR1, ADDR2, CITY, STATE, ZIP, COUNTRY, PHONE, USERID) values (#email#, #firstName#, #lastName#, #status#, #address1#, #address2:VARCHAR#, #city#, #state#, #zip#, #country#, #phone#, #username#)
+  </mapped-statement>
+
+  <mapped-statement name="updateProfile">
+    update PROFILE set LANGPREF = #languagePreference#, FAVCATEGORY = #favouriteCategoryId#, MYLISTOPT = #listOptionAsInt#, BANNEROPT = #bannerOptionAsInt# where USERID = #username#
+  </mapped-statement>
+
+  <mapped-statement name="insertProfile">
+    insert into PROFILE (LANGPREF, FAVCATEGORY, MYLISTOPT, BANNEROPT, USERID) values (#languagePreference#, #favouriteCategoryId#, #listOptionAsInt#, #bannerOptionAsInt#, #username#)
+  </mapped-statement>
+
+  <mapped-statement name="updateSignon">
+    update SIGNON set PASSWORD = #password# where USERNAME = #username#
+  </mapped-statement>
+
+  <mapped-statement name="insertSignon">
+    insert into SIGNON (PASSWORD,USERNAME) values (#password#,#username#)
+  </mapped-statement>
+
+</sql-map>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql-map
+    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sql-map name="Item">
+
+  <cache-model name="oneDayItem" reference-type="WEAK">
+    <flush-interval hours="24"/>
+  </cache-model>
+
+  <cache-model name="oneDayQuantity" reference-type="WEAK">
+    <flush-interval hours="24"/>
+    <flush-on-execute statement="updateInventoryQuantity"/>
+  </cache-model>
+
+  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Item">
+    <property name="itemId" column="ITEMID" columnIndex="1"/>
+    <property name="listPrice" column="LISTPRICE" columnIndex="2"/>
+    <property name="unitCost" column="UNITCOST" columnIndex="3"/>
+    <property name="supplierId" column="SUPPLIER" columnIndex="4"/>
+    <property name="productId" column="PRODUCTID" columnIndex="5"/>
+    <property name="product.productId" column="PRODUCTID" columnIndex="5"/>
+    <property name="product.name" column="NAME" columnIndex="6"/>
+    <property name="product.description" column="DESCN" columnIndex="7"/>
+    <property name="product.categoryId" column="CATEGORY" columnIndex="8"/>
+    <property name="status" column="STATUS" columnIndex="9"/>
+    <property name="attribute1" column="ATTR1" columnIndex="10"/>
+    <property name="attribute2" column="ATTR2" columnIndex="11"/>
+    <property name="attribute3" column="ATTR3" columnIndex="12"/>
+    <property name="attribute4" column="ATTR4" columnIndex="13"/>
+    <property name="attribute5" column="ATTR5" columnIndex="14"/>
+  </result-map>
+
+  <result-map name="result-with-quantity" class="org.springframework.samples.jpetstore.domain.Item">
+    <property name="itemId" column="ITEMID" columnIndex="1"/>
+    <property name="listPrice" column="LISTPRICE" columnIndex="2"/>
+    <property name="unitCost" column="UNITCOST" columnIndex="3"/>
+    <property name="supplierId" column="SUPPLIER" columnIndex="4"/>
+    <property name="productId" column="PRODUCTID" columnIndex="5"/>
+    <property name="product.productId" column="PRODUCTID" columnIndex="5"/>
+    <property name="product.name" column="NAME" columnIndex="6"/>
+    <property name="product.description" column="DESCN" columnIndex="7"/>
+    <property name="product.categoryId" column="CATEGORY" columnIndex="8"/>
+    <property name="status" column="STATUS" columnIndex="9"/>
+    <property name="attribute1" column="ATTR1" columnIndex="10"/>
+    <property name="attribute2" column="ATTR2" columnIndex="11"/>
+    <property name="attribute3" column="ATTR3" columnIndex="12"/>
+    <property name="attribute4" column="ATTR4" columnIndex="13"/>
+    <property name="attribute5" column="ATTR5" columnIndex="14"/>
+    <property name="quantity" column="QTY" columnIndex="15"/>
+  </result-map>
+
+  <mapped-statement name="getItemListByProduct" result-map="result">
+    select
+      ITEMID, LISTPRICE, UNITCOST, SUPPLIER, I.PRODUCTID, NAME,
+      DESCN, CATEGORY, STATUS, ATTR1, ATTR2, ATTR3, ATTR4, ATTR5
+    from ITEM I, PRODUCT P where P.PRODUCTID = I.PRODUCTID and I.PRODUCTID = #value#
+  </mapped-statement>
+
+  <mapped-statement name="getItem" result-map="result-with-quantity">
+    select
+      I.ITEMID, LISTPRICE, UNITCOST, SUPPLIER, I.PRODUCTID, NAME,
+      DESCN, CATEGORY, STATUS, ATTR1, ATTR2, ATTR3, ATTR4, ATTR5, QTY
+    from ITEM I, INVENTORY V, PRODUCT P where P.PRODUCTID = I.PRODUCTID and I.ITEMID = V.ITEMID and I.ITEMID = #value#
+  </mapped-statement>
+
+  <mapped-statement name="getInventoryQuantity" result-class="java.lang.Integer">
+    select QTY as value from INVENTORY where ITEMID = #value#
+  </mapped-statement>
+
+  <mapped-statement name="updateInventoryQuantity">
+    update INVENTORY set QTY = QTY - #increment# where ITEMID = #itemId#
+  </mapped-statement>
+
+</sql-map>

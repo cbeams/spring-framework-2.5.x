@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.18 2003-11-23 12:28:16 jhoeller Exp $
+    $Id: build.xml,v 1.19 2003-12-04 08:46:11 jhoeller Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -241,7 +241,10 @@
 				<include name="lib/aop-alliance/**"/>
 				<include name="lib/cglib/cglib-asm.jar"/>
 				<include name="lib/dom4j/**"/>
+				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
+				<include name="lib/ibatis/**"/>
+				<include name="lib/itext-pdf/**"/>
 				<include name="lib/jakarta-commons/commons-beanutils.jar"/>
 				<include name="lib/jakarta-commons/commons-collections.jar"/>
 				<include name="lib/jakarta-commons/commons-digester.jar"/>
@@ -249,13 +252,14 @@
 				<include name="lib/jakarta-commons/commons-logging.jar"/>
 				<include name="lib/j2ee/servlet.jar"/>
 				<include name="lib/j2ee/jdbc2_0-stdext.jar"/>
-				<include name="lib/itext-pdf/**"/>
+				<include name="lib/jdom/**"/>
 				<include name="lib/jstl/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/struts/**"/>
 				<include name="samples/countries/**"/>
 				<include name="samples/petclinic/**"/>
+				<include name="samples/jpetstore/**"/>
 				<include name="samples/tiles-example/**"/>
 				<include name="samples/webapp-minimal/**"/>
 				<include name="samples/webapp-typical/**"/>

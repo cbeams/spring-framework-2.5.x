@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql-map
+    PUBLIC "-//iBATIS.com//DTD SQL Map 1.0//EN"
+    "http://www.ibatis.com/dtd/sql-map.dtd">
+
+<sql-map name="Product">
+
+  <cache-model name="oneDayProduct" reference-type="WEAK">
+    <flush-interval hours="24"/>
+  </cache-model>
+
+  <result-map name="result" class="org.springframework.samples.jpetstore.domain.Product">
+    <property name="productId" column="PRODUCTID" columnIndex="1"/>
+    <property name="name" column="NAME" columnIndex="2"/>
+    <property name="description" column="DESCN" columnIndex="3"/>
+    <property name="categoryId" column="CATEGORY" columnIndex="4"/>
+  </result-map>
+
+  <mapped-statement name="getProduct" result-map="result">
+    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT where PRODUCTID = #value#
+  </mapped-statement>
+
+  <mapped-statement name="getProductListByCategory" result-map="result">
+    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT where CATEGORY = #value#
+  </mapped-statement>
+
+  <dynamic-mapped-statement name="searchProductList" result-map="result">
+    select PRODUCTID, NAME, DESCN, CATEGORY from PRODUCT
+    <dynamic prepend="WHERE">
+      <iterate property="keywordList" open="(" close=")" conjunction="OR">
+        lower(name) like #keywordList[]# OR lower(category) like #keywordList[]# OR lower(descn) like #keywordList[]#
+      </iterate>
+    </dynamic>
+  </dynamic-mapped-statement>
+
+</sql-map>

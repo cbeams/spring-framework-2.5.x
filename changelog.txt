@@ -1,27 +1,33 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.54 2003-11-28 21:09:46 jhoeller Exp $
+$Id: changelog.txt,v 1.55 2003-12-04 08:46:11 jhoeller Exp $
 
 
-Changes in version 1.0 RC1 (XX.12.2003)
----------------------------------------
+Changes in version 1.0 M4 (XX.12.2003)
+--------------------------------------
 * dissolved event propagation support in BeanWrapper and DataBinder
 * added "autowireExistingBean" method to BeanFactory interface
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
+* fixed potential multithreading issue on nested prototype resolution in AbstractBeanFactory
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
 * dissolved bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
+* added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
 * introduced support for iBATIS Database Layer, in the org.springframework.orm.ibatis package
+* added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
 * DispatcherServlet's default exception handling lets RuntimeExceptions straight through
 * HandlerInterceptors are allowed to throw any Exception
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
 * introduced WebContentInterceptor for applying request/response checks and preparations to a set of controllers
-* MultiActionController extends AbstractController now, for applying checks and preparation to all handle methods 
-* AbstractWizardFormController overrides "handleInvalidSubmit" to show the initial page of a new wizard form now
+* MultiActionController extends AbstractController, for applying checks and preparation to all handle methods
+* AbstractWizardFormController overrides "handleInvalidSubmit" to show the initial page of a new wizard form
+* added additional "referenceData(request,page)" method to AbstractWizardFormController
+* added additional "getTargetPage(request,command,errors,currentPage)" method to AbstractWizardFormController
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
+* introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
 
 
 Changes in version 1.0 M3 (25.11.2003)
