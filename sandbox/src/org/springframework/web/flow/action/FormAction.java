@@ -468,10 +468,12 @@ public class FormAction extends MultiAction implements InitializingBean {
 			}
 			try {
 				return createFormObject(context);
-			} catch (InstantiationException e) {
+			}
+			catch (InstantiationException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to instantiate form object", e);
-			} catch (IllegalAccessException e) {
+			}
+			catch (IllegalAccessException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to access form object class constructor", e);
 			}
@@ -523,7 +525,8 @@ public class FormAction extends MultiAction implements InitializingBean {
 
 	/**
 	 * Bind the parameters of the last event in given request context to the
-	 * given form object using given data binder.
+	 * given form object using given data binder and than validate the form
+	 * object using any registered validators.
 	 * @param context the action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @param binder the binder to use for binding
@@ -546,6 +549,13 @@ public class FormAction extends MultiAction implements InitializingBean {
 		return onBindAndValidate(context, binder.getTarget(), binder.getErrors());
 	}
 	
+	/**
+	 * Validate given form object using any registered validators.
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @param formObject the form object
+	 * @param errors possible binding errors
+	 */
 	protected void validate(RequestContext context, Object formObject, Errors errors) {
 		for (int i = 0; i < getValidators().length; i++) {
 			ValidationUtils.invokeValidator(getValidators()[i], formObject, errors);
