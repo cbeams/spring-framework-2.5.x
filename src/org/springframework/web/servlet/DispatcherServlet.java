@@ -709,7 +709,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// delegate to the View object for rendering
-		view.render(mv.getModel(), request, response);
+		view.render(mv.getModelInternal(), request, response);
 	}
 
 	/**

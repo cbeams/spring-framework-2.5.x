@@ -55,21 +55,23 @@ public class ModelAndView {
 
 	/**
 	 * Convenient constructor when there is no model data to expose.
+	 * Can also be used in conjunction with <code>addObject</code>.
 	 * @param view View object to render
+	 * @see #addObject
 	 */
 	public ModelAndView(View view) {
 		this.view = view;
-		this.model = new HashMap(0);
 	}
 
 	/**
 	 * Convenient constructor when there is no model data to expose.
+	 * Can also be used in conjunction with <code>addObject</code>.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet
+	 * @see #addObject
 	 */
 	public ModelAndView(String viewName) {
 		this.viewName = viewName;
-		this.model = new HashMap(0);
 	}
 
 	/**
@@ -105,8 +107,7 @@ public class ModelAndView {
 	 */
 	public ModelAndView(View view, String modelName, Object modelObject) {
 		this.view = view;
-		this.model = new HashMap(1);
-		this.model.put(modelName, modelObject);
+		addObject(modelName, modelObject);
 	}
 
 	/**
@@ -118,8 +119,7 @@ public class ModelAndView {
 	 */
 	public ModelAndView(String viewName, String modelName, Object modelObject) {
 		this.viewName = viewName;
-		this.model = new HashMap(1);
-		this.model.put(modelName, modelObject);
+		addObject(modelName, modelObject);
 	}
 
 
@@ -164,14 +164,26 @@ public class ModelAndView {
 	 * DispatcherServlet via a ViewResolver.
 	 */
 	public boolean isReference() {
-		return viewName != null;
+		return (this.viewName != null);
 	}
 
 	/**
-	 * Return the model map. May be null.
+	 * Return the model map. May return null.
+	 * Called by DispatcherServlet for evaluation of the model.
+	 */
+	protected Map getModelInternal() {
+		return this.model;
+	}
+
+	/**
+	 * Return the model map. Never returns null.
+	 * To be called by application code for modifying the model.
 	 */
 	public Map getModel() {
-		return model;
+		if (this.model == null) {
+			this.model = new HashMap(1);
+		}
+		return this.model;
 	}
 
 	/**
@@ -182,7 +194,7 @@ public class ModelAndView {
 	 * return modelAndView.addObject("foo", bar);
 	 */
 	public ModelAndView addObject(String modelName, Object modelObject) {
-		this.model.put(modelName, modelObject);
+		getModel().put(modelName, modelObject);
 		return this;
 	}
 
@@ -193,7 +205,7 @@ public class ModelAndView {
 	 * return modelAndView.addAllObjects(myModelMap);
 	 */
 	public ModelAndView addAllObjects(Map modelMap) {
-		this.model.putAll(modelMap);
+		getModel().putAll(modelMap);
 		return this;
 	}
 	
