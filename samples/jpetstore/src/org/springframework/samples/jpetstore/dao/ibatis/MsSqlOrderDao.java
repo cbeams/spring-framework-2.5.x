@@ -10,7 +10,7 @@ public class MsSqlOrderDao extends SqlMapOrderDao {
    * Whacked out MS SQL Server hack to allow Item ID to be retrieved so
    * that we can use it to link the foreign key of the Line Items!
    */
-  public void doInsertOrder(Order order) throws DataAccessException {
+  public void insertOrder(Order order) throws DataAccessException {
     Integer orderId = (Integer) getSqlMapTemplate().executeQueryForObject("msSqlServerInsertOrder", order);
     order.setOrderId(orderId.intValue());
     getSqlMapTemplate().executeUpdate("insertOrderStatus", order);
