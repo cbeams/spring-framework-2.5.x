@@ -118,10 +118,10 @@
 	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
 	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
 
-	<!-- The event parameter mapper action sets request parameters as attributes in the flow model.
+	<!-- The event parameter mapper action sets request parameters as attributes in flow scope.
 	     The exact mapping(s) policies are fully configurable; in this case, the
 	     "id" request parameter is mapped to the "colleagueId" attribute and converted
-	     to a java.lang.Long in the target flow model!  -->
+	     to a java.lang.Long in the target flow scope!  -->
 	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
 		<property name="mapping" value="id->colleagueId,java.lang.Long"/>
 		<property name="targetScopeAsString" value="flow"/>

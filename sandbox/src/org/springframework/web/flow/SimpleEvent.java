@@ -55,12 +55,12 @@ public class SimpleEvent extends Event {
 	 * Event parameters (optional).
 	 */
 	private Map parameters;
-	
+
 	/**
 	 * Constructor for use in subclasses.
 	 * @param source the source of the event
 	 */
-	protected SimpleEvent(Object source) {
+	public SimpleEvent(Object source) {
 		super(source);
 	}
 
@@ -71,20 +71,7 @@ public class SimpleEvent extends Event {
 	 */
 	public SimpleEvent(Object source, String id) {
 		super(source);
-		setId(id);
-	}
-
-	/**
-	 * Create a simple event with the specified <code>id</code> occuring in the
-	 * state with the specified <code>stateId</code>.
-	 * @param source the source of the event
-	 * @param id the event identifier
-	 * @param stateId the state in which this event occured
-	 */
-	public SimpleEvent(Object source, String id, String stateId) {
-		super(source);
-		setId(id);
-		setStateId(stateId);
+		setRequiredId(id);
 	}
 
 	/**
@@ -96,7 +83,7 @@ public class SimpleEvent extends Event {
 	 */
 	public SimpleEvent(Object source, String id, Map parameters) {
 		super(source);
-		setId(id);
+		setRequiredId(id);
 		setParameters(parameters);
 	}
 
@@ -111,13 +98,18 @@ public class SimpleEvent extends Event {
 	 */
 	public SimpleEvent(Object source, String id, String stateId, Map parameters) {
 		super(source);
-		setId(id);
+		setRequiredId(id);
 		setStateId(stateId);
 		setParameters(parameters);
 	}
 
 	public String getId() {
 		return id;
+	}
+
+	private void setRequiredId(String id) {
+		Assert.hasText(id, "The event id is required for this use - please set to a non-blank string identifier");
+		this.id = id;
 	}
 
 	/**
@@ -134,7 +126,7 @@ public class SimpleEvent extends Event {
 	public String getStateId() {
 		return stateId;
 	}
-	
+
 	/**
 	 * Set the state identifier.
 	 */
@@ -168,7 +160,7 @@ public class SimpleEvent extends Event {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Add given parameters to the set of parameters of this event.
 	 */
