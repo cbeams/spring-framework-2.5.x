@@ -63,7 +63,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore and Petclinic
 
 * ibatis/ibatis-common.jar, ibatis/ibatis-sqlmap.jar, ibatis/ibatis-sqlmap-2.jar
-- iBATIS SQL Maps 1.3.1 and 2.0 RC4 (http://www.ibatis.com)
+- iBATIS SQL Maps 1.3.1 and 2.0 RC5 (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps support
 
