@@ -17,8 +17,8 @@ public class AddOwnerForm extends AbstractClinicForm {
 	public AddOwnerForm() {
 		// OK to start with a blank command object
 		setCommandClass(Owner.class);
-        // need a session to hold the formBackingObject
-        setSessionForm(true);
+		// activate session form mode to allow for detection of duplicate submissions
+		setSessionForm(true);
 	}
 
 	/** Method inserts a new <code>Owner</code>. */

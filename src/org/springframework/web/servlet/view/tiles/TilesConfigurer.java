@@ -39,23 +39,20 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  *
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *
- * <p>
  * <pre>
- * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
- * &nbsp;&nbsp;&lt;property name="definitions"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;list&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/list&gt;
- * &nbsp;&nbsp;&lt;/property&gt;
- * &lt;/bean&gt;
- * </pre>
- * </p>
+ * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
+ *   &lt;property name="definitions">
+ *     &lt;list>
+ *       &lt;value>/WEB-INF/defs/general.xml&lt;/value>
+ *       &lt;value>/WEB-INF/defs/widgets.xml&lt;/value>
+ *       &lt;value>/WEB-INF/defs/administrator.xml&lt;/value>
+ *       &lt;value>/WEB-INF/defs/customer.xml&lt;/value>
+ *       &lt;value>/WEB-INF/defs/templates.xml&lt;/value>
+ *     &lt;/list>
+ *   &lt;/property>
+ * &lt;/bean></pre>
  *
- * <p>The values in the list are the actual files containing the definitions.
+ * The values in the list are the actual files containing the definitions.
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller

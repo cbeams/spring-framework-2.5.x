@@ -31,21 +31,19 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * The default location of the XmlWebApplicationContext configuration file
  * is therefore "/WEB-INF/action-servlet.xml".
  *
- * <p><code>
- * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/&gt;
- * </code>
+ * <pre>
+ * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/&gt;</pre>
  *
- * <p>The location of the context configuration files can be customized
+ * The location of the context configuration files can be customized
  * through the "contextConfigLocation" setting, analogous to the root
  * WebApplicationContext and FrameworkServlet contexts.
  *
- * <p><code>
- * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"&gt;<br>
- * &nbsp;&nbsp;&lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml,/WEB-INF/myContext.xml"/&gt;<br>
- * &lt;/plug-in&gt;
- * </code>
+ * <pre>
+ * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"&gt;
+ *   &lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml,/WEB-INF/myContext.xml"/&gt;
+ * &lt;/plug-in&gt;</pre>
  *
- * <p>Beans defined in the ContextLoaderPlugin context can be accessed
+ * Beans defined in the ContextLoaderPlugin context can be accessed
  * from conventional Struts Actions, via fetching the WebApplicationContext
  * reference from the ServletContext. ActionSupport and DispatchActionSupport
  * are pre-built convenience classes that provide easy access to the context.

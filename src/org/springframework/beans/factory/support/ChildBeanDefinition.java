@@ -19,11 +19,15 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.MutablePropertyValues;
 
 /**
- * Bean definition for beans whose class is defined by their ancestry. PropertyValues
- * defined by the parent will also be "inherited", although it's possible to override
- * them by redefining them in the property values associated with the child.
+ * Bean definition for beans whose class is defined by their ancestry.
+ *
+ * <p>PropertyValues defined by the parent will also be "inherited", although
+ * it's possible to override them by redefining them in the property values
+ * associated with the child.
+ *
  * @author Rod Johnson
- * @version $Revision: 1.9 $
+ * @author Juergen Hoeller
+ * @version $Revision: 1.10 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
@@ -31,6 +35,8 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Create a new ChildBeanDefinition for the given parent.
+	 * @param parentName the name of the parent bean
+	 * @param pvs the additional property values of the child
 	 */
 	public ChildBeanDefinition(String parentName, MutablePropertyValues pvs) {
 		super(pvs);
@@ -52,7 +58,12 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		return "Child bean with parent '" + getParentName() + "' defined in " + getResourceDescription();
+		StringBuffer sb = new StringBuffer("Child bean with parent '");
+		sb.append(getParentName()).append("'");
+		if (getResourceDescription() != null) {
+			sb.append(" defined in ").append(getResourceDescription());
+		}
+		return sb.toString();
 	}
 
 }

@@ -79,6 +79,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 */
 	public static final int FLUSH_EAGER = 2;
 
+
 	/** Constants instance for HibernateAccessor */
 	private static final Constants constants = new Constants(HibernateAccessor.class);
 
@@ -91,6 +92,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
 	private int flushMode = FLUSH_AUTO;
+
 
 	/**
 	 * Set the Hibernate SessionFactory that should be used to create
@@ -186,6 +188,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
 	}
+
 
 	/**
 	 * Flush the given Hibernate session if necessary.

@@ -19,14 +19,15 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Supports last modified HTTP requests to facilitate content caching.
- * Same contract as for the Servlet API's getLastModified() method.
+ * Supports last-modified HTTP requests to facilitate content caching.
+ * Same contract as for the Servlet API's getLastModified method.
  *
  * <p>Delegated to by SimpleControllerHandlerAdapter's getLastModified method.
- * Any controller within our MVC framework can implement this.
+ * Any controller within Spring's default MVC framework can implement this.
  *
  * @author Rod Johnson
  * @see SimpleControllerHandlerAdapter
+ * @see javax.servlet.http.HttpServlet#getLastModified
  */
 public interface LastModified {
 	
@@ -37,7 +38,8 @@ public interface LastModified {
 	 * and compared with If-Modified-Since headers that the client sends back.
 	 * The content will only get regenerated if there has been a modification.
 	 * @param request current HTTP request
-	 * @return the time the underlying resource was last modified
+	 * @return the time the underlying resource was last modified, or -1
+	 * meaning that the content must always be regenerated
 	 * @see org.springframework.web.servlet.HandlerAdapter#getLastModified
 	 * @see javax.servlet.http.HttpServlet#getLastModified
 	 */

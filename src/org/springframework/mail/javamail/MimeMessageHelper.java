@@ -55,18 +55,18 @@ import org.springframework.core.io.InputStreamSource;
  * Also used internally by JavaMailSenderImpl.
  *
  * <p>Sample code:
- * <p><code>
- * mailSender.send(new MimeMessagePreparator() {<br>
- * &nbsp;&nbsp;public void prepare(MimeMessage mimeMessage) throws MessagingException {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;message.setFrom("me@mail.com");<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;message.setTo("you@mail.com");<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;message.setSubject("my subject");<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;message.setText("my text");<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;message.addAttachment("logo.gif", new ClassPathResource("images/mylogo.gif"));<br>
- * &nbsp;&nbsp;}<br>
- * });
- * </code>
+ *
+ * <pre>
+ * mailSender.send(new MimeMessagePreparator() {
+ *   public void prepare(MimeMessage mimeMessage) throws MessagingException {
+ *     MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
+ *     message.setFrom("me@mail.com");
+ *     message.setTo("you@mail.com");
+ *     message.setSubject("my subject");
+ *     message.setText("my text");
+ *     message.addAttachment("logo.gif", new ClassPathResource("images/mylogo.gif"));
+ *   }
+ * });</pre>
  *
  * @author Juergen Hoeller
  * @since 19.01.2004

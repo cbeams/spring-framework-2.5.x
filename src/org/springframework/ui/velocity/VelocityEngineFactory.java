@@ -170,7 +170,7 @@ public class VelocityEngineFactory {
 			try {
 				Resource path = this.resourceLoader.getResource(this.resourceLoaderPath);
 				velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
-																				path.getFile().getAbsolutePath());
+																	 path.getFile().getAbsolutePath());
 			}
 			catch (IOException ex) {
 				if (logger.isDebugEnabled()) {

@@ -35,34 +35,34 @@ import org.springframework.util.ObjectUtils;
  * A property resource configurer that resolves placeholders in bean property values of
  * context definitions. It <i>pulls</i> values from a properties file into bean definitions.
  *
- * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:<br><br>
- * <code>
- * &nbsp;&nbsp;${...}
- * </code>
+ * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:
  *
- * <p>Example XML context definition:<br><br>
- * <code>
- * &nbsp;&nbsp;&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&lt;/bean&gt;
- * </code>
+ * <pre>
+ * ${...}</pre>
  *
- * <p>Example properties file:<br><br>
- * <code>
- * &nbsp;&nbsp;driver=com.mysql.jdbc.Driver<br>
- * &nbsp;&nbsp;dbname=mysql:mydb
- * </code>
+ * <p>Example XML context definition:
  *
- * <p>PropertyPlaceholderConfigurer checks simple property values, lists, maps,
+ * <pre>
+ * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+ *   &lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Example properties file:
+ *
+ * <pre>
+ * driver=com.mysql.jdbc.Driver
+ * dbname=mysql:mydb</pre>
+ *
+ * PropertyPlaceholderConfigurer checks simple property values, lists, maps,
  * props, and bean names in bean references. Furthermore, placeholder values can
- * also cross-reference other placeholders, like:<br><br>
- * <code>
- * &nbsp;&nbsp;rootPath=myrootdir
- * &nbsp;&nbsp;subPath=${rootPath}/subdir
- * </code>
+ * also cross-reference other placeholders, like:
  *
- * <p>In contrast to PropertyOverrideConfigurer, this configurer allows to fill in
+ * <pre>
+ * rootPath=myrootdir
+ * subPath=${rootPath}/subdir</pre>
+ *
+ * In contrast to PropertyOverrideConfigurer, this configurer allows to fill in
  * explicit placeholders in context definitions. Therefore, the original definition
  * cannot specify any default values for such bean properties, and the placeholder
  * properties file is supposed to contain an entry for each defined placeholder.
@@ -89,7 +89,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.10 2004-03-19 17:52:29 jhoeller Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.11 2004-04-22 07:58:22 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 

@@ -36,19 +36,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to use getSession with allowCreate=false, as the code relies on the interceptor
  * to provide proper Session handling. Typically the code will look as follows:
  *
- * <p><code>
- * public void doHibernateAction() {<br>
- * &nbsp;&nbsp;Session session = SessionFactoryUtils.getSession(this.sessionFactory, false);<br>
- * &nbsp;&nbsp;try {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;...<br>
- * &nbsp;&nbsp;}<br>
- * &nbsp;&nbsp;catch (HibernateException ex) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;throw SessionFactoryUtils.convertHibernateAccessException(ex);<br>
- * &nbsp;&nbsp;}<br>
- * }
- * </code>
+ * <pre>
+ * public void doHibernateAction() {
+ *   Session session = SessionFactoryUtils.getSession(this.sessionFactory, false);
+ *   try {
+ *     ...
+ *   }
+ *   catch (HibernateException ex) {
+ *     throw SessionFactoryUtils.convertHibernateAccessException(ex);
+ *   }
+ * }</pre>
  *
- * <p>Note that the application must care about handling HibernateExceptions itself,
+ * Note that the application must care about handling HibernateExceptions itself,
  * preferably via delegating to SessionFactoryUtils' convertHibernateAccessException
  * that converts them to ones that are compatible with the org.springframework.dao
  * exception hierarchy (like HibernateTemplate does).

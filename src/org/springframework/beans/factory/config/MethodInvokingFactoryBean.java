@@ -52,8 +52,8 @@ import org.springframework.util.MethodInvoker;
  *   &lt;property name="staticMethod">&lt;value>com.whatever.MyClassFactory.getInstance&lt;/value>&lt;/property>
  * &lt;/bean></pre>
  *
- * <p>An example of calling a static method then an instance method to get at a Java
- * System property. Somewhat verbose, but it works.
+ * <p>An example of calling a static method then an instance method to get at a
+ * Java system property. Somewhat verbose, but it works.
  *
  * <pre>
  * &lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -61,21 +61,20 @@ import org.springframework.util.MethodInvoker;
  *   &lt;property name="targetMethod">&lt;value>getProperties&lt;/value>&lt;/property>
  * &lt;/bean>
  *
- * <p>&lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+ * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
  *   &lt;property name="targetObject">&lt;ref local='sysProps'/>&lt;/property>
  *   &lt;property name="targetMethod">&lt;value>getProperty&lt;/value>&lt;/property>
  *   &lt;property name="arguments">
  *     &lt;list>
- *       &lt;value>|java.version|&lt;/value>
+ *       &lt;value>java.version&lt;/value>
  *     &lt;/list>
  *   &lt;/property>
- * &lt;/bean>
- * </pre>
+ * &lt;/bean></pre>
  * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.10 2004-04-21 17:50:27 jhoeller Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.11 2004-04-22 07:58:22 jhoeller Exp $
  */
 public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryBean, InitializingBean {
 

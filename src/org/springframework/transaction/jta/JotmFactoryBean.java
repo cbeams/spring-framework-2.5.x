@@ -37,26 +37,25 @@ import org.springframework.beans.factory.FactoryBean;
  * ObjectWeb's <a href="http://xapool.experlog.com">XAPool</a>, e.g. with bean
  * definitions like the following:
  *
- * <p><code>
- * &lt;bean id="jotm" class="org.springframework.transaction.jta.JotmFactoryBean"/&gt;<br>
- * <br>
- * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="userTransaction"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
- * &lt;/bean&gt;<br>
- * <br>
- * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource" destroy-method="shutdown"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="transactionManager"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&lt;property name="driverName"&gt;...&lt;/property&gt;<br>
- * &nbsp;&nbsp;&lt;property name="url"&gt;...&lt;/property&gt;<br>
- * &lt;/bean&gt;<br>
- * <br>
- * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource" destroy-method="shutdown"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="dataSource"&gt;&lt;ref local="innerDataSource"/&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&lt;property name="maxSize"&gt;...&lt;/property&gt;<br>
- * &lt;/bean&gt;
- * </code>
+ * <pre>
+ * &lt;bean id="jotm" class="org.springframework.transaction.jta.JotmFactoryBean"/&gt;
  *
- * <p>Uses JOTM's static access method to obtain the JOTM Current object, which
+ * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+ *   &lt;property name="userTransaction"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;
+ * &lt;/bean&gt;
+ *
+ * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource" destroy-method="shutdown"&gt;
+ *   &lt;property name="transactionManager"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;
+ *   &lt;property name="driverName"&gt;...&lt;/property&gt;
+ *   &lt;property name="url"&gt;...&lt;/property&gt;
+ * &lt;/bean&gt;
+ *
+ * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource" destroy-method="shutdown"&gt;
+ *   &lt;property name="dataSource"&gt;&lt;ref local="innerDataSource"/&gt;&lt;/property&gt;
+ *   &lt;property name="maxSize"&gt;...&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Uses JOTM's static access method to obtain the JOTM Current object, which
  * implements both the UserTransaction and the TransactionManager interface.
  *
  * @author Juergen Hoeller
@@ -67,9 +66,9 @@ import org.springframework.beans.factory.FactoryBean;
  */
 public class JotmFactoryBean implements FactoryBean, DisposableBean {
 
-	private Jotm jotm;
-
 	private Current jotmCurrent;
+
+	private Jotm jotm;
 
 	public JotmFactoryBean() throws ClassNotFoundException, NoSuchMethodException,
 	    IllegalAccessException, InvocationTargetException, NamingException {

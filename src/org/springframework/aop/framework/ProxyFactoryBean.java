@@ -72,7 +72,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.27 2004-04-15 22:05:15 dkopylenko Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.28 2004-04-22 07:58:22 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -158,7 +158,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		logger.debug("Set BeanFactory. Will configure interceptor beans...");
 		createAdvisorChain();
 		logger.info("ProxyFactoryBean config: " + this);
-		if (singleton) {
+		if (this.singleton) {
 			// Eagerly initialize the shared singleton instance
 			getSingletonInstance();
 			// We must listen to superclass advice change events to recache singleton
@@ -175,12 +175,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * getObject() for a proxy.
 	 * @return Object a fresh AOP proxy reflecting the current
 	 * state of this factory
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	public Object getObject() throws BeansException {
-		return (this.singleton) ?
-			getSingletonInstance() :
-			newPrototypeInstance();
+		return (this.singleton) ? getSingletonInstance() : newPrototypeInstance();
 	}
 
 	public Class getObjectType() {
@@ -201,7 +198,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		return this.singletonInstance;
 	}
 
-	private Object newPrototypeInstance() {
+	private synchronized Object newPrototypeInstance() {
 		refreshAdvisorChain();
 		refreshTarget();
 		// In the case of a prototype, we need to give the proxy
@@ -218,15 +215,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 	/**
-	 * Create the advisor (interceptor) chain. The advisors that
-	 * are sourced from a BeanFactory will be refreshed each time
-	 * a new prototype instance is added. Interceptors
-	 * added programmatically through the factory API are
-	 * unaffected by such changes.
+	 * Create the advisor (interceptor) chain. The advisors that are sourced
+	 * from a BeanFactory will be refreshed each time a new prototype instance
+	 * is added. Interceptors added programmatically through the factory API
+	 * are unaffected by such changes.
 	 */
 	private void createAdvisorChain() throws AopConfigException, BeansException {
 		if (this.interceptorNames == null || this.interceptorNames.length == 0) {
-			//throw new AopConfigException("Interceptor names are required");
 			return;
 		}
 		

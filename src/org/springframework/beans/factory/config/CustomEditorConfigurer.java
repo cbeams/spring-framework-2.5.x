@@ -31,22 +31,21 @@ import org.springframework.core.Ordered;
  * <p>Configuration example, assuming XML bean definitions and inner
  * beans for PropertyEditor instances:
  *
- * <p><code>
- * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="customEditors"&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;map&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entry key="java.util.Date"&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;bean class="mypackage.MyCustomDateEditor"/&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/entry&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entry key="mypackage.MyObject"&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;bean id="myEditor" class="mypackage.MObjectEditor"&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="myParam"&gt;&lt;value&gt;myValue&lt;/value&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/bean&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/entry&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/map&gt;<br>
- * &nbsp;&nbsp;&lt;/property&gt;<br>
- * &lt;/bean&gt;
- * </code>
+ * <pre>
+ * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ *   &lt;property name="customEditors"&gt;
+ *     &lt;map&gt;
+ *       &lt;entry key="java.util.Date"&gt;
+ *         &lt;bean class="mypackage.MyCustomDateEditor"/&gt;
+ *       &lt;/entry&gt;
+ *       &lt;entry key="mypackage.MyObject"&gt;
+ *         &lt;bean id="myEditor" class="mypackage.MObjectEditor"&gt;
+ *           &lt;property name="myParam"&gt;&lt;value&gt;myValue&lt;/value&gt;&lt;/property&gt;
+ *         &lt;/bean&gt;
+ *       &lt;/entry&gt;
+ *     &lt;/map&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 27.02.2004

@@ -51,7 +51,7 @@ public abstract class PersistenceManagerFactoryUtils {
 
 	/**
 	 * Get a JDO PersistenceManager via the given factory.
-	 * Is aware of a respective PersistenceManager bound to the current thread,
+	 * Is aware of a corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager.
 	 * Will create a new PersistenceManager else, if allowCreate is true.
 	 * @param pmf PersistenceManagerFactory to create the session with
@@ -144,9 +144,9 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	private static class PersistenceManagerSynchronization extends TransactionSynchronizationAdapter {
 
-		private PersistenceManagerHolder persistenceManagerHolder;
+		private final PersistenceManagerHolder persistenceManagerHolder;
 
-		private PersistenceManagerFactory persistenceManagerFactory;
+		private final PersistenceManagerFactory persistenceManagerFactory;
 
 		private PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
 			this.persistenceManagerHolder = pmHolder;

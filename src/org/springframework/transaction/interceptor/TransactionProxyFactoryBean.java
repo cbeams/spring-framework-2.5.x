@@ -61,7 +61,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.26 2004-04-01 15:36:03 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.27 2004-04-22 07:58:25 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -92,9 +92,11 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	/**
 	 * Set the target object, i.e. the bean to be wrapped with a transactional proxy.
-	 * The target may be any object, in case an InvokerInterceptor will be created.
-	 * If it is a MethodInterceptor, no wrapper interceptor is created. This enables
-	 * the use of a pooling target or prototype interceptor etc.
+	 * The target may be any object, in which case a SingletonTargetSource will be
+	 * created. If it is a TargetSource, no wrapper TargetSource is created:
+	 * This enables the use of a pooling or prototype TargetSource etc.
+	 * @see org.springframework.aop.TargetSource
+	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
 	public void setTarget(Object target) {
 		this.target = target;

@@ -50,7 +50,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.9 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: DataSourceUtils.java,v 1.10 2004-04-22 07:58:23 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -67,7 +67,8 @@ public abstract class DataSourceUtils {
 	 * <p>Use getDataSourceFromJndi(jndiName,false) in case of a custom JNDI name.
 	 * @param jndiName jndiName of the DataSource
 	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the data source cannot be located
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
+	 * if the data source cannot be located
 	 * @see #getDataSourceFromJndi(String, boolean)
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName)
@@ -82,7 +83,8 @@ public abstract class DataSourceUtils {
 	 * @param resourceRef if the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already contain it.
 	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the data source cannot be located
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
+	 * if the data source cannot be located
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef)
 	    throws CannotGetJdbcConnectionException {
@@ -97,7 +99,8 @@ public abstract class DataSourceUtils {
 			return (DataSource) new JndiTemplate().lookup(jndiName);
 		}
 		catch (NamingException ex) {
-			throw new CannotGetJdbcConnectionException("Naming exception looking up JNDI data source [" + jndiName + "]", ex);
+			throw new CannotGetJdbcConnectionException("Naming exception looking up JNDI data source [" +
+																								 jndiName + "]", ex);
 		}
 	}
 
@@ -105,12 +108,13 @@ public abstract class DataSourceUtils {
 	 * Get a connection from the given DataSource. Changes any SQL exception into
 	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
 	 * calling code and making any exception that is thrown more meaningful.
-	 * <p>Is aware of a respective connection bound to the current thread, for example
+	 * <p>Is aware of a corresponding connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * @param ds DataSource to get connection from
 	 * @return a JDBC connection from this DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
+	 * if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
@@ -162,8 +166,8 @@ public abstract class DataSourceUtils {
 	 * @param con connection to close if necessary
 	 * (if this is null, the call will be ignored)
 	 * @param ds DataSource that the connection came from
-	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException if the attempt to close the
-	 * Connection failed
+	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException
+	 * if the attempt to close the Connection failed
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void closeConnectionIfNecessary(Connection con, DataSource ds)
@@ -171,8 +175,8 @@ public abstract class DataSourceUtils {
 		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
 			return;
 		}
-		// leave the connection open only if the DataSource is our
-		// special data source, and it wants the connection left open
+		// Leave the connection open only if the DataSource is our
+		// special data source, and it wants the connection left open.
 		if (!(ds instanceof SmartDataSource) || ((SmartDataSource) ds).shouldClose(con)) {
 			try {
 				con.close();
@@ -231,9 +235,9 @@ public abstract class DataSourceUtils {
 	 */
 	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
 
-		private ConnectionHolder connectionHolder;
+		private final ConnectionHolder connectionHolder;
 
-		private DataSource dataSource;
+		private final DataSource dataSource;
 
 		private ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
 			this.connectionHolder = connectionHolder;

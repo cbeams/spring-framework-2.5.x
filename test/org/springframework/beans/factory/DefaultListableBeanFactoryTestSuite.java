@@ -261,20 +261,6 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		assertTrue("Specified singletons equal", kerry1 == kerry2);
 	}
 
-	/*
-	public void testInvalidBeanDefinition() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		Properties p = new Properties();
-		p.setProperty("test.class", "org.springframework.beans.TestBean");
-		p.setProperty("test.name", "Tony");
-		p.setProperty("test.age", "48");
-		//p.setProperty("
-		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
-		assertTrue("1 beans registered", count == 1);
-		testSingleTestBean(lbf);
-	}
-	*/
-
 	public void testNameAlreadyBound() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();

@@ -88,6 +88,7 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 	/** the ThemeSource for this ApplicationContext */
 	private ThemeSource themeSource;
 
+
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}

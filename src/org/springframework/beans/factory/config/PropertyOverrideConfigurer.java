@@ -26,18 +26,18 @@ import org.springframework.beans.FatalBeanException;
  * A property resource configurer that overrides bean property values in an application
  * context definition. It <i>pushes</i> values from a properties file into bean definitions.
  *
- * <p>Configuration lines are expected to be of the following form:<br><br>
- * <code>
- * &nbsp;&nbsp;beanName.property=value
- * </code>
+ * <p>Configuration lines are expected to be of the following form:
  *
- * <p>Example properties file:<br><br>
- * <code>
- * &nbsp;&nbsp;dataSource.driverClassName=com.mysql.jdbc.Driver<br>
- * &nbsp;&nbsp;dataSource.url=jdbc:mysql:mydb
- * </code>
+ * <pre>
+ * beanName.property=value</pre>
  *
- * <p>In contrast to PropertyPlaceholderConfigurer, the original definition can have default
+ * Example properties file:
+ *
+ * <pre>
+ * dataSource.driverClassName=com.mysql.jdbc.Driver
+ * dataSource.url=jdbc:mysql:mydb</pre>
+ *
+ * In contrast to PropertyPlaceholderConfigurer, the original definition can have default
  * values or no values at all for such bean properties. If an overriding properties file does
  * not have an entry for a certain bean property, the default context definition is used.
  *
@@ -50,7 +50,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 12.03.2003
  * @see PropertyPlaceholderConfigurer
- * @version $Id: PropertyOverrideConfigurer.java,v 1.5 2004-03-19 17:45:35 jhoeller Exp $
+ * @version $Id: PropertyOverrideConfigurer.java,v 1.6 2004-04-22 07:58:22 jhoeller Exp $
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 

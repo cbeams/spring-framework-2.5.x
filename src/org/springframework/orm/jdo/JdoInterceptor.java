@@ -35,19 +35,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * with allowCreate=false, as the code relies on the interceptor to provide proper
  * PersistenceManager handling. Typically the code will look as follows:
  *
- * <p><code>
- * public void doJdoAction() {<br>
- * &nbsp;&nbsp;PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.pmf, false);<br>
- * &nbsp;&nbsp;try {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;...<br>
- * &nbsp;&nbsp;}<br>
- * &nbsp;&nbsp;catch (JDOException ex) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;throw PersistenceManagerFactoryUtils.convertJdoAccessException(ex);<br>
- * &nbsp;&nbsp;}<br>
- * }
- * </code>
+ * <pre>
+ * public void doJdoAction() {
+ *   PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.pmf, false);
+ *   try {
+ *     ...
+ *   }
+ *   catch (JDOException ex) {
+ *     throw PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+ *   }
+ * }</pre>
  *
- * <p>Note that the application must care about handling JDOExceptions itself,
+ * Note that the application must care about handling JDOExceptions itself,
  * preferably via delegating to PersistenceManagerFactoryUtils' convertJdoAccessException
  * that converts them to ones that are compatible with the org.springframework.dao exception
  * hierarchy (jlike JdoTemplate does). As JDOExceptions are unchecked, they can simply

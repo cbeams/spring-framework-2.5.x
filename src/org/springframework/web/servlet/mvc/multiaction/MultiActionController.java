@@ -40,10 +40,11 @@ import org.springframework.web.servlet.mvc.SessionRequiredException;
  * Controller implementation that allows multiple request types to be
  * handled by the same class. Subclasses of this class can handle several
  * different types of request with methods of the form
- * <p><code>
- * &nbsp;&nbsp;ModelAndView actionName(HttpServletRequest request, HttpServletResponse response);
- * </code>
- * <p>May take a third parameter HttpSession in which an existing session will be required,
+ *
+ * <pre>
+ * ModelAndView actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ *
+ * May take a third parameter HttpSession in which an existing session will be required,
  * or a third parameter of an arbitrary class that gets treated as command
  * (i.e. an instance of the class gets created, and request parameters get bound to it)
  *
@@ -60,23 +61,26 @@ import org.springframework.web.servlet.mvc.SessionRequiredException;
  * should return a method name for a given request, based on any aspect of the request,
  * such as its URL or an "action" or like attribute. The default behavior is URL based.
  *
- * <p>Subclasses can implement custom exception handler methods with names such as
- * <p><code>
- * &nbsp;&nbsp;ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);
- * </code>
- * <p>The third parameter can be any subclass or Exception or RuntimeException.
+ * <p>Subclasses can implement custom exception handler methods with names such as:
  *
- * <p>There can also be an optional lastModified method for handlers, of signature
- * <p><code>
- * &nbsp;&nbsp;long anyMeaningfulNameLastModified(HttpServletRequest request)
- * </code>
- * <p>If such a method is present, it will be invoked. Default return from getLastModified()
- * is -1, meaning that content must always be regenerated.
+ * <pre>
+ * ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);</pre>
+ *
+ * The third parameter can be any subclass or Exception or RuntimeException.
+ *
+ * <p>There can also be an optional lastModified method for handlers, of signature:
+ *
+ * <pre>
+ * long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
+ *
+ * If such a method is present, it will be invoked. Default return from getLastModified
+ * is -1, meaning that the content must always be regenerated.
  *
  * <p>Note that method overloading isn't allowed.
  *
  * @author Rod Johnson
  * @see MethodNameResolver
+ * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
  */
 public class MultiActionController extends AbstractController implements LastModified  {
 		

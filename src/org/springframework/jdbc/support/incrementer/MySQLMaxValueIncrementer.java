@@ -39,13 +39,13 @@ import org.springframework.jdbc.support.JdbcUtils;
  * transactions that might be in progress.
  *
  * <p>Example:
- * <p><code>
- * &nbsp;&nbsp;create table tab (id int unsigned not null primary key, text varchar(100));<br>
- * &nbsp;&nbsp;create table tab_sequence (value int not null) type=MYISAM;<br>
- * &nbsp;&nbsp;insert into tab_sequence values(0);<br>
- * </code>
  *
- * <p>If cacheSize is set, the intermediate values are served without querying the
+ * <pre>
+ * create table tab (id int unsigned not null primary key, text varchar(100));
+ * create table tab_sequence (value int not null) type=MYISAM;
+ * insert into tab_sequence values(0);</pre>
+ *
+ * If cacheSize is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
@@ -53,7 +53,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: MySQLMaxValueIncrementer.java,v 1.5 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: MySQLMaxValueIncrementer.java,v 1.6 2004-04-22 07:58:24 jhoeller Exp $
  */
 
 public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {

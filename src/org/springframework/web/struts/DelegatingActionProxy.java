@@ -21,15 +21,14 @@ import org.springframework.web.context.WebApplicationContext;
  * class as action class. It will delegate to a Struts Action bean
  * in the ContextLoaderPlugIn context.
  *
- * <p><code>
- * &lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;
- * </code>
+ * <pre>
+ * &lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;</pre>
  *
- * <p>The name of the Action bean in the WebApplicationContext will be
+ * The name of the Action bean in the WebApplicationContext will be
  * determined from the mapping path and module prefix. This can be
  * customized by overriding the <code>determineActionBeanName</code> method.
  *
- * <p>E.g.:
+ * <p>Example:
  * <ul>
  * <li>mapping path "/login" -> bean name "/login"<br>
  * <li>mapping path "/login", module prefix "/mymodule" ->
@@ -40,13 +39,12 @@ import org.springframework.web.context.WebApplicationContext;
  * context looks as follows, being able to fully leverage
  * Spring's configuration facilities:
  *
- * <p><code>
- * &lt;bean name="/login" class="myapp.MyAction"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="..."&gt;...&lt;/property&gt;<br>
- * &lt;/bean&gt;
- * </code>
+ * <pre>
+ * &lt;bean name="/login" class="myapp.MyAction"&gt;
+ *   &lt;property name="..."&gt;...&lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
- * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
+ * Note: The idea of delegating to Spring-managed Struts Actions originated in
  * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
  * ContextLoaderPlugIn and DelegatingActionProxy constitute a clean-room
  * implementation of the same idea, essentially superseding the original plugin.

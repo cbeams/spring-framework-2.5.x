@@ -20,21 +20,18 @@ package org.springframework.core;
  * Interface that can be implemented by exceptions etc that are error coded.
  * The error code is a String, rather than a number, so it can be given
  * user-readable values, such as "object.failureDescription".
- * These codes will be resolved by a cMessageSource object.
  *
- * <p>This interface is necessary because both runtime and checked
- * exceptions are useful, and they cannot share a common,
- * framework-specific, superclass.
+ * <p>An error code can be resolved by a MessageSource, for example.
  *
  * @author Rod Johnson
- * @version $Id: ErrorCoded.java,v 1.3 2004-03-18 02:46:06 trisberg Exp $
+ * @version $Id: ErrorCoded.java,v 1.4 2004-04-22 07:58:23 jhoeller Exp $
  * @see org.springframework.context.MessageSource
  */
 public interface ErrorCoded {
 	
 	/**
 	 * Return the error code associated with this failure. 
-	 * The GUI can render this anyway it pleases, allowing for Int8ln etc.
+	 * The GUI can render this any way it pleases, allowing for localization etc.
 	 * @return a String error code associated with this failure,
 	 * or null if not error-coded
 	 */

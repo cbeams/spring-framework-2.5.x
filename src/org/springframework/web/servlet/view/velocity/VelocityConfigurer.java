@@ -31,13 +31,12 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  * The simplest way to use this class is to specify just a "resourceLoaderPath":
  * You do not need any further configuration then.
  *
- * <p><code>
- * &lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;<br>
- * &nbsp;&nbsp;&lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;&lt;/property&gt;<br>
- * &lt;/bean&gt;
- * </code>
+ * <pre>
+ * &lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+ *   &lt;property name="resourceLoaderPath">&lt;value>/WEB-INF/velocity/&lt;/value>&lt;/property>
+ * &lt;/bean></pre>
  *
- * <p>This bean must be included in the application context of any application
+ * This bean must be included in the application context of any application
  * using Spring's VelocityView for web MVC. It exists purely to configure Velocity.
  * It is not meant to be referenced by application components but just internally
  * by VelocityView. Implements VelocityConfig to be found by VelocityView without
@@ -50,7 +49,7 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityConfigurer.java,v 1.13 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: VelocityConfigurer.java,v 1.14 2004-04-22 07:58:27 jhoeller Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.19 2004-03-23 20:16:59 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.20 2004-04-22 07:58:23 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -337,7 +337,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		return "Root bean with class [" + getBeanClassName() + "] defined in " + getResourceDescription();
+		StringBuffer sb = new StringBuffer("Root bean with class [");
+		sb.append(getBeanClassName()).append(']');
+		if (getResourceDescription() != null) {
+			sb.append(" defined in ").append(getResourceDescription());
+		}
+		return sb.toString();
 	}
 
 }
