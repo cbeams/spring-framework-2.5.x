@@ -23,7 +23,7 @@
     </para>
     <para>
         This document provides a reference guide to Spring's features.
-        Since this document is still work-in-progress, you if you have any
+        Since this document is still work-in-progress, if you have any
         requests, comments, please post them on the userlist or on the
         forum at the SourceForge project page:
         <ulink url="http://www.sf.net/projects/springframework"/> 
@@ -74,7 +74,8 @@
 			<emphasis>context</emphasis> package,
 			providing a way to access beans in a framework-style manner,
 			somewhat resembling a JNDI-registry. The context package inherits
-			its features from the beans package and adds messaging, 
+			its features from the beans package and adds support text messaging using
+			e.g. resource bundles, 
 			event-propagation, resource-loading and transparent
 			creation of contexts by, for example, a servlet container.
 		</para>
@@ -228,6 +229,7 @@
 			for use in scalable failsafe webapplications, that might need declarative security.
 		</para>
 	</sect1>
+	
 </chapter>
 
 

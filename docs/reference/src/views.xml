@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--$Id: views.xml,v 1.7 2004-02-25 00:35:34 davison Exp $-->
+<!--$Id: views.xml,v 1.8 2004-02-25 22:58:56 aarendsen Exp $-->
 <chapter id="view">
 
     <title>Integrating view technologies</title>
@@ -23,6 +23,85 @@
             basics of how views in general are coupled to the MVC
             framework.</para>
 		
+	</sect1>
+	
+	<sect1 id="view-jsp">
+		<title>Using Spring together with JSP &amp; JSTL</title>
+		<para>
+			Spring provides a couple out-of-the-box view when in need for
+			JSP and JSTL views (which in fact happen to be the most popular ones).
+			Using JSP (and also JSTL) is done using a normal viewresolver defined
+			in the WebApplicationContext. Furthermore, of course you need to write
+			some JSPs that will actually render the view. This part describes some
+			of the features and additional things Spring provides to facilitate
+			JSP development.
+		</para>
+		<sect2 id="view-jsp-resolver">
+			<title>View resolvers</title>
+			<para> 
+				Just as with any other view technology you're integrating with
+				Spring, for JSPs you'll need a view resolver that will resolve your
+				views. The most commonly used view resolvers when developing with JSPs				
+				are the <literal>InternalResourceViewResolver</literal> and the
+				<literal>ResourceBundleViewResolver</literal>. Both are declared in
+				the WebApplicationContext:				
+			</para>
+			<programlisting><![CDATA[
+# The ResourceBundleViewResolver:
+<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+	<property name="basename"><value>views</value></property>
+</bean>
+
+# And a sample properties file is uses (views.properties in WEB-INF/classes):
+welcome.class=org.springframework.web.servlet.view.JstlView
+welcome.url=/WEB-INF/jsp/welcome.jsp
+
+productList.class=org.springframework.web.servlet.view.JstlView
+productList.url=/WEB-INF/jsp/productlist.jsp
+			]]></programlisting>
+
+			<para>
+				As you can see, the ResourceBundleViewResolver needs a properties file defining
+				the view names mapped to 1) a class and 2) a URL. With a ResourceBundleViewResolver
+				you can mix different types of views using only one resolver.
+			</para>
+			<programlisting><![CDATA[
+<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="viewClass"><value>org.springframework.web.servlet.view.JstlView</value></property>
+	<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+	<property name="suffix"><value>.jsp</value></property>
+</bean>			
+			]]></programlisting>
+			<para>
+				The InternalResourceBundleViewResolver can be configured for using JSPs as
+				described above. As probably already stated earlier on, we strongly encourage to
+				place JSP files in a a directory under the WEB-INF directory, since there they can't
+				be access directly by clients.
+			</para>
+		</sect2>
+		<sect2 id="view-jsp-jstl">
+			<title>'Plain-old' JSPs versus JSTL</title>
+			<para>
+				When using Java Standard Tag Library you need to use a special viewclass, i.e.
+				the <literal>JstlView</literal>. JSTL needs some preparation before things
+				like the i18N features. So remember: when using JSTL, use the JstlView.
+			</para>
+		</sect2>
+		<sect2 id="view-jsp-tags">
+			<title>Additional tags facilitating development</title>
+			<para>
+				Spring provides data binding of request parameters to command objects as described
+				in earlier chapters. To facilitate the development of JSP pages in combination
+				with those data binding features, Spring provides a couple of tags that ease the pain
+				(if that should even arise ;-). All Spring have <emphasis>html escaping</emphasis>
+				features to enable or disable escaping of characters.
+			</para>
+			<para>
+				The tag libarry descriptor (TLD) is included in the <literal>spring.jar</literal> as well
+				in the distribution itself.	More information about the individual tags can be found online:
+				<ulink url="http://www.springframework.org/docs/taglib/index.html"/>.
+			</para>
+		</sect2>
 	</sect1>
 	
 	<!-- ============================================================ -->

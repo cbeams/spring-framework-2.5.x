@@ -70,7 +70,7 @@
 		</para>
 		<para>
 			<emphasis>Note: there has been a lot of confusion about the use of the ApplicationContext as opposed to the 
-			BeanFactory. Basically when building applications in a J2EE-environment you're
+			BeanFactory. Basically when building applications in a J2EE-environment,
 			the better option would be to use the ApplicationContext, since it offers a more framework
 			style usage of the Spring Framework and can be initialized using a ServletContextListener
 			like the <literal>ContextLoaderListener</literal>.</emphasis>
@@ -581,7 +581,7 @@ public class ExampleBean {
 					</para>
 					<para>
 					<programlisting><![CDATA[
-<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init()"/>
+<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
 
 public class ExampleBean {
 	public void init() {
@@ -795,7 +795,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 		</sect1>
 		
 		<sect1 id="beans-factory-customizing">
-			<title>Customizing the BeanFactory (advanced stuff)</title>	
+			<title>Customizing the BeanFactory</title>	
 			<para>
 				When in need for special behavior for the BeanFactory you need to consult the
 				<literal>org.springframework.beans.factory.config</literal>-package, which
@@ -848,13 +848,25 @@ jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root
 				]]></programlisting>
-				<programlisting><![CDATA[=
+				<programlisting><![CDATA[
 XmlBeanFactory factory = new XmlBeanFactory(new FileInputStream("beans.xml"));
+
 Properties props = new Properties();
 props.load(new FileInputStream("jdbc.properties"));
+
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer(props);
 cfg.postProcessBeanFactory(factory);
 				]]></programlisting>
+				<para>
+					The <literal>PropertyPlaceHolderConfigurer</literal> does not only look for
+					properties in the properties file you're defining, but also checks against the
+					System properties if it cannot find the properties you're trying to replace.
+					This behavior can be customized by tweaking with the <literal>systemPropertiesMode</literal>
+					property of the configurer. It has three values, one to tell the configurer to always
+					override, one to let it <emphasis>never</emphasis> override and one to let it
+					override only if the property cannot be found in the properties file specified. Please
+					consult the JavaDoc for the PropertiesPlaceHolderConfigurer for more information.
+				</para>
 								
 			</sect2>
 		</sect1>
@@ -1373,8 +1385,12 @@ cfg.postProcessBeanFactory(factory);
 				<programlisting><![CDATA[
 public class EmailBean implements ApplicationContextAware {
 
-	/** the blacklist, setter ommitted for brevity */
+	/** the blacklist */
 	private List blackList;
+	
+	public void setBlackList(List blackList) {
+		this.blackList = blackList;
+	}
 	
 	public void setApplicationContext(ApplicationContext ctx) {
 		this.ctx = ctx;
@@ -1392,8 +1408,12 @@ public class EmailBean implements ApplicationContextAware {
 
 public class BlackListNotifier implement ApplicationListener {
 
-	/** notification address, setter left our for brevity */
+	/** notification address */
 	private String notificationAddress;
+	
+	public void setNotificationAddress(String notificationAddress) {
+		this.notificationAddress = notificationAddress;
+	}
 
 	public void onApplicationEvent(ApplicationEvent evt) {
 		if (evt instanceof BlackListEvent) {
