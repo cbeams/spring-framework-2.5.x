@@ -143,14 +143,14 @@ public class FlowAction extends TemplateAction {
 		// end struts specific
 
 		FlowExecution flowExecution;
-		ModelAndView viewDescriptor = null;
+		ModelAndView viewDescriptor;
 
 		if (getStringParameter(request, getFlowExecutionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
 			Flow flow = getFlow(mapping);
 			flowExecution = createFlowExecution(flow);
-			flowExecution.start(null, request, response);
+			viewDescriptor = flowExecution.start(null, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -182,7 +182,7 @@ public class FlowAction extends TemplateAction {
 								+ flowExecution.getCaption() + "' -- programmer error?");
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
-				logger.error("The event submitted by the browser was '" + getNotSetEventIdParameterMarker()
+				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '" + getNotSetEventIdParameterMarker()
 						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
 						+ getEventIdParameterName()
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
