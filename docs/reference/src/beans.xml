@@ -1499,16 +1499,174 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
   </sect1>
 
   <sect1 id="beans-factory-customizing">
-    <title>Customizing the BeanFactory</title>
+    <title>Customizing beans with BeanPostprocessors</title>
 
-    <para>When in need of special behavior in the BeanFactory you need to
-    consult the <literal>org.springframework.beans.factory.config</literal>
-    package, which should provide you all the things you need. Using the
-    config package you can for instance define a properties file of which the
-    property-entries are used as replacements values in the BeanFactory. Also,
-    you can implement custom behavior (like adding custom editors) using the
-    BeanFactoryPostProcessor. Each of the features the config-package offers
-    is described below:</para>
+    <para>A bean post-processor is a java class which implements the
+    <literal>org.springframework.beans.factory.config.BeanPostProcessor</literal>
+    interface, which consists of two callback methods. When such a class is
+    registered as a post-processor with the BeanFactory, for each bean
+    instance that is created by the BeanFactory, the post-processor will get a
+    callback from the BeanFactory before any initialization methods
+    (<emphasis>afterPropertiesSet</emphasis> and any declared init method) are
+    called, and also afterwards.The post-processor is free to do what it
+    wishes with the bean, including ignoring the callback completely. A bean
+    post-processor will typically check for marker interfaces, or do something
+    such as wrap a bean with a proxy. Some Spring helper classes are
+    implemented as bean post-processors.</para>
+
+    <para>It is important to know that a BeanFactory treats bean
+    post-processors slightly differently than an ApplicationContext. An
+    ApplicationContext will automatically detect any beans which are deployed
+    into it which implement the <literal>BeanPostProcessor</literal>
+    interface, and register them as post-processors, to be then called
+    appropriately by the factory on bean creation. Nothing else needs to be
+    done other than deploying the post-processor in a similar fashion to any
+    other bean. On the other hand, when using plain BeanFactories, bean
+    post-processors have to manually be <emphasis>explicitly</emphasis>
+    registerd, with a code sequence such as the following:<programlisting>ConfigurableBeanFactory bf = new .....;     // create BeanFactory
+   ...                       // now register some beans
+// now register any needed BeanPostProcessors
+MyBeanPostProcessor pp = new MyBeanPostProcessor();
+bf.addBeanPostProcessor(pp);
+
+// now start using the factory
+  ...</programlisting></para>
+
+    <para>Since this manual registration step is not convenient, and
+    ApplictionContexts are functionally supersets of BeanFactories, it is
+    generally recommended that ApplicationContext variants are used when bean
+    post-processors are needed.</para>
+  </sect1>
+
+  <sect1 id="beans-factory-customizing-factory-postprocessors">
+    <title>Customizing bean factories with BeanFactoryPostprocessors</title>
+
+    <para>A bean factory post-processor is a java class which implements the
+    <literal>org.springframework.beans.factory.config.BeanFactoryPostProcessor</literal>
+    interface. It is executed manually (in the case of the BeanFactory) or
+    automatically (in the case of the ApplicationContext) to apply changes of
+    some sort to an entire BeanFactory, after it has been constructed. Spring
+    includes a number of pre-existing bean factory post-processors, such as
+    the <literal>PropertyResourceConfigurer</literal> and the
+    <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
+    and <literal>BeanNameAutoProxyCreator</literal>, very useful for wrapping
+    other beans transactionally or with any other kind of proxy, as described
+    later in this manual. The BeanFactoryPostProcessor can be used to add
+    custom editors (as also mentioned in <xref
+    linkend="beans-beans-conversion" />).</para>
+
+    <para>In a BeanFactory, the processo of applying a
+    BeanFactoryPostProcessor is manual, and will be similar to this:</para>
+
+    <para><programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+// create placeholderconfigurer to bring in some property
+// values from a Properties file
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
+// now actually do the replacement
+cfg.postProcessBeanFactory(factory);</programlisting></para>
+
+    <para>An ApplicationContext will detect any beans which are deployed into
+    it which implement the <literal>BeanFactoryPostProcessor</literal>
+    interface, and automatically use them as bean factory post-processors, at
+    the appropriate time. Nothing else needs to be done other than deploying
+    these post-processor in a similar fashion to any other bean.</para>
+
+    <para>Since this manual step is not convenient, and ApplictionContexts are
+    functionally supersets of BeanFactories, it is generally recommended that
+    ApplicationContext variants are used when bean factory post-processors are
+    needed.</para>
+
+    <sect2 id="beans-factory-placeholderconfigurer">
+      <title>The <literal>PropertyPlaceholderConfigurer</literal></title>
+
+      <para>The <literal>PropertyPlaceholderConfigurer</literal>, implemented
+      as a bean factory post-processor, is used to externalize some property
+      values from a BeanFactory definition, into another separate file in Java
+      Properties format. This is useful to allow the person deploying an
+      application to customize some key properties (for example database URLs,
+      usernames and passwords), without the complexity or risk of modifying
+      the main XML definition file or files for the BeanFactory.</para>
+
+      <para>Consider a fragment from a BeanFactory definition, where a
+      DataSource with placeholder values is defined:</para>
+
+      <para>In the example below, a datasource is defined, and we will
+      configure some properties from an external Properties file. At runtime,
+      we will apply a <literal>PropertyPlaceholderConfigurer</literal> to the
+      BeanFactory which will replace some properties of the datasource:</para>
+
+      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>The actual values come from another file in Properties
+      format:</para>
+
+      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://production:9002
+jdbc.username=sa
+jdbc.password=root</programlisting>
+
+      <para>To use this with a BeanFactory, the bean factory post-processor is
+      manually executed on it:</para>
+
+      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
+cfg.postProcessBeanFactory(factory);</programlisting>
+
+      <para>Note that ApplicationContexts are able to automatically recognize
+      and apply beans deployed in them which implement
+      BeanFactoryPostProcessor. This means that as described here, applying
+      PropertyPlaceholderConfiguer is much more convenient when using an
+      ApplicationContext. For this reason, it is recommended that users
+      wishing to use this or other bean factory postprocessors use an
+      ApplicationContext instead of a BeanFactory.</para>
+
+      <para>The <literal>PropertyPlaceHolderConfigurer</literal> doesn't only
+      look for properties in the Properties file you specify, but also checks
+      against the Java System properties if it cannot find a property you are
+      trying to use. This behavior can be customized by setting the
+      <literal>systemPropertiesMode</literal> property of the configurer. It
+      has three values, one to tell the configurer to always override, one to
+      let it <emphasis>never</emphasis> override and one to let it override
+      only if the property cannot be found in the properties file specified.
+      Please consult the JavaDoc for the PropertiesPlaceHolderConfigurer for
+      more information.</para>
+    </sect2>
+
+    <sect2 id="beans-factory-placeholderconfigurer">
+      <title>The <literal>PropertyOverrideConfigurer</literal></title>
+
+      <para>The <literal>PropertyOverrideConfigurer</literal> is similar to
+      the <literal>PropertyPlaceholderConfigurer</literal>, but in contrast to
+      the latter, the original definitions can have default values or no
+      values at all for bean properties. If an overriding Properties file does
+      not have an entry for a certain bean property, the default context
+      definition is used.</para>
+
+      <para>Note that the bean factory definition is <emphasis>not</emphasis>
+      aware of being overridden, so it is not immediately obvious when looking
+      at the XML definition file that the override configurer is being used.
+      In case that there are multiple PropertyOverrideConfigurers that define
+      different values for the same bean property, the last one will win (due
+      to the overriding mechanism).</para>
+
+      <para>Properties file configuration lines are expected to be in the
+      format:<programlisting><emphasis>beanName.property=value</emphasis></programlisting></para>
+
+      <para>An example properties file could look like:<programlisting>dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql:mydb</programlisting></para>
+
+      <para>This example file would be usable against a BeanFactory definition
+      which contains a bean in it called <emphasis>dataSource</emphasis>,
+      which has <emphasis>driver</emphasis> and <emphasis>url</emphasis>
+      properties.</para>
+    </sect2>
   </sect1>
 
   <sect1 id="context-introduction">
@@ -1517,12 +1675,12 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     <para>While the <literal>beans</literal> package provides basic
     functionality for managing and manipulating beans, often in a programmatic
     way, the <literal>ApplicationContext</literal> introduces BeanFactory
-    functionality in a more <emphasis>framework-style</emphasis> approach.
-    Instead of programmatically loading beans using for example the
-    XmlBeanFactory and retrieving them using the <literal>getBean()</literal>
-    method, with the ApplicationContext you will be able to let the framework
-    you're working in load your beans using for example the
-    <literal>ContextLoader</literal>.</para>
+    functionality in a more <emphasis>framework-oriented style</emphasis>.
+    Instead of programmatically loading beans using, for example the
+    XmlBeanFactory and then retrieving them using the
+    <literal>getBean()</literal> method, with the ApplicationContext you will
+    be able to let the framework you're working in load your beans using for
+    example the <literal>ContextLoader</literal>.</para>
 
     <para>The basis for the context package is the
     <literal>ApplicationContext</literal> interface, located in the
@@ -1581,36 +1739,36 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
       <title>Using the <literal>MessageSource</literal></title>
 
       <para>The ApplicationContext interface extends an interface called
-      <literal>MessageSource</literal>, and therefore provides messaging
-      (i18n) functionality. Together with the
-      <literal>NestingMessageSource</literal>, capable of hierarchical message
-      resolving, these are the basic interfaces Spring provides to do message
-      resolving. Let's quickly review the methods defined there: <itemizedlist
-          spacing="compact">
+      <literal>MessageSource</literal>, and therefore provides messaging (i18n
+      - internationalization) functionality. Together with the
+      <literal>NestingMessageSource</literal>, capable of resolving
+      hierarchical messages, these are the basic interfaces Spring provides to
+      do message resolution. Let's quickly review the methods defined there:
+      <itemizedlist spacing="compact">
           <listitem>
             <para><literal>String getMessage (String code, Object[] args,
-            String default, Locale loc)</literal>: the basic method to
-            retrieve a message from the MessageSource. When no message could
-            be found for the locale specified, the default message is used.
-            Any arguments passed in are used as replacement values, using the
+            String default, Locale loc)</literal>: the basic method used to
+            retrieve a message from the MessageSource. When no message is
+            found for the specified locale, the default message is used. Any
+            arguments passed in are used as replacement values, using the
             <literal>MessageFormat</literal> functionality provided by the
-            JDK</para>
+            standard library.</para>
           </listitem>
 
           <listitem>
             <para><literal>String getMessage (String code, Object[] args,
-            Locale loc)</literal>: basically the same as the one above with
-            one difference: the fact that no default message can be specified
-            results in a <literal>NoSuchMessageException</literal> being
-            thrown if the message could not be found</para>
+            Locale loc)</literal>: essentially the same as the previous
+            method, but with one difference: no default message can be
+            specified; if the message can not be found, a
+            <literal>NoSuchMessageException</literal> is thrown.</para>
           </listitem>
 
           <listitem>
             <para><literal>String getMessage(MessageSourceResolvable
             resolvable, Locale locale)</literal>: all properties used in the
-            methods above are also wrapped in a class - the
-            <literal>MessageSourceResolvable</literal>, which you can use in
-            this method</para>
+            methods above are also wrapped in a class named
+            <literal>MessageSourceResolvable</literal>, which you can use via
+            this method.</para>
           </listitem>
         </itemizedlist></para>
 
@@ -1619,14 +1777,14 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
       the name <literal>messageSource</literal>. If such a bean is found, all
       calls to the methods desribed above will be delegated to the message
       source that was found. If no message source was found, the
-      ApplicationContext inspects to see if it has a parent containing a
-      similar bean, with a similar name. If so, it uses that bean as the
+      ApplicationContext inspects attempts to see if it has a parent
+      containing a bean with the same name. If so, it uses that bean as the
       MessageSource. If it can't find any source for messages, an empty
       <literal>StaticMessageSource</literal> will be instantiated in order to
       be able to accept calls to the methods defined above.</para>
 
-      <para>Spring provides two <literal>MessageSource</literal>
-      implementations at the moment. These are the
+      <para>Spring currently provides two <literal>MessageSource</literal>
+      implementations. These are the
       <literal>ResourceBundleMessageSource</literal> and the
       <literal>StaticMessageSource</literal>. Both implement
       <literal>NestingMessageSource</literal> in order to do nested messaging.
@@ -1847,95 +2005,79 @@ public class BlackListNotifier implement ApplicationListener {
     </sect2>
   </sect1>
 
-  <sect1 id="context-markers">
-    <title>Extra marker interfaces and lifecycle features</title>
+  <sect1 id="beans-context-customization">
+    <title>Customized behavior in the ApplicationContext</title>
 
-    <para>The BeanFactory already offers you some methods to control the
-    lifecycle of your beans (like <literal>InitializingBean</literal> or
-    <literal>init-method</literal> and its counterpart,
-    <literal>DisposableBean</literal> or <literal>destroy-method</literal>).
-    The <literal>context</literal> package builds on top of the BeanFactory so
-    you can use those features in the context package as well. Besides the
-    lifecycle features, the ApplicationContext has one extra marker interface
-    you can add to your beans, the <literal>ApplicationContextAware</literal>
-    interface. This interface will be used to let the bean know about the
-    ApplicationContext it is <emphasis>contained</emphasis> in, using the
-    <literal>setApplicationContext()</literal> method, which provides the
-    ApplicationContext as an argument.</para>
-  </sect1>
+    <para>The BeanFactory already offers a number of mechanisms to control the
+    lifecycle of beans deployed in it (such as marker interfaces like
+    <literal>InitializingBean</literal> or <literal>DisposableBean</literal>,
+    their configuration only equivalents such as the
+    <literal>init-method</literal> and <literal>destroy-method</literal>
+    attributes in an XmlBeanFactory config, and bean post-processors. In an
+    ApplicationContext, all of these still work, but additional mechanisms are
+    added for customizing behaviour of beans and the container.</para>
 
-  <sect1 id="context-customization">
-    <title>Customization of the ApplicationContext</title>
+    <sect2 id="beans-context-applicationcontextaware">
+      <title><literal>ApplicationContextAware</literal> marker
+      interface</title>
 
-    <para>Where the BeanFactory can be customized programmatically using
-    <literal>BeanFactoryPostProcessor</literal>, the ApplicationContext can be
-    customized using special beans, defined in your ApplicationContext</para>
-
-    <sect2 id="beans-factory-postprocessor">
-      <title>The <literal>BeanFactoryPostProcessor</literal></title>
-
-      <para>org.springframework.beans.factory.config.BeanFactoryPostProcessor
-      is the superclass for all post processors that are capable of
-      automatically applying changes to the ApplicationContext (or beans in
-      it) after the factory has been initialized. (BeanFactoryPostProcessors
-      are in fact also usable with regular BeanFactories, but do not get
-      applied automatically. Rather than trying to modify your code to apply
-      these post-processors to simple BeanFactories, it's easier to just use
-      ApplicationContexts). The BeanFactoryPostProcessor can be used to add
-      custom editors (as also mentioned in <xref
-      linkend="beans-beans-conversion" />). Some out-of-the-box post
-      processors are available, like the
-      <literal>PropertyResourceConfigurer</literal> and the
-      <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
-      and <literal>BeanNameAutoProxyCreator</literal>, very useful for
-      wrapping other beans transactionally, as described later in this
-      manual.</para>
+      <para>All marker interfaces availalble with BeanFactories still work.
+      The ApplicationContext does add one extra marker interface which beans
+      may implement,
+      <literal>org.springframework.context.ApplicationContextAware</literal>.
+      A bean which implements this interface and is deployed into the context
+      will be called back on creation of the bean, using the interface's
+      <literal>setApplicationContext()</literal> method, and provided with a
+      reference to the context, which may be stored for later interaction with
+      the context.</para>
     </sect2>
 
-    <sect2 id="beans-factory-placeholderconfigurer">
+    <sect2 id="beans-context-beanpostprocessor">
+      <title>The <literal>BeanPostProcessor</literal></title>
+
+      <para>Bean post-processors, java classes which implement the
+      <literal>org.springframework.beans.factory.config.BeanPostProcessor</literal>
+      interface, have <link linkend="beans-factory-customizing">already</link>
+      been mentioned. It is worth mentioning again here though, that
+      post-processors are much more convenient to use in ApplicationContexts
+      than in plain BeanFactories. In an ApplicationContext, any deployed bean
+      which implements the above marker interface is automatically detected
+      and registerd as a bean post-processor, to be called appropriately at
+      creation time for each bean in the factory.</para>
+    </sect2>
+
+    <sect2 id="beans-context-beanfactorypostprocessor">
+      <title>The <literal>BeanFactoryPostProcessor</literal></title>
+
+      <para>Bean factory post-processors, java classes which implement the
+      <literal>org.springframework.beans.factory.config.BeanFactoryPostProcessor</literal>
+      interface, have <link
+      linkend="beans-factory-customizing-factory-postprocessor">already</link>
+      been mentioned. It is worth mentioning again here though, that bean
+      factory post-processors are much more convenient to use in
+      ApplicationContexts than in plain BeanFactories. In an
+      ApplicationContext, any deployed bean which implements the above marker
+      interface is automatically detected as a bean factory post-processor, to
+      be called at the appropriate time.</para>
+    </sect2>
+
+    <sect2 id="beans-context-placeholderconfigurer">
       <title>The <literal>PropertyPlaceholderConfigurer</literal></title>
 
-      <para>The <literal>PropertyPlaceholderConfigurer</literal> is an
-      excellent solution when you want to externalize a few properties from a
-      file containing bean definitions. Say you want to let the person
-      responsible for deploying applications just fill in database URLs,
-      usernames and passwords. You could of course let him change the XML file
-      containing bean definitions, but that would be risky. Instead, use the
-      <literal>PropertyPlaceHolderConfigurer</literal> to - at runtime -
-      replace those properties by values from a properties file.</para>
+      <para>The <literal>PropertyPlaceholderConfigurer</literal> has <link
+      linkend="beans-factory-placeholderconfigurer">already</link> been
+      described, as used with a BeanFactory. It is worth mentioning here
+      though, that it is generally more convenient to use it with an
+      ApplicationContext, since the context will automatically recognize and
+      apply any bean factory post-processors, such as this one, when they are
+      simply deployed into it like any other bean. There is no need for a
+      manual step to execute it.</para>
 
-      <para>In the example below, a datasource is defined, and we will
-      configure some properties from an external Properties file. At runtime,
-      we will apply a <literal>PropertyPlaceholderConfigurer</literal> to the
-      BeanFactory which will replace some properties of the datasource:</para>
-
-      <programlisting>&lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-    &lt;property name="driverClassName"&gt;&lt;value&gt;${jdbc.driverClassName}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="url"&gt;&lt;value&gt;${jdbc.url}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="username"&gt;&lt;value&gt;${jdbc.username}&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="password"&gt;&lt;value&gt;${jdbc.password}&lt;/value&gt;&lt;/property&gt;
+      <programlisting>&lt;!-- property placeholder post-processor --&gt;
+&lt;bean id="placeholderConfig"
+      class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+    &lt;property name="location"&gt;&lt;value&gt;jdbc.properties&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
-
-      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
-jdbc.url=jdbc:hsqldb:hsql://production:9002
-jdbc.username=sa
-jdbc.password=root</programlisting>
-
-      <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
-PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
-cfg.setLocation(new FileSystemResource("jdbc.properties"));
-cfg.postProcessBeanFactory(factory);</programlisting>
-
-      <para>The <literal>PropertyPlaceHolderConfigurer</literal> does not only
-      look for properties in the properties file you're defining, but also
-      checks against the System properties if it cannot find the properties
-      you're trying to replace. This behavior can be customized by tweaking
-      with the <literal>systemPropertiesMode</literal> property of the
-      configurer. It has three values, one to tell the configurer to always
-      override, one to let it <emphasis>never</emphasis> override and one to
-      let it override only if the property cannot be found in the properties
-      file specified. Please consult the JavaDoc for the
-      PropertiesPlaceHolderConfigurer for more information.</para>
     </sect2>
   </sect1>
 
