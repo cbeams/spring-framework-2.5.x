@@ -284,9 +284,10 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	// methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
+		Assert.isInstanceOf(Serializable.class, attributeValue,
+				"attributes stored in the flow session should be Serializable");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue
-					+ "'");
+			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue + "'");
 		}
 		this.attributes.put(attributeName, attributeValue);
 	}
