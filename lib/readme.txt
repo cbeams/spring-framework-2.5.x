@@ -26,8 +26,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-2.0.jar, cglib/asm.jar
-- CGLIB 2.0 with ObjectWeb ASM 1.4 (http://cglib.sourceforge.net)
+* cglib/cglib-2.0.1.jar, cglib/asm.jar
+- CGLIB 2.0.1 with ObjectWeb ASM 1.4 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
 
@@ -63,7 +63,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore and Petclinic
 
 * ibatis/ibatis-common.jar, ibatis/ibatis-sqlmap.jar, ibatis/ibatis-sqlmap-2.jar
-- iBATIS SQL Maps 1.3.1 and 2.0 RC1 (http://www.ibatis.com)
+- iBATIS SQL Maps 1.3.1 and 2.0 RC3 (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps support
 
@@ -156,7 +156,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-lang.jar
-- Commons Lang 1.0 (http://jakarta.apache.org/commons/lang)
+- Commons Lang 1.0.1 (http://jakarta.apache.org/commons/lang)
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-logging.jar
@@ -231,13 +231,18 @@ distribution/website before using any of them in your own applications.
 * struts/struts-1.1.jar
 - Apache Struts 1.1 (http://jakarta.apache.org/struts)
 - required for building the framework
-- required at runtime when using Spring's TilesView
+- required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
 
-* velocity/velocity-1.4-rc1.jar
-- Velocity 1.4 RC1 (http://jakarta.apache.org/velocity)
+* velocity/velocity-1.4.jar
+- Velocity 1.4 (http://jakarta.apache.org/velocity)
 - required for building the framework
 - required at runtime when using Spring's VelocityView
+
+* velocity/velocity-tools-generic-1.1-rc1.jar
+- Velocity Tools 1.1 RC1 (http://jakarta.apache.org/velocity/tools)
+- required for building the framework
+- required at runtime when using VelocityView's support for Velocity Tools
 
 * xdoclet/xjavadoc-1.0.jar
 - XDoclet 1.0 (http://xdoclet.sourceforge.net)
