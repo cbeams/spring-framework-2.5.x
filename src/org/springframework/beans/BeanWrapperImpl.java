@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// Register default editors in this class, for restricted environments.
 		// We're not using the JRE's PropertyEditorManager to avoid potential
 		// SecurityExceptions when running in a SecurityManager.
-		this.defaultEditors = new HashMap(20);
+		this.defaultEditors = new HashMap(32);
 
 		// Simple editors, without parameterization capabilities.
 		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
@@ -668,8 +668,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		nestedBw.setPropertyValue(tokens, value);
 	}
 
-	protected void setPropertyValue(PropertyTokenHolder tokens, Object value)
-			throws BeansException {
+	protected void setPropertyValue(PropertyTokenHolder tokens, Object value) throws BeansException {
 		String propertyName = tokens.canonicalName;
 
 		if (tokens.keys != null) {
