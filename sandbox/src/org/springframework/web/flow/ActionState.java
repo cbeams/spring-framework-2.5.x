@@ -15,16 +15,12 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * A state that executes one or more action beans when entered.
@@ -34,210 +30,46 @@ public class ActionState extends TransitionableState {
 
 	private Set actionBeans = new LinkedHashSet(1);
 
-	public ActionState(String id) {
-		super(id);
-		setActionBeanName(createActionBeanName(id));
-	}
-
-	public ActionState(String id, Transition transition) {
-		super(id, transition);
-		setActionBeanName(createActionBeanName(id));
-	}
-
-	public ActionState(String id, Transition[] transitions) {
-		super(id, transitions);
-		setActionBeanName(createActionBeanName(id));
-	}
-
-	public ActionState(String id, ActionBean actionBean, Transition transition) {
-		super(id, transition);
-		setActionBean(actionBean);
-	}
-
-	public ActionState(String id, ActionBean actionBean, Transition[] transitions) {
-		super(id, transitions);
-		setActionBean(actionBean);
-	}
-
-	public ActionState(String id, ActionBean[] actionBeans, Transition[] transitions) {
-		super(id, transitions);
-		setActionBeans(actionBeans);
-	}
-
-	public ActionState(String id, String actionBeanName, Transition transition) {
-		super(id, transition);
-		setActionBeanName(actionBeanName);
-	}
-
-	public ActionState(String id, String actionBeanName, Transition[] transitions) {
-		super(id, transitions);
-		setActionBeanName(actionBeanName);
-	}
-
-	public ActionState(String id, String[] actionBeanNames, Transition[] transitions) {
-		super(id, transitions);
-		setActionBeanNames(actionBeanNames);
-	}
-
-	public ActionState(Flow flow, String id) {
-		super(flow, id);
-		setActionBeanName(createActionBeanName(id));
-	}
-
-	public ActionState(Flow flow, String id, Transition transition) {
-		super(flow, id, transition);
-		setActionBeanName(createActionBeanName(id));
-	}
-
-	public ActionState(Flow flow, String id, Transition[] transitions) {
-		super(flow, id, transitions);
-		setActionBeanName(createActionBeanName(id));
-	}
-
 	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
 		super(flow, id, transition);
-		setActionBean(actionBean);
+		addActionBean(actionBean);
 	}
 
 	public ActionState(Flow flow, String id, ActionBean actionBean, Transition[] transitions) {
 		super(flow, id, transitions);
-		setActionBean(actionBean);
+		addActionBean(actionBean);
 	}
 
 	public ActionState(Flow flow, String id, ActionBean[] actionBeans, Transition[] transitions) {
 		super(flow, id, transitions);
-		setActionBeans(actionBeans);
-	}
-
-	public ActionState(Flow flow, String id, String actionBeanName, Transition transition) {
-		super(flow, id, transition);
-		setActionBeanName(actionBeanName);
-	}
-
-	public ActionState(Flow flow, String id, String actionBeanName, Transition[] transitions) {
-		super(flow, id, transitions);
-		setActionBeanName(actionBeanName);
-	}
-
-	public ActionState(Flow flow, String id, String[] actionBeanNames, Transition[] transitions) {
-		super(flow, id, transitions);
-		setActionBeanNames(actionBeanNames);
-	}
-
-	protected String createActionBeanName(String id) {
-		return id;
-	}
-	
-	private static class ActionBeanHolder {
-		private String actionBeanName;
-
-		private ActionBean actionBean;
-
-		private ActionBeanHolder(String actionBeanName) {
-			Assert.hasText(actionBeanName, "The action bean name is required");
-			this.actionBeanName = actionBeanName;
-		}
-
-		private ActionBeanHolder(ActionBean actionBean) {
-			Assert.notNull(actionBean, "The action bean instance is required");
-			this.actionBean = actionBean;
-		}
-
-		public boolean equals(Object o) {
-			if (!(o instanceof ActionBeanHolder)) {
-				return false;
-			}
-			ActionBeanHolder holder = (ActionBeanHolder)o;
-			return ObjectUtils.nullSafeEquals(actionBeanName, holder.actionBeanName)
-					&& ObjectUtils.nullSafeEquals(actionBean, holder.actionBean);
-		}
-
-		public int hashCode() {
-			return ((actionBeanName != null ? actionBeanName.hashCode() : 0) + (actionBean != null ? actionBean
-					.hashCode() : 0));
-		}
+		addActionBeans(actionBeans);
 	}
 
 	public boolean isActionState() {
 		return true;
 	}
 
-	public void setActionBean(ActionBean actionBean) {
-		this.actionBeans = new LinkedHashSet(1);
-		addActionBean(actionBean);
+	protected void addActionBean(ActionBean actionBean) {
+		this.actionBeans.add(actionBean);
 	}
 
-	public void setActionBeanName(String actionBeanName) {
-		this.actionBeans = new LinkedHashSet(1);
-		addActionBeanName(actionBeanName);
-	}
-
-	public void setActionBeans(ActionBean[] actionBeans) {
-		this.actionBeans = new LinkedHashSet(actionBeans.length);
-		addActionBeans(actionBeans);
-	}
-
-	public void setActionBeanNames(String[] actionBeanNames) {
-		this.actionBeans = new LinkedHashSet(actionBeanNames.length);
-		addActionBeanNames(actionBeanNames);
-	}
-
-	public boolean addActionBeanName(String actionBeanName) {
-		return this.actionBeans.add(new ActionBeanHolder(actionBeanName));
-	}
-
-	public boolean addActionBean(ActionBean actionBean) {
-		return this.actionBeans.add(new ActionBeanHolder(actionBean));
-	}
-
-	public boolean addActionBeanNames(String[] actionBeanNames) {
-		Collection holders = new LinkedHashSet(actionBeanNames.length);
-		boolean changed = false;
-		for (int i = 0; i < actionBeanNames.length; i++) {
-			if (holders.add(new ActionBeanHolder(actionBeanNames[i]))) {
-				changed = true;
-			}
-		}
-		return changed;
-	}
-
-	public boolean addActionBeans(ActionBean[] actionBeans) {
-		Collection holders = new LinkedHashSet(actionBeans.length);
-		boolean changed = false;
+	protected void addActionBeans(ActionBean[] actionBeans) {
 		for (int i = 0; i < actionBeans.length; i++) {
-			if (holders.add(new ActionBeanHolder(actionBeans[i]))) {
-				changed = true;
-			}
+			this.actionBeans.add(actionBeans[i]);;
 		}
-		return changed;
-	}
-
-	public boolean removeActionBeanName(String actionBeanName) {
-		return this.actionBeans.remove(new ActionBeanHolder(actionBeanName));
-	}
-
-	public boolean removeActionBean(ActionBean actionBean) {
-		return this.actionBeans.remove(new ActionBeanHolder(actionBean));
 	}
 
 	protected ActionBean getActionBean() {
 		Iterator it = actionBeanIterator();
-		if (it.hasNext()) {
-			return (ActionBean)it.next();
-		}
-		else {
-			return null;
-		}
+		return (ActionBean)it.next();
 	}
 
-	protected String getActionBeanName() {
-		Iterator it = actionBeans.iterator();
-		if (it.hasNext()) {
-			return ((ActionBeanHolder)it.next()).actionBeanName;
-		}
-		else {
-			return null;
-		}
+	/**
+	 * @return An iterator that returns the set of action beans to execute for
+	 *         this state.
+	 */
+	protected Iterator actionBeanIterator() {
+		return actionBeans.iterator();
 	}
 
 	/**
@@ -281,34 +113,5 @@ public class ActionState extends TransitionableState {
 							+ "-- programmer configuration error; "
 							+ "make sure you add at least one action bean to this state"));
 		}
-	}
-
-	/**
-	 * @return An iterator that returns the set of action beans to execute for
-	 *         this state.
-	 */
-	protected Iterator actionBeanIterator() {
-		final Iterator it = this.actionBeans.iterator();
-		return new Iterator() {
-			public Object next() {
-				ActionBeanHolder holder = (ActionBeanHolder)it.next();
-				if (holder.actionBean != null) {
-					return holder.actionBean;
-				}
-				else {
-					ActionBean actionBean = (ActionBean)getFlowServiceLocator().getActionBean(holder.actionBeanName);
-					Assert.notNull(actionBean, "The action bean retrieved from the registry must not be null");
-					return actionBean;
-				}
-			}
-
-			public boolean hasNext() {
-				return it.hasNext();
-			}
-
-			public void remove() {
-				throw new UnsupportedOperationException("Remove not allowed");
-			}
-		};
 	}
 }

@@ -53,17 +53,6 @@ public abstract class AbstractState implements Serializable {
 	private String id;
 
 	/**
-	 * Creates a state with the provided the provided <code>id</code>.
-	 * 
-	 * An owning flow must be set before this state is used.
-	 * 
-	 * @param id The state identifier (must be unique to any future flow);
-	 */
-	public AbstractState(String id) {
-		setId(id);
-	}
-
-	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
 	 * provided <code>id</code>.
 	 * 
@@ -82,7 +71,7 @@ public abstract class AbstractState implements Serializable {
 	 * Creates a state for the provided <code>flow</code> identified by the
 	 * provided <code>id</code> in the specified <code>group</code>.
 	 * @param flow the owning flow
-	 * @param id the state identifier 
+	 * @param id the state identifier
 	 * @param groupId The id of the state group
 	 */
 	public AbstractState(Flow flow, String id, String groupId) {
@@ -168,10 +157,6 @@ public abstract class AbstractState implements Serializable {
 		return id;
 	}
 
-	protected FlowServiceLocator getFlowServiceLocator() {
-		return getFlow().getFlowServiceLocator();
-	}
-
 	public boolean equals(Object o) {
 		if (!(o instanceof AbstractState)) {
 			return false;
@@ -194,7 +179,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	public final ViewDescriptor enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected final ViewDescriptor enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + this + "' in flow '" + sessionExecution.getActiveFlowId() + "'");

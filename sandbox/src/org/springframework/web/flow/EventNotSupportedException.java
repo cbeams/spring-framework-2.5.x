@@ -15,11 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-
 import org.springframework.util.DefaultObjectStyler;
 
 /**
@@ -46,20 +41,8 @@ public class EventNotSupportedException extends FlowNavigationException {
 	}
 
 	public String getMessage() {
-		Collection t = state.getTransitions();
-		Collection events;
-		if (!t.isEmpty()) {
-			events = new LinkedHashSet(t.size());
-			Iterator it = t.iterator();
-			while (it.hasNext()) {
-				events.add(((Transition)it.next()).getEventIdCriteria());
-			}
-		}
-		else {
-			events = Collections.EMPTY_SET;
-		}
 		return "No transition found for event '" + eventId + "' in state '" + state.getId() + "' of flow '"
-				+ getFlow().getId() + "' -- valid transitional event criteria are " + DefaultObjectStyler.call(events)
-				+ " -- programmer error?";
+				+ getFlow().getId() + "' -- valid transitional event criteria are "
+				+ DefaultObjectStyler.call(state.getEventIdCriterion()) + " -- programmer error?";
 	}
 }

@@ -30,15 +30,6 @@ public class EndState extends AbstractState {
 
 	private String viewName;
 
-	public EndState(String id) {
-		super(id);
-	}
-
-	public EndState(String id, String viewName) {
-		super(id);
-		setViewName(viewName);
-	}
-
 	public EndState(Flow flow, String id) {
 		super(flow, id);
 	}
@@ -48,7 +39,7 @@ public class EndState extends AbstractState {
 		setViewName(viewName);
 	}
 
-	public void setViewName(String viewName) {
+	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
