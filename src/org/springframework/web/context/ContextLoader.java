@@ -92,10 +92,14 @@ public class ContextLoader {
 	 * @see #CONFIG_LOCATION_PARAM
 	 */
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) throws BeansException {
-		servletContext.log("Loading root WebApplicationContext");
+		long startTime = System.currentTimeMillis();
+		if (logger.isInfoEnabled()) {
+			logger.info("Root WebApplicationContext: initialization started");
+		}
+		servletContext.log("Loading Spring root WebApplicationContext");
 
 		try {
-			// determine parent for root web application context, if any
+			// Determine parent for root web application context, if any.
 			ApplicationContext parent = loadParentContext(servletContext);
 
 			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
@@ -103,9 +107,15 @@ public class ContextLoader {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("Using context class [" + wac.getClass().getName() + "] for root WebApplicationContext");
-				logger.info(
-						"Published root WebApplicationContext [" + wac + "] as ServletContext attribute with name [" +
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Published root WebApplicationContext [" + wac + "] as ServletContext attribute with name [" +
 						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
+			}
+
+			if (logger.isInfoEnabled()) {
+				long elapsedTime = System.currentTimeMillis() - startTime;
+				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
 			}
 
 			return wac;
@@ -161,7 +171,7 @@ public class ContextLoader {
 		if (configLocation != null) {
 			wac.setConfigLocations(
 				StringUtils.tokenizeToStringArray(
-					configLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS, true, true));
+						configLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 
 		wac.refresh();
@@ -188,7 +198,7 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 */
 	public void closeWebApplicationContext(ServletContext servletContext) throws ApplicationContextException {
-		servletContext.log("Closing root WebApplicationContext");
+		servletContext.log("Closing Spring root WebApplicationContext");
 		Object wac = servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (wac instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) wac).close();

@@ -192,7 +192,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected final void initServletBean() throws ServletException, BeansException {
 		long startTime = System.currentTimeMillis();
 		if (logger.isInfoEnabled()) {
-			logger.info("Framework servlet '" + getServletName() + "' init");
+			logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
 		}
 
 		try {
@@ -210,7 +210,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		if (logger.isInfoEnabled()) {
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("Framework servlet '" + getServletName() + "' init completed in " + elapsedTime + " ms");
+			logger.info("FrameworkServlet '" + getServletName() + "': initialization completed in " +
+					elapsedTime + " ms");
 		}
 	}
 
@@ -222,24 +223,26 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * @see #createWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
-		getServletContext().log("Loading WebApplicationContext for servlet '" + getServletName() + "'");
+		getServletContext().log(
+				"Loading WebApplicationContext for Spring FrameworkServlet '" + getServletName() + "'");
 
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = createWebApplicationContext(parent);
 		if (logger.isInfoEnabled()) {
-			logger.info("Using context class [" + wac.getClass().getName() +
-					"] for servlet '" + getServletName() + "'");
+			logger.info("Using context class [" + wac.getClass().getName() + "] for servlet '" +
+					getServletName() + "'");
 		}
 
 		if (this.publishContext) {
 			// publish the context as a servlet context attribute
 			String attName = getServletContextAttributeName();
 			getServletContext().setAttribute(attName, wac);
-			if (logger.isInfoEnabled()) {
-				logger.info("Published WebApplicationContext of servlet '" + getServletName() +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
 						"' as ServletContext attribute with name [" + attName + "]");
 			}
 		}
+
 		return wac;
 	}
 
@@ -255,10 +258,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Servlet with name '" + getServletName() +
+		if (logger.isDebugEnabled()) {
+			logger.debug("Servlet with name '" + getServletName() +
 					"' will try to create custom WebApplicationContext context of class '" +
-					getContextClass().getName() + "'" + " using parent context [" + parent + "]");
+					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
 		}
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
 			throw new ApplicationContextException(
@@ -275,8 +278,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		if (this.contextConfigLocation != null) {
 			wac.setConfigLocations(
 			    StringUtils.tokenizeToStringArray(
-							this.contextConfigLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS,
-							true, true));
+							this.contextConfigLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.refresh();
 		return wac;
@@ -427,7 +429,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * @see org.springframework.context.ConfigurableApplicationContext#close
 	 */
 	public void destroy() {
-		getServletContext().log("Closing WebApplicationContext of servlet '" + getServletName() + "'");
+		getServletContext().log(
+				"Closing WebApplicationContext of Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
