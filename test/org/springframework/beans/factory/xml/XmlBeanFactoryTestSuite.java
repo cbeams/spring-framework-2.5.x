@@ -19,6 +19,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.HasMap;
@@ -29,7 +30,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.16 2003-11-14 16:33:15 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.17 2003-11-15 12:44:27 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -588,6 +589,15 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod5");
 		// Should not have been autowired
 		assertNull(rod.getSpouse());
+	}
+
+	public void testAutowireByConstructorWithClassPathXmlApplicationContext() throws Exception {
+		InputStream is = getClass().getResourceAsStream("autowire.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		BeanFactory appCtx = (BeanFactory) xbf.getBean("childAppCtx");
+		assertTrue(appCtx.getBean("rod1") != null);
+		assertTrue(appCtx.getBean("dependingBean") != null);
+		assertTrue(appCtx.getBean("jenny") != null);
 	}
 
 	public void testSatisfiedAutowireByTypeWithDefault() throws Exception {

@@ -41,4 +41,20 @@
 
 	<bean id="other" class="org.springframework.beans.factory.LifecycleBean"/>
 
+	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
+		<constructor-arg>
+			<value>/org/springframework/beans/factory/xml/collections.xml</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="childAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
+		<constructor-arg>
+			<list>
+				<value>/org/springframework/beans/factory/xml/constructor-arg.xml</value>
+				<value>/org/springframework/beans/factory/xml/initializers.xml</value>
+			</list>
+		</constructor-arg>
+		<constructor-arg><ref bean="parentAppCtx"/></constructor-arg>
+	</bean>
+
 </beans>
