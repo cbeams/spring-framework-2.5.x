@@ -14,7 +14,8 @@ import junit.framework.TestCase;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.util.ClassLoaderUtils;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.mvc.DemoController;
 
@@ -22,23 +23,24 @@ import org.springframework.web.servlet.mvc.DemoController;
  * 
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.1.1.1 2003-08-14 16:21:06 trisberg Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.2 2003-10-13 16:45:26 jhoeller Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
 	private final static String BASE_PATH = "org/springframework/beans/factory/support/";
 	
 	private ListableBeanFactory listableFactory;
-	
-	/**
-	 * Constructor for BeanFactoryUtilsTest.
-	 * @param arg0
-	 */
-	public BeanFactoryUtilsTests(String arg0) throws Exception {
-		super(arg0);
+
+	protected void setUp() {
 		// Interesting hierarchical factory to test counts
 		// Slow to read so we cache it
-		this.listableFactory = new ClassPathXmlApplicationContext(new String[] {BASE_PATH + "root.xml", BASE_PATH + "middle.xml", BASE_PATH + "leaf.xml"});
+		XmlBeanFactory grandParent = new XmlBeanFactory();
+		grandParent.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), BASE_PATH + "root.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(grandParent);
+		parent.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), "middle.xml"));
+		XmlBeanFactory child = new XmlBeanFactory(parent);
+		child.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), "leaf.xml"));
+		this.listableFactory = child;
 	}
 	
 	public void testNoBeansOfType() {
