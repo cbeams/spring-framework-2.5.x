@@ -28,6 +28,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
 import org.springframework.util.ObjectUtils;
 
@@ -90,7 +93,8 @@ import org.springframework.util.ObjectUtils;
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
  */
-public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
+public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
+    implements BeanNameAware, BeanFactoryAware {
 
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
@@ -122,6 +126,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
 	private boolean ignoreUnresolvablePlaceholders = false;
+
+	private String beanName;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -176,17 +184,45 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
+	/**
+	 * Only necessary to check that we're not parsing our own bean definition,
+	 * to avoid failing on unresolvable placeholders in properties file locations.
+	 * The latter case can happen with placeholders for system properties in
+	 * resource locations.
+	 * @see #setLocations
+	 * @see org.springframework.core.io.ResourceEditor
+	 */
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
 
-	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
+	/**
+	 * Only necessary to check that we're not parsing our own bean definition,
+	 * to avoid failing on unresolvable placeholders in properties file locations.
+	 * The latter case can happen with placeholders for system properties in
+	 * resource locations.
+	 * @see #setLocations
+	 * @see org.springframework.core.io.ResourceEditor
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+
+	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
-		String[] beanNames = beanFactory.getBeanDefinitionNames();
+		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
-			BeanDefinition bd = beanFactory.getBeanDefinition(beanNames[i]);
-			try {
-				parseBeanDefinition(props, bd);
-			}
-			catch (BeanDefinitionStoreException ex) {
-				throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanNames[i], ex.getMessage());
+			// Check that we're not parsing our own bean definition,
+			// to avoid failing on unresolvable placeholders in properties file locations.
+			if (!(beanNames[i].equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
+				BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(beanNames[i]);
+				try {
+					parseBeanDefinition(props, bd);
+				}
+				catch (BeanDefinitionStoreException ex) {
+					throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanNames[i], ex.getMessage());
+				}
 			}
 		}
 	}
@@ -328,8 +364,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 				if (originalPlaceholder != null) {
 					originalPlaceholderToUse = originalPlaceholder;
 					if (placeholder.equals(originalPlaceholder)) {
-						throw new BeanDefinitionStoreException("Circular placeholder reference '" + placeholder +
-																									 "' in property definitions [" + props + "]");
+						throw new BeanDefinitionStoreException(
+						    "Circular placeholder reference '" + placeholder + "' in property definitions [" + props + "]");
 					}
 				}
 				else {
@@ -349,7 +385,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
 				if (propVal != null) {
 					propVal = parseString(props, propVal, originalPlaceholderToUse);
-					logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
+					}
 					strVal = strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
 					startIndex = strVal.indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
