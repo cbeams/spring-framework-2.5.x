@@ -26,6 +26,7 @@ Package org.springframework.orm
 
 Package org.springframework.mock
 * changed "addParameter" methods in MockHttpServletRequest to check for existing values, adding given values to the list
+* fixed "setAttribute" in MockHttpServletRequest/MockHttpSession/MockServletContext to correctly handle null values
 
 Package org.springframework.scheduling
 * TimerFactoryBean accepts SchedulerTimerTasks with "period" <= 0 now, scheduling them for one-time execution
@@ -33,6 +34,9 @@ Package org.springframework.scheduling
 * added "jobListenerNames"/"triggerListenerNames" property to JobDetailBean, CronTriggerBean, SimpleTriggerBean (resp.)
 
 Package org.springframework.web
+* added ServletContextAttributeFactoryBean, exposing an existing ServletContext attribute for bean references
+* added ServletContextAttributeExporter, taking Spring-defined objects and exposing them as ServletContext attributes
+* added ServletContextPropertyPlaceholderConfigurer, a subclass that falls back to web.xml context-param entries
 * fixed DispatcherServlet to copy attribute names before iterating over them to restore original values after include
 * added overloaded "getFormSessionAttributeName" method with HttpServletRequest argument to AbstractFormController
 * added overloaded "getPageSessionAttributeName" method with HttpServletRequest argument to AbstractWizardFormController
