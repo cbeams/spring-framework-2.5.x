@@ -183,7 +183,7 @@
 				The BeanFactory is the actual <emphasis>container</emphasis> (although we don't
 				like to use the word container too much, since it kind of sounds quite heavy),
 				containing and managing your beans. A BeanFactory loads BeanDefinitions and
-				- upon request - instantiate one (or possible more) instances of the bean in 
+				- upon request - instantiates one (or possibly more) instances of the bean in 
 				question and manages it by calling lifecycle methods.
 			</para>
 						
@@ -202,7 +202,7 @@
 				Of course you need to specify the actual class of your bean, that should be obvious.
 				There's absolutely no special requirements to your beanclass, it does not have to
 				implement a special interface to make it Spring compatible. Just specifying the bean class
-				should be enough. However, dependending on what type of IoC you're going to use for that specific
+				should be enough. However, dependending on what type of IoC you are going to use for that specific
 				bean, you should have a default constructor.
 			</para>
 			<para>
@@ -210,7 +210,7 @@
 				virtually <emphasis>any</emphasis> class you want it to manage. Most people using Spring
 				prefer to have actual beans (having just a default constructor and appropriate setters
 				and getters modelled after the properties) in the BeanFactory, but it it's also possible
-				to have more exotic non-bean-style classes in your BeanFactory. If for example you're having
+				to have more exotic non-bean-style classes in your BeanFactory. If, for example, you're having
 				a legacy connection pool that absolutely does not adhere to the bean specification, no worries,
 				Spring can manage it as well.
 			</para>
@@ -270,14 +270,14 @@
 		<sect2 id="beans-factory-collaborators">
 			<title>Setting beans properties and collaborators</title>
 			<para>
-				Inversion of Control is already referred to as <emphasis>Dependency Injection</emphasis>.
+				Inversion of Control has already been referred to as <emphasis>Dependency Injection</emphasis>.
 				The basic principle is that beans themselves do not define who or what they're depending
 				on, but instead, let the container do that for them. Also, the container <emphasis>injects</emphasis>
 				the actual dependencies, as opposed to the Service Locator pattern, where the beans themselves
 				do a lookup to resolve those dependencies. While not elaborating too much on the advantages
-				of Dependency Injection, it might be obvious that code gets much cleaner and reacher a higher 
-				grade of decoupling is much easier when beans themselves first of all do not lookup their
-				dependencies themselves, but also do not even know where the actual dependencies are located
+				of Dependency Injection, it might be obvious that code gets much cleaner and reaching a higher 
+				grade of decoupling is much easier when beans themselves do not lookup their
+				dependencies, but also do not even know where the actual dependencies are located
 				and of what actual instance they are.
 			</para>
 			<para>
@@ -286,11 +286,11 @@
 				<literal>PropertyEditors</literal> that
 				are defined in the Spring Framework. We'll explain that further along using some
 				examples of beans defined in the XML format. For now it might be handy to know that
-				a BeanDefinition, collaborators and properties are specified using 
+				BeanDefinitions, collaborators and properties are specified using 
 				<literal>PropertyValue</literal>-objects.
 			</para>
 			<para>
-				The resolving of the dependencies is a little too complex to go get into it in depth here,
+				The resolving of the dependencies is a little too complex to go in depth here, but
 				the basic procedure is as follows:
 				<orderedlist spacing="compact">
 					<listitem>
@@ -312,9 +312,9 @@
 						</para>
 					</listitem>
 					<listitem>
-						<para>In case of a collaborator, Sprign constructs a reference to the bean
+						<para>In the case of collaborators, Spring constructs a reference to the bean
 							that is used later on when the bean is actually instantiated. You can trust
-							Spring here that is sets the actual collaborator at the right moment
+							Spring here that it sets the actual collaborator at the right moments.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -469,15 +469,15 @@ public class ExampleBean {
 					            	you have a BeanDefinition with a collaborator typed <literal>DataSource</literal>,
 					            	Spring will search the entire bean factory for a bean definition of type
 					            	DataSource and use it as the collaborator. <emphasis>If 0 (zero) or more than
-					            	1 (one) bean definitions of the desired exist in the BeanFactory, a failure
+					            	1 (one) bean definitions of the desired type exist in the BeanFactory, a failure
 					            	will be reported and you won't be able to use autowiring for that specific bean</emphasis>
 				            	</entry>
 				            </row>
 				        </tbody>
 			        </tgroup>
 		        </table>
-		        <emphasis>Note: like already mentioned, for larger application it's discourage to use
-		        autowiring beacuse it removes the transparency and the structure from your collaborating
+		        <emphasis>Note: like already mentioned, for larger applications, it is discouraged to use
+		        autowiring because it removes the transparency and the structure from your collaborating
 		        classes.</emphasis>
 			</para>
 		</sect2>
@@ -535,7 +535,7 @@ public class ExampleBean {
 			<para>
 				Spring provides a couple of marker interfaces to change the behavior of your
 				bean in the BeanFactory. They include <literal>InitializingBean</literal> and
-				for example <literal>DisposableBean</literal>. Implementing those will for instance
+				<literal>DisposableBean</literal>. Implementing those will
 				result in the BeanFactory calling <literal>afterPropertiesSet()</literal> for the former and
 				<literal>destroy()</literal> for the latter to allow you to do things upon initialization and destruction.	    		
 			</para>
@@ -564,8 +564,8 @@ public class ExampleBean {
 								<para>
 									<literal>void afterPropertiesSet()</literal>: called after all
 									properties have been set by the beanfactory. This method enables you
-									to do checking if all necessary properties have been set correctly, or
-									to perform initialization work. You can throw <emphasis>any</emphasis>
+									to do checking to see if all necessary properties have been set correctly, or
+									to perform further initialization work. You can throw <emphasis>any</emphasis>
 									exception to indicate misconfiguration, initialization failures, etcetera
 								</para>
 							</listitem>
@@ -610,7 +610,7 @@ public class AnotherExampleBean implements InitializingBean {
 					<title>DisposableBean / <literal>destroy-method</literal></title>
 					<para>
 						The <literal>org.springframework.beans.factory.DisposableBean</literal> interface
-						provides you with the ability to get a callback when a beanfactor is destroyed.
+						provides you with the ability to get a callback when a beanfactory is destroyed.
 						The DisposableBean interface specifies one method:
 						<itemizedlist spacing="compact">
 							<listitem>
@@ -633,10 +633,10 @@ public class AnotherExampleBean implements InitializingBean {
 					</para>
 					<para>
 					<programlisting><![CDATA[
-<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="init()"/>
+<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup()"/>
 
 public class ExampleBean {
-	public void destroy() {
+	public void cleanup() {
 		// do some destruction work (like closing connection)
 	}
 }
@@ -736,7 +736,7 @@ public class AnotherExampleBean implements DisposableBean {
 			<title>Interacting with the BeanFactory</title>
 			<para>
 				Basically the BeanFactory is nothing more than an advanced factory capable
-				of maintaining a registry is different components or beans. The BeanFactory enables
+				of maintaining a registry oof different components or beans. The BeanFactory enables
 				you to read bean definitions and access them using the bean factory.
 				When just using the BeanFactory you would create one and read in some bean definitions
 				in the XML format as follows:
@@ -750,7 +750,6 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 				can retrieve instances of your beans. You'll get a reference to the same bean if
 				you defined it as a singleton (which is the default) and you'll get a new instance
 				each time if you set <literal>singleton</literal> to <emphasis>false</emphasis>.
-				Here's a list of all methods available:
 				
 				The client-side view of the BeanFactory is surprisingly simple. The 
 				<literal>BeanFactory</literal> interface four methods for clients to interact with
@@ -763,7 +762,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 							configured by the beanfactory configuration, a singleton and thus shared
 							instance will be returned, or a newly created bean. A 
 							<literal>BeansException</literal> will be thrown when either the
-							bean could not be found (in which it'll be a <literal>NoSuchBeanDefinitionException</literal>),
+							bean could not be found (in which case it'll be a <literal>NoSuchBeanDefinitionException</literal>),
 							or an exception occured while instantiated and preparing the bean
 						</para>
 					</listitem>
@@ -780,8 +779,8 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 						<para>
 							<literal>boolean isSingleton(String)</literal>: determines whether or not
 							the beandefinition registered under the given name is a singleton or
-							a prototype. If the beandefinition could corresponding the given name
-							could not ben found, and exception will be thrown 
+							a prototype. If the beandefinition corresponding to the given name
+							could not be found, an exception will be thrown 
 							(<literal>NoSuchBeanDefinitionException</literal>)							
 						</para>
 					</listitem>
@@ -809,9 +808,9 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 			<sect2 id="beans-factory-postprocessor">
 				<title>The <literal>BeanFactoryPostProcessor</literal></title>
 				<para>
-					The BeanFactoryPostProcessor is the superclass for all post processor that
+					The BeanFactoryPostProcessor is the superclass for all post processors that
 					are capable of applying changes to the BeanFactory (or beans in it) after the
-					factory has been initialized. The BeanFactoryPostProcessor can for instance 
+					factory has been initialized. The BeanFactoryPostProcessor can
 					be used to add custom editors
 					(as also mentioned in <xref linkend="beans-beans-conversion"/>). Some
 					out-of-the-box post processors are available, like the <literal>PropertyResourceConfigurer</literal>
@@ -823,16 +822,17 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
 				<para>
 					The <literal>PropertyPlaceholderConfigurer</literal> is an excellent solution
 					when you want to externalize a few properties from a file containing bean definitions.
-					Say you want to let a guy responsible for deploying applications just fill in
-					database URLs and usernames and passwords. You could of course let him change the
+					Say you want to let the person responsible for deploying applications just fill in
+					database URLs, usernames and passwords. You could of course let him change the
 					XML file containing bean definitions, but that would be risky. Instead, use the
 					<literal>PropertyPlaceHolderConfigurer</literal> to - at runtime - replace those
 					properties by values from a properties file.
 				</para>
 				<para>
-					In the example below, a datasource is defined,  and we'll use the <literal>PropertyPlaceHolderConfigurer</literal>.
+					In the example below, a datasource is defined,  and we will configure some
+                    properties from an external Properties file.
 					At runtime, we will apply a <literal>PropertyPlaceholderConfigurer</literal> to
-					the BeanFactory which will replace all some properties of the datasource:
+					the BeanFactory which will replace some properties of the datasource:
 				</para>
 				<programlisting><![CDATA[
 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
@@ -896,7 +896,7 @@ cfg.postProcessBeanFactory(factory);
 						</listitem>
 						<listitem>
 							<para>
-								checking of dependencies, which means that if dependencies are satisfied
+								checking of dependencies, which means that if dependencies are unsatisfied
 								(i.e. they are <literal>null</literal>), an <literal>UnsatisfiedDependencyException</literal>
 								will be thrown. (TODO: reference)
 							</para>
@@ -922,7 +922,7 @@ cfg.postProcessBeanFactory(factory);
 						</listitem>
 						<listitem>
 							<para>
-								if your bean a <literal>BeanFactoryAware</literal> the 
+								if your bean is <literal>BeanFactoryAware</literal> the 
 								<literal>setBeanFactory()</literal> method will now be called enabling
 								the bean to have access to the BeanFactory (TODO: reference)
 							</para>
@@ -937,9 +937,9 @@ cfg.postProcessBeanFactory(factory);
 				</para>
 				<para>
 			        When the <literal>BeanFactory</literal> gets destroyed (for instance when the
-			        application server shuts down, the destruction process of the BeanFactory
-			        will try to destroy all beans that it still knows. The destruction process 
-			        <emphasis>only comprises singletons beans</emphasis>.
+			        application server shuts down), the destruction process of the BeanFactory
+			        will try to destroy all beans that it knows about. The destruction process 
+			        <emphasis>will only occur for singletons beans</emphasis>.
 			        
 			        <orderedlist spacing="compact" continuation="continues">
 			        	<listitem>
@@ -1197,7 +1197,7 @@ cfg.postProcessBeanFactory(factory);
 				<listitem>
 					<para>
 						<emphasis>Loading of multiple contexts</emphasis>, allowing some of
-						them to be focussed and used for example only by the web-layer of 
+						them to be focused and used for example only by the web-layer of 
 						an application
 					</para>
 				</listitem>
@@ -1207,9 +1207,9 @@ cfg.postProcessBeanFactory(factory);
 		<para>
 			The ApplicationContext includes all the functionality the bean factory has as well. This means
 			you can define beans using the XML format as explained in <xref linkend="beans-factoryimpl-xml"/>
-			and <xref linkend="springbeansdtd"/> and look them using their name or id. Also,
-			you will be able to use all other features explained in this chapter, such as <emphasis>autowring</emphasis>,
-			<emphasis>setter-based</emphasis> or <emphasis>constructor-based depenency injection</emphasis>,
+			and <xref linkend="springbeansdtd"/> and retrieve them using their name or id. Also,
+			you will be able to use all of the other features explained in this chapter, such as <emphasis>autowring</emphasis>,
+			<emphasis>setter-based</emphasis> or <emphasis>constructor-based</emphasis> depenency injection,
 			<emphasis>dependency checking</emphasis>, <emphasis>lifecycle interfaces</emphasis>, etcetera.	
 			All other features the ApplicationContext includes are described below, as well as the
 			ways to access an ApplicationContext, load beans into an ApplicationContext and the ways to 
@@ -1222,13 +1222,13 @@ cfg.postProcessBeanFactory(factory);
 		<title>Added functionality of the <literal>ApplicationContext</literal></title>
 		<para>
 			As already stated in the previous section, the ApplicationContext has a couple of
-			features that distinguishes it from the BeanFactory. Let's review them one-by-one.
+			features that distinguish it from the BeanFactory. Let us review them one-by-one.
 		</para>
 		<sect2 id="context-functionality-messagesource">
 			<title>Using the <literal>MessageSource</literal></title>
 			<para>
 				The ApplicationContext interface extends an interface called <literal>MessageSource</literal>,
-				therefore provided messaging (i18n) functionality. Together with the <literal>NestingMessageSource</literal>,
+				and therefore provides messaging (i18n) functionality. Together with the <literal>NestingMessageSource</literal>,
 				capable of hierarchical message resolving, these are the basic interfaces Spring provides
 				to do message resolving. Let's quickly review the methods defined there:
 				<itemizedlist spacing="compact">
@@ -1267,9 +1267,9 @@ cfg.postProcessBeanFactory(factory);
 			<para>
 				Spring provides two <literal>MessageSource</literal> implementation at the moment. These
 				are the <literal>ResourceBundleMessageSource</literal> and the <literal>StaticMessageSource</literal>.
-				Both impelement <literal>NestingMessageSource</literal> in order to be able to 
+				Both implement <literal>NestingMessageSource</literal> in order to be able to 
 				do nested messaging. The StaticMessageSource is hardly ever used
-				and provided programmatic ways to add messages to the source. The ResourceBundleMessageSource
+				and provides programmatic ways to add messages to the source. The ResourceBundleMessageSource
 				is more interesting and is the one we will provides an example for:
 				<programlisting><![CDATA[
 <beans>
@@ -1297,7 +1297,7 @@ cfg.postProcessBeanFactory(factory);
 		<sect2 id="context-functionality-events">
 			<title>Propagating events</title>
 			<para>
-				Eventhandling in the ApplicationContext is provided through the <literal>ApplicationEvent</literal>
+				Event handling in the ApplicationContext is provided through the <literal>ApplicationEvent</literal>
 				class and <literal>ApplicationListener</literal> interface. When implementing the 
 				<literal>ApplicationListener</literal> in one of your beans, everytime an <literal>ApplicationEvent</literal>
 				gets published to the ApplicationContext, your bean will be notified, based on the
@@ -1348,7 +1348,7 @@ cfg.postProcessBeanFactory(factory);
 			</para>
 			<para>
 				Implementing custom events can be done as well. All you need to do is 
-				calling the <literal>publishEvent()</literal> method on the ApplicationContext
+				call the <literal>publishEvent()</literal> method on the ApplicationContext
 				and you're done. Let's have a look at an example. First, the ApplicationContext:
 				<programlisting><![CDATA[
 <bean id="emailer" class="example.EmailBean">
@@ -1416,7 +1416,7 @@ public class BlackListNotifier implement ApplicationListener {
 				files, but also newsfeeds from the Internet or normal webpages. Spring provides
 				a clean and transparent way of accessing resources in a protocol independent
 				way. The ApplicationContext has a method (<literal>getResource(String)</literal>)
-				taking care of this.
+				to take care of this.
 			</para>
 			<para>
 				The Resource class defines a couple of methods that are shared across all
@@ -1451,7 +1451,7 @@ public class BlackListNotifier implement ApplicationListener {
 				            	<entry><literal>isOpen()</literal></entry>
 				            	<entry>
 				            		Will return true is multiple streams cannot be opened
-				            		for this resource. This will be false for the some
+				            		for this resource. This will be false for some
 				            		resources, but file-based resources for instance, cannot
 				            		be read multiple times concurrently
 				            	</entry>
