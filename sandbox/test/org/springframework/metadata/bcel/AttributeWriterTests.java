@@ -7,21 +7,22 @@ package org.springframework.metadata.bcel;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.springframework.metadata.AttributeException;
 import org.springframework.metadata.AttributeWriter;
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.support.PersonAttribute;
 
-import junit.framework.TestCase;
-
 /**
  * 
  * @author Mark Pollack
  * @since Sep 28, 2003
- * @version $Id: AttributeWriterTests.java,v 1.1 2003-11-22 09:05:42 johnsonr Exp $
+ * @version $Id: AttributeWriterTests.java,v 1.2 2003-12-15 09:25:07 johnsonr Exp $
  * 
  */
 public class AttributeWriterTests extends TestCase {
@@ -71,22 +72,22 @@ public class AttributeWriterTests extends TestCase {
 
 		//Are the class attributes there?
 		Attributes attributes = new BcelAttributes();
-		List attribs = attributes.getAttributes(targetClass);
+		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals("Expected one custom class attribute", 1, attribs.size());
 
 		//Is is what we expect?
-		Object o = attribs.get(0);
+		Object o = attribs.iterator().next();
 		doAssertOnPerson(o);
 
 		//Are the method attributes there?
-		List methodAttribs = attributes.getAttributes(targetMethod);
+		Collection methodAttribs = attributes.getAttributes(targetMethod);
 		assertEquals(
 			"Expected one custom method attribute",
 			1,
 			methodAttribs.size());
 
 		//Is is what we expect?
-		o = methodAttribs.get(0);
+		o = methodAttribs.iterator().next();
 		doAssertOnPerson(o);
 
 	}
@@ -158,12 +159,14 @@ public class AttributeWriterTests extends TestCase {
 
 		//Are the class attributes there?
 		Attributes attributes = new BcelAttributes();
-		attributes.setAttributePackages(attribPackages);
-		List attribs = attributes.getAttributes(targetClass);
+		
+		// TODO restore this
+//		attributes.setAttributePackages(attribPackages);
+		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals("Expected one custom class attribute", 1, attribs.size());
 
 		//Is is what we expect?
-		Object o = attribs.get(0);
+		Object o = attribs.iterator().next();
 		doAssertOnPerson(o);
 	}
 
@@ -210,21 +213,21 @@ public class AttributeWriterTests extends TestCase {
 		Attributes attributes = new BcelAttributes();
 
 		//There should be no class attributes.
-		List attribs = attributes.getAttributes(targetClass);
+		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals(
 			"Expected zero custom class attributes",
 			0,
 			attribs.size());
 
 		//Are the method attributes there?
-		List methodAttribs = attributes.getAttributes(targetMethod);
+		Collection methodAttribs = attributes.getAttributes(targetMethod);
 		assertEquals(
 			"Expected one custom method attribute",
 			1,
 			methodAttribs.size());
 
 		//Is is what we expect?
-		Object o = methodAttribs.get(0);
+		Object o = methodAttribs.iterator().next();
 		doAssertOnPerson(o);
 	}
 
@@ -258,7 +261,7 @@ public class AttributeWriterTests extends TestCase {
 		Attributes attributes = new BcelAttributes();
 
 		//There should be no class attributes.
-		List attribs = attributes.getAttributes(targetClass);
+		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals(
 			"Expected zero custom class attributes",
 			0,
@@ -266,19 +269,19 @@ public class AttributeWriterTests extends TestCase {
 
 		//There should be no method attributes.
 		Method targetMethod = targetClass.getMethod("doReport", null);
-		List methodAttribs = attributes.getAttributes(targetMethod);
+		Collection methodAttribs = attributes.getAttributes(targetMethod);
 		assertEquals(
 			"Expected zero custom method attributes",
 			0,
 			methodAttribs.size());
 
 		//Are the field attributes there?
-		List fieldAttribs = attributes.getAttributes(targetField);
+		Collection fieldAttribs = attributes.getAttributes(targetField);
 		assertEquals(
 			"Expected one custom field attribute",
 			1,
 			fieldAttribs.size());
-		Object o = fieldAttribs.get(0);
+		Object o = fieldAttribs.iterator().next();
 		doAssertOnPerson(o);
 
 	}

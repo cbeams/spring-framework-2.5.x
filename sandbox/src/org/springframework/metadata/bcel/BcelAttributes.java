@@ -9,8 +9,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.bcel.classfile.ClassParser;
@@ -18,7 +18,9 @@ import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Unknown;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.metadata.*;
+import org.springframework.metadata.AttributeException;
+import org.springframework.metadata.AttributeParser;
+import org.springframework.metadata.Attributes;
 import org.springframework.metadata.support.AttributeCreator;
 import org.springframework.metadata.support.DotNetAttributeParser;
 
@@ -26,7 +28,7 @@ import org.springframework.metadata.support.DotNetAttributeParser;
  * Retrieve attributes stored in the .class file using the BCEL library
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  * @since Sep 30, 2003
- * @version $Id: BcelAttributes.java,v 1.1 2003-11-22 09:05:47 johnsonr Exp $
+ * @version $Id: BcelAttributes.java,v 1.2 2003-12-15 09:25:15 johnsonr Exp $
  */
 public class BcelAttributes implements Attributes {
 
@@ -67,7 +69,7 @@ public class BcelAttributes implements Attributes {
 	 * {@inheritdoc}
 	 * @param targetClass {@inheritdoc}
 	 */
-	public List getAttributes(Class targetClass) {
+	public Collection getAttributes(Class targetClass) {
 		return getAttributes(targetClass, null);
 	}
 
@@ -76,7 +78,7 @@ public class BcelAttributes implements Attributes {
 	 * @param targetClass {@inheritdoc}
 	 * @param filter {@inheritdoc}
 	 */
-	public List getAttributes(Class targetClass, Class filter) {
+	public Collection getAttributes(Class targetClass, Class filter) {
 		ArrayList al = new ArrayList();
 		if (! isAnnotatable(targetClass)) {
 			return al;					
@@ -114,7 +116,7 @@ public class BcelAttributes implements Attributes {
 	 * {@inheritdoc}
 	 * @param targetMethod {@inheritdoc}
 	 */
-	public List getAttributes(Method targetMethod) {
+	public Collection getAttributes(Method targetMethod) {
 		return getAttributes(targetMethod, null);
 	}
 
@@ -123,7 +125,7 @@ public class BcelAttributes implements Attributes {
 	 * @param targetMethod {@inheritdoc}
 	 * @param filter {@inheritdoc}
 	 */
-	public List getAttributes(Method targetMethod, Class filter) {
+	public Collection getAttributes(Method targetMethod, Class filter) {
 		ArrayList al = new ArrayList();
 		if (! isAnnotatable(targetMethod.getDeclaringClass())) {
 			return al;					
@@ -173,7 +175,7 @@ public class BcelAttributes implements Attributes {
 	 * {@inheritdoc}
 	 * @param targetField {@inheritdoc}
 	 */
-	public List getAttributes(Field targetField) {
+	public Collection getAttributes(Field targetField) {
 		return getAttributes(targetField, null);
 	}
 
@@ -182,7 +184,7 @@ public class BcelAttributes implements Attributes {
 	 * @param targetField {@inheritdoc}
 	 * @param filter {@inheritdoc}
 	 */
-	public List getAttributes(Field targetField, Class filter) {
+	public Collection getAttributes(Field targetField, Class filter) {
 		ArrayList al = new ArrayList();
 		if (! isAnnotatable(targetField.getDeclaringClass())) {
 			return al;					

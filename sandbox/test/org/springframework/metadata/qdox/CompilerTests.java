@@ -6,21 +6,22 @@ package org.springframework.metadata.qdox;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
+
+import junit.framework.TestCase;
+
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.MetadataCompiler;
 import org.springframework.metadata.bcel.AttributeWriterTests;
 import org.springframework.metadata.bcel.BcelAttributeWriter;
 import org.springframework.metadata.bcel.BcelAttributes;
 
-import junit.framework.TestCase;
-
 /**
  * Tests for the QDox based implementation of the MetadataCompiler
  *
  * @author Mark Pollack
  * @since Oct 13, 2003
- * @version $Id: CompilerTests.java,v 1.1 2003-11-22 09:05:42 johnsonr Exp $
+ * @version $Id: CompilerTests.java,v 1.2 2003-12-15 09:25:15 johnsonr Exp $
  */
 public class CompilerTests extends TestCase {
 
@@ -55,14 +56,16 @@ public class CompilerTests extends TestCase {
 
 		//Are the class attributes there?
 		Attributes attributes = new BcelAttributes();
-		attributes.setAttributePackages(attribPackages);
+
+		// TODO put this back
+	//	attributes.setAttributePackages(attribPackages);
 		Class targetClass =
 			org.springframework.metadata.qdox.SimpleService.class;
-		List attribs = attributes.getAttributes(targetClass);
+		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals("Expected one custom class attribute", 1, attribs.size());
 
 		//Is is what we expect?
-		Object o = attribs.get(0);
+		Object o = attribs.iterator().next();
 		AttributeWriterTests.doAssertOnPerson(o);
 
 		Class[] parameterTypes = new Class[] { int.class, float.class };
@@ -71,14 +74,14 @@ public class CompilerTests extends TestCase {
 		Method targetMethod = targetClass.getMethod("doWork", parameterTypes);
 		
 		//Are the method attributes there?
-		List methodAttribs = attributes.getAttributes(targetMethod);
+		Collection methodAttribs = attributes.getAttributes(targetMethod);
 		assertEquals(
 			"Expected one custom method attribute",
 			1,
 			methodAttribs.size());
 
 		//Is is what we expect?
-		o = methodAttribs.get(0);
+		o = methodAttribs.iterator().next();
 		AttributeWriterTests.doAssertOnPerson(o);
 	}
 

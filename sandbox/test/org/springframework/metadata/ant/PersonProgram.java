@@ -5,7 +5,7 @@
 package org.springframework.metadata.ant;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.bcel.BcelAttributes;
@@ -38,16 +38,18 @@ public class PersonProgram {
 		Class targetClass = Class.forName("org.springframework.metadata.ant.AnnotatedClass");
 		Attributes attributes = new BcelAttributes();
 		String[] packages = { "org.springframework.metadata.ant" };
-		attributes.setAttributePackages(packages);
 		
-		List attribs = attributes.getAttributes(targetClass);
+		// TODO put this back one day
+//		attributes.setAttributePackages(packages);
+		
+		Collection attribs = attributes.getAttributes(targetClass);
 		System.out.println("Found " + attribs.size() + " class attributes");
-		System.out.println("Attribute: " + attribs.get(0).toString());
+		System.out.println("Attribute: " + attribs.iterator().next().toString());
 		
 		Method targetMethod = targetClass.getMethod("doWork", null);
 		attribs = attributes.getAttributes(targetMethod);
 		System.out.println("Found " + attribs.size() + " attributes on method doWork()");
-		System.out.println("Attribute: " + attribs.get(0).toString());		
+		System.out.println("Attribute: " + attribs.iterator().next().toString());		
 		
 	}
 }
