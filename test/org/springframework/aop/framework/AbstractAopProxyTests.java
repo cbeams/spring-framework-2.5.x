@@ -60,7 +60,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.43 2004-08-04 15:10:57 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.44 2004-08-10 10:35:33 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -638,7 +638,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	/**
 	 * Static for CGLIB visibility
 	 */
-	static class ContextTestBean2 extends ContextTestBean {
+	static class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
 		protected void assertions(MethodInvocation invocation) {
 			assertTrue(invocation.getThis() == this);
 			assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
@@ -647,7 +647,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 
 	public void testTargetCanGetInvocation() throws Throwable {
-		final ContextTestBean2 expectedTarget = new ContextTestBean2();
+		final InvocationCheckExposedInvocationTestBean expectedTarget = new InvocationCheckExposedInvocationTestBean();
 		
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
 		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
@@ -1387,23 +1387,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			this.target = invocation.getThis();
 			return invocation.proceed();
 		}
-	}
-
-	protected abstract static class ContextTestBean extends TestBean {
-
-		public String getName() {
-			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
-			assertions(invocation);
-			return super.getName();
-		}
-
-		public void absquatulate() {
-			MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
-			assertions(invocation);
-			super.absquatulate();
-		}
-		
-		protected abstract void assertions(MethodInvocation invocation);
 	}
 
 	public static class EqualsTestBean extends TestBean {

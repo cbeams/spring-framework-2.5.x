@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JdkDynamicProxyTests.java,v 1.8 2004-07-24 10:52:35 johnsonr Exp $
+ * @version $Id: JdkDynamicProxyTests.java,v 1.9 2004-08-10 10:35:33 johnsonr Exp $
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
@@ -94,7 +94,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	}
 	
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {
-		final ContextTestBean expectedTarget = new ContextTestBean() {
+		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
 				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
