@@ -41,7 +41,6 @@ public class ValidationResultsErrorsCollector extends
     public void validationErrorOccured(PropertyValidator validator,
             PropertyValidationRule rule, Object bean, Object value) {
         super.validationErrorOccured(validator, rule, bean, value);
-        System.out.println(getFullNestedPath());
         rule.invokeRejectValue(errors, getNestedPath());
     }
 }
