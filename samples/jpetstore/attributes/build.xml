@@ -180,7 +180,7 @@
 				<include name="jdom.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
-				<include name="struts-1.1.jar"/>
+				<include name="struts-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -199,21 +199,18 @@
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="attributes/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="images/**"/>
-			<include name="WEB-INF/dataAccessContext*.xml"/>
-			<!-- Take overriding application context files from "attributes" -->
-			<fileset dir="attributes">
-				<include name="WEB-INF/declarativeServices.xml"/>
-				<include name="WEB-INF/applicationContext.xml"/>
-			</fileset>
-			<include name="WEB-INF/petstore-servlet.xml"/>
-			<include name="WEB-INF/sql-map-config.xml"/>
-			<include name="WEB-INF/struts-config.xml"/>
-			<include name="WEB-INF/caucho-servlet.xml"/>
-			<include name="WEB-INF/server-config.wsdd"/>
-			<include name="WEB-INF/jdbc.properties"/>
+			<include name="WEB-INF/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
+			<include name="WEB-INF/classes/**"/>
+			<exclude name="WEB-INF/web.xml"/>
+			<exclude name="WEB-INF/applicationContext.xml"/>
 			<exclude name="**/.*"/>
+			<!-- Take overriding application context files from "attributes" -->
+			<fileset dir="attributes">
+				<include name="WEB-INF/applicationContext.xml"/>
+				<include name="WEB-INF/declarativeServices.xml"/>
+			</fileset>
 		</war>
 
 	</target>
