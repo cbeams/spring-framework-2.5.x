@@ -12,13 +12,17 @@ import junit.framework.TestCase;
 import org.w3c.dom.Element;
 
 /**
+ * test the FormatHelper methods
  * 
  * @author Rod Johnson
+ * @author Darren Davison
  * @since 26-Jul-2003
- * @version $Id: FormatHelperTests.java,v 1.1.1.1 2003-08-14 16:21:30 trisberg Exp $
+ * @version $Id: FormatHelperTests.java,v 1.2 2003-10-27 00:00:39 davison Exp $
  */
 public class FormatHelperTests extends TestCase {
 
+	static long testTime = 1064359582063L; //appx 00:26 on 24/9/2003 in the UK (GMT +1)
+		
 	/**
 	 * Constructor for FormatHelperTests.
 	 * @param arg0
@@ -27,17 +31,73 @@ public class FormatHelperTests extends TestCase {
 		super(arg0);
 	}
 
+	/**
+	 * test null params for Locale
+	 */
+	public void testNullParamsForLocale() {
+		Element e;
+		String s;
+		try {
+			e = (Element) FormatHelper.dateTimeElement(testTime, null, null);
+			e = (Element) FormatHelper.dateTimeElement(testTime, "", null);
+			e = (Element) FormatHelper.dateTimeElement(testTime, null, "");						
+		} catch (Throwable ex) {
+			fail( "Passing null params to dateTimeElement(long, String, String) throws " + ex.getClass().getName());
+		}
+		
+		
+		try {
+			s = FormatHelper.currency(50d, null, null);
+			s = FormatHelper.currency(50d, "", null);
+			s = FormatHelper.currency(50d, null, "");
+		} catch (Throwable ex) {
+			fail( "Passing null params to currency(long, String, String) throws " + ex.getClass().getName());
+		}
+			
+	}
+	
 	/*
 	 * Test for Node dateTimeElement(long, String, String)
 	 */
-	public void testUkDateTimeElement() {
-		long t = System.currentTimeMillis();
-		Element e = (Element) FormatHelper.dateTimeElement(t, Locale.UK);
+	public void testDateTimeElement() {
+		Element e = (Element) FormatHelper.dateTimeElement(testTime, Locale.UK);
 		assertTrue(e.getTagName().equals("formatted-date"));
-		Element monthEle = (Element) e.getElementsByTagName("month").item(0);
-		// TODO finish this test case
+		Element el;
+		el = (Element) e.getElementsByTagName("year").item(0);
+		assertTrue( "2003".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("month").item(0);
+		assertTrue( "September".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("day-of-week").item(0);
+		assertTrue( "Wednesday".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("day-of-month").item(0);
+		assertTrue( "24".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("hours").item(0);
+		assertTrue( "12".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("minutes").item(0);
+		assertTrue( "26".equals(el.getFirstChild().getNodeValue() ));
+		el = (Element) e.getElementsByTagName("am-pm").item(0);
+		assertTrue( "AM".equals(el.getFirstChild().getNodeValue() ));
+		
+		// prove a different locale changes the output
+		e = (Element) FormatHelper.dateTimeElement(testTime, Locale.FRANCE);
+		el = (Element) e.getElementsByTagName("day-of-week").item(0);
+		assertTrue( "mercredi".equals(el.getFirstChild().getNodeValue() ));
 	}
 
-	
+	public void testCurrency() {
+		String s;
+		s = FormatHelper.currency( 50.0d, Locale.US);
+		assertTrue( "$50.00".equals(s));
+		
+		// pound sign (#163)
+		s = FormatHelper.currency( 50.0d, Locale.UK);
+		assertEquals( 163, s.charAt(0));
+		assertTrue( "50.00".equals(s.substring(1)));		
+		
+		// comma replace dec.point
+		s = FormatHelper.currency( 50.0d, Locale.FRANCE);
+		assertTrue( "50,00".equals(s.substring(0,5)));
+		
+	}
 
 }
