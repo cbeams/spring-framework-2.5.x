@@ -15,19 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Holder for both Model and View in our MVC framework.
+ * Holder for both Model and View in the web MVC framework.
  * Note that these are entirely distinct. This class merely holds
- * both to make it possible for a controller to return both
- * model and view in a single return value.
+ * both to make it possible for a controller to return both model
+ * and view in a single return value.
  *
- * <p>Class to represent a model and view returned by
- * an handler used by a DispatcherServlet.
- * The View can take the form of a reference to a View
- * object, or a String view name, which will need
- * to be resolved by a ViewResolver object.
- * The model is a Map, allowing the use of multiple data objects.
+ * <p>Class to represent a model and view returned by a handler used
+ * by a DispatcherServlet. The View can take the form of a reference
+ * to a View object, or a String view name which will need to be
+ * resolved by a ViewResolver object. The model is a Map, allowing
+ * the use of multiple data objects keyed by name.
  *
  * @author Rod Johnson
+ * @see ViewResolver
  */
 public class ModelAndView {
 
@@ -44,7 +44,7 @@ public class ModelAndView {
 	private String viewName;
 
 	/**
-	 * Convenient constructor when there is no model data to expose
+	 * Convenient constructor when there is no model data to expose.
 	 * @param view view reference
 	 */
 	public ModelAndView(View view) {
@@ -52,10 +52,9 @@ public class ModelAndView {
 		this.model = new HashMap();
 	}
 
-
 	/**
-	 * Convenient constructor when there is no model data to expose
-	 * @param viewName view name, resolved by the controller servlet
+	 * Convenient constructor when there is no model data to expose.
+	 * @param viewName view name, resolved by the DispatcherServlet
 	 */
 	public ModelAndView(String viewName) {
 		this.viewName = viewName;
@@ -63,11 +62,11 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a View reference and a model.
+	 * Creates new ModelAndView given a View object and a model.
 	 * @param view view to render this model
-	 * @param model Map of model names (Strings) to
-	 * models (Objects). Model entries may not be null, but the
-	 * model may be null if there is no model data.
+	 * @param model Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be null, but the model Map
+	 * may be null if there is no model data.
 	 */
 	public ModelAndView(View view, Map model) {
 		this.view = view;
@@ -75,12 +74,12 @@ public class ModelAndView {
 	}
 
 	/** 
-	 * Creates new ModelAndView given a viewName and a model.
+	 * Creates new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render this model.
 	 * This will be resolved by the DispatcherServlet at runtime.
-	 * @param model Map of model names (Strings) to
-	 * models (Objects). Model entries may not be null, but the
-	 * model may be null if there is no model data.
+	 * @param model Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be null, but the model Map
+	 * may be null if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map model) {
 		this.viewName = viewName;
@@ -90,8 +89,8 @@ public class ModelAndView {
 	/**
 	 * Convenient constructor to take a single model object.
 	 * @param view view reference
-	 * @param modelName modelName of the single entry in the modelObject
-	 * @param modelObject modelObject of the single entry in the modelObject
+	 * @param modelName name of the single entry in the model
+	 * @param modelObject modelObject the single model object
 	 */
 	public ModelAndView(View view, String modelName, Object modelObject) {
 		this(view);
@@ -101,8 +100,8 @@ public class ModelAndView {
 	/**
 	 * Convenient constructor to take a single model object.
 	 * @param viewName name of the view
-	 * @param modelName modelName of the single entry in the modelObject
-	 * @param modelObject modelObject of the single entry in the modelObject
+	 * @param modelName name of the single entry in the model
+	 * @param modelObject modelObject the single model object
 	 */
 	public ModelAndView(String viewName, String modelName, Object modelObject) {
 		this(viewName);
@@ -122,40 +121,44 @@ public class ModelAndView {
 	}
 
 	/**
-	 * @return whether we use a view reference
+	 * Return whether we use a view reference, i.e. true if the
+	 * view has been specified via a name to be resolved by the
+	 * DispatcherServlet via a ViewResolver.
 	 */
 	public boolean isReference() {
 		return viewName != null;
 	}
 
 	/**
-	 * @return the View reference, or null if we are using a viewName
-	 * to be resolved by the DispatcherServlet.
+	 * Return the View object, or null if we are using a view name
+	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	public View getView() {
 		return view;
 	}
 
 	/**
-	 * @return the viewName, or null if we are using a View reference
+	 * Return the view name to be resolved by the DispatcherServlet
+	 * via a ViewResolver, or null if we are using a View object.
 	 */
 	public String getViewName() {
 		return viewName;
 	}
 
 	/**
-	 * @return the model map. Map be null.
+	 * Return the model map. May be null.
 	 */
 	public Map getModel() {
 		return model;
 	}
 
 	/**
-	 * @return diagnostic information about this model and view
+	 * Return diagnostic information about this model and view.
 	 */
 	public String toString() {
 		String s = "ModelAndView: ";
-		s += isReference() ? "reference to view with name '" + viewName + "'" : "materialized View is " + view;
+		s += isReference() ? "reference to view with name [" + viewName + "]" :
+				"materialized View is [" + view + "]";
 		s += "; Model=[" + model + "]";
 		return s;
 	}
