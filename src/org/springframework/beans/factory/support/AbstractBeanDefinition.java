@@ -20,7 +20,7 @@ import org.springframework.beans.PropertyValues;
  * to return direct references to objects defined by BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.7 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.8 2004-01-14 07:36:59 jhoeller Exp $
  */
 public abstract class AbstractBeanDefinition {
 	
@@ -77,7 +77,7 @@ public abstract class AbstractBeanDefinition {
 
 	/**
 	 * Set whether this bean should be lazily initialized.
-	 * Only applicable for a singleton bean.
+	 * Only applicable to a singleton bean.
 	 * If false, it will get instantiated on startup by bean factories
 	 * that perform eager initialization of singletons.
 	 */
@@ -92,17 +92,14 @@ public abstract class AbstractBeanDefinition {
 		return lazyInit;
 	}
 
+	/**
+	 * Validate this bean definition.
+	 * @throws BeanDefinitionValidationException in case of validation failure
+	 */
 	public void validate() throws BeanDefinitionValidationException {
 		if (this.lazyInit && !this.singleton) {
-			throw new BeanDefinitionValidationException("Lazy initialization is just applicable for singleton beans");
+			throw new BeanDefinitionValidationException("Lazy initialization is just applicable to singleton beans");
 		}
-	}
-
-	public boolean equals(Object other) {
-		if (!(other instanceof AbstractBeanDefinition))
-			return false;
-		AbstractBeanDefinition obd = (AbstractBeanDefinition) other;
-		return this.propertyValues.changesSince(obd.propertyValues).getPropertyValues().length == 0;
 	}
 
 }

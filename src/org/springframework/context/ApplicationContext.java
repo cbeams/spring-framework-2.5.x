@@ -7,8 +7,8 @@ package org.springframework.context;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.io.Resource;
 
 /** 
@@ -34,9 +34,9 @@ import org.springframework.core.io.Resource;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.10 2003-12-30 00:15:36 jhoeller Exp $
+ * @version $Id: ApplicationContext.java,v 1.11 2004-01-14 07:36:59 jhoeller Exp $
  */
-public interface ApplicationContext extends AutowireCapableBeanFactory, HierarchicalBeanFactory, MessageSource {
+public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory, MessageSource {
 	
 	/**
 	 * Return the parent context, or null if there is no parent,

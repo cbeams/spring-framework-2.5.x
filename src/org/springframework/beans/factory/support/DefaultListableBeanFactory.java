@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.12 2003-12-30 01:16:35 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.13 2004-01-14 07:36:59 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -141,49 +141,6 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 			}
 		}
 		return result;
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of AutowireCapableBeanFactory
-	//---------------------------------------------------------------------
-
-	public Object autowire(Class beanClass) throws BeansException {
-		// Work out whether this is a Type 2 (JavaBean) or Type 3 (constructor) object.
-		// If it has a no-args constructor it's deemed to be Type 2, otherwise
-		// we try Type 3 autowiring.
-		Constructor[] constructors = beanClass.getConstructors();
-		for (int i = 0; i < constructors.length; i++) {
-			if (constructors[i].getParameterTypes().length == 0) {
-				Object bean = BeanUtils.instantiateClass(beanClass);
-				autowireBeanProperties(bean, AUTOWIRE_BY_TYPE, true);
-				return bean;
-			}
-		}
-		return autowireConstructor(beanClass);
-	}
-
-	public Object autowireConstructor(Class beanClass) {
-		RootBeanDefinition bd = new RootBeanDefinition(beanClass, null);
-		bd.setAutowire(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
-	}
-
-	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
-			throws BeansException {
-		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
-			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
-		}
-		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
-		bd.setAutowire(autowireMode);
-		if (dependencyCheck) {
-			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-		}
-		populateBean(existingBean.getClass().getName(), bd, new BeanWrapperImpl(existingBean));
-	}
-
-	public Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
-		return super.applyBeanPostProcessors(existingBean, name);
 	}
 
 

@@ -64,7 +64,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -389,7 +389,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		return getBeanFactory().getBean(name, requiredType);
 	}
 
-	public boolean containsBean(String name) throws BeansException {
+	public boolean containsBean(String name) {
 		return getBeanFactory().containsBean(name);
 	}
 
@@ -399,15 +399,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().getAliases(name);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of HierarchicalBeanFactory
-	//---------------------------------------------------------------------
-
-	public BeanFactory getParentBeanFactory() {
-		return getParent();
 	}
 
 
@@ -437,24 +428,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 
 	//---------------------------------------------------------------------
-	// Implementation of AutowireCapableBeanFactory
+	// Implementation of HierarchicalBeanFactory
 	//---------------------------------------------------------------------
 
-	public Object autowire(Class beanClass) throws BeansException {
-		return getBeanFactory().autowire(beanClass);
-	}
-
-	public Object autowireConstructor(Class beanClass) throws BeansException {
-		return getBeanFactory().autowireConstructor(beanClass);
-	}
-
-	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
-			throws BeansException {
-		getBeanFactory().autowireBeanProperties(existingBean, autowireMode, dependencyCheck);
-	}
-
-	public Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
-		return getBeanFactory().applyBeanPostProcessors(existingBean, name);
+	public BeanFactory getParentBeanFactory() {
+		return getParent();
 	}
 
 

@@ -89,6 +89,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
 	public static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
 	public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
+	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -229,7 +230,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				if (DEFAULT_VALUE.equals(autowire)) {
 					autowire = this.defaultAutowire;
 				}
-				rbd.setAutowire(getAutowire(autowire));
+				rbd.setAutowireMode(getAutowireMode(autowire));
 
 				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
 				if (!initMethodName.equals("")) {
@@ -486,7 +487,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return dependencyCheckCode;
 	}
 
-	protected int getAutowire(String att) {
+	protected int getAutowireMode(String att) {
 		int autowire = RootBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;
@@ -496,6 +497,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(att)) {
 			autowire = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+		}
+		else if (AUTOWIRE_AUTODETECT_VALUE.equals(att)) {
+			autowire = RootBeanDefinition.AUTOWIRE_AUTODETECT;
 		}
 		// else leave default value
 		return autowire;
