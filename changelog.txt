@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.84 2004-02-04 19:06:14 jhoeller Exp $
+$Id: changelog.txt,v 1.85 2004-02-07 00:34:43 jhoeller Exp $
 
 
-Changes in version 1.0 RC1 (xx.01.2003)
+Changes in version 1.0 RC1 (09.02.2003)
 ---------------------------------------
 
 Package org.springframework.aop
@@ -14,8 +14,12 @@ Package org.springframework.aop
 * changed AbstractAutoProxyCreator's "interceptors" property to "interceptorNames" to handle prototypes correctly
 
 Package org.springframework.beans
+* removed PropertyEditorManager registration from BeanWrapper, purely relying on local registration now
 * removed PropertyValuesValidator support from BeanWrapper
 * removed newWrapperInstance method from BeanWrapper
+* removed AbstractVetoableChangeListener from beans package
+* simplified BeanWrapperImpl's PropertyAccessException handling
+* improved BeanWrapperImpl's TypeMismatchException message in case of list or array entries
 * moved SortDefinition classes to new beans.support package
 * moved PagedListHolder classes from util package to beans.support, to remove cyclic package dependency
 * reworked BeanPostProcessor interface into postProcessBeforeInitialization and postProcessAfterInitialization
@@ -24,6 +28,8 @@ Package org.springframework.beans
 * added "autodetect" autowire mode that chooses either "constructor" or "byType" through introspection of the class
 * reworked AutowireCapableBeanFactory's "autowire" and "autowireConstructor" into a generic "autowire" method
 * moved AutowireCapableBeanFactory interface to package beans.factory.config
+* added SetFactoryBean class to package beans.factory.config, with "setClass" property for target class
+* reworked ListFactoryBean and MapFactoryBean to support "listClass" respectively "mapClass" properties
 * moved ConstructorArgumentValues and RuntimeBeanReference to package beans.factory.config
 * PropertyPlaceholderConfigurer resolves placeholders in constructor arguments
 * PropertyPlaceholderConfigurer supports resolution of system properties
@@ -35,34 +41,56 @@ Package org.springframework.beans
 * removed deprecated "ref external" support from XML bean definition format (use "ref bean" instead)
 * added new "idref" tag to XML bean definition format, for referencing a bean ID as string (allowing for validation)
 * added support for "autodetect" autowire mode to XML bean definition format
+* added "set" tag to XML bean definition format, analogous to "list" and "map"
 * fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
 
 Package org.springframework.context
 * ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
 * ApplicationContext's "getResource" method does not throw IOException anymore
 * always interpret file paths as relative in AbstractApplicationContext's "getResourceByPath" implementation
+* MessageSource's NoSuchMessageException is unchecked rather than checked, as it reflects a configuration error
 * renamed MessageSourceResolvable's "getArgs" method to "getArguments"
 * reworked internal structure of AbstractNestingMessageSource and ResourceBundleMessageSource
 * added ReloadableResourceBundleMessageSource, supporting hot reloading of message definition files
 * added "useCodeAsDefaultMessage" property to AbtractNestingMessageSource, to ease development and debugging
 
 Package org.springframework.core
+* removed HasRootCause, InternalErrorException, ParameterizableErrorCoded, and Timestamped
+* added JdkVersion class for easy detection of JDK 1.3 and 1.4
+* moved Constants and ControlFlow classes from util package to core
 * added InputStreamSource interface to package core.io, as super-interface of Resource
+* added "equals" and "hashCode" implementations to AbstractResource, based on descriptions strings
 * allow for ${...} placeholders in resource locations parsed by ResourceEditor, replacing them with system properties
 
 Package org.springframework.jdbc
 * added support for transaction suspension to DataSourceTransactionManager
+* added "isNativeConnectionNecessaryForNativePreparedStatements/CallableStatements" methods to NativeJdbcExtractor
+* added XAPoolNativeJdbcExtractor for ObjectWeb's XAPool
+* added CLOB handling to LobHandler, with BlobCreator reworked into LobCreator that covers both BLOBs and CLOBs
+* revised OracleLobHandler to work with all Oracle 9i drivers (classes12 and ojdbc14)
 * fixed handling of null values in DefaultLobHandler and OracleLobHandler
 * added getExceptionTranslator convenience method to JdbcDaoSupport
+* added JdbcOperations interface for JdbcTemplate, to ease unit testing
 
 Package org.springframework.mail
 * added MimeMessageHelper to package mail.javamail, providing simple access to a MimeMessage including attachments
 
 Package org.springframework.orm
-* revised Hibernate-JTA synchronization to close the Session early in case of a Hibernate TransactionManagerLookup
 * added support for transaction suspension to HibernateTransactionManager and JdoTransactionManager
+* added HibernateOperations and SqlMapOperations interfaces for HibernateTemplate respectively SqlMapTemplate
 * added convertHibernateAccessException convenience method to HibernateDaoSupport
 * added convertJdoAccessException convenience method to JdoDaoSupport
+* revised Hibernate-JTA synchronization to close the Session early in case of a Hibernate TransactionManagerLookup
+* added "jtaTransactionManager" property to LocalSessionFactoryBean, for driving Hibernate's TransactionManagerLookup
+* added ClobStringType for mapping Strings to LobHandler-managed CLOBs with Hibernate
+* added "lobHandler" property to LocalSessionFactoryBean, for driving ClobStringType
+* added "evict" method to HibernateTemplate
+* changed the argument of JdoDialect's "flush" from Transaction to PersistenceManager
+* JdoTransactionManager uses JdoDialect's "translateException" in case of flushing failure on commit
+
+Package org.springframework.remoting
+* made RemoteExporter's "serviceInterface" property required
+* added skeleton class check to Hessian/BurlapServiceExporter, to make them work with both Hessian/Burlap 2.x and 3.x
 
 Package org.springframework.samples
 * introduced Image Database sample application, illustrating LobHandler and HTTP multipart file uploads
@@ -70,13 +98,20 @@ Package org.springframework.samples
 Package org.springframework.transaction
 * added propagation behaviors "REQUIRES_NEW", "NOT_SUPPORTED", and "NEVER" to TransactionDefinition
 * refactored TransactionStatus into minimal interface, with DefaultTransactionStatus as default implementation
+* rollback on Error in TransactionInterceptor, via DefaultTransactionAttribute's "rollbackOn" implementation
 * added "readOnly" argument to TransactionSynchronization's "beforeCommit" method
+* added ResourceHolderSupport class to package transaction.support, based on the former ExpiringObject util class
 * reworked TransactionSynchronizationManager to move callback triggering to AbstractPlatformTransactionManager
 * added support for transaction suspension (including synchronization) to AbstractPlatformTransactionManager
-* rollback on Error in TransactionInterceptor, via DefaultTransactionAttribute's "rollbackOn" implementation
+* added support for transaction suspension to JtaTransactionManager, via the JTA TransactionManager interface
+* added JotmFactoryBean for exposing a JOTM instance (implementing UserTransaction and TransactionManager)
+* added WebSphereTransactionManagerFactoryBean for exposing a WebSphere 4/5's JTA TransactionManager
 
 Package org.springframework.ui
 * added VelocityEngineUtils utility class for convenient merging of a Velocity template with a model
+
+Package org.springframework.util
+* removed ObjectArrayUtils and ReflectionUtils
 
 Package org.springframework.validation
 * apply custom editor on Errors.getFieldValue to manually rejected field values too
@@ -93,17 +128,23 @@ Package org.springframework.web
 * renamed MultipartFile's "getOriginalFileName" method to "getOriginalFilename"
 * allow for existing multipart request in DispatcherServlet even if MultipartResolver configured (for forwards)
 * invoke HandlerInterceptor.afterCompletion even if a later HandlerInterceptor aborts processing
+* pass request and response into HandlerExceptionResolver's "resolveException" method
+* removed "setName" method from View interface, making AbstractView implement BeanNameAware instead
+* added "contentType" propert to UrlBasedViewResolver, for setting the content type of all resolved views
+* apply ContextResourceEditor to bean factories created by XmlViewResolver and ResourceBundleViewResolver
 * refactored URL path matching into UrlPathHelper, used by AbstractUrlHandlerMapping and AbstractMethodNameResolver
 * added "urlDecode" property to UrlPathHelper, for URL-decoding request URI and context path (if required)
 * renamed FileNameViewController to UrlFilenameViewController
 * removed deprecated "beanName" property from AbstractCommandController (use "commandName" instead)
 * SimpleFormController's default "onSubmit" forwards to success view with full Errors model instead of just command
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
+* removed experimental ValidatableThrowawayController
 * re-evaluate EL expressions on each tag rendering instead of on tag instance initialization in all Spring tags
 
 Building
-* added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
-* put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
+* replaced use-case-specific JARs with module-specific JARs (spring-core, spring-aop, spring-dao, spring-web, etc)
+* added "xdoclet/xjavadoc.jar" to "release" target in the framework build script (needed for building with attributes)
+* put Commons Attributes and XDoclet JARs in Ant classpath instead of expecting them in Ant's lib directory
 * renamed all "ant.bat" files in the samples to "build.bat"
 * added "build.bat" and "warfile.bat" files to "samples/jpetstore/attributes" directory
 * added "build.bat" file to framework root
