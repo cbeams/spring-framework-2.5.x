@@ -105,6 +105,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		this.rootFlow = rootFlow;
 		//add the list of default execution listeners configured for the flow
 		listenerList.add(rootFlow.getFlowExecutionListenerList());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Created new client execution for flow '" + rootFlow.getId() + "' with id '" + getId() + "'");
+		}
 	}
 
 	//methods implementing FlowExecutionInfo

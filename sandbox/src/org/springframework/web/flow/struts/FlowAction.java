@@ -52,8 +52,6 @@ public class FlowAction extends TemplateAction {
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
 
-	private HttpFlowExecutionManager executionManager;
-
 	protected String getActionPathAttributeName() {
 		return ACTION_PATH_ATTRIBUTE;
 	}
@@ -81,14 +79,10 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		synchronized (this) {
-			if (this.executionManager == null) {
-				FlowServiceLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-				Flow flow = locator.getFlow(getFlowId(mapping));
-				this.executionManager = new HttpFlowExecutionManager(flow, locator);
-			}
-		}
-		ModelAndView modelAndView = this.executionManager.handleRequest(request, response);
+		FlowServiceLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
+		Flow flow = locator.getFlow(getFlowId(mapping));
+		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(flow, locator);
+		ModelAndView modelAndView = executionManager.handleRequest(request, response);
 		// this is not very clean (pulling attribute from hard coded name)
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
 		if (flowExecution != null && flowExecution.isActive()) {
