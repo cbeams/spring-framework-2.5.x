@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.AttributeSetter;
-import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowModelMapper;
