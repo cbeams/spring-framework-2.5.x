@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.servlet.LastModified;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -86,7 +85,11 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  */
 public abstract class AbstractController extends WebContentGenerator implements Controller {
-	
+
+	public static final String METHOD_GET = "GET";
+
+	public static final String METHOD_POST = "POST";
+
 	/**
 	 * Set of supported methods (GET/POST etc.). GET and POST by default.
 	 */
@@ -101,8 +104,8 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 */
 	public AbstractController() {
 		this.supportedMethods = new HashSet();
-		this.supportedMethods.add("GET");
-		this.supportedMethods.add("POST");
+		this.supportedMethods.add(METHOD_GET);
+		this.supportedMethods.add(METHOD_POST);
 	}
 	
 	/**
@@ -135,6 +138,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 */
 	public final void setCacheSeconds(int seconds) {
 		this.cacheSeconds = seconds;
+		logger.info("Cache seconds set to " + seconds);
 	}
 	
 	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)

@@ -18,7 +18,13 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @see #setUseCacheControlHeader
  */
 public class WebContentGenerator extends WebApplicationObjectSupport {
-	
+
+	public static final String HEADER_PRAGMA = "Pragma";
+
+	public static final String HEADER_EXPIRES = "Expires";
+
+	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+
 	/** Use HTTP 1.0 expires header? */
 	private boolean useExpiresHeader = true;
 
@@ -48,14 +54,14 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	 * See www.mnot.net.cache docs.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
-		response.setHeader("Pragma", "No-cache");
+		response.setHeader(HEADER_PRAGMA, "No-cache");
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setDateHeader("Expires", 1L);
+			response.setDateHeader(HEADER_EXPIRES, 1L);
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
-			response.setHeader("Cache-Control", "no-cache");
+			response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
 		}
 	}
 
@@ -83,7 +89,7 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setDateHeader("Expires", System.currentTimeMillis() + seconds * 1000L);
+			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
@@ -91,7 +97,7 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 			if (mustRevalidate) {
 				hval += ", must-revalidate";
 			}
-			response.setHeader("Cache-Control", hval);
+			response.setHeader(HEADER_CACHE_CONTROL, hval);
 		}
 	}
 
@@ -113,7 +119,6 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Apply the given cache seconds and generate respective HTTP headers,
 	 * i.e. allow caching for the given number of seconds in case of a positive
 	 * value, prevent caching if given a 0 value, do nothing else.
-	 * Does not tell the browser to revalidate the resource.
 	 * @param response current HTTP response
 	 * @param seconds number of seconds into the future that the response
 	 * should be cacheable for
