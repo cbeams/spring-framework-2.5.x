@@ -35,6 +35,6 @@
 		</property>
 	</bean>
 
-	<bean id="viewController" class="org.springframework.web.servlet.mvc.FileNameViewController"/>
+	<bean id="viewController" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 
 </beans>

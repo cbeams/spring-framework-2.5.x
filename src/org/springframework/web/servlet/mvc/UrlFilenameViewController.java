@@ -6,11 +6,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Controller that transforms the file name at the end of a URL to view name.
- * Example: "/index.html" -> "index"
+ * Controller that transforms the virtual filename at the end of a URL
+ * to a view name. Example: "/index.html" -> "index"
  * @author Alef Arendsen
  */
-public class FileNameViewController implements Controller {
+public class UrlFilenameViewController implements Controller {
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
 		String uri = request.getRequestURI();
