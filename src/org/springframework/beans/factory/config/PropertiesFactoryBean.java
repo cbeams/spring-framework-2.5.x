@@ -85,14 +85,6 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 	}
 
 	/**
-	 * @deprecated in favor of setFileEncoding
-	 * @see #setFileEncoding
-	 */
-	public void setCharset(String charset) {
-		this.fileEncoding = charset;
-	}
-
-	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
 	 * The default is DefaultPropertiesPersister.
 	 * @see org.springframework.util.DefaultPropertiesPersister
