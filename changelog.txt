@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (25.3.2005)
+Changes in version 1.2 RC1 (27.3.2005)
 --------------------------------------
 
 Overall
@@ -46,6 +46,7 @@ Package org.springframework.core
 
 Package org.springframework.dao
 * added PessimisticLockingFailureException as super class for CannotAquireLock/DeadlockLoser/CannotSerializeTransaction
+* refined DataAccessUtils' "requiredUniqueResult" method to not throw an exception in case of a single null element
 
 Package org.springframework.jdbc
 * added InvalidResultSetAccessException, typically thrown when an invalid ResultSet column index or name was specified
@@ -60,8 +61,11 @@ Package org.springframework.jdbc
 * added LOB accessor methods that take column names to LobHandler interface, pre-implemented in AbstractLobHandler class
 * added "support.rowset" package, with SqlRowSet abstraction for disconnected result sets with Spring exceptions
 * added "queryForRowSet" methods to JdbcTemplate, returning a SqlRowSet as generic representation of the result rows
-* deprecated "queryForList" methods on JdbcOperations and JdbcTemplate, in favor of the new "queryForRowSet" methods
 * added "queryForObject" convenience methods to JdbcTemplate, taking a RowMapper argument and expecting a single row
+* added "queryForList" methods with "elementType" argument to JdbcTemplate, for extracting values from a single column
+* added "queryForMap" methods to JdbcTemplate, creating a Map representation for the columns of a single row
+* refined JdbcTemplate's "queryForList"/"queryForMap" to use a Commons Collections CaseInsensitiveMap if available
+* added RowSetResultExtractor, SingleColumnRowMapper and ColumnMapRowMapper as separate classes in "jdbc.core"
 * factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
 
 Package org.springframework.jmx
@@ -119,6 +123,7 @@ Package org.springframework.web
 * added "createBinder" and "initBinder" methods to MultiActionController, which may be overridden by subclasses
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
 * JSP BindTag saves previous "status" value and re-exposes it at the end of the tag (to support BindTag nesting)
+* added VelocityLayoutView, emulating the functionality offered by Velocity's VelocityLayoutServlet
 * AbstractXlstView offers an "errorListener" property and registers a default ErrorListener with the XSLT transformer
 * deprecated AbstractXsltView's "createDomNode" method in favor of new "createXsltSource" method
 
