@@ -22,6 +22,8 @@
 	
 	<bean id="nop" class="org.springframework.aop.interceptor.NopInterceptor" />
 	
+	
+	
 	<!--
 		This will create a bean for each thread ("apartment")
 	-->
@@ -50,6 +52,29 @@
 		<!-- Necessary as have a mixin and want to avoid losing the class,
 			 because there's no target interface -->
 		<property name="proxyTargetClass"><value>true</value></property>
+		
+	</bean>
+	
+	
+	<!-- Serialization tests using serializable target and advice -->
+	
+	<bean id="serializableNop" 
+		class="org.springframework.aop.interceptor.SerializableNopInterceptor" />
+	
+	<bean id="prototypePerson" class="org.springframework.beans.SerializablePerson" 
+		singleton="false">	
+	</bean>
+	
+	<bean id="personPoolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource">	
+		<property name="targetBeanName"><value>prototypePerson</value></property>
+		<property name="maxSize"><value>10</value></property>
+	</bean>
+	
+	<bean id="pooledPerson" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="targetSource"><ref local="personPoolTargetSource"/></property>
+		<property name="interceptorNames"><value>serializableNop</value></property>
 		
 	</bean>
 

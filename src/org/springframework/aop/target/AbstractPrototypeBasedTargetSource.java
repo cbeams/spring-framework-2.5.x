@@ -16,6 +16,10 @@
 
 package org.springframework.aop.target;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+
+import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,13 +36,17 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * <p>Such TargetSources must run in a BeanFactory, as it needs to call the
  * getBean() method to create a new prototype instance.
+ * 
+ * <p>
+ * PrototypeBasedTargetSources are serializable. This involves disconnecting the current target
+ * and turning into a SingletonTargetSource.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPrototypeBasedTargetSource.java,v 1.1 2004-04-20 21:54:01 jhoeller Exp $
+ * @version $Id: AbstractPrototypeBasedTargetSource.java,v 1.2 2004-07-27 15:39:53 johnsonr Exp $
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public abstract class AbstractPrototypeBasedTargetSource
-		implements TargetSource, BeanFactoryAware, InitializingBean {
+		implements TargetSource, BeanFactoryAware, InitializingBean, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -107,6 +115,27 @@ public abstract class AbstractPrototypeBasedTargetSource
 	public void afterPropertiesSet() {
 		if (this.targetBeanName == null) {
 			throw new IllegalStateException("targetBeanName is required");
+		}
+	}
+	
+	/**
+	 * Replaces this object with a SingletonTargetSource
+	 * on serialization.
+	 * Protected as otherwise it won't be invoked for
+	 * subclasses. (The writeReplace() method must be visible to
+	 * the class being serialized.)
+	 * <br>With this implementation of this method,
+	 * there is no need to mark non-serializable fields
+	 * in this class or subclasses as transient. 
+	 */
+	protected Object writeReplace() throws ObjectStreamException {
+		logger.info("Disconnecting TargetSource " + this);
+		try {
+			TargetSource disconnectedTargetSource =  new SingletonTargetSource(getTarget());
+			return disconnectedTargetSource;
+		}
+		catch (Exception ex) {
+			throw new AspectException("Can't get target", ex);
 		}
 	}
 

@@ -18,16 +18,20 @@ package org.springframework.aop.target;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.beans.Person;
+import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * Tests for pooling invoker interceptor
  * TODO need to make these tests stronger: it's hard to
  * make too many assumptions about a pool
  * @author Rod Johnson
- * @version $Id: CommonsPoolTargetSourceTests.java,v 1.4 2004-03-18 03:01:18 trisberg Exp $
+ * @version $Id: CommonsPoolTargetSourceTests.java,v 1.5 2004-07-27 15:39:34 johnsonr Exp $
  */
 public class CommonsPoolTargetSourceTests extends TestCase {
 
@@ -81,6 +85,27 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 //		assertTrue("Some free", conf.getFree() > 0);
 		//assertEquals(2, conf.getInvocations());
 		assertEquals(25, conf.getMaxSize());
+	}
+	
+	public void testTargetSourceSerializableWithoutConfigMixin() throws Exception {
+		CommonsPoolTargetSource cpts = (CommonsPoolTargetSource) beanFactory.getBean("personPoolTargetSource");
+		
+		SingletonTargetSource serialized = (SingletonTargetSource) SerializationTestUtils.serializeAndDeserialize(cpts);
+		assertTrue(serialized.getTarget() instanceof Person);
+	}
+	
+	
+	public void testProxySerializableWithoutConfigMixin() throws Exception {
+		Person pooled = (Person) beanFactory.getBean("pooledPerson");
+
+		System.out.println(((Advised) pooled).toProxyConfigString());
+		assertTrue(((Advised) pooled).getTargetSource() instanceof CommonsPoolTargetSource);
+		
+		//((Advised) pooled).setTargetSource(new SingletonTargetSource(new SerializablePerson()));
+		Person serialized = (Person) SerializationTestUtils.serializeAndDeserialize(pooled);
+		assertTrue(((Advised) serialized).getTargetSource() instanceof SingletonTargetSource);
+		serialized.setAge(25);
+		assertEquals(25, serialized.getAge());
 	}
 
 }
