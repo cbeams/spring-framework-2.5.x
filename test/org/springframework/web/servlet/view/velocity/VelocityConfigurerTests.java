@@ -1,4 +1,3 @@
-
 package org.springframework.web.servlet.view.velocity;
 
 import java.io.File;
@@ -13,6 +12,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.FileResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 import org.springframework.ui.velocity.VelocityInitializationException;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,20 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class VelocityConfigurerTests extends TestCase {
 
-	public void testVelocityEngineFactoryBeanWithoutApplicationContext() {
+	public void testVelocityEngineFactoryBeanWithConfigLocation() {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		Properties props = new Properties();
-		props.setProperty("myprop", "${app.root}/mydir");
-		vefb.setVelocityProperties(props);
-		vefb.setResourceLoaderPath("${app.root}");
-		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
-		assertEquals("${app.root}/mydir", ve.getProperty("myprop"));
-	}
-
-	public void testVelocityEngineFactoryBeanWithConfigLocationWithoutApplicationContext() {
-		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		vefb.setConfigLocation("myprops.properties");
+		vefb.setConfigLocation(new FileResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		vefb.setVelocityProperties(props);
@@ -49,95 +39,50 @@ public class VelocityConfigurerTests extends TestCase {
 		}
 	}
 
-	public void testVelocityEngineFactoryBeanWithApplicationContext() {
-		MockControl acControl = MockControl.createControl(ApplicationContext.class);
-		ApplicationContext ac = (ApplicationContext) acControl.getMock();
-		File resourceBase = new File("C:/mybase");
-		ac.getResourceBase();
-		acControl.setReturnValue(resourceBase);
-		acControl.replay();
-
+	public void testVelocityEngineFactoryBeanWithResourceLoaderPath() {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		vefb.setResourceLoaderPath("/mydir");
-		vefb.setApplicationContext(ac);
+		vefb.setResourceLoaderPath(new FileResource("/mydir") {
+			public boolean exists() {
+				return true;
+			}
+		});
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
 		VelocityEngine ve = (VelocityEngine) vefb.getObject();
-		assertEquals(new File(resourceBase, "/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
-
-		acControl.verify();
+		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
 	public void testVelocityConfigurer() {
 		MockControl acControl = MockControl.createControl(ApplicationContext.class);
 		ApplicationContext ac = (ApplicationContext) acControl.getMock();
-		File resourceBase = new File("C:/mybase");
-		ac.getResourceBase();
-		acControl.setReturnValue(resourceBase);
 		acControl.replay();
 
 		VelocityConfigurer vc = new VelocityConfigurer();
-		vc.setResourceLoaderPath("/mydir");
+		vc.setResourceLoaderPath(new FileResource("/mydir") {
+			public boolean exists() {
+				return true;
+			}
+		});
 		vc.setApplicationContext(ac);
 		assertTrue(vc.getVelocityEngine() instanceof VelocityEngine);
 		VelocityEngine ve = vc.getVelocityEngine();
-		assertEquals(new File(resourceBase, "/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
+		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 
 		acControl.verify();
 	}
 
-	public void testDefaultVelocityPropertiesLocationNotFound() throws Exception {
+	public void testVelocityConfigurerWithDefaultLocation() throws Exception {
 		VelocityConfigurer vc = new VelocityConfigurer();
+		String configLocation = VelocityConfigurer.DEFAULT_CONFIG_LOCATION;
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getResourceAsStream(VelocityConfigurer.DEFAULT_CONFIG_LOCATION);
-		wmc.setReturnValue(null);
-		wmc.replay();
-		try {
-			vc.setApplicationContext(wac);
-			fail();
-		}
-		catch (VelocityInitializationException ex) {
-			// expected
-		}
-		wmc.verify();
-	}
-	
-	public void testDefaultVelocityPropertiesFoundButBasePathNull() throws Exception {
-		testDefaultVelocityPropertiesFoundButBasePathNull(null);
-	}
-	
-	public void testCustomVelocityPropertiesFoundButBasePathNull() throws Exception {
-		testDefaultVelocityPropertiesFoundButBasePathNull("war/somewhere.properties");
-	}
-	
-	private boolean inited = false;
-	
-	private void testDefaultVelocityPropertiesFoundButBasePathNull(String configLocation) throws Exception {
-		inited = false;
-		VelocityConfigurer vc = new VelocityConfigurer() {
-			protected VelocityEngine newVelocityEngine() {
-				inited = true;
-				return super.newVelocityEngine();
-			}
-		};
-		if (configLocation != null) {
-			vc.setConfigLocation(configLocation);
-		}
-		else {
-			// We expect the default
-			configLocation = VelocityConfigurer.DEFAULT_CONFIG_LOCATION;
-		}
-		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getResourceAsStream(configLocation);
-		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
+		wac.getResource(configLocation);
+		wmc.setReturnValue(new InputStreamResource(new StringBufferInputStream("foo=bar"), "test"));
 		wmc.replay();
 		vc.setApplicationContext(wac);
 
 		VelocityEngine ve = vc.getVelocityEngine();
 		assertTrue(ve.getProperty("foo").equals("bar"));
 		// Check the new VelocityEngine was inited
-		assertTrue(inited);
 		wmc.verify();
 	}
 	
@@ -162,7 +107,6 @@ public class VelocityConfigurerTests extends TestCase {
 			public void init() throws Exception {
 				throw ex;
 			}
-
 		};
 		VelocityConfigurer vc = new VelocityConfigurer() {
 			protected VelocityEngine newVelocityEngine() {
@@ -172,8 +116,8 @@ public class VelocityConfigurerTests extends TestCase {
 		String configLocation = VelocityConfigurer.DEFAULT_CONFIG_LOCATION;
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getResourceAsStream(configLocation);
-		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
+		wac.getResource(configLocation);
+		wmc.setReturnValue(new InputStreamResource(new StringBufferInputStream("foo=bar"), "test"));
 		wmc.replay();
 		try {
 			vc.setApplicationContext(wac);
