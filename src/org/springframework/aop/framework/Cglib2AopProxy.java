@@ -732,6 +732,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 				// if exposing the proxy then AOP_PROXY must be used.
 				if (exposeProxy) {
+                    if(logger.isInfoEnabled()) {
+                        logger.info("Must expose proxy on advised method " + method + " - using AOP_PROXY");
+                    }
 					return AOP_PROXY;
 				}
 
@@ -756,6 +759,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 					return (index + fixedInterceptorOffset);
 				}
 				else {
+                    if(logger.isInfoEnabled()) {
+                        logger.info("Unable to apply any optimisations to advised method " + method + " - using AOP_PROXY");
+                    }
 					return AOP_PROXY;
 				}
 
