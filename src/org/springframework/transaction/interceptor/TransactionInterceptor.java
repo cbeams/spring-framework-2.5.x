@@ -10,6 +10,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.6 2003-11-22 10:06:03 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.7 2003-11-23 14:26:48 jhoeller Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -67,15 +68,11 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 
 	/**
 	 * Create a new TransactionInterceptor.
-	 * Sets AttributesTransactionAttributeSource as default source.
 	 * Does not set a default transaction manager!
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributeSource
-	 * @see AttributesTransactionAttributeSource
 	 */
 	public TransactionInterceptor() {
-		// Set default properties, which may be changed later
-		//this.transactionAttributeSource = new AttributesTransactionAttributeSource();
 	}
 
 	/**
