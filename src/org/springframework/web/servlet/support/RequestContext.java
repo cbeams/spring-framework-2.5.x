@@ -67,9 +67,11 @@ public class RequestContext {
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view
 	 */
-	public RequestContext(HttpServletRequest request, Map model) throws ServletException {
+	public RequestContext(HttpServletRequest request, Map model)
+		throws ServletException {
 		this.request = request;
-		this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request);
+		this.webApplicationContext =
+			RequestContextUtils.getWebApplicationContext(request);
 		this.locale = RequestContextUtils.getLocale(request);
 		this.theme = RequestContextUtils.getTheme(request);
 		this.model = model;
@@ -122,10 +124,20 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
 	 * @param code code of the message
+	 * @return the message
+	 */
+	public String getMessage(String code) throws NoSuchMessageException {
+		return getMessage(code, null, this.defaultHtmlEscape);
+	}
+
+	/**
+	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * @param code code of the message
 	 * @param args arguments for the message, or null if none
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
+	public String getMessage(String code, Object[] args)
+		throws NoSuchMessageException {
 		return getMessage(code, args, this.defaultHtmlEscape);
 	}
 
@@ -136,8 +148,10 @@ public class RequestContext {
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
 	 */
-	public String getMessage(String code, Object[] args, boolean htmlEscape) throws NoSuchMessageException {
-		String msg = this.webApplicationContext.getMessage(code, args, this.locale);
+	public String getMessage(String code, Object[] args, boolean htmlEscape)
+		throws NoSuchMessageException {
+		String msg =
+			this.webApplicationContext.getMessage(code, args, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
@@ -147,7 +161,8 @@ public class RequestContext {
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 */
-	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
+	public String getMessage(MessageSourceResolvable resolvable)
+		throws NoSuchMessageException {
 		return getMessage(resolvable, this.defaultHtmlEscape);
 	}
 
@@ -157,8 +172,12 @@ public class RequestContext {
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
 	 */
-	public String getMessage(MessageSourceResolvable resolvable, boolean htmlEscape) throws NoSuchMessageException {
-		String msg = this.webApplicationContext.getMessage(resolvable, this.locale);
+	public String getMessage(
+		MessageSourceResolvable resolvable,
+		boolean htmlEscape)
+		throws NoSuchMessageException {
+		String msg =
+			this.webApplicationContext.getMessage(resolvable, this.locale);
 		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
 	}
 
@@ -182,7 +201,8 @@ public class RequestContext {
 	 * @throws ServletException if the Errors instance could not be found
 	 * in the request
 	 */
-	public Errors getErrors(String name, boolean htmlEscape) throws ServletException {
+	public Errors getErrors(String name, boolean htmlEscape)
+		throws ServletException {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap();
 		}
@@ -191,15 +211,17 @@ public class RequestContext {
 		if (errors == null) {
 			errors = retrieveErrors(name);
 			if (errors == null) {
-				throw new ServletException("Invalid bind name [" + name + "]: Errors instance not found in request");
+				throw new ServletException(
+					"Invalid bind name ["
+						+ name
+						+ "]: Errors instance not found in request");
 			}
 			put = true;
 		}
 		if (htmlEscape && !(errors instanceof EscapedErrors)) {
 			errors = new EscapedErrors(errors);
 			put = true;
-		}
-		else if (!htmlEscape && errors instanceof EscapedErrors) {
+		} else if (!htmlEscape && errors instanceof EscapedErrors) {
 			errors = ((EscapedErrors) errors).getSource();
 			put = true;
 		}
@@ -217,8 +239,7 @@ public class RequestContext {
 		String key = BindException.ERROR_KEY_PREFIX + name;
 		if (this.model != null) {
 			return (Errors) this.model.get(key);
-		}
-		else {
+		} else {
 			return (Errors) this.request.getAttribute(key);
 		}
 	}
