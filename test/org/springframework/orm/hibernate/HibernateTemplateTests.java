@@ -294,7 +294,7 @@ public class HibernateTemplateTests extends TestCase {
 			// expected
 			assertEquals(TestBean.class, ex.getPersistentClass());
 			assertEquals("id", ex.getIdentifier());
-			assertEquals(onfex, ex.getRootCause());
+			assertEquals(onfex, ex.getCause());
 		}
 		sfControl.verify();
 		sessionControl.verify();
@@ -435,6 +435,29 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.lock(tb, LockMode.WRITE);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testEvict() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.evict(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.evict(tb);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -923,7 +946,7 @@ public class HibernateTemplateTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(sqlex, ex.getRootCause());
+			assertEquals(sqlex, ex.getCause());
 		}
 
 		try {
@@ -951,7 +974,7 @@ public class HibernateTemplateTests extends TestCase {
 			// expected
 			assertEquals(TestBean.class, ex.getPersistentClass());
 			assertEquals("id", ex.getIdentifier());
-			assertEquals(wcex, ex.getRootCause());
+			assertEquals(wcex, ex.getCause());
 		}
 
 		final StaleObjectStateException sosex = new StaleObjectStateException(TestBean.class, "id");
@@ -967,7 +990,7 @@ public class HibernateTemplateTests extends TestCase {
 			// expected
 			assertEquals(TestBean.class, ex.getPersistentClass());
 			assertEquals("id", ex.getIdentifier());
-			assertEquals(sosex, ex.getRootCause());
+			assertEquals(sosex, ex.getCause());
 		}
 
 		final QueryException qex = new QueryException("msg");
@@ -982,7 +1005,7 @@ public class HibernateTemplateTests extends TestCase {
 		}
 		catch (HibernateQueryException ex) {
 			// expected
-			assertEquals(qex, ex.getRootCause());
+			assertEquals(qex, ex.getCause());
 			assertEquals("query", ex.getQueryString());
 		}
 
@@ -1021,7 +1044,7 @@ public class HibernateTemplateTests extends TestCase {
 		}
 		catch (HibernateSystemException ex) {
 			// expected
-			assertEquals(hex, ex.getRootCause());
+			assertEquals(hex, ex.getCause());
 		}
 	}
 

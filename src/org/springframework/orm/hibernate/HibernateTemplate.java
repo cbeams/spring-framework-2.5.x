@@ -2,6 +2,7 @@ package org.springframework.orm.hibernate;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -333,6 +334,23 @@ public class HibernateTemplate extends HibernateAccessor {
 	}
 
 	/**
+	 * Remove the given object from the Session cache.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.evict.
+	 * @param entity the persistent instance to lock
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#evict(Object)
+	 */
+	public void evict(final Object entity) {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.evict(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
 	 * Delete the given persistent instance.
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.delete.
@@ -359,7 +377,7 @@ public class HibernateTemplate extends HibernateAccessor {
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#delete(String)
 	 */
-	public void deleteAll(final List entities) throws DataAccessException {
+	public void deleteAll(final Collection entities) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				for (Iterator it = entities.iterator(); it.hasNext();) {
