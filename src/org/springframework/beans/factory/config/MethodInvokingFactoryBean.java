@@ -74,7 +74,7 @@ import org.springframework.util.MethodInvoker;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.11 2004-04-22 07:58:22 jhoeller Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.12 2004-05-06 12:05:27 dkopylenko Exp $
  */
 public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryBean, InitializingBean {
 
@@ -95,6 +95,11 @@ public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryB
 		prepare();
 	}
 
+	/**
+	 * Will return the same value each time if the singleton property is set
+	 * to true, and otherwise return the value returned from invoking the
+	 * specified method.
+	 */
 	public Object getObject() throws Exception {
 		if (this.singleton) {
 			if (this.singletonObject == null) {
@@ -105,11 +110,7 @@ public class MethodInvokingFactoryBean extends MethodInvoker implements FactoryB
 		return invoke();
 	}
 
-	/*
-	 * Will return the same value each time if the singleton property is set
-	 * to true, and otherwise return the value returned from invoking the
-	 * specified method.
-	 */
+	
 	public Class getObjectType() {
 		Class type = getPreparedMethod().getReturnType();
 		if (type.equals(void.class)) {
