@@ -199,10 +199,6 @@ public class FlowSession implements MutableFlowModel, Serializable {
 
 	// methods implementing FlowModel
 
-	/**
-	 * Returns all the attributes stored in this flow session as a model map.
-	 * @return the flow session data model
-	 */
 	public Map getModel() {
 		return attributes;
 	}

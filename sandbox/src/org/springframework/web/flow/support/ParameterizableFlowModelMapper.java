@@ -355,6 +355,10 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 		public Object getRequiredAttribute(String attributeName, Class requiredType) {
 			throw new UnsupportedOperationException();
 		}
+		
+		public Map getModel() {
+			return map;
+		}
 
 		public void setAttribute(String attributeName, Object attributeValue) {
 			map.put(attributeName, attributeValue);

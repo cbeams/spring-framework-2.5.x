@@ -457,11 +457,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
 	}
 
-	/**
-	 * Returns the data model for this flow execution, suitable for exporting to
-	 * web views.
-	 * @return Map of model attributes for this flow execution.
-	 */
 	public Map getModel() {
 		Map model = new HashMap(getActiveFlowSession().getModel());
 		// the flow execution itself is available in the model

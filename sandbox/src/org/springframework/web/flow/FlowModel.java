@@ -16,6 +16,7 @@
 package org.springframework.web.flow;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -174,4 +175,11 @@ public interface FlowModel {
 	 * @return The entries that match the criteria.
 	 */
 	public Collection findAttributes(Constraint criteria);
+	
+	/**
+	 * Returns the data model for this flow model, suitable for exporting to
+	 * web views.
+	 * @return Map of model attributes for this flow model.
+	 */
+	public Map getModel();
 }
