@@ -88,7 +88,7 @@
 		<echo message="docs     --> Create complete Javadoc documentation"/>
 		<echo message="warfile  --> Build the web application archive"/>
 		<echo message="setupDB  --> Initialize the database"/>
-		<echo message="test     --> Run tests using initialized database"/>
+		<echo message="tests    --> Run tests using initialized database"/>
 		<echo message="all      --> Clean, build, docs, warfile, test"/>
 		<echo message=""/>
 
@@ -240,7 +240,7 @@
 	</target>
 
 
-	<target name="test" depends="build,setupDB" description="Run tests using initialized database">
+	<target name="tests" depends="build,setupDB" description="Run tests using initialized database">
 
 		<delete dir="${testbuild.dir}"/>
 		<mkdir dir="${testbuild.dir}"/>
@@ -286,6 +286,6 @@
 	</target>
 
 
-	<target name="all" depends="clean,build,docs,warfile,test" description="Clean,build,docs,warfile,test"/>
+	<target name="all" depends="clean,build,docs,warfile,tests" description="Clean,build,docs,warfile,tests"/>
 
 </project>
