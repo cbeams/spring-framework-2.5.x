@@ -59,7 +59,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.6 2003-10-22 15:19:13 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.7 2003-10-29 08:23:06 jhoeller Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -225,32 +225,21 @@ public class VelocityView extends AbstractView {
 				logger.debug("Merged OK with Velocity template '" + templateName + "' in VelocityView with name '" + getName() + "'");
 		}
 		catch (IOException ex) {
-			String mesg =
-				"Couldn't write to response trying to merge Velocity template with name '"
-					+ this.templateName
-					+ "' in VelocityView with name '"
-					+ getName()
-					+ "'";
+			String mesg = "Couldn't write to response trying to merge Velocity template with name [" +
+					this.templateName + "] in VelocityView with name '"	+ getName()	+ "'";
 			logger.error(mesg, ex);
 			throw new ServletException(mesg, ex);
 		}
 		catch (ParseErrorException ex) {
-			String mesg =
-				"Velocity template with name '"
-					+ this.templateName
-					+ "' appears to be invalid in VelocityView with name '"
-					+ getName()
-					+ "'";
+			String mesg = "Velocity template with name ["	+ this.templateName +
+					"] appears to be invalid in VelocityView with name '"	+ getName()	+ "'";
 			logger.error(mesg, ex);
 			throw new ServletException(mesg, ex);
 		}
 		catch (Exception ex) {
 			String mesg =
-				"Unknown error trying to merge Velocity template with name '"
-					+ this.templateName
-					+ "' in VelocityView with name '"
-					+ getName()
-					+ "'";
+				"Unknown error trying to merge Velocity template with name [" +
+					this.templateName	+ "] in VelocityView with name '"	+ getName()	+ "'";
 			logger.error(mesg, ex);
 			throw new ServletException(mesg, ex);
 		}
@@ -267,20 +256,14 @@ public class VelocityView extends AbstractView {
 			Set keys = model.keySet();
 			Iterator itr = keys.iterator();
 			while (itr.hasNext()) {
-				String modelname = (String) itr.next();
-				Object val = model.get(modelname);
-				
-				modelname = transformModelNameIfNecessary(modelname);
-
+				String modelName = (String) itr.next();
+				Object val = model.get(modelName);
+				modelName = transformModelNameIfNecessary(modelName);
 				if (logger.isDebugEnabled())
-					logger.debug("Added model with name '" + modelname
-							+ "' and class "
-							+ val.getClass()
-							+ " to Velocity context in view with name '"
-							+ getName()
-							+ "'");
+					logger.debug("Added model with name '" + modelName + "' and value [" + val +
+											 "] to Velocity context in view with name '" + getName() + "'");
 
-				vContext.put(modelname, val);
+				vContext.put(modelName, val);
 			}
 		}
 		else {
@@ -292,13 +275,11 @@ public class VelocityView extends AbstractView {
 	 * If necessary, transform the model name into a legal Velocity model name.
 	 * Velocity can't cope with .s in a variable name, so we change them to
 	 * _s. 
-	 * @param modelname
+	 * @param modelName
 	 */
-	protected String transformModelNameIfNecessary(String modelname) {
-		modelname = StringUtils.replace(modelname, ".", "_");
-		return modelname;
+	protected String transformModelNameIfNecessary(String modelName) {
+		return StringUtils.replace(modelName, ".", "_");
 	}
-
 
 	/**
 	 * Expose helpers unique to each rendring operation. 
