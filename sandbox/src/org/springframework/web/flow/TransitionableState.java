@@ -153,7 +153,7 @@ public abstract class TransitionableState extends State {
 	 * Internal helper method that gets a transition for given flow execution
 	 * request context.
 	 * @param context a flow execution context
-	 * @param return the transition, or null if not found
+	 * @return the transition, or null if not found
 	 */
 	protected Transition getTransition(RequestContext context) {
 		Iterator it = transitionsIterator();
