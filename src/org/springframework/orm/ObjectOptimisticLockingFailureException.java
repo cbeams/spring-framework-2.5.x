@@ -16,11 +16,12 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 
 	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier) {
 		this(persistentClass, identifier, "Object of class '" + persistentClass.getName() +
-		                                  "' with identifier [" + identifier + ": optimistic locking failed");
+		                                  "' with identifier [" + identifier + ": optimistic locking failed", null);
 	}
 
-	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier, String message) {
-		super(message);
+	public ObjectOptimisticLockingFailureException(Class persistentClass, Object identifier,
+																								 String msg, Throwable ex) {
+		super(msg, ex);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
 	}

@@ -22,7 +22,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 */
 	public ObjectRetrievalFailureException(Class persistentClass, Object identifier) {
 		this(persistentClass, identifier, "Object of class '" + persistentClass.getName() +
-		                                  "' with identifier [" + identifier + ": not found");
+																			"' with identifier [" + identifier + ": not found", null);
 	}
 
 	/**
@@ -30,10 +30,10 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * with the given explicit message.
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
-	 * @param message exception message
+	 * @param msg exception message
 	 */
-	public ObjectRetrievalFailureException(Class persistentClass, Object identifier, String message) {
-		super(message);
+	public ObjectRetrievalFailureException(Class persistentClass, Object identifier, String msg, Throwable ex) {
+		super(msg, ex);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
 	}

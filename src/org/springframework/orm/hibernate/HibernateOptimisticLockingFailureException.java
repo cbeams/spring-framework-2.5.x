@@ -13,7 +13,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 public class HibernateOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 
 	public HibernateOptimisticLockingFailureException(StaleObjectStateException ex) {
-		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage());
+		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage(), ex);
 	}
 
 }

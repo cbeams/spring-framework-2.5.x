@@ -11,18 +11,15 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  */
 public class HibernateQueryException extends InvalidDataAccessResourceUsageException {
 
-	private String queryString;
-
 	public HibernateQueryException(QueryException ex) {
-		super(ex.getMessage(), ex.getCause());
-		this.queryString = ex.getQueryString();
+		super(ex.getMessage(), ex);
 	}
 
 	/**
 	 * Return the HQL query string that was invalid.
 	 */
 	public String getQueryString() {
-		return queryString;
+		return ((QueryException) getRootCause()).getQueryString();
 	}
 
 }

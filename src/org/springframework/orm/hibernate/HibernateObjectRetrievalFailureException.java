@@ -14,11 +14,11 @@ import org.springframework.orm.ObjectRetrievalFailureException;
 public class HibernateObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 
 	public HibernateObjectRetrievalFailureException(ObjectNotFoundException ex) {
-		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage());
+		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage(), ex);
 	}
 
 	public HibernateObjectRetrievalFailureException(WrongClassException ex) {
-		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage());
+		super(ex.getPersistentClass(), ex.getIdentifier(), ex.getMessage(), ex);
 	}
 
 }

@@ -227,7 +227,8 @@ public class HibernateTemplateTests extends TestCase {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.load(TestBean.class, "id");
-		sessionControl.setThrowable(new ObjectNotFoundException("msg", "id", TestBean.class));
+		ObjectNotFoundException onfex = new ObjectNotFoundException("msg", "id", TestBean.class);
+		sessionControl.setThrowable(onfex);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
@@ -240,6 +241,9 @@ public class HibernateTemplateTests extends TestCase {
 		}
 		catch (HibernateObjectRetrievalFailureException ex) {
 			// expected
+			assertEquals(TestBean.class, ex.getPersistentClass());
+			assertEquals("id", ex.getIdentifier());
+			assertEquals(onfex, ex.getRootCause());
 		}
 		sfControl.verify();
 		sessionControl.verify();
@@ -801,10 +805,11 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals(sqlex, ex.getRootCause());
 		}
 
+		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class);
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new WrongClassException("msg", "id", TestBean.class);
+					throw wcex;
 				}
 			});
 			fail("Should have thrown HibernateObjectRetrievalFailureException");
@@ -813,12 +818,14 @@ public class HibernateTemplateTests extends TestCase {
 			// expected
 			assertEquals(TestBean.class, ex.getPersistentClass());
 			assertEquals("id", ex.getIdentifier());
+			assertEquals(wcex, ex.getRootCause());
 		}
 
+		final StaleObjectStateException sosex = new StaleObjectStateException(TestBean.class, "id");
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new StaleObjectStateException(TestBean.class, "id");
+					throw sosex;
 				}
 			});
 			fail("Should have thrown HibernateOptimisticLockingFailureException");
@@ -827,19 +834,23 @@ public class HibernateTemplateTests extends TestCase {
 			// expected
 			assertEquals(TestBean.class, ex.getPersistentClass());
 			assertEquals("id", ex.getIdentifier());
+			assertEquals(sosex, ex.getRootCause());
 		}
 
+		final QueryException qex = new QueryException("msg");
+		qex.setQueryString("query");
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new QueryException("msg", sqlex);
+					throw qex;
 				}
 			});
 			fail("Should have thrown InvalidDataAccessResourceUsageException");
 		}
 		catch (HibernateQueryException ex) {
 			// expected
-			assertEquals(sqlex, ex.getRootCause());
+			assertEquals(qex, ex.getRootCause());
+			assertEquals("query", ex.getQueryString());
 		}
 
 		try {
