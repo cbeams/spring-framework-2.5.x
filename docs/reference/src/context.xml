@@ -10,11 +10,11 @@
 	    	manipulating beans, sits the <literal>context</literal> package. The context
 	    	package acts as a registry of objects needed by your application. The functionality
 	    	it offers somewhat resembles the <emphasis>enterprise naming context</emphasis>
-	    	J2EE application server feature, however there are some key differences. For instance,
+	    	J2EE application servers feature, however there are some key differences. For instance,
 	    	objects bound in a Spring application context (<literal>ApplicationContext</literal>) don't
 	    	need to extend something like a remote interface or object. Second of all, application contexts
 	    	can be used throughout the complete range of layers of your applications, from within
-	    	Swing clients, webapplication, but also in Enterprise JavaBeans.
+	    	Swing clients, webapplications, but also in Enterprise JavaBeans.
 	    </para>
 	    <para>
 	    	The basis for the context package is the <literal>org.springframework.context.ApplicationContext</literal>

@@ -1,6 +1,6 @@
 <chapter id="overview">
 
-    <title>High Level Overview</title>
+    <title>Introduction</title>
     
     <sect1 id="overview-intro">
     	<title>Introduction</title>
@@ -64,6 +64,16 @@
 			Spring for a specific project and provides an overview of some of the advantages 
 			(and also disadvantages) of Spring and IoC in general.
 		</para>
+    </sect1>
+    
+    <sect1 id="overview-reading">
+    	<title>About this reference</title>
+    	<para>
+    		Teh Spring reference documentation is (to be) an extensive guide to Spring and should offer
+    		full insight into all the Spring features. Since the Spring Framework is quite big, this
+    		document is also quite big. This section provides you with some information about how to read this
+    		and what sections are important for certain scenarios.
+    	</para>
     </sect1>
 
 </chapter>

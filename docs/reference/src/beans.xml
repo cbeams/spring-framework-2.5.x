@@ -226,13 +226,6 @@ public void doIt() {
 			</para>
 		</sect2>  
 		
-		<sect2 id="beans-beans-event">
-			<title>Event propagation</title>
-			<para>
-				TODO: some info on changelisteners and things like that
-			</para>
-		</sect2>
-		
 		<sect2 id="beans-beans-other">
 			<title>Other features worth mentioning</title>
 			<para>

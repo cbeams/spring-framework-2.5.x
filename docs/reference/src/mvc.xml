@@ -144,7 +144,7 @@
 		<para>
 			The Spring DispatcherServlet has a couple of special beans it uses, in order to be able to process requests
 			and render the appropriate views. Those beans are included in the Spring framework and (optionally) have to be configured in 
-			the WebApplicationContext, just as any other bean would have to configured. Each of those beans, is described
+			the WebApplicationContext, just as any other bean would have to be configured. Each of those beans, is described
 			in more detail below. Right now, we'll just mention them, just to let you know they exist and to enable us to
 			go on talking about the DispatcherServlet. For most of the beans, defaults are provided so you don't have to
 			worry about those.
@@ -167,6 +167,12 @@
 						<entry>(<xref linkend="mvc-handlermapping"/>) a list of pre- and postprocessors and controllers that 
 							will be executed if they match certain criteria (for instance a matching URL specified with the
 							controller)
+						</entry>
+					</row>
+					<row>
+						<entry>controller(s)</entry>
+						<entry>(<xref linkend="mvc-controllers"/>) the beans providing the actual functionality (or at least, 
+							access to the functionality) as part of the MVC triad
 						</entry>
 					</row>
 					<row>
@@ -264,6 +270,363 @@
 		</para>
 		
 	</sect1>
+	
+	<sect1 id="mvc-controller">
+		<title>Controllers</title>
+		<para>
+			The notion of controller is part of the MVC design pattern. Controllers define application behavior, or at least
+			provide users with access to the application behavior. Controllers interpret user input and transform the user input
+			into a sensible model which will be represented to the user by the view. Spring has implemented the notion
+			of a controller in a very abstract way enabling a wide variety of different kinds of controllers to be created. 
+			Spring contains formcontroller, commandcontroller, controllers that execute wizard-style logic and more.			
+		</para>
+		
+		<para>
+			Spring's basis for the controller architecture is the <literal>org.springframework.mvc.Controller</literal> interface, which
+			is listed below.
+			<programlisting><![CDATA[
+public interface Controller {
+
+	/**
+	 * Process the request and return a ModelAndView object which the DispatcherServlet
+	 * will render.
+	 */
+	ModelAndView handleRequest(
+		HttpServletRequest request, 
+		HttpServletResponse response) 
+	throws Exception;
+}
+			]]></programlisting>
+			
+			As you can see, the Controller interface just states one single method that should be capable of 
+			handling a request and return an appropriate model and view. Those three concepts are the basis for the 
+			Spring MVC implemente; <emphasis>ModelAndView</emphasis> and <emphasis>Controller</emphasis>.
+			While the Controller interface is quite abstract, Spring offers a lot of controllers that already
+			contain a lot of functionality you might need. The controller interface just define the most commons
+			functionality offered by every controller: the functionality of handling a request and returning a model 
+			and a view.
+		</para>
+		
+		<sect2 id="mvc-controller-abstractcontroller">
+			<title>Using the <literal>AbstractController</literal> and <literal>WebContentGenerator</literal></title>
+			<para>
+				Of course, jsut a controller interface isn't enough. To provide a basic infrastructure, all Spring's
+				Controller inherit from AbstractController, a class offering caching support and for instance the setting
+				of the mimetype.
+			</para>
+			
+			<table id="mvc-controller-abstract-features" frame="all">
+				<title>Features offered by the <literal>AbstractController</literal></title>
+				<tgroup cols="2">
+					<colspec colname="c1" colwidth="1*"/>
+					<colspec colname="c2" colwidth="3*"/>
+					<thead>
+						<row>
+							<entry>Feature</entry>
+							<entry>Explanation</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>supportedMethods</literal></entry>
+							<entry>indicates what methods this controller should accept. Usually this is set to both
+								<literal>GET</literal> and <literal>POST</literal>, but you can modify this to reflect
+								the method you want to support. If a request is received with a method that is not supported
+								by the controller, the client will be informed of this (using a <literal>ServletException)</literal>)
+							</entry>
+						</row>
+						<row>
+							<entry><literal>requiresSession</literal></entry>
+							<entry>indicates whether or not this controller requires a session to do its work. This
+								feature is offered to all controllers. If a session is not present when such a controller
+								receives a request, the user is informed using a <literal>ServletException</literal>								
+							</entry>
+						</row>
+						<row>
+							<entry><literal>synchronizeSession</literal></entry>
+							<entry>
+								use this if you want handling by this controller to be synchronized on the user's session.
+								To be more specific, extending controller will override the <literal>handleRequestInternal</literal>
+								method, which will be synchronized if you specify this variable
+							</entry>
+						</row>
+						<row>
+							<entry><literal>cacheSeconds</literal></entry>
+							<entry>
+								when you want a controller to generate caching directive in the HTTP response, specify
+								a positive integer here. By default it is set to <emphasis>-1</emphasis> so no caching
+								directives will be included
+							</entry>
+						</row>
+						<row>
+							<entry><literal>useExpiresHeader</literal></entry>
+							<entry>
+								tweaking of your controllers specifying the HTTP 1.0 compatible
+								<emphasis>"Expires"</emphasis> header. By default it's set to true, so you won't have
+								to touch it
+							</entry>
+						</row>
+						<row>
+							<entry><literal>useCacheHeader</literal></entry>
+							<entry>
+								tweaking of your controllers specifying the HTTP 1.1 compatible
+								<emphasis>"Cache-Control"</emphasis> header. By default this is set to true so
+								you won't really have to touch it
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			
+			<emphasis>
+				the last two properties are actually part of the <literal>WebContentGenerator</literal> which is the superclass
+				of <literal>AbstractController</literal> but to keeps things clear...
+			</emphasis>
+			
+			<para>
+				When using the AbstractController as a baseclass for your controllers (which is <emphasis>not</emphasis> recommended
+				since there are a lot of other controller that might already do the job for your) you only have to override the
+				<literal>handleRequestInternal(HttpServletRequest, HttpServletResponse)</literal>-method and implement your logic
+				code and return a <literal>ModelAndView</literal> object there. A short example consisting of a class and a declaration
+				in the webapplicationcontext.
+				<programlisting><![CDATA[
+package samples;
+
+public class SampleController extends AbstractController {
+
+	public ModelAndView handleRequestInternal(
+		HttpServletRequest request,
+		HttpServletResponse response)
+	throws Exception {
+	
+		ModelAndView mav = new ModelAndView("index", null);
+	}
+}
+				]]></programlisting>
+				
+				<programlisting><![CDATA[
+<bean id="sampleController" class="samples.SampleController">
+	<property name="cacheSeconds"><value>120</value</property>
+</bean>
+				]]></programlisting>
+				
+				The class above and the declaration in the webapplicationcontext is all you need to do besides setting up a handler mapping
+				(see <xref linkend="mvc-handlermapping"/>) to get this very simple controller working. This controller will generates caching
+				directives telling the client to cache things for 2 minutes before rechecking. This controller furthermore returns an hard-coded
+				view (hmm, not so nice), named index (see <xref linkend="mvc-viewresolver"/> for more information about views).
+			</para>
+		</sect2>
+		
+		<sect2 id="mvc-controller-othersimplecontrollers">
+			<title>Other simple controller</title>
+			<para>
+				Besides the AbstractController - which you could of course extend, although a more concrete controller might offer you more
+				functionality - there are a couple of other simple controllers that might easy the pain of developing simple MVC applications.
+				The <literal>ParameterizableViewController</literal> basically is the same as the one in the example above, except for the
+				fact that you can specify its view name that it'll be returning in the webapplicationcontext (ahhh, no need to hard-code the viewname).
+				The viewname you 
+			</para>
+			<para>
+				The <literal>FileNameViewController</literal> inspects the URL and retrieves the filename of the file request (the filename of 
+				<literal>http://www.springframework.org/index.html</literal> is <literal>index</literal>) and uses that as a viewname. Nothing more
+				to it.
+			</para>
+		</sect2>
+		
+		<sect2 id="mvc-controller-multiaction">
+			<title>The <literal>MultiActionController</literal></title>
+			<para>
+				Spring offers a multi-action controller with which you aggregate multiple actions into one controller, grouping functionality
+				together. The multi-action controller lives in a separate package - <literal>org.springframework.web.mvc.multiaction</literal>
+				- and is capable of mapping requests to method names and then invoking the right method name. Using the multi-action controller
+				is especially handy when you're having a lot of commons functionality in one controller, but want to have multiple entry points
+				to the controller to tweak behavior for instance.
+			</para>
+			
+			<table id="mvc-controller-multiaction-features" frame="all">
+				<title>Features offered by the <literal>MultiActionController</literal></title>
+				<tgroup cols="2">
+					<colspec colname="c1" colwidth="1*"/>
+					<colspec colname="c2" colwidth="3*"/>
+					<thead>
+						<row>
+							<entry>Feature</entry>
+							<entry>Explanation</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>delegate</literal></entry>
+							<entry>there's two usage-scenarios for the MultiActionController. Either you subclass the MultiActionController
+								and specify the methods that will be resolved by the MethodNameResolver on the subclass (in case you
+								don't need this configuration parameter), or you define a delegate oject, on which methods resolved by the
+								Resolver will be invoked. If you choose to enter this scenario, you will have to define the delegate
+								using this configuration parameter as a collaborator
+							</entry>
+						</row>
+						<row>
+							<entry><literal>methodNameResolver</literal></entry>
+							<entry>somehow, the MultiActionController will need to resolve the method it has to invoke, based
+								on the request that came in. You can define a resolver that is capable of doing that using
+								this configuration parameter
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			
+			<para>
+				Methods defined for a multi-action controller will need to conform to the following signature:
+				<programlisting><![CDATA[
+// actionName can be replaced by any methodname
+ModelAndView actionName(HttpServletRequest, HttpServletResponse);
+				]]></programlisting>
+				Method overloading is not allowed since it'll confuse the MultiActionController. Furthermore, you can define
+				<emphasis>exception handlers</emphasis> capable of handling exception that will be thrown form a method you specify.
+				Exception handler methods need to return a ModelAndView object, just as any other action method and will need to conform to the following
+				signature: 
+				<programlisting><![CDATA[
+// anyMeaningfulName can be replaced by any methodname
+ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, ExceptionClass);
+				]]></programlisting>
+				The <literal>ExceptionClass</literal> can be <emphasis>any</emphasis> exception, as long as it's a subclass of 
+				<literal>java.lang.Exception</literal> or <literal>java.lang.RuntimeException</literal>.
+			</para>
+			
+			<para>
+				The <literal>MethodNameResolver</literal> is supposed to resolve method names based on the request coming in. There are three
+				resolver to your disposal, but of course you can implement more of them yourself if you want.
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							<literal>ParameterMethodNameResolver</literal> - capable of resolving a request parameter and using that as the
+							method name (<literal>http://www.sf.net/index.view?testParam=testIt</literal> will result in a method
+							<literal>testIt(HttpServletRequest, HttpServletResponse)</literal> being called). Use the
+							<literal>paramName</literal> configuration parameter to tweak the parameter that's inspected)
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<literal>InternalPathMethodNameResolver</literal> - retrieves the filename from the path and uses that
+							as the method name (<literal>http://www.sf.net/testing.view</literal> will result in a method
+							<literal>testing(HttpServletRequest, HttpServletResponse)</literal> being called)
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<literal>PropertiesMethodNameResolver</literal> - uses a user-defined properties object with
+							request URLs mapped to methodnames. When the properties contain <literal>/index/welcome.html=doIt</literal>
+							and a request to <literal>/index/welcome.html</literal> comes in, the 
+							<literal>doIt(HttpServletRequest, HttpServletResponse)</literal> method is called. This method name resolver
+							works with the <literal>PathMatcher</literal> (see <xref linkend="mvc-utilities-pathmatcher"/>) so
+							if the properties contained <literal>/**/welcom?.html</literal> it would also have worked!
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+			
+			<para>
+				A couple of examples. First of all one showing the <literal>ParameterMethodNameResolver</literal> and
+				the delegate property, which will accept requests to urls with the parameter method included and set
+				to <literal>retrieveIndex</literal>:
+				
+				<programlisting><![CDATA[					
+<bean id="paramResolver" class="org....mvc.multiaction.ParameterMethodNameResolver">
+	<property name="paramName"><value>method</value></property>
+</bean>
+
+<bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController">
+	<property name="methodNameResolver"><ref bean="paramResolver"/></property>
+	<property name="delegate"><ref bean="sampleDelegate"/>
+</bean>
+
+<bean id="sampleDelegate" class="samples.SampleDelegate"/>
+
+## together with
+
+public class SampleDelegate {
+
+	public ModelAndView retrieveIndex(
+		HttpServletRequest req, 
+		HttpServletResponse resp) {
+
+		rerurn new ModelAndView("index", "date", new Long(System.currentTimeMillis()));
+	}
+}							
+				]]></programlisting>
+				
+				When using the delegates shown above, we could also use the <literal>PropertiesMethodNameRseolver</literal>
+				to match a couple of URLs to the method we defined:
+				
+				<programlisting><![CDATA[
+<bean id="propsResolver" class="org....mvc.multiaction.PropertiesMethodNameResolver">
+	<property name="mappings">
+		<props>
+			<prop key="/index/welcome.html">retrieveIndex</prop>
+			<prop key="/**/notwelcome.html">retrieveIndex</prop>
+			<prop key="/*/user?.html">retrieveIndex</prop>
+		</props>
+	</property>
+</bean>
+
+<bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController">
+	<property name="methodNameResolver"><ref bean="propsResolver"/></property>
+	<property name="delegate"><ref bean="sampleDelegate"/>
+</bean>
+				]]></programlisting>
+				
+			</para>
+			
+		</sect2>
+			
+		<sect2 id="mvc-controller-command">
+			<title>CommandControllers</title>
+			<para>
+				Spring's <emphasis>CommandControllers</emphasis> are a fundamental part of the Spring MVC package. Command controllers provide
+				a way to interact with dataobjects and dynamically bind parameters from the <literal>HttpServletRequest</literal> to the
+				dataobject you're specifying. This compares to Struts actionforms, where in Spring, you don't have to implement any interface
+				of superclasses to do databinding. First, let's examine what command controllers available, just to get clear picture of what
+				you can do with them:
+				
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							<literal>AbstractCommandController</literal> - a command controller you can use to create your own
+							command controller, capable of binding request parameters to a data object you're specifying. This class does not
+							offer form functionality, it does however, offer validation features and let's you specify in the controller
+							itself what to do with the dataobject that has been filled with the parameters from the request.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<literal>AbstractFormController</literal> - an abstract controller offering form submission support.
+							Using this controller you can model forms and populate them using a dataobject you're retrieving in the
+							controller. After a user has filled the form, the AbstractFormController binds the fields, validates and
+							hands the object back to you - the controller - to take appropriate action. Supported features are
+							invalid form submission (resubmission), validation, and the right workflow a form always has. What
+							views you tie to your AbstractFormController you decide yourself. Use this controller if you need forms,
+							but don't want to specify what views you're going to show the user in the applicationcontext
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<literal>SimpleFormController</literal> - an even more concrete FormCotnroller that helps you
+							creating a form with corresponding data object even more. The SimpleFormController let's you specify a
+							command object, a viewname for the form, a viewname for page you want to show the user when formsubmission
+							has succeeded, and more
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<literal>WizardFormController</literal> - last but not least, a WizardFormController allows you
+							to model wizard-style manipulation of dataobjects, which is extremely handy when large dataobjects come in
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+		</sect2>		
+	</sect1>
+		
 	
 	<sect1 id="mvc-handlermapping">
 		<title>Handler mappings</title>
@@ -486,6 +849,18 @@ public class FileUploadBean {
 				Right now everything should work.
 			</para>
 		</sect2>	
+		
+	</sect1>
+	
+	<sect1 id="mvc-utilities">
+		<title>Commonly used utilities</title>
+		
+		<sect2 id="mvc-utilities-pathmatching">
+			<title>A little story about the pathmatcher</title>
+			<para>
+				bla
+			</para>
+		</sect2>
 		
 	</sect1>
 		

@@ -2,7 +2,6 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                       "../lib/docbook-dtd/docbookx.dtd"
 [
-<!ENTITY introduction				SYSTEM "introduction.xml">
 <!ENTITY overview					SYSTEM "overview.xml">
 <!ENTITY beans						SYSTEM "beans.xml">
 <!ENTITY context					SYSTEM "context.xml">
@@ -28,37 +27,34 @@
 
     <toc/>
 
-    &introduction;
-    
-    &overview;
-    
-    &beans;
-    
-    &context;
-    
-    &validation;
+	    &overview;
 
-<!--
-    &context-examples;
-  
-    &mail;
-    
+	    &background;
 
-    
-    &aop;
-    
-    &metadata;
-    
-    &jdbc;
-    
-    &orm;-->
-    
-    &mvc;
-    
-    &integration;
+	    &beans;
+	    
+	    &context;
+	    
+	    &validation;
+	    
+	    <!-- &util; -->
 
-    &background;
-
+	    &aop;
+	    
+	    &metadata;
+	    
+	    &mvc;
+	    
+	    &integration;
+	    
+	    <!-- &ejb; -->
+	    
+	    <!-- &jndi; -->
+	    
+	    <!-- &remoting; -->
+	    
+	    &mail;
+	
 </book>
 
 
