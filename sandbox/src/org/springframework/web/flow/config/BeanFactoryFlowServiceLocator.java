@@ -34,10 +34,16 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 
 	private BeanFactory beanFactory;
 
+	/**
+	 * Create a new service locator locating services in the bean factory
+	 * that will be passed in using the <code>setBeanFactory()</code> method. 
+	 */
 	public BeanFactoryFlowServiceLocator() {
-		
 	}
 
+	/**
+	 * Create a new service locator locating services in given bean factory. 
+	 */
 	public BeanFactoryFlowServiceLocator(BeanFactory beanFactory) {
 		setBeanFactory(beanFactory);
 	}
@@ -52,7 +58,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	protected BeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
-					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator - call setBeanFactory(bf)");
+					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator - call setBeanFactory()");
 		}
 		return beanFactory;
 	}
