@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.90 2004-02-14 19:18:46 trisberg Exp $
+$Id: changelog.txt,v 1.91 2004-02-17 17:26:21 jhoeller Exp $
 
 
 Changes in version 1.0 (01.03.2003)
@@ -10,6 +10,7 @@ Package org.springframework.beans
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * revised BeanFactoryLocator exception handling
 * renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
+* added PreferencesPlaceholderConfigurer, being able to resolve placeholders via J2SE 1.4 Preferences
 
 Package org.springframework.context
 * renamed JndiBeanFactoryLocator to ContextJndiBeanFactoryLocator
@@ -20,11 +21,19 @@ Package org.springframework.context
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
 
-Package org..springframework.jdbc.support
-* added support for new SQL Error Code categories - DataRetrievalFailureException, OptimisticLockingFailureException and DataAccessResourceFailureException
+Package org.springframework.jdbc
+* added support for new SQL error code categories: DataRetrieval/OptimisticLocking/DataAccessResourceFailureException
+* added overloaded query methods to JdbcTemplate, allowing to pass in prepared statement arguments as Object array
+* added queryForList/queryForObject/queryForInt methods to JdbcTemplate class and JdbcOperations interface
+* allowed ResultSetExtractor's "extractData" and JdbcTemplate's "doWithResultSetXxx" to return a result object
+* removed "doWithResultSetXxx" methods from JdbcOperations interface
+* removed JdbcHelper and its helper classes ColumnExtractor and DefaultColumnExtractor
 
 Package org.springframework.util
 * removed package path utility methods from ClassLoaderUtils
+
+Package org.springframework.web
+* added "defaultMethodName" property to ParameterMethodNameResolver
 
 
 Changes in version 1.0 RC1 (11.02.2003)
