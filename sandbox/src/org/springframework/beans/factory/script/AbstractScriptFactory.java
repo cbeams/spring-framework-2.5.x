@@ -25,7 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter;
+import org.springframework.beans.factory.dynamic.AbstractDynamicObjectAutoProxyCreator;
 import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -36,9 +36,9 @@ import org.springframework.core.io.ResourceLoader;
  * Separate out post processor
  * 
  * @author Rod Johnson
- * @version $Id: AbstractScriptFactory.java,v 1.4 2004-08-05 10:22:06 johnsonr Exp $
+ * @version $Id: AbstractScriptFactory.java,v 1.5 2004-08-10 14:27:22 johnsonr Exp $
  */
-public abstract class AbstractScriptFactory extends AbstractDynamicObjectConverter implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
+public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
 		BeanPostProcessor {
 
 	private ResourceLoader resourceLoader;
@@ -126,12 +126,15 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectConvert
 	 *      java.lang.String)
 	 */
 	protected void customizeProxyFactory(Object bean, ProxyFactory pf) {
-		DynamicScriptTargetSource ts = (DynamicScriptTargetSource) pf.getTargetSource();
-		Script script = ts.getScript();
-		
-		// Add Script interfaces
-		for (int i = 0; i < script.getInterfaces().length; i++) {
-			pf.addInterface(script.getInterfaces()[i]);
+		if (pf.getTargetSource() instanceof DynamicScriptTargetSource) {
+			// If we created it...
+			DynamicScriptTargetSource ts = (DynamicScriptTargetSource) pf.getTargetSource();
+			Script script = ts.getScript();
+			
+			// Add Script interfaces
+			for (int i = 0; i < script.getInterfaces().length; i++) {
+				pf.addInterface(script.getInterfaces()[i]);
+			}
 		}
 	}
 
