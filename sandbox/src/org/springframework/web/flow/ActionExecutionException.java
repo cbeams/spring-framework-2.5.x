@@ -26,6 +26,8 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class ActionExecutionException extends NestedRuntimeException {
 
+	private ActionState.NamedAction action;
+
 	/**
 	 * Create a new action execution exception.
 	 * @param message the message as to why execution failed
@@ -41,8 +43,20 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * @param action the action that generated the exception
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
-	public ActionExecutionException(ActionState state, ActionState.NamedAction action, Throwable cause) {
-		super("Executing action '" + action + "' in state '" + state.getId() + "' of flow '" + state.getFlow().getId()
-				+ "' threw an unrecoverable exception", cause);
+	public ActionExecutionException(ActionState.NamedAction action, Throwable cause) {
+		super("Executing action '" + action + "' in state '" + action.getState().getId() + "' of flow '"
+				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
 	}
+
+	public ActionState getState() {
+		return action.getState();
+	}
+
+	public Action getAction() {
+		return action.getAction();
+	}
+
+	public String getActionName() {
+		return action.getName();
+	}	
 }
