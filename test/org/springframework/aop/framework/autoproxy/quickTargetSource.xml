@@ -8,7 +8,7 @@
 <beans>
 
 	<bean id="aapc"
-		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 		<property name="customTargetSourceCreators">
 			<list>
 				<ref local="aapc.quickTargetSourceCreator" />

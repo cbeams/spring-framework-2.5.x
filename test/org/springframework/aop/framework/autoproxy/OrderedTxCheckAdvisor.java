@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.Ordered;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
@@ -32,12 +31,9 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * method invocations and check for presence of transaction context.
  * <br>Matches setters.
  * @author Rod Johnson
- * @version $Id: OrderedTxCheckAdvisor.java,v 1.4 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: OrderedTxCheckAdvisor.java,v 1.5 2004-03-23 14:32:00 jhoeller Exp $
  */
-public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements Ordered, InitializingBean {
-
-	/** Unordered by default */
-	private int order = Integer.MAX_VALUE;
+public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements InitializingBean {
 
 	/**
 	 * Should we insist on the presence of a transaction attribute
@@ -45,9 +41,31 @@ public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor im
 	 */
 	private boolean requireTransactionContext = false;
 
+	public boolean isRequireTransactionContext() {
+		return requireTransactionContext;
+	}
+
+	public void setRequireTransactionContext(boolean b) {
+		requireTransactionContext = b;
+	}
+
+	public CountingBeforeAdvice getCountingBeforeAdvice() {
+		return (CountingBeforeAdvice) getAdvice();
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		setAdvice(new TxCountingBeforeAdvice());
+	}
+
+	public boolean matches(Method m, Class targetClass) {
+		return m.getName().startsWith("set");
+	}
+
+
 	private class TxCountingBeforeAdvice extends CountingBeforeAdvice {
+
 		public void before(Method m, Object[] args, Object target) throws Throwable {
-			// Do transaction checks
+			// do transaction checks
 			if (requireTransactionContext) {
 				TransactionInterceptor.currentTransactionStatus();
 			}
@@ -57,55 +75,11 @@ public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor im
 					throw new RuntimeException("Shouldn't have a transaction");
 				}
 				catch (NoTransactionException ex) {
-					// This is Ok
+					// this is Ok
 				}
 			}
 			super.before(m, args, target);
 		}
-	}
-
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	/**
-	 * @see org.springframework.core.Ordered#getOrder()
-	 */
-	public int getOrder() {
-		return order;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isRequireTransactionContext() {
-		return requireTransactionContext;
-	}
-
-	/**
-	 * @param b
-	 */
-	public void setRequireTransactionContext(boolean b) {
-		requireTransactionContext = b;
-	}
-
-	public CountingBeforeAdvice getCountingBeforeAdvice() {
-		return (CountingBeforeAdvice) getAdvice();
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws Exception {
-		setAdvice(new TxCountingBeforeAdvice());
-	}
-
-	/**
-	 * @see org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor#matches(java.lang.reflect.Method, java.lang.Class)
-	 */
-	public boolean matches(Method m, Class targetClass) {
-		return m.getName().startsWith("set");
 	}
 
 }

@@ -29,57 +29,38 @@ import org.springframework.core.OrderComparator;
 
 /**
  * Abstract BeanPostProcessor implementation that creates AOP proxies. 
- * This class is completely generic; it contains
- * no special code to handle any particular aspects, such as pooling aspects.
- * <p>
- * Subclasses must implement the abstract findCandidateAdvisors() method to
- * return a list of Advisors applying to any object. Subclasses can also
+ * This class is completely generic; it contains no special code to handle
+ * any particular aspects, such as pooling aspects.
+ *
+ * <p>Subclasses must implement the abstract findCandidateAdvisors() method
+ * to return a list of Advisors applying to any object. Subclasses can also
  * override the inherited shouldSkip() method to exclude certain objects
  * from autoproxying, but they must be careful to invoke the shouldSkip()
  * method of this class, which tries to avoid circular reference problems
  * and infinite loops.
- * <p>
- * Advisors or advices requiring ordering should implement the Ordered interface.
+ *
+ * <p>Advisors or advices requiring ordering should implement the Ordered interface.
  * This class sorts advisors by Ordered order value. Advisors that don't implement
  * the Ordered interface will be considered to be unordered, and will appear
  * at the end of the advisor chain in undefined order.
+ *
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.6 2004-03-18 02:46:16 trisberg Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.7 2004-03-23 14:31:51 jhoeller Exp $
+ * @see #findCandidateAdvisors
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	
 	/**
-	 * Find all candidate advices to use in auto proxying.
-	 * @return list of Advisor
+	 * We override this method to ensure that all candidate advisors are materialized
+	 * under a stack trace including this bean. Otherwise, the dependencies won't
+	 * be apparent to the circular-reference prevention strategy in AbstractBeanFactory.
 	 */
-	protected abstract List findCandidateAdvisors();
-
-	/**
-	 * Find all eligible advices and for autoproxying this class.
-	 * @return the empty list, not null, if there are no pointcuts or interceptors
-	 */
-	protected List findEligibleAdvisors(Class clazz) {
-		List candidateAdvice = findCandidateAdvisors();
-		List eligibleAdvice = new LinkedList();
-		
-		for (int i = 0; i < candidateAdvice.size(); i++) {
-			// Sun, give me generics, please!
-			Advisor candidate = (Advisor) candidateAdvice.get(i);
-			if (AopUtils.canApply(candidate, clazz, null)) {
-				eligibleAdvice.add(candidate);
-				logger.info("Candidate Advice [" + candidate + "] ACCEPTED for class '" + clazz.getName() + "'");
-			}
-			else {
-				logger.info("Candidate Advice [" + candidate + "] REJECTED for class '" + clazz.getName() + "'");
-			}
-		}
-		
-		return eligibleAdvice;
+	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+		findCandidateAdvisors();
 	}
 
 	protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String name) {
-		//if (logger.isDebugEnabled())
-		//	logger.debug("getInterceptorsAndAdvicesForBean with name '" + name + "'; singleton=" + this.owningFactory.isSingleton(name));
 		List advices = findEligibleAdvisors(bean.getClass());
 		if (advices.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -89,22 +70,34 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Sort based on ordering.
+	 * Find all eligible advices and for autoproxying this class.
+	 * @return the empty list, not null, if there are no pointcuts or interceptors
+	 * @see #findCandidateAdvisors
 	 */
-	protected List sortAdvisors(List l) {
-		Collections.sort(l, new OrderComparator());
-		return l;
+	protected List findEligibleAdvisors(Class clazz) {
+		List candidateAdvice = findCandidateAdvisors();
+		List eligibleAdvice = new LinkedList();
+		for (int i = 0; i < candidateAdvice.size(); i++) {
+			// Sun, give me generics, please!
+			Advisor candidate = (Advisor) candidateAdvice.get(i);
+			if (AopUtils.canApply(candidate, clazz, null)) {
+				eligibleAdvice.add(candidate);
+				logger.info("Candidate Advice [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+			}
+			else {
+				logger.info("Candidate Advice [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+			}
+		}
+		return eligibleAdvice;
 	}
 
 	/**
-	 * We override this method to ensure that all candidate advisors are materialized
-	 * under a stack trace including this bean. Otherwise, the dependencies won't
-	 * be apparent to the circular-reference prevention strategy in AbstractBeanFactory.
-	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 * Sort advisors based on ordering.
+	 * @see org.springframework.core.Ordered
 	 */
-	public void setBeanFactory(BeanFactory beanFactory) {
-		super.setBeanFactory(beanFactory);
-		findCandidateAdvisors();
+	protected List sortAdvisors(List advisors) {
+		Collections.sort(advisors, new OrderComparator());
+		return advisors;
 	}
 
 	/**
@@ -118,13 +111,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
 		// to protect all PostProcessors
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		if (cflow.under(getClass(), "findCandidateAdvisors")) {
-			//System.err.println("Skipping " + name + ": " + cflow);
-			return true;
-		}
-		else {
-			return false;
-		}
+		return cflow.under(getClass(), "findCandidateAdvisors");
 	}
+
+	/**
+	 * Find all candidate advices to use in auto proxying.
+	 * @return list of Advisor
+	 */
+	protected abstract List findCandidateAdvisors();
 
 }

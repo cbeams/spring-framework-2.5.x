@@ -8,7 +8,7 @@
 <beans>
 
 <bean id="enterpriseServices" 
-		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">	
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 	
 	<!-- Change default exclusion prefix -->
 	<property name="usePrefix"><value>true</value></property>

@@ -37,7 +37,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.11 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.12 2004-03-23 14:32:00 jhoeller Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
@@ -53,8 +53,8 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	
 	public void testDefaultExclusionPrefix() throws Exception {
-		AdvisorAutoProxyCreator aapc = (AdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
-		assertEquals(ADVISOR_APC_BEAN_NAME + AdvisorAutoProxyCreator.SEPARATOR, aapc.getAdvisorBeanNamePrefix() );
+		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
+		assertEquals(ADVISOR_APC_BEAN_NAME + DefaultAdvisorAutoProxyCreator.SEPARATOR, aapc.getAdvisorBeanNamePrefix() );
 		assertFalse(aapc.getUsePrefix());
 	}
 	
@@ -193,9 +193,6 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	}
 	*/
 
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
@@ -213,11 +210,9 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("New value set correctly", newAge, test.getAge());
 		assertEquals("Transaction counts match", 1, txMan.commits);
 	}
-	
-	
+
 	/**
-	 * Should not roll back on servlet exception
-	 * @throws Exception
+	 * Should not roll back on servlet exception.
 	 */
 	public void testRollbackRulesOnMethodCauseRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();

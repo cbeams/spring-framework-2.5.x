@@ -11,7 +11,7 @@
 	</description>
 
 	<bean id="aapc"
-		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 		
 		<!-- This common interceptor will be applied always,
 		before custom lockable advisor -->
