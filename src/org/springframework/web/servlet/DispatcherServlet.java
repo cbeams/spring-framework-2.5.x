@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.web.servlet;
 
 import java.io.IOException;
@@ -88,7 +88,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.14 2003-11-21 10:19:05 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.15 2003-11-21 15:40:52 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -141,7 +141,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
 
 	/**
-	 * Additional logger for use when no mapping handlers are found for a request. 
+	 * Additional logger for use when no mapping handlers are found for a request.
 	 */
 	protected final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
@@ -261,7 +261,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings.isEmpty()) {
 			initDefaultHandlerMapping();
-			logger.info("No HandlerMappings found in servlet [" + getServletName() + "]: using default");
+			logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
 		}
 		else {
 			// We keep HandlerMappings in sorted order
@@ -296,7 +296,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// a default HandlerAdapter if no other adapters are found.
 		if (this.handlerAdapters.isEmpty()) {
 			initDefaultHandlerAdapter();
-			logger.info("No HandlerAdapters found in servlet [" + getServletName() + "]: using default");
+			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
 		}
 		else {
 			// We keep HandlerAdapters in sorted order
@@ -343,7 +343,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (BeansException ex) {
 			// We tried and failed to load the ViewResolver specified by a bean
 			throw new ServletException("Fatal error loading view resolver: bean with name '" + VIEW_RESOLVER_BEAN_NAME +
-																 "' is required in servlet [" + getServletName()  + "]", ex);
+																 "' is required in servlet '" + getServletName()  + "'", ex);
 		}
 	}
 
@@ -356,8 +356,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Both doGet() and doPost() are handled by this method.
 	 * It's up to HandlerAdapters to decide which methods are acceptable.
 	 */
-	protected void doService(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		logger.debug("DispatcherServlet with name [" + getServletName() + "] received request for [" + WebUtils.getRequestUri(request) + "]");
+	protected void doService(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		logger.debug("DispatcherServlet with name '" + getServletName() + "' received request for [" +
+		             WebUtils.getRequestUri(request) + "]");
 
 		// Make framework objects available for handlers
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
@@ -377,7 +379,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
 				// if we didn't find a handler
 				pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(processedRequest) +
-																"] in DispatcherServlet with name [" + getServletName() + "]");
+																"] in DispatcherServlet with name '" + getServletName() + "'");
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
@@ -406,14 +408,14 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			// Did the handler return a view to render?
 			if (mv != null) {
-				logger.debug("Will render view in DispatcherServlet with name [" + getServletName() + "]");
+				logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
 				Locale locale = this.localeResolver.resolveLocale(processedRequest);
 				response.setLocale(locale);
 				render(mv, processedRequest, response, locale);
 			}
 			else {
-				logger.debug("Null ModelAndView returned to DispatcherServlet with name [" +
-										 getServletName() + "]: assuming HandlerAdapter completed request handling");
+				logger.debug("Null ModelAndView returned to DispatcherServlet with name '" +
+										 getServletName() + "': assuming HandlerAdapter completed request handling");
 			}
 		}
 		finally {
@@ -458,7 +460,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		Iterator itr = this.handlerMappings.iterator();
 		while (itr.hasNext()) {
 			HandlerMapping hm = (HandlerMapping) itr.next();
-			logger.debug("Testing handler map [" + hm  + "] in DispatcherServlet with name [" + getServletName() + "]");
+			logger.debug("Testing handler map [" + hm  + "] in DispatcherServlet with name '" + getServletName() + "'");
 			HandlerExecutionChain handler = hm.getHandler(request);
 			if (handler != null)
 				return handler;
@@ -501,8 +503,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			view = mv.getView();
 		}
 		if (view == null) {
-			throw new ServletException("Error in ModelAndView object or View resolution encountered by servlet with name [" +
-																 getServletName() + "]: View to render cannot be null with ModelAndView [" + mv + "]");
+			throw new ServletException("Error in ModelAndView object or View resolution encountered by servlet with name '" +
+																 getServletName() + "': View to render cannot be null with ModelAndView [" + mv + "]");
 		}
 		view.render(mv.getModel(), request, response);
 	}
