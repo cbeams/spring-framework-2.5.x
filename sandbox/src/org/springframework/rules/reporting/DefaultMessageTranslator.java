@@ -40,10 +40,10 @@ import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectiveVisitorSupport;
 import org.springframework.util.Styler;
+import org.springframework.util.Visitor;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
-import org.springframework.util.visitor.Visitor;
 
 /**
  * @author Keith Donald

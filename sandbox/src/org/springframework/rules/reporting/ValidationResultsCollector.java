@@ -23,11 +23,11 @@ import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
 import org.springframework.rules.constraint.Not;
 import org.springframework.rules.constraint.Or;
+import org.springframework.util.ReflectiveVisitorSupport;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.Visitor;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
-import org.springframework.util.visitor.Visitor;
 
 /**
  * @author Keith Donald

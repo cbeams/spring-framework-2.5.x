@@ -23,9 +23,9 @@ import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectiveVisitorSupport;
+import org.springframework.util.Visitor;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
-import org.springframework.util.visitor.Visitor;
 
 /**
  * @author Keith Donald

@@ -1,4 +1,4 @@
-package org.springframework.util.visitor;
+package org.springframework.util;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
