@@ -74,12 +74,17 @@ public class ValidationResultsCollector implements Visitor {
         return resultsBuilder;
     }
 
-    public void collectPropertyResults(BeanPropertyExpression rootExpression) {
+    public PropertyResults collectPropertyResults(BeanPropertyExpression rootExpression) {
         resultsBuilder.setPropertyName(rootExpression.getPropertyName());
-        Boolean result =
-            (Boolean)visitorSupport.invokeVisit(this, rootExpression);
+        boolean result =
+            ((Boolean)visitorSupport.invokeVisit(this, rootExpression)).booleanValue();
         if (logger.isDebugEnabled()) {
             logger.debug("Final validation result: " + result);
+        }
+        if (!result) {
+            return resultsBuilder.getResults(rootExpression.getPropertyName());
+        } else {
+            return null;
         }
     }
 

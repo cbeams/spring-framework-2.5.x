@@ -32,18 +32,16 @@ import org.springframework.util.visitor.Visitor;
  * @author Keith Donald
  */
 public class PropertyResults {
-    protected static final Log logger =
-        LogFactory.getLog(PropertyResults.class);
+    protected static final Log logger = LogFactory
+            .getLog(PropertyResults.class);
     private String propertyName;
     private Object rejectedValue;
     private UnaryPredicate violatedConstraint;
     private Severity severity = Severity.ERROR;
     private MessageSourceResolvable[] resolvedArgs;
 
-    public PropertyResults(
-        String propertyName,
-        Object rejectedValue,
-        UnaryPredicate violatedConstraint) {
+    public PropertyResults(String propertyName, Object rejectedValue,
+            UnaryPredicate violatedConstraint) {
         this.propertyName = propertyName;
         this.rejectedValue = rejectedValue;
         this.violatedConstraint = violatedConstraint;
@@ -95,8 +93,8 @@ public class PropertyResults {
 
     public MessageSourceResolvable[] getMessageArguments() {
         if (resolvedArgs == null) {
-            this.resolvedArgs =
-                new DefaultArgumentTranslator(this).resolveArguments();
+            this.resolvedArgs = new DefaultArgumentTranslator(this)
+                    .resolveArguments();
             if (logger.isDebugEnabled()) {
                 logger.debug(DefaultObjectStyler.evaluate(resolvedArgs));
             }
@@ -105,8 +103,7 @@ public class PropertyResults {
     }
 
     public static class DefaultArgumentTranslator implements Visitor {
-        private ReflectiveVisitorSupport visitorSupport =
-            new ReflectiveVisitorSupport();
+        private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
         PropertyResults results;
         private List args = new ArrayList();
 
@@ -117,8 +114,8 @@ public class PropertyResults {
         public MessageSourceResolvable[] resolveArguments() {
             args.add(resolvableProperty(results.propertyName));
             visitorSupport.invokeVisit(this, results.violatedConstraint);
-            return (MessageSourceResolvable[])args.toArray(
-                new MessageSourceResolvable[0]);
+            return (MessageSourceResolvable[])args
+                    .toArray(new MessageSourceResolvable[0]);
         }
 
         void visit(CompoundBeanPropertyExpression rule) {
@@ -127,31 +124,24 @@ public class PropertyResults {
 
         void visit(BeanPropertiesExpression e) {
             add(
-                getAsProperty(e.getPredicate()),
-                new Object[] { resolvableProperty(e.getOtherPropertyName())},
-                e.toString());
+                    getAsProperty(e.getPredicate()),
+                    new Object[] { resolvableProperty(e.getOtherPropertyName()) },
+                    e.toString());
         }
 
         void visit(ParameterizedBeanPropertyExpression e) {
-            add(
-                getAsProperty(e.getPredicate()),
-                new Object[] { e.getParameter()},
-                e.toString());
+            add(getAsProperty(e.getPredicate()), new Object[] { e
+                    .getParameter() }, e.toString());
         }
 
         private MessageSourceResolvable resolvableProperty(String propertyName) {
             return new DefaultMessageSourceResolvable(
-                new String[] { propertyName },
-                null,
-                propertyName);
+                    new String[] { propertyName }, null, propertyName);
         }
 
         private void add(String code, Object[] args, String defaultMessage) {
-            this.args.add(
-                new DefaultMessageSourceResolvable(
-                    new String[] { code },
-                    args,
-                    defaultMessage));
+            this.args.add(new DefaultMessageSourceResolvable(
+                    new String[] { code }, args, defaultMessage));
         }
 
         private String getAsProperty(Object o) {
@@ -191,7 +181,8 @@ public class PropertyResults {
 
         //@HACK - please consider standard visitor here...
         void visit(StringLengthConstraint constraint) {
-            add(getAsProperty(constraint), new Object[] { new Integer(2) }, constraint.toString());
+            add(getAsProperty(constraint), new Object[] { new Integer(2) },
+                    constraint.toString());
         }
 
         void visit(UnaryPredicate constraint) {
@@ -201,8 +192,7 @@ public class PropertyResults {
     }
 
     public static class SummingVisitor implements Visitor {
-        private ReflectiveVisitorSupport visitorSupport =
-            new ReflectiveVisitorSupport();
+        private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
         private int sum;
         private UnaryPredicate constraint;
 
