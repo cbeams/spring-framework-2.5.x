@@ -27,7 +27,15 @@ public class BindErrorsTag extends RequestContextAwareTag {
 	}
 
 	protected int doStartTagInternal() throws ServletException {
-		Errors errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+		Errors errors = null;
+		try {
+			errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+		}
+		catch(ServletException ex){
+			//No Errors instance
+			return SKIP_BODY;
+		}
+		
 		if (errors.hasErrors()) {
 			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, errors);
 			return EVAL_BODY_INCLUDE;
