@@ -27,7 +27,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.13 2003-11-26 16:39:50 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.14 2003-12-04 18:32:09 jhoeller Exp $
 -->
 
 <!-- 
@@ -42,6 +42,7 @@
   Default values for all bean definitions. Can be overridden at
   the "bean" level. See those attribute definitions for details.
 -->
+<!ATTLIST beans default-lazy-init (true | false) "false">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
 <!ATTLIST beans default-autowire (no | byName | byType) "no">
 
@@ -94,7 +95,7 @@
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
 -->
-<!ATTLIST bean lazy-init (true | false) "false">
+<!ATTLIST bean lazy-init (true | false | default) "default">
 
 <!--
   The names of the beans that this bean depends on being initialized.

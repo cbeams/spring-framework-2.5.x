@@ -65,7 +65,6 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	private static final String ID_ATTRIBUTE = "id";
 	private static final String NAME_ATTRIBUTE = "name";
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
-	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
 	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
@@ -83,6 +82,9 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	private static final String VALUE_ELEMENT = "value";
 	private static final String PROPS_ELEMENT = "props";
 	private static final String PROP_ELEMENT = "prop";
+
+	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+	private static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 	private static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
@@ -108,6 +110,8 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
+		String defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
+		logger.debug("Default lazy init '" + defaultLazyInit + "'");
 		String defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
 		logger.debug("Default dependency check '" + defaultDependencyCheck + "'");
 		String defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
@@ -117,7 +121,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 		logger.debug("Found " + nl.getLength() + " <" + BEAN_ELEMENT + "> elements defining beans");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node n = nl.item(i);
-			loadBeanDefinition((Element) n, defaultDependencyCheck, defaultAutowire);
+			loadBeanDefinition((Element) n, defaultLazyInit, defaultDependencyCheck, defaultAutowire);
 		}
 	}
 
@@ -128,14 +132,16 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	 * If no id specified, use the first name in the name attribute as
 	 * canonical name, registering all others as aliases.
 	 */
-	private void loadBeanDefinition(Element ele, String defaultDependencyCheck, String defaultAutowire) {
+	private void loadBeanDefinition(Element ele, String defaultLazyInit, String defaultDependencyCheck,
+	                                String defaultAutowire) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
 		if (nameAttr != null && !"".equals(nameAttr)) {
 			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
 		}
-		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id, defaultDependencyCheck, defaultAutowire);
+		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id, defaultLazyInit,
+		                                                            defaultDependencyCheck, defaultAutowire);
 
 		if (id == null || "".equals(id)) {
 			if (!aliases.isEmpty()) {
@@ -161,7 +167,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	/**
 	 * Parse a standard bean definition.
 	 */
-	private AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName,
+	private AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName, String defaultLazyInit,
 	                                                   String defaultDependencyCheck, String defaultAutowire) {
 		try {
 			String className = null;
@@ -190,13 +196,15 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 				}
 
 				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-				if (DEFAULT_VALUE.equals(dependencyCheck))
+				if (DEFAULT_VALUE.equals(dependencyCheck)) {
 					dependencyCheck = defaultDependencyCheck;
+				}
 				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
 				String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
-				if (DEFAULT_VALUE.equals(autowire))
+				if (DEFAULT_VALUE.equals(autowire)) {
 					autowire = defaultAutowire;
+				}
 				rbd.setAutowire(getAutowire(autowire));
 
 				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
@@ -217,9 +225,12 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
 			}
-			if (ele.hasAttribute(LAZY_INIT_ATTRIBUTE)) {
-				bd.setLazyInit(TRUE_VALUE.equals(ele.getAttribute(LAZY_INIT_ATTRIBUTE)));
+
+			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(lazyInit)) {
+				lazyInit = defaultLazyInit;
 			}
+			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
 			return bd;
 		}
