@@ -97,6 +97,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
+
 	/**
 	 * Create a new HibernateTransactionManager instance.
 	 * A SessionFactory has to be set to be able to use it.
@@ -196,6 +197,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 			logger.debug("Found thread-bound session for Hibernate transaction");
@@ -233,7 +235,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// apply read-only
 			if (definition.isReadOnly()) {
-				session.setFlushMode(FlushMode.NEVER);
+				if (txObject.isNewSessionHolder()) {
+					// just set to NEVER in case of a new Session for this transaction
+					session.setFlushMode(FlushMode.NEVER);
+				}
 				try {
 					session.connection().setReadOnly(true);
 				}
@@ -241,6 +246,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					// SQLException or UnsupportedOperationException
 					logger.warn("Could not set JDBC connection read-only", ex);
 				}
+			}
+			else if (!txObject.isNewSessionHolder()) {
+				// we need AUTO for a non-read-only transaction
+				txObject.setPreviousFlushMode(session.getFlushMode());
+				session.setFlushMode(FlushMode.AUTO);
 			}
 
 			// add the Hibernate transaction to the session holder
@@ -369,6 +379,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else {
 			logger.debug("Not closing pre-bound Hibernate session after transaction");
+			if (txObject.getPreviousFlushMode() != null) {
+				txObject.getSessionHolder().getSession().setFlushMode(txObject.getPreviousFlushMode());
+			}
 		}
 	}
 

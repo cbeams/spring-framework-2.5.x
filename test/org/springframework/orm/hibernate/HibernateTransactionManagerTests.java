@@ -554,7 +554,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTransactionCommitWithPrebound() throws HibernateException, SQLException {
+	public void testTransactionCommitWithPreBound() throws HibernateException, SQLException {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -567,6 +567,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Transaction tx = (Transaction) txControl.getMock();
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER);
+		session.setFlushMode(FlushMode.AUTO);
+		sessionControl.setVoidCallable(1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 4);
 		con.getTransactionIsolation();

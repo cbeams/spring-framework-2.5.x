@@ -1,5 +1,7 @@
 package org.springframework.orm.hibernate;
 
+import net.sf.hibernate.FlushMode;
+
 /**
  * Hibernate transaction object, representing a SessionHolder.
  * Used as transaction object by HibernateTransactionManager.
@@ -22,6 +24,8 @@ public class HibernateTransactionObject {
 	private boolean newSessionHolder;
 
 	private Integer previousIsolationLevel;
+
+	private FlushMode previousFlushMode;
 
 	/**
 	 * Create HibernateTransactionObject for new SessionHolder.
@@ -66,6 +70,14 @@ public class HibernateTransactionObject {
 
 	public Integer getPreviousIsolationLevel() {
 		return previousIsolationLevel;
+	}
+
+	protected void setPreviousFlushMode(FlushMode previousFlushMode) {
+		this.previousFlushMode = previousFlushMode;
+	}
+
+	public FlushMode getPreviousFlushMode() {
+		return previousFlushMode;
 	}
 
 }
