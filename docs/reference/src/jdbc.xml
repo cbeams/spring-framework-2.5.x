@@ -215,9 +215,6 @@ su.update();</programlisting>The custom translator is passed a data source
       creates a new table.<programlisting>import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * @author trisberg
- */
 public class ExecuteAStatement {
   private JdbcTemplate jt;
   private DataSource dataSource;
@@ -252,9 +249,6 @@ public class ExecuteAStatement {
       <programlisting>import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * @author trisberg
- */
 public class RunAQuery {
   private JdbcTemplate jt;
   private DataSource dataSource;
@@ -297,7 +291,32 @@ public class RunAQuery {
     <sect2>
       <title>Updating the database</title>
 
-      <para>ToDo</para>
+      <para>There are also a number of update methods that you can use. I will
+      show an example where we update a column for a certain primary key. In
+      this example I am using an SQL statement that has place holders for tow
+      parameters. Most of the query and update methods have this
+      functionality. The parameter values are passed in as an array of
+      objects.</para>
+
+      <programlisting>import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
+public class ExecuteAnUpdate {
+    private JdbcTemplate jt;
+    private DataSource dataSource;
+
+    public void setName(int id, String name) {
+        jt = new JdbcTemplate(dataSource);
+        jt.update("update mytable set name = ? where id = ?", new Object[] {name, new Integer(id)});
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+}</programlisting>
+
+      <para></para>
     </sect2>
   </sect1>
 
@@ -523,7 +542,35 @@ public class RunAQuery {
       to add a custom update method) it can easily be parameterized by setting
       SQL and declaring parameters.</para>
 
-      <para>Example - ToDo</para>
+      <programlisting>import java.sql.Types;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.object.SqlUpdate;
+
+public class UpdateCreditRating  extends SqlUpdate {
+    public UpdateCreditRating(DataSource ds) {
+        setDataSource(ds);
+        setSql("update customer set credit_rating = ? where id = ?");
+        declareParameter(new SqlParameter(Types.NUMERIC));
+        declareParameter(new SqlParameter(Types.NUMERIC));
+        compile();
+    }
+
+    /**
+     * @param id for the Customer to be updated
+     * @param rating the new value for credit rating
+     * @return number of rows updated
+     */
+    public int run(int id, int rating) {
+        Object[] params =
+            new Object[] {
+                new Integer(rating),
+                new Integer(id)};
+        return update(params);
+    }
+}</programlisting>
     </sect2>
 
     <sect2 id="jdbc-StoredProcedure">
@@ -538,7 +585,75 @@ public class RunAQuery {
       other features provided by this class are still necessary in JDBC
       3.0.</para>
 
-      <para>Example - ToDo</para>
+      <para>Here is an example of a program that calls a function sysdate()
+      that comes with any Oracle database. To use the stored procedure
+      functionality you have to create a class tha extends
+      <literal>StoredProcedure</literal>. There are no input parameters, but
+      there is an output parameter that is declared as a date using the class
+      <literal>SqlOutParameter</literal>. The <literal>execute()</literal>
+      method returns a map with an entry for each declared output parameter
+      using the parameter name as the key.</para>
+
+      <programlisting>import java.sql.Types;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.datasource.*;
+import org.springframework.jdbc.object.StoredProcedure;
+
+public class TestSP {
+
+    public static void main(String[] args)  {
+        
+        System.out.println("DB TestSP!");
+        TestSP t = new TestSP();
+        t.test();
+        System.out.println("Done!");
+        
+    }
+    
+    void test() {
+        DriverManagerDataSource ds = new DriverManagerDataSource();
+        ds.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        ds.setUrl("jdbc:oracle:thin:@localhost:1521:mydb");
+        ds.setUsername("scott");
+        ds.setPassword("tiger");
+
+        MyStoredProcedure sproc = new MyStoredProcedure(ds);
+        Map res = sproc.execute();
+        printMap(res);
+                
+    }
+
+    private class MyStoredProcedure extends StoredProcedure {
+        public static final String SQL = "sysdate";
+
+        public MyStoredProcedure(DataSource ds) {
+            setDataSource(ds);
+            setFunction(true);
+            setSql(SQL);
+            declareParameter(new SqlOutParameter("date", Types.DATE));
+            compile();
+        }
+
+        public Map execute() {
+            Map out = execute(new HashMap());
+            return out;
+        }
+
+    }
+
+    private static void printMap(Map r) {
+        Iterator i = r.entrySet().iterator();
+        while (i.hasNext()) {
+            System.out.println((String) i.next().toString());  
+        }
+    }
+}</programlisting>
     </sect2>
 
     <sect2 id="jdbc-SqlFunction">
