@@ -6,18 +6,14 @@
 
 package org.springframework.beans.factory;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyEditorSupport;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.ErrorCodedPropertyVetoException;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.PropertyVetoExceptionsException;
+import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 
@@ -28,7 +24,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.9 2004-01-20 11:26:44 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.10 2004-02-02 11:49:30 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -219,15 +215,15 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			fail("Shouldn't succeed with type mismatch");
 		}
 		catch (BeanCreationException wex) {
-			assertTrue(wex.getRootCause() instanceof PropertyVetoExceptionsException);
-			PropertyVetoExceptionsException ex = (PropertyVetoExceptionsException) wex.getRootCause();
+			assertTrue(wex.getCause() instanceof PropertyAccessExceptionsException);
+			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) wex.getCause();
 			// Further tests
 			assertTrue("Has one error ", ex.getExceptionCount() == 1);
-			assertTrue("Error is for field age", ex.getPropertyVetoException("age") != null);
+			assertTrue("Error is for field age", ex.getPropertyAccessException("age") != null);
 
 			TestBean tb = (TestBean) ex.getBeanWrapper().getWrappedInstance();
 			assertTrue("Age still has default", tb.getAge() == 0);
-			assertTrue("We have rejected age in exception", ex.getPropertyVetoException("age").getPropertyChangeEvent().getNewValue().equals("34x"));
+			assertTrue("We have rejected age in exception", ex.getPropertyAccessException("age").getPropertyChangeEvent().getNewValue().equals("34x"));
 			assertTrue("valid name stuck", tb.getName().equals("typeMismatch"));
 			assertTrue("valid spouse stuck", tb.getSpouse().getName().equals("Rod"));
 		}
@@ -327,29 +323,8 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	}
 
 
-
-	public static class AgistListener implements VetoableChangeListener {
-		int events;
-
-		public void vetoableChange(PropertyChangeEvent e) throws PropertyVetoException {
-			++events;
-			//System.out.println("VetoableChangeEvent: old value=[" + e.getOldValue() + "] new value=[" + e.getNewValue() + "]");
-			if ("age".equals(e.getPropertyName())) {
-				//if (e.getPropertyName().equals("age")
-				Integer newValue = (Integer) e.getNewValue();
-				if (newValue.intValue() > 65) {
-					//System.out.println("Yeah! got another old bugger and vetoed it");
-					throw new ErrorCodedPropertyVetoException("You specified " + newValue.intValue() + "; that's too bloody old", e, "tooOld");
-				}
-			}
-		}
-
-		public int getEventCount() {
-			return events;
-		}
-	}
-
 	public static class TestBeanEditor extends PropertyEditorSupport {
+
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");
@@ -358,4 +333,5 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			setValue(tb);
 		}
 	}
+
 }

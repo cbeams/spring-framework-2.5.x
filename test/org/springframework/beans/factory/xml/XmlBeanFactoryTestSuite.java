@@ -45,7 +45,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.33 2004-01-21 23:13:19 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.34 2004-02-02 11:49:30 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -545,7 +545,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			fail();
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause() instanceof ServletException);
+			assertTrue(ex.getCause() instanceof ServletException);
 		}
 	}
 
@@ -598,7 +598,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			xbf.getBean("lazy-and-bad");
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause() instanceof ServletException);
+			assertTrue(ex.getCause() instanceof ServletException);
 		}
 	}
 
@@ -872,7 +872,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			// should have thrown BeanDefinitionStoreException
 		}
 		catch (BeanDefinitionStoreException ex) {
-			assertTrue(ex.getRootCause() instanceof ClassNotFoundException);
+			assertTrue(ex.getCause() instanceof ClassNotFoundException);
 			// expected
 		}
 	}

@@ -64,8 +64,6 @@
 		<property name="testBean2"><ref bean="kathy"/></property>
 	</bean>
 
-	<bean id="agistListener" class="org.springframework.beans.factory.AbstractBeanFactoryTests$AgistListener"/>
-
 	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>

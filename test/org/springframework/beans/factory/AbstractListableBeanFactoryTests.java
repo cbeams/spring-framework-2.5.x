@@ -22,7 +22,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 * Subclasses can override this.
 	 */
 	public void testCount() {
-		assertCount(14);
+		assertCount(13);
 	}
 	
 	protected final void assertCount(int count) {
