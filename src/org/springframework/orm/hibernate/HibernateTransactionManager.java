@@ -127,6 +127,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
 
+	/**
+	 * Just needed for entityInterceptorBeanName.
+	 * @see #setEntityInterceptorBeanName
+	 */
 	private BeanFactory beanFactory;
 
 

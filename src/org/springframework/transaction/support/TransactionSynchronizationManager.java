@@ -174,7 +174,7 @@ public abstract class TransactionSynchronizationManager {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Return if thread synchronizations are active for the current thread.
+	 * Return if transaction synchronization is active for the current thread.
 	 * Can be called before register to avoid unnecessary instance creation.
 	 * @see #registerSynchronization
 	 */
@@ -183,7 +183,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Activate thread synchronizations for the current thread.
+	 * Activate transaction synchronization for the current thread.
 	 * Called by transaction manager on transaction begin.
 	 * @throws IllegalStateException if synchronization is already active
 	 */
@@ -197,7 +197,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Register a new transaction synchronization for the current thread.
-	 * Called by resource management code.
+	 * Typically called by resource management code.
 	 * @throws IllegalStateException if synchronization is not active
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
@@ -223,7 +223,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Deactivate thread synchronizations for the current thread.
+	 * Deactivate transaction synchronization for the current thread.
 	 * Called by transaction manager on transaction cleanup.
 	 * @throws IllegalStateException if synchronization is not active
 	 */

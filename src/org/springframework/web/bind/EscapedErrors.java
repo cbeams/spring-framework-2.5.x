@@ -30,9 +30,9 @@ import org.springframework.web.util.HtmlUtils;
  * for convenient usage in HTML views. Can be retrieved easily via
  * RequestContext's getErrors method.
  *
- * <p>Note that BindTag does <i>not</i> use this class to avoid unnecessary creation
- * of ObjectError instances. It just escapes the messages and values that get
- * copied into the respective BindStatus instance.
+ * <p>Note that BindTag does <i>not</i> use this class to avoid unnecessary
+ * creation of ObjectError instances. It just escapes the messages and values
+ * that get copied into the respective BindStatus instance.
  *
  * @author Juergen Hoeller
  * @since 01.03.2003
@@ -156,15 +156,17 @@ public class EscapedErrors implements Errors {
 			if (value instanceof String) {
 				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
 			}
-			return new FieldError(fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
-														fieldError.getCodes(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+			return new FieldError(
+					fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
+					fieldError.getCodes(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
-		return new ObjectError(source.getObjectName(), source.getCodes(), source.getArguments(),
-													 HtmlUtils.htmlEscape(source.getDefaultMessage()));
+		return new ObjectError(
+				source.getObjectName(), source.getCodes(), source.getArguments(),
+				HtmlUtils.htmlEscape(source.getDefaultMessage()));
 	}
 
 	private List escapeObjectErrors(List source) {
-		List escaped = new ArrayList();
+		List escaped = new ArrayList(source.size());
 		for (Iterator it = source.iterator(); it.hasNext();) {
 			ObjectError objectError = (ObjectError)it.next();
 			escaped.add(escapeObjectError(objectError));

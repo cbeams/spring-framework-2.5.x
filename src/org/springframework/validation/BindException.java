@@ -177,8 +177,9 @@ public class BindException extends Exception implements Errors {
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		String fixedField = fixedField(field);
 		Object newVal = getBeanWrapper().getPropertyValue(fixedField);
-		FieldError fe = new FieldError(this.objectName, fixedField, newVal, false,
-																	 resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
+		FieldError fe = new FieldError(
+				this.objectName, fixedField, newVal, false,
+				resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
 		addError(fe);
 	}
 
@@ -331,6 +332,7 @@ public class BindException extends Exception implements Errors {
 	 * @see #ERROR_KEY_PREFIX
 	 * @see org.springframework.web.servlet.ModelAndView
 	 * @see org.springframework.web.servlet.tags.BindTag
+	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	public final Map getModel() {
 		Map model = new HashMap();

@@ -19,10 +19,9 @@ package org.springframework.beans;
 import java.beans.PropertyChangeEvent;
 
 /**
- * Exception thrown on a type mismatch when trying to set a property.
+ * Exception thrown on a type mismatch when trying to set a bean property.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.6 $
  */
 public class TypeMismatchException extends PropertyAccessException {
 
@@ -45,13 +44,13 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable ex) {
 		super(propertyChangeEvent,
-					"Failed to convert property value of type [" +
-		      (propertyChangeEvent.getNewValue() != null ?
-		       propertyChangeEvent.getNewValue().getClass().getName() : null) +
-		      "] to required type [" + requiredType.getName() + "]" +
-					(propertyChangeEvent.getPropertyName() != null ?
-					 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
-					ex);
+				"Failed to convert property value of type [" +
+				(propertyChangeEvent.getNewValue() != null ?
+				propertyChangeEvent.getNewValue().getClass().getName() : null) +
+				"] to required type [" + requiredType.getName() + "]" +
+				(propertyChangeEvent.getPropertyName() != null ?
+				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
+				ex);
 		this.requiredType = requiredType;
 	}
 
