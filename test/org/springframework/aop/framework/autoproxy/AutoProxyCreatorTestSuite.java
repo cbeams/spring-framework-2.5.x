@@ -28,11 +28,12 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.DummyFactory;
+import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ACATest;
 import org.springframework.context.BeanThatListens;
@@ -42,7 +43,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.5 2004-04-01 15:36:04 jhoeller Exp $
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.6 2004-05-04 06:14:43 jhoeller Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 
@@ -61,24 +62,32 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		parentMessageSource.addMessage("code1", Locale.getDefault(), "message1");
 
 		this.sac = new StaticApplicationContext(parent);
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("singleton", "false");
 		sac.registerSingleton("prototypeFactory", DummyFactory.class, pvs);
+
 		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, new MutablePropertyValues());
+
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		bd.getPropertyValues().addPropertyValue("spouse", null);
+		RootBeanDefinition innerBean = new RootBeanDefinition(TestBean.class, null);
+		bd.getPropertyValues().addPropertyValue("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("autoProxyTest", bd);
+
 		sac.registerSingleton("autoProxyTest2", IndexedTestBean.class, new MutablePropertyValues());
 		sac.registerSingleton("testInterceptorForCreator", TestInterceptor.class, new MutablePropertyValues());
+
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("beanNames", "autoProxyTest,autoProxyTest2,prototypeFac*");
+		pvs.addPropertyValue("beanNames", "autoProxyTest,autoProxyTest2,prototypeFac*,innerBean");
 		List interceptors = new LinkedList();
 		interceptors.add("testInterceptorForCreator");
 		pvs.addPropertyValue("interceptorNames", interceptors);
 		sac.registerSingleton("beanNameAutoProxyCreator", BeanNameAutoProxyCreator.class, pvs);
+
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
+		
 		sac.refresh();
 
 		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");
