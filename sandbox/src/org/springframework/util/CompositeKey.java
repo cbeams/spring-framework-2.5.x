@@ -23,22 +23,6 @@ public class CompositeKey {
     private Set parts;
 
     /**
-     * Creates a CompositeKey from the set of individual keys.
-     * 
-     * @param parts
-     *            The set of key parts.
-     * @throws IllegalArgumentException
-     *             if the set is null or has less than 2 elements.
-     */
-    public CompositeKey(Set parts) {
-        Assert.notNull(parts);
-        Assert.isTrue(
-            parts.size() > 1,
-            "A composite key by definition has more than one key.");
-        this.parts = new LinkedHashSet(parts);
-    }
-
-    /**
      * Creates a CompositeKey with two key parts.
      * 
      * @param part1
