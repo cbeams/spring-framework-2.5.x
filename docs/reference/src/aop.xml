@@ -1,7 +1,154 @@
 <chapter id="aop">
 
-    <title>Aspect Oriented Programming with Spring</title>
+    <title>Spring AOP: Aspect Oriented Programming with Spring</title>
+    
+    <sect1 id="aop-introduction">
+    	<title>Concepts</title>
+    	
+    	
+    	<sect2 id="aop-introduction-defn">
+    		<title>AOP concepts</title>
+    		
+    		<para>
+    			Define pointcuts, advice, aspect, introduction, etc.
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-spring-defn">
+    		<title>Spring terminology</title>
+    		
+    		<para>
+    			Classes for pointcuts, Advisor etc.
+    		</para>
+    		
+    		<para>
+    			Note AOP Alliance ocmpliance
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-proxies">
+    		<title>AOP Proxies in Spring</title>
+    		
+    		<para>
+    			Talk about dynamic proxies and CGLIB
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-pointcuts">
+    		<title>Pointcuts in Spring</title>
+    		
+    		<para>
+    			Spring pointcut model
+    		</para>
+
+    	</sect2>
+    	
+    	<sect2 id="aop-introduction-advice-types">
+    		<title>Advice types</title>
+    		
+    		<para>
+    			Talk about interception advice, before and throws advice.
+    			Point out it's extensible (discussed below).
+    		</para>
+
+    	</sect2>
+
+    </sect1>
+    
+    <sect1 id="aop-pfb">
+    	<title>Using the ProxyFactoryBean to create AOP proxies</title>
+    	
+    	<sect2 id="aop-pfb-1">
+    		<title>Basics</title>
+
+    	</sect2>
+    	
+    	
+    	<sect2 id="aop-pfb-2">
+    		<title>JavaBean properties</title>
+
+    	</sect2>
+    	
+
+    </sect1>
+    
+    
+    <sect1 id="aop-prog">
+    	<title>Creating AOP proxies programmatically with the ProxyFactory</title>
+
+    </sect1>
+    
+    <sect1 id="aop-tfb">
+    	<title>Convenient proxy creation with the TransactionProxyFactoryBean</title>
+    	
+    	<para>
+    		The commonest case is to create 
+    	</para>
+
+    </sect1>
+    
+    
+    <sect1 id="aop-autoproxy">
+    	<title>Using the "autoproxy" facility</title>
+    	
+    	<sect2 id="aop-autoproxy-1">
+    		<title>Using the "autoproxy" facility</title>
+
+    	</sect2>
+    	
+    	
+    	<sect2 id="aop-autoproxy-metadata">
+    		<title>Using metadata-driven autoproxying</title>
+
+    	</sect2>
+    	
+
+    </sect1>
+    
+    
+    <sect1 id="aop-advanced">
+    	<title>Advanced capabilities</title>
+    	
+    	<sect2 id="aop-targetsource">
+    		<title>Using custom TargetSources</title>
+    		
+    		<para>
+    		define concept
+    		</para>
+    		
+    		<para>
+    			TargetSources can be used to support pooling, etc.
+    		</para>
+
+    	</sect2>
+    	
+    	
+    	<sect2 id="aop-extensibility">
+    		<title>Defining new advice and advisor types</title>
+    		
+    		<para>
+    		Spring AOP is designed to be highly extensible. While the interception implementation
+    		strategy is presently used internally in all cases, it is possible to support
+    		arbitrary advice types in addition to interception around advice, before and throws advice
+    		(which are supported out of the box).
+    		</para>
+    	
+    		<para>
+    		The org.springframework.aop.framework.adapter package is an SPI package allowing
+    		support for new custom advice types to be added without changing the core
+    		framework.
+    		</para>
+    		
+    		<para>
+    		Please refer to this package's Javadocs for further information.
+    		</para>
+
+    	</sect2>
+    	
+
+    </sect1>
 
 </chapter>
-
-
