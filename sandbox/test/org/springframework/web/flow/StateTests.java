@@ -40,7 +40,7 @@ public class StateTests extends TestCase {
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
-		assertEquals(1, ((ExecutionCounterAction)state.getAction()).getExecutionCount());
+		assertEquals(1, ((ExecutionCounterAction)state.getAction().getTargetAction()).getExecutionCount());
 	}
 
 	public void testActionStateActionChain() {
@@ -54,9 +54,10 @@ public class StateTests extends TestCase {
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
-		Action[] actions = state.getActions();
+		ActionStateAction[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
-			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
+			ActionStateAction action = actions[i];
+			assertEquals(1, ((ExecutionCounterAction)(action.getTargetAction())).getExecutionCount());
 		}
 	}
 
@@ -78,20 +79,21 @@ public class StateTests extends TestCase {
 
 	public void testActionStateActionChainNamedActions() {
 		Flow flow = new Flow("myFlow");
-		ActionStateAction[] stateActions = new ActionStateAction[4];
-		stateActions[0] = new ActionStateAction(new ExecutionCounterAction("not mapped result"));
-		stateActions[1] = new ActionStateAction(new ExecutionCounterAction(null));
-		stateActions[2] = new ActionStateAction(new ExecutionCounterAction(""), "action3");
-		stateActions[3] = new ActionStateAction(new ExecutionCounterAction("success"), "action4");
-		ActionState state = new ActionState(flow, "actionState", stateActions, new Transition("action4.success", "finish"));
+		ActionStateAction[] actions = new ActionStateAction[4];
+		actions[0] = new ActionStateAction(new ExecutionCounterAction("not mapped result"));
+		actions[1] = new ActionStateAction(new ExecutionCounterAction(null));
+		actions[2] = new ActionStateAction(new ExecutionCounterAction(""), "action3");
+		actions[3] = new ActionStateAction(new ExecutionCounterAction("success"), "action4");
+		ActionState state = new ActionState(flow, "actionState", actions, new Transition("action4.success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("action4.success", flowExecution.getLastEventId());
-		Action[] actions = state.getActions();
-		for (int i = 0; i < stateActions.length; i++) {
-			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
+		actions = state.getActions();
+		for (int i = 0; i < actions.length; i++) {
+			ActionStateAction action = actions[i];
+			assertEquals(1, ((ExecutionCounterAction)(action.getTargetAction())).getExecutionCount());
 		}
 	}
 

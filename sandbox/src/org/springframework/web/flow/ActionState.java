@@ -54,44 +54,46 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action the unnamed action to execute in this state
+	 * @param targetAction the unnamed action to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, Action action, Transition transition) throws IllegalArgumentException {
+	public ActionState(Flow flow, String id, Action targetAction, Transition transition)
+			throws IllegalArgumentException {
 		super(flow, id, transition);
-		addAction(action);
+		addAction(targetAction);
 	}
 
 	/**
 	 * Create a new action state.
 	 * @param flow the owning flow
-	 * @param actionInfo The action and any configuration properties for use
-	 *        within this state
+	 * @param action The action and any configuration properties for use within
+	 *        this state
 	 * @param action the named action to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionStateAction actionInfo, Transition transition)
+	public ActionState(Flow flow, String id, ActionStateAction action, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
-		addAction(actionInfo);
+		addAction(action);
 	}
 
 	/**
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param action the unnamed action to execute in this state
+	 * @param targetAction the unnamed action to execute in this state
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, Action action, Transition[] transitions) throws IllegalArgumentException {
+	public ActionState(Flow flow, String id, Action targetAction, Transition[] transitions)
+			throws IllegalArgumentException {
 		super(flow, id, transitions);
-		addAction(action);
+		addAction(targetAction);
 	}
 
 	/**
@@ -114,29 +116,30 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param actions the unnamed actions to execute in this state
+	 * @param targetActions the unnamed actions to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, Action[] actions, Transition transition) throws IllegalArgumentException {
+	public ActionState(Flow flow, String id, Action[] targetActions, Transition transition)
+			throws IllegalArgumentException {
 		super(flow, id, transition);
-		addActions(actions);
+		addActions(targetActions);
 	}
 
 	/**
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param actions the unnamed actions to execute in this state
+	 * @param targetActions the unnamed actions to execute in this state
 	 * @param transitions the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions)
+	public ActionState(Flow flow, String id, Action[] targetActions, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
-		addActions(actions);
+		addActions(targetActions);
 	}
 
 	/**
@@ -205,10 +208,10 @@ public class ActionState extends TransitionableState {
 	 * @param actionNames the names of the actions
 	 * @param actions the actions to add
 	 */
-	protected void addActions(ActionStateAction[] actionInfos) {
-		Assert.notEmpty(actionInfos, "You must add at least one action info");
-		for (int i = 0; i < actionInfos.length; i++) {
-			addAction(actionInfos[i]);
+	protected void addActions(ActionStateAction[] actions) {
+		Assert.notEmpty(actions, "You must add at least one action");
+		for (int i = 0; i < actions.length; i++) {
+			addAction(actions[i]);
 		}
 	}
 
@@ -245,7 +248,7 @@ public class ActionState extends TransitionableState {
 	 * Returns the first action executed by this action state.
 	 * @return the first action
 	 */
-	public Action getAction() {
+	public ActionStateAction getAction() {
 		return getActions()[0];
 	}
 
@@ -253,11 +256,11 @@ public class ActionState extends TransitionableState {
 	 * Returns the list of actions executed by this action state.
 	 * @return the action list, as a typed array
 	 */
-	public Action[] getActions() {
-		Action[] actions = new Action[actionExecutors.size()];
+	public ActionStateAction[] getActions() {
+		ActionStateAction[] actions = new ActionStateAction[actionExecutors.size()];
 		int i = 0;
 		for (Iterator it = actionExecutors(); it.hasNext();) {
-			actions[i++] = ((ActionExecutor)it.next()).getAction().getAction();
+			actions[i++] = ((ActionExecutor)it.next()).getAction();
 		}
 		return actions;
 	}
@@ -265,21 +268,22 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Returns the name associated with an action instance executed by this
 	 * action state.
-	 * @param action the action for which the name should be looked up
+	 * @param targetAction the action for which the name should be looked up
 	 * @return the name of given action or <code>null</code> if the action
 	 *         does not have a name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
 	 */
-	public ActionStateAction getActionInfo(Action action) throws NoSuchElementException {
-		Assert.notNull(action, "The action should not be [null]");
+	public ActionStateAction getAction(Action targetAction) throws NoSuchElementException {
+		Assert.notNull(targetAction, "The action should not be [null]");
 		for (Iterator it = actionExecutors(); it.hasNext();) {
 			ActionStateAction actionInfo = ((ActionExecutor)it.next()).getAction();
-			if (actionInfo.getAction() == action) {
+			if (actionInfo.getTargetAction() == targetAction) {
 				return actionInfo;
 			}
 		}
-		throw new NoSuchElementException("Action '" + action + "' is not an action executed by state '" + this + "'");
+		throw new NoSuchElementException("Target action '" + targetAction + "' is not an action executed by state '"
+				+ this + "'");
 	}
 
 	/**
@@ -382,7 +386,7 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				return getEvent(action.getAction().execute(context));
+				return getEvent(action.getTargetAction().execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(this, e);

@@ -47,7 +47,7 @@ public class ActionStateAction {
 	/**
 	 * The action to execute when the action state is entered.
 	 */
-	private Action action;
+	private Action targetAction;
 
 	/**
 	 * Contextual properties about the configured action's use within the
@@ -63,7 +63,7 @@ public class ActionStateAction {
 	 */
 	public ActionStateAction(ActionState state, Action action) {
 		this.state = state;
-		this.action = action;
+		this.targetAction = action;
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class ActionStateAction {
 	 * @param action The action
 	 */
 	public ActionStateAction(Action action) {
-		this.action = action;
+		this.targetAction = action;
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class ActionStateAction {
 	public ActionStateAction(Action action, String name) {
 		this.properties = new HashMap(1);
 		setName(name);
-		this.action = action;
+		this.targetAction = action;
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class ActionStateAction {
 		this.properties = new HashMap(1);
 		setName(name);
 		setDescription(description);
-		this.action = action;
+		this.targetAction = action;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class ActionStateAction {
 	 */
 	public ActionStateAction(Action action, Map properties) {
 		this.properties = new HashMap(properties);
-		this.action = action;
+		this.targetAction = action;
 	}
 
 	/**
@@ -154,8 +154,8 @@ public class ActionStateAction {
 	 * Returns the action
 	 * @return the action
 	 */
-	public Action getAction() {
-		return action;
+	public Action getTargetAction() {
+		return targetAction;
 	}
 
 	/**
@@ -198,6 +198,6 @@ public class ActionStateAction {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("action", action).append("properties", properties).toString();
+		return new ToStringCreator(this).append("action", targetAction).append("properties", properties).toString();
 	}
 }
