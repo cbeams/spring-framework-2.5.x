@@ -11,107 +11,111 @@
     lots of IoC convenience features, addressing many typical Hibernate
     integration issues. All of these comply with Spring's generic transaction
     and DAO exception hierarchies.</para>
+
+    <para>Spring's adds significant support when using the O/R mapping layer
+    of your choice to create data-access applications. First of all you should
+    know that once you started using Spring's support for O/R mapping, you
+    don't have to go all the way. No matter to what extent, you're invited to
+    review and leverage the Spring approach, before deciding to take the
+    effort and risk of building a similar infrastructure in-house. Much of the
+    O/R mapping support, no matter what technology you're using may be used in
+    a library style, as everything is designed as a set of reusable JavaBeans.
+    Usage inside an ApplicationContext or BeanFactory does provide additional
+    benefits in terms of ease of configuration and deployment; as such, most
+    examples in this section show configuration inside an
+    ApplicationContext.</para>
+
+    <para>Some of the the benefits of using Spring to create your O/R mapping
+    applications include:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>To avoid vendor lock-in, and allow mix-and-match
+        implementation strategies.</emphasis> While Hibernate is powerful,
+        flexible, open source and free, it still uses a proprietary API.
+        Furthermore one could agrue that iBatis is a bit lightweight, although
+        it's excellent for use in application that don't require complex O/R
+        mapping strategies. Given the choice, it's usually desirable to
+        implement major application functionality using standard or abstracted
+        APIs, in case you need to switch to another implementation for reasons
+        of functionality, performance, or any other concerns. For example,
+        Spring's abstraction of Hibernate Transactions and Exceptions, along
+        with its IoC approach which allow you to easily swap in mapper/DAO
+        objects implementing data-access functionality, make it easy to
+        isolate all Hibernate-specific code in one area of your application,
+        without sacrificing any of the power of Hibernate. Higher level
+        service code dealing with the DAOs has no need to know anything about
+        their implementation. This approach has the additional benefit of
+        making it easy to intentionally implement data-access with a
+        mix-and-match approach (i.e. some data-access performed using
+        Hibernate, and some using JDBC, others using iBatis) in a
+        non-intrusive fashion, potentially providing great benefits in terms
+        of continuing to use legacy code or leveraging the strength of each
+        technology.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Ease of testing</emphasis>. Spring's inversion of
+        control approach makes it easy to swap the implementations and
+        locations of Hibernate session factories, datasources, transaction
+        managers, and mapper object implementations (if needed). This makes it
+        much easier to isolate and test each piece of persistence-related code
+        in isolation.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>General resource management.</emphasis> Spring
+        application contexts can handle the location and configuration of
+        Hibernate SessionFactories, JDBC datasources, iBatis SQLMaps
+        configuration objects, and other related resources. This makes these
+        values easy to manage and change. Spring offers efficient, easy and
+        safe handling of Hibernate Sessions. Related code using Hibernate
+        generally needs to use the same Hibernate Session object for
+        efficiency and proper transaction handling. Spring makes it easy to
+        transparaently create and bind a session tot he current thread, using
+        either a declarative, AOP method interceptor approach, or by using an
+        explicit, template wrapper class at the Java code level. Thus Spring
+        solves many of the usage issues that repeatedly arise on the Hibernate
+        forums.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Exception wrapping.</emphasis>Spring can wrap
+        exceptions from you O/R mapping tool of choice, converting them from
+        proprietary, checked exceptions, to a set of abstracted runtime
+        exceptions. This allows you to handle most persistence exceptions,
+        which are non-recoverable, only in the appropriate layers, without
+        annoying boilerplate catches/throws, and exception declarations. You
+        can still trap and handle exceptions anywhere you need to. Remember
+        that JDBC exceptions (including DB specific dialects) are also
+        converted to the same hierarchy, meaning that you can perform some
+        operations with JDBC within a consistent programming model.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Integrated transaction management.</emphasis> Spring
+        allows you to wrap your O/R mapping code with either a declarative,
+        AOP style method interceptor, or an explicit 'template' wrapper class
+        at the Java code level. In either case, transaction semantics are
+        handled for you, and proper transaction handling (rollback, etc.) in
+        case of exceptions is taken care of. As discussed below, you also get
+        the benefit of being able to use and swap various transaction
+        managers, without your Hibernate related code being affected. As an
+        added benefit, JDBC-related code can fully integrate transactionally
+        with the code you use to do O/R mapping. This is useful for handling
+        functionality not implemented in for example Hibernate or
+        iBatis.</para>
+      </listitem>
+    </itemizedlist>
   </sect1>
 
   <sect1 id="orm-hibernate">
     <title>Hibernate</title>
 
     <sect2>
-      <title>Overview</title>
+      <title></title>
 
-      <para>Spring adds significant value in a number of areas, when creating
-      data-access applications using Hibernate. You are invited to review and
-      leverage the Spring approach, no matter to what extent, before deciding
-      to take the effort and risk of building similar infrastructure in-house.
-      Much of this Hibernate support code may be used in a library style, as
-      everything is designed as a set of reusable JavaBeans. Usage inside an
-      ApplicationContext or BeanFactory does provide additional benefits in
-      terms of ease of configuration and deployment; as such, most examples in
-      this section show configuration inside an ApplicationContext.</para>
-
-      <para>Benefits of using Spring to create your Hibernate applications
-      include:<itemizedlist>
-          <listitem>
-            <para><emphasis>Session management.</emphasis> Spring offers
-            efficient, easy, and safe handling of Hibernate Sessions. Related
-            code using Hibernate generally needs to use the same Hibernate
-            Session object for efficiency and proper transaction handling.
-            Spring makes it easy to transparently create and bind a session to
-            the current thread, using either a declarative, AOP method
-            interceptor approach, or by using an explicit,
-            <emphasis>template</emphasis> wrapper class at the Java code
-            level. Thus Spring solves many of the usage issues that repeatedly
-            arise on the Hibernate forums.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>General resource management.</emphasis> Spring
-            application contexts can handle the location and configuration of
-            Hibernate SessionFactories, JDBC datasources, and other related
-            resources. This makes these values easy to manage and
-            change.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>Integrated transaction management.</emphasis>
-            Spring allows you to wrap your Hibernate code with either a
-            declarative, AOP style method interceptor, or an explicit
-            'template' wrapper class at the Java code level. In either case,
-            transaction semantics are handled for you, and proper transaction
-            handling (rollback, etc.) in case of exceptions is taken care of.
-            As discussed below, you also get the benefit of being able to use
-            and swap various transaction managers, without your Hibernate
-            related code being affected. As an added benefit, JDBC-related
-            code can fully integrate transactionally with Hibernate code. This
-            is useful for handling functionality not implemented in
-            Hibernate.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>Exception wrapping. </emphasis>Spring can wrap
-            Hibernate exceptions, converting them from proprietary, checked
-            exceptions, to a set of abstracted runtime exceptions. This allows
-            you to handle most persistence exceptions, which are
-            non-recoverable, only in the appropriate layers, without annoying
-            boilerplate catches/throws, and exception declarations. You can
-            still trap and handle exceptions anywhere you need to. Remember
-            that JDBC exceptions (including DB specific dialects) are also
-            converted to the same hierarchy, meaning that you can perform some
-            operations with JDBC within a consistent programming model.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>To avoid vendor lock-in, and allow mix-and-match
-            implementation strategies.</emphasis> While Hibernate is powerful,
-            flexible, open source and free, it still uses a proprietary API.
-            Given the choice, it's usually desirable to implement major
-            application functionality using standard or abstracted APIs, in
-            case you need to switch to another implementation for reasons of
-            functionality, performance, or any other concerns. Spring's
-            abstraction of Hibernate Transactions and Exceptions, along with
-            its IoC approach which allow you to easily swap in mapper/DAO
-            objects implementing data-access functionality, make it easy to
-            isolate all Hibernate-specific code in one area of your
-            application, without sacrificing any of the power of Hibernate.
-            Higher level service code dealing with the DAOs has no need to
-            know anything about their implementation. This approach has the
-            additional benefit of making it easy to intentionally implement
-            data-access with a mix-and-match approach (i.e. some data-access
-            performed using Hibernate, and some using JDBC) in a non-intrusive
-            fashion, potentially providing great benefits in terms of
-            continuing to use legacy code or leveraging the strength of each
-            technology.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>Ease of testing.</emphasis> Spring's inversion of
-            control approach makes it easy to swap the implementations and
-            locations of Hibernate session factories, datasources, transaction
-            managers, and mapper object implementations (if needed). This
-            makes it much easier to isolate and test each piece of
-            persistence-related code in isolation. </para>
-          </listitem>
-        </itemizedlist></para>
+      <para></para>
     </sect2>
 
     <sect2>
@@ -845,8 +849,178 @@ ProductService productService =
   <sect1>
     <title>iBATIS</title>
 
-    <para>ToDo</para>
+    <para>Through the <literal>org.springframework.orm.ibatis</literal> package,
+    Spring supports iBATIS SqlMaps 1.3.x and 2.0. The iBATIS support much
+    resembles Hibernate support in that it supports the same template style
+    programming and just as with Hibernate, iBatis support works with Spring's
+    exception hierarchy and let's you enjoy the all IoC features Spring
+    has.</para>
+	
+	<sect2>
+		<title>Overview and differences between 1.3.x and 2.0</title>
 
-    <para></para>
+
+    <para>Spring supports both iBATIS SqlMaps 1.3 and 2.0. First let's have a
+    look at the differences between the two.
+	
+	<table
+      frame="all"><title>iBATIS SqlMaps supporting classes for 1.3 and 2.0</title><tgroup cols="3"><colspec
+      colname="c1" colwidth="4*" /><colspec colname="c2" colwidth="2*"/><colspec colname="c3" colwidth="2*"/><thead>
+		<row>
+			<entry>Feature</entry>
+			<entry>1.3.x</entry>
+			<entry>2.0</entry>			
+		</row>
+	</thead>
+		<tbody>
+			<row><entry>Creation of SqlMap</entry>
+			<entry><literal>SqlMapFactoryBean</literal></entry>
+			<entry><literal>SqlMapClientFactoryBean</literal></entry>
+			</row>
+			<row>
+				<entry>Template-style helper class</entry>
+				<entry><literal>SqlMapTemplate</literal></entry>
+				<entry><literal>SqlMapClientTemplate</literal></entry>
+			</row>
+			<row>
+				<entry>Callback to use MappedStatement</entry>
+				<entry><literal>SqlMapCallback</literal></entry>
+				<entry><literal>SqlMapClientCallback</literal></entry>
+			</row>
+			<row>
+				<entry>Super class for DAOs</entry>
+				<entry><literal>SqlMapDaoSupport</literal></entry>
+				<entry><literal>SqlMapClientDaoSupport</literal></entry>
+			</row>
+</tbody></tgroup></table>	
+	</para>
+	</sect2>
+	<sect2>
+		<title>Setting up the SqlMap</title>
+		<para>
+			Using iBATIS SqlMaps involves creating SqlMap configuration files containing statements
+			and result maps. Spring takes care of loading those using the <literal>SqlMapFactoryBean</literal>
+			or <literal>SqlMapClientFactoryBean</literal> where the latter is to be used in combination
+			with SqlMaps 2.0.
+		</para>
+		<para>
+			<programlisting><![CDATA[		
+public class Account {
+	private String name;
+	private String email;
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getEmail() {
+		return this.email;
+	}
+	
+	public void setEmail(String email) {
+		this.email = email;
+	}
+}]]></programlisting>
+			Suppose we would want to map this class. We'd have to create the following SqlMap.
+			Using the query, we can later on retrieve users through their email addresses.
+			<literal>Account.xml</literal>:
+			<programlisting><![CDATA[
+<sql-map name="Account">
+	<result-map name="result" class="examples.Account">
+		<property name="name" column="NAME" columnIndex="1"/>
+		<property name="email" column="EMAIL" columnIndex="2"/>
+	</result-map>
+	
+	<mapped-statement name="getAccountByEmail" result-map="result">
+		select
+			  ACCOUNT.NAME,
+			  ACCOUNT.EMAIL
+		from ACCOUNT
+		where ACCOUNT.EMAIL = #value#
+	</mapped-statement>
+	
+	<mapped-statement name="insertAccount">
+		insert into ACCOUNT (NAME, EMAIL) values (#name#, #email#)
+	</mapped-statement>
+</sql-map>
+]]></programlisting>
+			After having defined the Sql Map, we have to create a configuration file for iBATIS
+			(<literal>sqlmap-config.xml</literal>):
+<programlisting><![CDATA[
+<sql-map-config>
+
+	<sql-map resource="example/Account.xml"/>
+
+</sql-map-config>
+]]></programlisting>
+			iBATIS loads resources from the classpath so be sure to add the Account.xml file to the
+			classpath somewhere.
+		</para>
+		<para>
+			Using Spring, we can now very easily set up the SqlMap, using the
+			<literal>SqlMapFactoryBean</literal>:
+<programlisting><![CDATA[
+<bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean">
+	<property name="configLocation"><value>WEB-INF/sqlmap-config.xml</value></property>
+</bean>
+]]></programlisting>
+		</para>		
+	</sect2>
+	<sect2>
+		<title>Using <literal>SqlMapDaoSupport</literal></title>
+		<para>
+			The <literal>SqlMapDaoSupport</literal> class offers a supporting class similar to
+			the <literal>HibernateDaoSupport</literal> and the <literal>JdbcDaoSupport</literal> types.
+			Let's implement a DAO:
+<programlisting><![CDATA[
+public class SqlMapAccountDao extends SqlMapDaoSupport implements AccountDao {
+
+	public Account getAccount(String email) throws DataAccessException {
+		Account acc = new Account();
+		acc.setEmail();
+		return (Account)getSqlMapTemplate().executeQueryForObject("getAccountByEmail", email);
+	}
+
+	public void insertAccount(Account account) throws DataAccessException {
+		getSqlMapTemplate().executeUpdate("insertAccount", account);
+	}
+}
+]]></programlisting>
+			As you can see, we're using the SqlMapTemplate to execute the query. Spring has initialized
+			the SqlMap for us using the SqlMapFactoryBean and when setting up the SqlMapAccountDao
+			as follows, you're all set to go:
+<programlisting><![CDATA[
+<!-- for more information about using datasource, have a look at the JDBC chapter -->
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
+	<property name="url"><value>${jdbc.url}</value></property>
+	<property name="username"><value>${jdbc.username}</value></property>
+	<property name="password"><value>${jdbc.password}</value></property>
+</bean>
+
+<bean id="accountDao" class="example.SqlMapAccountDao">
+	<property name="dataSource"><ref local="dataSource"/></property>
+	<property name="sqlMap"><ref local="sqlMap"/></property>
+</bean>
+]]></programlisting>
+		</para>
+	</sect2>
+	<sect2>
+		<title>Transaction management</title>
+		<para>
+			It's pretty easy to add declarative transaction management to applications using
+			iBATIS. Basically the only thing you need to do is adding a transaction 
+			manager to you application context and declaratively set your transaction boundaries using
+			for example the <literal>TransactionProxyFactoryBean</literal>. More on this can be found
+			in <xref linkend="transaction"/>
+		</para>
+		<para>
+			TODO elaborate!
+		</para>
+	</sect2>	
   </sect1>
 </chapter>
