@@ -5,6 +5,7 @@
  
 package org.springframework.aop.support;
 
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 
 import javax.servlet.ServletException;
@@ -20,7 +21,7 @@ import org.springframework.aop.framework.AopConfigException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.1 2003-12-05 16:28:26 johnsonr Exp $
+ * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.2 2003-12-05 16:55:10 johnsonr Exp $
  */
 public class ThrowsAdviceInterceptorTests extends TestCase {
 
@@ -84,6 +85,12 @@ public class ThrowsAdviceInterceptorTests extends TestCase {
 		ServletException ex = new ServletException();
 		MockControl mc = MockControl.createControl(MethodInvocation.class);
 		MethodInvocation mi = (MethodInvocation) mc.getMock();
+		mi.getMethod();
+		mc.setReturnValue(Object.class.getMethod("hashCode", null), 1);
+		mi.getArguments();
+		mc.setReturnValue(null);
+		mi.getThis();
+		mc.setReturnValue(new Object());
 		mi.proceed();
 		mc.setThrowable(ex);
 		mc.replay();
@@ -150,11 +157,17 @@ public class ThrowsAdviceInterceptorTests extends TestCase {
 	}
 	
 	public static class MyThrowsHandler extends AbstractAopProxyTests.MethodCounter {
-		 public void afterThrowing(ServletException ex) {
+		// Full method signature
+		 public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
 		 	count("servletException");
 		 }
 		public void afterThrowing(RemoteException ex) throws Throwable {
 			count("remoteException");
+		 }
+		
+		/** Not valid, wrong number of arguments */
+		public void afterThrowing(Method m, Exception ex) throws Throwable {
+			throw new UnsupportedOperationException("Shouldn't be called");
 		 }
 	}
 	
