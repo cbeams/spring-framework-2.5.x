@@ -190,8 +190,8 @@ public class HttpServletFlowExecutionManager {
 			// signal the event within the current state
 			Event event = createEvent(request, response);
 			Assert.hasText(event.getId(), "The '" + getEventIdParameterName() + "' request parameter (or '"
-					+ getEventIdRequestAttributeName()
-					+ "' request attribute) is present in the request -- programmer error?");
+					+ getEventIdRequestAttributeName() + "' request attribute) is not present in the request -- "
+					+ "make sure the submitting view or other client provides it as input");
 			// see if the eventId was set to a static marker placeholder because
 			// of a view configuration error
 			if (event.getId().equals(getNotSetEventIdParameterMarker())) {
@@ -240,8 +240,8 @@ public class HttpServletFlowExecutionManager {
 	 * Create a flow event wrapping given request.
 	 */
 	protected Event createEvent(HttpServletRequest request, HttpServletResponse response) {
-		return new HttpServletRequestEvent(request, response, getEventIdParameterName(), getEventIdRequestAttributeName(),
-				getCurrentStateIdParameterName(), getParameterNameValueDelimiter());
+		return new HttpServletRequestEvent(request, response, getEventIdParameterName(),
+				getEventIdRequestAttributeName(), getCurrentStateIdParameterName(), getParameterNameValueDelimiter());
 	}
 
 	/**
