@@ -18,6 +18,7 @@ package org.springframework.aop.framework;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
@@ -682,6 +683,11 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 */
 		public int accept(Method method) {
 
+			// don't modify protected methods
+			if(Modifier.isProtected(method.getModifiers())) {
+				return NO_OVERRIDE;
+			}
+			
 			if (method.getDeclaringClass() == Object.class
 			    && method.getName().equals("finalize")) {
 				logger

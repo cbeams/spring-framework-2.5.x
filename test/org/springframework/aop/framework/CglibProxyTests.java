@@ -71,6 +71,20 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			// Ok
 		}
 	}
+	
+	public void testProtectedMethodInvocation() throws Throwable {
+		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
+		mockTargetSource.setTarget(bean);
+		
+		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvice(new NopInterceptor());
+		AopProxy aop = new Cglib2AopProxy(as);
+		
+		Object proxy = aop.getProxy();
+		
+		assertTrue("CGLIB proxy not generated", AopUtils.isCglibProxy(proxy));
+	}
 
 	public void testProxyCanBeClassNotInterface() throws Throwable {
 		TestBean raw = new TestBean();
