@@ -91,7 +91,16 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
-	private static final String CONTENT_DISPOSITION = "Content-Disposition";
+	/**
+	 * Constant that defines "Content-Disposition" header.
+	 */
+	private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+
+	/**
+	 * Stores the default Content-Disposition header. Used to make IE play nice.
+	 */
+	private static final String CONTENT_DISPOSITION_INLINE = "inline";
+
 
 	/**
 	 * A String key used to lookup the <code>JRDataSource</code> in the model.
@@ -126,10 +135,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private Properties headers;
 
-	/**
-	 * Stores the default Content-Disposition header. Used to make IE play nice.
-	 */
-	private String contentDisposition = "inline";
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -165,14 +170,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Specify the set of headers that are included in each of response.
-	 * @param headers the headers to write to each response.
-	 */
-	public void setHeaders(Properties headers) {
-		this.headers = headers;
-	}
-
-	/**
 	 * Set the list of names corresponding to the model parameters that will contain
 	 * data source objects for use in sub-reports. Spring will convert these objects
 	 * to instances of <code>JRDataSource</code> where applicable and will then
@@ -194,6 +191,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	public void setSubReportDataKeys(String[] subReportDataKeys) {
 		this.subReportDataKeys = subReportDataKeys;
+	}
+
+	/**
+	 * Specify the set of headers that are included in each of response.
+	 * @param headers the headers to write to each response.
+	 */
+	public void setHeaders(Properties headers) {
+		this.headers = headers;
 	}
 
 
@@ -223,12 +228,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
-		if(headers == null) {
-			headers = new Properties();
+		if (this.headers == null) {
+			this.headers = new Properties();
 		}
-
-		if(!headers.containsKey(CONTENT_DISPOSITION)) {
-			headers.setProperty(CONTENT_DISPOSITION, contentDisposition);
+		if (!this.headers.containsKey(HEADER_CONTENT_DISPOSITION)) {
+			this.headers.setProperty(HEADER_CONTENT_DISPOSITION, CONTENT_DISPOSITION_INLINE);
 		}
 	}
 
@@ -390,10 +394,10 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		JRAbstractExporter exporter = createExporter();
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
 
-		// set the headers
-		for(Enumeration en = headers.propertyNames(); en.hasMoreElements();) {
-			String key = (String)en.nextElement();
-			response.addHeader(key, headers.getProperty(key));
+		// Apply the headers to the response.
+		for (Enumeration en = this.headers.propertyNames(); en.hasMoreElements();) {
+			String key = (String) en.nextElement();
+			response.addHeader(key, this.headers.getProperty(key));
 		}
 
 		if (useWriter()) {
