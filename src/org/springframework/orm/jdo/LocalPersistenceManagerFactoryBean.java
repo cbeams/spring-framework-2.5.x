@@ -24,7 +24,6 @@ import java.util.Properties;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
-import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,10 +74,10 @@ import org.springframework.core.io.Resource;
  * &lt;/bean&gt;
  * </pre>
  *
- * <p>Note that some PersistenceManagerFactory implementations might require
- * such direct setup to be able to accept an external connection factory
- * (i.e. a JDBC DataSource). This FactoryBean's "dataSource" property might
- * not work for those, as it is applied after JDOHelper's initialization work.
+ * <p>Note that such direct setup of a PersistenceManagerFactory implementation
+ * is the only way to pass an external connection factory (i.e. a JDBC DataSource)
+ * into a JDO instance. With the standard properties-driven approach, you can
+ * only use an internal connection pool or a JNDI DataSource.
  *
  * <p>The "close" method is standardized as of JDO 1.0.1; don't forget to
  * specify it as "destroy-method" for any PersistenceManagerFactory instance.
@@ -91,7 +90,6 @@ import org.springframework.core.io.Resource;
  * @see JdoTransactionManager#setPersistenceManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
- * @see #setDataSource
  * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
  * @see javax.jdo.PersistenceManagerFactory#close
  */
@@ -102,10 +100,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	private Resource configLocation;
 
 	private Properties jdoProperties;
-
-	private DataSource dataSource;
-
-	private DataSource dataSource2;
 
 	private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -127,37 +121,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 */
 	public void setJdoProperties(Properties jdoProperties) {
 		this.jdoProperties = jdoProperties;
-	}
-
-	/**
-	 * Set the DataSource to be used by the PersistenceManagerFactory.
-	 * If set, this will override corresponding settings in JDO properties.
-	 * <p>This is the main DataSource to be used by the JDO implementation.
-	 * When specifying it as reference here, you can use any DataSource
-	 * that your application defines, being able to choose any connection
-	 * pool implementation (be it local or from JNDI).
-	 * <p>Note: If this is set, the JDO settings should not define
-	 * a connection factory to avoid meaningless double configuration.
-	 * @see #setDataSource2
-	 * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Set the second DataSource to be used by the PersistenceManagerFactory.
-	 * If set, this will override corresponding settings in JDO properties.
-	 * <p>A JDO implementation typically uses the second DataSource for
-	 * performing strictly non-transactional operations, like key generation.
-	 * It is only necessary to specify this when actually using JTA and a
-	 * key generation strategy that depends on non-transactional execution.
-	 * <p>Note: If this is set, the JDO settings should not define
-	 * a second connection factory to avoid meaningless double configuration.
-	 * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory2
-	 */
-	public void setDataSource2(DataSource dataSource2) {
-		this.dataSource2 = dataSource2;
 	}
 
 
@@ -195,15 +158,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		// build factory instance
 		this.persistenceManagerFactory = newPersistenceManagerFactory(props);
-
-		if (this.dataSource != null) {
-			// use given DataSource as JDO connection factory
-			this.persistenceManagerFactory.setConnectionFactory(this.dataSource);
-		}
-		if (this.dataSource2 != null) {
-			// use given DataSource as second JDO connection factory
-			this.persistenceManagerFactory.setConnectionFactory2(this.dataSource2);
-		}
 	}
 
 	/**

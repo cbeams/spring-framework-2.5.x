@@ -23,12 +23,10 @@ import java.util.Properties;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
@@ -42,14 +40,8 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 			}
 		};
 		pmfb.setJdoProperties(new Properties());
-		DataSource ds = new DriverManagerDataSource();
-		DataSource ds2 = new DriverManagerDataSource();
-		pmfb.setDataSource(ds);
-		pmfb.setDataSource2(ds2);
 		pmfb.afterPropertiesSet();
-		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfb.getObject();
-		assertEquals(ds, pmf.getConnectionFactory());
-		assertEquals(ds2, pmf.getConnectionFactory2());
+		assertTrue(pmfb.getObject() instanceof MockPersistenceManagerFactory);
 	}
 
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidSettings() throws IOException {
