@@ -48,6 +48,14 @@ public class OjbAccessor extends JdbcAccessor {
 	}
 
 	/**
+	 * Return the JDBC Connection Descriptor alias of the PersistenceBroker
+	 * configuration to use.
+	 */
+	public String getJcdAlias() {
+		return (this.pbKey != null ? this.pbKey.getAlias() : null);
+	}
+
+	/**
 	 * Set the PBKey of the PersistenceBroker configuration to use.
 	 * Default is the default connection configured for OJB.
 	 */
@@ -72,7 +80,7 @@ public class OjbAccessor extends JdbcAccessor {
 	 * @return the corresponding DataAccessException instance
 	 * @see #setExceptionTranslator
 	 */
-	protected DataAccessException convertOjbAccessException(PersistenceBrokerException ex) {
+	public DataAccessException convertOjbAccessException(PersistenceBrokerException ex) {
 		if (ex.getCause() instanceof PersistenceBrokerException) {
 			return convertOjbAccessException((PersistenceBrokerException) ex.getCause());
 		}
