@@ -85,10 +85,8 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
-	 * Create a reference data map for the given request. This map will be used
-	 * as input data when a new flow execution would be started for this
-	 * request.
-	 * 
+	 * Create a input attributes for new flow executions started by the exeution
+	 * manager.
 	 * <p>
 	 * Default implementation returns null. Subclasses can override if needed.
 	 * 
@@ -98,5 +96,4 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected Map getFlowExecutionInput(HttpServletRequest request) {
 		return null;
 	}
-
 }

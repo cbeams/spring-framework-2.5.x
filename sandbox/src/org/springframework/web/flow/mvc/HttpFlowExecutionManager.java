@@ -97,12 +97,12 @@ public class HttpFlowExecutionManager {
 	 * Execution will typically result in a state transition.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
-	 * @param inputData input data to be passed to the FlowExecution when
+	 * @param inputAttributes input data to be passed to the FlowExecution when
 	 *        creating a new FlowExecution
 	 * @return the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response, Map inputData)
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response, Map inputAttributes)
 			throws Exception {
 		FlowExecution flowExecution;
 		ModelAndView modelAndView;
@@ -113,7 +113,7 @@ public class HttpFlowExecutionManager {
 				this.flow = getFlow(request);
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(inputData, request, response);
+			modelAndView = flowExecution.start(inputAttributes, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -122,26 +122,29 @@ public class HttpFlowExecutionManager {
 			flowExecution = getRequiredFlowExecution(request);
 
 			// let client tell you what state they are in (if possible)
-			String stateId = getRequestParameter(request, getCurrentStateIdParameterName());
+			String stateId = request.getParameter(getCurrentStateIdParameterName());
 
 			// let client tell you what event was signaled in the current state
-			String eventId = getRequestParameter(request, getEventIdParameterName());
+			String eventId = request.getParameter(getEventIdParameterName());
 
-			if (eventId == null) {
+			if (!StringUtils.hasText(eventId)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("No '" + getEventIdParameterName()
-							+ "' parameter was found; falling back to request attribute");
+					logger.debug("No '" + getEventIdParameterName() + "' parameter was found; falling back to '"
+							+ getEventIdRequestAttributeName() + "' request attribute");
 				}
 				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 			}
-			if (eventId == null) {
-				throw new IllegalArgumentException(
-						"The '"
-								+ getEventIdParameterName()
-								+ "' request parameter (or '"
-								+ getEventIdRequestAttributeName()
-								+ "' request attribute) is required to signal an event in the current state of this executing flow '"
-								+ flowExecution.getCaption() + "' -- programmer error?");
+			if (!StringUtils.hasText(eventId)) {
+				eventId = getRequestParameter(request, getEventIdParameterName());
+				if (!StringUtils.hasText(eventId)) {
+					throw new IllegalArgumentException(
+							"The '"
+									+ getEventIdParameterName()
+									+ "' request parameter (or '"
+									+ getEventIdRequestAttributeName()
+									+ "' request attribute) is required to signal an event in the current state of this executing flow '"
+									+ flowExecution.getCaption() + "' -- programmer error?");
+				}
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
 				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
@@ -216,8 +219,8 @@ public class HttpFlowExecutionManager {
 	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
 		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName());
 		if (!StringUtils.hasText(flowExecutionId)) {
-			throw new IllegalStateException(
-					"The '" + getFlowExecutionIdParameterName() + "' parameter is not present in the request; not enough information to lookup flow execution");
+			throw new IllegalStateException("The '" + getFlowExecutionIdParameterName()
+					+ "' parameter is not present in the request; not enough information to lookup flow execution");
 		}
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
