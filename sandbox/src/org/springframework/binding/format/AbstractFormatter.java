@@ -17,8 +17,6 @@ package org.springframework.binding.format;
 
 import java.text.ParseException;
 
-import org.springframework.binding.TypeConversionException;
-import org.springframework.binding.TypeConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.closure.Closure;
@@ -28,7 +26,7 @@ import org.springframework.util.closure.Closure;
  * those who need general type conversion.)
  * @author Keith Donald
  */
-public abstract class AbstractFormatter implements Formatter, TypeConverter, Closure {
+public abstract class AbstractFormatter implements Formatter, Closure {
 
 	private Class valueClass;
 
@@ -55,29 +53,6 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 
 	public Class getValueClass() {
 		return valueClass;
-	}
-
-	public Object convert(Object o) throws TypeConversionException {
-		if (allowEmpty && isEmpty(o)) {
-			return getEmptyFormattedValue();
-		}
-		Assert.isTrue(!isEmpty(o), "Object to convert from '" + getValueClass().getName() + "' to '" + String.class
-				+ "' (or vice versa) cannot be empty");
-		if (getValueClass().isInstance(o)) {
-			return doFormatValue(o);
-		}
-		else if (String.class.isInstance(o)) {
-			try {
-				return parseValue((String)o);
-			}
-			catch (InvalidFormatException e) {
-				throw new TypeConversionException(o, String.class, e);
-			}
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported object " + o
-					+ "'; I do not know how to convert objects of this type");
-		}
 	}
 
 	public final String formatValue(Object value) {
@@ -132,8 +107,9 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 	public boolean isAllowEmpty() {
 		return allowEmpty;
 	}
-
+	
 	public Object call(Object argument) {
-		return convert(argument);
+		return formatValue(argument);
 	}
+
 }

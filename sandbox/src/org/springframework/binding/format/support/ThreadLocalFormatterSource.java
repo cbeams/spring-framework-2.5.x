@@ -95,6 +95,10 @@ public class ThreadLocalFormatterSource implements FormatterSource {
 		return formatter;
 	}
 
+	public DateFormatter getDateFormatter(String encodedFormat) {
+		throw new UnsupportedOperationException();
+	}
+
 	public DateFormatter getDateTimeFormatter() {
 		return getDateTimeFormatter(this.defaultDateStyle, this.defaultTimeStyle);
 	}
