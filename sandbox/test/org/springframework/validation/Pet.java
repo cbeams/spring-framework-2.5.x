@@ -10,6 +10,7 @@ public class Pet {
     private Name name;
     private int age;
     private Date dateOfBirth;
+    private String favoriteToy;
 
     public Name getName() {
         return name;
@@ -34,6 +35,18 @@ public class Pet {
      */
     public void setName(Name name) {
         this.name = name;
+    }
+
+    /**
+     * @@org.springframework.rcp.validator.rules.Required()
+     * @@org.springframework.rcp.validator.rules.MaxLength(25)
+     */
+    public String getFavoriteToy() {
+        return favoriteToy;
+    }
+    
+    public void setFavoriteToy(String favoriteToy) {
+        this.favoriteToy = favoriteToy;
     }
 
     public void setAge(int age) {

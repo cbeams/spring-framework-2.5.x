@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="validatorBuilder" class="org.springframework.validation.support.ValidatorBuilder"/>
+		<constructor-arg index="0">
+			<description>The validated bean type</description>
+			<value>org.springframework.validation.Pet</value>
+		</constructor-arg>
+		<map>
+			<entry key="name.lastName">
+				<value><bean class="org.springframework.validation.rules.Required"/></value>
+			</entry>
+			<entry key="favoriteToy">
+				<value>
+					<set>
+						<bean class="org.springframework.validation.rules.Required"/>
+						<bean class="org.springframework.validation.rules.MaxLength">
+							<constructor-arg>25</constructor-arg>							
+						</bean>
+					</set>
+				</value>
+			</entry>
+		</map>
+	</bean>
+	
+</beans>
