@@ -152,5 +152,42 @@
 		</attribute>
 
 	</tag>
+	
+	<tag>
+
+		<name>transform</name>
+		<tag-class>org.springframework.web.servlet.tags.TransformTag</tag-class>
+		<body-content>JSP</body-content>
+
+		<description>
+			Provides transformation of variables to Strings using appropriate
+            Custom Editor from BindTag (can only be used inside BindTag)
+		</description>
+
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>scope</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+	</tag>
 
 </taglib>
