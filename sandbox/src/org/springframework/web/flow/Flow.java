@@ -229,7 +229,10 @@ public class Flow implements FlowEventProcessor, Serializable {
      * The <code>VIEW</code> view state identifier.
      */
     public static final String VIEW = "view";
-
+    /**
+     * The <code>SELECT</code> event identifier.
+     */
+	public static final String SELECT = "select";
 	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
@@ -388,12 +391,12 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlowId
+	 * @param subFlowStateId
 	 * @param transition
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowId, Transition transition) {
-		return add(new SubFlowState(subFlowId, transition));
+	public boolean addSubFlow(String subFlowStateId, Transition transition) {
+		return add(new SubFlowState(subFlowStateId, transition));
 	}
 
 	/**
@@ -410,22 +413,22 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlowId
+	 * @param subFlowStateId
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowId, Transition[] transitions) {
-		return add(new SubFlowState(subFlowId, transitions));
+	public boolean addSubFlow(String subFlowStateId, Transition[] transitions) {
+		return add(new SubFlowState(subFlowStateId, transitions));
 	}
 
 	/**
-	 * @param subFlowId
+	 * @param subFlowStateId
 	 * @param subFlowAttributesMapperId
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
+	public boolean addSubFlow(String subFlowStateId, String subFlowAttributesMapperId, Transition[] transitions) {
+		return add(new SubFlowState(subFlowStateId, subFlowAttributesMapperId, transitions));
 	}
 
 	/**
@@ -1316,21 +1319,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return onFinish(save(saveActionStateIdPrefix));
 	}
 
-	/**
-	 * @param errorStateIdPrefix
-	 * @return
-	 */
-	public Transition onError(String errorStateIdPrefix) {
-		return onEvent(getErrorEventId(), errorStateIdPrefix);
-	}
-
-	/**
-	 * @return
-	 */
-	public String getErrorEventId() {
-		return ERROR;
-	}
-    
     public Transition onReset(String resetStateIdPrefix) {
         return onEvent(getResetEventId(), resetStateIdPrefix);
     }
@@ -1353,6 +1341,44 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return RESUME;
 	}
 
+	/**
+	 * @param selectStateIdPrefix
+	 * @return
+	 */
+	public Transition onSelect(String selectStateIdPrefix) {
+		return onEvent(getSelectEventId(), selectStateIdPrefix);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getSelectEventId() {
+		return SELECT;
+	}
+    
+	/**
+	 * @param viewStateIdPrefix
+	 * @return
+	 */
+	public Transition onSelectGet(String selectStateIdPrefix) {
+		return onSelect(get(selectStateIdPrefix));
+	}
+
+	/**
+	 * @param errorStateIdPrefix
+	 * @return
+	 */
+	public Transition onError(String errorStateIdPrefix) {
+		return onEvent(getErrorEventId(), errorStateIdPrefix);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getErrorEventId() {
+		return ERROR;
+	}
+    
 	/**
 	 * @param viewStateIdPrefix
 	 * @return
