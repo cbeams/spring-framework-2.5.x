@@ -124,10 +124,14 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Load and configure the given View. Only invoked once per View.
-	 * Delegates to the loadView template method for actual loading.
-	 * <p>Sets the ApplicationContext on the View if necessary.
-	 * @see #loadView
+	 * Create and configure the given View. Only invoked once per View.
+	 * Delegates to the <code>createView</code> template method for actual creation.
+	 * <p>Sets the ApplicationContext on the View, if necessary. View objects
+	 * returned by <code>createView</code> are supposed to either be created based
+	 * on the URL (direct instantiation of a specific view class) or based on a
+	 * BeanFactory (managed bean definitions, but without ApplicationContextAware
+	 * callback). Consequently, the ApplicationContext has to be set explicitly here.
+	 * @see #createView
 	 */
 	private View prepareView(String viewName, Locale locale) throws Exception {
 		View view = createView(viewName, locale);
@@ -139,7 +143,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 	/**
 	 * Create the actual View object.
-	 * Default implementation delegates to loadView.
+	 * Default implementation delegates to <code>loadView</code>.
 	 * <p>Can be overridden to resolve certain view names in a
 	 * special fashion, before delegating to the actual loadView
 	 * implementation provided by the subclass.
