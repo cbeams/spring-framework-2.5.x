@@ -8,7 +8,7 @@
   	    <property name="typeMappings">
   	    	<map>
   	    		<entry key="gender">
-  	    			<bean class="org.springframework.enum.TypeMapping">
+  	    			<bean class="org.springframework.enum.support.TypeMapping">
   	    				<property name="enumClass">
   	    					<value>org.springframework.enum.Gender</value>
   	    				</property>

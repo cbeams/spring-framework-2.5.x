@@ -40,7 +40,7 @@ public class CodedEnumUserType implements UserType {
     private String enumType;
     private Class enumClass;
     private CodedEnumResolver enumResolver = StaticCodedEnumResolver
-            .getInstance();
+            .instance();
     private NullableType persistentType;
 
     protected CodedEnumUserType(Class enumClass) {
@@ -129,7 +129,7 @@ public class CodedEnumUserType implements UserType {
         if (enumType == null) {
             enumType = ClassUtils.getShortNameAsProperty(enumClass);
         }
-        return enumResolver.getEnum(enumType, code);
+        return enumResolver.getEnum(enumType, code, null);
     }
 
     /**

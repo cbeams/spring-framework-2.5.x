@@ -1,8 +1,17 @@
 /*
- * Created on May 7, 2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.enum.support;
 
@@ -14,46 +23,79 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.enum.CodedEnum;
-import org.springframework.enum.LocalizedEnumResolver;
+import org.springframework.enum.CodedEnumResolver;
+import org.springframework.util.Assert;
 
 /**
- * @author kdonald
+ * Abstract base class for localized coded enum resolvers.
+ * 
+ * @author Keith Donald
  */
-public abstract class AbstractCodedEnumResolver implements LocalizedEnumResolver {
+public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
     private Map localeCache = new HashMap();
 
+    /**
+     * @see org.springframework.enum.CodedEnumResolver#getEnumsAsList(java.lang.String,
+     *      java.util.Locale)
+     */
     public List getEnumsAsList(String type, Locale locale) {
         return Collections.unmodifiableList(new ArrayList(getEnumsAsMap(type,
                 locale).values()));
     }
 
+    /**
+     * @see org.springframework.enum.CodedEnumResolver#getEnumsAsMap(java.lang.String,
+     *      java.util.Locale)
+     */
     public Map getEnumsAsMap(String type, Locale locale) {
-        Map locales = getLocaleEnums(locale);
-        Map types = (Map)locales.get(type);
-        if (types == null) {
-            types = findLocalizedEnums(type, locale);
-            locales.put(locale, types);
+        Assert.notNull(type);
+        Map localizedEnumTypes = getLocaleEnums(locale);
+        Map typeEnums = (Map)localizedEnumTypes.get(type);
+        if (typeEnums == null) {
+            typeEnums = findLocalizedEnums(type, locale);
+            if (typeEnums == null) {
+                return Collections
+                    .unmodifiableMap(Collections.EMPTY_MAP);
+            }
+            localizedEnumTypes.put(locale, typeEnums);
         }
-        return Collections.unmodifiableMap(types);
+        return Collections.unmodifiableMap(typeEnums);
     }
 
-    public void put(Locale locale, CodedEnum enum) {
-        Map enums = (Map)getLocaleEnums(locale).get(enum.getType());
-        enums.put(enum.getCode(), enum);
+    /**
+     * @see org.springframework.enum.CodedEnumResolver#getEnum(java.lang.String,
+     *      java.lang.Object, java.util.Locale)
+     */
+    public CodedEnum getEnum(String type, Object code, Locale locale) {
+        Assert.notNull(code);
+        return (CodedEnum)getEnumsAsMap(type, locale).get(code);
     }
 
     private Map getLocaleEnums(Locale locale) {
         Map m = (Map)localeCache.get(locale);
         if (m == null) {
-            localeCache.put(locale, new HashMap());
+            m = new HashMap();
+            localeCache.put(locale, m);
         }
         return m;
     }
 
-    public CodedEnum getEnum(String type, Object code, Locale locale) {
+    protected void put(Locale locale, CodedEnum enum) {
+        Map localizedTypes = (Map)getLocaleEnums(locale);
+        Map enums = (Map)localizedTypes.get(enum.getType());
+        if (enums == null) {
+            enums = new HashMap();
+            localizedTypes.put(enum.getType(), enums);
+        }
+        enums.put(enum.getCode(), enum);
+    }
+
+    protected void add(CodedEnum enum) {
+        put(null, enum);
+    }
+
+    protected Map findLocalizedEnums(String type, Locale locale) {
         return null;
     }
-    
-    protected abstract Map findLocalizedEnums(String type, Locale locale);
 
 }

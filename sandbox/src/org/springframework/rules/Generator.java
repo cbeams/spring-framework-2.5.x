@@ -28,5 +28,5 @@ public interface Generator {
      *            The procedure callback that will process each generated
      *            element.
      */
-    public void run(UnaryProcedure procedureCallback);
+    public void forEachRun(UnaryProcedure procedureCallback);
 }

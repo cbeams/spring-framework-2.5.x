@@ -25,13 +25,19 @@ import org.springframework.util.ToStringBuilder;
 import org.springframework.util.comparators.NullSafeComparator;
 
 /**
+ * Abstract base superclass for CodedEnum implementations.
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractCodedEnum implements CodedEnum,
         MessageSourceResolvable, Serializable, Comparable {
     private Comparable code;
+
     private String label;
 
+    /**
+     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>
+     */
     public static final Comparator LABEL_ORDER = new Comparator() {
         public int compare(Object o1, Object o2) {
             AbstractCodedEnum e1 = (AbstractCodedEnum)o1;
@@ -51,29 +57,37 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         this.label = label;
     }
 
+    /**
+     * @see org.springframework.enum.CodedEnum#getCode()
+     */
     public Object getCode() {
         return code;
     }
 
+    /**
+     * @see org.springframework.enum.CodedEnum#getKey()
+     */
     public String getKey() {
         return getType() + "." + getCode();
     }
 
+    /**
+     * @see org.springframework.enum.CodedEnum#getLabel()
+     */
     public String getLabel() {
         return label;
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof AbstractCodedEnum)) {
-            return false;
-        }
+        if (!(o instanceof AbstractCodedEnum)) { return false; }
         AbstractCodedEnum e = (AbstractCodedEnum)o;
         return this.code.equals(e.code) && this.getType().equals(e.getType());
     }
 
     public int compareTo(Object o) {
         AbstractCodedEnum e = (AbstractCodedEnum)o;
-        Assert.isTrue(getType().equals(e.getType()));
+        Assert.isTrue(getType().equals(e.getType()),
+                "You may only compare enumerations of the same type.");
         return code.compareTo(e.code);
     }
 
@@ -89,6 +103,8 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     /**
+     * The enumeration key is used as the message key for internationalizing enums.
+     * 
      * @see org.springframework.context.MessageSourceResolvable#getCodes()
      */
     public String[] getCodes() {
@@ -108,7 +124,8 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     public String getDefaultMessage() {
         if (label != null) {
             return getLabel();
-        } else {
+        }
+        else {
             return String.valueOf(getCode());
         }
     }

@@ -1,10 +1,3 @@
-/*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/test/org/springframework/enum/CodedEnumTestSuite.java,v 1.1 2004-05-03 04:30:19 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-05-03 04:30:19 $
- *
- * Copyright Computer Science Innovations (CSI), 2003. All rights reserved.
- */
 package org.springframework.enum;
 
 import java.util.List;
@@ -15,13 +8,6 @@ import junit.framework.TestCase;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.DefaultObjectStyler;
 
-/**
- * %single sentence summary caption%.
- * 
- * %long description%.
- *
- * @author  keith
- */
 public class CodedEnumTestSuite extends TestCase {
     static ClassPathXmlApplicationContext ac;
 
@@ -38,11 +24,11 @@ public class CodedEnumTestSuite extends TestCase {
     
     public void testEnumRetrieval() {
         CodedEnumResolver resolver = (CodedEnumResolver)ac.getBean("enumResolver");
-        Map map = resolver.getEnumsAsMap("gender");
+        Map map = resolver.getEnumsAsMap("gender", null);
         System.out.println(DefaultObjectStyler.evaluate(map));
-        map = resolver.getEnumsAsMap("gender");
+        map = resolver.getEnumsAsMap("gender", null);
         System.out.println(DefaultObjectStyler.evaluate(map));
-        List list = resolver.getEnumsAsList("gender");
+        List list = resolver.getEnumsAsList("gender", null);
         System.out.println(DefaultObjectStyler.evaluate(list));
     }
 

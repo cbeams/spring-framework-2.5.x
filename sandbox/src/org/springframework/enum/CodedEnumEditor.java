@@ -16,23 +16,54 @@
 package org.springframework.enum;
 
 import java.beans.PropertyEditorSupport;
+import java.util.Locale;
 
+import org.springframework.enum.support.StaticCodedEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * @author keith
+ * Property Editor converts the string form of a CodedEnum into a CodedEnum
+ * instance using a CodedEnumResolver.
+ * 
+ * @author Keith Donald
  */
 public class CodedEnumEditor extends PropertyEditorSupport {
-    private CodedEnumResolver resolver;
+    private Locale locale = Locale.getDefault();
 
+    private CodedEnumResolver resolver = StaticCodedEnumResolver.instance();
+
+    /**
+     * Set the resolver to used to lookup enums.
+     * 
+     * @param resolver
+     *            the coded enum resolver
+     */
     public void setEnumResolver(CodedEnumResolver resolver) {
         this.resolver = resolver;
     }
 
+    /**
+     * Sets the locale to use when resolving enums.
+     * 
+     * @param locale
+     *            the locale
+     */
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    private Locale getLocale() {
+        return Locale.getDefault();
+    }
+
+    /**
+     * @see java.beans.PropertyEditor#setAsText(java.lang.String)
+     */
     public void setAsText(String text) throws IllegalArgumentException {
         String[] keyParts = StringUtils.delimitedListToStringArray(text, ".");
-        Assert.isTrue(keyParts.length == 2, "Enum key must be formatted <type>.<code>");
+        Assert.isTrue(keyParts.length == 2,
+                "Enum string key must in the format '<type>.<code>'");
 
         Object code;
         String strCode = keyParts[1];
@@ -40,26 +71,35 @@ public class CodedEnumEditor extends PropertyEditorSupport {
             char c = strCode.charAt(0);
             if (Character.isLetter(c)) {
                 code = new Character(c);
-            } else if (Character.isDigit(c)) { 
-                code = new Integer(c);
-            } else {
-                throw new IllegalArgumentException("Invalid enum code '" + strCode + "'");
             }
-        } else {
+            else if (Character.isDigit(c)) {
+                code = new Integer(c);
+            }
+            else {
+                throw new IllegalArgumentException("Invalid enum code '"
+                        + strCode + "'");
+            }
+        }
+        else {
             try {
                 code = new Integer(strCode);
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e) {
                 code = strCode;
-            }            
+            }
         }
-        CodedEnum enum = resolver.getEnum(keyParts[0], code);
-        Assert.notNull(enum, "No enum with key " + text + " was found");
+        CodedEnum enum = resolver.getEnum(keyParts[0], code, getLocale());
+        Assert.notNull(enum, "No enum with string key '" + text
+                + "' was found.");
         setValue(enum);
     }
 
+    /**
+     * @see java.beans.PropertyEditor#getAsText()
+     */
     public String getAsText() {
         CodedEnum enum = (CodedEnum)getValue();
-        return String.valueOf(enum.getKey());
+        return enum.getKey();
     }
 
 }

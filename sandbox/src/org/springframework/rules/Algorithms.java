@@ -25,7 +25,7 @@ import org.springframework.rules.factory.Functions;
  * functor objects such as predicates.
  * 
  * @author Keith Donald
- * @version $Id: Algorithms.java,v 1.3 2004-04-29 21:49:43 kdonald Exp $
+ * @version $Id: Algorithms.java,v 1.4 2004-05-24 05:09:54 kdonald Exp $
  */
 public class Algorithms {
     private Functions functions = Functions.instance();
@@ -71,10 +71,10 @@ public class Algorithms {
     public Generator select(final Generator generator,
             final UnaryPredicate predicate) {
         return new Generator() {
-            public void run(UnaryProcedure procedure) {
+            public void forEachRun(UnaryProcedure procedure) {
                 UnaryProcedure constrainedProcedure = functions.constrain(
                         procedure, predicate);
-                generator.run(constrainedProcedure);
+                generator.forEachRun(constrainedProcedure);
             }
         };
     }

@@ -18,11 +18,51 @@ package org.springframework.enum;
 import org.springframework.context.MessageSourceResolvable;
 
 /**
- * @author  Keith Donald
+ * A interface for objects that are enumerations. Each enum instance has the
+ * following characteristics:
+ * 
+ * <p>
+ * A type that identifies the enum's class. For example, "fileFormat".
+ * <p>
+ * A code that uniquely identifies the enum within the context of its type. For
+ * example, "CSV".  Different classes of codes are possible (Character, Integer, String.)
+ * <p>
+ * A descriptive label. For example, "the CSV File Format".
+ * <p>
+ * A uniquely identifying key that identifies the enum in the context of all
+ * other enums (of potentially different types.) For example, "fileFormat.CSV".
+ * 
+ * @author Keith Donald
  */
 public interface CodedEnum extends MessageSourceResolvable, Comparable {
+
+    /**
+     * Returns this enumeration's type.  Each type should be unique.
+     * 
+     * @return The type.
+     */
     public String getType();
+
+    /**
+     * Returns this enumeration's code.  Each code should be unique within enumeration's
+     * of the same type.
+     * 
+     * @return The code.
+     */
     public Object getCode();
+
+    /**
+     * Returns a descriptive, optional label.
+     * 
+     * @return The label.
+     */
     public String getLabel();
+
+    /**
+     * Returns a uniquely indentifying key string.  A key generally consists of the
+     * <type>.<code> composite and should globally uniquely identify this enumeration.
+     * 
+     * @return The unique key.
+     */
     public String getKey();
 }

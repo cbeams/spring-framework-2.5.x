@@ -18,11 +18,8 @@ package org.springframework.enum.support;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -31,27 +28,20 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.enum.CodedEnum;
-import org.springframework.enum.CodedEnumResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.util.Assert;
-import org.springframework.util.Cache;
 
 /**
  * @author keith
  */
-public class CachingJdbcCodedEnumResolver implements InitializingBean,
-        CodedEnumResolver {
+public class CachingJdbcCodedEnumResolver extends AbstractCodedEnumResolver
+        implements InitializingBean {
     private Map typeMappings;
-    private Cache enumTypeCache = new Cache(false) {
-        public Object create(Object type) {
-            return findEnums((String)type);
-        }
-    };
+
     private DataSource dataSource;
 
     public CachingJdbcCodedEnumResolver() {
-
     }
 
     public CachingJdbcCodedEnumResolver(DataSource source) {
@@ -72,22 +62,7 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
         this.typeMappings = typeMappings;
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnums(java.lang.String)
-     */
-    public Map getEnumsAsMap(String type) {
-        return (Map)enumTypeCache.get(type);
-    }
-
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnums(java.lang.String)
-     */
-    public List getEnumsAsList(String type) {
-        return Collections.unmodifiableList(new ArrayList(getEnumsAsMap(type)
-                .values()));
-    }
-
-    private Map findEnums(String type) {
+    protected Map findLocalizedEnums(String type, Locale locale) {
         TypeMapping mapping = getTypeMapping(type);
         Class clazz = mapping.getEnumClass();
         Assert.isTrue(CodedEnum.class.isAssignableFrom(clazz));
@@ -112,10 +87,12 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
                             if (codeStr.length() == 1) {
                                 code = new Character(codeStr.charAt(0));
                             }
-                        } else if (code instanceof Integer
+                        }
+                        else if (code instanceof Integer
                                 || code instanceof Short) {
                             codeClass = int.class;
-                        } else {
+                        }
+                        else {
                             throw new IllegalArgumentException(
                                     "No supported enum code class found for "
                                             + code);
@@ -129,7 +106,8 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
                                     .instantiateClass(c, new Object[] { code,
                                             label });
                             enumMap.put(enum.getCode(), enum);
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             throw new DataIntegrityViolationException(
                                     "Unable to map data in table to enum class "
                                             + enumClass, e);
@@ -142,27 +120,11 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
     private TypeMapping getTypeMapping(String type) {
         if (typeMappings == null) {
             return new TypeMapping(type);
-        } else {
+        }
+        else {
             TypeMapping mapping = (TypeMapping)typeMappings.get(type);
             Assert.notNull(mapping);
             return mapping;
-        }
-    }
-
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnum(java.lang.String,
-     *      java.lang.Object)
-     */
-    public CodedEnum getEnum(String type, Object code) {
-        return (CodedEnum)getEnumsAsMap(type).get(code);
-    }
-
-    public void refreshCache() {
-        Iterator keys = enumTypeCache.keys();
-        this.enumTypeCache.clear();
-        while (keys.hasNext()) {
-            String type = (String)keys.next();
-            getEnumsAsMap(type);
         }
     }
 
