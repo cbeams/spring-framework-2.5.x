@@ -24,11 +24,12 @@ import java.net.URL;
 import java.net.URLDecoder;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for class path resources.
- * Uses either the Thread context class loader or a given
- * Class for loading resources.
+ * Uses either the thread context class loader, a given ClassLoader
+ * or a given Class for loading resources.
  *
  * <p>Supports resolution as File if the class path resource
  * resides in the file system, but not for resources in a JAR.
@@ -44,20 +45,38 @@ public class ClassPathResource extends AbstractResource {
 
 	private final String path;
 
+	private ClassLoader classLoader;
+
 	private Class clazz;
 
 	/**
 	 * Create a new ClassPathResource for ClassLoader usage.
 	 * A leading slash will be removed, as the ClassLoader
 	 * resource access methods will not accept it.
+	 * <p>The thread context class loader will be used for
+	 * loading the resource.
 	 * @param path the absolute path within the classpath
 	 * @see java.lang.ClassLoader#getResourceAsStream
+	 * @see java.lang.Thread#getContextClassLoader
 	 */
 	public ClassPathResource(String path) {
+		this(path, (ClassLoader) null);
+	}
+
+	/**
+	 * Create a new ClassPathResource for ClassLoader usage.
+	 * A leading slash will be removed, as the ClassLoader
+	 * resource access methods will not accept it.
+	 * @param path the absolute path within the classpath
+	 * @param classLoader the class loader to load the resource with
+	 * @see java.lang.ClassLoader#getResourceAsStream
+	 */
+	public ClassPathResource(String path, ClassLoader classLoader) {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
 		this.path = path;
+		this.classLoader = classLoader;
 	}
 
 	/**
@@ -79,8 +98,12 @@ public class ClassPathResource extends AbstractResource {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
 		else {
-			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-			is = ccl.getResourceAsStream(this.path);
+			ClassLoader cl = this.classLoader;
+			if (cl == null) {
+				// no class loader specified -> use thread context class loader
+				cl = Thread.currentThread().getContextClassLoader();
+			}
+			is = cl.getResourceAsStream(this.path);
 		}
 		if (is == null) {
 			throw new FileNotFoundException("Could not open " + getDescription());
@@ -94,12 +117,16 @@ public class ClassPathResource extends AbstractResource {
 			url = this.clazz.getResource(this.path);
 		}
 		else {
-			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-			url = ccl.getResource(this.path);
+			ClassLoader cl = this.classLoader;
+			if (cl == null) {
+				// no class loader specified -> use thread context class loader
+				cl = Thread.currentThread().getContextClassLoader();
+			}
+			url = cl.getResource(this.path);
 		}
 		if (url == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL " +
-																			"because it does not exist");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to URL because it does not exist");
 		}
 		return url;
 	}
@@ -108,27 +135,18 @@ public class ClassPathResource extends AbstractResource {
 		URL url = getURL();
 		if (!URL_PROTOCOL_FILE.equals(url.getProtocol())) {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
-																			"because it does not reside in the file system: URL=[" + url + "]");
+					"because it does not reside in the file system: URL=[" + url + "]");
 		}
 		return new File(URLDecoder.decode(url.getFile()));
 	}
 
 	public Resource createRelative(String relativePath) {
-		int packageIndex = this.path.indexOf('/');
-		if (packageIndex != -1) {
-			String packagePath = this.path.substring(0, packageIndex);
-			if (!relativePath.startsWith("/")) {
-				packagePath += "/";
-			}
-			return new ClassPathResource(packagePath + relativePath);
-		}
-		else {
-			return new ClassPathResource(relativePath);
-		}
+		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
+		return new ClassPathResource(pathToUse, this.clazz);
 	}
 
 	public String getFilename() {
-		return new File(this.path).getName();
+		return StringUtils.getFilename(this.path);
 	}
 
 	public String getDescription() {
