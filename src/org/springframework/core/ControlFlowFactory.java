@@ -27,6 +27,7 @@ import java.io.StringWriter;
  * but we don't want to impose a runtime dependency on JDK 1.4.
  *
  * @author Rod Johnson
+ * @since 02.02.2004
  */
 public abstract class ControlFlowFactory {
 	
@@ -43,7 +44,6 @@ public abstract class ControlFlowFactory {
 	 * analysis of the stack trace (through constructing a new throwable).
 	 * However, they are useful in some cases.
 	 * <p>This implementation uses the StackTraceElement class introduced in Java 1.4.
-	 * @author Rod Johnson
 	 * @see java.lang.StackTraceElement
 	 */
 	static class Jdk14ControlFlow implements ControlFlow {
@@ -57,7 +57,6 @@ public abstract class ControlFlowFactory {
 		public boolean under(Class clazz) {
 			String className = clazz.getName();
 			for (int i = 0; i < stack.length; i++) {
-				//System.out.println(stack[i]);
 				if (this.stack[i].getClassName().equals(className)) {
 					return true;
 				}
@@ -109,11 +108,10 @@ public abstract class ControlFlowFactory {
 	 * <p>Note that such pointcuts are 10-15 times more expensive to evaluate under
 	 * JDK 1.3 than other pointcuts, as they require analysis of the stack trace
 	 * (through constructing a new throwable). However, they are useful in some cases.
-	 * @author Rod Johnson
 	 */
 	static class Jdk13ControlFlow implements ControlFlow {
 
-		private String stackTrace;
+		private final String stackTrace;
 
 		public Jdk13ControlFlow() {
 			StringWriter sw = new StringWriter();

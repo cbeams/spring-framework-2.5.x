@@ -62,7 +62,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 
 	/**
 	 * Convenience method when we have only a single pattern.
-	 * Use either this method or setPatterns(), not both.
+	 * Use either this method or setPatterns, not both.
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
@@ -73,8 +73,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * Set the regular expressions defining methods to match.
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
-	 * @param patterns Perl5 regular expressions describing methods
-	 * to match
+	 * @param patterns regular expressions describing methods to match
 	 */
 	public void setPatterns(String[] patterns) {
 		this.patterns = patterns;
@@ -138,7 +137,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	}
 
 	
-	//	---------------------------------------------------------------------
+	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
 	

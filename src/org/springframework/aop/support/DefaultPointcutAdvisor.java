@@ -78,20 +78,20 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 		return order;
 	}
 
+	public void setPointcut(Pointcut pointcut) {
+		this.pointcut = pointcut;
+	}
+
+	public Pointcut getPointcut() {
+		return pointcut;
+	}
+
 	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
 
 	public Advice getAdvice() {
 		return advice;
-	}
-
-	public Pointcut getPointcut() {
-		return pointcut;
-	}
-	
-	public void setPointcut(Pointcut pointcut) {
-		this.pointcut = pointcut;
 	}
 
 	public boolean isPerInstance() {
@@ -107,8 +107,7 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 	}
 	
 	public String toString() {
-		return "DefaultPointcutAdvisor: pointcut=" + pointcut + "; " +
-				"advice=" + advice;
+		return "DefaultPointcutAdvisor: pointcut [" + this.pointcut + "], advice [" + this.advice + "]";
 	}
 
 }

@@ -48,9 +48,24 @@ public class ScheduledTimerTask {
 	private boolean fixedRate = false;
 
 
+	/**
+	 * Create a new ScheduledTimerTask,
+	 * to be populated via bean properties.
+	 * @see #setTimerTask
+	 * @see #setDelay
+	 * @see #setPeriod
+	 * @see #setFixedRate
+	 */
 	public ScheduledTimerTask() {
 	}
 
+	/**
+	 * Create a new ScheduledTimerTask.
+	 * @param timerTask the TimerTask to schedule
+	 * @param delay the delay before starting the task for the first time (ms)
+	 * @param period the period between repeated task executions (ms)
+	 * @param fixedRate whether to schedule as fixed-rate execution
+	 */
 	public ScheduledTimerTask(TimerTask timerTask, long delay, long period, boolean fixedRate) {
 		this.timerTask = timerTask;
 		this.delay = delay;

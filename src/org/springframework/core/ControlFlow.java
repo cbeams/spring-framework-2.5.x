@@ -21,16 +21,29 @@ package org.springframework.core;
  * the current call stack. Useful in AOP (as in AspectJ cflow concept)
  * but not AOP-specific.
  * @author Rod Johnson
+ * @since 02.02.2004
  */
 public interface ControlFlow {
-	
+
+	/**
+	 * Detect whether we're under the given class,
+	 * according to the current stack trace.
+	 * @param clazz the clazz to look for
+	 */
 	boolean under(Class clazz);
 
 	/**
-	 * Matches whole method name.
+	 * Detect whether we're under the given class and method,
+	 * according to the current stack trace.
+	 * @param clazz the clazz to look for
+	 * @param methodName the name of the method to look for
 	 */
 	boolean under(Class clazz, String methodName);
-	
+
+	/**
+	 * Detect whether the current stack trace contains the given token.
+	 * @param token the token to look for
+	 */
 	boolean underToken(String token);
 
 }
