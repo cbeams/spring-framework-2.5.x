@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -24,7 +25,9 @@ import java.util.ResourceBundle;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.core.Ordered;
@@ -52,7 +55,7 @@ import org.springframework.web.servlet.View;
  * @see java.util.PropertyResourceBundle
  * @see UrlBasedViewResolver
  */
-public class ResourceBundleViewResolver extends AbstractCachingViewResolver implements Ordered {
+public class ResourceBundleViewResolver extends AbstractCachingViewResolver implements Ordered, DisposableBean {
 
 	/** Default if no other basename is supplied */
 	public final static String DEFAULT_BASENAME = "views";
@@ -64,7 +67,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	private String defaultParentView;
 
 	/** Locale -> BeanFactory */
-	private Map cachedFactories = new HashMap();
+	private final Map cachedFactories = new HashMap();
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -109,6 +113,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		this.defaultParentView = defaultParentView;
 	}
 
+
 	protected View loadView(String viewName, Locale locale) throws MissingResourceException, BeansException {
 		try {
 			return (View) initFactory(locale).getBean(viewName, View.class);
@@ -128,20 +133,30 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		if (parsedBundle != null) {
 			return parsedBundle;
 		}
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(getApplicationContext());
-		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(lbf);
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory(getApplicationContext());
+		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
 		for (int i = 0; i < this.basenames.length; i++) {
 			ResourceBundle bundle = ResourceBundle.getBundle(this.basenames[i], locale,
 																											 Thread.currentThread().getContextClassLoader());
 			reader.registerBeanDefinitions(bundle);
 		}
-		lbf.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
-		lbf.preInstantiateSingletons();
+		factory.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
+
 		if (isCache()) {
-			this.cachedFactories.put(locale, lbf);
+			factory.preInstantiateSingletons();
+			this.cachedFactories.put(locale, factory);
 		}
-		return lbf;
+		return factory;
+	}
+
+	public void destroy() throws BeansException {
+		for (Iterator it = this.cachedFactories.values().iterator(); it.hasNext();) {
+			ConfigurableBeanFactory factory = (ConfigurableBeanFactory) it.next();
+			factory.destroySingletons();
+		}
+		this.cachedFactories.clear();
 	}
 
 }

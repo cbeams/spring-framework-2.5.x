@@ -20,7 +20,9 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
@@ -47,7 +49,7 @@ import org.springframework.web.servlet.View;
  * @see ResourceBundleViewResolver
  * @see UrlBasedViewResolver
  */
-public class XmlViewResolver extends AbstractCachingViewResolver implements Ordered {
+public class XmlViewResolver extends AbstractCachingViewResolver implements Ordered, DisposableBean {
 
 	/** Default if no other location is supplied */
 	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
@@ -56,7 +58,8 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 
 	private Resource location;
 
-	private BeanFactory cachedFactory;
+	private ConfigurableBeanFactory cachedFactory;
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -112,17 +115,26 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 		if (this.cachedFactory != null) {
 			return this.cachedFactory;
 		}
+
 		Resource actualLocation = this.location;
 		if (actualLocation == null) {
 			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
 		}
-		XmlBeanFactory xbf = new XmlBeanFactory(actualLocation, getApplicationContext());
-		xbf.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
-		xbf.preInstantiateSingletons();
+
+		XmlBeanFactory factory = new XmlBeanFactory(actualLocation, getApplicationContext());
+		factory.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
+
 		if (isCache()) {
-			this.cachedFactory = xbf;
+			factory.preInstantiateSingletons();
+			this.cachedFactory = factory;
 		}
-		return xbf;
+		return factory;
+	}
+
+	public void destroy() throws BeansException {
+		if (this.cachedFactory != null) {
+			this.cachedFactory.destroySingletons();
+		}
 	}
 
 }
