@@ -25,12 +25,12 @@ import org.springframework.rules.support.ClosureWithoutResult;
  * @author keith
  */
 public class ConstrainedClosureWithoutResult extends ClosureWithoutResult {
-    private Closure procedure;
+    private Closure closure;
 
     private Constraint constraint;
 
     public ConstrainedClosureWithoutResult(Closure procedure, Constraint constraint) {
-        this.procedure = procedure;
+        this.closure = procedure;
         this.constraint = constraint;
     }
 
@@ -40,7 +40,7 @@ public class ConstrainedClosureWithoutResult extends ClosureWithoutResult {
      */
     public void doCall(Object argument) {
         if (constraint.test(argument)) {
-            procedure.call(argument);
+            closure.call(argument);
         }
     }
 

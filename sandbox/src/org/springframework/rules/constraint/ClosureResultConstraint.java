@@ -20,14 +20,14 @@ import org.springframework.rules.Constraint;
 import org.springframework.util.Assert;
 
 /**
- * Tests the result returned from evaluating a unary function.
+ * Tests the result returned from evaluating a closure function.
  * 
  * @author Keith Donald
  */
 public class ClosureResultConstraint implements Constraint {
     private Constraint constraint;
 
-    private Closure function;
+    private Closure closure;
 
     /**
      * Creates a UnaryFunctionResultTester that tests the result returned from
@@ -42,7 +42,7 @@ public class ClosureResultConstraint implements Constraint {
         Assert.notNull(constraint);
         Assert.notNull(function);
         this.constraint = constraint;
-        this.function = function;
+        this.closure = function;
     }
 
     /**
@@ -52,12 +52,12 @@ public class ClosureResultConstraint implements Constraint {
      * @see org.springframework.rules.Constraint#test(java.lang.Object)
      */
     public boolean test(Object argument) {
-        Object returnValue = function.call(argument);
+        Object returnValue = closure.call(argument);
         return this.constraint.test(returnValue);
     }
 
     public Closure getFunction() {
-        return function;
+        return closure;
     }
 
     public Constraint getPredicate() {
@@ -65,6 +65,6 @@ public class ClosureResultConstraint implements Constraint {
     }
 
     public String toString() {
-        return "[" + function.toString() + " " + constraint.toString() + "]";
+        return "[" + closure.toString() + " " + constraint.toString() + "]";
     }
 }

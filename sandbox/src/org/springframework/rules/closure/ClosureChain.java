@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class ClosureChain implements Closure {
-    private Set functions = new LinkedHashSet();
+    private Set closures = new LinkedHashSet();
 
     /**
      * Constructs a function chain with no initial members. It is expected the
@@ -56,8 +56,8 @@ public class ClosureChain implements Closure {
      */
     public ClosureChain(Closure function1, Closure function2) {
         Assert.isTrue(function1 != null && function2 != null);
-        functions.add(function1);
-        functions.add(function2);
+        closures.add(function1);
+        closures.add(function2);
     }
 
     /**
@@ -67,7 +67,7 @@ public class ClosureChain implements Closure {
      *            the aggregated functions
      */
     public ClosureChain(Closure[] functions) {
-        this.functions.addAll(Arrays.asList(functions));
+        this.closures.addAll(Arrays.asList(functions));
     }
 
     /**
@@ -79,7 +79,7 @@ public class ClosureChain implements Closure {
      * @return A reference to this, to support easy chaining.
      */
     public ClosureChain add(Closure function) {
-        this.functions.add(function);
+        this.closures.add(function);
         return this;
     }
 
@@ -89,7 +89,7 @@ public class ClosureChain implements Closure {
      * @return An iterator
      */
     public Iterator iterator() {
-        return functions.iterator();
+        return closures.iterator();
     }
 
     public Object call(Object argument) {
@@ -104,7 +104,7 @@ public class ClosureChain implements Closure {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer("chain(");
+        StringBuffer buf = new StringBuffer("closure-chain(");
         for (Iterator i = iterator(); i.hasNext();) {
             buf.append(i.next());
             if (i.hasNext()) {

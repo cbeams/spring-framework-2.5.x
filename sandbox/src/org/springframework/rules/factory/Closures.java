@@ -44,8 +44,8 @@ public class Closures {
         return new ClosureChain(functionsToChain);
     }
 
-    public Closure constrain(Closure procedure, Constraint predicate) {
-        return new ConstrainedClosureWithoutResult(procedure, predicate);
+    public Closure constrain(Closure closure, Constraint predicate) {
+        return new ConstrainedClosureWithoutResult(closure, predicate);
     }
 
 }

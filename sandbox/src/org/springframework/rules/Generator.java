@@ -24,9 +24,9 @@ public interface Generator {
      * Execute the generator, and for each element generated, pass it as an
      * argument to the specified closure callback for processing.
      * 
-     * @param closure
+     * @param generatedElementCallback
      *            The procedure callback that will process each generated
      *            element.
      */
-    public void generate(Closure closure);
+    public void generate(Closure generatedElementCallback);
 }
