@@ -4,8 +4,6 @@
  */
 package org.springframework.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
@@ -13,11 +11,13 @@ import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicPublisher;
+import javax.jms.TopicSession;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * An implementation of the JmsSender interface that uses the 
@@ -31,145 +31,212 @@ import org.apache.commons.logging.LogFactory;
  * provides a new domain independent API that allows for easy 
  * mix-and-match use of Point-to-Point and Publish/Subscribe domain.
  */
-public class JmsSender102 extends AbstractJmsSender {
+public class JmsSender102 extends AbstractJmsSender
+{
 
-	protected final Log logger = LogFactory.getLog(getClass());
+    /**
+     * By default the JmsSender uses the Point-to-Point domain.
+     */
+    private boolean _isPubSub = false;
 
-	/**
-	 * By default the JmsSender uses the Point-to-Point domain.
-	 */
-	private boolean _isPubSub = false;
+    /**
+     * Construct a new JmsSender for bean usage.
+     * Note: The ConnectionFactory has to be set before using the instance.
+     * This constructor can be used to prepare a JmsSender via a BeanFactory,
+     * typically setting the ConnectionFactory via setConnectionFactory.
+     * @see #setConnectionFactory
+     */
+    public JmsSender102()
+    {
+    }
 
-	/**
-	 * Construct a new JmsSender for bean usage.
-	 * Note: The ConnectionFactory has to be set before using the instance.
-	 * This constructor can be used to prepare a JmsSender via a BeanFactory,
-	 * typically setting the ConnectionFactory via setConnectionFactory.
-	 * @see #setConnectionFactory
-	 */
-	public JmsSender102() {
-	}
+    /**
+     * Set the JmsSender to be for the Publish/Subscribe domain only. This
+     * implies the use of Topics.
+     * @param isTopic 
+     */
+    public void setPubSubDomain(boolean isPubSub)
+    {
+        _isPubSub = isPubSub;
+    }
 
-	/**
-	 * Set the JmsSender to be for the Publish/Subscribe domain only. This
-	 * implies the use of Topics.
-	 * @param isTopic 
-	 */
-	public void setPubSubDomain(boolean isPubSub) {
-		_isPubSub = isPubSub;
-	}
+    /**
+     * Returns true if the destination(s) of the JmsSender is to a topic.
+     * False indicates sending to a Queue which is the default destination
+     * type.
+     * @return true if the destination(s) is a Topic.
+     */
+    public boolean isPubSubDomain()
+    {
+        return _isPubSub;
+    }
 
-	/**
-	 * Returns true if the destination(s) of the JmsSender is to a topic.
-	 * False indicates sending to a Queue which is the default destination
-	 * type.
-	 * @return true if the destination(s) is a Topic.
-	 */
-	public boolean isPubSubDomain() {
-		return _isPubSub;
-	}
+    public void send(String destinationName, MessageCreator messageCreator)
+        throws JmsException
+    {
+        if (isPubSubDomain())
+        {
+            sendPubSub(destinationName, messageCreator);
+        } else
+        {
+            sendP2P(destinationName, messageCreator);
+        }
+    }
 
-	/**
-	 * Construct a new JmsSender, given a ConnectionFactory instance 
-	 * to obtain connections from.
-	 * @param cf The JMS ConnectionFactory to obtain connections from
-	 */
-	public JmsSender102(ConnectionFactory cf) {
-		setConnectionFactory(cf);
-	}
+    private void sendPubSub(String topicName, MessageCreator messageCreator)
+    {
+        TopicConnection topicConnection = null;
+        try
+        {
+            topicConnection =
+                ((TopicConnectionFactory) getConnectionFactory())
+                    .createTopicConnection();
+            TopicSession topicSession =
+                topicConnection.createTopicSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+            Topic topic = (Topic) super.lookupJndiResource(topicName);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Looked up topic with name [" + topicName + "]");
+            }
+            TopicPublisher publisher = topicSession.createPublisher(topic);
 
-	/* TODO
-	public JmsSender102(String connectionFactoryJndiName)
-	{
-		
-	}
-	*/
+            Message message = messageCreator.createMessage(topicSession);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Message created was [" + message + "]");
+            }
+            publisher.publish(topic, message);
 
-	public void send(String jndiDestinationName, MessageCreator messageCreator)
-		throws JmsException {
-		if (isPubSubDomain()) {
-			//TODO
-		} else {
-			sendP2P(jndiDestinationName, messageCreator);
-		}
-	}
+        } catch (NamingException e)
+        {
+            throw new JmsException(
+                "Couldn't get topic name [" + topicName + "] from JNDI",
+                e);
 
-	
+        } catch (JMSException e)
+        {
+            throw new JmsException(
+                "Couln't create JMS TopicConnection or TopicSession",
+                e);
+        } finally
+        {
+            if (topicConnection != null)
+            {
+                try
+                {
+                    topicConnection.close();
+                } catch (JMSException e)
+                {
+                    logger.warn("Failed to close the topic connection", e);
+                }
+            }
+        }
+    }
 
-	/**
-	 * @param jndiDestinationName
-	 * @param messageCreator
-	 */
-	private void sendP2P(String queueName, MessageCreator messageCreator) {
-		//TODO code to deal with JNDI prefix.
+    /**
+     * @param jndiDestinationName
+     * @param messageCreator
+     */
+    private void sendP2P(String queueName, MessageCreator messageCreator)
+    {
+        //TODO code to deal with JNDI prefix.
 
-		QueueConnection queueConnection = null;
-		try {
-			//TODO provide our own stand alone connectionfactory impl to
-			//set the username, password, and client id can be set on the 
-			//connection.  This seems to be how it is done in administration
-			//of j2ee apps...otherwise move username,password into this class.
-			queueConnection =
-				((QueueConnectionFactory) getConnectionFactory())
-					.createQueueConnection();
+        QueueConnection queueConnection = null;
+        try
+        {
+            //TODO provide our own stand alone connectionfactory impl to
+            //set the username, password, and client id can be set on the 
+            //connection.  This seems to be how it is done in administration
+            //of j2ee apps...otherwise move username,password into this class.
+            queueConnection =
+                ((QueueConnectionFactory) getConnectionFactory())
+                    .createQueueConnection();
 
-			//TODO think if properties in the sender class is the
-			//place to hold this config information.
-			QueueSession queueSession =
-				queueConnection.createQueueSession(
-					isSessionTransacted(),
-					getSessionAcknowledgeMode());
+            //TODO think if properties in the sender class is the
+            //place to hold this config information.
+            QueueSession queueSession =
+                queueConnection.createQueueSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
 
-			final Queue queue = (Queue) super.lookupJndiResource(queueName);
-			logger.info("Looked up queue with name [" + queueName + "]");
-			QueueSender queueSender = queueSession.createSender(queue);
-			Message message = messageCreator.createMessage(queueSession);
-			//TODO put in pretty printer.
-			logger.info("Message created was [" + message + "]");
+            final Queue queue = (Queue) super.lookupJndiResource(queueName);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Looked up queue with name [" + queueName + "]");
+            }
+            QueueSender queueSender = queueSession.createSender(queue);
+            Message message = messageCreator.createMessage(queueSession);
+            //TODO put in pretty printer.
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Message created was [" + message + "]");
+            }
 
-			
-			queueSender.send(queue, message);
-			logger.info("Message sent OK");
+            queueSender.send(queue, message);
+            logger.info("Message sent OK");
 
-		} catch (NamingException e) {
-			throw new JmsException(
-				"Couldn't get queue name [" + queueName + "]",
-				e);
+        } catch (NamingException e)
+        {
+            throw new JmsException(
+                "Couldn't get queue name [" + queueName + "] from JNDI",
+                e);
 
-		} catch (JMSException e) {
-			throw new JmsException(
-				"Couln't create JMS QueueConnection or QueueSession",
-				e);
-		}
-	}
+        } catch (JMSException e)
+        {
+            throw new JmsException(
+                "Couln't create JMS QueueConnection or QueueSession",
+                e);
+        } finally
+        {
+            if (queueConnection != null)
+            {
+                try
+                {
+                    queueConnection.close();
+                } catch (JMSException e)
+                {
+                    logger.warn("Failed to close the queue connection", e);
+                }
+            }
+        }
+    }
 
-	/**
-	 * In addition to checking if the connection factory is set, make sure
-	 * that the supplied connection factory is of the appropriate type for
-	 * the specified destination type.  QueueConnectionFactory for queues
-	 * and TopicConnectionFactory for topics.
-	 */
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		//Make sure that the ConnectionFactory passed is consistent
-		//with sending on the specifies destination type.
-		//Some providers implementations of the ConnectionFactory implement both
-		//domain interfaces under the cover, so just check if the selected
-		//domain is consistent with the type of connection factory.
-		if (isPubSubDomain()) {
-			if (getConnectionFactory() instanceof TopicConnectionFactory) {
-				//Do nothing, all ok.
-			} else {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for topics but did not supply an instance of a TopicConnectionFactory");
-			}
-		} else {
-			if (getConnectionFactory() instanceof QueueConnectionFactory) {
-				//Do nothing, all ok.
-			} else {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for queues but did not supply an instance of a QueueConnectionFactory");
-			}
-		}
+    /**
+     * In addition to checking if the connection factory is set, make sure
+     * that the supplied connection factory is of the appropriate type for
+     * the specified destination type.  QueueConnectionFactory for queues
+     * and TopicConnectionFactory for topics.
+     */
+    public void afterPropertiesSet()
+    {
+        super.afterPropertiesSet();
+        //Make sure that the ConnectionFactory passed is consistent
+        //with sending on the specifies destination type.
+        //Some providers implementations of the ConnectionFactory implement both
+        //domain interfaces under the cover, so just check if the selected
+        //domain is consistent with the type of connection factory.
+        if (isPubSubDomain())
+        {
+            if (getConnectionFactory() instanceof TopicConnectionFactory)
+            {
+                //Do nothing, all ok.
+            } else
+            {
+                throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for topics but did not supply an instance of a TopicConnectionFactory");
+            }
+        } else
+        {
+            if (getConnectionFactory() instanceof QueueConnectionFactory)
+            {
+                //Do nothing, all ok.
+            } else
+            {
+                throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for queues but did not supply an instance of a QueueConnectionFactory");
+            }
+        }
 
-	}
+    }
 
 }
