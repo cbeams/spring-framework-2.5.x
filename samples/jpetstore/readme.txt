@@ -77,8 +77,9 @@ A guide to step-by-step deployment, assuming JDK 1.4.x and Tomcat 4.x:
 If you want to test remote service access:
 1. create an order with the JPetStore web UI (first order number will be 1000)
 2. adapt server URL in "client/client.properties" (if not using the default)
-3. run "client/client.bat 1000" to fetch and show the order with number 1000
-4. run "client/client.bat 1000 10" to fetch the order 10 times per protocol
+3. switch to the "client" directory as execution directory
+4. run "client.bat 1000" to fetch and show the order with number 1000
+5. run "client.bat 1000 10" to fetch the order 10 times per protocol
 
 
 3. ATTRIBUTES VERSION
