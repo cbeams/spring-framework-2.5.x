@@ -28,9 +28,20 @@ import org.springframework.core.io.Resource;
  * FactoryBean that sets up a Quartz Scheduler and exposes it for
  * bean references.
  *
+ * <p>Allows registration of JobDetails, Calendars and Triggers,
+ * automatically starting the scheduler on initialization and
+ * shutting it down on destruction. In typical scenarios, there is
+ * no need to access the Scheduler instance itself in application code.
+ *
+ * <p>Note that Quartz instantiates a new Job for each execution, in
+ * contrast to Timer which uses a TimerTask instance that is shared
+ * between repeated executions. Just JobDetail descriptors are shared.
+ *
  * @author Juergen Hoeller
  * @since 18.02.2004
- * @version $Id: SchedulerFactoryBean.java,v 1.4 2004-02-21 22:30:10 dkopylenko Exp $
+ * @see org.quartz.Scheduler
+ * @see org.quartz.impl.StdSchedulerFactory
+ * @version $Id: SchedulerFactoryBean.java,v 1.5 2004-02-22 21:53:26 jhoeller Exp $
  */
 public class SchedulerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
