@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.9 2004-04-01 15:36:03 jhoeller Exp $
+ * @version $Id: CglibProxyTests.java,v 1.10 2004-06-04 09:59:27 robharrop Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 	
@@ -113,7 +113,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 		catch (AspectException ex) {
 			// Check that stack trace is preserved
-			assertTrue(ex.getCause() instanceof CodeGenerationException);
+			// FIX: CGLIB will throw an IllegalArgumentException when trying to create a proxy
+			// of a class where the constructor is not visible - Rob Harrop
+			assertTrue((ex.getCause() instanceof CodeGenerationException) || (ex.getCause() instanceof IllegalArgumentException));
 			
 			// Check that error message is helpful
 			
