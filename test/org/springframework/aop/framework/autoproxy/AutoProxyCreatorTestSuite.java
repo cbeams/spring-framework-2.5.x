@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.TargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -43,7 +44,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.7 2004-08-03 09:08:42 jhoeller Exp $
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.8 2004-08-10 19:32:41 jhoeller Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 
@@ -135,7 +136,8 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 			setOrder(0);
 		}
 
-		protected Object[] getInterceptorsAndAdvisorsForBean(Object bean, String name) {
+		protected Object[] getInterceptorsAndAdvisorsForBean(
+				Object bean, String name, TargetSource customTargetSource) {
 			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean)
 				return DO_NOT_PROXY;
 			else if (name.startsWith("aca"))
