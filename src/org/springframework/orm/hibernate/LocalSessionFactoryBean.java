@@ -164,7 +164,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	public void setMappingResources(String[] mappingResources) {
 		this.mappingLocations = new Resource[mappingResources.length];
 		for (int i = 0; i < mappingResources.length; i++) {
-			this.mappingLocations[i] = new ClassPathResource(mappingResources[i]);
+			this.mappingLocations[i] = new ClassPathResource(mappingResources[i].trim());
 		}
 	}
 

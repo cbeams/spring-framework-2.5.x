@@ -66,7 +66,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) {
-		setValue(this.resourceLoader.getResource(resolvePath(text)));
+		setValue(this.resourceLoader.getResource(resolvePath(text).trim()));
 	}
 
 	/**
