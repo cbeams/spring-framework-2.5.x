@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.object.MappingSqlQuery;
@@ -320,17 +319,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	}
 
 	protected void retrieveIdentity(final Entity entity) {
-		getJdbcTemplate().doWithResultSetFromStaticQuery(getIdentityQuery(),
-			new ResultSetExtractor() {
-				public void extractData(ResultSet rs) throws SQLException {
-					if (!rs.next()) {
-						throw new SQLException("Cannot retrieve identity of inserted row");
-					}
-					entity.setId(rs.getInt(1));
-				}
-			}
-		);
-
+		entity.setId(getJdbcTemplate().queryForInt(getIdentityQuery()));
 	}
 
 	/**
