@@ -18,9 +18,9 @@ package org.springframework.orm.ibatis;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -35,8 +35,10 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
 /**
  * @author Juergen Hoeller
@@ -100,6 +102,59 @@ public class SqlMapClientTests extends TestCase {
 		conControl.verify();
 		smsControl.verify();
 		smcControl.verify();
+	}
+
+	public void testQueryForObjectOnSqlMapClient() throws SQLException {
+		DataSource dataSource = new TransactionAwareDataSourceProxy(new DriverManagerDataSource());
+		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
+		SqlMapClient client = (SqlMapClient) clientControl.getMock();
+		client.getDataSource();
+		clientControl.setReturnValue(dataSource, 2);
+		client.queryForObject("myStatement", "myParameter");
+		clientControl.setReturnValue("myResult", 1);
+		clientControl.replay();
+		SqlMapClientTemplate template = new SqlMapClientTemplate();
+		template.setSqlMapClient(client);
+		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
+		clientControl.verify();
+	}
+
+	public void testQueryForObjectOnSqlMapSession() throws SQLException {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
+		SqlMapClient client = (SqlMapClient) clientControl.getMock();
+		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
+		SqlMapSession session = (SqlMapSession) sessionControl.getMock();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+		client.getDataSource();
+		clientControl.setReturnValue(ds, 3);
+		client.openSession();
+		clientControl.setReturnValue(session, 1);
+		session.setUserConnection(con);
+		sessionControl.setVoidCallable(1);
+		session.queryForObject("myStatement", "myParameter");
+		sessionControl.setReturnValue("myResult", 1);
+		session.close();
+		sessionControl.setVoidCallable(1);
+
+		dsControl.replay();
+		conControl.replay();
+		clientControl.replay();
+		sessionControl.replay();
+
+		SqlMapClientTemplate template = new SqlMapClientTemplate();
+		template.setSqlMapClient(client);
+		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
+
+		dsControl.verify();
+		clientControl.verify();
 	}
 
 	public void testQueryForObject() throws SQLException {
