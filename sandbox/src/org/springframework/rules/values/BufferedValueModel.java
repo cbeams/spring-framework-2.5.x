@@ -26,7 +26,9 @@ import org.springframework.util.ObjectUtils;
 public class BufferedValueModel extends AbstractValueModel implements
         ValueModel {
 
-    private Object bufferedValue;
+    private static final Object NO_VALUE = new Object();
+
+    private Object bufferedValue = NO_VALUE;
 
     private ValueModel wrappedModel;
 
@@ -42,7 +44,10 @@ public class BufferedValueModel extends AbstractValueModel implements
                                     + BufferedValueModel.this.wrappedModel
                                             .get() + "']");
                 }
-                set(BufferedValueModel.this.wrappedModel.get());
+                if (isChangeBuffered()) {
+                    logger.warn("[Losing buffered edit " + get() + "]");
+                }
+                set(NO_VALUE);
             }
         });
         this.commitTrigger = commitTrigger;
@@ -67,11 +72,21 @@ public class BufferedValueModel extends AbstractValueModel implements
     }
 
     private void commit() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Committing buffered value '" + get()
-                    + "' to wrapped value model " + wrappedModel + "]");
+        if (isChangeBuffered()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Committing buffered value '" + get()
+                        + "' to wrapped value model " + wrappedModel + "]");
+            }
+            wrappedModel.set(bufferedValue);
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[No buffered edit to commit; nothing to do...]");
+            }
         }
-        wrappedModel.set(bufferedValue);
+    }
+
+    public boolean isChangeBuffered() {
+        return bufferedValue != NO_VALUE;
     }
 
     private void revert() {
@@ -79,14 +94,14 @@ public class BufferedValueModel extends AbstractValueModel implements
             logger.debug("[Reverting buffered value '" + get() + " to value "
                     + wrappedModel.get() + "]");
         }
-        set(wrappedModel.get());
+        set(NO_VALUE);
     }
 
     /**
      * @see org.springframework.rules.values.ValueModel#get()
      */
     public Object get() {
-        if (bufferedValue != null) {
+        if (bufferedValue != NO_VALUE) {
             return bufferedValue;
         }
         else {
@@ -100,7 +115,12 @@ public class BufferedValueModel extends AbstractValueModel implements
     public void set(Object value) {
         if (ObjectUtils.nullSafeEquals(this.bufferedValue, value)) { return; }
         if (logger.isDebugEnabled()) {
-            logger.debug("[Setting buffered value to '" + value + "']");
+            if (value == NO_VALUE) {
+                logger.debug("[Setting buffered value to NO_VALUE]");
+            }
+            else {
+                logger.debug("[Setting buffered value to '" + value + "']");
+            }
         }
         this.bufferedValue = value;
         fireValueChanged();

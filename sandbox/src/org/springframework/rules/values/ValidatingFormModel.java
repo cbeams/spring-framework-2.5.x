@@ -74,7 +74,6 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     public Object getValue(String aspect) {
-        System.out.println(aspect);
         return getValueModel(aspect).get();
     }
 

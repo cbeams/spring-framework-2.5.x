@@ -102,6 +102,9 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
      *      java.lang.Object)
      */
     public void setValue(String aspect, Object value) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Setting aspect '" + aspect + "' = " + value);
+        }
         this.beanWrapper.setPropertyValue(aspect, value);
     }
     
