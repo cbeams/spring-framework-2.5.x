@@ -21,11 +21,12 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.quartz.JobPersistenceException;
 import org.quartz.SchedulerConfigException;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.SchedulerSignaler;
+import org.quartz.utils.ConnectionProvider;
+import org.quartz.utils.DBConnectionManager;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
@@ -43,72 +44,83 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * assume to get proper locks etc.
  *
  * @author Juergen Hoeller
- * @since 07.06.2004
+ * @since 1.1
  * @see SchedulerFactoryBean#setDataSource
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
  */
 public class LocalDataSourceJobStore extends JobStoreCMT {
 
+	/**
+	 * Name used for the transactional ConnectionProvider for Quartz.
+	 * This provider will delegate to the local Spring-managed DataSource.
+	 * @see org.quartz.utils.DBConnectionManager#addConnectionProvider
+	 * @see SchedulerFactoryBean#setDataSource
+	 */
+	public static final String TX_DATA_SOURCE_NAME = "springTxDataSource";
+
+	/**
+	 * Name used for the non-transactional ConnectionProvider for Quartz.
+	 * This provider will delegate to the local Spring-managed DataSource.
+	 * @see org.quartz.utils.DBConnectionManager#addConnectionProvider
+	 * @see SchedulerFactoryBean#setDataSource
+	 */
+	public static final String NON_TX_DATA_SOURCE_NAME = "springNonTxDataSource";
+
 	private DataSource dataSource;
 
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
 	    throws SchedulerConfigException {
 
-		// DataSource names are not needed here, but checked in base class.
-		setDataSource("dummy");
-		setNonManagedTXDataSource("dummy");
-
-		this.dataSource = (DataSource) SchedulerFactoryBean.getConfigTimeDataSource();
-		// absolutely needs thread-bound DataSource to initialize
+		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
+		// Absolutely needs thread-bound DataSource to initialize.
 		if (this.dataSource == null) {
 			throw new SchedulerConfigException(
 			    "No local DataSource found for configuration - " +
 			    "dataSource property must be set on SchedulerFactoryBean");
 		}
 
+		// Configure transactional connection settings for Quartz.
+		setDataSource(TX_DATA_SOURCE_NAME);
+		setDontSetAutoCommitFalse(true);
+
+		// Register transactional ConnectionProvider for Quartz.
+		DBConnectionManager.getInstance().addConnectionProvider(
+				TX_DATA_SOURCE_NAME,
+				new ConnectionProvider() {
+					public Connection getConnection() throws SQLException {
+						// Return a transactional Connection, if any.
+						return DataSourceUtils.getConnection(dataSource);
+					}
+					public void shutdown() throws SQLException {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
+				}
+		);
+
+		// Configure non-transactional connection settings for Quartz.
+		setNonManagedTXDataSource(NON_TX_DATA_SOURCE_NAME);
+
+		// Register non-transactional ConnectionProvider for Quartz.
+		DBConnectionManager.getInstance().addConnectionProvider(
+				NON_TX_DATA_SOURCE_NAME,
+				new ConnectionProvider() {
+					public Connection getConnection() throws SQLException {
+						// Always return a non-transactional Connection.
+						return dataSource.getConnection();
+					}
+					public void shutdown() throws SQLException {
+						// Do nothing - a Spring-managed DataSource has its own lifecycle.
+					}
+				}
+		);
+
 		super.initialize(loadHelper, signaler);
 	}
 
-	protected Connection getConnection() {
-		// Do not prepare connection here, as this is driven by the transaction.
-		return DataSourceUtils.getConnection(this.dataSource);
-	}
-
-	protected Connection getNonManagedTXConnection() throws JobPersistenceException {
-		try {
-			// Do a direct DataSource.getConnection() call,
-			// as we never want to have a transactional connection here.
-			// Of course, this is usually called by a Quartz thread,
-			// so there can't be an active transaction anyway...
-			Connection con = this.dataSource.getConnection();
-
-			// Following block copied from base class implementation,
-			// due to lack of specific hooks in the base class.
-			if (!isDontSetNonManagedTXConnectionAutoCommitFalse()) {
-				con.setAutoCommit(false);
-			}
-			if (isTxIsolationLevelReadCommitted()) {
-				con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-			}
-
-			return con;
-		}
-		catch (SQLException ex) {
-			throw new JobPersistenceException("Failed to prepare JDBC connection", ex);
-		}
-	}
-
 	protected void closeConnection(Connection con) {
-		// will work for transactional and non-transactional connections
+		// Will work for transactional and non-transactional connections.
 		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
-	}
-
-	/**
-	 * Do not perform the base class' DataSource shutdown here:
-	 * A Spring-provided DataSource has its own lifecycle.
-	 */
-	public void shutdown() {
 	}
 
 }
