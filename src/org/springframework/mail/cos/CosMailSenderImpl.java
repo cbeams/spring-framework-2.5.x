@@ -13,8 +13,9 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 
 /**
- * Simple implementation of SMPT mail sending on top of Jason Hunter's
- * MailMessage class that's included in COS (com.oreilly.servlet).
+ * Simple implementation of SMTP mail sending on top of Jason Hunter's
+ * MailMessage class that's included in
+ * <a href="http://servlets.com/cos">COS (com.oreilly.servlet)</a>.
  *
  * <p>Does not support any richer functionality than MailSender and
  * SimpleMailMessage, therefore there's no optional richer interface like

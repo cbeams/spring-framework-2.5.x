@@ -13,8 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
- * implementation for MultipartFile.
+ * MultipartFile implementation for Jakarta Commons FileUpload.
  * @author Trevor D. Cook
  * @since 29-Sep-2003
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver

@@ -18,8 +18,8 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.WebUtils;
 
 /**
- * MultipartResolver implementation for
- * <a href="http://www.servlets.com/cos">Jason Hunter's COS (com.oreilly.servlet)</a>.
+ * MultipartResolver implementation for Jason Hunter's
+ * <a href="http://www.servlets.com/cos">COS (com.oreilly.servlet)</a>.
  * Works with a COS MultipartRequest underneath.
  *
  * <p>Provides maximumFileSize and headerEncoding settings as bean properties;
