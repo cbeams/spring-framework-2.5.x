@@ -15,19 +15,21 @@
  */
 package org.springframework.rules.reporting;
 
-/**
- * @author Keith Donald
- */
-public class Severity {
-    public static final Severity WARNING = new Severity(0);
-    public static final Severity ERROR = new Severity(1);
-    private int value;
+import org.springframework.enum.ShortCodedEnum;
+import org.springframework.enum.support.StaticCodedEnumResolver;
 
-    private Severity(int magnitude) {
-        this.value = magnitude;
+public class Severity extends ShortCodedEnum {
+    public static final Severity INFO = new Severity(0, "Info");
+
+    public static final Severity WARNING = new Severity(1, "Warning");
+
+    public static final Severity ERROR = new Severity(2, "Error");
+
+    private Severity(int magnitude, String label) {
+        super(magnitude, label);
     }
 
-    public int getValue() {
-        return value;
+    static {
+        StaticCodedEnumResolver.instance().registerStaticEnums(Severity.class);
     }
 }
