@@ -25,7 +25,7 @@ import org.springframework.beans.factory.BeanFactory;
  * to expose this functionality for existing bean instances.
  *
  * <p>This subinterface of BeanFactory is not meant to be used in normal
- * application code: Stick to BeanFactory or ListableBeanFactory for
+ * application code: stick to BeanFactory or ListableBeanFactory for
  * typical use cases.
  *
  * <p>Integration code for other frameworks can leverage this interface to
@@ -38,10 +38,16 @@ import org.springframework.beans.factory.BeanFactory;
  * on the internal BeanFactory of a context, though, accessible through
  * ConfigurableApplicationContext's <code>getBeanFactory</code> method.
  *
+ * <p>To get access to an AutowireCapableBeanFactory, you can also
+ * implement the BeanFactoryAware interface, which exposes the internal
+ * BeanFactory even when running in an ApplicationContext. Simply cast
+ * the passed-in BeanFactory to AutowireCapableBeanFactory.
+ *
  * @author Juergen Hoeller
  * @since 04.12.2003
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
+ * @see org.springframework.beans.factory.BeanFactoryAware
  * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
  * @see org.springframework.context.ConfigurableApplicationContext#getBeanFactory
  */
@@ -119,7 +125,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Apply BeanPostProcessors to the given existing bean instance,
-	 * invoking their postProcessBeforeInitialization methods.
+	 * invoking their <code>postProcessBeforeInitialization</code> methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean
@@ -130,10 +136,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException;
 
-
 	/**
 	 * Apply BeanPostProcessors to the given existing bean instance,
-	 * invoking their postProcessAfterInitialization methods.
+	 * invoking their <code>postProcessAfterInitialization</code> methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean

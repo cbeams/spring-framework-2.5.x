@@ -53,7 +53,6 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		parent.registerBeanDefinition("rod",
 			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 
-		// Load from classpath, NOT a file path
 		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
 			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
@@ -141,8 +140,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 	public void testCommentsAndCdataInValue() {
 		TestBean bean = (TestBean) getBeanFactory().getBean("commentsInValue");
-		assertEquals("Failed to handle comments and CDATA properly",
-								 "this is a <!--comment-->", bean.getName());
+		assertEquals("Failed to handle comments and CDATA properly", "this is a <!--comment-->", bean.getName());
 	}
 
 }
