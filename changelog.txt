@@ -67,6 +67,7 @@ Package org.springframework.remoting
 
 Package org.springframework.scheduling
 * SchedulerFactoryBean reschedules triggers in case of "overwriteExistingJobs", to update triggers of persistent jobs
+* SchedulerFactoryBean auto-detects Quartz 1.4 vs 1.3, invoking the appropriate "addCalendar" method via reflection
 
 Package org.springframework.transaction
 * fixed TransactionAspectSupport's after-returning behavior to always call commit even if transaction is not new
