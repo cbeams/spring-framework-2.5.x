@@ -96,7 +96,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.34 2004-05-18 12:25:45 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.35 2004-05-19 08:28:20 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -124,15 +124,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
-	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
-	 * Only used when "detectAllViewResolvers" is turned off.
+	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
+	 * Only used when "detectAllHandlerMappings" is turned off.
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
 
 	/**
-	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
-	 * Only used when "detectAllViewResolvers" is turned off.
+	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this
+	 * namespace. Only used when "detectAllHandlerExceptionResolvers" is turned off.
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";

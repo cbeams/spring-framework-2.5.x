@@ -57,9 +57,9 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @author Juergen Hoeller
  * @see #setNamespace
  * @see #setConfigLocations
+ * @see #getResourcePatternResolver
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
- * @see org.springframework.util.PathMatcher#retrieveMatchingFiles
  * @see org.springframework.context.support.AbstractApplicationContext#getResource
  * @see org.springframework.ui.context.ThemeSource
  */

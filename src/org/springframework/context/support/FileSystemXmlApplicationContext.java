@@ -44,7 +44,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @see org.springframework.util.PathMatcher#retrieveMatchingFiles
+ * @see #getResourcePatternResolver
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 

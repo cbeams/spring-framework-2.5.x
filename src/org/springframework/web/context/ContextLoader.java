@@ -73,11 +73,13 @@ public class ContextLoader {
 
 	/**
 	 * Name of servlet context parameter that can specify the config location
-	 * for the root context, falling back to DEFAULT_CONFIG_LOCATION.
+	 * for the root context, falling back to the implementation's default else.
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext#DEFAULT_CONFIG_LOCATION
 	 */
 	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
+
 
 	/**
 	 * Initialize Spring's web application context for the given servlet context,
