@@ -408,15 +408,15 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.execute
 	 */
-	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo sessionExecution,
+	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
-		Assert.isTrue(sessionExecution.isActive(),
+		Assert.isTrue(flowExecutionInfo.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
-		FlowExecutionStack sessionExecutionInternal = ((FlowExecutionStack)sessionExecution);
-		fireRequestSubmitted(sessionExecutionInternal, request);
-		TransitionableState state = sessionExecutionInternal.getActiveFlow().getRequiredTransitionableState(stateId);
-		ViewDescriptor view = state.execute(eventId, sessionExecutionInternal, request, response);
-		fireRequestProcessed(sessionExecutionInternal, request);
+		FlowExecutionStack flowExecution = ((FlowExecutionStack)flowExecutionInfo);
+		fireRequestSubmitted(flowExecution, request);
+		TransitionableState state = flowExecution.getActiveFlow().getRequiredTransitionableState(stateId);
+		ViewDescriptor view = state.execute(eventId, flowExecution, request, response);
+		fireRequestProcessed(flowExecution, request);
 		return view;
 	}
 

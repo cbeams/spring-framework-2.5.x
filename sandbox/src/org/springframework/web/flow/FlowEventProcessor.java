@@ -96,7 +96,7 @@ public interface FlowEventProcessor {
 	 *         or if the <code>stateId</code> does not map to a valid flow
 	 *         state.
 	 */
-	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo sessionExecution,
+	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 
 }
