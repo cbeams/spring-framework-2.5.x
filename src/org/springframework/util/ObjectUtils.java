@@ -22,8 +22,10 @@ package org.springframework.util;
  * comprehensive suite of object utilities.
  * @author Juergen Hoeller
  * @author Keith Donald
+ * @author Rod Johnson
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
+ * @version $Id: ObjectUtils.java,v 1.4 2004-06-30 15:35:54 johnsonr Exp $
  */
 public abstract class ObjectUtils {
 
@@ -46,5 +48,24 @@ public abstract class ObjectUtils {
 	public static String getIdentityHexString(Object o) {
 		return Integer.toHexString(System.identityHashCode(o));
 	}
+	
+	public static boolean isCheckedException(Throwable t) {
+		return (t instanceof Exception) && (!(t instanceof RuntimeException));
+	}
+	
+	public static boolean isCompatibleWithThrowsClause(Throwable t, Class[] declaredExceptions) {
+		if (t instanceof RuntimeException) {
+			return true;
+		}
+		if (declaredExceptions != null) {
+			for (int i = 0; i < declaredExceptions.length; i++) {
+				if (declaredExceptions[i].isAssignableFrom(t.getClass())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 
 }
