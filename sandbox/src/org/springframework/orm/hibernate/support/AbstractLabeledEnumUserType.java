@@ -60,10 +60,6 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 		return new int[] { persistentType().sqlType() };
 	}
 
-	protected String enumType() {
-		return returnedClass().getName();
-	}
-
 	public boolean equals(Object o1, Object o2) throws HibernateException {
 		return ObjectUtils.nullSafeEquals(o1, o2);
 	}
@@ -81,13 +77,13 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 	}
 
 	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
-		Comparable code = (Comparable)persistentType().nullSafeGet(rs, names[0]);
+		Comparable code = (Comparable) persistentType().nullSafeGet(rs, names[0]);
 		if (code == null) {
 			return null;
 		}
-		LabeledEnum e = resolver.getLabeledEnum(enumType(), code);
+		LabeledEnum e = resolver.getLabeledEnum(returnedClass(), code);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
+			logger.debug("Resolved enum '" + e + "' of type '" + returnedClass() + "' from persisted code " + code);
 		}
 		return e;
 	}
@@ -97,7 +93,7 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
 					+ value.getClass() + "]");
 		}
-		LabeledEnum codedEnum = (LabeledEnum)value;
+		LabeledEnum codedEnum = (LabeledEnum) value;
 		Comparable code = null;
 		if (codedEnum != null) {
 			code = codedEnum.getCode();

@@ -52,7 +52,7 @@ public class LabeledEnumFormatter extends AbstractFormatter {
 	}
 
 	protected Object doParseValue(String label) throws IllegalArgumentException {
-		LabeledEnum labeledEnum = this.resolver.getLabeledEnum(getValueClass().getName(), label);
+		LabeledEnum labeledEnum = this.resolver.getLabeledEnum(getValueClass(), label);
 		if (!isAllowEmpty()) {
 			Assert.notNull(labeledEnum, "The label '" + label + "' did not map to a valid enum instance for type "
 					+ getValueClass());

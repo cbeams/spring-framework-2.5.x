@@ -18,7 +18,6 @@ package org.springframework.util.enums;
 
 import junit.framework.TestCase;
 
-import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
@@ -28,15 +27,19 @@ import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 public class LabeledEnumTests extends TestCase {
 
 	public void testForCodeFound() {
-		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 11));
-		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 13));
+		Dog golden = (Dog)StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)11));
+		Dog borderCollie = (Dog)StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
 	public void testDoesNotMatchWrongClass() {
-		LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short) 1));
-		assertEquals(null, none);
+		try {
+			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)1));
+			fail("Should have failed");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
 	}
 
 	public void testEquals() {
@@ -53,7 +56,6 @@ public class LabeledEnumTests extends TestCase {
 			super(code, name);
 		}
 	}
-
 
 	public static class Dog extends ShortCodedLabeledEnum {
 

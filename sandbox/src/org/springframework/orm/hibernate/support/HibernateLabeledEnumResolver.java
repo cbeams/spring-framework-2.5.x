@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.support.Block;
 import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.LabeledEnumResolver;
@@ -37,7 +37,7 @@ import org.springframework.util.enums.LabeledEnumResolver;
 public class HibernateLabeledEnumResolver implements LabeledEnumResolver {
 
 	private final Log logger = LogFactory.getLog(getClass());
-	
+
 	private HibernateTemplate hibernateTemplate;
 
 	public HibernateLabeledEnumResolver(HibernateTemplate template) {
@@ -45,49 +45,43 @@ public class HibernateLabeledEnumResolver implements LabeledEnumResolver {
 		this.hibernateTemplate = template;
 	}
 
-	public LabeledEnum getLabeledEnum(String type, Comparable code) {
+	public LabeledEnum getLabeledEnum(Class type, Comparable code) throws IllegalArgumentException {
 		try {
-			Class clazz = ClassUtils.forName(type);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Loading coded enum persistent implementation class '" + clazz.getName() + "' with id '"
+				logger.debug("Loading coded enum persistent implementation class '" + type.getName() + "' with id '"
 						+ code + "'");
 			}
-			return (LabeledEnum)hibernateTemplate.load(clazz, (Serializable)code);
-		}
-		catch (ClassNotFoundException e) {
-			IllegalArgumentException iae = new IllegalArgumentException(
-					"The type must be a valid java class identifier");
-			iae.initCause(e);
-			throw iae;
-		}
-		catch (ClassCastException e) {
+			LabeledEnum le = (LabeledEnum)hibernateTemplate.get(type, (Serializable)code);
+			if (le == null) {
+				throw new IllegalArgumentException("No labeled enum instance found of type '" + type + "' with code '"
+						+ code + "'");
+			}
+			return le;
+		} catch (ClassCastException e) {
 			IllegalArgumentException iae = new IllegalArgumentException("The code must be a serializable");
 			iae.initCause(e);
 			throw iae;
 		}
 	}
 
-	public LabeledEnum getLabeledEnum(String type, String label) {
-		throw new UnsupportedOperationException();
+	public LabeledEnum getLabeledEnum(Class type, String label) throws IllegalArgumentException {
+		LabeledEnum le = (LabeledEnum)DataAccessUtils.uniqueResult(hibernateTemplate.find("from " + type
+				+ " t where t.label == '" + label + "'"));
+		if (le == null) {
+			throw new IllegalArgumentException("No labeled enum instance found of type '" + type + "' with label '"
+					+ label + "'");
+		}
+		return le;
 	}
 
-	public Collection getLabeledEnumCollection(String type) {
-		try {
-			Class clazz = ClassUtils.forName(type);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading all coded enum persistent implementations of class '" + clazz.getName());
-			}
-			return (Collection)hibernateTemplate.loadAll(clazz);
+	public Collection getLabeledEnumCollection(Class type) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loading all coded enum persistent implementations of class '" + type.getName());
 		}
-		catch (ClassNotFoundException e) {
-			IllegalArgumentException iae = new IllegalArgumentException(
-					"The type must be a valid java class identifier");
-			iae.initCause(e);
-			throw iae;
-		}
+		return (Collection)hibernateTemplate.loadAll(type);
 	}
 
-	public Map getLabeledEnumMap(String type) {
+	public Map getLabeledEnumMap(Class type) {
 		Collection all = getLabeledEnumCollection(type);
 		final Map map = new HashMap(all.size());
 		new Block() {
