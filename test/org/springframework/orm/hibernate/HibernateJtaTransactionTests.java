@@ -23,7 +23,6 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
-import javax.transaction.xa.XAResource;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
@@ -258,7 +257,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockTransaction transaction = new MockTransaction();
+		MockJtaTransaction transaction = new MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
@@ -577,7 +576,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 	public void testJtaSessionSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockTransaction transaction = new MockTransaction();
+		MockJtaTransaction transaction = new MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
@@ -632,8 +631,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 	public void testJtaSessionSynchronizationWithSuspendedTransaction() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockTransaction transaction1 = new MockTransaction();
-		MockTransaction transaction2 = new MockTransaction();
+		MockJtaTransaction transaction1 = new MockJtaTransaction();
+		MockJtaTransaction transaction2 = new MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 5);
 		tm.getTransaction();
@@ -712,7 +711,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 	public void testJtaSessionSynchronizationWithNonSessionFactoryImplementor() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		MockTransaction transaction = new MockTransaction();
+		MockJtaTransaction transaction = new MockJtaTransaction();
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
@@ -771,41 +770,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-	}
-
-
-	private static class MockTransaction implements javax.transaction.Transaction {
-
-		private Synchronization synchronization;
-
-		public int getStatus() {
-			return Status.STATUS_ACTIVE;
-		}
-
-		public void registerSynchronization(Synchronization synchronization) {
-			this.synchronization = synchronization;
-		}
-
-		private Synchronization getSynchronization() {
-			return synchronization;
-		}
-
-		public boolean delistResource(XAResource xaResource, int i) {
-			return false;
-		}
-
-		public boolean enlistResource(XAResource xaResource) {
-			return false;
-		}
-
-		public void commit() {
-		}
-
-		public void rollback() {
-		}
-
-		public void setRollbackOnly() {
-		}
 	}
 
 }
