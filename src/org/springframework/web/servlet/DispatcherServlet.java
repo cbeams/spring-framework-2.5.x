@@ -79,7 +79,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.26 2004-02-02 11:26:57 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.27 2004-02-06 18:04:44 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -392,7 +392,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Exception ex) {
 				ModelAndView exMv = null;
 				for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-					exMv = ((HandlerExceptionResolver) it.next()).resolveException(ex, mappedHandler.getHandler());
+					HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
+					exMv = resolver.resolveException(request, response, mappedHandler.getHandler(), ex);
 				}
 				if (exMv != null) {
 					if (logger.isDebugEnabled()) {

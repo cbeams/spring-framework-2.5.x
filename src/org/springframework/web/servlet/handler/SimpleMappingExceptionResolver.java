@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,11 +44,11 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
 
-	public final void setOrder(int order) {
+	public void setOrder(int order) {
 	  this.order = order;
 	}
 
-	public final int getOrder() {
+	public int getOrder() {
 	  return order;
 	}
 
@@ -92,9 +95,11 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 
-	public ModelAndView resolveException(Exception ex, Object handler) {
+	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
+	                                     Object handler, Exception ex) {
 		// check for specific mappings
-		if (this.mappedHandlers == null || this.mappedHandlers.contains(handler)) {
+		if (this.exceptionMappings != null &&
+		    (this.mappedHandlers == null || this.mappedHandlers.contains(handler))) {
 			for (Iterator it = this.exceptionMappings.keySet().iterator(); it.hasNext();) {
 				Class exceptionClass = (Class) it.next();
 				if (exceptionClass.isInstance(ex)) {
