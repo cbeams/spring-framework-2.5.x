@@ -24,7 +24,7 @@ import java.io.StringWriter;
  * implementation class.
  *
  * <p>We want to use the more efficient Java 1.4 StackTraceElement if we can,
- * and we don't want to impose a runtime dependency on 1.4.
+ * but we don't want to impose a runtime dependency on JDK 1.4.
  *
  * @author Rod Johnson
  */
@@ -44,8 +44,9 @@ public abstract class ControlFlowFactory {
 	 * However, they are useful in some cases.
 	 * <p>This implementation uses the StackTraceElement class introduced in Java 1.4.
 	 * @author Rod Johnson
+	 * @see java.lang.StackTraceElement
 	 */
-	private static class Jdk14ControlFlow implements ControlFlow {
+	static class Jdk14ControlFlow implements ControlFlow {
 
 		private StackTraceElement[] stack;
 
@@ -110,7 +111,7 @@ public abstract class ControlFlowFactory {
 	 * (through constructing a new throwable). However, they are useful in some cases.
 	 * @author Rod Johnson
 	 */
-	private static class Jdk13ControlFlow implements ControlFlow {
+	static class Jdk13ControlFlow implements ControlFlow {
 
 		private String stackTrace;
 
