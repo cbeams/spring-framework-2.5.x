@@ -57,7 +57,7 @@ public abstract class FlowNavigationException extends NestedRuntimeException {
 	/**
 	 * Returns the flow in which the navigation exception occured.
 	 */
-	protected Flow getFlow() {
+	public Flow getFlow() {
 		return flow;
 	}
 }

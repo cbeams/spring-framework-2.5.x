@@ -62,15 +62,15 @@ public class NoSuchTransitionException extends FlowNavigationException {
 	}
 
 	/**
-	 * @return Returns the event that occured that could not be handled.
+	 * Returns the event that occured that could not be handled.
 	 */
 	public Event getEvent() {
 		return event;
 	}
 
 	/**
-	 * @return Returns the state that could not execute a transition on the
-	 *         occurence of the event.
+	 * Returns the state that could not execute a transition on the
+	 * occurence of the event.
 	 */
 	public TransitionableState getState() {
 		return state;

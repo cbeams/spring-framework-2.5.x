@@ -52,7 +52,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	
 	/**
 	 * Returns the id of the state that was not found.
-	 * @return The state id
+	 * @return the state id
 	 */
 	public String getStateId() {
 		return stateId;
