@@ -25,6 +25,9 @@ public abstract class ExpressionEvaluationUtils {
 
 	/**
 	 * Check if the given expression value is an EL expression.
+	 * @param the expression to check
+	 * @return <code>true</code> if the expression is an EL expression,
+	 * <code>false</code> otherwise
 	 */
 	public static boolean isExpressionLanguage(String value) {
 		return value.indexOf("${") != -1;
