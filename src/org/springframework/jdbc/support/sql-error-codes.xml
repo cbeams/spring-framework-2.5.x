@@ -2,13 +2,13 @@
 	
 <beans>
 
-	<!--
-		-	If the Database Product Name contains characters that are invalid
-		-   to use in the id attribute (like a space) then we need to 
-		-	add a property named "databaseProductName" that holds this value.
-		-   If this property is present, then it will be used instead of the id for
-		-   looking up the error codes based on the current database.
-		-->
+  <!--
+    -  If the Database Product Name contains characters that are invalid
+    -  to use in the id attribute (like a space) then we need to 
+    -  add a property named "databaseProductName" that holds this value.
+    -  If this property is present, then it will be used instead of the id for
+    -  looking up the error codes based on the current database.
+    -->
 
   <bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
     <property name="badSqlGrammarCodes"><value>-204,-206,-301,-408</value></property>
@@ -47,6 +47,12 @@
     <property name="useSqlStateForTranslation"><value>true</value></property>
     <property name="badSqlGrammarCodes"><value>03000,42000,42601,42803,42602,42622,42939,42804,42P18,42809,42703,42883,42P01,42P02,42704</value></property>
     <property name="dataIntegrityViolationCodes"><value>23000,23001,23502,23503,23505,23514</value></property>
+  </bean>
+
+  <bean id="Sybase" class="org.springframework.jdbc.support.SQLErrorCodes">
+    <property name="databaseProductName"><value>Sybase SQL Server</value></property>
+    <property name="badSqlGrammarCodes"><value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value></property>
+    <property name="dataIntegrityViolationCodes"><value>423,511,515,530,547,2601,2615,2714</value></property>
   </bean>
 
 </beans>
