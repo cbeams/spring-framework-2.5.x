@@ -130,15 +130,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected AbstractFlowBuilder() {
 		super();
 	}
-	
+
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator) {
 		super(flowServiceLocator);
 	}
-	
+
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
 		super(flowServiceLocator, flowCreator);
 	}
-	
+
 	public final void init() throws FlowBuilderException {
 		setFlow(createFlow(flowId()));
 	}
@@ -202,16 +202,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param subFlowId the id of the Flow definition to retieve and to be
 	 *        spawned as a subflow (could also be the ID of a FlowFactoryBean
 	 *        that produces the Flow)
-	 * @param attributesMapperId The id of the attributes mapper, to map
+	 * @param attributesMapperIdPrefix The id of the attributes mapper, to map
 	 *        attributes between the the flow built by this builder and the sub
 	 *        flow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
 	 */
-	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId,
+	protected void addSubFlowState(String id, String subFlowId, String attributesMapperIdPrefix,
 			String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperId), subFlowDefaultFinishStateId);
+		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperIdPrefix),
+				subFlowDefaultFinishStateId);
 	}
 
 	/**
@@ -219,9 +220,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * ID.
 	 * @param id the state id
 	 * @param subFlow the Flow definition to be spawned as a subflow
-	 * @param attributesMapperId The id of the attributes mapper, to map
-	 *        attributes between the the flow built by this builder and the sub
-	 *        flow
+	 * @param attributesMapper The attributes mapper to map attributes between
+	 *        the the flow built by this builder and the sub flow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        sub flow ends (this assumes you always transition to the same
 	 *        state regardless of which EndState is reached in the subflow)
@@ -261,13 +261,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param id the state id
 	 * @param subFlowId the id of the Flow definition to retieve (could also be
 	 *        the ID of a FlowFactoryBean that produces the Flow)
-	 * @param attributesMapperId The id of the attributes mapper to map
+	 * @param attributesMapperIdPrefix The id of the attributes mapper to map
 	 *        attributes between the the flow built by this builder and the sub
 	 *        flow
 	 * @param transitions The eligible set of state transitions
 	 */
-	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
-		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperId), transitions);
+	protected void addSubFlowState(String id, String subFlowId, String attributesMapperIdPrefix,
+			Transition[] transitions) {
+		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperIdPrefix), transitions);
 	}
 
 	/**
@@ -2187,7 +2188,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected String join(String prefix, String suffix) {
-		return prefix + DOT_SEPARATOR + suffix;
+		return prefix + getQualifierDelimiter() + suffix;
+	}
+
+	/**
+	 * @return
+	 */
+	protected String getQualifierDelimiter() {
+		return DOT_SEPARATOR;
 	}
 
 	/**
@@ -2197,7 +2205,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected String attributesMapper(String attributesMapperIdPrefix) {
 		Assert.notNull(attributesMapperIdPrefix, "The attributes mapper id prefix is required");
 		if (!attributesMapperIdPrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
-			return attributesMapperIdPrefix + DOT_SEPARATOR + ATTRIBUTES_MAPPER_ID_SUFFIX;
+			return attributesMapperIdPrefix + getQualifierDelimiter() + ATTRIBUTES_MAPPER_ID_SUFFIX;
 		}
 		else {
 			return attributesMapperIdPrefix;

@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,8 +25,10 @@ import junit.framework.TestCase;
 
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowAttributesMapper;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
@@ -43,7 +48,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	private static String PERSON_DETAILS = "personDetails";
 
 	public void testDependencyLookup() {
-		TestMasterFlowDependencyLookup master = new TestMasterFlowDependencyLookup();
+		TestMasterFlowBuilderLookupById master = new TestMasterFlowBuilderLookupById();
 		master.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
 			public Action getAction(String actionId) throws ServiceLookupException {
 				return new NoOpAction();
@@ -51,9 +56,18 @@ public class AbstractFlowBuilderTests extends TestCase {
 
 			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if (flowDefinitionId.equals(PERSON_DETAILS)) {
-					BaseFlowBuilder builder = new TestFlowDependencyLookup();
+					BaseFlowBuilder builder = new TestDetailFlowBuilderLookupById();
 					builder.setFlowServiceLocator(this);
 					return new FlowFactoryBean(builder).getFlow();
+				}
+				else {
+					throw new UnsupportedOperationException();
+				}
+			}
+
+			public FlowAttributesMapper getFlowAttributesMapper(String id) throws ServiceLookupException {
+				if (id.equals("personId.attributesMapper")) {
+					return new PersonIdMapper();
 				}
 				else {
 					throw new UnsupportedOperationException();
@@ -74,7 +88,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	public void testNoBeanFactorySet() {
-		TestMasterFlowDependencyLookup master = new TestMasterFlowDependencyLookup();
+		TestMasterFlowBuilderLookupById master = new TestMasterFlowBuilderLookupById();
 		try {
 			new FlowFactoryBean(master).getFlow();
 			fail("Should have failed, no bean factory set for default bean factory flow service locator");
@@ -84,7 +98,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	}
 
-	private class TestMasterFlowDependencyLookup extends AbstractFlowBuilder {
+	public class TestMasterFlowBuilderLookupById extends AbstractFlowBuilder {
 		protected String flowId() {
 			return PERSONS_LIST;
 		}
@@ -92,12 +106,69 @@ public class AbstractFlowBuilderTests extends TestCase {
 		public void buildStates() {
 			addGetState(PERSONS_LIST);
 			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, PERSON_DETAILS, null, get(PERSONS_LIST));
+			addSubFlowState(PERSON_DETAILS, PERSON_DETAILS, "personId", get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}
 
-	private class TestFlowDependencyLookup extends AbstractFlowBuilder {
+	public class TestMasterFlowBuilderLookupByType extends AbstractFlowBuilder {
+		protected String flowId() {
+			return PERSONS_LIST;
+		}
+
+		public void buildStates() {
+			addGetState(PERSONS_LIST, executeAction(NoOpAction.class));
+			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
+			addSubFlowState(PERSON_DETAILS, TestDetailFlowBuilderLookupByType.class,
+					useAttributesMapper(PersonIdMapper.class), get(PERSONS_LIST));
+			addFinishEndState();
+		}
+	}
+
+	public class TestMasterFlowBuilderDependencyInjection extends AbstractFlowBuilder {
+		private NoOpAction noOpAction;
+
+		private Flow subFlow;
+
+		private PersonIdMapper personIdMapper;
+
+		public void setNoOpAction(NoOpAction noOpAction) {
+			this.noOpAction = noOpAction;
+		}
+
+		public void setPersonIdMapper(PersonIdMapper personIdMapper) {
+			this.personIdMapper = personIdMapper;
+		}
+
+		public void setSubFlow(Flow subFlow) {
+			this.subFlow = subFlow;
+		}
+
+		protected String flowId() {
+			return PERSONS_LIST;
+		}
+
+		public void buildStates() {
+			addGetState(PERSONS_LIST, noOpAction);
+			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
+			addSubFlowState(PERSON_DETAILS, subFlow, personIdMapper, get(PERSONS_LIST));
+			addFinishEndState();
+		}
+	}
+
+	public static class PersonIdMapper implements FlowAttributesMapper {
+		public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+			Map inputMap = new HashMap(1);
+			inputMap.put("personId", parentFlowModel.getAttribute("personId"));
+			return inputMap;
+		}
+
+		public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
+				MutableAttributesAccessor parentFlowModel) {
+		}
+	}
+
+	private class TestDetailFlowBuilderLookupById extends AbstractFlowBuilder {
 		protected String flowId() {
 			return PERSON_DETAILS;
 		}
@@ -110,7 +181,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	}
 
-	private class TestFlowTypeSafeDependencyLookup extends AbstractFlowBuilder {
+	public class TestDetailFlowBuilderLookupByType extends AbstractFlowBuilder {
 		protected String flowId() {
 			return PERSON_DETAILS;
 		}
@@ -123,7 +194,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	};
 
-	private class TestFlowTypeSafeDependencyInjection extends AbstractFlowBuilder {
+	public static class TestDetailFlowBuilderDependencyInjection extends AbstractFlowBuilder {
 
 		private NoOpAction noOpAction;
 
@@ -146,7 +217,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	/**
 	 * Action bean stub that does nothing, just returns a "success" result
 	 */
-	private final class NoOpAction extends AbstractAction {
+	public static final class NoOpAction extends AbstractAction {
 		public String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws Exception {
 			return success();
