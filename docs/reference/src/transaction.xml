@@ -182,16 +182,44 @@
 
     <para>show Hibernate also from PetClinic</para>
 
-    <para></para>
+    <para>In this case, we need</para>
+
+    <para>The DataSource bean definition will be as above</para>
+
+    <para><programlisting>&#60;bean id=&#34;sessionFactory&#34; class=&#34;org.springframework.orm.hibernate.LocalSessionFactoryBean&#34;&#62;
+    &#60;property name=&#34;dataSource&#34;&#62;&#60;ref local=&#34;dataSource&#34;/&#62;&#60;/property&#62;
+    &#60;property name=&#34;mappingResources&#34;&#62;
+        &#60;value&#62;org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml&#60;/value&#62;
+    &#60;/property&#62;
+    &#60;property name=&#34;hibernateProperties&#34;&#62;
+        &#60;props&#62;
+            &#60;prop key=&#34;hibernate.dialect&#34;&#62;${hibernate.dialect}&#60;/prop&#62;
+        &#60;/props&#62;
+    &#60;/property&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;transactionManager&#34; 
+    class=&#34;org.springframework.orm.hibernate.HibernateTransactionManager&#34;&#62;
+    &#60;property name=&#34;sessionFactory&#34;&#62;&#60;ref local=&#34;sessionFactory&#34;/&#62;&#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+    <para>With Hibernate and JTA transactions</para>
+
+    <para><programlisting>&#60;bean id=&#34;transactionManager&#34; 
+    class=&#34;org.springframework.transaction.jta.JtaTransactionManager&#34;/&#62;</programlisting></para>
+
+    <para>Note that this is identical to JTA configuration for any resource,
+    as these are global transactions, which can enlist any transactional
+    resource.</para>
 
     <para>How are resources associated with a transaction? HEADING 2</para>
 
     <para>DataSourceUtils formula, same for Hibernate</para>
 
     <para>Of course, once you&#39;ve used Spring&#39;s JDBC support or
-    Hibernate support you won&#39;t want to use DataSourceUtils or the other
-    helper classes, because you&#39;ll be much happier working via the Spring
-    abstraction than directly with the relevant APIs.</para>
+    Hibernate support you won&#39;t want to use <literal>DataSourceUtils</literal>
+    or the other helper classes, because you&#39;ll be much happier working
+    via the Spring abstraction than directly with the relevant APIs.</para>
   </sect1>
 
   <sect1>
@@ -217,10 +245,13 @@
 
     <para>The TransactionTemplate adopts the same approach as other Spring
     <emphasis>templates</emphasis> such as JdbcTemplate and HibernateTemplate.
-    It uses a callback approach. Like other templates, a TransactionTemplate
-    is threadsafe.</para>
+    It uses a callback approach, to free application code from the working of
+    acquiring and releasing resources. (No more try/catch/finally.) Like other
+    templates, a TransactionTemplate is threadsafe.</para>
 
-    <para>Application code that must execute in a transaction context uses</para>
+    <para>Application code that must execute in a transaction context looks
+    like this. Note that the TransactionCallback can be used to return a
+    value:</para>
 
     <para><programlisting>Object result = tt.execute(new TransactionCallback() {
     public Object doInTransaction(TransactionStatus status) {
@@ -229,7 +260,8 @@
     }
 });</programlisting></para>
 
-    <para>er</para>
+    <para>If there&#39;s no return value, use a <literal>TransactionCallbackWithoutResult</literal>:
+    </para>
 
     <para><programlisting>tt.execute(new TransactionCallbackWithoutResult() {
     protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -240,7 +272,14 @@
 
     <para>er</para>
 
-    <para></para>
+    <para>Application classes wishing to use the TransactionTemplate must have
+    access to a PlatformTransactionManager: usually exposed as a JavaBean
+    property or as a constructor argument.</para>
+
+    <para>It&#39;s easy to unit test such classes with a mock or stub
+    PlatformTransactionManager. There&#39;s no JNDI lookup or static magic
+    here: it&#39;s a simple interface. As usual, you can use Spring to
+    simplify your unit testing.</para>
 
     <para>er</para>
   </sect1>
@@ -281,7 +320,11 @@
       </listitem>
 
       <listitem>
-        <para></para>
+        <para>Spring gives you an opportunity to customize transactional
+        behaviour, using AOP. For example, if you want to insert custom
+        behaviour in the case of transaction rollback, you can. With EJB CMT,
+        you have no way to influence the container&#39;s transaction
+        management other than setRollbackOnly().</para>
       </listitem>
 
       <listitem>
@@ -301,8 +344,8 @@
     automatically on an <emphasis>application exception</emphasis> (checked
     exception other than <literal>java.rmi.RemoteException</literal>).</para>
 
-    <para>The performance of Spring declarative transaction management exceeds
-    that of EJB CMT, in benchmarks we have run.</para>
+    <para>On our benchmarks, the performance of Spring declarative transaction
+    management exceeds that of EJB CMT.</para>
 
     <para>ConFIGURATION</para>
 
@@ -355,8 +398,8 @@
   <sect1>
     <title>Common problems</title>
 
-    <para>Developers should take care to use the correct
-    PlatformTransactionManager for their requirements.</para>
+    <para>Developers should take care to use the correct <emphasis>PlatformTransactionManager</emphasis>
+    implementation for their requirements.</para>
 
     <para>It&#39;s important to understand how the Spring transaction
     abstraction works with JTA global transactions. Used properly, there is no
