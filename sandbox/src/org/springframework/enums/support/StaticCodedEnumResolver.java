@@ -76,6 +76,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
         }
         new CodedEnumFieldValueGenerator(clazz).run(new Block() {
             protected void handle(Object value) {
+            	System.out.println("Adding value " + value);
                 add((CodedEnum)value);
             }
         });
@@ -95,7 +96,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
         public CodedEnumFieldValueGenerator(Class clazz) {
             Assert.notNull(clazz, "clazz is required");
-            Assert.isTrue(CodedEnum.class.isAssignableFrom(clazz), "clazz '" + clazz + "' is not an enum");
             this.clazz = clazz;
         }
 
@@ -104,7 +104,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
-                    if (clazz.isAssignableFrom(field.getType())) {
+                    if (CodedEnum.class.isAssignableFrom(field.getType())) {
                         try {
                             Object value = field.get(null);
                             Assert.isTrue(CodedEnum.class.isInstance(value),
