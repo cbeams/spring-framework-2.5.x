@@ -170,6 +170,7 @@
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/metadata/**"/>
 			</fileset>
+			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
@@ -248,6 +249,20 @@
 		<jar jarfile="${dist.dir}/spring-orm.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/**"/>
+				<exclude name="org/springframework/orm/hibernate/**"/>
+				<exclude name="org/springframework/orm/hibernate3/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-hibernate.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/hibernate/**"/>
+				<include name="org/springframework/orm/hibernate3/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -268,6 +283,7 @@
 				<include name="META-INF/**"/>
 				<include name="org/springframework/**"/>
 			</fileset>
+			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
