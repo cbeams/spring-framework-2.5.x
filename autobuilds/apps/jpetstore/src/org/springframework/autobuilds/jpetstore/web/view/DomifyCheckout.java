@@ -10,12 +10,14 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.DOMOutputter;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.springframework.autobuilds.jpetstore.domain.*;
 import org.springframework.web.servlet.view.xslt.AbstractXsltView;
 import org.springframework.web.servlet.view.xslt.FormatHelper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 
@@ -56,10 +58,14 @@ public class DomifyCheckout extends AbstractXsltView {
         
         Locale locale = Locale.US;
         
-		// build it with jdom then convert to w3c (to keep our sanity)
-        Document doc = new Document();
-        Element root = new Element(rootName);
-        doc.setRootElement(root);
+        Document doc =
+            DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder()
+                .newDocument();
+
+        Element root = doc.createElement(rootName);
+        doc.appendChild(root);
         
         Cart cart = (Cart) map.get("cart");
         root.setAttribute("subTotal", FormatHelper.currency(cart.getSubTotal(), locale));
@@ -68,51 +74,51 @@ public class DomifyCheckout extends AbstractXsltView {
 		Iterator items = cart.getAllCartItems();
 		while (items.hasNext()) {
 			CartItem ci = (CartItem) items.next();
-			Element ciXml = new Element("cartItem");
-			root.addContent(ciXml);
+			Element ciXml = doc.createElement("cartItem");
 			ciXml.setAttribute("inStock", ci.isInStock() ? "Y" : "N");
 			ciXml.setAttribute("quantity", String.valueOf(ci.getQuantity()));
 			ciXml.setAttribute("totalPrice", FormatHelper.currency(ci.getTotalPrice(), locale));
-			
+            root.appendChild(ciXml);
+            
 			Item item = ci.getItem();
-			Element itemXml = new Element("item");
-			ciXml.addContent(itemXml);
+			Element itemXml = doc.createElement("item");
 			itemXml.setAttribute("id", item.getItemId());
 			itemXml.setAttribute("listPrice", FormatHelper.currency(item.getListPrice(), locale));
+            
 			if (item.getAttribute1() != null) {
-				Element attrib = new Element("attribute");
-				itemXml.addContent(attrib);
-				attrib.setText(item.getAttribute1());
+				Element attrib = doc.createElement("attribute");
+                attrib.appendChild(doc.createTextNode(item.getAttribute1()));
+                itemXml.appendChild(attrib);
 			}
 			if (item.getAttribute2() != null) {
-				Element attrib = new Element("attribute");
-				itemXml.addContent(attrib);
-				attrib.setText(item.getAttribute2());
+				Element attrib = doc.createElement("attribute");
+                attrib.appendChild(doc.createTextNode(item.getAttribute2()));
+                itemXml.appendChild(attrib);
 			}
 			if (item.getAttribute3() != null) {
-				Element attrib = new Element("attribute");
-				itemXml.addContent(attrib);
-				attrib.setText(item.getAttribute3());
+				Element attrib = doc.createElement("attribute");
+                attrib.appendChild(doc.createTextNode(item.getAttribute3()));
+                itemXml.appendChild(attrib);
 			}
 			if (item.getAttribute4() != null) {
-				Element attrib = new Element("attribute");
-				itemXml.addContent(attrib);
-				attrib.setText(item.getAttribute4());
+				Element attrib = doc.createElement("attribute");
+                attrib.appendChild(doc.createTextNode(item.getAttribute4()));
+                itemXml.appendChild(attrib);
 			}
 			if (item.getAttribute5() != null) {
-				Element attrib = new Element("attribute");
-				itemXml.addContent(attrib);
-				attrib.setText(item.getAttribute5());
+				Element attrib = doc.createElement("attribute");
+                attrib.appendChild(doc.createTextNode(item.getAttribute5()));
+                itemXml.appendChild(attrib);
 			}
+            ciXml.appendChild(itemXml);
 			
-			Element prod = new Element("productName");
-			itemXml.addContent(prod);
-			prod.setText(item.getProduct().getName());
+			Element prod = doc.createElement("productName");
+			prod.appendChild(doc.createTextNode(item.getProduct().getName()));
+            itemXml.appendChild(prod);
 
 		}
         
-        // convert & return
-        return new DOMOutputter().output(doc);
+        return doc;
     }
 
 }
