@@ -395,7 +395,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
 					// proceed with unprocessed value
-					startIndex = buf.indexOf(this.placeholderPrefix, endIndex);
+					startIndex = buf.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
