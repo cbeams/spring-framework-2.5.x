@@ -20,7 +20,11 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 
 /**
- * Service locator interface used by flows to retrieve needed artifacts.
+ * Service locator interface used by flow builders to retrieve needed artifacts.
+ * 
+ * <p>
+ * Note that a service locator is a configuration time object. It is not used
+ * during flow execution!
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
