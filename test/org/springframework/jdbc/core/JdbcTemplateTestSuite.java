@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.12 2004-02-07 00:19:21 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.13 2004-02-16 21:34:05 trisberg Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -1041,6 +1041,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			(DatabaseMetaData) ctrlDatabaseMetaData.getMock();
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
