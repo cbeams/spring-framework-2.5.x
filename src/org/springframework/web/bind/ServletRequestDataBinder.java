@@ -74,13 +74,12 @@ public class ServletRequestDataBinder extends DataBinder {
 	 */
 	public void bind(ServletRequest request) {
 		// bind normal HTTP parameters
-		bind(new ServletRequestParameterPropertyValues(request));
+		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 
 		// bind multipart files
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 			Map fileMap = multipartRequest.getFileMap();
-			MutablePropertyValues pvs = new MutablePropertyValues();
 			for (Iterator it = fileMap.keySet().iterator(); it.hasNext();) {
 				String key = (String) it.next();
 				MultipartFile value = (MultipartFile) fileMap.get(key);
@@ -88,8 +87,9 @@ public class ServletRequestDataBinder extends DataBinder {
 					pvs.addPropertyValue(key, value);
 				}
 			}
-			bind(pvs);
 		}
+		
+		bind(pvs);
 	}
 
 	/**
