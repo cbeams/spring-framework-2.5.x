@@ -533,6 +533,7 @@
       <report>maven-junit-report-plugin</report>
       <report>maven-clover-plugin</report>
       <report>maven-tasklist-plugin</report>
+      <report>maven-simian-plugin</report>
       <report>maven-jdepend-plugin</report>
    </reports>
 </project>
