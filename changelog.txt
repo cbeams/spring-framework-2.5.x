@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.62 2003-12-11 15:05:39 johnsonr Exp $
+$Id: changelog.txt,v 1.63 2003-12-12 19:49:16 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -10,15 +10,17 @@ Package org.springframework.aop
 * introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
 * introduced Before and Throws advice, in addition to interception Around advice
 * replaced InvokerInterceptor and ProxyInterceptor interface by TargetSource interface
-* removed exposeInvocation option in proxy factories
-* added org.springframework.aop.framework.adapter package allowing new Advisor and advice types to be supported without changing the basic AOP framework
-* significant reduction in overhead of AOP framework
+* removed "exposeInvocation" option in proxy factories
+* significantly reduced overhead of AOP framework
+* added aop.framework.adapter package to allow for new Advisor/advice types without changing the basic AOP framework
 
 Package org.springframework.beans
 * removed event propagation support in BeanWrapper
-* added registerCustomEditor(Class, PropertyEditor) convenience method to the BeanWrapper interface
-* added registerCustomEditor(Class, PropertyEditor) method to the ConfigurableBeanFactory interface
+* added FileEditor to standard PropertyEditors, for creating java.io.File instances from Strings
+* added "registerCustomEditor(Class, PropertyEditor)" convenience method to the BeanWrapper interface
+* added "registerCustomEditor(Class, PropertyEditor)" method to the ConfigurableBeanFactory interface
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
+* added "containsBeanDefinition" method to ListableBeanFactory interface (same as in BeanDefinitionRegistry)
 * introduced AutowireCapableBeanFactory interface, allowing for autowiring of externally managed bean instances
 * dissolved PropertyValuesProviderFactoryBean interface and AbstractFactoryBean convenience base class
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
@@ -26,6 +28,7 @@ Package org.springframework.beans
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * consider arrays of primitive wrappers as "simple" properties in the sense of dependency-check="simple"
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
+* added "beanClassLoader" property to AbstractBeanDefinitionReader, to override the thread context class loader
 * removed bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * added "allowBeanDefinitionOverriding" property in DefaultListableBeanFactory
 * added optional "description" element in XML bean definition documents to allow for user documentation
@@ -71,6 +74,11 @@ Package org.springframework.web
 * added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
 * introduced GenericFilterBean and OncePerRequestFilter base classes in package org.springframework.web.filter
 * reworked MultipartFilter to extend GenericFilterBean/OncePerRequestFilter
+* added "isEmpty" method to MultipartFile interface, for checking whether a file has been chosen in a multipart form
+* renamed CommonsMultipartResolver's "maximumFileSize"/"maximumInMemorySize" to "maxUploadSize"/"maxInMemorySize"
+* renamed CosMultipartResolver's "maximumFileSize" to "maxUploadSize"
+* reworked CommonsMultipartResolver's/CosMultipartResolver's "uploadTempDir" from String to java.io.File
+* fixed multipart cleanup with a local MultipartResolver in DispatcherServlet
 * added "getRequiredWebApplicationContext" method to WebApplicationContextUtils
 * dissolved support for exposing "config" objects as ServletContext attributes
 * introduced ConfigurableWebApplicationContext configuration interface instead of constructor requirements
@@ -78,12 +86,14 @@ Package org.springframework.web
 * allowed for overriding context creation in ContextLoader (now a full object) and FrameworkServlet
 * added "contextConfigLocation" property to FrameworkServlet, analogous to ContextLoader's
 * DispatcherServlet's default exception handling lets RuntimeExceptions straight through
-* HandlerMappings and HandlerInterceptors are allowed to throw any Exception
+* HandlerMappings, HandlerInterceptors, ViewResolvers, and Views are allowed to throw any Exception
 * allowed for on-demand fetching of prototype handlers in SimpleUrlHandlerMapping and BeanNameUrlHandlerMapping
+* removed UrlHandlerAware support in AbstractUrlHandlerMapping
 * added ModelAndView argument to HandlerInterceptor's "postHandle" method, for exposing additional model objects
 * added "afterCompletion" method to HandlerInterceptor, invoked on any outcome for proper resource cleanup
 * added HandlerInterceptorAdapter for simplified implementation of pre-only/post-only interceptors
-* dissolved UrlHandlerAware support in AbstractUrlHandlerMappinng
+* changed ServletExceptions in RequestContextUtils to IllegalStateExceptions
+* InternalResourceViewResolver and XmlViewResolver override getCacheKey for more efficient non-locale-aware caching
 * moved SimpleMappingExceptionResolver from package org.springframework.web.servlet.support to web.servlet.handler
 * moved UserRoleAuthorizationInterceptor from package org.springframework.web.servlet.support to web.servlet.handler
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
@@ -94,6 +104,8 @@ Package org.springframework.web
 * added additional "getTargetPage(request,command,errors,currentPage)" method to AbstractWizardFormController
 * introduced ThrowawayController and ValidatableThrowawayController for WebWork/Maverick-style controllers
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
+* removed "exposeDateFormatter" and "exposeCurrencyFormatter" properties in VelocityView
+* added "dateToolAttribute" to VelocityView, for exposing a DateTool instance (DateTool is from Velocity Tools)
 
 
 Changes in version 1.0 M3 (25.11.2003)
