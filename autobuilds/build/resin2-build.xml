@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: resin2-build.xml,v 1.4 2004-01-08 01:32:06 davison Exp $
+	$Id: resin2-build.xml,v 1.5 2004-06-07 23:35:18 davison Exp $
 -->
 <project name="autobuilds-resin2" basedir="." default="usage">
 
@@ -45,12 +45,30 @@ autobuilds directory for information.
 		
 	
 	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${resin2.url} to ${tarballs.dir}/${resin2.tarball}" />
+		<get
+			src="${resin2.url}"
+			dest="${tarballs.dir}/${resin2.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
 		extract-server
 		
 		extract server to installs area and configure from
 		local config files
 	-->
 	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${resin2.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
 		<untar 
 			compression="gzip" 
 			src="${tarballs.dir}/${resin2.tarball}"

@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.7 2004-02-25 00:35:35 davison Exp $
+ * @version $Id: readme.txt,v 1.8 2004-06-07 23:35:34 davison Exp $
  */
 
 
@@ -303,7 +303,6 @@ or if you'd like to see something moved up this list.
  - create remote webapp / socket listener to accept standard-format reports 
    from autobuilds and aggregate stats as html pages with links to the raw 
    build files.
- - http downloads implemented
  - allow d/load of .zip tarballs for 'doze
  - handle exceptions / build failures that leave the server(s) running
  - use gui testrunner as an option (build.props / based on -k option)?

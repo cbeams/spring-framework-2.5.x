@@ -6,14 +6,14 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: tomcat5-build.xml,v 1.6 2004-01-17 00:07:25 davison Exp $
+	$Id: tomcat5-build.xml,v 1.7 2004-06-07 23:35:19 davison Exp $
 -->
 <project name="autobuilds-tomcat5" basedir="." default="usage">
 
 	
 	<property name="appserver.distname" value="jakarta-tomcat-${tomcat5.version}" />
-	<property name="deploy.dir" value="webapps" />
-	
+	<property name="deploy.dir" value="webapps" />		
+			
 
 	<path id="server-classpath">
 		<fileset dir="${servers.install.dir}/${appserver.distname}/server/lib">
@@ -49,12 +49,30 @@ autobuilds directory for information.
 	
 	
 	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${tomcat5.url} to ${tarballs.dir}/${tomcat5.tarball}" />
+		<get
+			src="${tomcat5.url}"
+			dest="${tarballs.dir}/${tomcat5.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
 		extract-server
 		
 		extract server to installs area and configure from
 		local config files
 	-->
 	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${tomcat5.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
 		<untar 
 			compression="gzip" 
 			src="${tarballs.dir}/${tomcat5.tarball}"

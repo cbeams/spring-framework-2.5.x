@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: tomcat4-build.xml,v 1.7 2004-06-02 21:18:02 aarendsen Exp $
+	$Id: tomcat4-build.xml,v 1.8 2004-06-07 23:35:18 davison Exp $
 -->
 <project name="autobuilds-tomcat4" basedir="." default="usage">
 
@@ -50,12 +50,30 @@ autobuilds directory for information.
 	
 	
 	<!--
+		get-server
+		
+		d/l from url if we don't already have it
+	-->
+	<target name="get-server" unless="server.binary.present">
+		<echo message="Downloading ${tomcat4.url} to ${tarballs.dir}/${tomcat4.tarball}" />
+		<get
+			src="${tomcat4.url}"
+			dest="${tarballs.dir}/${tomcat4.tarball}" />	
+	</target>
+		
+		
+		
+	<!--
 		extract-server
 		
 		extract server to installs area and configure from
 		local config files
 	-->
 	<target name="extract-server">
+		<!-- check latest d/l available -->
+		<available file="${tarballs.dir}/${tomcat4.tarball}" property="server.binary.present"/>
+		<antcall target="get-server"/>
+		
 		<untar 
 			compression="gzip" 
 			src="${tarballs.dir}/${tomcat4.tarball}"

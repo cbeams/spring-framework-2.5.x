@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.10 2004-06-04 13:04:24 aarendsen Exp $
+	$Id: build.xml,v 1.11 2004-06-07 23:35:18 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -30,6 +30,9 @@
 	<property name="autobuilds.mail.from" value="autobuilds@springframework.org"/>
 	<property name="autobuilds.mail.failure.subject" value="Spring Autobuilds Failure Report"/>
 	
+	
+	<!-- server properties file with version numbers and download locations -->
+	<property file="servers.properties"/>
 	
 	<!-- build.properties is local per user -->
 	<property file="build.properties"/>
@@ -65,22 +68,7 @@
 	-->
 	<property name="tarballs.dir" value="${java.io.tmpdir}" />
 	
-	<!-- 
-		Version numbers and file names for each server that we can deploy to
-	-->	
-	<property name="tomcat4.version" value="4.1.30" />	
-	<property name="tomcat4.tarball" value="jakarta-tomcat-4.1.30.tar.gz" />
-	<property name="jboss3.version" value="3.2.3" />
-	<property name="jboss3.tarball" value="jboss-3.2.3.tgz" />
-	<property name="tomcat5.version" value="5.0.25" />
-	<property name="tomcat5.tarball" value="jakarta-tomcat-5.0.25.tar.gz" />
-	<property name="jetty4.version" value="4.2.17" />
-	<property name="jetty4.tarball" value="Jetty-4.2.17-all.tar.gz" />
-	<property name="resin2.version" value="2.1.11" />
-	<property name="resin2.tarball" value="resin-2.1.11.tar.gz" />
-	<property name="resin3.version" value="3.0.4" />
-	<property name="resin3.tarball" value="resin-3.0.4.tar.gz" />
-	
+		
 	<!--
 		server ports
 	-->
