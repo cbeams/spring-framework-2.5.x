@@ -51,18 +51,30 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private String password;
 
+	/**
+	 * Set the mail protocol. Default is SMTP.
+	 */
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
 
+	/**
+	 * Set the mail host, typically an SMTP host.
+	 */
 	public void setHost(String host) {
 		this.host = host;
 	}
 
+	/**
+	 * Set the username for the account at the mail host, if any.
+	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
+	/**
+	 * Set the password for the account at the mail host, if any.
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -88,6 +100,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				if (simpleMessage.getCc() != null) {
 					for (int j = 0; j < simpleMessage.getCc().length; j++) {
 						mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(simpleMessage.getCc()[j]));
+					}
+				}
+				if (simpleMessage.getBcc() != null) {
+					for (int j = 0; j < simpleMessage.getBcc().length; j++) {
+						mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(simpleMessage.getBcc()[j]));
 					}
 				}
 				if (simpleMessage.getSubject() != null) {

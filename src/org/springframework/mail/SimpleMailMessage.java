@@ -20,6 +20,8 @@ public class SimpleMailMessage {
 
 	private String[] cc;
 
+	private String[] bcc;
+
 	private String subject;
 
 	private String text;
@@ -38,6 +40,8 @@ public class SimpleMailMessage {
 		this.to = original.getTo();
 		this.cc = new String[original.getCc().length];
 		System.arraycopy(original.getCc(), 0, this.cc, 0, original.getCc().length);
+		this.bcc = new String[original.getBcc().length];
+		System.arraycopy(original.getCc(), 0, this.bcc, 0, original.getBcc().length);
 		this.subject = original.getSubject();
 		this.text = original.getText();
 	}
@@ -64,6 +68,14 @@ public class SimpleMailMessage {
 
 	public String[] getCc() {
 		return cc;
+	}
+
+	public void setBcc(String[] bcc) {
+		this.bcc = bcc;
+	}
+
+	public String[] getBcc() {
+		return bcc;
 	}
 
 	public void setSubject(String subject) {
