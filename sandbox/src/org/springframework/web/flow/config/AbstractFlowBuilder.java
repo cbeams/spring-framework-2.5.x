@@ -1,5 +1,17 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow.config;
 
@@ -15,6 +27,83 @@ import org.springframework.web.flow.ViewState;
 
 /**
  * Base class for flow builders that programmatically build flows.
+ * 
+ * <p>
+ * To give you an example of what a web flow definition might look like, the
+ * following piece of java code defines a web flow equivalent to the work flow
+ * implemented by Spring MVC's simple form controller:
+ * 
+ * <pre>
+ * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
+ *
+ *   public static final String PERSON_DETAILS = "personDetails";
+ * 
+ *   protected String flowId() {
+ *       return PERSON_DETAILS;
+ *   }
+ *   
+ *   public void buildStates() {
+ *       addGetState(PERSON_DETAILS));
+ *       addViewState(PERSON_DETAILS));
+ *       addBindAndValidateState(PERSON_DETAILS));
+ *       addDefaultEndState());
+ *   }
+ * </pre>
+ * 
+ * What this java-based FlowBuilder implementation does is add 4 states to the
+ * "personDetails" flow -- a "get action" state (the start state), a "view"
+ * state, a "bind and validate" action state, and a end marker state.
+ * 
+ * The first state, an action state, will be assigned the indentifier as
+ * 'personDetails.get'. This action state will automatically be configured with
+ * the following defaults:
+ * <ol>
+ * <li>A action bean named 'personDetails.get' - this is the name of the
+ * <code>ActionBean</code> instance that will execute when this state is
+ * entered. In this example, the <code>ActionBean</code> will go out to the
+ * DB, load the Person, and put it in the Flow's data model.
+ * <li>An "success" transition to a default view state, called
+ * 'personDetails.view'. This means when <code>ActionBean</code> returns a
+ * "success" result event (aka outcome), the 'viewPersonDetails' state will be
+ * transitioned to.
+ * <li>It will act as the start state for this flow.
+ * </ol>
+ * 
+ * The second state, a view state, will be identified as 'personDetails.view'.
+ * This view state will automatically be configured with the following defaults:
+ * <ol>
+ * <li>A view name called 'personDetails.view' - this is the logical name of a
+ * view resource. This logical view name gets mapped to a physical view resource
+ * (jsp, etc.) by the calling front controller.
+ * <li>A "submit" transition to a bind and validate action state, indentified
+ * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
+ * event is signaled by the view (for example, on a submit button click), the
+ * bindAndValidate action state will be entered and the '
+ * <code>personDetails.bindAndValidate</code>'<code>ActionBean</code> will
+ * be executed.
+ * </ol>
+ * 
+ * The third state, an action state, will be indentified as
+ * 'personDetails.bindAndValidate'. This action state will automatically be
+ * configured with the following defaults:
+ * <ol>
+ * <li>A action bean named 'personDetails.bindAndValidate' - this is the name
+ * of the <code>ActionBean</code> instance that will execute when this state
+ * is entered. In this example, the <code>ActionBean</code> will bind form
+ * input to a backing Person form object, validate it, and update the DB.
+ * <li>A "success" transition to a default end state, called 'finish'. This
+ * means if the <code>ActionBean</code> returns a "success" event, the
+ * 'finish' end state will be transitioned to and the flow will terminate.
+ * </ol>
+ * 
+ * The fourth and last state, a end state, will be indentified with the default
+ * end state ID 'finish'. This end state is a marker that signals the end of the
+ * flow. When entered, the flow session terminates, and if this flow is acting
+ * as a root flow in the current flow execution, any flow-allocated resources
+ * will be cleaned up. An end state can optionally be configured with a logical
+ * view name to forward to when entered. It will also trigger a state transition
+ * in a resuming parent flow, if this flow was participating as a spawned
+ * 'subflow' within a suspended parent flow.
  * 
  * @author Keith Donald
  */

@@ -27,8 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.flow.config.AbstractFlowBuilder;
-import org.springframework.web.flow.config.FlowBuilder;
 
 /**
  * Singleton definition of a web flow.
@@ -38,110 +36,38 @@ import org.springframework.web.flow.config.FlowBuilder;
  * typically fulfills a business process that takes place over a series of steps
  * (modeled as states.)
  * 
+ * <p>
  * Structurally, a Flow is composed of a set of states. A state is a point in
  * the flow where something happens; for instance, showing a view, executing an
  * action, or spawning a subflow.
  * 
+ * <p>
  * Each state has one or more transitions that are used to move to another
  * state. A transition is triggered by an event.
  * 
- * Each Flow has exactly one start state. A start state is simply a marker for
- * the state the Flow should transition to when a start event is signaled.
- * 
- * To give you an example of what a web flow definition might look like, the
- * following piece of java code defines a web flow equivalent to the work flow
- * implemented by Spring MVC's simple form controller:
  * <p>
+ * Each Flow has exactly one start state. A start state is simply a marker for
+ * the state the Flow execution should start in.
  * 
- * <pre>
- * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
- *
- *   public static final String PERSON_DETAILS = "personDetails";
- * 
- *   protected String flowId() {
- *       return PERSON_DETAILS;
- *   }
- *   
- *   public void buildStates() {
- *       addGetState(PERSON_DETAILS));
- *       addViewState(PERSON_DETAILS));
- *       addBindAndValidateState(PERSON_DETAILS));
- *       addDefaultEndState());
- *   }
- * </pre>
- * 
- * What this java-based FlowBuilder implementation does is add 4 states to the
- * "personDetails" flow -- a "get action" state (the start state), a "view"
- * state, a "bind and validate" action state, and a end marker state.
- * 
- * The first state, an action state, will be assigned the indentifier as
- * 'personDetails.get'. This action state will automatically be configured with
- * the following defaults:
- * <ol>
- * <li>A action bean named 'personDetails.get' - this is the name of the
- * <code>ActionBean</code> instance that will execute when this state is
- * entered. In this example, the <code>ActionBean</code> will go out to the
- * DB, load the Person, and put it in the Flow's data model.
- * <li>An "success" transition to a default view state, called
- * 'personDetails.view'. This means when <code>ActionBean</code> returns a
- * "success" result event (aka outcome), the 'viewPersonDetails' state will be
- * transitioned to.
- * <li>It will act as the start state for this flow.
- * </ol>
- * 
- * The second state, a view state, will be identified as 'personDetails.view'.
- * This view state will automatically be configured with the following defaults:
- * <ol>
- * <li>A view name called 'personDetails.view' - this is the logical name of a
- * view resource. This logical view name gets mapped to a physical view resource
- * (jsp, etc.) by the calling front controller.
- * <li>A "submit" transition to a bind and validate action state, indentified
- * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
- * event is signaled by the view (for example, on a submit button click), the
- * bindAndValidate action state will be entered and the '
- * <code>personDetails.bindAndValidate</code>'<code>ActionBean</code> will
- * be executed.
- * </ol>
- * 
- * The third state, an action state, will be indentified as
- * 'personDetails.bindAndValidate'. This action state will automatically be
- * configured with the following defaults:
- * <ol>
- * <li>A action bean named 'personDetails.bindAndValidate' - this is the name
- * of the <code>ActionBean</code> instance that will execute when this state
- * is entered. In this example, the <code>ActionBean</code> will bind form
- * input to a backing Person form object, validate it, and update the DB.
- * <li>A "success" transition to a default end state, called 'finish'. This
- * means if the <code>ActionBean</code> returns a "success" event, the
- * 'finish' end state will be transitioned to and the flow will terminate.
- * </ol>
- * 
- * The fourth and last state, a end state, will be indentified with the default
- * end state ID 'finish'. This end state is a marker that signals the end of the
- * flow. When entered, the flow session terminates, and if this flow is acting
- * as a root flow in the current flow execution, any flow-allocated resources
- * will be cleaned up. An end state can optionally be configured with a logical
- * view name to forward to when entered. It will also trigger a state transition
- * in a resuming parent flow, if this flow was participating as a spawned
- * 'subflow' within a suspended parent flow.
- * 
- * Instances of class are typically built by a FlowBuilder implementation, but
- * may also be subclassed. It, and the rest of the web.flow syste, has been
- * designed with minimal dependencies on other parts of Spring, easily usable in
- * a standalone fashion.
+ * <p>
+ * Instances of this class are typically built by a FlowBuilder implementation, but
+ * may also be subclassed. It, and the rest of the web.flow system, has been
+ * designed with minimal dependencies on other parts of Spring, and is easily usable
+ * in a standalone fashion.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  * 
- * @see ActionState
- * @see ViewState
- * @see SubFlowState
- * @see EndState
- * @see Transition
- * @see FlowExecution
- * @see FlowBuilder
- * @see AbstractFlowBuilder
+ * @see org.springframework.web.flow.ActionState
+ * @see org.springframework.web.flow.ViewState
+ * @see org.springframework.web.flow.SubFlowState
+ * @see org.springframework.web.flow.EndState
+ * @see org.springframework.web.flow.Transition
+ * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.config.FlowBuilder
+ * @see org.springframework.web.flow.config.AbstractFlowBuilder
+ * @see org.springframework.web.flow.config.XmlFlowBuilder
  */
 public class Flow implements Serializable {
 
@@ -176,25 +102,19 @@ public class Flow implements Serializable {
 		setId(id);
 	}
 
+	/**
+	 * @return The unique id of this flow.
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * @param id The unique id of this flow.
+	 */
 	protected void setId(String id) {
 		Assert.notNull(id, "The flow id is required");
 		this.id = id;
-	}
-
-	public boolean equals(Object o) {
-		if (!(o instanceof Flow)) {
-			return false;
-		}
-		Flow flow = (Flow)o;
-		return id.equals(flow.id);
-	}
-
-	public int hashCode() {
-		return id.hashCode();
 	}
 
 	/**
@@ -289,6 +209,10 @@ public class Flow implements Serializable {
 		return startState;
 	}
 
+	/**
+	 * Check that given state is present in the flow and throw an exception
+	 * if it's not.
+	 */
 	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
 		getRequiredState(state.getId());
 	}
@@ -297,8 +221,8 @@ public class Flow implements Serializable {
 	 * Return the state with the provided id, throwing a exception if no state
 	 * exists with that id.
 	 * @param stateId the state id
-	 * @return The state with that ID
-	 * @throws NoSuchFlowStateException No state exists with that ID.
+	 * @return The state with that id
+	 * @throws NoSuchFlowStateException No state exists with that id.
 	 */
 	public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
 		AbstractState state = getState(stateId);
@@ -353,7 +277,7 @@ public class Flow implements Serializable {
 	/**
 	 * Return the <code>TransitionableState</code> with this <id>stateId
 	 * </id>, throwing an exception if not found.
-	 * @param stateId
+	 * @param stateId Id of the state to look up
 	 * @return The transitionableState
 	 * @throws NoSuchFlowStateException No transitionable state exists by this
 	 *         id
@@ -378,6 +302,18 @@ public class Flow implements Serializable {
 			stateIds.add(((AbstractState)it.next()).getId());
 		}
 		return (String[])stateIds.toArray(new String[0]);
+	}
+
+	public boolean equals(Object o) {
+		if (!(o instanceof Flow)) {
+			return false;
+		}
+		Flow flow = (Flow)o;
+		return id.equals(flow.id);
+	}
+
+	public int hashCode() {
+		return id.hashCode();
 	}
 
 	public String toString() {
