@@ -2,7 +2,6 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
 
 package org.springframework.beans.factory;
 
@@ -16,14 +15,12 @@ import org.springframework.beans.BeansException;
  */
 public class BeanDefinitionStoreException extends BeansException {
 
-    /**
-    * Constructs a <code>BeanDefinitionStoreException</code> with the specified detail message.
-     * @param msg the detail message.
-     * @param t the root cause of the problem with the factory.
-     */
-    public BeanDefinitionStoreException(String msg,Throwable t) {
-        super(msg, t);
-    }
+	public BeanDefinitionStoreException(String msg) {
+		super(msg);
+	}
+
+	public BeanDefinitionStoreException(String msg, Throwable t) {
+		super(msg, t);
+	}
+
 }
-
-
