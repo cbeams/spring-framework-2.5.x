@@ -1,6 +1,17 @@
 /*
- * The Spring Framework is published under the terms of the Apache Software
- * License.
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.util;
 
@@ -12,11 +23,11 @@ package org.springframework.util;
  */
 public class ToStringBuilder {
     private static final ToStringStyler DEFAULT_STYLER = new DefaultToStringStyler();
-    private boolean field;
     private StringBuffer buffer = new StringBuffer(512);
     private ToStringStyler styler;
     private Object object;
-
+    private boolean field;
+    
     /**
      * Creates a ToStringBuilder for this object.
      * 
@@ -142,12 +153,12 @@ public class ToStringBuilder {
      * @return this, to support call-chaining.
      */
     public ToStringBuilder append(String fieldName, Object value) {
-        printSeparator();
+        printFieldSeparator();
         styler.styleField(buffer, fieldName, value);
         return this;
     }
 
-    private void printSeparator() {
+    private void printFieldSeparator() {
         if (field) {
             styler.styleFieldSeparator(buffer);
         } else {
@@ -164,6 +175,5 @@ public class ToStringBuilder {
         styler.styleEnd(buffer, object);
         return buffer.toString();
     }
-    
 
 }
