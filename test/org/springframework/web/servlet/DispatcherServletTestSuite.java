@@ -89,9 +89,9 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 
 			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
+			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
+			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
@@ -148,9 +148,9 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexControllerServlet.getWebApplicationContext());
 			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
 			assertTrue("Correct locale", Locale.CANADA.equals(rc.getLocale()));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
+			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
+			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
@@ -160,9 +160,9 @@ public class DispatcherServletTestSuite extends TestCase {
 
 			rc.setDefaultHtmlEscape(true);
 			assertTrue("Is in HTML escaping mode", rc.isDefaultHtmlEscape());
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors);
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
+			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors);
+			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));

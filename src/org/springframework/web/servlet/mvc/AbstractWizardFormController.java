@@ -203,7 +203,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
 	    throws ServletException {
 		if (page >= 0 && page < this.pages.length) {
-			logger.debug("Showing wizard page " + page + " for form bean '" + getBeanName() + "'");
+			logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			// set page session attribute for tracking
 			request.getSession().setAttribute(getPageSessionAttributeName(), new Integer(page));
 			// set page request attribute for evaluation by views
@@ -247,7 +247,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @return the name of the page session attribute
 	 */
 	protected final String getPageSessionAttributeName() {
-		return getClass() + ".page." + getBeanName();
+		return getClass() + ".page." + getCommandName();
 	}
 
 	/**
@@ -277,18 +277,18 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 		// cancel?
 		if (isCancel(request)) {
-			logger.debug("Cancelling wizard for form bean '" + getBeanName() + "'");
+			logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
 			return processCancel(request, response, command, errors);
 		}
 
 		// finish?
 		if (isFinish(request)) {
-			logger.debug("Finishing wizard for form bean '" + getBeanName() + "'");
+			logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
 			return validatePagesAndFinish(request, response, command, errors);
 		}
 
 		// normal submit: validate current page and show specified target page
-		logger.debug("Validating wizard page " + currentPage + " for form bean '" + getBeanName() + "'");
+		logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
 		validatePage(command, errors, currentPage);
 
 		int targetPage = getTargetPage(request, currentPage);

@@ -211,7 +211,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 		public TestWizardController(Class commandClass, String beanName) {
 			setCommandClass(commandClass);
-			setBeanName(beanName);
+			setCommandName(beanName);
 		}
 
 		protected void validatePage(Object command, Errors errors, int page) {
@@ -235,13 +235,13 @@ public class WizardFormControllerTestSuite extends TestCase {
 		protected ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
 		                                     Object command, BindException errors)
 		    throws ServletException, IOException {
-			return new ModelAndView("success", getBeanName(), command);
+			return new ModelAndView("success", getCommandName(), command);
 		}
 
 		protected ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
 		                                    Object command, BindException errors)
 		    throws ServletException, IOException {
-			return new ModelAndView("abort", getBeanName(), command);
+			return new ModelAndView("abort", getCommandName(), command);
 		}
 	}
 

@@ -34,7 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setCommandClass
- * @see #setBeanName
+ * @see #setCommandName
  * @see #setValidator
  */
 public abstract class AbstractCommandController extends BaseCommandController {
@@ -56,11 +56,11 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	/**
 	 * Create a new AbstractCommandController.
 	 * @param commandClass class of the command bean
-	 * @param beanName name of the command bean
+	 * @param commandName name of the command bean
 	 */
-	public AbstractCommandController(Class commandClass, String beanName) {
+	public AbstractCommandController(Class commandClass, String commandName) {
 		setCommandClass(commandClass);
-		setBeanName(beanName);
+		setCommandName(commandName);
 	}
 	
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)

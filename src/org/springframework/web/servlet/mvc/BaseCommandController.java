@@ -79,7 +79,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  *      <td><b>description</b></td>
  *  </tr>
  *  <tr>
- *      <td>beanName</td>
+ *      <td>commandName</td>
  *      <td>command</td>
  *      <td>the name to use when binding the instantiated command class
  *          to the request</td>
@@ -114,9 +114,9 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  */
 public abstract class BaseCommandController extends AbstractController {
 
-	public static final String DEFAULT_BEAN_NAME = "command";
+	public static final String DEFAULT_COMMAND_NAME = "command";
 
-	private String beanName = DEFAULT_BEAN_NAME;
+	private String commandName = DEFAULT_COMMAND_NAME;
 
 	private Class commandClass;
 
@@ -125,18 +125,28 @@ public abstract class BaseCommandController extends AbstractController {
 	private boolean validateOnBinding = true;
 
 	/**
-	 * Set the bean name of the command.
-	 * The command instance will be included in the model under this name.
+	 * Set the name of the command in the model.
+	 * @deprecated as of 1.0 M3: use setCommandName instead.
+	 * This method will be removed before 1.0 final!
+	 * @see #setCommandName
 	 */
 	public final void setBeanName(String beanName) {
-		this.beanName = beanName;
+		setCommandName(beanName);
 	}
 
 	/**
-	 * Return the bean name of the command.
+	 * Set the name of the command in the model.
+	 * The command object will be included in the model under this name.
 	 */
-	protected final String getBeanName() {
-		return this.beanName;
+	public final void setCommandName(String commandName) {
+		this.commandName = commandName;
+	}
+
+	/**
+	 * Return the name of the command in the model.
+	 */
+	protected final String getCommandName() {
+		return this.commandName;
 	}
 
 	/**
@@ -266,7 +276,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 			throws ServletException {
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getBeanName());
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		initBinder(request, binder);
 		return binder;
 	}

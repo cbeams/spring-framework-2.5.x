@@ -152,12 +152,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Create a new AbstractFormController.
-	 * <p>Subclasses should set the following properties, either in
-	 * the constructor or via a BeanFactory: beanName, commandClass,
-	 * bindOnNewForm, sessionForm.
+	 * <p>Subclasses should set the following properties, either in the constructor
+	 * or via a BeanFactory: commandName, commandClass, bindOnNewForm, sessionForm.
 	 * Note that commandClass doesn't need to be set when overriding
 	 * formBackingObject, as the latter determines the class anyway.
-	 * @see #setBeanName
+	 * @see #setCommandName
 	 * @see #setCommandClass
 	 * @see #setBindOnNewForm
 	 * @see #setSessionForm
@@ -207,7 +206,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * or null if not in session form mode.
 	 */
 	protected final String getFormSessionAttributeName() {
-		return isSessionForm() ? getClass() + ".form." + getBeanName() : null;
+		return isSessionForm() ? getClass() + ".form." + getCommandName() : null;
 	}
 
 	/**

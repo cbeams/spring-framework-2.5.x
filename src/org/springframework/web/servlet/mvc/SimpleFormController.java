@@ -89,13 +89,12 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * Create a new SimpleFormController.
-	 * <p>Subclasses should set the following properties, either in the
-	 * constructor or via a BeanFactory: commandClass, beanName,
-	 * sessionForm, formView, successView.
-	 * Note that commandClass doesn't need to be set when overriding
+	 * <p>Subclasses should set the following properties, either in the constructor
+	 * or via a BeanFactory: commandName, commandClass, sessionForm, formView,
+	 * successView. Note that commandClass doesn't need to be set when overriding
 	 * formBackingObject, as this determines the class anyway.
 	 * @see #setCommandClass
-	 * @see #setBeanName
+	 * @see #setCommandName
 	 * @see #setSessionForm
 	 * @see #setFormView
 	 * @see #setSuccessView
@@ -233,7 +232,7 @@ public class SimpleFormController extends AbstractFormController {
 	protected ModelAndView onSubmit(Object command) throws ServletException {
 		if (getSuccessView() == null)
 			throw new ServletException("successView isn't set");
-		return new ModelAndView(getSuccessView(), getBeanName(), command);
+		return new ModelAndView(getSuccessView(), getCommandName(), command);
 	}
 
 }

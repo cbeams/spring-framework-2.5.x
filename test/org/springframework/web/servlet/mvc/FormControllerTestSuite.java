@@ -33,7 +33,7 @@ public class FormControllerTestSuite extends TestCase {
 		
 		RefController mc = new RefController();
 		mc.setFormView(formView);
-		mc.setBeanName("tb");
+		mc.setCommandName("tb");
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
 		
@@ -45,7 +45,7 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
 		
 		// Has bean
-		TestBean person = (TestBean) mv.getModel().get(mc.getBeanName());
+		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		int[] numbers = (int[]) mv.getModel().get(mc.NUMBERS_ATT);
 		assertTrue("model is non null", person != null);
 		assertTrue("numbers is non null", numbers != null);
@@ -57,7 +57,7 @@ public class FormControllerTestSuite extends TestCase {
 		
 		RefController mc = new RefController();
 		mc.setFormView(formView);
-		mc.setBeanName("tb");
+		mc.setCommandName("tb");
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
 		
@@ -66,11 +66,11 @@ public class FormControllerTestSuite extends TestCase {
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
-		assertTrue("has errors", mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getBeanName()) != null);
+		assertTrue("has errors", mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName()) != null);
 		
 		assertTrue("refDataCount == 1", mc.refDataCount == 1);
 		
-		TestBean person = (TestBean) mv.getModel().get(mc.getBeanName());
+		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		int[] numbers = (int[]) mv.getModel().get(mc.NUMBERS_ATT);
 		assertTrue("model is non null", person != null);
 		assertTrue("numbers is non null", numbers != null);
@@ -190,11 +190,11 @@ public class FormControllerTestSuite extends TestCase {
 		mv.getViewName().equals(formView));
 		
 		// Has bean
-		TestBean person = (TestBean) mv.getModel().get(mc.getBeanName());
+		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age is default", person.getAge() == new TestBean().getAge());
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getBeanName());
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("One error", errors.getErrorCount() == 1);
 		FieldError fe = errors.getFieldError("age");
@@ -230,7 +230,7 @@ public class FormControllerTestSuite extends TestCase {
 		// yes, but it was rejected after binding by the validator
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age is default", person.getAge() == new TestBean().getAge());
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getBeanName());
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("One error", errors.getErrorCount() == 2);
 		FieldError fe = errors.getFieldError("age");
@@ -337,11 +337,11 @@ public class FormControllerTestSuite extends TestCase {
 		mv.getViewName().equals(formView));
 
 		// Has bean
-		IndexedTestBean bean = (IndexedTestBean) mv.getModel().get(mc.getBeanName());
+		IndexedTestBean bean = (IndexedTestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", bean != null);
 		assertEquals("name3", bean.getArray()[0].getName());
 		assertEquals("name1", ((TestBean) bean.getList().get(0)).getName());
-		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getBeanName());
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
 		assertTrue("errors returned in model", errors != null);
 		assertTrue("2 errors", errors.getErrorCount() == 2);
 		FieldError fe1 = errors.getFieldError("array[1].age");
@@ -378,7 +378,7 @@ public class FormControllerTestSuite extends TestCase {
 		
 		public TestController() {
 			setCommandClass(TestBean.class);
-			setBeanName(BEAN_NAME);
+			setCommandName(BEAN_NAME);
 		}
 		
 		protected Object formBackingObject(HttpServletRequest request) throws ServletException {
