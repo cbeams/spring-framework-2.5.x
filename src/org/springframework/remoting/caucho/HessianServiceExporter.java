@@ -1,17 +1,16 @@
 package org.springframework.remoting.caucho;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
-
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.server.HessianSkeleton;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.remoting.support.RemoteExporter;
 
 /**
  * Web controller that exports the specified service bean as Hessian service
@@ -28,28 +27,32 @@ import com.caucho.hessian.server.HessianSkeleton;
  * @since 13.05.2003
  * @see HessianProxyFactoryBean
  */
-public class HessianServiceExporter implements Controller {
+public class HessianServiceExporter extends RemoteExporter implements Controller {
 
 	private HessianSkeleton skeleton;
 
-	/**
-	 * Set the service to export via Hessian.
-	 * Typically populated via a bean reference.
-	 */
-	public void setService(Object service) {
-		this.skeleton = new HessianSkeleton(service);
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		this.skeleton = new HessianSkeleton(getProxyForService());
 	}
 
 	/**
 	 * Process the incoming Hessian request and create a Hessian response.
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HessianInput in = new HessianInput(request.getInputStream());
 		HessianOutput out = new HessianOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
-		} catch (Throwable e) {
-		  throw new ServletException(e);
+		}
+		catch (Exception ex) {
+			throw ex;
+		}
+		catch (Error ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
+		  throw new ServletException(ex);
 		}
 		return null;
 	}

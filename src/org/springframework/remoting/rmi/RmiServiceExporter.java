@@ -1,6 +1,5 @@
 package org.springframework.remoting.rmi;
 
-import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -11,21 +10,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.remoting.support.RemoteExporter;
 
 /**
- * RMI exporter that exposes the specified service as transparent RMI object
- * with the specified name. Such services can be accessed via RmiProxyFactoryBean.
+ * RMI exporter that exposes the specified service as RMI object with the specified
+ * name. Such services can be accessed via plain RMI or via RmiProxyFactoryBean.
+ * Also supports exposing any non-RMI service via RMI invokers, to be accessed via
+ * RmiProxyFactoryBean's automatic detection of such invokers.
  *
- * <p>Transparent means that RMI communication works on the RemoteInvocationHandler
+ * <p>With an RMI invoker, RMI communication works on the RemoteInvocationHandler
  * level, needing only one stub for any service. Service interfaces do not have to
  * extend java.rmi.Remote or throw RemoteException on all methods, but in and out
  * parameters have to be serializable.
- *
- * <p>A conventional RMI lookup will return a RemoteInvocationHandler instance
- * instead of a proxy implementing the service interface. To access the service,
- * a java.lang.reflect.Proxy has to be created, using a StubInvocationHandler
- * configured for the RemoteInvocationHandler instance. Of course, a helper like
- * RmiProxyFactoryBean makes this much simpler!
  *
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
@@ -35,26 +31,18 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 13.05.2003
  * @see RmiProxyFactoryBean
+ * @see org.springframework.remoting.caucho.HessianServiceExporter
+ * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
-public class RmiServiceExporter implements InitializingBean {
+public class RmiServiceExporter extends RemoteExporter implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private Object service;
 
 	private String serviceName;
 
 	private int servicePort = 0;  // anonymous port
 
 	private int registryPort = Registry.REGISTRY_PORT;
-
-	/**
-	 * Set the service to export via RMI.
-	 * Typically populated via a bean reference.
-	 */
-	public void setService(Object service) {
-		this.service = service;
-	}
 
 	/**
 	 * Set the name of the exported RMI service,
@@ -85,7 +73,13 @@ public class RmiServiceExporter implements InitializingBean {
 	 * Register the service as RMI object.
 	 * Creates an RMI registry on the specified port if none exists.
 	 */
-	public void afterPropertiesSet() throws RemoteException, AlreadyBoundException {
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+
+		if (this.serviceName == null) {
+			throw new IllegalArgumentException("serviceName is required");
+		}
+
 		Registry registry = null;
 		logger.info("Looking for RMI registry at port '" + this.registryPort + "'");
 		try {
@@ -102,15 +96,15 @@ public class RmiServiceExporter implements InitializingBean {
 
 		// bind wrapper to registry
 		logger.info("Binding RMI service '" + this.serviceName + "' to registry at port '" + this.registryPort + "'");
-		if (this.service instanceof Remote) {
-			// plain RMI service
-			Remote exportedObject = UnicastRemoteObject.exportObject((Remote) this.service, this.servicePort);
+		if (getService() instanceof Remote) {
+			// conventional RMI service
+			Remote exportedObject = UnicastRemoteObject.exportObject((Remote) getService(), this.servicePort);
 			registry.rebind(this.serviceName, exportedObject);
 		}
 		else {
 			// RMI invoker
 			logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
-			Remote wrapper = new RemoteInvocationWrapper(this.service, this.servicePort);
+			Remote wrapper = new RemoteInvocationWrapper(getProxyForService(), this.servicePort);
 			registry.rebind(this.serviceName, wrapper);
 		}
 	}

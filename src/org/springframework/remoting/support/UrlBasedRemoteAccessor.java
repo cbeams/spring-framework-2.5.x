@@ -1,12 +1,12 @@
 package org.springframework.remoting.support;
 
-import org.springframework.beans.factory.InitializingBean;
-
 /**
+ * Abstract base class for classes that access remote services via URLs.
+ * Provides a "serviceUrl" bean property.
  * @author Juergen Hoeller
  * @since 15.12.2003
  */
-public class UrlBasedRemoteAccessor extends RemoteAccessor {
+public abstract class UrlBasedRemoteAccessor extends RemoteAccessor {
 
 	private String serviceUrl;
 

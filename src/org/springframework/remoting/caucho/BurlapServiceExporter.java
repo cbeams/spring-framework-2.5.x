@@ -1,17 +1,16 @@
 package org.springframework.remoting.caucho;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
-
 import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
 import com.caucho.burlap.server.BurlapSkeleton;
+
+import org.springframework.remoting.support.RemoteExporter;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
 
 /**
  * Web controller that exports the specified service bean as Burlap service
@@ -28,29 +27,34 @@ import com.caucho.burlap.server.BurlapSkeleton;
  * @since 13.05.2003
  * @see BurlapProxyFactoryBean
  */
-public class BurlapServiceExporter implements Controller {
+public class BurlapServiceExporter extends RemoteExporter implements Controller {
 
 	private BurlapSkeleton skeleton;
 
-	/**
-	 * Set the service to export via Burlap.
-	 * Typically populated via a bean reference.
-	 */
-	public void setService(Object service) {
-		this.skeleton = new BurlapSkeleton(service);
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		this.skeleton = new BurlapSkeleton(getProxyForService());
 	}
 
 	/**
 	 * Process the incoming Burlap request and create a Burlap response.
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		BurlapInput in = new BurlapInput(request.getInputStream());
 		BurlapOutput out = new BurlapOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
-		} catch (Throwable ex) {
+		}
+		catch (Exception ex) {
+			throw ex;
+		}
+		catch (Error ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
 		  throw new ServletException(ex);
 		}
 		return null;
 	}
+
 }

@@ -9,14 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Abstract base class for classes that proxy a remote service.
- * Exposes the proxy when used as bean reference. Used e.g. by the
- * Caucho and RMI proxy factory implementations.
- *
- * <p>Subclasses just need to implement createProxy, using the properties
- * of the factory instance. Note that such a proxy should throw unchecked
- * RemoteAccessException, to be able to transparently expose the service
- * to client objects via a plain Java business interface.
+ * Abstract base class for classes that access a remote service.
+ * Provides a "serviceInterface" bean property.
  *
  * <p>Note that the service interface being used will show some signs of
  * remotability, like the granularity of method calls that it offers.
@@ -33,7 +27,8 @@ public abstract class RemoteAccessor {
 	private Class serviceInterface;
 
 	/**
-	 * Set the interface of the service that this factory should create a proxy for.
+	 * Set the interface of the service to access.
+	 * Typically required to be able to create a suitable serviuce proxy.
 	 * The interface must be suitable for the particular service and remoting tool.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -44,7 +39,7 @@ public abstract class RemoteAccessor {
 	}
 
 	/**
-	 * Return the interface of the service that this factory should create a proxy for.
+	 * Return the interface of the service to access.
 	 */
 	protected Class getServiceInterface() {
 		return serviceInterface;
