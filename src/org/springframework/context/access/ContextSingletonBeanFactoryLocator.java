@@ -12,6 +12,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
@@ -29,7 +31,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  * nor legal to share definitions with SingletonBeanFactoryLocator at the same time.
  * 
  * @author Colin Sampaleanu
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLocator {
@@ -93,7 +95,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	}
 	
 	/**
-	 * Overrides default method to create definition oject as an ApplicationContext
+	 * Overrides default method to create definition object as an ApplicationContext
 	 * instead of the default BeanFactory. This does not affect what can actually
 	 * be loaded by that definition.
 	 */
@@ -101,4 +103,19 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 		return new FileSystemXmlApplicationContext(resources);
 	}
 	
+    /**
+     * Overrides default method to work with ApplicationContext
+     */
+	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
+
+		if (groupDef instanceof ConfigurableApplicationContext) {
+			// debugging trace only
+			if (logger.isDebugEnabled()) {
+				logger.debug("ContextSingletonBeanFactoryLocator group with resourceName '"
+						+ resourceName
+						+ "' being released, as no more references.");
+			}
+			((ConfigurableApplicationContext) groupDef).close();
+		}
+	}
 }

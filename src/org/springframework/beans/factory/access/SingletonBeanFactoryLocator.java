@@ -17,11 +17,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.UrlResource;
@@ -37,13 +37,13 @@ import org.springframework.core.io.UrlResource;
  * (sometimes) for a small amount of glue code. Excessive usage will lead to code
  * that is more tightly coupled, and harder to modify or test.</p>
  *
- * <p>In this implementation, an ApplicationContext is built up from one or more XML
+ * <p>In this implementation, a BeanFactory is built up from one or more XML
  * definition files, accessed as resources. The default name of the resource file(s)
  * is 'beanRefFactory.xml', which is used when the instance is obtained with the no-arg 
  * {@link #getInstance()} method. Using {@link #getInstance(String selector)} will
  * return a singleton instance which will use a name for the resource file(s) which
  * is the specificed selector argument, instead of the default. The purpose of this
- * Application Context is to create and hold a copy of one or more 'real' BeanFactory
+ * BeanFactory is to create and hold a copy of one or more 'real' BeanFactory
  * or Application Context instances, and allow those to be obtained either directly or
  * via an alias. As such, it provides a level of indirection, and allows multiple
  * pieces of code, which are not able to work in a Dependency Injection fashion, to
@@ -251,7 +251,7 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  *   
  * @author Colin Sampaleanu
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
@@ -292,10 +292,11 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws FatalBeanException {
 		synchronized (instances) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
-				             instances.hashCode() + ", instances=" + instances);
-			}
+			// debugging trace only
+			//if (logger.isDebugEnabled()) {
+			//	logger.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
+			//	             instances.hashCode() + ", instances=" + instances);
+			//}
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
 			if (bfl == null) {
 				bfl = new SingletonBeanFactoryLocator(selector);
@@ -325,19 +326,18 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		this.resourceName = resourceName;
 	}
 
+	// see superclass JavaDoc: org.springframework.beans.factory.access.BeanFactoryLocator#useFactory(java.lang.String)
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		synchronized (this.bfgInstancesByKey) {
 			BeanFactoryGroup bfg = (BeanFactoryGroup) this.bfgInstancesByKey
 					.get(this.resourceName);
-			if (logger.isDebugEnabled()) {
-				logger.debug("bfgInstancesByKey=" + this.bfgInstancesByKey);
-			}
 
 			if (bfg != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Factory group with resourceName '" + this.resourceName
-							+ "' requested. Using existing instance.");
-				}
+				// debugging trace only
+				//if (logger.isDebugEnabled()) {
+				//	logger.debug("Factory group with resourceName '" + this.resourceName
+				//			+ "' requested. Using existing instance.");
+				//}
 				bfg.refCount++;
 			}
 			else {
@@ -381,7 +381,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				this.bfgInstancesByObj.put(groupContext, bfg);
 			}
 
-			BeanFactory groupContext = bfg.definition;
+			final BeanFactory groupContext = bfg.definition;
 
 			String lookupId = factoryKey;
 			Object bean;
@@ -419,14 +419,34 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 			final BeanFactory beanFactory = (BeanFactory) bean;
 			return new BeanFactoryReference() {
+				
+				BeanFactory _groupContext;
+				
+				// constructor
+				{
+					_groupContext = groupContext;
+				}
+				
 				public BeanFactory getFactory() {
 					return beanFactory;
 				}
 				public void release() throws FatalBeanException {
-					// Currently does nothing.
-					// An ideal implementation would use reference counting data to release owning
-					// container when no more BeanFactories within it are used, however depending on
-					// the usage scenario, this could also cause thrashing.
+					synchronized (bfgInstancesByKey) {
+						BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj
+						.get(_groupContext);
+						if (bfg != null) {
+							bfg.refCount--;
+							if (bfg.refCount == 0) {
+								destroyDefinition(_groupContext, resourceName);
+								bfgInstancesByKey.remove(resourceName);
+								bfgInstancesByObj.remove(_groupContext);
+							}
+						}
+						else {
+							logger.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition more times than it has actually been used. Resourcename="
+									+ resourceName);
+						}
+					}
 				}
 			};
 		}
@@ -451,6 +471,21 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		}
 		fac.preInstantiateSingletons();
 		return fac;
+	}
+	
+    /**
+     * Destroy definition in separate method so subclass may work with other definition types
+     */
+	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
+		if (groupDef instanceof ConfigurableBeanFactory) {
+			// debugging trace only
+			if (logger.isDebugEnabled()) {
+				logger.debug("Factory group with resourceName '"
+						+ resourceName
+						+ "' being released, as no more references.");
+			}
+			((ConfigurableBeanFactory) groupDef).destroySingletons();
+		}
 	}
 
 	/**

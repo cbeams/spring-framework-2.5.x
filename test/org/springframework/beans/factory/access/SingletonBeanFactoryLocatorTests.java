@@ -16,7 +16,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Colin Sampaleanu
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SingletonBeanFactoryLocatorTests extends TestCase {
 
@@ -42,21 +42,30 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 			}
 		};
 
-		BeanFactory fac = facLoc.useBeanFactory("a.qualified.name.of.some.sort")
-				.getFactory();
-		fac = facLoc.useBeanFactory("another.qualified.name").getFactory();
+		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
+		BeanFactory fac = bfr.getFactory();
+		bfr = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr.getFactory();
 		// verify that the same instance is returned
 		TestBean tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("beans1.bean1"));
 		tb.setName("was beans1.bean1");
-		fac = facLoc.useBeanFactory("another.qualified.name").getFactory();
+		bfr = facLoc.useBeanFactory("another.qualified.name");
+		fac = bfr.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		fac = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias")
-				.getFactory();
+		bfr = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+		fac = bfr.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
+		
+		// now verify that we can call release 4 times, and the 5th should log warning
+		bfr.release();
+		bfr.release();
+		bfr.release();
+		bfr.release();
+		bfr.release();
 	}
 
 	/**
