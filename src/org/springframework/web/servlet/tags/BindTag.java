@@ -104,7 +104,7 @@ public class BindTag extends RequestContextAwareTag {
 		// retrieve Errors object
 		this.errors = getRequestContext().getErrors(name, false);
 		if (this.errors == null) {
-			throw new JspTagException("Could not find Errors instance for bean [" + name + "] in request");
+			throw new JspTagException("Could not find Errors instance for bean '" + name + "' in request");
 		}
 
 		List fes = null;
