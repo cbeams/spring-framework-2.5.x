@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.util.StringUtils;
 
 /**
  * Standalone XML application context, taking the context definition
@@ -17,58 +15,49 @@ import org.springframework.util.StringUtils;
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 
-	private String configLocation;
+	private String[] configLocations;
 
 	/**
-	 * Create a new FileSystemXmlApplicationContext with the given location.
-	 * The locations specify the parents in descending order, i.e. the last
-	 * location is the one of this context.
-	 * @param locations comma-delimited String consisting of locations
+	 * Create a new FileSystemXmlApplicationContext, loading the definitions
+	 * from the given XML file.
+	 * @param configLocation file path
 	 */
-	public FileSystemXmlApplicationContext(String locations) throws ApplicationContextException, BeansException, IOException {
-		this(StringUtils.commaDelimitedListToStringArray(locations));
-	}
-
-	/**
-	 * Create a new FileSystemXmlApplicationContext with the given locations.
-	 * The locations specify the parents in descending order, i.e. the last
-	 * location is the one of this context.
-	 * @param locations String array consisting of locations
-	 */
-	public FileSystemXmlApplicationContext(String[] locations) throws ApplicationContextException, BeansException, IOException {
-		if (locations.length == 0) {
-			throw new ApplicationContextException("At least 1 config location required");
-		}
-
-		this.configLocation = locations[locations.length - 1];
-		logger.debug("Trying to open XML application context file '" + this.configLocation + "'");
-
-		// Recurse
-		if (locations.length > 1) {
-			// There were parent(s)
-			String[] parentLocations = new String[locations.length - 1];
-			System.arraycopy(locations, 0, parentLocations, 0, locations.length - 1);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Setting parent context for locations: [" +
-										 StringUtils.arrayToDelimitedString(parentLocations, ","));
-			}
-			ApplicationContext parent = createParentContext(parentLocations);
-			setParent(parent);
-		}
-
-		// Initialize this context
+	public FileSystemXmlApplicationContext(String configLocation)
+	    throws BeansException, IOException {
+		this.configLocations = new String[] {configLocation};
 		refresh();
 	}
 
 	/**
-	 * Create parent context for the given remaining locations.
+	 * Create a new FileSystemXmlApplicationContext, loading the definitions
+	 * from the given XML files.
+	 * @param configLocations array of file paths
 	 */
-	protected ApplicationContext createParentContext(String[] locations) throws IOException {
-		return new FileSystemXmlApplicationContext(locations);
+	public FileSystemXmlApplicationContext(String[] configLocations)
+	    throws BeansException, IOException {
+		this.configLocations = configLocations;
+		refresh();
+	}
+
+	/**
+	 * Create a new FileSystemXmlApplicationContext with the given parent,
+	 * loading the definitions from the given XML files.
+	 * @param configLocations array of file paths
+	 * @param parent the parent context
+	 */
+	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
+	    throws BeansException, IOException {
+		super(parent);
+		this.configLocations = configLocations;
+		refresh();
 	}
 
 	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException {
-		beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocation));
+		if (this.configLocations != null) {
+			for (int i = 0; i < this.configLocations.length; i++) {
+				beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
+			}
+		}
 	}
 
 }

@@ -3,19 +3,18 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Standalone XML application context, taking the context definition
- * files from the classpath. Mainly useful for test harnesses,
+ * files from the class path. Mainly useful for test harnesses,
  * but also for application contexts embedded within JARs.
  *
- * <p>Note: Generally treats (file) paths as class path resources,
- * when using ApplicationContext.getResourceAsStream.
- * Only supports full classpath names including package specification,
- * like "/mypackage/myresource.dat".
+ * <p>Note: Generally treats (file) paths as class path resources, when using
+ * ApplicationContext.getResourceAsStream. Only supports full class path
+ * names including package specification, like "/mypackage/myresource.dat".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -24,17 +23,37 @@ import org.springframework.util.ClassLoaderUtils;
  */
 public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationContext {
 
-	public ClassPathXmlApplicationContext(String locations) throws ApplicationContextException, IOException {
-		super(locations);
+	/**
+	 * Create a new ClassPathXmlApplicationContext, loading the definitions
+	 * from the given XML file.
+	 * @param configLocation file path
+	 */
+	public ClassPathXmlApplicationContext(String configLocation)
+	    throws BeansException, IOException {
+		super(configLocation);
 	}
 
-	public ClassPathXmlApplicationContext(String[] locations) throws ApplicationContextException, IOException {
-		super(locations);
+	/**
+	 * Create a new ClassPathXmlApplicationContext, loading the definitions
+	 * from the given XML files.
+	 * @param configLocations array of file paths
+	 */
+	public ClassPathXmlApplicationContext(String[] configLocations)
+	    throws BeansException, IOException {
+		super(configLocations);
 	}
 
-	protected ApplicationContext createParentContext(String[] locations) throws IOException {
-		return new ClassPathXmlApplicationContext(locations);
+	/**
+	 * Create a new ClassPathXmlApplicationContext with the given parent,
+	 * loading the definitions from the given XML files.
+	 * @param configLocations array of file paths
+	 * @param parent the parent context
+	 */
+	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent)
+	    throws BeansException, IOException {
+		super(configLocations, parent);
 	}
+
 
 	/**
 	 * This implementation treats paths as class path resources.
