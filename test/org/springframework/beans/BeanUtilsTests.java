@@ -1,9 +1,7 @@
 package org.springframework.beans;
 
 import java.beans.PropertyVetoException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -37,15 +35,6 @@ public class BeanUtilsTests extends TestCase {
 		catch (FatalBeanException ex) {
 			// expected
 		}
-	}
-
-	public void testGetAllInterfaces() {
-		DerivedTestBean testBean = new DerivedTestBean();
-		List ifcs = Arrays.asList(BeanUtils.getAllInterfaces(testBean));
-		assertTrue("Correct number of interfaces", ifcs.size() == 3);
-		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
-		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
-		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 
 	public void testCopyProperties() throws Exception {
