@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -220,6 +221,17 @@ public class RequestContext {
 	}
 
 	/**
+	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * @param code code of the message
+	 * @param args arguments for the message as a List, or null if none
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getMessage(String code, List args, String defaultMessage) {
+		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, this.defaultHtmlEscape);
+	}
+
+	/**
 	 * Retrieve the message for the given code.
 	 * @param code code of the message
 	 * @param args arguments for the message, or null if none
@@ -251,6 +263,17 @@ public class RequestContext {
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
 		return getMessage(code, args, this.defaultHtmlEscape);
+	}
+
+	/**
+	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * @param code code of the message
+	 * @param args arguments for the message as a List, or null if none
+	 * @return the message
+	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 */
+	public String getMessage(String code, List args) throws NoSuchMessageException {
+		return getMessage(code, (args != null ? args.toArray() : null), this.defaultHtmlEscape);
 	}
 
 	/**
@@ -311,8 +334,22 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getThemeMessage(String code, String[] args, String defaultMessage) {
+	public String getThemeMessage(String code, Object[] args, String defaultMessage) {
 		return this.theme.getMessageSource().getMessage(code, args, defaultMessage, this.locale);
+	}
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @param args arguments for the message as a List, or null if none
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getThemeMessage(String code, List args, String defaultMessage) {
+		return this.theme.getMessageSource().getMessage(
+				code, (args != null ? args.toArray() : null), defaultMessage, this.locale);
 	}
 
 	/**
@@ -336,8 +373,22 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getThemeMessage(String code, String[] args) throws NoSuchMessageException {
+	public String getThemeMessage(String code, Object[] args) throws NoSuchMessageException {
 		return this.theme.getMessageSource().getMessage(code, args, this.locale);
+	}
+
+	/**
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically
+	 * denote theme-specific resource paths and not client-visible messages.
+	 * @param code code of the message
+	 * @param args arguments for the message as a List, or null if none
+	 * @return the message
+	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 */
+	public String getThemeMessage(String code, List args) throws NoSuchMessageException {
+		return this.theme.getMessageSource().getMessage(
+				code, (args != null ? args.toArray() : null), this.locale);
 	}
 
 	/**

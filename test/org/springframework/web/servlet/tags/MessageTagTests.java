@@ -16,15 +16,22 @@
 
 package org.springframework.web.servlet.tags;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * @author Juergen Hoeller
@@ -87,7 +94,7 @@ public class MessageTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("testAttr");
+		tag.setCode("testArgs");
 		tag.setArguments("arg1,arg2");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test arg1 message arg2", message.toString());
@@ -102,7 +109,7 @@ public class MessageTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("testAttr");
+		tag.setCode("testArgs");
 		tag.setArguments(new Object[] {"arg1", new Integer(5)});
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test arg1 message 5", message.toString());
@@ -117,7 +124,7 @@ public class MessageTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("testAttr");
+		tag.setCode("testArgs");
 		tag.setArguments(new Integer(5));
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test 5 message {1}", message.toString());
@@ -132,7 +139,7 @@ public class MessageTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("testAttr");
+		tag.setCode("testArgs");
 		tag.setArguments("${arg1}");
 		pc.setAttribute("arg1", "my,value");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
@@ -148,7 +155,7 @@ public class MessageTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("testAttr");
+		tag.setCode("testArgs");
 		tag.setArguments("${arg1},${arg2}");
 		pc.setAttribute("arg1", "my,value");
 		pc.setAttribute("arg2", new Integer(5));
@@ -283,6 +290,23 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setVar("testvar2");
 		tag.doStartTag();
+	}
+
+	public void testRequestContext() throws ServletException {
+		PageContext pc = createPageContext();
+		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
+		assertEquals("test message", rc.getMessage("test"));
+		assertEquals("test message", rc.getMessage("test", (Object[]) null));
+		assertEquals("test message", rc.getMessage("test", "default"));
+		assertEquals("test message", rc.getMessage("test", (Object[]) null, "default"));
+		assertEquals("test arg1 message arg2",
+				rc.getMessage("testArgs", new String[] {"arg1", "arg2"}, "default"));
+		assertEquals("test arg1 message arg2",
+				rc.getMessage("testArgs", Arrays.asList(new String[] {"arg1", "arg2"}), "default"));
+		assertEquals("default", rc.getMessage("testa", "default"));
+		assertEquals("default", rc.getMessage("testa", (List) null, "default"));
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"test"});
+		assertEquals("test message", rc.getMessage(resolvable));
 	}
 
 }
