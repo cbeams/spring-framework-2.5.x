@@ -178,78 +178,119 @@ public class OracleLobHandler implements LobHandler {
 
 		public void setBlobAsBytes(PreparedStatement ps, int parameterIndex, final byte[] content)
 				throws SQLException {
-			Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
-				public void populateLob(Object lob) throws Exception {
-					Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
-					OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
-					try {
-						out.write(content);
-						out.flush();
-					}
-					finally {
+			if (content != null) {
+				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
+					public void populateLob(Object lob) throws Exception {
+						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
+						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
 						try {
-							out.close();
+							out.write(content);
+							out.flush();
 						}
-						catch (IOException ignore) {
+						finally {
+							try {
+								out.close();
+							}
+							catch (IOException ex) {
+								logger.warn("Could not close BLOB OutputStream", ex);
+							}
 						}
 					}
-				}
-			});
-			ps.setBlob(parameterIndex, blob);
-			logger.debug("Set bytes for BLOB with length " + blob.length());
+				});
+				ps.setBlob(parameterIndex, blob);
+				logger.debug("Set bytes for BLOB with length " + blob.length());
+			}
+			else {
+				ps.setBlob(parameterIndex, null);
+				logger.debug("Set BLOB to null");
+			}
 		}
 
 		public void setBlobAsBinaryStream(PreparedStatement ps, int parameterIndex,
 		                                  final InputStream binaryStream, int contentLength)
 				throws SQLException {
-			Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
-				public void populateLob(Object lob) throws Exception {
-					Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", null);
-					FileCopyUtils.copy(binaryStream, ((OutputStream) methodToInvoke.invoke(lob, null)));
-				}
-			});
-			ps.setBlob(parameterIndex, blob);
-			logger.debug("Set binary stream for BLOB with length " + blob.length());
+			if (binaryStream != null) {
+				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
+					public void populateLob(Object lob) throws Exception {
+						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", null);
+						FileCopyUtils.copy(binaryStream, ((OutputStream) methodToInvoke.invoke(lob, null)));
+					}
+				});
+				ps.setBlob(parameterIndex, blob);
+				logger.debug("Set binary stream for BLOB with length " + blob.length());
+			}
+			else {
+				ps.setBlob(parameterIndex, null);
+				logger.debug("Set BLOB to null");
+			}
 		}
 
 		public void setClobAsString(PreparedStatement ps, int parameterIndex, final String content)
 		    throws SQLException {
-			Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
-				public void populateLob(Object lob) throws Exception {
-					Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
-					Writer writer = ((Writer) methodToInvoke.invoke(lob, null));
-					writer.write(content);
-					writer.close();
-				}
-			});
-			ps.setClob(parameterIndex, clob);
-			logger.debug("Set string for CLOB with length " + clob.length());
+			if (content != null) {
+				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+					public void populateLob(Object lob) throws Exception {
+						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
+						Writer writer = ((Writer) methodToInvoke.invoke(lob, null));
+						try {
+							writer.write(content);
+							writer.flush();
+						}
+						finally {
+							try {
+								writer.close();
+							}
+							catch (IOException ex) {
+								logger.warn("Could not close CLOB Writer", ex);
+							}
+						}
+					}
+				});
+				ps.setClob(parameterIndex, clob);
+				logger.debug("Set string for CLOB with length " + clob.length());
+			}
+			else {
+				ps.setClob(parameterIndex, null);
+				logger.debug("Set CLOB to null");
+			}
 		}
 
 		public void setClobAsAsciiStream(PreparedStatement ps, int parameterIndex,
 		                                 final InputStream asciiStream, int contentLength)
 		    throws SQLException {
-			Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
-				public void populateLob(Object lob) throws Exception {
-					Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", null);
-					FileCopyUtils.copy(asciiStream, ((OutputStream) methodToInvoke.invoke(lob, null)));
-				}
-			});
-			ps.setClob(parameterIndex, clob);
-			logger.debug("Set ASCII stream for CLOB with length " + clob.length());
+			if (asciiStream != null) {
+				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+					public void populateLob(Object lob) throws Exception {
+						Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", null);
+						FileCopyUtils.copy(asciiStream, ((OutputStream) methodToInvoke.invoke(lob, null)));
+					}
+				});
+				ps.setClob(parameterIndex, clob);
+				logger.debug("Set ASCII stream for CLOB with length " + clob.length());
+			}
+			else {
+				ps.setClob(parameterIndex, null);
+				logger.debug("Set CLOB to null");
+			}
 		}
 
 		public void setClobAsCharacterStream(PreparedStatement ps, int parameterIndex,
 		                                     final Reader characterStream, int contentLength)
 		    throws SQLException {
-			Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
-				public void populateLob(Object lob) throws Exception {
-					Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
-					FileCopyUtils.copy(characterStream, ((Writer) methodToInvoke.invoke(lob, null)));
-				}
-			});
-			ps.setClob(parameterIndex, clob);
-			logger.debug("Set character stream for CLOB with length " + clob.length());
+			if (characterStream != null) {
+				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
+					public void populateLob(Object lob) throws Exception {
+						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
+						FileCopyUtils.copy(characterStream, ((Writer) methodToInvoke.invoke(lob, null)));
+					}
+				});
+				ps.setClob(parameterIndex, clob);
+				logger.debug("Set character stream for CLOB with length " + clob.length());
+			}
+			else {
+				ps.setClob(parameterIndex, null);
+				logger.debug("Set CLOB to null");
+			}
 		}
 
 

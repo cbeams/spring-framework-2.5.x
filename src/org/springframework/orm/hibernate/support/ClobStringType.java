@@ -5,17 +5,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import net.sf.hibernate.type.ImmutableType;
+import net.sf.hibernate.UserType;
 import net.sf.hibernate.util.EqualsHelper;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate.LocalSessionFactoryBean;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Hibernate Type implementation for Strings that get mapped to CLOBs.
+ * Hibernate UserType implementation for Strings that get mapped to CLOBs.
  * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
  *
  * <p>Particularly useful for storing Strings with more than 4000 characters in an
@@ -23,15 +23,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
  * work with most JDBC-compliant databases respectively drivers. In this case,
- * the field type does not have to be CLOB: For databases like MySQL, any large
- * enough text type will work.
+ * the field type does not have to be CLOB: For databases like MySQL and MS SQL
+ * Server, any large enough text type will work.
  *
  * @author Juergen Hoeller
  * @since 12.01.2004
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setLobHandler
  * @see org.springframework.jdbc.support.lob.LobHandler
  */
-public class ClobStringType extends ImmutableType {
+public class ClobStringType implements UserType {
 
 	protected final LobHandler lobHandler;
 
@@ -39,11 +39,23 @@ public class ClobStringType extends ImmutableType {
 		this.lobHandler = LocalSessionFactoryBean.getConfigTimeLobHandler();
 	}
 
-	public Object get(ResultSet rs, String name) throws SQLException {
-		return this.lobHandler.getClobAsString(rs, rs.findColumn(name));
+	public int[] sqlTypes() {
+		return new int[] {Types.CLOB};
 	}
 
-	public void set(PreparedStatement st, Object value, int index) throws SQLException {
+	public Class returnedClass() {
+		return String.class;
+	}
+
+	public boolean equals(Object x, Object y) {
+		return EqualsHelper.equals(x, y);
+	}
+
+	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws SQLException {
+		return this.lobHandler.getClobAsString(rs, rs.findColumn(names[0]));
+	}
+
+	public void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			throw new IllegalStateException("ClobStringType requires active transaction synchronization");
 		}
@@ -52,27 +64,12 @@ public class ClobStringType extends ImmutableType {
 		TransactionSynchronizationManager.registerSynchronization(new LobCreatorSynchronization(lobCreator));
 	}
 
-
-	public Class getReturnedClass() {
-		return String.class;
+	public Object deepCopy(Object value) {
+		return value;
 	}
 
-	public int sqlType() {
-		return Types.CLOB;
-	}
-
-	public String getName() { return "string"; }
-
-	public boolean equals(Object x, Object y) {
-		return EqualsHelper.equals(x, y);
-	}
-
-	public String toString(Object value) {
-		return (String) value;
-	}
-
-	public Object fromStringValue(String xml) {
-		return xml;
+	public boolean isMutable() {
+		return false;
 	}
 
 
@@ -81,7 +78,7 @@ public class ClobStringType extends ImmutableType {
 	 * Invokes LobCreator.close to clean up temporary LOBs that might have been created.
 	 * @see org.springframework.jdbc.support.lob.LobCreator#close
 	 */
-	private static class LobCreatorSynchronization implements TransactionSynchronization {
+	private static class LobCreatorSynchronization extends TransactionSynchronizationAdapter {
 
 		private final LobCreator lobCreator;
 
@@ -89,14 +86,8 @@ public class ClobStringType extends ImmutableType {
 			this.lobCreator = lobCreator;
 		}
 
-		public void beforeCommit() {
-		}
-
 		public void beforeCompletion() {
 			this.lobCreator.close();
-		}
-
-		public void afterCompletion(int status) {
 		}
 	}
 
