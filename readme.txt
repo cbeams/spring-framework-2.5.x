@@ -86,7 +86,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~230 KB)
+* "spring-core" (~235 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -94,7 +94,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~205 KB)
+* "spring-context" (~220 KB)
 - Contents: application context, validation framework, UI support, mail, JNDI, JMS, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
@@ -102,19 +102,19 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~175 KB)
+* "spring-orm" (~180 KB)
 - Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
-* "spring-web" (~85 KB)
+* "spring-web" (~90 KB)
 - Contents: web application context, multipart resolver, Struts support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts)
 
-* "spring-webmvc" (~150 KB)
+* "spring-webmvc" (~155 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1195 KB)
+* "spring" (~1225 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
@@ -134,16 +134,16 @@ the JSTL (standard.jar) has to be available in the class path. Else, any JSTL im
 
 Documentation can be found in the "docs" directory:
 * the Spring reference documentation
-* the "Spring MVC step-by-step" tutorial
+* the Spring MVC step-by-step tutorial
 
 Documented sample applications and skeletons can be found in "samples":
-* "countries"
-* "imagedb"
-* "jpetstore"
-* "petclinic"
-* "tiles-example"
-* "webapp-minimal"
-* "webapp-typical"
+* countries
+* imagedb
+* jpetstore
+* petclinic
+* tiles-example
+* webapp-minimal
+* webapp-typical
 
 Petclinic features alternative DAO implementations and application configurations for Hibernate, Apache OJB
 and JDBC, with HSQL and MySQL as target databases. The default Petclinic configuration is Hibernate on HSQL;
@@ -152,13 +152,10 @@ to be able to build and run it, the Spring distribution comes with all required 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of
 internal structure and wiring. On top of a Spring-managed middle tier, it offers two alternative web
-tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL.
+tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL. Furthermore,
+it illustrates remoting via 5 different strategies: Hessian, Burlap, HTTP invoker, RMI invoker, and JAX-RPC.
 
 The Image Database sample is a simple one-screen image management web app that illustrates various
 Spring-integrated technologies: BLOB/CLOB handling with MySQL and Oracle, Velocity and FreeMarker for
 web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
-
-"Expert One-on-One J2EE Design and Development" discusses many of Spring's design ideas in detail.
-Note: The code examples in the book refer to the original framework version that came with the book.
-Thus, they need to be adapted for the current Spring release.
 
