@@ -91,6 +91,8 @@ public class ClientContinuationFlowExecutionStorage implements FlowExecutionStor
 	 * Subclasses can override this to change the decoding algorithm. This
 	 * class just does a BASE64 decoding and then deserializes the flow
 	 * execution.
+	 * @param data the encode flow execution data
+	 * @return the decoded flow execution instance
 	 */
 	protected FlowExecution decode(String data) {
 		return new FlowExecutionContinuation(Base64.decodeBase64(data.getBytes()), isCompress()).getFlowExecution();
@@ -102,6 +104,8 @@ public class ClientContinuationFlowExecutionStorage implements FlowExecutionStor
 	 * <p>
 	 * Subclasses can override this to change the encoding algorithm. This
 	 * class just does a BASE64 encoding of the serialized flow execution.
+	 * @param the flow execution instance
+	 * @return the encoded string representation
 	 */
 	protected String encode(FlowExecution flowExecution) {
 		byte[] data = new FlowExecutionContinuation(flowExecution, isCompress()).getData(false);

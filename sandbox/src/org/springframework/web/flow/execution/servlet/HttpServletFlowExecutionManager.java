@@ -38,7 +38,7 @@ import org.springframework.web.flow.execution.FlowExecutionManager;
  * @author Keith Donald
  */
 public class HttpServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
-	
+
 	/**
 	 * Creates an HTTP-servlet based flow execution manager.
 	 */
@@ -70,14 +70,14 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	protected void initDefaults() {
 		setFlowExecutionStorage(new HttpSessionFlowExecutionStorage());
 	}
-	
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getFlowLocator()==null) {
+		if (getFlowLocator() == null) {
 			// a convenience default for use with Spring bean factories
 			setFlowLocator(new BeanFactoryFlowServiceLocator(beanFactory));
 		}
 	}
-	
+
 	/**
 	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request
