@@ -39,7 +39,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * 
  * Fully instantiable as is, or by a custom subclass. This action differs from a
  * standard BindAndValidate action in that it doesn't do validation (not needed
- * during form setup), and has a specific setupFormReferenceData hook.
+ * during form setup), and has a specific <code>setupReferenceData</code> hook.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
