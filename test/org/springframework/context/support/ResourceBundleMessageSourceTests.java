@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * @author Juergen Hoeller
@@ -69,10 +70,21 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		Locale.setDefault(expectGermanFallback ? Locale.GERMAN : Locale.CANADA);
 		assertEquals("message1", ac.getMessage("code1", null, Locale.ENGLISH));
 		assertEquals(fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2",
-		             ac.getMessage("code2", null, Locale.ENGLISH));
+				ac.getMessage("code2", null, Locale.ENGLISH));
+
 		assertEquals("nachricht2", ac.getMessage("code2", null, Locale.GERMAN));
 		assertEquals("nochricht2", ac.getMessage("code2", null, new Locale("DE", "at")));
 		assertEquals("noochricht2", ac.getMessage("code2", null, new Locale("DE", "at", "oo")));
+
+		MessageSourceAccessor accessor = new MessageSourceAccessor(ac);
+		LocaleContextHolder.setLocale(new Locale("DE", "at"));
+		try {
+			assertEquals("nochricht2", accessor.getMessage("code2"));
+		}
+		finally {
+			LocaleContextHolder.setLocale(null);
+		}
+
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
 		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"});
 		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
