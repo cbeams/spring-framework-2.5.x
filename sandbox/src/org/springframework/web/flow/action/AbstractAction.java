@@ -269,7 +269,9 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 *         model
 	 */
 	protected Errors getFormErrors(FlowModel model) throws IllegalStateException {
-		return getRequiredFormErrors(model, null);
+		//implementation note: don't use get getRequiredFormErrors(model, formObjectErrors)
+		//since that would prefix the attribute name
+		return (Errors)model.getRequiredAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class);
 	}
 
 	/**
@@ -304,20 +306,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * the specified name.
 	 * @param model The flow model
 	 * @param formObjectErrorsName The name of the Errors object, which will be
-	 *        prefixed with {@link BindException#ERROR_KEY_PREFIX}, may be
-	 *        <code>null</code> at which time the value of the
-	 *        {@link #FORM_OBJECT_ERRORS_ATTRIBUTE} attribute is returned
+	 *        prefixed with {@link BindException#ERROR_KEY_PREFIX}
 	 * @return The form object errors instance
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         model
 	 */
 	protected Errors getRequiredFormErrors(FlowModel model, String formObjectErrorsName) throws IllegalStateException {
-		if (!StringUtils.hasText(formObjectErrorsName)) {
-			return (Errors)model.getRequiredAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class);
-		}
-		else {
-			return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
-		}
+		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
 	}
 
 	/**
