@@ -145,8 +145,8 @@
 <!ATTLIST subflow-state flow CDATA #IMPLIED>
 
 <!--
-	Optional name (bean id) of a mapper that will map model data to and from
-	the sub flow.
+	Optional indentifier of a mapper that will map data to and from
+	the spawned sub flow.
 -->
 <!ATTLIST subflow-state attribute-mapper CDATA #IMPLIED>
 

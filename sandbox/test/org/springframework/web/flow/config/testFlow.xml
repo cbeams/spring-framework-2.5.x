@@ -6,27 +6,44 @@
 <web-flow id="testFlow" start-state="actionState1">
 
 	<action-state id="actionState1">
-		<action bean="action1"/>
-		<action name="action2Name" bean="action2"/>
-		<transition event="event1" to="viewState1"/>
-		<transition event="action2Name.event2" to="viewState2"/>
+		<action id="action1"/>
+		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
+		<action name="action2Name" id="action2"/>
+		<transition on="event1" to="viewState1"/>
+		<transition on="action2Name.event2" to="viewState2"/>
 	</action-state>
-	
+
+	<action-state id="actionState2" action="action1">
+		<transition on="event1" to="endState1"/>
+	</action-state>
+
+	<action-state id="actionState3" action="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction">
+		<transition on="event1" to="endState1"/>
+	</action-state>
+
+	<action-state id="actionState4" action="action1">
+		<transition on="event1" to="endState1"/>
+	</action-state>
+
 	<view-state id="viewState1" view="view1">
-		<transition event="event1" to="subFlowState1"/>
+		<transition on="event1" to="subFlowState1"/>
 	</view-state>
 	
 	<view-state id="viewState2">
-		<transition event="event2" to="subFlowState2"/>
+		<transition on="event2" to="subFlow2"/>
+	</view-state>
+
+	<view-state id="viewState3">
+		<transition on="event3" to="actionState3"/>
 	</view-state>
 	
-	<sub-flow-state id="subFlowState1" flow="subFlow1" model-mapper="modelMapper1">
-		<transition event="event1" to="endState1"/>
-	</sub-flow-state>
+	<subflow-state id="subFlowState1" flow="subFlow1" attribute-mapper="attributeMapper1">
+		<transition on="event1" to="endState1"/>
+	</subflow-state>
 	
-	<sub-flow-state id="subFlowState2" flow="subFlow2">
-		<transition event="event2" to="endState2"/>
-	</sub-flow-state>
+	<subflow-state id="subFlow2">
+		<transition on="event2" to="endState2"/>
+	</subflow-state>
 	
 	<end-state id="endState1" view="endView1"/>
 	
