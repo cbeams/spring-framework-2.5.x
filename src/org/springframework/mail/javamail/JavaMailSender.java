@@ -23,10 +23,10 @@ import org.springframework.mail.MailSystemException;
 /**
  * MailSender implementation for JavaMail API
  * @author Dmitriy Kopylenko
- * @version $Id: JavaMailSender.java,v 1.1 2003-09-10 00:14:54 dkopylenko Exp $
+ * @version $Id: JavaMailSender.java,v 1.2 2003-09-15 13:04:00 dkopylenko Exp $
  */
 public class JavaMailSender implements MailSender {
-	
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	/**
@@ -40,14 +40,14 @@ public class JavaMailSender implements MailSender {
 
 		MimeMessage message = new MimeMessage(session);
 		try {
-			if(logger.isDebugEnabled())
+			if (logger.isDebugEnabled())
 				logger.debug("Sending email using the following mail properties [" + mailSettings + "]");
-				
+
 			message.setSubject(mailSettings.getMailSubject());
 			message.setText(mailSettings.getMailText());
 			message.setFrom(new InternetAddress(mailSettings.getMailFrom()));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(mailSettings.getMailTo()));
-			if (mailSettings.getMailCc().length > 0) {
+			if (mailSettings.getMailCc() != null) {
 				for (int i = 0; i < mailSettings.getMailCc().length; i++)
 					message.addRecipient(Message.RecipientType.CC, new InternetAddress(mailSettings.getMailCc()[i]));
 			}
