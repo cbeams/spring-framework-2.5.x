@@ -37,10 +37,6 @@ public abstract class TransitionableState extends AbstractState {
 	
 	private Set transitions = new LinkedHashSet();
 
-	public TransitionableState(Flow flow, String id) {
-		super(flow, id);
-	}
-
 	public TransitionableState(Flow flow, String id, Transition transition) {
 		super(flow, id);
 		add(transition);

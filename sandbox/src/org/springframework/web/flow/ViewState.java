@@ -35,15 +35,6 @@ public class ViewState extends TransitionableState {
 	 */
 	private String viewName;
 
-	public ViewState(Flow flow, String id) {
-		super(flow, id);
-	}
-
-	public ViewState(Flow flow, String id, String viewName) {
-		super(flow, id);
-		setViewName(viewName);
-	}
-
 	public ViewState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
 	}
