@@ -140,6 +140,14 @@ public class SchedulingTestSuite extends TestCase {
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
 		scheduler.getContext();
 		schedulerControl.setReturnValue(new SchedulerContext());
+		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
 		scheduler.addJob(jobDetail0, true);
 		schedulerControl.setVoidCallable();
 		scheduler.scheduleJob(trigger0);
@@ -150,7 +158,7 @@ public class SchedulingTestSuite extends TestCase {
 		schedulerControl.setReturnValue(new Date());
 		scheduler.start();
 		schedulerControl.setVoidCallable();
-		scheduler.shutdown();
+		scheduler.shutdown(false);
 		schedulerControl.setVoidCallable();
 		schedulerControl.replay();
 
@@ -211,6 +219,14 @@ public class SchedulingTestSuite extends TestCase {
 
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
+		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		schedulerControl.setReturnValue(null);
 		scheduler.addJob(jobDetail0, true);
 		schedulerControl.setVoidCallable();
 		scheduler.addJob(jobDetail1, true);
@@ -221,7 +237,7 @@ public class SchedulingTestSuite extends TestCase {
 		schedulerControl.setReturnValue(new Date());
 		scheduler.start();
 		schedulerControl.setVoidCallable();
-		scheduler.shutdown();
+		scheduler.shutdown(false);
 		schedulerControl.setVoidCallable();
 		schedulerControl.replay();
 
@@ -254,7 +270,7 @@ public class SchedulingTestSuite extends TestCase {
 		schedulerControl.setReturnValue(schedulerContext, 4);
 		scheduler.start();
 		schedulerControl.setVoidCallable();
-		scheduler.shutdown();
+		scheduler.shutdown(false);
 		schedulerControl.setVoidCallable();
 		schedulerControl.replay();
 
