@@ -25,11 +25,11 @@ import junit.framework.TestCase;
 
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
-import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
@@ -156,14 +156,14 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	public static class PersonIdMapper implements FlowAttributesMapper {
-		public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+		public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("personId", parentFlowModel.getAttribute("personId"));
 			return inputMap;
 		}
 
-		public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
-				MutableAttributesAccessor parentFlowModel) {
+		public void mapSubFlowOutputAttributes(FlowModel subFlowModel,
+				MutableFlowModel parentFlowModel) {
 		}
 	}
 
@@ -218,7 +218,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 */
 	public static final class NoOpAction implements Action {
 		public String execute(HttpServletRequest request, HttpServletResponse response,
-				MutableAttributesAccessor attributes) throws Exception {
+				MutableFlowModel attributes) throws Exception {
 			return "success";
 		}
 	}

@@ -11,11 +11,11 @@ import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
-import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
@@ -39,7 +39,7 @@ public class XmlFlowBuilderTests extends TestCase {
 				if ("action1".equals(actionId) || "action2".equals(actionId)) {
 					return new Action() {
 						public String execute(HttpServletRequest request, HttpServletResponse response,
-								MutableAttributesAccessor model) throws Exception {
+								MutableFlowModel model) throws Exception {
 							return "testOk";
 						}
 					};
@@ -58,12 +58,12 @@ public class XmlFlowBuilderTests extends TestCase {
 					throws ServiceLookupException {
 				if ("attribMapper1".equals(flowAttributesMapperId)) {
 					return new FlowAttributesMapper() {
-						public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+						public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 							return new HashMap();
 						}
 
-						public void mapSubFlowOutputAttributes(AttributesAccessor endingSubFlowModel,
-								MutableAttributesAccessor resumingParentFlowModel) {
+						public void mapSubFlowOutputAttributes(FlowModel endingSubFlowModel,
+								MutableFlowModel resumingParentFlowModel) {
 						}
 					};
 				}

@@ -157,14 +157,14 @@ public class StateTests extends TestCase {
 	}
 
 	public static class InputOutputMapper implements FlowAttributesMapper {
-		public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+		public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("childInputAttribute", parentFlowModel.getAttribute("parentInputAttribute"));
 			return inputMap;
 		}
 
-		public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
-				MutableAttributesAccessor parentFlowModel) {
+		public void mapSubFlowOutputAttributes(FlowModel subFlowModel,
+				MutableFlowModel parentFlowModel) {
 			parentFlowModel.setAttribute("parentOutputAttribute", subFlowModel.getAttribute("childInputAttribute"));
 		}
 	}
@@ -187,7 +187,7 @@ public class StateTests extends TestCase {
 		}
 
 		public String execute(HttpServletRequest request, HttpServletResponse response,
-				MutableAttributesAccessor attributes) throws Exception {
+				MutableFlowModel attributes) throws Exception {
 			executionCount++;
 			return result;
 		}
