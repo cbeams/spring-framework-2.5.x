@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.access;
 
@@ -20,27 +20,44 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
- * Default implementation of BeanFactoryReference, wrapping a newly
- * created BeanFactory, destroying its singletons on release.
+ * Default implementation of BeanFactoryReference, wrapping a newly created
+ * BeanFactory, destroying its singletons on release. As per
+ * BeanFactoryReference contract, release may be called more than once, with
+ * subsequent calls not doing anything. However, callging getFactory after a
+ * release call will cause an exception.
+ * 
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @since 13.02.2004
  */
 public class DefaultBeanFactoryReference implements BeanFactoryReference {
 
-	private final BeanFactory beanFactory;
+	private BeanFactory beanFactory;
 
 	public DefaultBeanFactoryReference(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 	public BeanFactory getFactory() {
-		return beanFactory;
+		BeanFactory retval = this.beanFactory;
+		if (retval == null)
+			throw new IllegalStateException(
+					"BeanFactory owned by this BeanFactoryReference has been released");
+		return retval;
 	}
 
 	public void release() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) this.beanFactory).destroySingletons();
+
+		if (beanFactory != null) {
+			BeanFactory savedFactory;
+			synchronized (this) {
+				savedFactory = beanFactory;
+				beanFactory = null;
+			}
+
+			if (savedFactory != null && savedFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) savedFactory).destroySingletons();
+			}
 		}
 	}
-
 }
