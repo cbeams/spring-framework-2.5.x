@@ -1,72 +1,69 @@
 package org.springframework.jdbc.object;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
+import org.easymock.MockControl;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.BadSqlGrammarException;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlReturnResultSet;
+import org.springframework.jdbc.*;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.mock.SpringMockCallableStatement;
-import org.springframework.jdbc.mock.SpringMockConnection;
-import org.springframework.jdbc.mock.SpringMockDataSource;
-import org.springframework.jdbc.mock.SpringMockJdbcFactory;
 
-import com.mockobjects.sql.MockResultSet;
+public class StoredProcedureTestSuite extends JdbcTestCase {
 
-public class StoredProcedureTestSuite extends TestCase {
-
-	//private String sqlBase = "SELECT seat_id, name FROM SEAT WHERE seat_id = ";
-
-	private SpringMockDataSource mockDataSource;
-	private SpringMockConnection mockConnection;
-	private SpringMockCallableStatement mockCallable;
-	private MockResultSet[] mockResultSet;
+	private MockControl ctrlCallable;
+	private CallableStatement mockCallable;
 
 	public StoredProcedureTestSuite(String name) {
 		super(name);
 	}
 
-	public void setUp() throws Exception {
-		mockDataSource = SpringMockJdbcFactory.dataSource();
-		mockConnection =
-			SpringMockJdbcFactory.connection(false, mockDataSource);
+	/**
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		ctrlCallable = MockControl.createControl(CallableStatement.class);
+		mockCallable = (CallableStatement) ctrlCallable.getMock();
 	}
 
+	/**
+	 * @see junit.framework.TestCase#tearDown()
+	 */
 	protected void tearDown() throws Exception {
-		mockDataSource.verify();
-		mockConnection.verify();
-		if (mockCallable != null) {
-			mockCallable.verify();
-		}
+		super.tearDown();
+
+		ctrlCallable.verify();
+	}
+
+	/**
+	 * @see org.springframework.jdbc.object.JdbcTestCase#replay()
+	 */
+	protected void replay() {
+		super.replay();
+		ctrlCallable.replay();
 	}
 
 	public void testNoSuchStoredProcedure() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		mockConnection.addExpectedCallableStatement(mockCallable);
-		mockDataSource.setExpectedConnectCalls(2);
-
 		SQLException sex =
 			new SQLException(
 				"Syntax error or access violation exception",
 				"42000");
-		mockCallable.setupThrowExceptionOnExecute(sex);
-		mockCallable.setExpectedExecuteCalls(1);
+		mockCallable.execute();
+		ctrlCallable.setThrowable(sex);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + NoSuchStoredProcedure.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
 
 		NoSuchStoredProcedure sproc = new NoSuchStoredProcedure(mockDataSource);
 		try {
@@ -81,26 +78,58 @@ public class StoredProcedureTestSuite extends TestCase {
 		throws Exception {
 		AddInvoice adder = new AddInvoice(mockDataSource);
 		int id = adder.execute(amount, custid);
-		//System.out.println("New row is " + id);
-		assertTrue("Received correct new row id", id == 4);
+		assertEquals(4, id);
 	}
 
 	public void testAddInvoices() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		mockConnection.addExpectedCallableStatement(mockCallable);
-		mockCallable.setExpectedExecuteCalls(1);
-		mockDataSource.setExpectedConnectCalls(2);
+		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(2, new Integer(3), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(3, Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getObject(3);
+		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+
 		testAddInvoice(1106, 3);
 	}
 
 	public void testAddInvoicesWithinTransaction() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		mockConnection.addExpectedCallableStatement(mockCallable);
-		mockCallable.setExpectedExecuteCalls(1);
-		mockDataSource.setExpectedConnectCalls(0);
+		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(2, new Integer(3), Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(3, Types.INTEGER);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getObject(3);
+		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+
 		DataSourceUtils.getThreadObjectManager().bindThreadObject(
 			mockDataSource,
 			new ConnectionHolder(mockConnection));
+
 		try {
 			testAddInvoice(1106, 3);
 		} finally {
@@ -110,28 +139,32 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	public void testNullArg() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		mockConnection.addExpectedCallableStatement(mockCallable);
-		mockCallable.setExpectedExecuteCalls(1);
-		mockDataSource.setExpectedConnectCalls(2);
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+
+		mockCallable.setNull(1, Types.VARCHAR);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("{call " + NullArg.SQL + "(?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ctrlResultSet.replay();
 
 		NullArg na = new NullArg(mockDataSource);
 		na.execute((String) null);
 	}
 
-	/*
-		public void testUncompiled() throws Exception {
-			UncompiledStoredProcedure uc = new UncompiledStoredProcedure(mockDataSource);
-			try {
-				uc.execute();
-				fail("Shouldn't succeed in executing uncompiled stored procedure");
-			} catch (InvalidDataAccessApiUsageException idaauex) {
-				// OK
-			}
-		}
-	*/
-
 	public void testUnnamedParameter() throws Exception {
+		replay();
 		try {
 			UnnamedParameterStoredProcedure unp =
 				new UnnamedParameterStoredProcedure(mockDataSource);
@@ -142,10 +175,7 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	public void testMissingParameter() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		//mockConnection.addExpectedCallableStatement(mockCallable);
-		mockCallable.setExpectedExecuteCalls(0);
-		mockDataSource.setExpectedConnectCalls(1);
+		replay();
 
 		try {
 			MissingParameterStoredProcedure mp =
@@ -158,16 +188,20 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	public void testStoredProcedureExceptionTranslator() throws Exception {
-		mockDataSource.setExpectedConnectCalls(1);
-		mockCallable = new SpringMockCallableStatement();
-		mockConnection.addExpectedCallableStatement(mockCallable);
-
 		SQLException sex =
 			new SQLException(
 				"Syntax error or access violation exception",
 				"42000");
-		mockCallable.setupThrowExceptionOnExecute(sex);
-		mockCallable.setExpectedExecuteCalls(1);
+		mockCallable.execute();
+		ctrlCallable.setThrowable(sex);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + StoredProcedureExceptionTranslator.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
 
 		StoredProcedureExceptionTranslator sproc =
 			new StoredProcedureExceptionTranslator(mockDataSource);
@@ -175,30 +209,51 @@ public class StoredProcedureTestSuite extends TestCase {
 			sproc.execute();
 			fail("Custom exception should be thrown");
 		} catch (CustomDataException ex) {
-			//System.out.println("CAUGHT:" + ex);
 			// OK
 		}
 	}
 
 	public void testStoredProcedureWithResultSet() throws Exception {
-		mockCallable = new SpringMockCallableStatement();
-		//MockResultSet mockResultSet = SpringMockJdbcFactory.resultSet(new Object[][] { { new Integer(1), "Bubba" } },  new String[] {"ID", "NAME"}, mockCallable);		
-		mockConnection.addExpectedCallableStatement(mockCallable);
-		mockDataSource.setExpectedConnectCalls(2);
-		mockCallable.setExpectedExecuteCalls(1);
-		//mockCallable.addResultSet(mockResultSet);
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
 
-		//TODO: Add real test - need to find a way to return a reult set using mock objects
-		StoredProcedureWithResultSet sproc = new StoredProcedureWithResultSet(mockDataSource);
+		mockResultSet.getString(2);
+		ctrlResultSet.setReturnValue("Bubba");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getResultSet();
+		ctrlCallable.setReturnValue(mockResultSet);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + StoredProcedureWithResultSet.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ctrlResultSet.replay();
+
+		StoredProcedureWithResultSet sproc =
+			new StoredProcedureWithResultSet(mockDataSource);
 		sproc.execute();
+
+		ctrlResultSet.verify();
 	}
 
-
 	private class AddInvoice extends StoredProcedure {
-
+		public static final String SQL = "add_invoice";
 		public AddInvoice(DataSource ds) {
 			setDataSource(ds);
-			setSql("add_invoice");
+			setSql(SQL);
 			declareParameter(new SqlParameter("amount", Types.INTEGER));
 			declareParameter(new SqlParameter("custid", Types.INTEGER));
 			declareParameter(new SqlOutParameter("newid", Types.INTEGER));
@@ -216,7 +271,7 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	private class NullArg extends StoredProcedure {
-
+		public static final String SQL = "takes_null";
 		/**
 		 * Constructor for AddInvoice.
 		 * @param cf
@@ -224,7 +279,7 @@ public class StoredProcedureTestSuite extends TestCase {
 		 */
 		public NullArg(DataSource ds) {
 			setDataSource(ds);
-			setSql("takes_null");
+			setSql(SQL);
 			declareParameter(new SqlParameter("ptest", Types.VARCHAR));
 			compile();
 		}
@@ -238,9 +293,11 @@ public class StoredProcedureTestSuite extends TestCase {
 
 	private class NoSuchStoredProcedure extends StoredProcedure {
 
+		public static final String SQL = "no_sproc_with_this_name";
+
 		public NoSuchStoredProcedure(DataSource ds) {
 			setDataSource(ds);
-			setSql("no_sproc_with_this_name");
+			setSql(SQL);
 			compile();
 		}
 
@@ -250,9 +307,9 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	private class UncompiledStoredProcedure extends StoredProcedure {
-
+		public static final String SQL = "uncompile_sp";
 		public UncompiledStoredProcedure(DataSource ds) {
-			super(ds, "uncompile_sp");
+			super(ds, SQL);
 		}
 
 		public void execute() {
@@ -291,13 +348,15 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	private class StoredProcedureWithResultSet extends StoredProcedure {
+		public static final String SQL = "sproc_with_result_set";
 
 		private List results = new LinkedList();
 
 		public StoredProcedureWithResultSet(DataSource ds) {
 			setDataSource(ds);
-			setSql("sproc_with_result_set");
-			declareParameter(new SqlReturnResultSet("rs", new RowCallbackHandlerImpl()));
+			setSql(SQL);
+			declareParameter(
+				new SqlReturnResultSet("rs", new RowCallbackHandlerImpl()));
 			compile();
 		}
 
@@ -307,8 +366,7 @@ public class StoredProcedureTestSuite extends TestCase {
 		}
 
 		private class RowCallbackHandlerImpl implements RowCallbackHandler {
-			public void processRow(ResultSet rs)  throws SQLException {
-				System.out.println("OK:" +rs.getString(1) + " " +rs.getString(2));
+			public void processRow(ResultSet rs) throws SQLException {
 				results.add(rs.getString(2));
 			}
 		}
@@ -316,10 +374,10 @@ public class StoredProcedureTestSuite extends TestCase {
 	}
 
 	private class StoredProcedureExceptionTranslator extends StoredProcedure {
-
+		public static final String SQL = "no_sproc_with_this_name";
 		public StoredProcedureExceptionTranslator(DataSource ds) {
 			setDataSource(ds);
-			setSql("no_sproc_with_this_name");
+			setSql(SQL);
 			setExceptionTranslator(new SQLExceptionTranslator() {
 				public DataAccessException translate(
 					String task,
