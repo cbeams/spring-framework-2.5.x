@@ -311,7 +311,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private String id;
 
-	private StartState startState;
+	private FlowStartStateMarker startState;
 
 	private StateGroups stateGroups = new StateGroups();
 
@@ -492,15 +492,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param groupId
-	 * @param state
-	 * @return
-	 */
-	public boolean addAll(String groupId, AbstractState state) {
-		return addAll(groupId, new AbstractState[] { state });
-	}
-
-	/**
-	 * @param groupId
 	 * @param states
 	 * @return
 	 */
@@ -592,6 +583,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param startStateId
+	 * @throws NoSuchFlowStateException
+	 */
+	public void setStartState(String startStateId) throws NoSuchFlowStateException {
+		setStartState(getRequiredTransitionableState(startStateId));
+	}
+
+	/**
 	 * @param state
 	 * @throws NoSuchFlowStateException
 	 */
@@ -600,15 +599,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting start state for flow '" + getId() + "' as '" + state + "'");
 		}
-		this.startState = new StartState(state);
-	}
-
-	/**
-	 * @param startStateId
-	 * @throws NoSuchFlowStateException
-	 */
-	public void setStartState(String startStateId) throws NoSuchFlowStateException {
-		this.startState = new StartState((ViewState)getRequiredState(startStateId));
+		this.startState = new FlowStartStateMarker(state);
 	}
 
 	/**
@@ -663,7 +654,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 * @throws IllegalStateException
 	 */
-	public StartState getStartState() throws IllegalStateException {
+	protected FlowStartStateMarker getStartState() throws IllegalStateException {
 		Assert.state(startState != null, "No state has been marked as the start state for this flow '" + getId()
 				+ "' -- programmer error?");
 		return startState;
@@ -749,7 +740,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 					+ "' was requested; processing...");
 		}
 		TransitionableState state = getRequiredTransitionableState(stateId);
-		return new StartState(state).enter(this, request, response, inputAttributes);
+		return new FlowStartStateMarker(state).enter(this, request, response, inputAttributes);
 	}
 
 	/**
@@ -774,7 +765,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, String stateId,
 			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) {
 		TransitionableState state = getRequiredTransitionableState(stateId);
-		return new StartState(state).enter(this, sessionExecution, request, response, inputAttributes);
+		return new FlowStartStateMarker(state).enter(this, sessionExecution, request, response, inputAttributes);
 	}
 
 	/**

@@ -29,12 +29,12 @@ import org.springframework.util.DefaultObjectStyler;
 /**
  * @author Keith Donald
  */
-public class StartState implements Serializable {
-	private static final Log logger = LogFactory.getLog(StartState.class);
+public class FlowStartStateMarker implements Serializable {
+	private static final Log logger = LogFactory.getLog(FlowStartStateMarker.class);
 
 	private TransitionableState state;
 
-	public StartState(TransitionableState state) {
+	public FlowStartStateMarker(TransitionableState state) {
 		Assert.notNull(state, "The start state is required");
 		this.state = state;
 	}
@@ -49,9 +49,9 @@ public class StartState implements Serializable {
 			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getState()
 					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
 		}
-		FlowSessionExecutionStack sessionExecutionStack = createFlowSessionExecutionStack();
-		ViewDescriptor startingView = enter(flow, sessionExecutionStack, request, response, inputAttributes);
-		return new FlowSessionExecutionStartResult(sessionExecutionStack, startingView);
+		FlowSessionExecutionStack sessionExecution = createFlowSessionExecutionStack();
+		ViewDescriptor startingView = enter(flow, sessionExecution, request, response, inputAttributes);
+		return new FlowSessionExecutionStartResult(sessionExecution, startingView);
 	}
 
 	public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
