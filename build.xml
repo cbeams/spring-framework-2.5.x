@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.9 2003-11-04 15:47:30 dkopylenko Exp $
+    $Id: build.xml,v 1.10 2003-11-11 22:30:28 colins Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -257,7 +257,7 @@
 		<mkdir dir="${testbuild.dir}"/>
 
 		<javac destdir="${testbuild.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="false">
+			deprecation="false" optimize="false" failonerror="true">
 			<src path="${test.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath location="${build.dir}"/>
@@ -312,7 +312,7 @@
 		<mkdir dir="${livetestbuild.dir}"/>
 
 		<javac destdir="${livetestbuild.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="false">
+			deprecation="false" optimize="false" failonerror="true">
 			<src path="${livetest.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath location="${build.dir}"/>
@@ -329,7 +329,7 @@
 		<mkdir dir="${clover.build.dir}"/>
 
 		<javac destdir="${clover.build.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="false">
+			deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
 		</javac>
