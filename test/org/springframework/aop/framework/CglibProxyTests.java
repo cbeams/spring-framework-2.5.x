@@ -17,11 +17,11 @@
 package org.springframework.aop.framework;
 
 import net.sf.cglib.core.CodeGenerationException;
-
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.support.AopUtils;
+
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
@@ -49,7 +49,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		return true;
 	}
 
-	
 	public void testNullConfig() {
 		try {
 			AopProxy aop = new Cglib2AopProxy(null);
@@ -67,7 +66,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			AopProxy aop = createAopProxy(pc);
 			aop.getProxy();
 			fail("Shouldn't allow no target with CGLIB proxy");
-		} catch (AopConfigException ex) {
+		}
+		catch (AopConfigException ex) {
 			// Ok
 		}
 	}
@@ -116,10 +116,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		catch (AspectException ex) {
 			// Check that stack trace is preserved
 			// FIX: CGLIB will throw an IllegalArgumentException when trying to
-			// create a proxy
-			// of a class where the constructor is not visible - Rob Harrop
-			assertTrue((ex.getCause() instanceof CodeGenerationException)
-					|| (ex.getCause() instanceof IllegalArgumentException));
+			// create a proxy of a class where the constructor is not visible - Rob Harrop.
+			assertTrue(ex.getCause() instanceof CodeGenerationException ||
+					ex.getCause() instanceof IllegalArgumentException);
 
 			// Check that error message is helpful
 
@@ -128,11 +127,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			//assertTrue(ex.getMessage().indexOf("final") != -1);
 			//assertTrue(ex.getMessage().indexOf("visible") != -1);
 		}
-
 	}
 
 	public void testMultipleProxies() {
-
 		TestBean target = new TestBean();
 		target.setAge(20);
 		TestBean target2 = new TestBean();
@@ -146,7 +143,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	private ITestBean getAdvisedProxy(TestBean target) {
-
 		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
 		pf.setProxyTargetClass(true);
 
@@ -158,6 +154,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		pf.setExposeProxy(false);
 
 		return (ITestBean)pf.getProxy();
-
 	}
+
 }

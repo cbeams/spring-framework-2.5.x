@@ -16,14 +16,13 @@
 
 package org.springframework.aop.target;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
 
 /**
- * Canonical TargetSource when there's no target, and behavior is supplied
- * by interfaces and advisors.
+ * Canonical TargetSource when there's no target,
+ * and behavior is supplied by interfaces and advisors.
  * @author Rod Johnson
  */
 public class EmptyTargetSource implements TargetSource, Serializable {
@@ -54,14 +53,15 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	/**
 	 * Required to support serialization.
 	 * Replaces with canonical instance on deserialization,
-	 * protecting Singleton pattern. 
-	 * Alternative to overriding equals().
+	 * protecting the Singleton pattern.
+	 * Alternative to overriding <code>equals</code>.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return INSTANCE;
 	}
 	
 	public String toString() {
-		return "EmptyTargetSource: there is no target";
+		return "EmptyTargetSource: no target";
 	}
+
 }
