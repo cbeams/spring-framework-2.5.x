@@ -247,30 +247,6 @@ public interface HibernateOperations {
 	void save(Object entity, Serializable id) throws DataAccessException;
 
 	/**
-	 * Save respectively update the given persistent instance,
-	 * according to its ID (matching the configured "unsaved-value"?).
-	 * @param entity the persistent instance to save respectively update
-	 * (to be associated with the Hibernate Session)
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
-	 */
-	void saveOrUpdate(Object entity) throws DataAccessException;
-
-	/**
-	 * Save respectively update the contents of given persistent object,
-	 * according to its ID (matching the configured "unsaved-value"?).
-	 * Will copy the contained fields to an already loaded instance
-	 * with the same ID, if appropriate.
-	 * @param entity the persistent object to save respectively update
-	 * (<i>not</i> necessarily to be associated with the Hibernate Session)
-	 * @return the actually associated persistent object
-	 * (either an already loaded instance with the same ID, or the given object)
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#saveOrUpdateCopy(Object)
-	 */
-	Object saveOrUpdateCopy(Object entity) throws DataAccessException;
-
-	/**
 	 * Update the given persistent instance.
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -290,6 +266,40 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#update(Object)
 	 */
 	void update(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Save or update the given persistent instance,
+	 * according to its id (matching the configured "unsaved-value"?).
+	 * @param entity the persistent instance to save or update
+	 * (to be associated with the Hibernate Session)
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
+	 */
+	void saveOrUpdate(Object entity) throws DataAccessException;
+
+	/**
+	 * Save or update all given persistent instances,
+	 * according to its id (matching the configured "unsaved-value"?).
+	 * @param entities the persistent instances to save or update
+	 * (to be associated with the Hibernate Session)
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
+	 */
+	void saveOrUpdateAll(Collection entities) throws DataAccessException;
+
+	/**
+	 * Save or update the contents of given persistent object,
+	 * according to its id (matching the configured "unsaved-value"?).
+	 * Will copy the contained fields to an already loaded instance
+	 * with the same id, if appropriate.
+	 * @param entity the persistent object to save or update
+	 * (<i>not</i> necessarily to be associated with the Hibernate Session)
+	 * @return the actually associated persistent object
+	 * (either an already loaded instance with the same id, or the given object)
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#saveOrUpdateCopy(Object)
+	 */
+	Object saveOrUpdateCopy(Object entity) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.

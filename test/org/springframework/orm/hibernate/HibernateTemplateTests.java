@@ -17,8 +17,8 @@
 package org.springframework.orm.hibernate;
 
 import java.lang.reflect.Proxy;
-import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -792,6 +792,50 @@ public class HibernateTemplateTests extends TestCase {
 		ht.save(tb, "id");
 	}
 
+	public void testUpdate() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.update(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.update(tb);
+	}
+
+	public void testUpdateWithLockMode() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.update(tb);
+		sessionControl.setVoidCallable(1);
+		session.lock(tb, LockMode.UPGRADE);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.update(tb, LockMode.UPGRADE);
+	}
+
 	public void testSaveOrUpdate() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
@@ -836,15 +880,18 @@ public class HibernateTemplateTests extends TestCase {
 		}
 	}
 
-	public void testUpdate() throws HibernateException {
-		TestBean tb = new TestBean();
+	public void testSaveOrUpdateAll() throws HibernateException {
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO);
-		session.update(tb);
+		session.saveOrUpdate(tb1);
+		sessionControl.setVoidCallable(1);
+		session.saveOrUpdate(tb2);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
@@ -854,10 +901,13 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.update(tb);
+		List tbs = new ArrayList();
+		tbs.add(tb1);
+		tbs.add(tb2);
+		ht.saveOrUpdateAll(tbs);
 	}
 
-	public void testUpdateWithLockMode() throws HibernateException {
+	public void testSaveOrUpdateCopy() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -865,10 +915,8 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO);
-		session.update(tb);
-		sessionControl.setVoidCallable(1);
-		session.lock(tb, LockMode.UPGRADE);
-		sessionControl.setVoidCallable(1);
+		session.saveOrUpdateCopy(tb);
+		sessionControl.setReturnValue(tb, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -877,7 +925,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.update(tb, LockMode.UPGRADE);
+		ht.saveOrUpdateCopy(tb);
 	}
 
 	public void testDelete() throws HibernateException {

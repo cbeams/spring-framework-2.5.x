@@ -504,25 +504,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}, true);
 	}
 
-	public void saveOrUpdate(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				checkWriteOperationAllowed(session);
-				session.saveOrUpdate(entity);
-				return null;
-			}
-		}, true);
-	}
-
-	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException {
-		return execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				checkWriteOperationAllowed(session);
-				return session.saveOrUpdateCopy(entity);
-			}
-		}, true);
-	}
-
 	public void update(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -540,6 +521,37 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				session.update(entity);
 				session.lock(entity, lockMode);
 				return null;
+			}
+		}, true);
+	}
+
+	public void saveOrUpdate(final Object entity) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				session.saveOrUpdate(entity);
+				return null;
+			}
+		}, true);
+	}
+
+	public void saveOrUpdateAll(final Collection entities) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					session.saveOrUpdate(it.next());
+				}
+				return null;
+			}
+		}, true);
+	}
+
+	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException {
+		return execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
+				return session.saveOrUpdateCopy(entity);
 			}
 		}, true);
 	}
@@ -1162,8 +1174,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Invocation handler that suppresses close calls on Hibernate Sessions.
 	 * Also prepares returned Query and Criteria objects.
 	 * @see net.sf.hibernate.Session#close
-	 * @see #prepareQuery
-	 * @see #prepareCriteria
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
