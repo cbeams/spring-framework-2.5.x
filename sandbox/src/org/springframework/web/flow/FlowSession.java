@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.web.flow.support.FlowUtils;
 
 /**
  * A single client session instance for a flow participating in a FlowExecution.
@@ -200,6 +201,22 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
 		}
 		this.attributes.remove(attributeName);
+	}
+	
+	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException {
+		Assert.state(inTransaction(tokenName, tokenValue, reset));
+	}
+	
+	public boolean inTransaction(String tokenName, String tokenValue, boolean reset) {
+		return FlowUtils.isTokenValid(this, tokenName, tokenValue, reset);
+	}
+	
+	public void setTransactionToken(String tokenName) {
+		FlowUtils.saveToken(this, tokenName);
+	}
+	
+	public void clearTransactionToken(String tokenName) {
+		FlowUtils.resetToken(this, tokenName);
 	}
 
 	public String toString() {

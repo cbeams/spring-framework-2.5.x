@@ -42,4 +42,20 @@ public interface MutableAttributesAccessor extends AttributesAccessor {
 	 * @param attributes The map of attributes (name=value pairs).
 	 */
 	public void setAttributes(Map attributes);
+	
+    /**
+     * <p>Save a new transaction token in this model.
+     * 
+     * @param tokenName the key used to save the token in the model map
+     */
+    public void setTransactionToken(String tokenName);
+
+    /**
+     * <p>Reset the saved transaction token in this model. This
+     * indicates that transactional token checking will not be needed
+     * on the next request that is submitted.
+     * 
+     * @param tokenName the key used to save the token in the model map
+     */
+    public void clearTransactionToken(String tokenName);
 }

@@ -87,6 +87,10 @@ public interface AttributesAccessor {
 	 *         wrong type.
 	 */
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException;
+	
+	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException;
+	
+	public boolean inTransaction(String tokenName, String tokenValue, boolean reset);
 
 	/**
 	 * Does the attribute by the provided name exist in this model?

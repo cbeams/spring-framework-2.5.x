@@ -354,5 +354,24 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		public void removeAttribute(String attributeName) {
 			map.remove(attributeName);
 		}
+		
+		public void assertInTransaction(String tokenName, String tokenValue,
+				boolean reset) throws IllegalStateException {
+			throw new UnsupportedOperationException();
+		}
+		
+		public boolean inTransaction(String token, String tokenValue,
+				boolean reset) {
+			throw new UnsupportedOperationException();
+		}
+		
+		public void setTransactionToken(String tokenName) {
+			throw new UnsupportedOperationException();
+		}
+		
+		public void clearTransactionToken(String tokenName) {
+			throw new UnsupportedOperationException();
+		}
+		
 	}
 }

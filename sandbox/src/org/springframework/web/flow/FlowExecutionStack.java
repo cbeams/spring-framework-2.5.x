@@ -373,6 +373,22 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		}
 		return endingSession;
 	}
+	
+	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException {
+		getActiveFlowSession().assertInTransaction(tokenName, tokenValue, reset);
+	}
+	
+	public boolean inTransaction(String tokenName, String tokenValue, boolean reset) {
+		return getActiveFlowSession().inTransaction(tokenName, tokenValue, reset);
+	}
+	
+	public void setTransactionToken(String tokenName) {
+		getActiveFlowSession().setTransactionToken(tokenName);
+	}
+	
+	public void clearTransactionToken(String tokenName) {
+		getActiveFlowSession().clearTransactionToken(tokenName);
+	}
 
 	// lifecycle event publishers
 

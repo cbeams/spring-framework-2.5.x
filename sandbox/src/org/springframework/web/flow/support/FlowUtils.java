@@ -113,6 +113,29 @@ public class FlowUtils {
      * @return true when the token is valid, false otherwise
      */
     public static boolean isTokenValid(MutableAttributesAccessor model, String tokenName, HttpServletRequest request, String requestTokenName, boolean reset) {
+    	String requestToken=request.getParameter(requestTokenName);
+    	return isTokenValid(model, tokenName, requestToken, reset);
+    }
+
+    /**
+     * <p>Return <code>true</code> if there is a transaction token stored in
+     * given model and the given value matches it. Returns <code>false</code> when
+     * <ul>
+     * 	<li>there is no transaction token saved in the model</li>
+     * 	<li>given toke value is null</li>
+     * 	<li>
+     * 		the given transaction token value does not match the
+     *  	transaction token in the model
+     *	</li>
+     * </ul>
+     *
+     * @param model the model map where the token is stored
+     * @param tokenName the key used to save the token in the model map
+     * @param tokenValue the token value to check
+     * @param reset indicates whether or not the token should be reset after checking it
+     * @return true when the token is valid, false otherwise
+     */
+    public static boolean isTokenValid(MutableAttributesAccessor model, String tokenName, String tokenValue, boolean reset) {
     	synchronized (model) {
 	    	String modelToken=(String)model.getAttribute(tokenName);
 	    	if (modelToken==null) {
@@ -123,13 +146,12 @@ public class FlowUtils {
 	            resetToken(model, tokenName);
 	        }
 	
-	        String requestToken=request.getParameter(requestTokenName);
-	        if (requestToken==null) {
+	        if (tokenValue==null) {
 	            return false;
 	        }
 	
-	        return modelToken.equals(requestToken);
+	        return modelToken.equals(tokenValue);
     	}
     }
-
+    
 }
