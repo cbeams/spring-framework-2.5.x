@@ -306,6 +306,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
+		if (this.namingStrategy != null) {
+			// pass given naming strategy to Hibernate Configuration
+			config.setNamingStrategy(this.namingStrategy);
+		}
+
 		if (this.configLocation != null) {
 			// load Hibernate configuration from given location
 			config.configure(this.configLocation.getURL());
@@ -358,11 +363,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		if (this.entityInterceptor != null) {
 			// set given entity interceptor at SessionFactory level
 			config.setInterceptor(this.entityInterceptor);
-		}
-
-		if (this.namingStrategy != null) {
-			// pass given naming strategy to Hibernate Configuration
-			config.setNamingStrategy(this.namingStrategy);
 		}
 
 		// perform custom post-processing in subclasses
