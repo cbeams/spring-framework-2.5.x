@@ -38,8 +38,8 @@ import org.springframework.web.flow.MutableFlowModel;
  * 
  * Fully instantiable as is, or by a custom subclass. This action differs from a
  * standard BindAndValidate action in that it doesn't do validation (not needed
- * during form setup), and has a specific <code>setupReferenceData</code>
- * hook.
+ * during form setup), is capable of form prepopulation from request
+ * parameters, and has a specific <code>setupReferenceData</code> hook.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -98,8 +98,8 @@ public class SetupFormAction extends BindAndValidateAction {
 		}
 	}
 
-	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableFlowModel model) throws Exception {
+	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+			throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		if (prepopulateFromRequest) {

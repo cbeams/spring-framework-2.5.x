@@ -192,9 +192,6 @@ public class BindAndValidateAction extends AbstractAction {
 		return messageCodesResolver;
 	}
 
-	/**
-	 *  
-	 */
 	public void afterPropertiesSet() {
 		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {
