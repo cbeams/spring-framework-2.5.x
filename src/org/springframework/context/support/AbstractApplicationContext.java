@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -390,7 +390,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 
 	/**
 	 * This implementation supports fully qualified URLs and appropriate
-	 * (file) paths, via getResourceByPath.
+	 * file paths, via getResourceByPath.
 	 * Throws a FileNotFoundException if getResourceByPath returns null.
 	 * @see #getResourceByPath
 	 */
@@ -404,7 +404,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 			// no URL -> try (file) path
 			InputStream in = getResourceByPath(location);
 			if (in == null) {
-				throw new FileNotFoundException("Location '" + location + "' isn't a URL and cannot be interpreted as (file) path");
+				throw new FileNotFoundException("Location [" + location + "] isn't a URL and cannot be interpreted as file path");
 			}
 			return in;
 		}

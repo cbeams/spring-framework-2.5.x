@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
@@ -60,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.6 2003-10-13 23:29:27 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.7 2003-10-16 18:59:41 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -394,7 +395,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private String getFinalPath(String nestedPath) {
 		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Final path in nested property value '" + nestedPath + "' is '" + finalPath + "'");
+			logger.debug("Final path in nested property value [" + nestedPath + "] is [" + finalPath + "]");
 		}
 		return finalPath;
 	}
@@ -410,7 +411,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		if (pos > -1) {
 			String nestedProperty = path.substring(0, pos);
 			String nestedPath = path.substring(pos + 1);
-			logger.debug("Navigating to property path '" + nestedPath + "' of nested property '" + nestedProperty + "'");
+			logger.debug("Navigating to property path [" + nestedPath + "] of nested property [" + nestedProperty + "]");
 			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
 			return nestedBw.getBeanWrapperForNestedProperty(nestedPath);
 		}
@@ -439,7 +440,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// lookup cached sub-BeanWrapper, create new one if not found
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(propertyValue);
 		if (nestedBw == null) {
-			logger.debug("Creating new nested BeanWrapper for property '" + nestedProperty + "'");
+			logger.debug("Creating new nested BeanWrapper for property [" + nestedProperty + "]");
 			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + nestedProperty + NESTED_PROPERTY_SEPARATOR);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
@@ -455,7 +456,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			this.nestedBeanWrappers.put(propertyValue, nestedBw);
 		}
 		else {
-			logger.debug("Using cached nested BeanWrapper for property '" + nestedProperty + "'");
+			logger.debug("Using cached nested BeanWrapper for property [" + nestedProperty + "]");
 		}
 		return nestedBw;
 	}
@@ -503,8 +504,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 					// The getter threw an exception, so we couldn't retrieve the old value.
 					// We're not really interested in any exceptions at this point,
 					// so we merely log the problem and leave oldValue null
-					logger.warn("Failed to invoke getter '" + readMethod.getName()
-											+ "' to get old property value before property change: getter probably threw an exception",
+					logger.warn("Failed to invoke getter [" + readMethod.getName() +
+											"] to get old property value before property change: getter probably threw an exception",
 											ex);
 				}
 			}
@@ -526,8 +527,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 			// Make the change
 			if (logger.isDebugEnabled())
-				logger.debug("About to invoke write method ["
-										 + writeMethod + "] on object of class '" + object.getClass().getName() + "'");
+				logger.debug("About to invoke write method [" + writeMethod +
+				             "] on object of class [" + object.getClass().getName() + "]");
 			writeMethod.invoke(object, new Object[]{propertyChangeEvent.getNewValue()});
 			if (logger.isDebugEnabled())
 				logger.debug("Invoked write method [" + writeMethod + "] ok");
@@ -624,8 +625,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 			throw new FatalBeanException("Cannot get scalar property [" + propertyName + "]: not readable", null);
 		}
 		if (logger.isDebugEnabled())
-			logger.debug("About to invoke read method ["
-									 + readMethod + "] on object of class '" + object.getClass().getName() + "'");
+			logger.debug("About to invoke read method [" + readMethod +
+			             "] on object of class [" + object.getClass().getName() + "]");
 		try {
 			return readMethod.invoke(object, null);
 		}

@@ -110,7 +110,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	public XmlWebApplicationContext(ApplicationContext parent, String namespace) {
 		super(parent);
 		this.namespace = namespace;
-		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+		setDisplayName("WebApplicationContext for namespace [" + namespace + "]");
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
 		this.servletContext = servletContext;
 		this.configLocations = initConfigLocations();
-		logger.info("Using config location [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "'");
+		logger.info("Using config location [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");
 		refresh();
 		
 		if (this.namespace == null) {
