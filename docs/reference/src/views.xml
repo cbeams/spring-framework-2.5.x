@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.12 2004-03-01 18:36:04 davison Exp $-->
+<!--$Id: views.xml,v 1.13 2004-03-09 23:03:35 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -19,9 +19,9 @@
   <sect1 id="view-jsp">
     <title>Using Spring together with JSP &amp; JSTL</title>
 
-    <para>Spring provides a couple out-of-the-box view when in need for JSP
-    and JSTL views (which in fact happen to be the most popular ones). Using
-    JSP (and also JSTL) is done using a normal viewresolver defined in the
+    <para>Spring provides a couple of out-of-the-box solutions for JSP and
+    JSTL views (which in fact happen to be the most popular ones). Using JSP
+    (and also JSTL) is done using a normal viewresolver defined in the
     WebApplicationContext. Furthermore, of course you need to write some JSPs
     that will actually render the view. This part describes some of the
     features and additional things Spring provides to facilitate JSP
@@ -96,38 +96,54 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
   <sect1 id="view-tiles">
     <title>Using Tiles</title>
-    <para>
-        It is possible to integrate Tiles - just as any other view technology - in webapplications
-        using Spring. The following describes in a broad way how to do this.
-    </para>
-    
-        <sect2 id="view-tiles-dependencies">
-            <title>Dependencies</title>
-            <para>        
-                To be able to use Tiles you have to have a couple of additional dependencies including in your        
-                project. The following is the list of dependencies you need.
-            </para>
-            <para>
-                <itemizedlist spacing="compact">
-                    <listitem><para><literal>struts version 1.1</literal></para></listitem>
-                    <listitem><para><literal>commons-beanutils</literal></para></listitem>
-                    <listitem><para><literal>commons-digester</literal></para></listitem>
-                    <listitem><para><literal>commons-logging</literal></para></listitem>
-                    <listitem><para><literal>commons-lang</literal></para></listitem>
-                </itemizedlist>
-            </para>
-            <para>
-                The dependencies are all available in the Spring distribution.
-            </para>
-        </sect2>
-        
-        <sect2 id="view-tiles-integrate">
-            <title>How to integrate Tiles</title>
-            <para>        
-                To be able to use Tiles, you have to configure it using files containing definitions (for basic information on definitions and
-                other Tiles concepts, please have a look at <ulink url="http://jakarta.apache.org/struts"/>. In Spring this is
-                done using the <literal>TilesConfigurer</literal>. Have a look at the following piece of code (which you should include in your WebApplicationContext):
-                <programlisting> 
+
+    <para>It is possible to integrate Tiles - just as any other view
+    technology - in webapplications using Spring. The following describes in a
+    broad way how to do this.</para>
+
+    <sect2 id="view-tiles-dependencies">
+      <title>Dependencies</title>
+
+      <para>To be able to use Tiles you have to have a couple of additional
+      dependencies including in your project. The following is the list of
+      dependencies you need.</para>
+
+      <para><itemizedlist spacing="compact">
+          <listitem>
+            <para><literal>struts version 1.1</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>commons-beanutils</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>commons-digester</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>commons-logging</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>commons-lang</literal></para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>The dependencies are all available in the Spring
+      distribution.</para>
+    </sect2>
+
+    <sect2 id="view-tiles-integrate">
+      <title>How to integrate Tiles</title>
+
+      <para>To be able to use Tiles, you have to configure it using files
+      containing definitions (for basic information on definitions and other
+      Tiles concepts, please have a look at <ulink
+      url="http://jakarta.apache.org/struts"></ulink>. In Spring this is done
+      using the <literal>TilesConfigurer</literal>. Have a look at the
+      following piece of code (which you should include in your
+      WebApplicationContext): <programlisting> 
 &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
    &lt;property name="factoryClass"&gt;
        &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
@@ -142,63 +158,66 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
        &lt;/list&gt;
    &lt;/property&gt;
 &lt;/bean&gt;
-              </programlisting>
-          </para>
-          <para>
-            As you can see, there are five files containing definitions, which are all located in the WEB-INF/defs directory. At initialization of the
-            WebApplicationContext, the files will be loaded and the definitionsfactory defined by the <literal>factoryClass</literal>-property is
-            initialized. After that has been done, the tiles includes in the definition files can be used as views within your Spring webapplication.
-            To be able to use the views you have to have a <literal>ViewResolver</literal> just as with any other view technology used with Spring. Below
-            you can find two possibilities, the <literal>InternalResourceViewResolver</literal> and the <literal>ResourceBundleViewResolver</literal>.
-          </para>
-          
-              <sect3 id="view-tiles-internal">
-                <title><literal>InternalResourceViewResolver</literal></title>
-                <para>
-                    The InternalResourceViewResolver instantiates the given <literal>viewClass</literal> for each view it has to resolve.
-                    <programlisting>        
+              </programlisting></para>
+
+      <para>As you can see, there are five files containing definitions, which
+      are all located in the WEB-INF/defs directory. At initialization of the
+      WebApplicationContext, the files will be loaded and the
+      definitionsfactory defined by the
+      <literal>factoryClass</literal>-property is initialized. After that has
+      been done, the tiles includes in the definition files can be used as
+      views within your Spring webapplication. To be able to use the views you
+      have to have a <literal>ViewResolver</literal> just as with any other
+      view technology used with Spring. Below you can find two possibilities,
+      the <literal>InternalResourceViewResolver</literal> and the
+      <literal>ResourceBundleViewResolver</literal>.</para>
+
+      <sect3 id="view-tiles-internal">
+        <title><literal>InternalResourceViewResolver</literal></title>
+
+        <para>The InternalResourceViewResolver instantiates the given
+        <literal>viewClass</literal> for each view it has to resolve.
+        <programlisting>        
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
     &lt;property name="requestContextAttribute"&gt;&lt;value&gt;requestContext&lt;/value&gt;&lt;/property&gt;
     &lt;property name="viewClass"&gt;
         &lt;value&gt;org.springframework.web.servlet.view.tiles.TilesView&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
-                    </programlisting>
-                </para>
-                
-            </sect3>
-            <sect3 id="view-tiles-resource">
-                <title><literal>ResourceBundleViewResolver</literal></title>
-                <para>
-                    The ResourceBundleViewResolver has to be provided with a property file containing viewnames and viewclasses the resolver can use:
-                    <programlisting>
+                    </programlisting></para>
+      </sect3>
+
+      <sect3 id="view-tiles-resource">
+        <title><literal>ResourceBundleViewResolver</literal></title>
+
+        <para>The ResourceBundleViewResolver has to be provided with a
+        property file containing viewnames and viewclasses the resolver can
+        use: <programlisting>
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
     &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
-                    </programlisting>
-                </para>
-                
-                <para>
-                    <programlisting><![CDATA[
+                    </programlisting></para>
+
+        <para><programlisting>
         welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
-        welcomeView.url=welcome (<b>this is the name of a definition</b>)
+        welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
         
         vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-        vetsView.url=vetsView (<b>again, this is the name of a definition</b>)
+        vetsView.url=vetsView (&lt;b&gt;again, this is the name of a definition&lt;/b&gt;)
         
         findOwnersForm.class=org.springframework.web.servlet.view.JstlView
         findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
-                    ]]></programlisting>
-                    As you can see, when using the ResourceBundleViewResolver, you can mix view using different view technologies.
-                </para>
-            </sect3>
-        </sect2>
-    </sect1>
+                    </programlisting> As you can see, when using the
+        ResourceBundleViewResolver, you can mix view using different view
+        technologies.</para>
+      </sect3>
+    </sect2>
+  </sect1>
 
   <sect1 id="view-velocity">
     <title>Velocity</title>
 
-    <para>Velocity is a view technology developed the Jakarta Project. More
+    <para>Velocity is a view technology developed by the Jakarta Project. More
     information about Velocity can be found at
     http://jakarta.apache.org/velocity. This section describes how to
     integrate the Velocity view technology for use with Spring.</para>
@@ -1468,5 +1487,4 @@ public class PDFPage extends AbstractPdfView {
       stack in this Tapestry application.</para>
     </sect2>
   </sect1>
-
 </chapter>
