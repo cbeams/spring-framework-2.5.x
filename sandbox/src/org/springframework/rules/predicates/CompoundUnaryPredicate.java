@@ -100,7 +100,7 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
     public void validateTypeSafety(final Class clazz) {
         UnaryPredicate predicate = new UnaryPredicate() {
             public boolean test(Object o) {
-                return o.getClass() != clazz || o.getClass() != this.getClass();
+                return clazz.getClass().isAssignableFrom(o.getClass());
             }
         };
         Object violator = Algorithms.findFirst(predicates, predicate);
