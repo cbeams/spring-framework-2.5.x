@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.flow.config.FlowServiceLookupException;
 import org.springframework.web.flow.config.NoSuchActionException;
@@ -87,11 +88,7 @@ public class XmlFlowBuilderTest extends TestCase {
 		});
 		builder.setFlowExecutionListener(new FlowExecutionListenerAdapter() {});
 		
-		builder.init();
-		builder.buildStates();
-		builder.buildExecutionListeners();
-		
-		flow=builder.getResult();
+		flow=new FlowFactoryBean(builder).getFlow();
 	}
 	
 	public void testBuildResult() {
