@@ -755,7 +755,7 @@ public class SampleDelegate {
                 <prop key="/*/account.form">editAccountFormController</prop>
                 <prop key="/*/editaccount.form">editAccountFormController</prop>
                 <prop key="/ex/view*.html">someViewController</prop>
-                <prop key="/**/help.html
+                <prop key="/**/help.html">helpController</prop>
             </props>
         </property>
     </bean>
@@ -849,7 +849,7 @@ public class SampleDelegate {
                 ]]></programlisting>
                 
                 <programlisting><![CDATA[
-package samnples;
+package samples;
 
 public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
