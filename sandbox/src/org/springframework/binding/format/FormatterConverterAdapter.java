@@ -19,10 +19,10 @@ import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.Converter;
 import org.springframework.util.closure.Closure;
 
-public class TypeConverterFormatterAdapter implements Converter, Closure {
+public class FormatterConverterAdapter implements Converter, Closure {
 	private Formatter formatter;
 
-	public TypeConverterFormatterAdapter(Formatter formatter) {
+	public FormatterConverterAdapter(Formatter formatter) {
 		this.formatter = formatter;
 	}
 

@@ -15,36 +15,35 @@
  */
 package org.springframework.binding.format;
 
-import java.beans.PropertyEditorSupport;
+import java.beans.PropertyEditor;
 
 import org.springframework.util.Assert;
 
 /**
- * Adapts a formatter to the property editor interface.
+ * Adapts a property editor to the type converter interface.
  * @author Keith Donald
  */
-public class PropertyEditorFormatterAdapter extends PropertyEditorSupport {
+public class PropertyEditorFormatterAdapter extends AbstractFormatter {
 
-    private Formatter formatter;
+	private PropertyEditor propertyEditor;
 
-    public PropertyEditorFormatterAdapter(Formatter formatter) {
-        Assert.notNull(formatter, "Formatter is required");
-        this.formatter = formatter;
-    }
+	public PropertyEditorFormatterAdapter(PropertyEditor propertyEditor) {
+		super(Object.class);
+		Assert.notNull(propertyEditor, "Property editor is required");
+		this.propertyEditor = propertyEditor;
+	}
 
-    public void setAsText(String text) throws IllegalArgumentException {
-        try {
-            setValue(formatter.parseValue(text));
-        }
-        catch (InvalidFormatException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Could not convert back from string: "
-                    + e.getMessage());
-            iae.initCause(e);
-            throw iae;
-        }
-    }
+	public PropertyEditor getPropertyEditor() {
+		return propertyEditor;
+	}
 
-    public String getAsText() {
-		return formatter.formatValue(getValue());
-    }
+	protected String doFormatValue(Object value) {
+		propertyEditor.setValue(value);
+		return propertyEditor.getAsText();
+	}
+
+	protected Object doParseValue(String formattedValue) {
+		propertyEditor.setAsText(formattedValue);
+		return propertyEditor.getValue();
+	}
 }
