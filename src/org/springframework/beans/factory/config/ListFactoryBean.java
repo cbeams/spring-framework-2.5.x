@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -29,15 +27,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 09.12.2003
  */
-public class ListFactoryBean implements FactoryBean, InitializingBean {
+public class ListFactoryBean extends AbstractFactoryBean {
 
 	private List sourceList;
 
 	private Class targetListClass = ArrayList.class;
-
-	private List targetList;
-
-	private boolean singleton = true;
 
 	/**
 	 * Set the source List, typically populated via XML "list" elements.
@@ -61,41 +55,17 @@ public class ListFactoryBean implements FactoryBean, InitializingBean {
 		this.targetListClass = targetListClass;
 	}
 
-	/**
-	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is true.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
-
-	public void afterPropertiesSet() {
-		if (this.sourceList == null) {
-			throw new IllegalArgumentException("sourceList is required");
-		}
-		if (this.singleton) {
-			this.targetList = (List) BeanUtils.instantiateClass(this.targetListClass);
-			this.targetList.addAll(this.sourceList);
-		}
-	}
-
-	public Object getObject() {
-		if (this.singleton) {
-			return this.targetList;
-		}
-		else {
-			List result = (List) BeanUtils.instantiateClass(this.targetListClass);
-			result.addAll(this.sourceList);
-			return result;
-		}
-	}
-
 	public Class getObjectType() {
 		return List.class;
 	}
 
-	public boolean isSingleton() {
-		return singleton;
+	protected Object createInstance() {
+		if (this.sourceList == null) {
+			throw new IllegalArgumentException("sourceList is required");
+		}
+		List result = (List) BeanUtils.instantiateClass(this.targetListClass);
+		result.addAll(this.sourceList);
+		return result;
 	}
 
 }

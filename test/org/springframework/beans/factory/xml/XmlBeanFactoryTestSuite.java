@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.42 2004-04-01 14:56:39 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.43 2004-04-26 22:05:50 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1003,7 +1003,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals("jenny", map.get("jen"));
 	}
 
-	public void testCollectionFactoryDefaults() {
+	public void testCollectionFactoryDefaults() throws Exception {
 		ListFactoryBean listFactory = new ListFactoryBean();
 		listFactory.setSourceList(new LinkedList());
 		listFactory.afterPropertiesSet();

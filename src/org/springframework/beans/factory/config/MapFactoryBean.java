@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -29,15 +27,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 09.12.2003
  */
-public class MapFactoryBean implements FactoryBean, InitializingBean {
+public class MapFactoryBean extends AbstractFactoryBean {
 
 	private Map sourceMap;
 
 	private Class targetMapClass = HashMap.class;
-
-	private Map targetMap;
-
-	private boolean singleton = true;
 
 	/**
 	 * Set the source Map, typically populated via XML "map" elements.
@@ -61,41 +55,17 @@ public class MapFactoryBean implements FactoryBean, InitializingBean {
 		this.targetMapClass = targetMapClass;
 	}
 
-	/**
-	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is true.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
-
-	public void afterPropertiesSet() {
-		if (this.sourceMap == null) {
-			throw new IllegalArgumentException("sourceMap is required");
-		}
-		if (this.singleton) {
-			this.targetMap = (Map) BeanUtils.instantiateClass(this.targetMapClass);
-			this.targetMap.putAll(this.sourceMap);
-		}
-	}
-
-	public Object getObject() {
-		if (this.singleton) {
-			return this.targetMap;
-		}
-		else {
-			Map result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
-			result.putAll(this.sourceMap);
-			return result;
-		}
-	}
-
 	public Class getObjectType() {
 		return Map.class;
 	}
 
-	public boolean isSingleton() {
-		return singleton;
+	protected Object createInstance() {
+		if (this.sourceMap == null) {
+			throw new IllegalArgumentException("sourceMap is required");
+		}
+		Map result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
+		result.putAll(this.sourceMap);
+		return result;
 	}
 
 }

@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class PropertiesFactoryBeanTests extends TestCase {
 
-	public void testWithPropertiesFile() throws IOException {
+	public void testWithPropertiesFile() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		pfb.afterPropertiesSet();
@@ -37,7 +37,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		assertEquals("value1", props.getProperty("key1"));
 	}
 
-	public void testWithLocalProperties() throws IOException {
+	public void testWithLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
@@ -47,7 +47,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		assertEquals("value2", props.getProperty("key2"));
 	}
 
-	public void testWithPropertiesFileAndLocalProperties() throws IOException {
+	public void testWithPropertiesFileAndLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		Properties localProps = new Properties();
@@ -59,7 +59,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		assertEquals("value2", props.getProperty("key2"));
 	}
 
-	public void testWithPrototype() throws IOException {
+	public void testWithPrototype() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setSingleton(false);
 		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
