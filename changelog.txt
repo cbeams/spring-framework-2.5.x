@@ -9,13 +9,18 @@ Changes in version 1.1 final (4.9.2004)
 Package org.springframework.aop
 * ProxyFactoryBean returns full target class as object type in case of a singleton
 * reworked AbstractPrototypeBasedTargetSource's target class check to look for bean class on BeanDefinition first
-* deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favour of "getNrOfObjects"/"getNrOfHits" etc
+* deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favour of "getObjectCount"/"getHitCount" etc
+* renamed Jdk14RegexpMethodPointcut to JdkRegexpMethodPointcut
 
 Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
 * refined BeanWrapperImpl's "findCustomEditor" to consider editors registered for all path variations without index/key
-* added "getBeanClass" method to BeanDefinition interface, available via ConfigurableBeanFactory
+* deprecated PagedListHolder's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
+* deprecated ConstructorArgumentValues' "getNrOfArguments" in favor of "getArgumentCount" (for consistent method naming)
 * added "applyBeanPropertyValues" method to AutowireCapableBeanFactory, for populating an existing bean instance
+* moved "getBeanDefinition" method from ConfigurableBeanFactory down to ConfigurableListableBeanFactory interface
+* added "getBeanClass", "isAbstract", "isSingleton", "isLazyInit" methods to BeanDefinition interface
+* added "abstract" attribute for XML bean definitions, for marking parent beans that are not meant to be instantiated
 
 Package org.springframework.ejb
 * reworked AbstractSlsbInvokerInterceptor's "cacheHome" feature to not hold a proxy as instance variable if not caching
@@ -40,6 +45,8 @@ Package org.springframework.jndi
 * added JndiObjectTargetSource which performs a fresh JNDI lookup for each call, allowing for hot redeployment in JNDI
 
 Package org.springframework.orm
+* added overloaded constructors that take a "persistentClassName" String to ObjectOptimisticLockingFailureException
+* added overloaded constructors that take a "persistentClassName" String to ObjectRetrievalFailureException
 * fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
 
 Package org.springframework.mail
@@ -63,7 +70,10 @@ Package org.springframework.validation
 Package org.springframework.web
 * added special parsing of original filenames to CommonsMultipartFile, detecting both Unix- and Windows-style paths
 * reworked AbstractPathMapHandlerMapping's "getClassesWithPathMapAttributes" to return a Class array rather than names
+* added "allowRequestOverride" and "allowSessionOverride" properties to AbstractTemplateView (off by default)
 * added "buildPdfMetadata" callback to AbstractPdfView, for adding meta fields like author to the iText PDF Document
+* deprecated AbstractWizardFormController's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
+* added LookupDispatchActionSupport class to Struts support, analogous to ActionSupport but for LookupDispatchActions
 
 
 Changes in version 1.1 RC2 (19.8.2004)
@@ -73,7 +83,7 @@ Package org.springframework.aop
 * added "customizeProxyFactory" hook method in AbstractAutoProxyCreator
 * renamed AbstractAutoProxyCreator's "getInterceptorsAndAdvisorsForBean" method to "getAdvicesAndAdvisorsForBean"
 * AbstractAutoProxyCreator's "getAdvicesAndAdvisorsForBean" method takes a TargetSource as third argument now
-* added Jdk14RegexpMethodPointcut
+* added Jdk14RegexpMethodPointcut, building on the java.util.regex package, as alternative to Perl5RegexpMethodPointcut
 
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
