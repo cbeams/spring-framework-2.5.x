@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.ApplicationContextException;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.WebUtils;
 
@@ -82,8 +83,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * Register the given handler instance for the given URL path.
 	 * @param urlPath URL the bean is mapped to
 	 * @param handler the handler instance
+	 * @throws ApplicationContextException if there is already a
+	 * handler mapped to the given URL path
 	 */
-	protected final void registerHandler(String urlPath, Object handler) {
+	protected final void registerHandler(String urlPath, Object handler) throws ApplicationContextException {
+		Object mappedHandler = this.handlerMap.get(urlPath);
+		if (mappedHandler != null) {
+			throw new ApplicationContextException("Cannot map handler [" + handler + "] to URL path [" + urlPath +
+			                                      "]: there's already handler [" + mappedHandler + "] mapped");
+		}
 		this.handlerMap.put(urlPath, handler);
 		logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
 	}

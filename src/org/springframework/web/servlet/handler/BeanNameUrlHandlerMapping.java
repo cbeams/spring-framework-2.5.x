@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.springframework.util.StringUtils;
+import org.springframework.context.ApplicationContextException;
 
 /**
  * Implementation of the HandlerMapping interface to map from URLs
@@ -26,7 +27,7 @@ import org.springframework.util.StringUtils;
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
-	public void initApplicationContext() {
+	public void initApplicationContext() throws ApplicationContextException {
 		logger.debug("Looking for URL mappings...");
 		String[] urlMaps = getApplicationContext().getBeanDefinitionNames();
 

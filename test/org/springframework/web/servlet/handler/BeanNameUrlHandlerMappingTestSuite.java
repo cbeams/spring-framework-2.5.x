@@ -10,6 +10,7 @@ import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.context.ApplicationContextException;
 
 /**
  * @author Rod Johnson
@@ -124,6 +125,17 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		req = new MockHttpServletRequest(null, "GET", "/mypath/tes");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec == null);
+	}
+
+	public void testDoubleMappings() throws ServletException {
+		BeanNameUrlHandlerMapping hm = (BeanNameUrlHandlerMapping) wac.getBean("handlerMapping");
+		try {
+			hm.registerHandler("/mypath/welcome.html", "handler");
+			fail("Should have thrown ApplicationContextException");
+		}
+		catch (ApplicationContextException ex) {
+			// expected
+		}
 	}
 
 }

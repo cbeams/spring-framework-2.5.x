@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.context.ApplicationContextException;
+
 /**
  * Implementation of the HandlerMapping interface to map from URLs
  * to request handler beans.
@@ -60,7 +62,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		this.urlMap = mappings;
 	}
 
-	public void initApplicationContext() {
+	public void initApplicationContext() throws ApplicationContextException {
 		if (this.urlMap == null) {
 			throw new IllegalArgumentException("Either 'urlMap' or 'mappings' is required");
 		}
