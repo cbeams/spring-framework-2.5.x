@@ -51,10 +51,10 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  * successfully handled.
  * </ul>
  *
- * TODO update this with action and render service
- * <p>Subclasses must implement doService() to handle requests. Because this extends
- * PortletBean rather than Portlet directly, bean properties are mapped
- * onto it. Subclasses can override initFrameworkPortlet() for custom initialization.
+ * <p>Subclasses must implement doActionService() and doRenderService() to handle
+ * action and render requests. Because this extends PortletBean rather than Portlet
+ * directly, bean properties are mapped onto it. Subclasses can override
+ * initFrameworkPortlet() for custom initialization.
  *
  * <p>Regards a "contextClass" parameter at the portlet init-param level,
  * falling back to the default context class (XmlPortletApplicationContext) if not found.
@@ -80,7 +80,7 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #doService
  * @see #initFrameworkPortlet
  * @see #setContextClass
