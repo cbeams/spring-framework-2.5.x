@@ -42,13 +42,11 @@ import javax.jms.TopicSession;
  * API as JmsTemplate does for JMS 1.1 providers.
  *
  * <p>You must specify the domain or style of messaging to be either
- * Point-to-Point (Queues) or Publish/Subscribe(Topics) using the method
- * {@link JmsTemplate#setPubSubDomain(boolean) setPubSubDomain}
+ * Point-to-Point (Queues) or Publish/Subscribe(Topics), using the
+ * "pubSubDomain" property. Point-to-Point (Queues) is the default domain.
  *
- * <p><b>The default JMS domain is the Point-to-Point domain (Queues).</b>
- *
- * <p>The pubSubDomain property is an implementation detail due to the use of
- * similar but seperate class heirarchies in the JMS 1.0.2 API. JMS 1.1
+ * <p>The "pubSubDomain" property is an important setting due to the use
+ * of similar but seperate class hierarchies in the JMS 1.0.2 API. JMS 1.1
  * provides a new domain-independent API that allows for easy mix-and-match
  * use of Point-to-Point and Publish/Subscribe domain.
  *
@@ -56,6 +54,7 @@ import javax.jms.TopicSession;
  * @author Juergen Hoeller
  * @see #setConnectionFactory
  * @see #setPubSubDomain
+ * @see JmsTemplate
  */
 public class JmsTemplate102 extends JmsTemplate {
 
@@ -172,7 +171,7 @@ public class JmsTemplate102 extends JmsTemplate {
 			}
 		}
 		else {
-			if (this.isExplicitQosEnabled()) {
+			if (isExplicitQosEnabled()) {
 				((QueueSender) producer).send(message, getDeliveryMode(), getPriority(), getTimeToLive());
 			}
 			else {

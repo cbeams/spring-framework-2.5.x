@@ -41,25 +41,33 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * Helper class that simplifies JMS access code. This class requires a
  * JMS 1.1 provider, because it builds on the new domain-independent API.
- * Use the JmsTemplate102 subclass for JMS 1.0.2 providers.
+ * <b>Use the {@link JmsTemplate102 JmsTemplate102} subclass for
+ * JMS 1.0.2 providers.</b>
  *
  * <p>If you want to use dynamic destination creation, you must specify
- * the type of JMS destination to create using the method
- * {@link JmsTemplate#setPubSubDomain setPubSubDomain}. For other usages,
- * this is not necessary, in contrast to when working with JmsTemplate102.
- * Point-to-Point (Queues) is the default domain.
+ * the type of JMS destination to create, using the "pubSubDomain" property.
+ * For other operations, this is not necessary, in contrast to when working
+ * with JmsTemplate102. Point-to-Point (Queues) is the default domain.
  *
  * <p>Default settings for JMS sessions are not transacted and auto-acknowledge.
- * As per section 17.3.5 of the EJB specification, the transaction and
- * acknowledgement parameters are ignored when a JMS Session is created
- * inside the container environment.
+ * As defined by the J2EE specification, the transaction and acknowledgement
+ * parameters are ignored when a JMS Session is created inside an active
+ * transaction, no matter if a JTA transaction or a Spring-managed transaction.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @see #setConnectionFactory
+ * @see #setPubSubDomain
+ * @see JmsTemplate102
  */
 public class JmsTemplate implements JmsOperations, InitializingBean {
 
+	/**
+	 * Default timeout for receive operations:
+	 * -1 indicates a blocking receive without timeout.
+	 */
 	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -102,7 +110,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	private MessageConverter messageConverter;
 
 	/**
-	 * The the timeout to use for receive operations.
+	 * The timeout to use for receive operations.
 	 */
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
