@@ -27,9 +27,10 @@ import net.sf.jasperreports.engine.export.JRXlsExporter;
 public class JasperReportsExcelView extends
 		AbstractOutputStreamDrivenJasperReportsView {
 
-	/**
-     * Sets the content type of this view to <code>application/vnd.ms-excel</code>.
-	 */
+    /**
+     * Creates a new <code>JasperReportsExcelView</code>. Configures view
+     * content type.
+     */
 	public JasperReportsExcelView() {
 		setContentType("application/vnd.ms-excel");
 	}

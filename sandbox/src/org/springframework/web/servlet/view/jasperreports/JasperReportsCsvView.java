@@ -19,26 +19,28 @@ import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 
 /**
- * Implementation of AbstractJasperReportsView that renders
- * report results in CSV format.
+ * Implementation of AbstractJasperReportsView that renders report results in
+ * CSV format.
+ * 
  * @author robh
  */
 public class JasperReportsCsvView extends AbstractWriterDrivenJasperReportsView {
 
     /**
-     * Sets the content type of this report to <code>text/csv</code>
-     *
+     * Creates a new <code>JasperReportsCsvView</code>. Configures view
+     * content type.
      */
-	public JasperReportsCsvView() {
-		setContentType("text/csv");
-	}
+    public JasperReportsCsvView() {
+        setContentType("text/csv");
+    }
 
     /**
      * Returns an instance of <code>JRCsvExporter</code>
+     * 
      * @return A <code>JRCsvExporter</code>
      */
-	protected JRAbstractExporter getExporter() {
-		return new JRCsvExporter();
-	}
+    protected JRAbstractExporter getExporter() {
+        return new JRCsvExporter();
+    }
 
 }
