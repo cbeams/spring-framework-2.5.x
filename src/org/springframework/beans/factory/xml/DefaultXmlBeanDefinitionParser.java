@@ -31,7 +31,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -61,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.29 2004-07-02 07:21:15 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.30 2004-07-08 21:27:40 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -642,12 +641,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		StringBuffer value = new StringBuffer();
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
-			Object item = nl.item(i);
-			if (item instanceof Text) {
-				value.append(((Text) item).getData());
-			}
-			else if (item instanceof Comment) {
-				// ignore
+			Node item = nl.item(i);
+			if (item instanceof org.w3c.dom.CharacterData) {
+				if (!(item instanceof Comment)) {
+					value.append(item.getNodeValue());
+				}
 			}
 			else {
 				throw new BeanDefinitionStoreException(this.resource, beanName,

@@ -77,6 +77,14 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		return factory;
 	}
 
+	public void testCount() {
+		assertCount(14);
+	}
+
+	public void testTestBeanCount() {
+		assertTestBeanCount(8);
+	}
+
 	public void testFactoryNesting() {
 		ITestBean father = (ITestBean) getBeanFactory().getBean("father");
 		assertTrue("Bean from root context", father != null);
@@ -124,6 +132,12 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
 		assertTrue("Touchy is empty", "".equals(rod.getTouchy()));
 		assertTrue("Touchy is empty", "".equals(kerry.getTouchy()));
+	}
+
+	public void testCommentsAndCdataInValue() {
+		TestBean bean = (TestBean) getBeanFactory().getBean("commentsInValue");
+		assertEquals("Failed to handle comments and CDATA properly",
+								 "this is a <!--comment-->", bean.getName());
 	}
 
 }
