@@ -26,7 +26,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * use Spring Metadata.
  * Has knowledge of pooling and other specific enterprise aspects.
  * @author Rod Johnson
- * @version $Id: EnterpriseServices.java,v 1.2 2003-11-22 17:22:29 jhoeller Exp $
+ * @version $Id: EnterpriseServices.java,v 1.3 2003-11-24 21:49:05 jhoeller Exp $
  */
 public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 
@@ -65,13 +65,14 @@ public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 		
 		List l = this.attributes.getAttributes(bean.getClass(), PoolingAttribute.class);
 		if (l.size() == 1) {
-			if (getBeanFactory().isSingleton(beanName))
+			if (getBeanFactory().isSingleton(beanName)) {
 				throw new BeanDefinitionStoreException("Cannot pool singleton bean '" + beanName + "'", null);
+			}
 			logger.info("Configuring pooling...");
 			
 			PoolingAttribute pa = (PoolingAttribute) l.get(0);
 			AbstractPoolingInvokerInterceptor cpii = createPoolingInvoker();
-			cpii.setPoolSize(pa.getSize());
+			cpii.setMaxSize(pa.getSize());
 			cpii.setTargetBeanName(beanName);
 			try {
 				// Infinite cycle: tries to create the bean if we don't use a different factory
