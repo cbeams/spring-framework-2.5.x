@@ -48,7 +48,7 @@ public class SqlMapDaoSupport {
 	/**
 	 * Return the JDBC DataSource used by this DAO.
 	 */
-	protected final DataSource getDataSource() {
+	public final DataSource getDataSource() {
 		return sqlMapTemplate.getDataSource();
 	}
 
@@ -62,7 +62,7 @@ public class SqlMapDaoSupport {
 	/**
 	 * Return the iBATIS Database Layer SqlMap that this template works with.
 	 */
-	protected final SqlMap getSqlMap() {
+	public final SqlMap getSqlMap() {
 		return this.sqlMapTemplate.getSqlMap();
 	}
 
@@ -78,7 +78,7 @@ public class SqlMapDaoSupport {
 	 * Return the JdbcTemplate for this DAO,
 	 * pre-initialized with the DataSource or set explicitly.
 	 */
-	protected final SqlMapTemplate getSqlMapTemplate() {
+	public final SqlMapTemplate getSqlMapTemplate() {
 	  return sqlMapTemplate;
 	}
 

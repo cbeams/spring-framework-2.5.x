@@ -61,7 +61,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	/**
 	 * Return the JDO PersistenceManagerFactory used by this DAO.
 	 */
-	protected final PersistenceManagerFactory getPersistenceManagerFactory() {
+	public final PersistenceManagerFactory getPersistenceManagerFactory() {
 		return jdoTemplate.getPersistenceManagerFactory();
 	}
 
@@ -77,7 +77,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 * Return the JdoTemplate for this DAO, pre-initialized
 	 * with the PersistenceManagerFactory or set explicitly.
 	 */
-	protected final JdoTemplate getJdoTemplate() {
+	public final JdoTemplate getJdoTemplate() {
 	  return jdoTemplate;
 	}
 
@@ -95,6 +95,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 */
 	protected void initDao() throws Exception {
 	}
+	
 
 	/**
 	 * Get a JDO PersistenceManager, either from the current transaction or

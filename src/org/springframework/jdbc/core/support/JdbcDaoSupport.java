@@ -61,7 +61,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	/**
 	 * Return the JDBC DataSource used by this DAO.
 	 */
-	protected final DataSource getDataSource() {
+	public final DataSource getDataSource() {
 		return jdbcTemplate.getDataSource();
 	}
 
@@ -77,7 +77,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Return the JdbcTemplate for this DAO,
 	 * pre-initialized with the DataSource or set explicitly.
 	 */
-	protected final JdbcTemplate getJdbcTemplate() {
+	public final JdbcTemplate getJdbcTemplate() {
 	  return jdbcTemplate;
 	}
 
@@ -95,6 +95,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 */
 	protected void initDao() throws Exception {
 	}
+
 
 	/**
 	 * Get a JDBC Connection, either from the current transaction or a new one.

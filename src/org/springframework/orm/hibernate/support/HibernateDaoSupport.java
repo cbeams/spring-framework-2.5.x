@@ -66,7 +66,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	/**
 	 * Return the Hibernate SessionFactory used by this DAO.
 	 */
-	protected final SessionFactory getSessionFactory() {
+	public final SessionFactory getSessionFactory() {
 		return hibernateTemplate.getSessionFactory();
 	}
 
@@ -82,7 +82,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * Return the HibernateTemplate for this DAO,
 	 * pre-initialized with the SessionFactory or set explicitly.
 	 */
-	protected final HibernateTemplate getHibernateTemplate() {
+	public final HibernateTemplate getHibernateTemplate() {
 	  return hibernateTemplate;
 	}
 
@@ -100,6 +100,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 */
 	protected void initDao() throws Exception {
 	}
+
 
 	/**
 	 * Get a Hibernate Session, either from the current transaction or

@@ -49,7 +49,7 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 	/**
 	 * Return the JDBC DataSource used by this DAO.
 	 */
-	protected final DataSource getDataSource() {
+	public final DataSource getDataSource() {
 		return sqlMapClientTemplate.getDataSource();
 	}
 
@@ -63,7 +63,7 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 	/**
 	 * Return the iBATIS Database Layer SqlMap that this template works with.
 	 */
-	protected final SqlMapClient getSqlMapClient() {
+	public final SqlMapClient getSqlMapClient() {
 		return this.sqlMapClientTemplate.getSqlMapClient();
 	}
 
@@ -79,7 +79,7 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 	 * Return the JdbcTemplate for this DAO,
 	 * pre-initialized with the DataSource or set explicitly.
 	 */
-	protected final SqlMapClientTemplate getSqlMapClientTemplate() {
+	public final SqlMapClientTemplate getSqlMapClientTemplate() {
 	  return sqlMapClientTemplate;
 	}
 
