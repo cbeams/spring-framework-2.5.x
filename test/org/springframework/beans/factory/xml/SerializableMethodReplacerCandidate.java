@@ -16,16 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.awt.Point;
 import java.io.Serializable;
 
 /**
- * 
  * @author Rod Johnson
  */
 public abstract class SerializableMethodReplacerCandidate extends MethodReplaceCandidate implements Serializable {
-	
-	
+
 	//public abstract Point getPoint();
 
 }

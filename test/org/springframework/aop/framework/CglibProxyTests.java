@@ -22,7 +22,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContextException;

@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import junit.framework.TestCase;

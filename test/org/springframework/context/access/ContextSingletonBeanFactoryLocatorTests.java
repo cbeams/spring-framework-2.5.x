@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
-import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocatorTests;
 import org.springframework.beans.factory.access.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
