@@ -117,7 +117,7 @@ public class HttpInvokerTestSuite extends TestCase {
 		}
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithCustomFactoryAndExecutor() throws Exception {
+	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() throws Exception {
 		TestBean target = new TestBean("myname", 99);
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
@@ -125,7 +125,10 @@ public class HttpInvokerTestSuite extends TestCase {
 		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-				assertTrue(invocation instanceof TestRemoteInvocation);
+				assertNotNull(invocation.getAttributes());
+				assertEquals(1, invocation.getAttributes().size());
+				assertEquals("myValue", invocation.getAttributes().get("myKey"));
+				assertEquals("myValue", invocation.getAttribute("myKey"));
 				return super.invoke(invocation, targetObject);
 			}
 		});
@@ -136,7 +139,67 @@ public class HttpInvokerTestSuite extends TestCase {
 		pfb.setServiceUrl("http://myurl");
 		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
 			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
-				return new TestRemoteInvocation(methodInvocation);
+				RemoteInvocation invocation = new RemoteInvocation(methodInvocation);
+				invocation.addAttribute("myKey", "myValue");
+				try {
+					invocation.addAttribute("myKey", "myValue");
+					fail("Should have thrown IllegalStateException");
+				}
+				catch (IllegalStateException ex) {
+					// expected: already defined
+				}
+				assertNotNull(invocation.getAttributes());
+				assertEquals(1, invocation.getAttributes().size());
+				assertEquals("myValue", invocation.getAttributes().get("myKey"));
+				assertEquals("myValue", invocation.getAttribute("myKey"));
+				return invocation;
+			}
+		});
+
+		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			protected RemoteInvocationResult doExecuteRequest(
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
+					throws IOException, ClassNotFoundException {
+				assertEquals("http://myurl", config.getServiceUrl());
+				MockHttpServletRequest request = new MockHttpServletRequest();
+				MockHttpServletResponse response = new MockHttpServletResponse();
+				request.setContent(baos.toByteArray());
+				exporter.handleRequest(request, response);
+				return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()));
+			}
+		});
+
+		pfb.afterPropertiesSet();
+		ITestBean proxy = (ITestBean) pfb.getObject();
+		assertEquals("myname", proxy.getName());
+		assertEquals(99, proxy.getAge());
+	}
+
+	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() throws Exception {
+		TestBean target = new TestBean("myname", 99);
+		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
+		exporter.setServiceInterface(ITestBean.class);
+		exporter.setService(target);
+		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
+			public Object invoke(RemoteInvocation invocation, Object targetObject)
+					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+				assertTrue(invocation instanceof TestRemoteInvocation);
+				assertNull(invocation.getAttributes());
+				assertNull(invocation.getAttribute("myKey"));
+				return super.invoke(invocation, targetObject);
+			}
+		});
+		exporter.afterPropertiesSet();
+
+		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
+		pfb.setServiceInterface(ITestBean.class);
+		pfb.setServiceUrl("http://myurl");
+		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
+			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
+				RemoteInvocation invocation = new TestRemoteInvocation(methodInvocation);
+				assertNull(invocation.getAttributes());
+				assertNull(invocation.getAttribute("myKey"));
+				return invocation;
 			}
 		});
 
