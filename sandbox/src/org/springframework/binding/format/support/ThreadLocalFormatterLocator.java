@@ -22,14 +22,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.binding.format.DateFormatter;
-import org.springframework.binding.format.FormatterSource;
+import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.LocaleContext;
 import org.springframework.binding.format.NumberFormatter;
 import org.springframework.binding.format.Style;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.support.DefaultThreadLocalContext;
 
-public class ThreadLocalFormatterSource implements FormatterSource {
+public class ThreadLocalFormatterLocator implements FormatterLocator {
 
 	private static final String DEFAULT_DATE_FORMATTER_KEY = "dateFormatter";
 

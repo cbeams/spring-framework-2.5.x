@@ -23,7 +23,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
-import org.springframework.binding.TypeConverter;
+import org.springframework.binding.convert.Converter;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +38,7 @@ public class Mapping implements Serializable {
 
 	private String targetAttributeName;
 
-	private TypeConverter valueTypeConverter;
+	private Converter valueTypeConverter;
 
 	/**
 	 * Creates a mapping definition that will map the specified attribute name
@@ -58,7 +58,7 @@ public class Mapping implements Serializable {
 	 * @param sourceAttributeName The source attribute name
 	 * @param valueTypeConverter the type converter
 	 */
-	public Mapping(String sourceAttributeName, TypeConverter valueTypeConverter) {
+	public Mapping(String sourceAttributeName, Converter valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = sourceAttributeName;
 		this.valueTypeConverter = valueTypeConverter;
@@ -85,7 +85,7 @@ public class Mapping implements Serializable {
 	 * @param targetAttributeName The target attribute name
 	 * @param valueTypeConverter the type converter
 	 */
-	public Mapping(String sourceAttributeName, String targetAttributeName, TypeConverter valueTypeConverter) {
+	public Mapping(String sourceAttributeName, String targetAttributeName, Converter valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = targetAttributeName;
 		this.valueTypeConverter = valueTypeConverter;
