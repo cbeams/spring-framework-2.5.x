@@ -70,7 +70,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.6 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.7 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -119,7 +119,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JtaTransactionManager
 
 * j2ee/mail.jar
-- JavaMail 1.3.1 (http://java.sun.com/products/javamail)
+- JavaMail 1.3.2 (http://java.sun.com/products/javamail)
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
