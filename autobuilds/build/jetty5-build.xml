@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: jetty5-build.xml,v 1.1 2004-02-25 00:35:34 davison Exp $
+	$Id: jetty5-build.xml,v 1.2 2004-03-29 19:20:48 davison Exp $
 -->
 <project name="autobuilds-jetty5" basedir="." default="usage">
 
@@ -14,6 +14,12 @@
 	<property name="appserver.distname" value="Jetty-${jetty5.version}" />
 	<property name="deploy.dir" value="webapps" />
 	
+	
+	<path id="server-classpath">
+		<fileset dir="${servers.install.dir}/${appserver.distname}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
 
 	<!--
 		usage
@@ -87,6 +93,8 @@ autobuilds directory for information.
 			<jvmarg value="-Djetty.port=${autobuilds.server.http.port}" />
     	  	<jvmarg value="-Djetty.home=${servers.install.dir}/${appserver.distname}" />
     	  	<arg value="etc/${target.app}.xml" />
+			
+			<classpath refid="server-classpath" />
 
       	</java>
 	</target>
