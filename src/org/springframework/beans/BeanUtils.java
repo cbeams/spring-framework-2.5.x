@@ -1,10 +1,10 @@
 package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
-import java.util.Arrays;
-import java.util.List;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Static convenience methods for JavaBeans.
@@ -54,12 +54,19 @@ public abstract class BeanUtils {
 		}
 	}
 
+	/**
+	 * Check if the given class represents a primitive array.
+	 */
 	public static boolean isPrimitiveArray(Class clazz) {
 		return boolean[].class.equals(clazz) || byte[].class.equals(clazz) || char[].class.equals(clazz) ||
 		    short[].class.equals(clazz) || int[].class.equals(clazz) || long[].class.equals(clazz) ||
 		    float[].class.equals(clazz) || double[].class.equals(clazz);
 	}
 
+	/**
+	 * Check if the given class represents a "simple" property,
+	 * i.e. a primitive, a String, a Class, or a corresponding array.
+	 */
 	public static boolean isSimpleProperty(Class clazz) {
 		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
 		    clazz.equals(String.class) || clazz.equals(String[].class) ||
