@@ -13,11 +13,11 @@ public class MsSqlOrderDao extends SqlMapOrderDao {
   public void insertOrder(Order order) throws DataAccessException {
     Integer orderId = (Integer) getSqlMapClientTemplate().queryForObject("msSqlServerInsertOrder", order);
     order.setOrderId(orderId.intValue());
-    getSqlMapClientTemplate().update("insertOrderStatus", order);
+    getSqlMapClientTemplate().insert("insertOrderStatus", order);
     for (int i = 0; i < order.getLineItems().size(); i++) {
       LineItem lineItem = (LineItem) order.getLineItems().get(i);
       lineItem.setOrderId(order.getOrderId());
-      getSqlMapClientTemplate().update("insertLineItem", lineItem);
+      getSqlMapClientTemplate().insert("insertLineItem", lineItem);
     }
   }
   

@@ -31,12 +31,12 @@ public class SqlMapOrderDao extends SqlMapClientDaoSupport implements OrderDao {
 
   public void insertOrder(Order order) throws DataAccessException {
 		order.setOrderId(this.sequenceDao.getNextId("ordernum"));
-		getSqlMapClientTemplate().update("insertOrder", order);
-		getSqlMapClientTemplate().update("insertOrderStatus", order);
+		getSqlMapClientTemplate().insert("insertOrder", order);
+		getSqlMapClientTemplate().insert("insertOrderStatus", order);
     for (int i = 0; i < order.getLineItems().size(); i++) {
       LineItem lineItem = (LineItem) order.getLineItems().get(i);
       lineItem.setOrderId(order.getOrderId());
-      getSqlMapClientTemplate().update("insertLineItem", lineItem);
+      getSqlMapClientTemplate().insert("insertLineItem", lineItem);
     }
   }
 
