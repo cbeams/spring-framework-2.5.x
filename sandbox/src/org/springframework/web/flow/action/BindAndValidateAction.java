@@ -80,7 +80,7 @@ import org.springframework.web.flow.ScopeType;
  * <tr>
  * <td>messageCodesResolver</td>
  * <td><i>null </i></td>
- * <td>Set the strategy to use for resolving errors into message codes.</td>
+ * <td>Set the strategy to use for resolving error message codes.</td>
  * </tr>
  * </table>
  * @author Keith Donald

@@ -113,17 +113,16 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (Action)createService(implementationClass, autowireMode);
 	}
 
-	private Object createService(Class implementationClass, AutowireMode autowireMode) {
+	protected Object createService(Class implementationClass, AutowireMode autowireMode) {
 		if (autowireMode == AutowireMode.DEFAULT) {
 			return createService(implementationClass, getDefaultAutowireMode());
 		}
 		// TODO throw a service creation exception?
 		if (autowireMode == AutowireMode.NONE) {
-			return (Action)BeanUtils.instantiateClass(implementationClass);
+			return BeanUtils.instantiateClass(implementationClass);
 		}
 		else {
-			return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
-					false);
+			return getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
 		}
 	}
 
