@@ -1080,6 +1080,7 @@
 			<src path="${sandbox.src.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
+		    <classpath location="${target.mockclasses.dir}"/>
 		</javac>
 
 		<copy todir="${sandbox.target.classes.dir}" preservelastmodified="true">
@@ -1399,6 +1400,7 @@
 			<include name="dist/spring-webflow.jar"/>
 			<include name="dist/spring-webflow-support.jar"/>
 			<include name="dist/spring-webflow.dtd"/>
+			<include name="builds/**"/>
 			<include name="sandbox/src/org/springframework/web/flow/**"/>
             <include name="sandbox/src/org/springframework/web/struts/**"/>
             <include name="sandbox/src/org/springframework/util/**"/>
@@ -1416,8 +1418,8 @@
         <fileset id="webflow.javadoc" dir="${sandbox.javadocs.dir}"/>
 
 		<zip zipfile="${target.release.dir}/${webflow.release.zip}">
-			<zipfileset refid="webflow.main" prefix="${release.path}"/>
-            <zipfileset refid="webflow.javadoc" prefix="${release.path}/docs/api"/>
+			<zipfileset refid="webflow.main" prefix="${webflow.release.path}"/>
+            <zipfileset refid="webflow.javadoc" prefix="${webflow.release.path}/docs/api"/>
 		</zip>
 
     </target>
