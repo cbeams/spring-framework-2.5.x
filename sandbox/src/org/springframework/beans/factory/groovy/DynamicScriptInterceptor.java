@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.DisposableBean;
  * if the pollIntervalSeconds constructor argument is
  * positive.
  * @author Rod Johnson
- * @version $Id: DynamicScriptInterceptor.java,v 1.1 2004-07-30 18:42:35 johnsonr Exp $
+ * @version $Id: DynamicScriptInterceptor.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
 class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
 		implements BeanFactoryAware, BeanNameAware, DynamicScript, DisposableBean {
@@ -99,7 +99,7 @@ class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
 	}
 	
 	/**
-	 * @see org.springframework.beans.groovy.DynamicScript#reload()
+	 * @see org.springframework.beans.factory.groovy.DynamicScript#reload()
 	 */
 	public void reload() throws GroovyScriptException {
 		//System.out.println(owningFactory);		
@@ -118,14 +118,14 @@ class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
 	}
 
 	/**
-	 * @see org.springframework.beans.groovy.DynamicScript#getLoads()
+	 * @see org.springframework.beans.factory.groovy.DynamicScript#getLoads()
 	 */
 	public int getLoads() {
 		return loads;
 	}
 
 	/**
-	 * @see org.springframework.beans.groovy.DynamicScript#getLastReloadMillis()
+	 * @see org.springframework.beans.factory.groovy.DynamicScript#getLastReloadMillis()
 	 */
 	public long getLastReloadMillis() {
 		return lastReloadMillis;

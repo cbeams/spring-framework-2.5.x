@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
 
 import java.io.File;
 import java.net.URL;

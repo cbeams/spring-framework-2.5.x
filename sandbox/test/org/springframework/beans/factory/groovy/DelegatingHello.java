@@ -14,15 +14,23 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Hello.java,v 1.1 2004-07-30 18:42:34 johnsonr Exp $
+ * @version $Id: DelegatingHello.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
-public interface Hello {
+public class DelegatingHello implements Hello {
 	
-	String sayHello();
+	private Hello hello;
+	
+	public void setHello(Hello hello) {
+		this.hello = hello;
+	}
+	
+	public String sayHello() {
+		return this.hello.sayHello();
+	}
 
 }

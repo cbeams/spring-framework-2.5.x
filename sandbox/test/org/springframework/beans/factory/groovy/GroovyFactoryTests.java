@@ -14,19 +14,25 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
 
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.groovy.DynamicScript;
+import org.springframework.beans.factory.groovy.GroovyFactory;
+import org.springframework.beans.factory.groovy.ScriptNotFoundException;
 
 /**
+ * TODO test script with syntax errors
  * 
  * @author Rod Johnson
- * @version $Id: GroovyFactoryTests.java,v 1.1 2004-07-30 18:42:34 johnsonr Exp $
+ * @version $Id: GroovyFactoryTests.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
 public class GroovyFactoryTests extends TestCase {
+	
+	private static final String SCRIPT_BASE = "org/springframework/beans/factory/groovy/";
 	
 	public void testNoScriptFound() {
 		try {
@@ -39,12 +45,12 @@ public class GroovyFactoryTests extends TestCase {
 	}
 	
 	public void testValidScript() {
-		GroovyObject groovyObject = GroovyFactory.staticObject("org/springframework/beans/groovy/SimpleHello.groovy");
+		GroovyObject groovyObject = GroovyFactory.staticObject(SCRIPT_BASE + "SimpleHello.groovy");
 		System.out.println(groovyObject);
 	}
 	
 	public void testNotReloadable() {
-		Hello hello = (Hello) GroovyFactory.staticObject("org/springframework/beans/groovy/SimpleHello.groovy");
+		Hello hello = (Hello) GroovyFactory.staticObject(SCRIPT_BASE + "SimpleHello.groovy");
 		assertFalse("Doesn't proxy unless dynamic features requested", AopUtils.isCglibProxy(hello));
 		assertEquals("hello world", hello.sayHello());
 		assertFalse("Doesn't implement DynamicScript unless dynamic features requested", 

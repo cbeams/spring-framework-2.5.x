@@ -14,19 +14,15 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
-
-import org.codehaus.groovy.control.CompilationFailedException;
+package org.springframework.beans.factory.groovy;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: CompilationException.java,v 1.1 2004-07-30 18:42:35 johnsonr Exp $
+ * @version $Id: Hello.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
-public class CompilationException extends GroovyScriptException {
+public interface Hello {
 	
-	public CompilationException(String mesg, CompilationFailedException ex) {
-		super(mesg, ex);
-	}
+	String sayHello(); 
 
 }

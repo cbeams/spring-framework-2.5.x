@@ -14,23 +14,19 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
+
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DelegatingHello.java,v 1.1 2004-07-30 18:42:34 johnsonr Exp $
+ * @version $Id: GroovyScriptException.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
-public class DelegatingHello implements Hello {
+public abstract class GroovyScriptException extends NestedRuntimeException {
 	
-	private Hello hello;
-	
-	public void setHello(Hello hello) {
-		this.hello = hello;
-	}
-	
-	public String sayHello() {
-		return this.hello.sayHello();
+	public GroovyScriptException(String mesg, Throwable t) {
+		super(mesg, t);
 	}
 
 }

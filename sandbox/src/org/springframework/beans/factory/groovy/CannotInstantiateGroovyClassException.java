@@ -14,23 +14,20 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.groovy;
+package org.springframework.beans.factory.groovy;
 
-import java.io.IOException;
+
 
 /**
+ * TODO use an existing spring class (JAR size?)
  * 
  * @author Rod Johnson
- * @version $Id: ScriptNotFoundException.java,v 1.1 2004-07-30 18:42:35 johnsonr Exp $
+ * @version $Id: CannotInstantiateGroovyClassException.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
-public class ScriptNotFoundException extends GroovyScriptException {
+public class CannotInstantiateGroovyClassException extends GroovyScriptException {
 	
-	public ScriptNotFoundException(String mesg, IOException ex) {
+	public CannotInstantiateGroovyClassException(String mesg, Exception ex) {
 		super(mesg, ex);
-	}
-	
-	public ScriptNotFoundException(String mesg) {
-		super(mesg, null);
 	}
 
 }

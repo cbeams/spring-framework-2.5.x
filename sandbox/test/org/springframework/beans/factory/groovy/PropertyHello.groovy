@@ -1,4 +1,4 @@
-package org.springframework.beans.groovy
+package org.springframework.beans.factory.groovy
 
 class Test implements Hello {
 

@@ -7,10 +7,10 @@
 <beans>
 	
 	<bean id="simple"
-		class="org.springframework.beans.groovy.GroovyFactory"
+		class="org.springframework.beans.factory.groovy.GroovyFactory"
 		factory-method="staticObject"
 	>
-		<constructor-arg index="0"><value>org/springframework/beans/groovy/SimpleHello.groovy</value></constructor-arg>
+		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/SimpleHello.groovy</value></constructor-arg>
 	</bean>
 	
 	<!--
@@ -19,10 +19,10 @@
 	-->
 	<bean id="property"
 		singleton="false"
-		class="org.springframework.beans.groovy.GroovyFactory"
+		class="org.springframework.beans.factory.groovy.GroovyFactory"
 		factory-method="dynamicObject"
 	>
-		<constructor-arg index="0"><value>org/springframework/beans/groovy/PropertyHello.groovy</value></constructor-arg>
+		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/PropertyHello.groovy</value></constructor-arg>
 		
 		<!-- Reload seconds -->
 		<constructor-arg index="1"><value>20</value></constructor-arg>
@@ -31,7 +31,8 @@
 		<property name="message"><value>hello world property</value></property>
 	</bean>
 	
-	<bean id="dependsOnProperty" class="org.springframework.beans.groovy.DelegatingHello">
+	<bean id="dependsOnProperty" 
+		class="org.springframework.beans.factory.groovy.DelegatingHello">
 		<!-- Depends on dynamic hello -->
 		<property name="hello"><ref local="property"></ref></property>
 	</bean>
