@@ -4,7 +4,7 @@
 <h2>The Spring Framework - A Lightweight Container</h2>
 
 <p><i>Rod Johnson, Juergen Hoeller<br>
-July 2003</i>
+July/October 2003</i>
 
 
 <p><h3>1. Introduction</h3>
@@ -131,18 +131,22 @@ July 2003</i>
 
 <p><h3>6. Spring Bean Container vs PicoContainer</h3>
 
-<p>Another lightweight container getting attention recently is the PicoContainer. Its original incentive is to offer a more lightweight and less intrusive model than Avalon. It is built around components that specify dependencies via constructor arguments, instead of having to use some ServiceManager. This infrastructure intends to solve the same problems as Spring's application context concept but has some severe drawbacks:
+<p>Another lightweight container getting attention recently is the PicoContainer. Its original incentive is to offer a more lightweight and less intrusive model than Avalon. It is built around components that specify dependencies via constructor arguments, instead of having to use some ServiceManager. This infrastructure intends to solve the same problems as Spring's bean factory concept but has some severe drawbacks:
 
 <ul>
-<li>There's no notion of a specific component instance, just one implementation class for any given type. What if one would like to use 2 DataSource instances for 2 databases? How to configure the 2 differently? How to pass a specific one of those to a certain component? This is not possible with PicoContainer: It registers exactly one instance per type.
+<li>There's no notion of a specific component instance for a specific component dependency, just one implementation class for any given type. What if one would like to use 2 DataSource instances for 2 databases in the same component? How to pass a specific one of those to a each component dependency, if there are 2 dependencies (i.e. constructor arguments) of the same type? This is currently not possible with PicoContainer.
 
-<li>Pico-managed classes are only allowed to have one single constructor, with all objects that the class depends on as arguments. This does not allow for convenient reuse of the class.
+<li>PicoContainer just deals with direct dependencies on single components. A Spring-managed bean can reference multiple components in a list or map, for example a list of interceptors or validators. This mechanism is very powerful and can be applied to a wide range of configuration scenarios. Spring's approach allows for this in a natural and intuitive way.
 
-<li>Using existing classes is hard with PicoContainer: You have to subclass and write a single magic constructor there. Spring has the ability to work with any existing JavaBean.
+<li>Pico's support for primitive parameters (including Strings) is poor. They suffer from the same limitations as component dependencies, that is, just one instance of any given type for each component. Multiple int, boolean, or String parameters for a single component are very common; Pico is currently not suitable for such requirements.
 
-<li>Inheritance is painful and error-prone when constructor chaining is required. Spring can use final bean properties to avoid errors. A constructor (or any method) with 10 arguments is a code smell and suggests refactoring into an initializer object. Spring can easily support this, via a bean reference.
+<li>Using existing classes is hard with PicoContainer: You have to subclass and write magic constructors there, or even worse, wrap the existing class. Spring has the ability to work with any existing JavaBean.
 
-<li>Unit tests concern one method of a service object. Why require providing all params to a constructor if you're really interested in the DataSource property etc? You only need to set the properties you require in Spring.
+<li>Inheritance is painful and error-prone when constructor chaining is required. Spring can use final bean properties to avoid errors. A constructor (or any method) with 10 arguments is a code smell and suggests refactoring into an initializer object. Spring can easily support such an initializer via a bean reference.
+
+<li>Unit tests concern one method of a service object. Why require providing all params to a constructor if you're really interested in the DataSource property etc? You only need to set the properties that you require with Spring.
+
+<li>Circular references are impossible with constructor-based dependencies. Even if they are not particularly recommended, they can be resolved with the JavaBean approach, under normal dependency circumstances.
 
 <li>JavaBeans are an elegant part of core Java: Why not use them? PicoContainer objects will need to follow a unique constructor pattern.
 
@@ -153,17 +157,13 @@ July 2003</i>
 <li>In the future, Spring may offer dynamic reconfiguration of contexts, if beans can handle it by updating individual changed properties. With constructors alone this would mean changing the identity of the component.
 </ul>
 
-<p>PicoContainer's main advantage is that it does not need instance-specific meta data like XML bean definitions, although it does need some kind of component and parameter registration. As this basic design strategy leads to the above mentioned severe limitations, we consider it questionable. Using very simple XML meta data, Spring offers a significantly more flexible and powerful infrastructure that achieves Pico's goals among other things.
+<p>PicoContainer's typical usage style involves programmatic component and parameter registration. This is also possible with Spring, using ListableBeanFactoryImpl and its registerBeanDefinition methods. The difference is that we recommend the XML style while Pico favors programmatic registration. NanoContainers built on top of Pico might offer XML component definitions; as of October 2003, the Nano project is still not in a public stage though.
 
-<p>An example: To create the above generic application context with PicoContainer, you'd have to subclass BasicDataSource to give it one single constructor that takes all "necessary" parameters (is password or validationQuery necessary, for example?), and you would just be able to register one such instance for the DataSource interface (what if you'd like to access 2 databases?).
+<p>An example: To create the above generic application context with PicoContainer, you'd have to subclass BasicDataSource to give it one single constructor that takes all necessary (?) parameters (is "password" or "validationQuery" necessary, for example?), and you would just be able to pass one DataSource instance to each component.
 
-<p><b>P.S. on PicoContainer's new bean-style factory [24-07-2003]</b>
+<p>The main argument for Pico's constructor-based "Type 3 IoC" approach is that it cannot miss any dependencies; it guarantees a fully configured instance. But why should every component need to receive instances for all possible dependencies and parameters? A bean-based approach, aka "Type 2 IoC" but without enabler interfaces, allows for optional dependencies without any hassle. We consider such flexibility more important than to avoid missing dependencies at any cost.
 
-<p>PicoContainer features a bean-style component factory now, as of 1.0 alpha-2, in response to the first version of this article. This can remedy some of the issues that we've mentioned, although PicoContainer still focuses on the constructor-based approach in all of its documentation.
-
-<p>Note that the first and most important issue still applies: There is no notion of a specific instance for a given type. We consider passing a reference to a specific instance a very important feature for wiring up applications, which necessarily involves some kind of configuration like in an XML file (Spring makes this pluggable). PicoContainer sacrifices this to be able to adhere to its configuration-less "Type 3 IoC" dogma.
-
-<p>Finally, regarding the argument that constructor-based "Type 3 IoC" cannot miss any dependencies: Why should every component need to receive instances for all possible dependencies and parameters? A bean-description-based approach, aka "Type 2 IoC" but without "enabler" interfaces, allows for optional dependencies without any hassle. We consider such flexibility more important than to avoid missing dependencies at any cost.
+<p>As of release 1.0 M2, Spring offers "autowire" functionality, that is, automatically satisfying dependencies with matching objects from the application context if there's just one instance of each demanded type defined there. The new "dependency-check" feature lets the bean factory check that all dependencies (objects, simple parameters, or both) have been satisfied if this is a requirement. Both features allow a Spring bean factory to give the same level of guarantee for proper configuration as a PicoContainer.
 
 
 <p><h3>Links</h3>
