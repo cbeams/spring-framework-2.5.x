@@ -95,7 +95,7 @@ public class HttpServletFlowExecutionManager {
 	 * @param flow the default flow for which executions will be managed
 	 */
 	public HttpServletFlowExecutionManager(FlowLocator flowLocator, Flow flow) {
-        this.flowLocator = flowLocator;
+		this.flowLocator = flowLocator;
 		this.flow = flow;
 	}
 
@@ -122,7 +122,7 @@ public class HttpServletFlowExecutionManager {
 	protected Flow getFlow() {
 		return flow;
 	}
-	
+
 	/**
 	 * Set the flow whose executions will be managed if there is no alternate
 	 * flow id specified in a "_flowId" request parameter.
@@ -138,7 +138,7 @@ public class HttpServletFlowExecutionManager {
 	protected FlowExecutionListener[] getFlowExecutionListeners() {
 		return this.flowExecutionListeners;
 	}
-	
+
 	/**
 	 * Set the flow execution listener that will be notified of managed
 	 * flow executions.
@@ -146,7 +146,7 @@ public class HttpServletFlowExecutionManager {
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
 	}
-	
+
 	/**
 	 * Sets the flow execution listeners that will be notified of managed
 	 * flow executions.
@@ -255,12 +255,15 @@ public class HttpServletFlowExecutionManager {
 	protected Flow getFlow(HttpServletRequest request) {
 		String flowId = request.getParameter(getFlowIdParameterName());
 		if (!StringUtils.hasText(flowId)) {
-			Assert.notNull(this.flow, "This flow execution manager is not configured with a default top-level flow");
+			Assert.notNull(this.flow,
+					"This flow execution manager is not configured with a default top-level flow; thus, "
+							+ "the flow to execute must be provided by client views via the '"
+							+ getFlowIdParameterName() + "' parameter, yet no parameter was provided in this request");
 			return this.flow;
 		}
 		else {
-			Assert.notNull(this.flowLocator,
-					"The flow locator is required to lookup flows to execute by a flow id request parameter");
+			Assert.notNull(this.flowLocator, "The flow locator is required to lookup the requested flow with id '"
+					+ flowId + "'; however, the flowLocator property is null");
 			return this.flowLocator.getFlow(flowId);
 		}
 	}
@@ -384,8 +387,7 @@ public class HttpServletFlowExecutionManager {
 		String flowExecutionId = RequestUtils.getRequiredStringParameter(request, getFlowExecutionIdParameterName());
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			throw new NoSuchFlowExecutionException(flowExecutionId, e);
 		}
 	}
