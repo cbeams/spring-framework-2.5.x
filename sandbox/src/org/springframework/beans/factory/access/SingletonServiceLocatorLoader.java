@@ -33,19 +33,44 @@ import org.springframework.util.ClassUtils;
  * <li>By specifying one or more bean id references in the application context
  * that point to locators with static load() methods. In this case, the load()
  * method is called directly on the locator instance to configure the singleton
- * instance.
+ * instance. For example:
+ * <pre>
+ *     &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *           class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *       &lt;constructor-arg index=&quot;0&quot;&gt;
+ *         &lt;listgt;
+ *           &lt;valuegt;consoleServices&lt;/value&gt;
+ *         &lt;/list&gt;
+ *       &lt;/constructor-arg&gt;        
+ *     &lt;/bean&gt;
+ * </pre>
+ * ... will call the static <code>load</code> method on the
+ * <code>ConsoleServices</code> class, passing in the configured
+ * <code>consoleServices</code> bean.
  * 
  * <li>By specifying one or more singleton locator accessor classes with the
  * bean ID that corresponds to the instance to be loaded and shared. In this
  * case, load is called on the singleton locator accessor, and not the locator
- * itself. This completely abstracts away singleton status from the locator
- * class. This format consists of:
+ * itself. This approach completely abstracts away singleton status from the
+ * locator class. As an example:
  * </ol>
- * <p>
  * 
  * <pre>
- *     &lt;singletonLocatorAccessor.classname&gt;@&lt;locator.beanId&gt;
+ *    &lt;pre&gt;
+ *     &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *           class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *       &lt;constructor-arg index=&quot;0&quot;&gt;
+ *         &lt;listgt;
+ *           &lt;valuegt;consoleServices@com.acme.ConsoleServicesSingletonAccessor&lt;/value&gt;
+ *         &lt;/list&gt;
+ *       &lt;/constructor-arg&gt;        
+ *     &lt;/bean&gt;
+ *    &lt;/pre&gt;
  * </pre>
+ * 
+ * ... will call the static <code>load</code> method on the
+ * <code>ConsoleServicesSingletonAccessor</code> class, passing in the
+ * configured <code>consoleServices</code> bean.
  * 
  * Note - take care not to abuse this pattern. Generally dependency
  * injection/IoC should be preferred to singleton, getInstance() style lookup.
@@ -98,15 +123,15 @@ public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor {
             } else {
                 // singleton class specified, use it to load shared instance
                 try {
-                    globalLocatorClass = Class.forName(locatorBeanId.substring(
-                            0, classSep));
                     locatorInstance = beanFactory.getBean(locatorBeanId
+                            .substring(0, classSep));
+                    globalLocatorClass = Class.forName(locatorBeanId
                             .substring(classSep + 1));
                 } catch (ClassNotFoundException e) {
                     logger.warn("No class found '"
                             + locatorBeanId.substring(0, classSep) + "'");
                     logger
-                            .warn("The singleton locator expression must be in the form <singleton.locator.accessor.class>@<shared-bean-id-to-load>");
+                            .warn("The singleton locator expression must be in the form <sharedBeanIdToLoad@singletonServiceLocatorAccessorClassName>");
                 }
             }
             if (locatorInstance == null || globalLocatorClass == null) {
