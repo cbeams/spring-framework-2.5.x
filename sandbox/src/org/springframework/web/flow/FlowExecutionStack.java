@@ -55,6 +55,8 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 
 	private static final long serialVersionUID = 3258688806151469104L;
 
+	// static logger because FlowExecutionStack objects can be serialized
+	// and then restored
 	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	/**
@@ -250,13 +252,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		String stateId = event.getStateId();
 		if (!StringUtils.hasText(stateId)) {
 			if (logger.isDebugEnabled()) {
-				logger
-						.debug("Current state id was not provided in request to signal event '"
-								+ eventId
-								+ "' in flow "
-								+ getCaption()
-								+ "' -- pulling current state id from session -- "
-								+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
+				logger.debug("Current state id was not provided in request to signal event '"
+						+ eventId
+						+ "' in flow "
+						+ getCaption()
+						+ "' -- pulling current state id from session -- "
+						+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
 			}
 			stateId = getCurrentStateId();
 		}

@@ -55,6 +55,8 @@ public class FlowSession implements Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
+	// static logger because FlowSession objects can be serialized and
+	// then restored
 	protected static final Log logger = LogFactory.getLog(FlowSession.class);
 
 	/**

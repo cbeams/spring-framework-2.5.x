@@ -36,7 +36,7 @@ import org.springframework.util.closure.support.Block;
  */
 public class InternalRequestContext implements StateContext, TransactionSynchronizer {
 
-	protected static final Log logger = LogFactory.getLog(InternalRequestContext.class);
+	protected final Log logger = LogFactory.getLog(InternalRequestContext.class);
 
 	private Event originatingEvent;
 

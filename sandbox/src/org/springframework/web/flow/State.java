@@ -49,7 +49,7 @@ import org.springframework.util.ToStringCreator;
  */
 public abstract class State {
 
-	protected static final Log logger = LogFactory.getLog(State.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * The state's owning flow.
