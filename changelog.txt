@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.59 2003-12-09 08:54:40 jhoeller Exp $
+$Id: changelog.txt,v 1.60 2003-12-09 11:17:54 johnsonr Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -12,7 +12,8 @@ Package org.springframework.aop
 * replaced InvokerInterceptor and ProxyInterceptor interface by TargetSource interface
 
 Package org.springframework.beans
-* dissolved event propagation support in BeanWrapper and DataBinder
+* added optional <description> element in XML bean definition documents to allow user documentation
+* removed event propagation support in BeanWrapper and DataBinder
 * introduced AutowireCapableBeanFactory interface, allowing for autowiring of externally managed bean instances
 * dissolved PropertyValuesProviderFactoryBean interface and AbstractFactoryBean convenience base class
 * fixed ManagedList and ManagedMap resolution for prototypes in AbstractBeanFactory
@@ -20,7 +21,7 @@ Package org.springframework.beans
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * consider arrays of primitive wrappers as "simple" properties in the sense of dependency-check="simple"
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
-* dissolved bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
+* removed bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
 * allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "default-lazy-init" attribute for XML bean definitions

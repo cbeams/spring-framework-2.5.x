@@ -45,8 +45,10 @@ import org.springframework.util.StringUtils;
  * these kinds of bean.
 
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 26.11.2003
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @version $Id: DefaultXmlBeanDefinitionReader.java,v 1.3 2003-12-09 11:17:55 johnsonr Exp $
  */
 public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionReader {
 
@@ -60,6 +62,7 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 	private static final String DEFAULT_VALUE = "default";
 
 	private static final String BEAN_ELEMENT = "bean";
+	private static final String DESCRIPTION_ELEMENT = "description";
 	private static final String CLASS_ATTRIBUTE = "class";
 	private static final String PARENT_ATTRIBUTE = "parent";
 	private static final String ID_ATTRIBUTE = "id";
@@ -302,26 +305,35 @@ public class DefaultXmlBeanDefinitionReader extends AbstractXmlBeanDefinitionRea
 
 	/**
 	 * Get the value of a property element. May be a list.
+	 * @param ele property element
 	 */
 	private Object getPropertyValue(Element ele) {
 		// Can only have one element child:
 		// value, ref, collection
 		NodeList nl = ele.getChildNodes();
-		Element childEle = null;
+		Element valueRefOrCollectionElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i) instanceof Element) {
-				if (childEle != null) {
-					throw new BeanDefinitionStoreException("<property> element can have only one child element, not " + nl.getLength());
+			if ( nl.item(i) instanceof Element) {
+				Element candidateEle = (Element) nl.item(i);
+				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
+					// Keep going: we don't use this value for now
 				}
-				childEle = (Element) nl.item(i);
+				else {
+					// Child element is what we're looking for
+					valueRefOrCollectionElement = candidateEle;
+				}				
 			}
 		}
-		if (childEle == null) {
-			throw new BeanDefinitionStoreException("<property> must have a child element");
+		if (valueRefOrCollectionElement == null) {
+			throw new BeanDefinitionStoreException("<property> element must have a value ref or collection subelement");
 		}
-		return parsePropertySubelement(childEle);
+		return parsePropertySubelement(valueRefOrCollectionElement);
 	}
 
+	/**
+	 * Parse a value, ref or collection subelement of a property element
+	 * @param ele subelement of property element; we don't know which yet
+	 */
 	private Object parsePropertySubelement(Element ele) {
 		if (ele.getTagName().equals(REF_ELEMENT)) {
 			// a generic reference to any name of any bean

@@ -2,6 +2,16 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+
+	<description>
+		Tests for list and map handling in an XML bean definition file.
+	</description>
+	
+	<bean id="validEmptyWithDescription" class="org.springframework.beans.TestBean">
+		<description>
+			I have no properties and I'm happy without them. 
+		</description>
+	</bean>
 	
 	
 	<bean id="jenny" class="org.springframework.beans.TestBean">	
@@ -14,7 +24,13 @@
 	</bean>
 	
 	<bean id="david" class="org.springframework.beans.TestBean">	
-		<property name="name"><value>David</value></property>
+		<description>
+			Simple bean, without any collections.
+		</description>
+		<property name="name">
+			<description>The name of the user</description>
+			<value>David</value>
+		</property>
 		<property name="age"><value>27</value></property>
 	</bean>
 	
@@ -22,6 +38,7 @@
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>32</value></property>
 		<property name="friends">
+			<description>List of Rod's friends</description>
 			<list>
 				<ref local="jenny"/>
 				<ref local="david"/>

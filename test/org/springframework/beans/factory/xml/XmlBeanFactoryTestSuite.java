@@ -30,10 +30,21 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
+ * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.23 2003-12-04 18:45:16 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.24 2003-12-09 11:16:57 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
+	
+	public void testDescriptionButNoProperties() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(is);
+		TestBean validEmpty = (TestBean) xbf.getBean("validEmptyWithDescription");
+		assertEquals(0, validEmpty.getAge());
+	}
 
 	/** Uses a separate factory */
 	public void testRefToSeparatePrototypeInstances() throws Exception {
