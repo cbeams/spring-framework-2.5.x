@@ -176,15 +176,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	/**
-	 * Set the JTA UserTransaction to use as direct reference.
-	 * Typically just used for local JTA setups; in a J2EE environment,
-	 * the UserTransaction will always be fetched from JNDI.
-	 */
-	public void setUserTransaction(UserTransaction userTransaction) {
-		this.userTransaction = userTransaction;
-	}
-
-	/**
 	 * Set the JNDI name of the JTA UserTransaction.
 	 * The default one is used if not set.
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
@@ -194,12 +185,35 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	/**
+	 * Set the JTA UserTransaction to use as direct reference.
+	 * Typically just used for local JTA setups; in a J2EE environment,
+	 * the UserTransaction will always be fetched from JNDI.
+	 */
+	public void setUserTransaction(UserTransaction userTransaction) {
+		this.userTransaction = userTransaction;
+	}
+
+	/**
+	 * Return the JTA UserTransaction that this transaction manager uses.
+	 */
+	public UserTransaction getUserTransaction() {
+		return userTransaction;
+	}
+
+	/**
 	 * Set the JTA TransactionManager to use as direct reference.
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
 	 */
 	public void setTransactionManager(TransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
+	}
+
+	/**
+	 * Return the JTA TransactionManager that this transaction manager uses.
+	 */
+	public TransactionManager getTransactionManager() {
+		return transactionManager;
 	}
 
 	/**
@@ -307,8 +321,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected boolean isExistingTransaction(Object transaction) {
 		try {
-			int status = ((UserTransaction) transaction).getStatus();
-			return (status != Status.STATUS_NO_TRANSACTION);
+			return (this.userTransaction.getStatus() != Status.STATUS_NO_TRANSACTION);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);
@@ -319,13 +332,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		if (logger.isDebugEnabled()) {
 			logger.debug("Beginning JTA transaction [" + transaction + "] ");
 		}
-		UserTransaction ut = (UserTransaction) transaction;
 		applyIsolationLevel(definition.getIsolationLevel());
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
-				ut.setTransactionTimeout(definition.getTimeout());
+				this.userTransaction.setTransactionTimeout(definition.getTimeout());
 			}
-			ut.begin();
+			this.userTransaction.begin();
 		}
 		catch (NotSupportedException ex) {
 			// assume "nested transactions not supported"
@@ -349,6 +361,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	 * @param isolationLevel isolation level taken from transaction definition
 	 * @throws InvalidIsolationLevelException if the given isolation level
 	 * cannot be applied
+	 * @see #getUserTransaction
+	 * @see #getTransactionManager
 	 */
 	protected void applyIsolationLevel(int isolationLevel) throws InvalidIsolationLevelException {
 		if (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
@@ -389,7 +403,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
 		try {
-			return ((UserTransaction) transaction).getStatus() == Status.STATUS_MARKED_ROLLBACK;
+			return (this.userTransaction.getStatus() == Status.STATUS_MARKED_ROLLBACK);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);
@@ -401,7 +415,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			logger.debug("Committing JTA transaction [" + status.getTransaction() + "]");
 		}
 		try {
-			((UserTransaction) status.getTransaction()).commit();
+			this.userTransaction.commit();
 		}
 		catch (RollbackException ex) {
 			throw new UnexpectedRollbackException("JTA transaction rolled back", ex);
@@ -422,7 +436,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			logger.debug("Rolling back JTA transaction [" + status.getTransaction() + "]");
 		}
 		try {
-			((UserTransaction) status.getTransaction()).rollback();
+			this.userTransaction.rollback();
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on rollback", ex);
@@ -434,7 +448,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			logger.debug("Setting JTA transaction [" + status.getTransaction() + "] rollback-only");
 		}
 		try {
-			((UserTransaction) status.getTransaction()).setRollbackOnly();
+			this.userTransaction.setRollbackOnly();
 		}
 		catch (IllegalStateException ex) {
 			throw new NoTransactionException("No active JTA transaction");
