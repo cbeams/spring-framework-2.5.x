@@ -52,7 +52,7 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	}
 
 	/**
-	 * Create a new unsupported event exception.
+	 * Create a new no matching transition exception.
 	 * @param state the state that could not be transitioned out of
 	 * @param context the request context that did not trigger a valid
 	 *        transition
