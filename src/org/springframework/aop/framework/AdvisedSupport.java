@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.24 2004-02-22 09:48:50 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.25 2004-03-12 02:58:08 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -81,6 +81,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	
 	private MethodInvocationFactory methodInvocationFactory;
+	
+	/** Default AopProxyFactory is this */
+	private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 	
 	/**
 	 * Set to true when the first AOP proxy has been created, meaning that we must
@@ -142,6 +145,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.advisorChainFactory = advisorChainFactory;
 		addListener(advisorChainFactory);
 	}
+	
+	/**
+	 * Customise the AopProxyFactory, allowing different strategies
+	 * to be dropped in without changing the core framework.
+	 * For example, an AopProxyFactory could return an AopProxy using
+	 * dynamic proxies, CGLIB or code generation strategy. 
+	 * @param apf AopProxyFactory to use. The default uses dynamic
+	 * proxies or CGLIB.
+	 */
+	public void setAopProxyFactory(AopProxyFactory apf) {
+		this.aopProxyFactory = apf;
+	}
 
 	/**
 	 * Return the AdvisorChainFactory associated with this ProxyConfig.
@@ -184,7 +199,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	
-	public void addInterceptor(Interceptor interceptor) {
+	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
 		addInterceptor(pos, interceptor);
 	}
@@ -196,7 +211,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Cannot add IntroductionInterceptors this way.
 	 */
-	public void addInterceptor(int pos, Interceptor interceptor) {
+	public void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException {
 		if (!(interceptor instanceof MethodInterceptor)) {
 			throw new AopConfigException(getClass().getName() + " only handles MethodInterceptors");
 		}
@@ -206,11 +221,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisor(pos, new DefaultPointcutAdvisor(interceptor));
 	}
 	
-	public void addBeforeAdvice(final MethodBeforeAdvice ba) {
+	public void addBeforeAdvice(final MethodBeforeAdvice ba) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ba));
 	}
 	
-	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) {
+	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(throwsAdvice));
 	}
 	
@@ -258,6 +273,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 	
 	public void removeAdvisor(int index) throws AopConfigException {
+		if (isFrozen())
+			throw new AopConfigException("Cannot remove Advisor: config is frozen");
 		if (index < 0 || index > advisors.size() - 1)
 			throw new AopConfigException("Advisor index " + index + " is out of bounds: " +					"Only have " + advisors.size() + " advisors");
 		Advisor advisor = (Advisor) advisors.get(index);
@@ -277,7 +294,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Convenience method to remove an interceptor
 	 */
-	public final boolean removeInterceptor(Interceptor interceptor) {
+	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
 		int index = indexOf(interceptor);
 		if (index == -1) {
 			return false;
@@ -329,7 +346,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
-	private void addAdvisorInternal(int pos, Advisor advice) {
+	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
+		if (isFrozen())
+			throw new AopConfigException("Cannot add advisor: config is frozen");
 		this.advisors.add(pos, advice);
 		updateAdvisorsArray();
 		adviceChanged();
@@ -345,7 +364,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisorInternal(pos, advisor);
 	}
 
-	public void addAdvisor(int pos, Advisor advisor) {
+	public void addAdvisor(int pos, Advisor advisor) throws AopConfigException {
 		if (advisor instanceof IntroductionAdvisor) {
 			addAdvisor(pos, (IntroductionAdvisor) advisor);
 		}
@@ -382,7 +401,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return whether it was replaced. If the advisor wasn't found in the
 	 * list of advisors, this method returns false and does nothing.
 	 */
-	public final boolean replaceAdvisor(Advisor a, Advisor b) {
+	public final boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
 		int index = indexOf(a);
 		if (index == -1 || b == null)
 			return false;
@@ -441,6 +460,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			((AdvisedSupportListener) listeners.get(i)).activated(this);
 		}
 	}
+	
 
 	/**
 	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
@@ -450,13 +470,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (!isActive) {
 			activate();
 		}
-		boolean useCglib = getOptimize() || getProxyTargetClass() || this.interfaces.isEmpty();
-		if (useCglib) {
-			return CglibProxyFactory.createCglibProxy(this);
-		}
-		else {
-			return new JdkDynamicAopProxy(this);
-		}
+		
+		return this.aopProxyFactory.createAopProxy(this);
 	}
 	
 	/**
@@ -481,18 +496,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append("advisorChainFactory=" + advisorChainFactory);
 		sb.append(super.toString());
 		return sb.toString();
-	}
-
-
-	/**
-	 * Inner class to just introduce a CGLIB dependency
-	 * when actually creating a CGLIB proxy.
-	 */
-	private static class CglibProxyFactory {
-
-		private static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
-			return new Cglib2AopProxy(advisedSupport);
-		}
 	}
 
 }
