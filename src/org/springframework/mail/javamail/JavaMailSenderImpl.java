@@ -43,7 +43,7 @@ import org.springframework.mail.SimpleMailMessage;
  * @author Juergen Hoeller
  * @see JavaMailSender
  * @see org.springframework.mail.MailSender
- * @version $Id: JavaMailSenderImpl.java,v 1.9 2004-03-01 09:22:57 jhoeller Exp $
+ * @version $Id: JavaMailSenderImpl.java,v 1.10 2004-03-17 07:44:56 jhoeller Exp $
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -106,7 +106,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	* Set the mail server port. Default is 25.
+	 * Set the mail server port. Default is -1, letting JavaMail
+	 * use the default SMTP port (25).
 	*/
 	public void setPort(int port) {
 		this.port = port;
@@ -224,7 +225,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				mimeMessagePreparators[i].prepare(mimeMessage);
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[])mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
