@@ -128,11 +128,13 @@ public class CommonsMultipartResolverTests extends TestCase {
 		while (fileIter.hasNext()) {
 			fileNames.add(fileIter.next());
 		}
-		assertEquals(2, fileNames.size());
+		assertEquals(3, fileNames.size());
 		assertTrue(fileNames.contains("field1"));
 		assertTrue(fileNames.contains("field2"));
+		assertTrue(fileNames.contains("field2x"));
 		CommonsMultipartFile file1 = (CommonsMultipartFile) request.getFile("field1");
 		CommonsMultipartFile file2 = (CommonsMultipartFile) request.getFile("field2");
+		CommonsMultipartFile file2x = (CommonsMultipartFile) request.getFile("field2x");
 		List fileMapKeys = new ArrayList();
 		List fileMapValues = new ArrayList();
 		for (Iterator fileMapIter = request.getFileMap().keySet().iterator(); fileMapIter.hasNext();) {
@@ -140,21 +142,27 @@ public class CommonsMultipartResolverTests extends TestCase {
 			fileMapKeys.add(key);
 			fileMapValues.add(request.getFileMap().get(key));
 		}
-		assertEquals(2, fileMapKeys.size());
-		assertEquals(2, fileMapValues.size());
+		assertEquals(3, fileMapKeys.size());
+		assertEquals(3, fileMapValues.size());
 		int field1Index = fileMapKeys.indexOf("field1");
 		int field2Index = fileMapKeys.indexOf("field2");
+		int field2xIndex = fileMapKeys.indexOf("field2x");
 		assertTrue(field1Index != -1);
 		assertTrue(field2Index != -1);
+		assertTrue(field2xIndex != -1);
 		MultipartFile mapFile1 = (MultipartFile) fileMapValues.get(field1Index);
 		MultipartFile mapFile2 = (MultipartFile) fileMapValues.get(field2Index);
+		MultipartFile mapFile2x = (MultipartFile) fileMapValues.get(field2xIndex);
 		assertEquals(mapFile1, file1);
 		assertEquals(mapFile2, file2);
+		assertEquals(mapFile2x, file2x);
 
 		assertEquals("type1", file1.getContentType());
 		assertEquals("type2", file2.getContentType());
+		assertEquals("type2", file2x.getContentType());
 		assertEquals("field1.txt", file1.getOriginalFilename());
 		assertEquals("field2.txt", file2.getOriginalFilename());
+		assertEquals("field2x.txt", file2x.getOriginalFilename());
 		assertEquals("text1", new String(file1.getBytes()));
 		assertEquals("text2", new String(file2.getBytes()));
 		assertEquals(5, file1.getSize());
@@ -310,17 +318,18 @@ public class CommonsMultipartResolverTests extends TestCase {
 						throw new IllegalStateException("Already a multipart request");
 					}
 					List fileItems = new ArrayList();
-					MockFileItem fileItem1 = new MockFileItem("field1", "type1",
-					                                          empty ? "" : "field1.txt",
-					                                          empty ? "" : "text1");
-					MockFileItem fileItem2 = new MockFileItem("field2", "type2",
-					                                          empty ? "" : "C:/field2.txt",
-					                                          empty ? "" : "text2");
+					MockFileItem fileItem1 = new MockFileItem(
+					    "field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
+					MockFileItem fileItem2 = new MockFileItem(
+					    "field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
+					MockFileItem fileItem2x = new MockFileItem(
+					    "field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
 					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 					MockFileItem fileItem4 = new MockFileItem("field4", null, null, "value4");
 					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");
 					fileItems.add(fileItem1);
 					fileItems.add(fileItem2);
+					fileItems.add(fileItem2x);
 					fileItems.add(fileItem3);
 					fileItems.add(fileItem4);
 					fileItems.add(fileItem5);

@@ -70,7 +70,23 @@ public class CommonsMultipartFile implements MultipartFile {
 	}
 
 	public String getOriginalFilename() {
-		return (this.fileItem.getName() != null ? new File(this.fileItem.getName()).getName() : null);
+		if (this.fileItem.getName() == null) {
+			return null;
+		}
+		// check for Unix-style path
+		int pos = this.fileItem.getName().lastIndexOf("/");
+		if (pos == -1) {
+			// check for Windows-style path
+			pos = this.fileItem.getName().lastIndexOf("\\");
+		}
+		if (pos != -1)  {
+			// any sort of path separator found
+			return this.fileItem.getName().substring(pos + 1);
+		}
+		else {
+			// plain name
+			return this.fileItem.getName();
+		}
 	}
 
 	public String getContentType() {
