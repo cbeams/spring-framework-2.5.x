@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+  - Service layer ApplicationContext definition for jbossintegration project. Defines beans
+  - belonging to service layer. This context will normally be shared by all code that wants to
+  - use a shared context, as opposd to a beanfactory or context specific to a test. It will be
+  - made the parent of the web-app's ApplicationContext, in a demand-load fashion.
+ -->
+	
+<beans>
+
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+	</bean>
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
+	<!-- Local DataSource that works in any environment -->
+	<!--
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
+		<property name="url"><value>${jdbc.url}</value></property>
+		<property name="username"><value>${jdbc.username}</value></property>
+		<property name="password"><value>${jdbc.password}</value></property>
+	</bean>
+	-->
+
+	<!-- JNDI DataSource for J2EE environments -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName"><value>java:DefaultDS</value></property>
+	</bean>
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+	<!-- an EJB proxy with the cached home flag on, to test home lookup every time -->  
+	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
+		<property name="jndiName">
+			<value>Simple</value>
+		</property>
+		<property name="cacheHome">
+			<value>true</value>
+		</property>
+		<property name="businessInterface">
+			<value>org.springframework.integrationtest.ejbtest.simple.ejb.SimpleService</value>
+		</property>
+	</bean>
+
+</beans>
