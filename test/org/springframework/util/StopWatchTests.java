@@ -112,13 +112,12 @@ public class StopWatchTests extends TestCase {
 		catch (UnsupportedOperationException ex) {
 			// Ok
 		}
-		
 	}
 	
 	public void testFailureToStartBeforeGettingTimings() {
 		StopWatch sw = new StopWatch();
 		try {
-			sw.getLastInterval();
+			sw.getLastTaskTimeMillis();
 			fail("Can't get last interval if no tests run");
 		}
 		catch (IllegalStateException ex) {

@@ -89,8 +89,8 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
-		pc.addInterceptor(mi);
+		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
+		pc.addAdvice(mi);
 	
 		// We don't care about the object
 		pc.setTarget(new Object());
@@ -144,7 +144,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 
 		ProxyFactory pc = new ProxyFactory(tb1);
 		NopInterceptor nop = new NopInterceptor();
-		pc.addInterceptor(nop);
+		pc.addAdvice(nop);
 		ITestBean proxy = (ITestBean) createProxy(pc);
 		assertEquals(nop.getCount(), 0);
 		assertEquals(tb1.getAge(), proxy.getAge());
@@ -183,7 +183,7 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 		pf1.setExposeProxy(true);
 		assertTrue(pf1.getExposeProxy());
 
-		pf1.addInterceptor(di);
+		pf1.addAdvice(di);
 		INeedsToSeeProxy proxied = (INeedsToSeeProxy) createProxy(pf1);
 		assertEquals(0, di.getCount());
 		

@@ -66,7 +66,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 	public void testNoTarget() {
 		AdvisedSupport pc = new AdvisedSupport(new Class[]{ITestBean.class});
-		pc.addInterceptor(new NopInterceptor());
+		pc.addAdvice(new NopInterceptor());
 		try {
 			AopProxy aop = createAopProxy(pc);
 			aop.getProxy();
@@ -142,7 +142,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		pf.setProxyTargetClass(true);
 
 		MethodInterceptor static1 = new NopInterceptor();
-		pf.addInterceptor(static1);
+		pf.addAdvice(static1);
 
 		pf.setTarget(target);
 		pf.setFrozen(true);

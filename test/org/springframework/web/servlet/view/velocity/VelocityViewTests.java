@@ -266,10 +266,12 @@ public class VelocityViewTests extends TestCase {
 				NumberTool numberTool = (NumberTool) context.get("numberTool");
 				assertTrue(numberTool.getLocale().equals(Locale.CANADA));
 			}
-			protected void exposeHelpers(Context vContext, HttpServletRequest request) throws Exception {
-				vContext.put("myHelper", "myValue");
+
+			protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+				model.put("myHelper", "myValue");
 			}
 		};
+		
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
 		vv.setVelocityFormatterAttribute("velocityFormatter");

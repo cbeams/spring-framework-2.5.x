@@ -23,7 +23,7 @@ import java.util.Arrays;
 import org.aopalliance.aop.AspectException;
 
 /**
- * Miscellaneous utilities for AOP proxies
+ * Miscellaneous utilities for AOP proxies.
  * @author Rod Johnson
  */
 public abstract class AopProxyUtils {
@@ -34,7 +34,7 @@ public abstract class AopProxyUtils {
 	 * @return the complete set of interfaces to proxy
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
-		// Won't include Advised, which may be necessary
+		// Won't include Advised, which may be necessary.
 		Class[] proxiedInterfacesOnConfig = advised.getProxiedInterfaces() == null ? new Class[0] : advised.getProxiedInterfaces();
 		int lengthFromConfig = proxiedInterfacesOnConfig.length;
 		int addedInterfaces = 0;
@@ -54,41 +54,42 @@ public abstract class AopProxyUtils {
 	/**
 	 * Invoke the target directly via reflection.
 	 */
-	public static Object invokeJoinpointUsingReflection(Object target, Method m, Object[] args) throws Throwable {
-		//	Use reflection to invoke the method
-		 try {
-			 Object rval = m.invoke(target, args);
-			 return rval;
-		 }
-		 catch (InvocationTargetException ex) {
-			 // Invoked method threw a checked exception. 
-			 // We must rethrow it. The client won't see the interceptor.
-			 throw ex.getTargetException();
-		 }
-		 catch (IllegalArgumentException ex) {
-			throw new AspectException("AOP configuration seems to be invalid: tried calling " + m + " on [" + target + "]: " +  ex);
-		 }
-		 catch (IllegalAccessException ex) {
-			 throw new AspectException("Couldn't access method " + m, ex);
-		 }
+	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
+	    throws Throwable {
+		// Use reflection to invoke the method.
+		try {
+		 return method.invoke(target, args);
+		}
+		catch (InvocationTargetException ex) {
+			// Invoked method threw a checked exception.
+			// We must rethrow it. The client won't see the interceptor.
+			throw ex.getTargetException();
+		}
+		catch (IllegalArgumentException ex) {
+			throw new AspectException("AOP configuration seems to be invalid: tried calling " +
+			    method + " on [" + target + "]: " +  ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new AspectException("Couldn't access method " + method, ex);
+		}
 	}
 	
 	/**
 	 * Note the same as equality of the AdvisedSupport objects.
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
-		if (a == b)
+		if (a == b) {
 			return true;
-	
-		if (!equalsProxiedInterfaces(a, b))
+		}
+		if (!equalsProxiedInterfaces(a, b)) {
 			return false;
-
-		if (!equalsAdvisors(a, b))
+		}
+		if (!equalsAdvisors(a, b)) {
 			return false;
-	
-		if (a.getTargetSource() == null)
-			return b.getTargetSource() == null;
-	
+		}
+		if (a.getTargetSource() == null) {
+			return (b.getTargetSource() == null);
+		}
 		return a.getTargetSource().equals(b.getTargetSource());
 	}
 	
@@ -99,6 +100,5 @@ public abstract class AopProxyUtils {
 	public static boolean equalsAdvisors(AdvisedSupport a, AdvisedSupport b) {
 		return Arrays.equals(a.getAdvisors(), b.getAdvisors());
 	}
-
 
 }

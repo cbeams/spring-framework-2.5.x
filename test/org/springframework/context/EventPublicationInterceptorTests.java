@@ -71,7 +71,7 @@ public class EventPublicationInterceptorTests extends TestCase {
 		interceptor.setApplicationEventClass(TestEvent.class);
 
 		ProxyFactory factory = new ProxyFactory(target);
-		factory.addInterceptor(0, interceptor);
+		factory.addAdvice(0, interceptor);
 
 		ITestBean testBean = (ITestBean) factory.getProxy();
 

@@ -73,7 +73,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		MethodInterceptor mi = (MethodInterceptor) miControl.getMock();
 
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
-		pc.addInterceptor(mi);
+		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
 		// Really would like to permit null arg:can't get exact mi
@@ -102,7 +102,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		};
 	
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
-		pc.addInterceptor(ExposeInvocationInterceptor.INSTANCE);
+		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns
@@ -110,7 +110,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 				return super.invoke(invocation);
 			}
 		};
-		pc.addInterceptor(tii);
+		pc.addAdvice(tii);
 		pc.setTarget(expectedTarget);
 		AopProxy aop = createAopProxy(pc);
 

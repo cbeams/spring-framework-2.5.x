@@ -24,10 +24,10 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
@@ -119,7 +119,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(1, cba.getCalls());
 		
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&directTarget");
-		assertEquals("Has correct object type", TestBean.class, pfb.getObjectType());
+		assertTrue("Has correct object type", TestBean.class.isAssignableFrom(pfb.getObjectType()));
 	}
 	
 	public void testGetObjectTypeWithTargetViaTargetSource() {
@@ -127,10 +127,8 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
 		assertTrue(tb.getName().equals("Adam"));
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
-		assertEquals("Has correct object type", TestBean.class, pfb.getObjectType());
+		assertTrue("Has correct object type", TestBean.class.isAssignableFrom(pfb.getObjectType()));
 	}
-	
-	
 	
 	public void testGetObjectTypeWithNoTargetOrTargetSource() {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml", getClass()));
@@ -144,7 +142,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			assertEquals("getName", ex.getMessage());
 		}
 		FactoryBean pfb = (ProxyFactoryBean) bf.getBean("&noTarget");
-		assertNull("Has null object type", pfb.getObjectType());
+		assertTrue(ITestBean.class.isAssignableFrom(pfb.getObjectType()));
 	}
 	
 	/**
@@ -165,7 +163,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(pc1.getAdvisors(), pc2.getAdvisors());
 		int oldLength = pc1.getAdvisors().length;
 		NopInterceptor di = new NopInterceptor();
-		pc1.addInterceptor(1, di);
+		pc1.addAdvice(1, di);
 		assertEquals(pc1.getAdvisors(), pc2.getAdvisors());
 		assertEquals("Now have one more advisor", oldLength + 1, pc2.getAdvisors().length);
 		assertEquals(di.getCount(), 0);
@@ -334,16 +332,16 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 	
 		// Now check non-effect of removing interceptor that isn't there
-		config.removeInterceptor(new DebugInterceptor());
+		config.removeAdvice(new DebugInterceptor());
 	
 		assertTrue(config.getAdvisors().length == oldCount);
 	
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
-		config.addInterceptor(0, debugInterceptor);
+		config.addAdvice(0, debugInterceptor);
 		it.getSpouse();
 		assertEquals(1, debugInterceptor.getCount());
-		config.removeInterceptor(debugInterceptor);
+		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 		// not invoked again
 		assertTrue(debugInterceptor.getCount() == 1);
@@ -376,7 +374,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(time, ts.getTimeStamp());
 		
 		// Can remove
-		config.removeInterceptor(ti);
+		config.removeAdvice(ti);
 		assertTrue(config.getAdvisors().length == oldCount);
 		
 		// Check no change on existing object reference
@@ -390,19 +388,19 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 		
 		// Now check non-effect of removing interceptor that isn't there
-		config.removeInterceptor(new DebugInterceptor());
+		config.removeAdvice(new DebugInterceptor());
 		assertTrue(config.getAdvisors().length == oldCount);
 		
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
-		config.addInterceptor(0, debugInterceptor);
+		config.addAdvice(0, debugInterceptor);
 		it.getSpouse();
 		// Won't affect existing reference
 		assertTrue(debugInterceptor.getCount() == 0);
 		it = (ITestBean) factory.getBean("test2");
 		it.getSpouse();
 		assertEquals(1, debugInterceptor.getCount());
-		config.removeInterceptor(debugInterceptor);
+		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 		
 		// Still invoked wiht old reference
@@ -430,7 +428,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		Advised pc = (Advised) it;
 		it.getAge();
 		NopInterceptor di = new NopInterceptor();
-		pc.addInterceptor(0, di);
+		pc.addAdvice(0, di);
 		assertEquals(0, di.getCount());
 		it.setAge(25);
 		assertEquals(25, it.getAge());

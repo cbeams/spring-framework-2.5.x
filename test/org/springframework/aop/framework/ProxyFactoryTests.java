@@ -19,6 +19,8 @@ package org.springframework.aop.framework;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -62,9 +64,9 @@ public class ProxyFactoryTests extends TestCase {
 		Advisor advisor = new DefaultPointcutAdvisor(new CountingBeforeAdvice());
 		Advised advised = (Advised) pf.getProxy();
 		// Can use advised and ProxyFactory interchangeably
-		advised.addInterceptor(nop);
+		advised.addAdvice(nop);
 		pf.addAdvisor(advisor);
-		assertEquals(-1, pf.indexOf((Interceptor) null));
+		assertEquals(-1, pf.indexOf((Advice) null));
 		assertEquals(-1, pf.indexOf(new NopInterceptor()));
 		assertEquals(0, pf.indexOf(nop));
 		assertEquals(-1, advised.indexOf((Advisor) null));
@@ -78,7 +80,7 @@ public class ProxyFactoryTests extends TestCase {
 		NopInterceptor nop = new NopInterceptor();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(cba);
-		pf.addInterceptor(nop);
+		pf.addAdvice(nop);
 		pf.addAdvisor(advisor);
 		ITestBean proxied = (ITestBean) pf.getProxy();
 		proxied.setAge(5);
@@ -99,10 +101,10 @@ public class ProxyFactoryTests extends TestCase {
 		NopInterceptor nop = new NopInterceptor();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(cba);
-		pf.addInterceptor(nop);
+		pf.addAdvice(nop);
 		pf.addAdvisor(advisor);
 		NopInterceptor nop2 = new NopInterceptor();
-		pf.addInterceptor(nop2);
+		pf.addAdvice(nop2);
 		ITestBean proxied = (ITestBean) pf.getProxy();
 		proxied.setAge(5);
 		assertEquals(1, cba.getCalls());
@@ -150,7 +152,7 @@ public class ProxyFactoryTests extends TestCase {
 		Advisor advisor1 = new DefaultPointcutAdvisor(cba1);
 		Advisor advisor2 = new DefaultPointcutAdvisor(cba2);
 		pf.addAdvisor(advisor1);
-		pf.addInterceptor(nop);
+		pf.addAdvice(nop);
 		ITestBean proxied = (ITestBean) pf.getProxy();
 		// Use the type cast feature
 		// Replace etc methods on advised should be same as on ProxyFactory
@@ -225,9 +227,9 @@ public class ProxyFactoryTests extends TestCase {
 	
 	public void testCanOnlyAddMethodInterceptors() {
 		ProxyFactory factory = new ProxyFactory(new TestBean());
-		factory.addInterceptor(0, new NopInterceptor());
+		factory.addAdvice(0, new NopInterceptor());
 		try {
-			factory.addInterceptor(0, new Interceptor() {
+			factory.addAdvice(0, new Interceptor() {
 			});
 			fail("Should only be able to add MethodInterceptors");
 		}
@@ -243,14 +245,14 @@ public class ProxyFactoryTests extends TestCase {
 		NopInterceptor di = new NopInterceptor();
 		NopInterceptor diUnused = new NopInterceptor();
 		ProxyFactory factory = new ProxyFactory(new TestBean());
-		factory.addInterceptor(0, di);
+		factory.addAdvice(0, di);
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertTrue(factory.interceptorIncluded(di));
 		assertTrue(!factory.interceptorIncluded(diUnused));
 		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 1);
 		assertTrue(factory.countInterceptorsOfType(TransactionInterceptor.class) == 0);
 	
-		factory.addInterceptor(0, diUnused);
+		factory.addAdvice(0, diUnused);
 		assertTrue(factory.interceptorIncluded(diUnused));
 		assertTrue(factory.countInterceptorsOfType(NopInterceptor.class) == 2);
 	}

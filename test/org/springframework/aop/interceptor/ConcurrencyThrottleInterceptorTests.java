@@ -40,7 +40,7 @@ public class ConcurrencyThrottleInterceptorTests extends TestCase {
 		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
 		ConcurrencyThrottleInterceptor cti = new ConcurrencyThrottleInterceptor();
 		cti.setConcurrencyLimit(concurrencyLimit);
-		proxyFactory.addInterceptor(cti);
+		proxyFactory.addAdvice(cti);
 		proxyFactory.setTarget(tb);
 		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
 
