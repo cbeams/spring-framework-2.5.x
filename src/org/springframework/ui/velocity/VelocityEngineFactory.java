@@ -117,13 +117,18 @@ public class VelocityEngineFactory {
 		this.velocityEngine = newVelocityEngine();
 		Properties props = new Properties();
 
-		try {
-			// try default config location as fallback
-			Resource actualLocation = this.configLocation;
-			if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
+		// try default config location as fallback
+		Resource actualLocation = this.configLocation;
+		if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
+			try {
 				actualLocation = getDefaultConfigLocation();
 			}
+			catch (IOException ex) {
+				throw new VelocityInitializationException("Default Velocity config file not found", ex);
+			}
+		}
 
+		try {
 			// load config file if set
 			if (actualLocation != null) {
 				logger.info("Loading Velocity config from [" + actualLocation + "]");
@@ -137,7 +142,7 @@ public class VelocityEngineFactory {
 			}
 		}
 		catch (IOException ex) {
-			throw new VelocityInitializationException("Error loading Velocity config from [" + this.configLocation + "]", ex);
+			throw new VelocityInitializationException("Error loading Velocity config from " + actualLocation, ex);
 		}
 
 		// merge local properties if set
