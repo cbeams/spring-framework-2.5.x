@@ -28,7 +28,7 @@
           Reference Documentation
         </subtitle>
         <releaseinfo>1.0</releaseinfo>
-        <pubdate>(Work in progress.)</pubdate>
+        <pubdate>(Work in progress)</pubdate>
         
         <authorgroup>
             <author>
@@ -79,6 +79,8 @@
 	    &dao;
 
 	    &jdbc;
+
+	    &orm;
 
 	    &mvc;
 	    

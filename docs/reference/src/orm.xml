@@ -1,7 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="orm">
+  <title>Data Access using O/R Mappers</title>
 
-    <title>Data Access using O/R Mappers</title>
+  <sect1 id="orm-introducion">
+    <title>Introduction</title>
 
+    <para>Spring provides integration with Hibernate, JDO, and iBATIS SQL Maps
+    in terms of resource holders, DAO implementation support, and transaction
+    strategies. For Hibernate there is first-class support with lots of IoC
+    convenience features, addressing many typical Hibernate integration
+    issues. All of these comply to Spring's generic transaction and DAO
+    exception hierarchies.</para>
+  </sect1>
+
+  <sect1 id="orm-hibernate">
+    <title>Hibernate</title>
+
+    <para>Spring's lightweight bean container offers IoC-style wiring up of
+    business objects, DAOs, and resources like JDBC DataSources and Hibernate
+    SessionFactories. Such an XML-defined application context is a powerful
+    alternative to manually managed singletons or factories that parse their
+    configuration from custom properties files. As non-intrusiveness is a
+    central goal, such Spring-configured application beans do not need to
+    depend on Spring interfaces or classes but get configured via their bean
+    properties. This concept can be applied in any environment, be it a J2EE
+    web app, a desktop app, or even an applet. In the context of Hibernate,
+    Spring's generic transaction management for DAOs is of particular
+    interest. The goal is to separate data access and transaction demarcation
+    aspects to allow for reusable transactional business objects that are not
+    tied to any specific data access or transaction strategy. Demarcation can
+    either happen programmatically via TransactionTemplate, or declaratively
+    via the AOP TransactionInterceptor. Both native Hibernate / JDBC
+    transactions and JTA are supported as strategies out-of-the-box. This is a
+    viable alternative to local Stateless Session Beans. Spring's
+    HibernateTemplate offers a simple way to implement Hibernate-based DAOs
+    without caring about handling Session instances or participating in
+    transactions. No need for try-catch blocks, no need for transaction
+    checks. A simple Hibernate access method can be a one-liner! Combining
+    heterogeneous DAOs works seamlessly, both in terms of DAO interfaces and
+    participating in transactions. For example, certain DAOs can be
+    implemented on plain JDBC, preferably via Spring's JdbcTemplate to avoid
+    manual exception handling.</para>
+
+    <para>You can use a lot of Spring's features respectively classes in a
+    library style, as everything is designed as a set of reusable JavaBeans.
+    Don't be discouraged by the fact that Spring can serve as full application
+    framework too! The application context concept is an additional benefit,
+    not a requirement for using other Spring features. In any case, you're
+    invited to review and leverage the Spring approach, no matter to what
+    extent, before deciding to take the effort and risk of building such
+    infrastructure in-house.</para>
+
+    <sect2>
+      <title>Resource Management</title>
+
+      <para>Typical business applications are often cluttered with repetitive
+      resource management code. Many projects try to invent own solutions for
+      this issue, sometimes sacrificing proper handling of failures for
+      programming convenience. Spring advocates strikingly simple solutions
+      for proper resource handling: Inversion of control via templating, i.e.
+      infrastructure classes with callback interfaces, or applying AOP
+      interceptors. The infrastructure cares for proper resource handling, and
+      for appropriate conversion of specific API exceptions to an unchecked
+      infrastructure exception hierarchy. Spring introduces a DAO exception
+      hierarchy, applicable to any data access strategy. For direct JDBC, the
+      JdbcTemplate class cares for connection handling, and for proper
+      conversion of SQLException to the DataAccessException hierarchy,
+      including translation of database-specific SQL error codes to meaningful
+      exception classes. It supports both JTA and JDBC transactions, via
+      respective Spring transaction managers. Spring also offers Hibernate and
+      JDO support, consisting of a HibernateTemplate / JdoTemplate analogous
+      to JdbcTemplate, a HibernateInterceptor / JdoInterceptor, and a
+      Hibernate / JDO transaction manager. The major goal is to allow for
+      clear application layering, with any data access and transaction
+      technology, and for loose coupling of application objects. No more
+      business object dependencies on the data access or transaction strategy,
+      no more hard-coded resource lookups, no more hard-to-replace singletons,
+      no more custom service registries. One simple and consistent approach to
+      wiring up application objects, keeping them as reusable and free from
+      container dependencies as possible. All the individual data access
+      features are usable on their own but integrate nicely with Spring's
+      application context concept, providing XML-based configuration and
+      cross-referencing of plain JavaBean instances that don't need to be
+      Spring-aware. In a typical Spring app, many important objects are
+      JavaBeans: data access templates, data access objects (that use the
+      templates), transaction managers, business objects (that use the data
+      access objects and transaction managers), web view resolvers, web
+      controllers (that use the business objects), etc.</para>
+    </sect2>
+
+    <sect2>
+      <title>Resource Definitions in an Application Context</title>
+
+      <para>To avoid tying application objects to hard-coded resource lookups,
+      Spring allows to define resources like a JDBC DataSource or a Hibernate
+      SessionFactory as beans in an application context. Application objects
+      that need to access resources just receive references to such
+      pre-defined instances via bean references (the DAO definition in the
+      next section illustrates this). The following excerpt from an XML
+      application context definition shows how to set up a JDBC DataSource and
+      a Hibernate SessionFactory on top of it:</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+        &lt;property name="jndiName"&gt;
+            &lt;value&gt;jdbc/myds&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+   &lt;bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+       &lt;property name="mappingResources"&gt;
+           &lt;list&gt;
+               &lt;value&gt;product.hbm.xml&lt;/value&gt;
+           &lt;/list&gt;
+       &lt;/property&gt;
+       &lt;property name="hibernateProperties"&gt;
+           &lt;props&gt;
+               &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
+           &lt;/props&gt;
+       &lt;/property&gt;
+       &lt;property name="dataSource"&gt;
+           &lt;ref bean="myDataSource"/&gt;
+       &lt;/property&gt;
+   &lt;/bean&gt;
+
+   ...
+
+&lt;/beans&gt;</programlisting>
+
+      <para>Note that switching from a JNDI-located DataSource to a locally
+      defined one like a Jakarta Commons DBCP BasicDataSource is just a matter
+      of configuration:</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
+    &lt;property name="driverClassName"&gt;
+        &lt;value&gt;org.hsqldb.jdbcDriver&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property name="url"&gt;
+        &lt;value&gt;jdbc:hsqldb:hsql://localhost:9001&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property name="username"&gt;
+        &lt;value&gt;sa&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property name="password"&gt;
+        &lt;value&gt;&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>You can also use a JNDI-located SessionFactory, but that's
+      typically not necessary outside an EJB context (see the "container
+      resources vs local resources" section for a discussion).</para>
+    </sect2>
+
+    <sect2>
+      <title>Inversion of Control: Template and Callback</title>
+
+      <para>The basic programming model for templating looks as follows, for
+      methods that can be part of any custom data access object or business
+      object. There are no restrictions on the implementation of the
+      surrounding object at all, it just needs to provide a Hibernate
+      SessionFactory. It can get the latter from anywhere, but preferably as
+      bean reference from a Spring application context - via a simple
+      setSessionFactory bean property setter. The following snippets show a
+      DAO definition in a Spring application context, referencing the above
+      defined SessionFactory, and an example for a DAO method
+      implementation.</para>
+
+      <programlisting>&lt;beans&gt;
+
+    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    ...
+
+&lt;/beans&gt;</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl implements ProductDao {
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public List loadProductsByCategory(final String category) {
+        HibernateTemplate hibernateTemplate =
+            new HibernateTemplate(this.sessionFactory);
+
+        return (List) hibernateTemplate.execute(
+            new HibernateCallback() {
+                public Object doInHibernate(Session session) throws HibernateException {
+                    List result = session.find(
+                        "from test.Product product where product.category=?",
+                        category, Hibernate.STRING);
+                    // do some further stuff with the result list
+                    return result;
+                }
+            }
+        );
+    }
+}</programlisting>
+
+      <para>A callback implementation can effectively be used for any
+      Hibernate data access. HibernateTemplate will care for proper Session
+      opening and closing in any case, and for automatically participating in
+      transactions. The template instances are thread-safe and reusable, they
+      can thus be kept as instance variables of the surrounding class. For
+      simple single step actions like a single find, load, saveOrUpdate, or
+      delete call, HibernateTemplate offers alternative convenience methods
+      that can replace such one line callback implementations. Furthermore,
+      Spring provides a convenient HibernateDaoSupport base class that
+      provides a setSessionFactory method for receiving a SessionFactory, and
+      getSessionFactory and getHibernateTemplate for use by subclasses. In
+      combination, this allows for very simple DAO implementations for typical
+      requirements:</para>
+
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+
+    public List loadProductsByCategory(String category) {
+        return getHibernateTemplate().find(
+            "from test.Product product where product.category=?", category,
+            Hibernate.STRING);
+    }
+}</programlisting>
+    </sect2>
+
+    <sect2>
+      <title>Applying an AOP Interceptor Instead of a Template</title>
+
+      <para>An alternative to using a HibernateTemplate is Spring's AOP
+      HibernateInterceptor, replacing the callback implementation with
+      straight Hibernate code within a delegating try/catch block, and a
+      respective interceptor configuration in the application context. The
+      following snippets show respective DAO, interceptor, and proxy
+      definitions in a Spring application context, and an example for a DAO
+      method implementation.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    ...
+
+    &lt;bean id="myHibernateInterceptor" 
+        class="org.springframework.orm.hibernate.HibernateInterceptor"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductDaoTarget" class="product.ProductDaoImpl"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductDao" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+        &lt;property name="proxyInterfaces"&gt;
+            &lt;value&gt;product.ProductDao&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="interceptorNames"&gt;
+            &lt;list&gt;
+                &lt;value&gt;myHibernateInterceptor&lt;/value&gt;
+                &lt;value&gt;myProductDaoTarget&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    ...
+
+&lt;/beans&gt;</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+
+    public List loadProductsByCategory(final String category) throws MyException {
+        Session session = SessionFactoryUtils.getSession(getSessionFactory(), false);
+        try {
+            List result = session.find(
+                "from test.Product product where product.category=?",
+                category, Hibernate.STRING);
+            if (result == null) {
+                throw new MyException("invalid search result");
+            }
+            return result;
+        }
+        catch (HibernateException ex) {
+            throw SessionFactoryUtils.convertHibernateAccessException(ex);
+        }
+    }
+}</programlisting>
+
+      <para>This method will only work with a HibernateInterceptor for it,
+      caring for opening a thread-bound Session before and closing it after
+      the method call. The "false" flag on getSession makes sure that the
+      Session must already exist; else SessionFactoryUtils would create a new
+      one if none found. If there is already a SessionHolder bound to the
+      thread, e.g. by a HibernateTransactionManager transaction,
+      SessionFactoryUtils automatically takes part in it in any case.
+      HibernateTemplate uses SessionFactoryUtils underneath - it's all the
+      same infrastructure. The major advantage of HibernateInterceptor is that
+      it allows any checked application exception to be thrown within the data
+      access code, while HibernateTemplate is restricted to unchecked
+      exceptions within the callback. Note that one can offen defer the
+      respective checks and throwing of application exceptions to after the
+      callback, though. The interceptor's major drawback is that it requires
+      special setup in the context. HibernateTemplate's convenience methods
+      offers simpler means for many scenarios.</para>
+    </sect2>
+
+    <sect2>
+      <title>Programmatic Transaction Demarcation</title>
+
+      <para>On top of such lower-level data access services, transactions can
+      be demarcated in a higher level of the application, spanning any number
+      of operations. There are no restrictions on the implementation of the
+      surrounding business object here too, it just needs a Spring
+      PlatformTransactionManager. Again, the latter can come from anywhere,
+      but preferably as bean reference via a setTransactionManager method -
+      just like the productDAO should be set via a setProductDao method. The
+      following snippets show a transaction manager and a business object
+      definition in a Spring application context, and an example for a
+      business method implementation.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    ...
+
+    &lt;bean id="myTransactionManager" 
+        class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
+        &lt;property name="transactionManager"&gt;
+            &lt;ref bean="myTransactionManager"/&gt;
+        &lt;/property&gt;
+        &lt;property name="productDao"&gt;
+            &lt;ref bean="myProductDao"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">public class ProductServiceImpl implements ProductService {
+
+    private PlatformTransactionManager transactionManager;
+    private ProductDao productDao;
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    public void increasePriceOfAllProductsInCategory(final String category) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(this.transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        transactionTemplate.execute(
+            new TransactionCallbackWithoutResult() {
+                public void doInTransactionWithoutResult(TransactionStatus status) {
+                    List productsToChange = productDAO.loadProductsByCategory(category);
+                    ...
+                }
+            }
+        );
+    }
+}</programlisting>
+
+      <para></para>
+    </sect2>
+
+    <sect2>
+      <title>Declarative Transaction Demarcation</title>
+
+      <para>Alternatively, one can use Spring's AOP TransactionInterceptor,
+      replacing the transaction demarcation code with an interceptor
+      configuration in the application context. This allows to keep business
+      objects free from repetitive transaction demarcation code in each
+      business method. Furthermore, transaction semantics like propagation
+      behavior and isolation level can be changed in a configuration file and
+      do not affect the business object implementations.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    ...
+
+    &lt;bean id="myTransactionManager" 
+        class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myTransactionInterceptor" 
+        class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+        &lt;property name="transactionManager"&gt;
+            &lt;ref bean="myTransactionManager"/&gt;
+        &lt;/property&gt;
+        &lt;property name="transactionAttributeSource"&gt;
+            &lt;value&gt;
+                product.ProductService.increasePrice*=PROPAGATION_REQUIRED
+                product.ProductService.someOtherBusinessMethod=PROPAGATION_MANDATORY
+            &lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+        &lt;property name="productDao"&gt;
+            &lt;ref bean="myProductDao"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductService" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+        &lt;property name="proxyInterfaces"&gt;
+            &lt;value&gt;product.ProductService&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name="interceptorNames"&gt;
+            &lt;list&gt;
+                &lt;value&gt;myTransactionInterceptor&lt;/value&gt;
+                &lt;value&gt;myProductServiceTarget&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">public class ProductServiceImpl implements ProductService {
+
+    private ProductDao productDao;
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    public void increasePriceOfAllProductsInCategory(final String category) {
+        List productsToChange = this.productDAO.loadProductsByCategory(category);
+        ...
+    }
+
+    ...
+
+}</programlisting>
+
+      <para>Like with HibernateInterceptor, TransactionInterceptor allows any
+      checked application exception to be thrown with the callback code, while
+      TransactionTemplate is restricted to unchecked exceptions within the
+      callback. TransactionTemplate will trigger a rollback in case of an
+      unchecked application exception, or if the transaction has been marked
+      rollback-only by the application (via TransactionStatus).
+      TransactionInterceptor behaves the same way by default but allows
+      configurable rollback policies per method. A convenient alternative way
+      of setting up declarative transactions is TransactionProxyFactoryBean,
+      particularly if there are no other AOP interceptors involved.
+      TransactionProxyFactoryBean combines the proxy definition itself with
+      transaction configuration for a particular target bean. This reduces the
+      configuration effort to one target bean plus one proxy bean.
+      Furthermore, you do not need to specify which interfaces or classes the
+      transactional methods are defined in.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    ...
+
+    &lt;bean id="myTransactionManager" 
+        class="org.springframework.orm.hibernate.HibernateTransactionManager"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+        &lt;property name="productDao"&gt;
+            &lt;ref bean="myProductDao"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;
+            &lt;ref bean="myTransactionManager"/&gt;
+        &lt;/property&gt;
+        &lt;property name="target"&gt;
+            &lt;ref bean="myProductServiceTarget"/&gt;
+        &lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_MANDATORY&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+    </sect2>
+
+    <sect2>
+      <title>Transaction Management Strategies</title>
+
+      <para>Both TransactionTemplate and TransactionInterceptor delegate the
+      actual transaction handling to a PlatformTransactionManager instance,
+      which can be a HibernateTransactionManager (for a single Hibernate
+      SessionFactory, using a ThreadLocal Session under the hood) or a
+      JtaTransactionManager (delegating to the JTA subsystem of the container)
+      for Hibernate applications. You could even use a custom
+      PlatformTransactionManager implementation. So switching from native
+      Hibernate transaction management to JTA, i.e. when facing distributed
+      transaction requirements for certain deployments of your application, is
+      just a matter of configuration. Simply replace the Hibernate transaction
+      manager with Spring's JTA transaction implementation. Both transaction
+      demarcation and data access code will work without changes, as they just
+      use the generic transaction management APIs. For distributed
+      transactions across multiple Hibernate session factories, simply combine
+      JtaTransactionManager as transaction strategy with multiple
+      LocalSessionFactoryBean definitions. Each of your DAOs then gets one
+      specific SessionFactory reference passed into its respective bean
+      property. If all underlying JDBC data sources are transactional
+      container ones, a business object can demarcate transactions across any
+      number of DAOs and any number of session factories without special
+      regard, as long as using JtaTransactionManager as strategy.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;beans&gt;
+
+    &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+        &lt;property name="jndiName"&gt;
+            &lt;value&gt;jdbc/myds1&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myDataSource2" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+        &lt;property name="jndiName"&gt;
+            &lt;value&gt;jdbc/myds2&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+        &lt;property name="mappingResources"&gt;
+            &lt;list&gt;
+                &lt;value&gt;product.hbm.xml&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;property name="hibernateProperties"&gt;
+            &lt;props&gt;
+                &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.MySQLDialect&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+        &lt;property name="dataSource"&gt;
+            &lt;ref bean="myDataSource1"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="mySessionFactory2" class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+        &lt;property name="mappingResources"&gt;
+            &lt;list&gt;
+                &lt;value&gt;inventory.hbm.xml&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;property name="hibernateProperties"&gt;
+            &lt;props&gt;
+                &lt;prop key="hibernate.dialect"&gt;net.sf.hibernate.dialect.OracleDialect&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+        &lt;property name="dataSource"&gt;
+            &lt;ref bean="myDataSource2"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myTransactionManager" 
+        class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;
+
+    &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory1"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myInventoryDao" class="product.InventoryDaoImpl"&gt;
+        &lt;property name="sessionFactory"&gt;
+            &lt;ref bean="mySessionFactory2"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+        &lt;property name="productDao"&gt;
+            &lt;ref bean="myProductDao"/&gt;
+        &lt;/property&gt;
+        &lt;property name="inventoryDao"&gt;
+            &lt;ref bean="myInventoryDao"/&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="myProductService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;
+            &lt;ref bean="myTransactionManager"/&gt;
+        &lt;/property&gt;
+        &lt;property name="target"&gt;
+            &lt;ref bean="myProductServiceTarget"/&gt;
+        &lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+                &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_MANDATORY&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>Both HibernateTransactionManager and JtaTransactionManager allow
+      for proper JVM-level cache handling with Hibernate - without
+      container-specific transaction manager lookup or JCA connector (as long
+      as not using EJB to initiate transactions). Additionally,
+      HibernateTransactionManager can export the JDBC Connection used by
+      Hibernate to plain JDBC access code. This allows for high level
+      transaction demarcation with mixed Hibernate/JDBC data access completely
+      without JTA, as long as just accessing one database!</para>
+    </sect2>
+
+    <sect2>
+      <title>Using Spring-managed Application Beans</title>
+
+      <para>A Spring application context definition can be loaded with a
+      variety of context implementations, from FileSystemXmlApplicationContext
+      and ClassPathXmlApplicationContext to XmlWebApplicationContext. This
+      allows for reuse of Spring-managed data access and business objects in
+      all kinds of environments. By default, a web app will have its root
+      context defined in "WEB-INF/applicationContext.xml". In any Spring app,
+      an application context defined in an XML file wires up all the
+      application beans that are involved, from the Hibernate session factory
+      to custom data access and business objects (like the beans above). Most
+      of them do not have to be aware of being managed by the Spring
+      container, not even when collaborating with other beans, as they simply
+      follow JavaBeans conventions. A bean property can either represent a
+      value parameter or a collaborating bean. The following bean definition
+      could be part of a Spring web MVC context that accesses business beans
+      in a root application context.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">&lt;bean id="myProductList" class="product.ProductListController"&gt;
+    &lt;property name="productService"&gt;
+        &lt;ref bean="myProductService"/&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>Spring web controllers are provided with all business or data
+      access objects they need via bean references, so there typically isn't
+      any need to do manual bean lookups in the application context. But when
+      using Spring-managed beans with Struts, or within an EJB implementation
+      or even an applet, one is always able to look up a bean manually.
+      Therefore, Spring beans can be leveraged virtually anywhere. One just
+      needs a reference to the application context, be it via a servlet
+      context attribute in the web case, or a manually created instance from a
+      file or class path resource.</para>
+
+      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+ProductService productService = (ProductService) context.getBean("myProductService");</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context =
+    new FileSystemXmlApplicationContext("C:/myContext.xml");
+ProductService productService =
+    (ProductService) context.getBean("myProductService");</programlisting>
+
+      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context =
+    new ClassPathXmlApplicationContext("myContext.xml");
+ProductService productService =
+    (ProductService) context.getBean("myProductService");</programlisting>
+
+      <para></para>
+    </sect2>
+
+    <sect2>
+      <title>Container Resources versus Local Resources</title>
+
+      <para>Spring's resource management allows for simple switching between a
+      JNDI SessionFactory and a local one, same for a JNDI DataSource, without
+      having to change a single line of application code. Whether to keep the
+      resource definitions in the container or locally within the application,
+      is mainly a matter of the transaction strategy being used. Compared to a
+      Spring-defined local SessionFactory, a manually registered JNDI
+      SessionFactory does not provide any benefits. If registered via
+      Hibernate's JCA connector, there is the added value of transparently
+      taking part in JTA transactions, especially within EJBs. An important
+      benefit of Spring's transaction support is that it isn't bound to a
+      container at all. Configured to any other strategy than JTA, it will
+      work in a standalone or test environment too. Especially for the typical
+      case of single-database transactions, this is a very lightweight and
+      powerful alternative to JTA. When using local EJB Stateless Session
+      Beans to drive transactions, you depend both on an EJB container and JTA
+      - even if you just access a single database anyway, and just use SLSBs
+      for declarative transactions via CMT. The alternative of using JTA
+      programmatically requires a J2EE environment too. JTA does not just
+      involve container dependencies in terms of JTA itself and of JNDI
+      DataSources. For non-Spring JTA-driven Hibernate transactions, you have
+      to use the Hibernate JCA connector, or extra Hibernate transaction code
+      with JTATransaction being configured, for proper JVM-level caching.
+      Spring-driven transactions can work with a locally defined Hibernate
+      SessionFactory nicely, just like with a local JDBC DataSource - if
+      accessing a single database, of course. Therefore you just have to fall
+      back to Spring's JTA transaction strategy when actually facing
+      distributed transaction requirements. Note that a JCA connector needs
+      container-specific deployment steps, and obviously JCA support in the
+      first place. This is far more hassle than deploying a simple web app
+      with local resource definitions and Spring-driven transactions. And you
+      often need the Enterprise Edition of your container, as e.g. WebLogic
+      Express does not provide JCA. A Spring app with local resources and
+      transactions spanning one single database will work in any J2EE web
+      container (without JTA, JCA, or EJB) - like Tomcat, Resin, or even plain
+      Jetty. Additionally, such a middle tier can be reused in desktop
+      applications or test suites easily. All things considered: If you do not
+      use EJB, stick with local SessionFactory setup and Spring's
+      HibernateTransactionManager or JtaTransactionManager. You will get all
+      benefits including proper transactional JVM-level caching and
+      distributed transactions, without any container deployment hassle. JNDI
+      registration of a Hibernate SessionFactory via the JCA connector only
+      adds value for use within EJBs.</para>
+    </sect2>
+
+    <sect2>
+      <title>Skeletons and Samples</title>
+
+      <para>For a commented and detailed sample configuration of a J2EE web
+      app with Spring and Hibernate, have a look at the "webapp-typical"
+      skeleton, included in the Spring Framework distribution. It outlines
+      various data source and transaction manager configuration options that
+      are suitable for JDBC and Hibernate apps. It also shows how to configure
+      AOP interceptors, focussing on the transaction interceptor. As of
+      release 1.0 M2, the Petclinic sample in the Spring distribution offers
+      alternative DAO implementations and application context configurations
+      for JDBC and Hibernate. Petclinic can therefore serve as working sample
+      app that illustrates the use of Hibernate in a Spring web app. It also
+      leverages declarative transaction demarcation with different transaction
+      strategies.</para>
+
+      <para></para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>JDO</title>
+
+    <para>ToDO</para>
+  </sect1>
+
+  <sect1>
+    <title>iBATIS</title>
+
+    <para>ToDo</para>
+
+    <para></para>
+  </sect1>
 </chapter>
-
-
