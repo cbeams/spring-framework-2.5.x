@@ -268,9 +268,9 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param model The flow data model, allowing access to attributes needed to
 	 *        retrieve the form object.
 	 * @return The form object
-	 * @throws IllegalStateException the form object loaded was null
-	 * @throws ObjectRetrievalFailureException the form object could not be
+	 * @throws FormObjectRetrievalFailureException the form object could not be
 	 *         loaded
+	 * @throws IllegalStateException the form object loaded was null
 	 */
 	protected final Object loadRequiredFormObject(FlowExecutionContext context)
 			throws FormObjectRetrievalFailureException, IllegalStateException {
