@@ -72,7 +72,7 @@ public class StateTests extends TestCase {
 			flowExecution.start(new SimpleEvent(this, "start"));
 			fail("Should not have matched to another state transition");
 		}
-		catch (CannotExecuteStateTransitionException e) {
+		catch (NoMatchingTransitionException e) {
 			// expected
 		}
 	}
