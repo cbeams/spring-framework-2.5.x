@@ -28,14 +28,14 @@ import org.springframework.util.closure.support.Block;
 /**
  * Request context implementation used internally by the web flow system.
  * <p>
- * This implementation uses a <i>synchronizer token</i> to implement application
- * transaction functionality.
+ * This implementation uses a <i>synchronizer token</i> to implement
+ * application transaction functionality.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class InternalRequestContext implements StateContext, TransactionSynchronizer {
-	
+
 	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	private Event requestEvent;
@@ -56,7 +56,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.lastEvent = requestEvent;
 		this.flowExecution = flowExecution;
 	}
-	
+
 	// implementing RequestContext
 
 	public Flow getRootFlow() {
@@ -101,7 +101,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	public Map getModel() {
 		// merge request and flow scope
-		Map model=new HashMap(getFlowScope().size() + getRequestScope().size());
+		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
 		model.putAll(getFlowScope().getAttributeMap());
 		model.putAll(getRequestScope().getAttributeMap());
 		// make the flow execution itself available in the model
@@ -118,7 +118,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	// implementing StateContext
-	
+
 	public void setCurrentState(State state) {
 		State previousState = this.flowExecution.getCurrentState();
 		this.flowExecution.setCurrentState(state);
@@ -134,7 +134,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	public FlowSession getActiveFlowSession() {
 		return this.flowExecution.getActiveFlowSession();
 	}
-	
+
 	public FlowSession getParentFlowSession() throws IllegalStateException {
 		return this.flowExecution.getParentFlowSession();
 	}
@@ -142,8 +142,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	public FlowSession endActiveFlowSession() {
 		FlowSession endedSession = this.flowExecution.endActiveFlowSession();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Session for flow '" + endedSession.getFlow().getId()
-					+ "' ended, session details = " + endedSession);
+			logger.debug("Session for flow '" + endedSession.getFlow().getId() + "' ended, session details = "
+					+ endedSession);
 		}
 		if (this.flowExecution.isActive()) {
 			fireSubFlowEnded(endedSession);
@@ -153,7 +153,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 		return endedSession;
 	}
-	
+
 	public ViewDescriptor spawn(Flow subFlow, Map subFlowInput) {
 		this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
 		fireSubFlowSpawned();
@@ -161,8 +161,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Spawn the provided flow definition as a subflow, activating
-	 * it and parameterizing it with the provided sub flow input.
+	 * Spawn the provided flow definition as a subflow, activating it and
+	 * parameterizing it with the provided sub flow input.
 	 * @param subFlow the subflow
 	 * @param stateId the id of the state to start execution in
 	 * @param subFlowInput the subflow input attributes
@@ -174,7 +174,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireSubFlowSpawned();
 		return subFlow.getState(stateId).enter(this);
 	}
-	
+
 	// lifecycle event management
 
 	/**
@@ -230,8 +230,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 */
 	protected void fireEventSignaled(final Event event) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
-					+ " listener(s)");
+			logger
+					.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
+							+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -251,7 +252,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateTransitioned(InternalRequestContext.this, previousState, getCurrentState());
+				((FlowExecutionListener)o).stateTransitioned(InternalRequestContext.this, previousState,
+						getCurrentState());
 			}
 		});
 	}
@@ -262,8 +264,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 */
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow execution started event to "
-					+ getFlowExecutionListenerList().size() + " listener(s)");
+			logger.debug("Publishing sub flow execution started event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -278,8 +280,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 */
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow ended event to " + getFlowExecutionListenerList().size()
-					+ " listener(s)");
+			logger
+					.debug("Publishing sub flow ended event to " + getFlowExecutionListenerList().size()
+							+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -302,7 +305,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 			}
 		});
 	}
-	
+
 	// implementing TransactionSynchronizer
 
 	public boolean inTransaction(boolean end) {
@@ -310,8 +313,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public void assertInTransaction(boolean end) throws IllegalStateException {
-		Assert.state(isEventTokenValid(getTransactionTokenAttributeName(), getTransactionTokenParameterName(),
-				end), "The request is not executing in the context of an application transaction");
+		Assert.state(isEventTokenValid(getTransactionTokenAttributeName(), getTransactionTokenParameterName(), end),
+				"The request is not executing in the context of an application transaction");
 	}
 
 	public void beginTransaction() {
@@ -323,8 +326,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Get the name for the transaction token attribute. Defaults to
-	 * "txToken".
+	 * Get the name for the transaction token attribute. Defaults to "txToken".
 	 */
 	protected String getTransactionTokenAttributeName() {
 		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
@@ -358,15 +360,15 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Return <code>true</code> if there is a transaction token stored in
-	 * the flow scope, and the value submitted as a event parameter matches
-	 * it. Returns <code>false</code> when
+	 * Return <code>true</code> if there is a transaction token stored in the
+	 * flow scope, and the value submitted as a event parameter matches it.
+	 * Returns <code>false</code> when
 	 * <ul>
 	 * <li>there is no transaction token saved in the flow scope</li>
 	 * <li>there is no transaction token included as a request event parameter
 	 * </li>
-	 * <li>the included transaction token value does not match the
-	 * transaction token in the flow scope</li>
+	 * <li>the included transaction token value does not match the transaction
+	 * token in the flow scope</li>
 	 * </ul>
 	 * @param tokenName the key used to save the token in the scope
 	 * @param tokenParameterName name of the event parameter holding the token
@@ -380,9 +382,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Return <code>true</code> if there is a transaction token stored in
-	 * the flow scope and the given value matches it. Returns
-	 * <code>false</code> when
+	 * Return <code>true</code> if there is a transaction token stored in the
+	 * flow scope and the given value matches it. Returns <code>false</code>
+	 * when
 	 * <ul>
 	 * <li>there is no transaction token saved in the flow scope</li>
 	 * <li>given token value is empty</li>

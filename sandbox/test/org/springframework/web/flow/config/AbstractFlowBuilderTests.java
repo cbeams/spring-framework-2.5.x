@@ -63,7 +63,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 					return new FlowFactoryBean(builder).getFlow();
 				}
 				else {
-					throw new NoSuchFlowDefinitionException(flowDefinitionId);
+					throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
 				}
 			}
 
@@ -72,7 +72,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 					return new PersonIdMapper();
 				}
 				else {
-					throw new NoSuchFlowAttributeMapperException(id);
+					throw new NoSuchFlowAttributeMapperException(id, null);
 				}
 			}
 		});

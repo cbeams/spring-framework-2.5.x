@@ -53,14 +53,14 @@ public class FlowExecutionStackTests extends TestCase {
 				if (flow.getClass().equals(flowDefinitionImplementationClass)) {
 					return flow;
 				}
-				throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass);
+				throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass, null);
 			}
 
 			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if (flow.getId().equals(flowDefinitionId)) {
 					return flow;
 				}
-				throw new NoSuchFlowDefinitionException(flowDefinitionId);
+				throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
 			}
 
 			public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)

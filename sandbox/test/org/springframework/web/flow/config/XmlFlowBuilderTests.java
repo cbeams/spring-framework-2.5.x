@@ -161,14 +161,14 @@ public class XmlFlowBuilderTests extends TestCase {
 					}
 				};
 			}
-			throw new NoSuchActionException(actionId);
+			throw new NoSuchActionException(actionId, null);
 		}
 
 		public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 			if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
 				return new Flow(flowDefinitionId);
 			}
-			throw new NoSuchFlowDefinitionException(flowDefinitionId);
+			throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
 		}
 
 		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
@@ -183,7 +183,7 @@ public class XmlFlowBuilderTests extends TestCase {
 					}
 				};
 			}
-			throw new NoSuchFlowAttributeMapperException(flowModelMapperId);
+			throw new NoSuchFlowAttributeMapperException(flowModelMapperId, null);
 		}
 	};
 
