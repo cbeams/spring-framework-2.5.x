@@ -26,16 +26,16 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 
 	private Flow flow;
 
-	private FlowCreator flowFactory = new DefaultFlowFactory();
+	private FlowCreator flowCreator = new DefaultFlowCreator();
 
-	private static class DefaultFlowFactory implements FlowCreator {
+	private static class DefaultFlowCreator implements FlowCreator {
 		public Flow createFlow(String flowId) {
 			return new Flow(flowId);
 		}
 	}
 
-	public void setFlowFactory(FlowCreator flowFactory) {
-		this.flowFactory = flowFactory;
+	public void setFlowCreator(FlowCreator flowCreator) {
+		this.flowCreator = flowCreator;
 	}
 
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
@@ -90,12 +90,12 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	/**
 	 * Create the instance of the Flow built by this builder. Subclasses may
 	 * override to return a custom Flow implementation, or simply pass in a
-	 * custom FlowFactory.
+	 * custom FlowCreator implementation.
 	 * 
 	 * @param id The flow identifier.
 	 * @return The flow built by this builder.
 	 */
 	protected Flow createFlow(String id) {
-		return this.flowFactory.createFlow(id);
+		return this.flowCreator.createFlow(id);
 	}
 }
