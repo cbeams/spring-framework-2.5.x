@@ -27,7 +27,7 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.UserRoleAuthorizationInterceptor;
-import org.springframework.web.servlet.support.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
