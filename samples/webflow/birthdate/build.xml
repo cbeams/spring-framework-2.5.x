@@ -23,6 +23,11 @@
 			<fileset file="${spring.jar}" />
 			<fileset file="${spring.webflow.jar}" />
 			<fileset file="${spring.webflow.support.jar}" />
+			<fileset file="${commons.beanutils.jar}" />
+			<fileset file="${commons.collections.jar}" />
+			<fileset file="${commons.digester.jar}" />
+			<fileset file="${commons.validator}" />
+			<fileset file="${struts.jar}" />
 		</copy>
 	</target>
 </project>
