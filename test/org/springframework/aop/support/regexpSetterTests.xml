@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Simple target -->
+	<bean id="test" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>custom</value></property>
+		<property name="age"><value>666</value></property>
+	</bean>
+	
+
+	
+	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
+	</bean>
+	
+	<bean id="regexpAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAroundAdvisor">
+		<property name="interceptor"><ref local="nopInterceptor"/></property>
+		<property name="pattern"><value>.*get.*</value></property>
+	</bean>
+	
+	<bean id="advised" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
+		
+		<property name="target"><ref local="test"/></property>	
+		<property name="interceptorNames"><value>regexpAdvisor</value></property>		
+		
+	</bean>
+	
+
+</beans>		
+	
+	
