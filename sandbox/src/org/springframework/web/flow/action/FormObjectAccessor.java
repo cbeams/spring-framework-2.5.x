@@ -71,7 +71,7 @@ public class FormObjectAccessor {
 	public Object getFormObject(Class formObjectClass, ScopeType scope) throws IllegalStateException {
 		return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, formObjectClass, scope);
 	}
-	
+
 	/**
 	 * Gets the form object from the context, using the specified name.
 	 * @param formObjectName the name of the form object in the context
@@ -94,10 +94,11 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         context or is not of the required type
 	 */
-	public Object getFormObject(String formObjectName, Class formObjectClass, ScopeType scope) throws IllegalStateException {
+	public Object getFormObject(String formObjectName, Class formObjectClass, ScopeType scope)
+			throws IllegalStateException {
 		return getScope(scope).getRequiredAttribute(formObjectName, formObjectClass);
 	}
-	
+
 	/**
 	 * Expose given form object using the well known name
 	 * {@link #FORM_OBJECT_ATTRIBUTE_NAME} in specified scope.
@@ -107,7 +108,7 @@ public class FormObjectAccessor {
 	public void exposeFormObject(Object formObject, ScopeType scope) {
 		exposeFormObject(formObject, FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
-	
+
 	/**
 	 * Expose given form object using given name in specified scope.
 	 * @param formObject the form object
@@ -129,7 +130,7 @@ public class FormObjectAccessor {
 	public Errors getFormErrors(ScopeType scope) throws IllegalStateException {
 		return getFormErrors(FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
-	
+
 	/**
 	 * Gets the form object <code>Errors</code> tracker from the context,
 	 * using the specified form object name.
@@ -141,7 +142,8 @@ public class FormObjectAccessor {
 	 *         context
 	 */
 	public Errors getFormErrors(String formObjectName, ScopeType scope) throws IllegalStateException {
-		return (Errors)getScope(scope).getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
+		return (Errors)getScope(scope).getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName,
+				Errors.class);
 	}
 
 	/**
@@ -173,7 +175,7 @@ public class FormObjectAccessor {
 	public void exposeErrors(Errors errors, ScopeType scope) {
 		getScope(scope).setAttribute(BindException.ERROR_KEY_PREFIX + errors.getObjectName(), errors);
 	}
-	
+
 	/**
 	 * Helper method to get the indicated scope from the flow execution
 	 * request context.

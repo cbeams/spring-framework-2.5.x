@@ -102,5 +102,6 @@ public interface FlowAttributeMapper {
 	 *        to, where output attributes of the child sub flow will be set as
 	 *        input.
 	 */
-	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes, MutableAttributeSource parentFlowAttributes);
+	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes,
+			MutableAttributeSource parentFlowAttributes);
 }

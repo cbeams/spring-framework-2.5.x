@@ -210,8 +210,8 @@ public class FormAction extends MultiAction implements InitializingBean {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(this, new Class[] { Object.class,
-			Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
+	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(this, new Class[] {
+			Object.class, Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
 
 	/**
 	 * Return the name of the form object in the flow scope.

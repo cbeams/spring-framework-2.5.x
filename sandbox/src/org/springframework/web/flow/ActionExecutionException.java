@@ -30,7 +30,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * The action that threw an exception while executing.
 	 */
 	private ActionStateAction action;
-	
+
 	/**
 	 * Create a new action execution exception.
 	 * @param message a descriptive error message
@@ -46,9 +46,8 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
 	public ActionExecutionException(ActionStateAction action, Throwable cause) {
-		super("Executing action '" + action + "' in state '" + action.getState().getId()
-				+ "' of flow '" + action.getState().getFlow().getId()
-				+ "' threw an unrecoverable exception", cause);
+		super("Executing action '" + action + "' in state '" + action.getState().getId() + "' of flow '"
+				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
 		this.action = action;
 	}
 

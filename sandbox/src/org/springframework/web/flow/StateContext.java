@@ -38,13 +38,13 @@ public interface StateContext extends RequestContext {
 	 * @param lastEvent the last event that occured
 	 */
 	public void setLastEvent(Event lastEvent);
-	
+
 	/**
 	 * Get the flow session currently active in the flow execution.
 	 * @throws IllegalStateException when the flow execution is not active
 	 */
 	public FlowSession getActiveFlowSession() throws IllegalStateException;
-	
+
 	/**
 	 * Get the flow session of the parent flow of the flow currently
 	 * active in the flow execution.

@@ -36,12 +36,12 @@ import org.springframework.web.util.WebUtils;
  * @author Erwin Vervaet
  */
 public class HttpServletRequestEvent extends Event {
-	
+
 	/**
 	 * The parameters contained in the request.
 	 */
 	private Map parameters;
-	
+
 	/**
 	 * The response associated with the request that originated this event.
 	 */
@@ -79,8 +79,7 @@ public class HttpServletRequestEvent extends Event {
 	 * @param response the HTTP servlet response associated with the request
 	 */
 	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response) {
-		this(request, response,
-				FlowConstants.EVENT_ID_PARAMETER, FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE,
+		this(request, response, FlowConstants.EVENT_ID_PARAMETER, FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE,
 				FlowConstants.CURRENT_STATE_ID_PARAMETER, "_");
 	}
 
@@ -97,8 +96,8 @@ public class HttpServletRequestEvent extends Event {
 	 *        (e.g. "_eventId_value=bar")
 	 */
 	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response,
-			String eventIdParameterName, String eventIdAttributeName,
-			String currentStateIdParameterName, String parameterValueDelimiter) {
+			String eventIdParameterName, String eventIdAttributeName, String currentStateIdParameterName,
+			String parameterValueDelimiter) {
 		super(request);
 		this.response = response;
 		this.eventIdParameterName = eventIdParameterName;
@@ -108,18 +107,18 @@ public class HttpServletRequestEvent extends Event {
 		// initialize parameters
 		this.parameters = WebUtils.getParametersStartingWith(request, null);
 		if (request instanceof MultipartHttpServletRequest) {
-			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) getRequest();
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest)getRequest();
 			this.parameters.putAll(multipartRequest.getFileMap());
 		}
 	}
-	
+
 	/**
 	 * Returns the HTTP servlet request that originated this event.
 	 */
 	public HttpServletRequest getRequest() {
 		return (HttpServletRequest)getSource();
 	}
-	
+
 	/**
 	 * Returns the HTTP servlet response associated with the HTTP
 	 * servlet request that originated this event.
@@ -127,7 +126,7 @@ public class HttpServletRequestEvent extends Event {
 	public HttpServletResponse getResponse() {
 		return response;
 	}
-	
+
 	/**
 	 * Obtain a named parameter from the event parameters. This method will
 	 * try to obtain a parameter value using the following algorithm:
@@ -177,7 +176,7 @@ public class HttpServletRequestEvent extends Event {
 		// we couldn't find the parameter value
 		return null;
 	}
-	
+
 	public String getId() {
 		String eventId = searchForParameter(eventIdParameterName, parameterNameValueDelimiter);
 		if (!StringUtils.hasText(eventId)) {

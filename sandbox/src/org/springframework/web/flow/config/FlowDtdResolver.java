@@ -45,8 +45,7 @@ public class FlowDtdResolver implements EntityResolver {
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 				return source;
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				// fall trough below
 			}
 		}

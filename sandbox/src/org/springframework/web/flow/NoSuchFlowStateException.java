@@ -49,7 +49,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 				+ "-- likely programmer error, check your flow configuration", cause);
 		this.stateId = stateId;
 	}
-	
+
 	/**
 	 * Returns the id of the state that was not found.
 	 * @return the state id

@@ -153,9 +153,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String TO_ATTRIBUTE = "to";
 
 	private static final String PROPERTY_ELEMENT = "property";
-	
+
 	private static final String VALUE_ELEMENT = "value";
-	
 
 	private Resource resource;
 
@@ -191,7 +190,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		this.resource = resource;
 		setFlowServiceLocator(flowServiceLocator);
 	}
-	
+
 	/**
 	 * Returns the XML resource from which the flow definition is read.
 	 */
@@ -205,7 +204,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
-	
+
 	/**
 	 * Returns whether or not the XML parser will validate the document.
 	 */
@@ -220,7 +219,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public void setValidating(boolean validating) {
 		this.validating = validating;
 	}
-	
+
 	/**
 	 * Returns the SAX entity resolver used by the XML parser.
 	 */
@@ -245,14 +244,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
 		try {
 			loadFlowDefinition();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new FlowBuilderException("Cannot load the XML flow definition resource '" + resource + "'", e);
-		}
-		catch (ParserConfigurationException e) {
+		} catch (ParserConfigurationException e) {
 			throw new FlowBuilderException("Cannot configure parser to parse the XML flow definition", e);
-		}
-		catch (SAXException e) {
+		} catch (SAXException e) {
 			throw new FlowBuilderException("Cannot parse the flow definition XML document '" + resource + "'", e);
 		}
 		parseFlowDefinition();
@@ -262,10 +258,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public void buildStates() throws FlowBuilderException {
 		parseStateDefinitions();
 	}
-	
+
 	public void dispose() {
 		setFlow(null);
-		doc=null;
+		doc = null;
 	}
 
 	/**
@@ -294,13 +290,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			docBuilder.setEntityResolver(this.entityResolver);
 			is = resource.getInputStream();
 			doc = docBuilder.parse(is);
-		}
-		finally {
+		} finally {
 			if (is != null) {
 				try {
 					is.close();
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					logger.warn("Could not close InputStream", ex);
 				}
 			}
@@ -437,7 +431,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		return actionStateAction;
 	}
-	
+
 	/**
 	 * Parse a property definition from given element and add the property
 	 * to given action.
@@ -477,29 +471,29 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return new Transition(event, to);
 	}
 
-    /**
-     * Obtain an attribute mapper reference from given sub flow definition
-     * element and return the identified mapper, or null if no mapper is referenced.
-     */
-    protected FlowAttributeMapper parseAttributeMapper(Element element) {
-    	List attributeMapperElements = DomUtils.getChildElementsByTagName(element, ATTRIBUTE_MAPPER_ELEMENT);
-    	if (attributeMapperElements.isEmpty()) {
-    		return null;
-    	}
-    	else {
-    		Element attributeMapperElement = (Element)attributeMapperElements.get(0);
-    		return (FlowAttributeMapper)parseFlowService(attributeMapperElement, FlowAttributeMapper.class);
-    	}
-    }
-    
-    /**
-     * Parse a flow service definition contained in given element.
-     * @param element the definition element
-     * @param serviceType type of the flow service to parse (Action, FlowAttributeMapper)
-     * @return the flow service
-     * @throws FlowBuilderException when the service definition cannot be parsed
-     */
-    protected Object parseFlowService(Element element, Class serviceType) throws FlowBuilderException {
+	/**
+	 * Obtain an attribute mapper reference from given sub flow definition
+	 * element and return the identified mapper, or null if no mapper is referenced.
+	 */
+	protected FlowAttributeMapper parseAttributeMapper(Element element) {
+		List attributeMapperElements = DomUtils.getChildElementsByTagName(element, ATTRIBUTE_MAPPER_ELEMENT);
+		if (attributeMapperElements.isEmpty()) {
+			return null;
+		}
+		else {
+			Element attributeMapperElement = (Element)attributeMapperElements.get(0);
+			return (FlowAttributeMapper)parseFlowService(attributeMapperElement, FlowAttributeMapper.class);
+		}
+	}
+
+	/**
+	 * Parse a flow service definition contained in given element.
+	 * @param element the definition element
+	 * @param serviceType type of the flow service to parse (Action, FlowAttributeMapper)
+	 * @return the flow service
+	 * @throws FlowBuilderException when the service definition cannot be parsed
+	 */
+	protected Object parseFlowService(Element element, Class serviceType) throws FlowBuilderException {
 		String serviceId = element.getAttribute(BEAN_ATTRIBUTE);
 		if (StringUtils.hasText(serviceId)) {
 			// an explicit bean reference was specified
@@ -517,17 +511,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				// autowire mode
 				String autowireLabel = element.getAttribute(AUTOWIRE_ATTRIBUTE);
 				try {
-					AutowireMode autowireMode =
-						(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(autowireLabel);
+					AutowireMode autowireMode = (AutowireMode)new LabeledEnumFormatter(AutowireMode.class)
+							.parseValue(autowireLabel);
 					Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
 					if (Action.class.equals(serviceType)) {
-						return getFlowServiceLocator().createAction(serviceClass, autowireMode);						
+						return getFlowServiceLocator().createAction(serviceClass, autowireMode);
 					}
 					else if (FlowAttributeMapper.class.equals(serviceType)) {
 						return getFlowServiceLocator().createFlowAttributeMapper(serviceClass, autowireMode);
 					}
-				}
-				catch (InvalidFormatException e) {
+				} catch (InvalidFormatException e) {
 					throw new FlowBuilderException("Unsupported autowire mode '" + autowireLabel + "'", e);
 				}
 			}
@@ -538,13 +531,14 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 						+ "are required for a '" + ClassUtils.getShortName(serviceType) + "' service definition");
 				Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
 				if (Action.class.equals(serviceType)) {
-					return getFlowServiceLocator().getAction(serviceClass);					
+					return getFlowServiceLocator().getAction(serviceClass);
 				}
 				else {
 					return getFlowServiceLocator().getFlowAttributeMapper(serviceClass);
 				}
 			}
 		}
-		throw new FlowBuilderException("Illegal service definition for service of type '" + ClassUtils.getShortName(serviceType) + "'");
-    }
+		throw new FlowBuilderException("Illegal service definition for service of type '"
+				+ ClassUtils.getShortName(serviceType) + "'");
+	}
 }

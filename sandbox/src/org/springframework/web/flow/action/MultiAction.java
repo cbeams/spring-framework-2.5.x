@@ -99,8 +99,8 @@ public class MultiAction extends AbstractAction {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private DispatchMethodInvoker executeMethodDispatcher = new DispatchMethodInvoker(this, new Class[] { RequestContext.class },
-			Event.class, "action", "public Event <methodName>(RequestContext)");
+	private DispatchMethodInvoker executeMethodDispatcher = new DispatchMethodInvoker(this,
+			new Class[] { RequestContext.class }, Event.class, "action", "public Event <methodName>(RequestContext)");
 
 	/**
 	 * The action execute method name resolver strategy.

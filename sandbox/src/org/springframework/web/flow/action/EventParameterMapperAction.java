@@ -61,7 +61,7 @@ import org.springframework.web.flow.ScopeType;
 public class EventParameterMapperAction extends AbstractAction {
 
 	private AttributeMapper eventParameterMapper;
-	
+
 	private ScopeType targetScope = ScopeType.REQUEST;
 
 	/**

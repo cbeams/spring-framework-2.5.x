@@ -40,8 +40,8 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param cause the underlying cause of this exception
 	 */
 	public CannotExecuteStateTransitionException(TransitionableState sourceState, Throwable cause) {
-		super(sourceState.getFlow(), "Could not execute a transition from state '" + sourceState + "' to another state in flow '"
-				+ sourceState.getFlow().getId() + "'", cause);
+		super(sourceState.getFlow(), "Could not execute a transition from state '" + sourceState
+				+ "' to another state in flow '" + sourceState.getFlow().getId() + "'", cause);
 		this.sourceState = sourceState;
 	}
 
@@ -67,14 +67,14 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 		this.sourceState = transition.getSourceState();
 		this.transition = transition;
 	}
-	
+
 	/**
 	 * Returns the state in which the exception occured.
 	 */
 	public TransitionableState getSourceState() {
 		return sourceState;
 	}
-	
+
 	/**
 	 * Returns the transition that could not be executed.
 	 */

@@ -35,10 +35,11 @@ import org.springframework.web.flow.FlowExecution;
  * @author Erwin Vervaet
  */
 public class FlowExecutionContinuation implements Serializable {
-	
+
 	private byte[] data;
+
 	private boolean compressed;
-	
+
 	/**
 	 * Create a new flow execution continuation using given data,
 	 * which should be a serialized representation of a 
@@ -51,7 +52,7 @@ public class FlowExecutionContinuation implements Serializable {
 		this.data = data;
 		this.compressed = compressed;
 	}
-	
+
 	/**
 	 * Create a new flow execution continuation for given flow execution.
 	 * @param flowExecution the flow execution to wrap
@@ -74,17 +75,16 @@ public class FlowExecutionContinuation implements Serializable {
 				this.data = baos.toByteArray();
 			}
 			this.compressed = compress;
-		}
-		catch (NotSerializableException e) {
+		} catch (NotSerializableException e) {
 			throw new FlowExecutionStorageException(
-					"Could not serialize flow execution -- make sure all objects stored in flow scope are serializable!", e);
-		}
-		catch (IOException e) {
+					"Could not serialize flow execution -- make sure all objects stored in flow scope are serializable!",
+					e);
+		} catch (IOException e) {
 			throw new FlowExecutionStorageException(
 					"IOException creating a flow execution continuation -- this should not happen!", e);
 		}
 	}
-	
+
 	/**
 	 * Returns a clone of the flow execution wrapped by this object.
 	 * @throws FlowExecutionStorageException when the flow execution cannot
@@ -94,12 +94,10 @@ public class FlowExecutionContinuation implements Serializable {
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(getData(true)));
 			return (FlowExecution)ois.readObject();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new FlowExecutionStorageException(
 					"IOException loading the flow execution continuation -- this should not happen!", e);
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new FlowExecutionStorageException(
 					"ClassNotFoundException loading the flow execution continuation -- this should not happen!", e);
 		}
@@ -118,8 +116,7 @@ public class FlowExecutionContinuation implements Serializable {
 		if (isCompressed() && decompress) {
 			try {
 				return decompress(data);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new FlowExecutionStorageException(
 						"Cannot decompress flow execution continuation data -- this should not happen!", e);
 			}
@@ -128,14 +125,14 @@ public class FlowExecutionContinuation implements Serializable {
 			return data;
 		}
 	}
-	
+
 	/**
 	 * Returns whether or not this flow execution continuation is compressed.
 	 */
 	public boolean isCompressed() {
 		return compressed;
 	}
-	
+
 	/**
 	 * Internal helper method to compress given data using GZIP compression.
 	 */
@@ -147,7 +144,7 @@ public class FlowExecutionContinuation implements Serializable {
 		gzipos.close();
 		return baos.toByteArray();
 	}
-	
+
 	/**
 	 * Internal helper method to decompress given data using GZIP decompression.
 	 */

@@ -146,9 +146,12 @@ public class FlowSession implements Serializable {
 	 */
 	protected void setCurrentState(State newState) {
 		Assert.notNull(newState, "The newState is required");
-		Assert.isTrue(this.flow == newState.getFlow(), "The newState belongs to the flow associated with this flow session");
+		Assert.isTrue(this.flow == newState.getFlow(),
+				"The newState belongs to the flow associated with this flow session");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState + "'");
+			logger
+					.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState
+							+ "'");
 		}
 		this.currentState = newState;
 	}
@@ -162,7 +165,7 @@ public class FlowSession implements Serializable {
 	}
 
 	// custom serialization
-	
+
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.flow.getId());
 		out.writeObject(this.currentState.getId());
@@ -186,12 +189,15 @@ public class FlowSession implements Serializable {
 		// readObject() method since we need the flow locator!
 		Assert.state(this.flow == null, "The flow is already set -- already restored");
 		Assert.state(this.currentState == null, "The current state is already set -- already restored");
-		Assert.notNull(flowId,
-				"The flow id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
+		Assert
+				.notNull(flowId,
+						"The flow id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.flow = flowLocator.getFlow(this.flowId);
 		this.flowId = null;
-		Assert.notNull(currentStateId,
-				"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
+		Assert
+				.notNull(
+						currentStateId,
+						"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;
 	}

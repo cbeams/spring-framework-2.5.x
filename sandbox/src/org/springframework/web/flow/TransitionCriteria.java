@@ -27,7 +27,7 @@ package org.springframework.web.flow;
  * @author Erwin Vervaet
  */
 public interface TransitionCriteria {
-	
+
 	/**
 	 * Check if the transition should execute based on the given flow
 	 * execution request context.
@@ -35,5 +35,5 @@ public interface TransitionCriteria {
 	 * @return true if the transition should fire, false otherwise
 	 */
 	public boolean test(RequestContext context);
-	
+
 }

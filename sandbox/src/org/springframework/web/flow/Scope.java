@@ -55,7 +55,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public Scope(ScopeType scopeType) {
 		this.scopeType = scopeType;
 	}
-	
+
 	// implementing AttributeAccessor
 
 	public boolean containsAttribute(String attributeName) {
@@ -91,12 +91,12 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
 		if (value == null) {
-			throw new IllegalStateException("Required attribute '" + attributeName
-					+ "' is not present in " + this + "; attributes present are = " + Styler.call(getAttributeMap()));
+			throw new IllegalStateException("Required attribute '" + attributeName + "' is not present in " + this
+					+ "; attributes present are = " + Styler.call(getAttributeMap()));
 		}
 		return value;
 	}
-	
+
 	/**
 	 * Get the value of a required attribute and make sure it is of
 	 * the required type.
@@ -113,14 +113,14 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 		}
 		return value;
 	}
-	
+
 	/**
 	 * Returns the contents of this scope as a map.
 	 */
 	public Map getAttributeMap() {
 		return Collections.unmodifiableMap(this.attributes);
 	}
-	
+
 	// implementing AttributeSetter
 
 	public Object setAttribute(String attributeName, Object attributeValue) {
@@ -138,19 +138,19 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 			setAttribute((String)entry.getKey(), entry.getValue());
 		}
 	}
-	
+
 	/**
 	 * Remove an attribute from this scope.
 	 * @param attributeName the name of the attribute to remove
-     * @return previous value associated with specified attribute name,
-     *         or <tt>null</tt> if there was no mapping for the name
+	 * @return previous value associated with specified attribute name,
+	 *         or <tt>null</tt> if there was no mapping for the name
 	 */
 	public Object removeAttribute(String attributeName) {
 		return this.attributes.remove(attributeName);
 	}
 
 	// implementing Map
-	
+
 	public int size() {
 		return this.attributes.size();
 	}
@@ -158,7 +158,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public boolean isEmpty() {
 		return this.attributes.isEmpty();
 	}
-	
+
 	public boolean containsKey(Object key) {
 		return this.attributes.containsKey(key);
 	}
@@ -166,11 +166,11 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public boolean containsValue(Object value) {
 		return this.attributes.containsValue(value);
 	}
-	
+
 	public Object get(Object key) {
 		return this.attributes.get(key);
 	}
-	
+
 	public Object put(Object key, Object value) {
 		return this.attributes.put(key, value);
 	}
@@ -178,7 +178,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public Object remove(Object key) {
 		return removeAttribute(String.valueOf(key));
 	}
-	
+
 	public void putAll(Map t) {
 		this.attributes.putAll(t);
 	}
@@ -186,15 +186,15 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public void clear() {
 		this.attributes.clear();
 	}
-	
+
 	public Set keySet() {
 		return this.attributes.keySet();
 	}
-	
+
 	public Collection values() {
 		return this.attributes.values();
 	}
-	
+
 	public Set entrySet() {
 		return this.attributes.entrySet();
 	}

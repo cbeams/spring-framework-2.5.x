@@ -31,9 +31,12 @@ public class NoSuchFlowAttributeMapperException extends ServiceLookupException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowAttributeMapperException(String attributeMapperId, Throwable cause) {
-		super(attributeMapperId, "No flow attribute mapper was found with id '"
-				+ attributeMapperId
-				+ "' -- make sure there is a single FlowAttributeMapper instance exported in the registry with this id", cause);
+		super(
+				attributeMapperId,
+				"No flow attribute mapper was found with id '"
+						+ attributeMapperId
+						+ "' -- make sure there is a single FlowAttributeMapper instance exported in the registry with this id",
+				cause);
 	}
 
 	/**

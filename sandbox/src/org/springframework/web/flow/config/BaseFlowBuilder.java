@@ -55,7 +55,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 * An abstract factory for flow creation.
 	 */
 	private FlowCreator flowCreator = new DefaultFlowCreator();
-	
+
 	/**
 	 * The <code>Flow</code> produced by this builder.
 	 */
@@ -176,7 +176,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	protected Flow createFlow(String id) {
 		return this.flowCreator.createFlow(id);
 	}
-	
+
 	/**
 	 * The default FlowCreator implementation. This just instantiates the
 	 * <code>Flow</code> class. If you need a custom <code>Flow</code>

@@ -70,7 +70,8 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @param autowireMode the autowire policy
 	 * @return the instantiated (and possibly autowired) attribute mapper
 	 */
-	public FlowAttributeMapper createFlowAttributeMapper(Class attributeMapperImplementationClass, AutowireMode autowireMode);
+	public FlowAttributeMapper createFlowAttributeMapper(Class attributeMapperImplementationClass,
+			AutowireMode autowireMode);
 
 	/**
 	 * Lookup a flow model mapper with specified id.

@@ -42,11 +42,8 @@ public class NoSuchFlowDefinitionException extends ServiceLookupException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowDefinitionException(String flowId, Throwable cause) {
-		super(
-				flowId,
-				"No flow definition was found with id '"
-						+ flowId
-						+ "' -- make sure there is a Flow or FlowFactoryBean instance exported in the registry with this id",
+		super(flowId, "No flow definition was found with id '" + flowId
+				+ "' -- make sure there is a Flow or FlowFactoryBean instance exported in the registry with this id",
 				cause);
 	}
 }

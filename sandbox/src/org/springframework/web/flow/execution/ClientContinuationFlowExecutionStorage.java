@@ -53,16 +53,16 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * @author Erwin Vervaet
  */
 public class ClientContinuationFlowExecutionStorage implements FlowExecutionStorage {
-	
+
 	private boolean compress = false;
-	
+
 	/**
 	 * Returns whether or not continuations should be compressed.
 	 */
 	public boolean isCompress() {
 		return compress;
 	}
-	
+
 	/**
 	 * Set whether or not continuations should be compressed.
 	 */

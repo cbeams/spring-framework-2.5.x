@@ -190,8 +190,7 @@ public class Transition {
 		State state = null;
 		try {
 			state = getTargetState();
-		}
-		catch (NoSuchFlowStateException e) {
+		} catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
 		// enter the target state (note: any exceptions are propagated)

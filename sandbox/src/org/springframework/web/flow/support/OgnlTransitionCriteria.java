@@ -53,8 +53,7 @@ public class OgnlTransitionCriteria implements TransitionCriteria {
 			Object result = Ognl.getValue(this.expressionString, context);
 			Assert.isInstanceOf(Boolean.class, result);
 			return ((Boolean)result).booleanValue();
-		}
-		catch (OgnlException e) {
+		} catch (OgnlException e) {
 			throw new IllegalArgumentException("Invalid transition expression '" + this.expressionString + "':" + e);
 		}
 	}

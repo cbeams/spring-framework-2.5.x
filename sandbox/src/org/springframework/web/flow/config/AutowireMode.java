@@ -32,7 +32,7 @@ import org.springframework.util.enums.support.ShortCodedLabeledEnum;
  * @author Erwin Vervaet
  */
 public class AutowireMode extends ShortCodedLabeledEnum {
-	
+
 	/**
 	 * Constant that indicates autowiring bean properties by name.
 	 */

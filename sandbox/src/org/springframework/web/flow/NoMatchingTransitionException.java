@@ -86,7 +86,8 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	 * @param message the message
 	 * @param cause the underlying cause
 	 */
-	public NoMatchingTransitionException(TransitionableState state, RequestContext context, String message, Throwable cause) {
+	public NoMatchingTransitionException(TransitionableState state, RequestContext context, String message,
+			Throwable cause) {
 		super(state.getFlow(), message, cause);
 		this.state = state;
 		this.context = context;

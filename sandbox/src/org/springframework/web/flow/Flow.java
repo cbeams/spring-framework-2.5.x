@@ -168,13 +168,9 @@ public class Flow {
 			return;
 		}
 		if (containsState(state.getId())) {
-			throw new IllegalArgumentException(
-					"This flow '"
-							+ getId()
-							+ "' already contains a state with id '"
-							+ state.getId()
-							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
-							+ Styler.call(getStateIds()));
+			throw new IllegalArgumentException("This flow '" + getId() + "' already contains a state with id '"
+					+ state.getId() + "' - state ids must be locally unique to the flow definition; "
+					+ "existing stateIds of this flow include: " + Styler.call(getStateIds()));
 		}
 		boolean firstAdd = states.isEmpty();
 		this.states.add(state);

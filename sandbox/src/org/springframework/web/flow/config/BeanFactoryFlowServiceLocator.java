@@ -136,8 +136,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public Action getAction(String actionId) throws ServiceLookupException {
 		try {
 			return (Action)getBeanFactory().getBean(actionId, Action.class);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchActionException(actionId, e);
 		}
 	}
@@ -149,8 +148,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 		try {
 			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionImplementationClass);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchActionException(actionImplementationClass, e);
 		}
 	}
@@ -158,8 +156,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 		try {
 			return (Flow)getBeanFactory().getBean(flowDefinitionId, Flow.class);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchFlowDefinitionException(flowDefinitionId, e);
 		}
 	}
@@ -181,8 +178,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 						"The flow factory must produce flows using a FlowBuilder of type '"
 								+ requiredBuilderImplementationClass + "', but it doesn't"));
 			}
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchFlowDefinitionException(flowDefinitionId, e);
 		}
 	}
@@ -195,8 +191,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 						+ Flow.class.getName() + "'");
 			}
 			return (Flow)BeanFactoryUtils.beanOfType(getListableBeanFactory(), flowDefinitionImplementationClass);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass, e);
 		}
 	}
@@ -211,8 +206,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 		try {
 			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchFlowAttributeMapperException(flowModelMapperId, e);
 		}
 	}
@@ -228,8 +222,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		try {
 			return (FlowAttributeMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
 					flowModelMapperImplementationClass);
-		}
-		catch (BeansException e) {
+		} catch (BeansException e) {
 			throw new NoSuchFlowAttributeMapperException(flowModelMapperImplementationClass, e);
 		}
 	}

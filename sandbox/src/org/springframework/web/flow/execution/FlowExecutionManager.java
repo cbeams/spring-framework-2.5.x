@@ -103,7 +103,7 @@ public class FlowExecutionManager {
 	private FlowExecutionListener[] flowExecutionListeners;
 
 	private FlowExecutionStorage flowExecutionStorage;
-	
+
 	/**
 	 * Create a new flow execution manager. Before use, the manager should
 	 * be appropriately configured using setter methods. At least the flow
@@ -117,7 +117,7 @@ public class FlowExecutionManager {
 	 */
 	public FlowExecutionManager() {
 	}
-	
+
 	/**
 	 * Returns the flow whose executions are managed by this manager.
 	 * Could be <code>null</code> if there is no preconfigured flow and
@@ -275,8 +275,8 @@ public class FlowExecutionManager {
 		if (!StringUtils.hasText(flowId)) {
 			Assert.notNull(getFlow(),
 					"This flow execution manager is not configured with a default top-level flow; thus, "
-						+ "the flow to execute must be provided by client views via the '"
-						+ getFlowIdParameterName() + "' parameter, yet no parameter was provided in this event");
+							+ "the flow to execute must be provided by client views via the '"
+							+ getFlowIdParameterName() + "' parameter, yet no parameter was provided in this event");
 			return getFlow();
 		}
 		else {

@@ -132,7 +132,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getCaption() {
-		return "[" + getQualifiedActiveFlowId()	+ "]";
+		return "[" + getQualifiedActiveFlowId() + "]";
 	}
 
 	/**
@@ -252,12 +252,13 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		String stateId = event.getStateId();
 		if (!StringUtils.hasText(stateId)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Current state id was not provided in request to signal event '"
-						+ eventId
-						+ "' in flow "
-						+ getCaption()
-						+ "' -- pulling current state id from session -- "
-						+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
+				logger
+						.debug("Current state id was not provided in request to signal event '"
+								+ eventId
+								+ "' in flow "
+								+ getCaption()
+								+ "' -- pulling current state id from session -- "
+								+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
 			}
 			stateId = getCurrentStateId();
 		}
@@ -432,9 +433,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 			return "[Empty FlowExecutionStack; no flows are active]";
 		}
 		else {
-			return new ToStringCreator(this).append("activeFlowId", getActiveFlowId()).append(
-					"currentStateId", getCurrentStateId()).append("rootFlow", getRootFlow()).append(
-					"executingFlowSessions", executingFlowSessions).toString();
+			return new ToStringCreator(this).append("activeFlowId", getActiveFlowId()).append("currentStateId",
+					getCurrentStateId()).append("rootFlow", getRootFlow()).append("executingFlowSessions",
+					executingFlowSessions).toString();
 		}
 	}
 }

@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeSource;
 import org.springframework.binding.AttributeMapper;
+import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.binding.support.ParameterizableAttributeMapper;

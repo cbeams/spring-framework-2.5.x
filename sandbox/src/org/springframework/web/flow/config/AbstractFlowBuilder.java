@@ -166,7 +166,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		setFlow(createFlow(flowId()));
 		return getFlow();
 	}
-	
+
 	public void dispose() {
 		setFlow(null);
 	}

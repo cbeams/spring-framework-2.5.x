@@ -62,8 +62,7 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 			FlowExecutionStorageException {
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), id);
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}

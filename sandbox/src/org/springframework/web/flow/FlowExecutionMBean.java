@@ -38,7 +38,7 @@ public interface FlowExecutionMBean {
 	 * @return the flow execution up time
 	 */
 	public long getUptime();
-	
+
 	/**
 	 * Return a display string suitable for logging/printing in a console
 	 * containing info about this flow execution.

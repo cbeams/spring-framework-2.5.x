@@ -163,28 +163,32 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No attribute mapper configured for this sub flow state '"
-						+ getId()
-						+ "' -- as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
-						+ subFlow.getId() + "'");
+				logger
+						.debug("No attribute mapper configured for this sub flow state '"
+								+ getId()
+								+ "' -- as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
+								+ subFlow.getId() + "'");
 			}
 			return new HashMap();
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes, MutableAttributeSource parentFlowAttributes) {
+	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes,
+			MutableAttributeSource parentFlowAttributes) {
 		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow -- "
-						+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
+				logger
+						.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow -- "
+								+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
 			}
 			this.flowAttributeMapper.mapSubFlowOutputAttributes(subFlowAttributes, parentFlowAttributes);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No attribute mapper is configured for the resuming state '"
-						+ getId()
-						+ "' -- note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
+				logger
+						.debug("No attribute mapper is configured for the resuming state '"
+								+ getId()
+								+ "' -- note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
 			}
 		}
 	}

@@ -38,9 +38,8 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * @param formObjectName the id of the object that should have been retrieved
 	 */
 	public FormObjectRetrievalFailureException(Class formObjectClass, String formObjectName) {
-		this(formObjectClass, formObjectName,
-				"Form object of class [" + formObjectClass.getName() + "] with name [" + formObjectName + "]: not found",
-				null);
+		this(formObjectClass, formObjectName, "Form object of class [" + formObjectClass.getName() + "] with name ["
+				+ formObjectName + "]: not found", null);
 	}
 
 	/**
@@ -51,8 +50,7 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * @param msg exception message
 	 * @param cause source exception
 	 */
-	public FormObjectRetrievalFailureException(
-			Class formObjectClass, String formObjectName, String msg, Throwable cause) {
+	public FormObjectRetrievalFailureException(Class formObjectClass, String formObjectName, String msg, Throwable cause) {
 		super(msg, cause);
 		this.formObjectClass = formObjectClass;
 		this.formObjectName = formObjectName;
@@ -65,9 +63,8 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * @param formObjectName the ID of the object that should have been retrieved
 	 */
 	public FormObjectRetrievalFailureException(String formObjectClassName, String formObjectName) {
-		this(formObjectClassName, formObjectName,
-				"Form object of class [" + formObjectClassName + "] with name [" + formObjectName + "]: not found",
-				null);
+		this(formObjectClassName, formObjectName, "Form object of class [" + formObjectClassName + "] with name ["
+				+ formObjectName + "]: not found", null);
 	}
 
 	/**
@@ -78,8 +75,8 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * @param msg exception message
 	 * @param cause source exception
 	 */
-	public FormObjectRetrievalFailureException(
-			String formObjectClassName, String formObjectName, String msg, Throwable cause) {
+	public FormObjectRetrievalFailureException(String formObjectClassName, String formObjectName, String msg,
+			Throwable cause) {
 		super(msg, cause);
 		this.formObjectClass = formObjectClassName;
 		this.formObjectName = formObjectName;
@@ -90,7 +87,7 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * If no Class was specified, this method returns null.
 	 */
 	public Class getFormObjectClass() {
-		return (this.formObjectClass instanceof Class ? (Class) this.formObjectClass : null);
+		return (this.formObjectClass instanceof Class ? (Class)this.formObjectClass : null);
 	}
 
 	/**
@@ -98,8 +95,8 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * Will work for both Class objects and String names.
 	 */
 	public String getFormObjectClassName() {
-		return (this.formObjectClass instanceof Class ?
-				((Class) this.formObjectClass).getName() : this.formObjectClass.toString());
+		return (this.formObjectClass instanceof Class ? ((Class)this.formObjectClass).getName() : this.formObjectClass
+				.toString());
 	}
 
 	/**
