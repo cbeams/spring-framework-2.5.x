@@ -66,7 +66,7 @@ public class TilesView extends InternalResourceView {
 				return;
 			}
 
-			exposeModelsAsRequestAttributes(model, request);
+			exposeModelAsRequestAttributes(model, request);
 
 			// get current tile context
 			ComponentContext tileContext = ComponentContext.getContext(request);
@@ -80,13 +80,13 @@ public class TilesView extends InternalResourceView {
 
 			// execute controller associated to definition, if any
 			Controller controller = definition.getOrCreateController();
-			logger.info("Executing controller " + controller);
 			if (controller instanceof ApplicationContextAware) {
-				logger.info("Setting applcation context " + getApplicationContext());
 				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
 			}
 			if (controller != null) {
-				logger.info("Executing controller " + controller + " now");	
+				if (logger.isDebugEnabled()) {
+					logger.debug("Executing controller [" + controller + "]");
+				}
 				controller.perform(tileContext, request, response, getServletContext());
 			}
 
@@ -99,7 +99,7 @@ public class TilesView extends InternalResourceView {
 			rd.include(request, response);
 		}
 		catch (Exception ex) {
-			throw new ServletException("Could not render Tiles view: " + ex.getMessage(), ex);
+			throw new ServletException("Could not render Tiles view '" + getName() + "': " + ex.getMessage(), ex);
 		}
 	}
 

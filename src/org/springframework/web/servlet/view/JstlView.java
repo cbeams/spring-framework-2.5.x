@@ -24,8 +24,8 @@ import org.springframework.web.servlet.support.JstlUtils;
  */
 public class JstlView extends InternalResourceView {
 
-	protected void exposeModelsAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
-		super.exposeModelsAsRequestAttributes(model, request);
+	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
+		super.exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(request, getApplicationContext());
 	}
 }
