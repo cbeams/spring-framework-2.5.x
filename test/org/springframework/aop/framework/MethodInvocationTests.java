@@ -20,7 +20,7 @@ import org.springframework.beans.TestBean;
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -41,6 +41,7 @@ new Attrib4jAttributeRegistry());
 		super(arg0);
 	}
 
+/*
 	public void testNullInterceptor() throws Exception {
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
@@ -64,17 +65,18 @@ new Attrib4jAttributeRegistry());
 		} catch (AopConfigException ex) {
 		}
 	}
+*/
 
 	public void testValidInvocation() throws Throwable {
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List is = new LinkedList();
-		is.add(new DefaultInterceptionAdvice(new MethodInterceptor() {
+		is.add(new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
 			}
-		}));
+		});
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
 		m, null, is // list
 	);
@@ -93,7 +95,7 @@ new Attrib4jAttributeRegistry());
 				return returnValue;
 			}
 		};
-		is.add(new DefaultInterceptionAdvice(interceptor));
+		is.add(interceptor);
 
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
 		m, null, is // list

@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.3 2003-11-11 18:31:52 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.4 2003-11-12 12:30:20 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -58,18 +58,26 @@ public class AopProxy implements InvocationHandler {
 	/** Config used to configure this proxy */
 	private ProxyConfig config;
 	
+	/** Factory for method invocation objects, to allow optimization */
+	private MethodInvocationFactory methodInvocationFactory;
+	
 	/**
 	 * 
 	 * @throws AopConfigException if the config is invalid. We try
 	 * to throw an informative exception in this case, rather than let
 	 * a mysterious failure happen later.
 	 */
-	public AopProxy(ProxyConfig config) throws AopConfigException {
+	public AopProxy(ProxyConfig config, MethodInvocationFactory methodInvocationFactory) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
 		if (config.getAdvices() == null || config.getAdvices().size() == 0)
 			throw new AopConfigException("Cannot create AopProxy with null interceptors");
 		this.config = config;
+		this.methodInvocationFactory = methodInvocationFactory;
+	}
+	
+	public AopProxy(ProxyConfig config) throws AopConfigException {
+		this(config, new DefaultMethodInvocationFactory(config));
 	}
 	
 	/**
@@ -79,13 +87,7 @@ public class AopProxy implements InvocationHandler {
 	 */
 	public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 	
-		// Create a new invocation object
-		// TODO refactor into InvocationFactory?
-		MethodInvocationImpl invocation = new MethodInvocationImpl(proxy,
-		              this.config.getTarget(), method.getDeclaringClass(),
-									method, args,
-									this.config.getAdvices() // could customize here
-						);
+		MethodInvocationImpl invocation = this.methodInvocationFactory.getMethodInvocation(this.config, proxy, method, args);
 		
 		if (this.config.getExposeInvocation()) {
 			// Make invocation available if necessary

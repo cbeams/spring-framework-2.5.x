@@ -8,8 +8,6 @@ package org.springframework.aop.framework;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.intercept.AspectException;
@@ -18,14 +16,12 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.*;
-import org.springframework.aop.framework.support.*;
 
 
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.3 2003-11-11 18:31:52 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.4 2003-11-12 12:30:20 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -64,39 +60,21 @@ public class MethodInvocationImpl implements MethodInvocation {
 	
 	
 	/**
-	 * TODO take interceptor chain as well?
+	 * Construct a new MethodInvocation with given arguments
+	 * @param interceptors interceptors that should be applied
 	 */
 	public MethodInvocationImpl(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
-					List advices) {
-		if (advices == null || advices.size() == 0) 
-			throw new AopConfigException("Must provide advices");				
+					List interceptors) {
+		//if (advices == null || advices.size() == 0) 
+		//	throw new AopConfigException("Must provide advices");				
 						
 		this.proxy = proxy;
 		this.targetInterface = targetInterface;
 		this.target = target;
 		this.method = m;
 		this.arguments = arguments;
-		Class targetClass = target != null ? target.getClass() : m.getDeclaringClass();
-		
-		// TODO make more efficient. Could just hold indices in an int array
-		// Could cache static pointcut decisions
-		this.interceptors = new LinkedList();
-		for (Iterator iter = advices.iterator(); iter.hasNext();) {
-			Object advice = iter.next();
-			if (advice instanceof InterceptionAdvice) {
-				InterceptionAdvice ia = (InterceptionAdvice) advice;
-				if (Pointcuts.matches(ia.getPointcut(), m, targetClass, arguments)) {
-					this.interceptors.add(ia.getInterceptor());
-				}
-			}
-			else if (advice instanceof IntroductionAdvice) {
-				IntroductionAdvice ia = (IntroductionAdvice) advice;
-				if (ia.getClassFilter().matches(targetClass)) {
-					this.interceptors.add(ia.getIntroductionInterceptor());
-				}
-			}
-		} 
+		this.interceptors = interceptors;
 	}
 	
 	
@@ -207,6 +185,9 @@ public class MethodInvocationImpl implements MethodInvocation {
 			throw new AspectException("All interceptors have already been invoked");
 		
 		// We begin with -1 and increment early
+		
+		// TODO could evaluate dynamic method matcher here: static part will already have
+		// been evaluated?
 		
 		// TODO think about removing cast
 		MethodInterceptor interceptor = (MethodInterceptor) this.interceptors.get(++this.currentInterceptor);
