@@ -46,7 +46,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	public void testNullOrEmpty() throws Exception {
-		Method method = ITestBean.class.getMethod("getAge", null);
+		Method method = ITestBean.class.getMethod("getAge", (Class[]) null);
 		
 		MapAttributes mar = new MapAttributes();
 		mar.register(method, null);
@@ -60,7 +60,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	public void testSingleTransactionAttribute() throws Exception {
-		Method method = ITestBean.class.getMethod("getAge", null);
+		Method method = ITestBean.class.getMethod("getAge", (Class[]) null);
 	
 		TransactionAttribute txAtt = new DefaultTransactionAttribute();
 		
@@ -75,7 +75,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	
 	
 	public void testTransactionAttributeAmongOthers() throws Exception {
-		Method method = TestBean.class.getMethod("getAge", null);
+		Method method = TestBean.class.getMethod("getAge", (Class[]) null);
 
 		TransactionAttribute txAtt = new DefaultTransactionAttribute();
 	
@@ -93,8 +93,8 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	 * @throws Exception
 	 */
 	public void testTransactionAttributeDeclaredOnClassMethod() throws Exception {
-		Method classMethod = TestBean.class.getMethod("getAge", null);
-		Method interfaceMethod = ITestBean.class.getMethod("getAge", null);
+		Method classMethod = TestBean.class.getMethod("getAge", (Class[]) null);
+		Method interfaceMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
 
 		TransactionAttribute txAtt = new DefaultTransactionAttribute();
 
@@ -107,7 +107,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	public void testTransactionAttributeDeclaredOnInterfaceMethodOnly() throws Exception {
-		Method interfaceMethod = ITestBean.class.getMethod("getAge", null);
+		Method interfaceMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
 
 		TransactionAttribute txAtt = new DefaultTransactionAttribute();
 
@@ -120,8 +120,8 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	public void testTransactionAttributeDeclaredOnTargetClassMethodTakesPrecedenceOverAttributeDeclaredOnInterfaceMethod() throws Exception {
-		Method classMethod = TestBean.class.getMethod("getAge", null);
-		Method interfaceMethod = ITestBean.class.getMethod("getAge", null);
+		Method classMethod = TestBean.class.getMethod("getAge", (Class[]) null);
+		Method interfaceMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
 
 		TransactionAttribute interfaceAtt = new DefaultTransactionAttribute();
 		TransactionAttribute classAtt = new DefaultTransactionAttribute();
@@ -136,7 +136,7 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	}
 	
 	public void testRollbackRulesAreApplied() throws Exception {
-		Method method = TestBean.class.getMethod("getAge", null);
+		Method method = TestBean.class.getMethod("getAge", (Class[]) null);
 
 		MapAttributes ma = new MapAttributes();
 		TransactionAttribute txAtt = new RuleBasedTransactionAttribute();
@@ -156,11 +156,10 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 	
 	/**
 	 * Test that transaction attribute is inherited from class
-	 * if not specified on method
-	 * @throws Exception
+	 * if not specified on method.
 	 */
 	public void testDefaultsToClassTransactionAttribute() throws Exception {
-		Method method = TestBean.class.getMethod("getAge", null);
+		Method method = TestBean.class.getMethod("getAge", (Class[]) null);
 
 		TransactionAttribute txAtt = new DefaultTransactionAttribute();
 		MapAttributes ma = new MapAttributes();

@@ -135,13 +135,15 @@ public abstract class HttpServletBean extends HttpServlet {
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
-		private ServletConfigPropertyValues(ServletConfig config, Set requiredProperties) throws ServletException {
+		private ServletConfigPropertyValues(ServletConfig config, Set requiredProperties)
+		    throws ServletException {
+			
 			Set missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet(requiredProperties) : null;
 
-			Enumeration enum = config.getInitParameterNames();
-			while (enum.hasMoreElements()) {
-				String property = (String) enum.nextElement();
+			Enumeration en = config.getInitParameterNames();
+			while (en.hasMoreElements()) {
+				String property = (String) en.nextElement();
 				Object value = config.getInitParameter(property);
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
@@ -151,9 +153,10 @@ public abstract class HttpServletBean extends HttpServlet {
 
 			// fail if we are still missing properties
 			if (missingProps != null && missingProps.size() > 0) {
-				throw new ServletException("Initialization from ServletConfig for servlet '" + config.getServletName() +
-																	 "' failed; the following required properties were missing: " +
-																	 StringUtils.collectionToDelimitedString(missingProps, ", "));
+				throw new ServletException(
+				    "Initialization from ServletConfig for servlet '" + config.getServletName() +
+				    "' failed; the following required properties were missing: " +
+				    StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

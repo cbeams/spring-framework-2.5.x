@@ -113,8 +113,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		if (this.exposeRequestAttributes) {
-			for (Enumeration enum = request.getAttributeNames(); enum.hasMoreElements();) {
-				String attribute = (String) enum.nextElement();
+			for (Enumeration en = request.getAttributeNames(); en.hasMoreElements();) {
+				String attribute = (String) en.nextElement();
 				if (model.containsKey(attribute) && !this.allowRequestOverride) {
 					throw new ServletException("Cannot expose request attribute '" + attribute +
 						"' because of an existing model object of the same name");
@@ -131,8 +131,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 		if (this.exposeSessionAttributes) {
 			HttpSession session = request.getSession(false);
 			if (session != null) {
-				for (Enumeration enum = session.getAttributeNames(); enum.hasMoreElements();) {
-					String attribute = (String) enum.nextElement();
+				for (Enumeration en = session.getAttributeNames(); en.hasMoreElements();) {
+					String attribute = (String) en.nextElement();
 					if (model.containsKey(attribute) && !this.allowSessionOverride) {
 						throw new ServletException("Cannot expose session attribute '" + attribute +
 							"' because of an existing model object of the same name");

@@ -150,8 +150,8 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		if (this.jdoProperties != null) {
 			// use propertyNames enumeration to also catch default properties
-			for (Enumeration enum = this.jdoProperties.propertyNames(); enum.hasMoreElements();) {
-				String key = (String) enum.nextElement();
+			for (Enumeration en = this.jdoProperties.propertyNames(); en.hasMoreElements();) {
+				String key = (String) en.nextElement();
 				props.setProperty(key, this.jdoProperties.getProperty(key));
 			}
 		}

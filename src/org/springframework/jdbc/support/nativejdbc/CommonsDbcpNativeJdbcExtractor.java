@@ -78,8 +78,8 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			// We need to use reflection here, as the "getInnermostDelegate"
 			// method signature varies between Commons DBCP 1.1 and 1.2.
 			try {
-				Method getInnermostDelegate = ps.getClass().getMethod(GET_INNERMOST_DELEGATE_METHOD_NAME, null);
-				return (PreparedStatement) getInnermostDelegate.invoke(ps, null);
+				Method getInnermostDelegate = ps.getClass().getMethod(GET_INNERMOST_DELEGATE_METHOD_NAME, (Class[]) null);
+				return (PreparedStatement) getInnermostDelegate.invoke(ps, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not retrieve innermost delegate", ex);
@@ -93,8 +93,8 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			// We need to use reflection here, as the "getInnermostDelegate"
 			// method signature varies between Commons DBCP 1.1 and 1.2.
 			try {
-				Method getInnermostDelegate = cs.getClass().getMethod(GET_INNERMOST_DELEGATE_METHOD_NAME, null);
-				return (CallableStatement) getInnermostDelegate.invoke(cs, null);
+				Method getInnermostDelegate = cs.getClass().getMethod(GET_INNERMOST_DELEGATE_METHOD_NAME, (Class[]) null);
+				return (CallableStatement) getInnermostDelegate.invoke(cs, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not retrieve innermost delegate", ex);

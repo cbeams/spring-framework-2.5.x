@@ -70,8 +70,10 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		try {
 			this.wrappedConnectionClass = getClass().getClassLoader().loadClass(WRAPPED_CONNECTION_NAME);
 			this.wrappedStatementClass = getClass().getClassLoader().loadClass(WRAPPED_STATEMENT_NAME);
-			this.getUnderlyingConnectionMethod = this.wrappedConnectionClass.getMethod("getUnderlyingConnection", null);
-			this.getUnderlyingStatementMethod = this.wrappedStatementClass.getMethod("getUnderlyingStatement", null);
+			this.getUnderlyingConnectionMethod =
+			    this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
+			this.getUnderlyingStatementMethod =
+			    this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
 		}
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException(
@@ -85,7 +87,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.wrappedConnectionClass.isAssignableFrom(con.getClass())) {
 			try {
-				return (Connection) this.getUnderlyingConnectionMethod.invoke(con, null);
+				return (Connection) this.getUnderlyingConnectionMethod.invoke(con, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingConnection method", ex);
@@ -100,7 +102,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		if (this.wrappedStatementClass.isAssignableFrom(stmt.getClass())) {
 			try {
-				return (Statement) this.getUnderlyingStatementMethod.invoke(stmt, null);
+				return (Statement) this.getUnderlyingStatementMethod.invoke(stmt, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingStatement method", ex);
@@ -131,8 +133,8 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		if (rs.getClass().getName().equals(WRAPPED_RESULT_SET_NAME)) {
 			try {
-				Method getUnderlyingResultSetMethod = rs.getClass().getMethod("getUnderlyingResultSet", null);
-				return (ResultSet) getUnderlyingResultSetMethod.invoke(rs, null);
+				Method getUnderlyingResultSetMethod = rs.getClass().getMethod("getUnderlyingResultSet", (Class[]) null);
+				return (ResultSet) getUnderlyingResultSetMethod.invoke(rs, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingResultSet method", ex);

@@ -51,10 +51,10 @@ public class AopUtilsTests extends TestCase {
 	}
 	
 	public void testIsMethodDeclaredOnOneOfTheseInterfaces() throws Exception {
-		Method m = Object.class.getMethod("hashCode", null);
+		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, null));
 		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { ITestBean.class }));
-		m = TestBean.class.getMethod("getName", null);
+		m = TestBean.class.getMethod("getName", (Class[]) null);
 		assertTrue(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { ITestBean.class }));
 		assertTrue(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { Comparable.class, ITestBean.class }));
 		assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { Comparable.class }));
@@ -71,7 +71,7 @@ public class AopUtilsTests extends TestCase {
 	*/
 	
 	public void testIsMethodDeclaredOnOneOfTheseInterfacesRequiresInterfaceArguments() throws Exception {
-		Method m = Object.class.getMethod("hashCode", null);
+		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		try {
 			assertFalse(AopUtils.methodIsOnOneOfTheseInterfaces(m, new Class[] { TestBean.class }));
 			fail();
@@ -80,8 +80,7 @@ public class AopUtilsTests extends TestCase {
 			// Ok
 		}
 	}
-	
-	
+
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			public boolean matches(Method method, Class clazzy) {
@@ -135,7 +134,6 @@ public class AopUtilsTests extends TestCase {
 	 * canonical instances of AOP classes, they return the same instance,
 	 * not a new instance that's subverted the singleton construction
 	 * limitation.
-	 * @throws Exception
 	 */
 	public void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
 		assertSame(MethodMatcher.TRUE, SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
@@ -146,7 +144,6 @@ public class AopUtilsTests extends TestCase {
 		assertSame(Pointcuts.GETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.GETTERS));
 		assertSame(ExposeInvocationInterceptor.INSTANCE, SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
 	}
-	
 
 	public void testDynamicSuperclasses() {
 		DynamicMethodMatcherPointcut mmpc = new DynamicMethodMatcherPointcut() {

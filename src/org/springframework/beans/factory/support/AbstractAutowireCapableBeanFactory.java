@@ -1017,7 +1017,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (!Modifier.isPublic(initMethod.getModifiers())) {
 				initMethod.setAccessible(true);
 			}
-			initMethod.invoke(bean, null);
+			initMethod.invoke(bean, (Object[]) null);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();

@@ -61,8 +61,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
-		for (Enumeration enum = props.propertyNames(); enum.hasMoreElements();) {
-			String key = (String) enum.nextElement();
+		for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
+			String key = (String) en.nextElement();
 			processKey(beanFactory, key, props.getProperty(key));
 		}
 	}
@@ -82,8 +82,12 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		logger.debug("Property '" + key + "' set to [" + value + "]");
 	}
-	
-	protected void applyPropertyValue(ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
+
+	/**
+	 * Apply the given property value to the corresponding bean.
+	 */ 
+	protected void applyPropertyValue(
+	    ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
 		BeanDefinition bd = factory.getBeanDefinition(beanName);
 		bd.getPropertyValues().addPropertyValue(property, value);
 	}

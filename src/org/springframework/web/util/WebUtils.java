@@ -247,13 +247,13 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
 	public static Map getParametersStartingWith(ServletRequest request, String prefix) {
-		Enumeration enum = request.getParameterNames();
+		Enumeration en = request.getParameterNames();
 		Map params = new HashMap();
 		if (prefix == null) {
 			prefix = "";
 		}
-		while (enum != null && enum.hasMoreElements()) {
-			String paramName = (String) enum.nextElement();
+		while (en != null && en.hasMoreElements()) {
+			String paramName = (String) en.nextElement();
 			if ("".equals(prefix) || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);

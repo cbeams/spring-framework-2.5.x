@@ -511,7 +511,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			logger.debug("About to invoke read method [" + pd.getReadMethod() + "] on object of class [" +
 					this.object.getClass().getName() + "]");
 		try {
-			Object value = pd.getReadMethod().invoke(this.object, null);
+			Object value = pd.getReadMethod().invoke(this.object, (Object[]) null);
 			if (key != null) {
 				if (value == null) {
 					throw new NullValueInNestedPathException(

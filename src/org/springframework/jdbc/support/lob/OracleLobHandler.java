@@ -216,7 +216,7 @@ public class OracleLobHandler implements LobHandler {
 				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", new Class[0]);
-						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
+						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
 						FileCopyUtils.copy(content, out);
 					}
 				});
@@ -237,8 +237,8 @@ public class OracleLobHandler implements LobHandler {
 			if (binaryStream != null) {
 				Blob blob = (Blob) createLob(ps, blobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
-						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", null);
-						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
+						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", (Class[]) null);
+						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
 						FileCopyUtils.copy(binaryStream, out);
 					}
 				});
@@ -258,8 +258,8 @@ public class OracleLobHandler implements LobHandler {
 			if (content != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
-						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
-						Writer writer = (Writer) methodToInvoke.invoke(lob, null);
+						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
+						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
 						FileCopyUtils.copy(content, writer);
 					}
 				});
@@ -280,8 +280,8 @@ public class OracleLobHandler implements LobHandler {
 			if (asciiStream != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
-						Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", null);
-						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, null);
+						Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", (Class[]) null);
+						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
 						FileCopyUtils.copy(asciiStream, out);
 					}
 				});
@@ -302,8 +302,8 @@ public class OracleLobHandler implements LobHandler {
 			if (characterStream != null) {
 				Clob clob = (Clob) createLob(ps, clobClass, new LobCallback() {
 					public void populateLob(Object lob) throws Exception {
-						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", null);
-						Writer writer = (Writer) methodToInvoke.invoke(lob, null);
+						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
+						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
 						FileCopyUtils.copy(characterStream, writer);
 					}
 				});
@@ -327,7 +327,7 @@ public class OracleLobHandler implements LobHandler {
 			try {
 				Object lob = prepareLob(getOracleConnection(ps), lobClass);
 				callback.populateLob(lob);
-				lob.getClass().getMethod("close", null).invoke(lob, null);
+				lob.getClass().getMethod("close", (Class[]) null).invoke(lob, (Object[]) null);
 				this.createdLobs.add(lob);
 				logger.debug("Created new Oracle LOB");
 				return lob;

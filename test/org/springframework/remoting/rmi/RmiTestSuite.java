@@ -121,53 +121,25 @@ public class RmiTestSuite extends TestCase {
 			fail("url isn't set, expected IllegalArgumentException");
 		} 
 		catch(IllegalArgumentException e){
-			//expected
+			// expected
 		}
 	}
-	
-	public void testBogusRmiServiceExporter() throws Exception{
-		RmiServiceExporter exporter = new RmiServiceExporter();
-		exporter.setServiceName("bogusService");
-		exporter.setServicePort(9999);
-		exporter.setRegistryPort(8888);
-		RemoteBean testBean = new RemoteBean();
-		exporter.setServiceInterface(IRemoteBean.class);
-		exporter.setService(testBean);
 
-		try {
-			exporter.afterPropertiesSet();
-			fail("calling an unregistered service, should have thrown StubNotFoundException");
-		} 
-		catch(StubNotFoundException e){
-			//expected
-		}
-
-		//test the "service has no name" case
-		exporter.setServiceName(null);
-
-		try {
-			exporter.afterPropertiesSet();
-			fail("did not provide a name for the service, should have thrown IllegalArgumentException");
-		} 
-		catch(IllegalArgumentException illegalArg){
-			//expected
-		}
-	}
-	
 	public void testRemoteInvocation() throws NoSuchMethodException {
 		// let's see if the remote invocation object works:
-		
+
 		RemoteBean rb = new RemoteBean();
-		
+
 		MethodInvocation mi = new ReflectiveMethodInvocation(
-				rb, rb, rb.getClass().getDeclaredMethod("setName", new Class[] {String.class}), new Object[] { "bla" }, RemoteBean.class, new ArrayList());
-		
+				rb, rb, rb.getClass().getDeclaredMethod("setName", new Class[] {String.class}),
+		    new Object[] { "bla" }, RemoteBean.class, new ArrayList());
+
 		RemoteInvocation inv = new RemoteInvocation(mi);
-		
+
 		assertEquals("setName", inv.getMethodName());
 		assertEquals("bla", inv.getArguments()[0]);
 		assertEquals(String.class, inv.getParameterTypes()[0]);
-		
+
 		// this is a bit BS, but we need to test it
 		inv = new RemoteInvocation();
 		inv.setArguments(new Object[] { "bla" });
@@ -176,7 +148,7 @@ public class RmiTestSuite extends TestCase {
 		assertEquals("setName", inv.getMethodName());
 		inv.setParameterTypes(new Class[] {String.class});
 		assertEquals(String.class, inv.getParameterTypes()[0]);
-		
+
 		inv = new RemoteInvocation("setName", new Class[] {String.class}, new Object[] {"bla"});
 		assertEquals("bla", inv.getArguments()[0]);
 		assertEquals("setName", inv.getMethodName());

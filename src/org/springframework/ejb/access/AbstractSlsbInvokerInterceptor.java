@@ -115,7 +115,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	protected Method getCreateMethod(Object home) throws AspectException {
 		try {
 			// cache the EJB create() method that must be declared on the home interface
-			return home.getClass().getMethod("create", null);
+			return home.getClass().getMethod("create", (Class[]) null);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new AspectException(
@@ -172,7 +172,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 				createMethodToUse = getCreateMethod(home);
 			}
 			// invoke cached EJB home object
-			return createMethodToUse.invoke(home, null);
+			return createMethodToUse.invoke(home, (Object[]) null);
 		}
 		catch (IllegalAccessException ex) {
 			throw new AspectException("Could not access EJB home create() method", ex);

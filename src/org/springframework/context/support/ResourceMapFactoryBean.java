@@ -53,8 +53,8 @@ public class ResourceMapFactoryBean extends PropertiesFactoryBean implements Res
 	protected Object createInstance() throws Exception {
 		Map resourceMap = new HashMap();
 		Properties props = mergeProperties();
-		for (Enumeration enum = props.propertyNames(); enum.hasMoreElements();) {
-			String key = (String) enum.nextElement();
+		for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
+			String key = (String) en.nextElement();
 			String location = props.getProperty(key);
 			resourceMap.put(key, this.resourceLoader.getResource(this.resourceBasePath + location));
 		}

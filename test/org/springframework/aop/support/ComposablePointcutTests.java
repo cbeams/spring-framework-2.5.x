@@ -69,7 +69,7 @@ public class ComposablePointcutTests extends TestCase {
 		Pointcut pc = new ComposablePointcut();
 		
 		assertTrue(pc.getClassFilter().matches(Object.class));
-		assertTrue(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode", null), Exception.class));
+		assertTrue(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode", (Class[]) null), Exception.class));
 	}
 	
 

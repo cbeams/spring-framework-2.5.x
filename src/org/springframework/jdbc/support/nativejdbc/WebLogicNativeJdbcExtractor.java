@@ -57,7 +57,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public WebLogicNativeJdbcExtractor() {
 		try {
 			this.jdbcExtensionClass = getClass().getClassLoader().loadClass(JDBC_EXTENSION_NAME);
-			this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", null);
+			this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", (Class[]) null);
 		}
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException(
@@ -92,7 +92,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
 			try {
-				return (Connection) this.getVendorConnectionMethod.invoke(con, null);
+				return (Connection) this.getVendorConnectionMethod.invoke(con, (Object[]) null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not invoke WebLogic's getVendorConnection method", ex);

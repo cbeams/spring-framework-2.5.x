@@ -21,9 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.beans.TestBean;
 
 /**
@@ -38,19 +38,11 @@ public class MethodInvocationTests extends TestCase {
 		Method m = o.getClass().getMethod(methodName, args);
 		MethodInvocationImpl invocation = new MethodInvocationImpl(null, null, m.getDeclaringClass(), 
 	m, null, interceptors, // list
-new Attrib4jAttributeRegistry());
+	new Attrib4jAttributeRegistry());
 	return invocation;
-}*/
+	}*/
 
-	/**
-	 * Constructor for MethodInvocationTests.
-	 * @param arg0
-	 */
-	public MethodInvocationTests(String arg0) {
-		super(arg0);
-	}
-
-/*
+	/*
 	public void testNullInterceptor() throws Exception {
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
@@ -74,10 +66,10 @@ new Attrib4jAttributeRegistry());
 		} catch (AopConfigException ex) {
 		}
 	}
-*/
+	*/
 
 	public void testValidInvocation() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", null);
+		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List is = new LinkedList();
@@ -94,8 +86,7 @@ new Attrib4jAttributeRegistry());
 	}
 	
 	/**
-	 * ToString on target can cause failure
-	 * @throws Throwable
+	 * ToString on target can cause failure.
 	 */
 	public void testToStringDoesntHitTarget() throws Throwable {
 		Object target = new TestBean() {
@@ -106,14 +97,14 @@ new Attrib4jAttributeRegistry());
 		final Object returnValue = new Object();
 		List is = new LinkedList();
 
-		Method m = Object.class.getMethod("hashCode", null);
+		Method m = Object.class.getMethod("hashCode", (Class[]) null);
 		Object proxy = new Object();
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, //?
-		m, null, null, is // list
-	);
+		ReflectiveMethodInvocation invocation =
+		    new ReflectiveMethodInvocation(proxy, target, m, null, null, is);
 
-		// if it hits target the test will fail with the UnsupportedOpException
-		// in the inner class above
+		// If it hits target, the test will fail with the UnsupportedOpException
+		// in the inner class above.
 		invocation.toString();
 	}
+
 }

@@ -42,7 +42,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.7 2004-08-09 08:30:00 jhoeller Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.8 2004-10-06 16:58:21 jhoeller Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
@@ -56,7 +56,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		try {
 			// Cache the methods we'll be testing
 			exceptionalMethod = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
-			getNameMethod = ITestBean.class.getMethod("getName", null);
+			getNameMethod = ITestBean.class.getMethod("getName", (Class[]) null);
 			setNameMethod = ITestBean.class.getMethod("setName", new Class[] { String.class} );
 		}
 		catch (NoSuchMethodException ex) {

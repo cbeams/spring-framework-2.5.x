@@ -397,8 +397,8 @@ public class SchedulerFactoryBean
 
 			if (this.quartzProperties != null) {
 				// use propertyNames enumeration to also catch default properties
-				for (Enumeration enum = this.quartzProperties.propertyNames(); enum.hasMoreElements();) {
-					String key = (String) enum.nextElement();
+				for (Enumeration en = this.quartzProperties.propertyNames(); en.hasMoreElements();) {
+					String key = (String) en.nextElement();
 					props.setProperty(key, this.quartzProperties.getProperty(key));
 				}
 			}

@@ -27,7 +27,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * $Id: MethodMatchersTests.java,v 1.4 2004-07-24 18:25:48 johnsonr Exp $
+ * $Id: MethodMatchersTests.java,v 1.5 2004-10-06 16:58:20 jhoeller Exp $
  */
 public class MethodMatchersTests extends TestCase {
 
@@ -45,10 +45,10 @@ public class MethodMatchersTests extends TestCase {
 	 */
 	public MethodMatchersTests(String arg0) throws Exception {
 		super(arg0);
-		EXCEPTION_GETMESSAGE = Exception.class.getMethod("getMessage", null);
-		ITESTBEAN_GETAGE = ITestBean.class.getMethod("getAge", null);
+		EXCEPTION_GETMESSAGE = Exception.class.getMethod("getMessage", (Class[]) null);
+		ITESTBEAN_GETAGE = ITestBean.class.getMethod("getAge", (Class[]) null);
 		ITESTBEAN_SETAGE = ITestBean.class.getMethod("setAge", new Class[] { int.class });
-		IOTHER_ABSQUATULATE = IOther.class.getMethod("absquatulate", null);
+		IOTHER_ABSQUATULATE = IOther.class.getMethod("absquatulate", (Class[]) null);
 	}
 
 	public void testDefaultMatchesAll() throws Exception {

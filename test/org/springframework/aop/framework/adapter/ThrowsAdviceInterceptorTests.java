@@ -96,7 +96,7 @@ public class ThrowsAdviceInterceptorTests extends TestCase {
 		MockControl mc = MockControl.createControl(MethodInvocation.class);
 		MethodInvocation mi = (MethodInvocation) mc.getMock();
 		mi.getMethod();
-		mc.setReturnValue(Object.class.getMethod("hashCode", null), 1);
+		mc.setReturnValue(Object.class.getMethod("hashCode", (Class[]) null), 1);
 		mi.getArguments();
 		mc.setReturnValue(null);
 		mi.getThis();

@@ -17,22 +17,21 @@
 package org.springframework.core;
 
 /**
- * Tests with ControlFlowFactory return
+ * Tests with ControlFlowFactory return.
  * @author Rod Johnson
  */
 public class DefaultControlFlowTests extends AbstractControlFlowTests {
 	
 	/**
-	 * Necessary only because
-	 * Eclipse won't run test suite unless it declares some methods
-	 * as well as inherited methods
+	 * Necessary only because Eclipse won't run test suite unless
+	 * it declares some methods as well as inherited methods.
 	 */
 	public void testThisClassPlease() {
 	}
 
 	protected ControlFlow createControlFlow() {
 		ControlFlow cf = ControlFlowFactory.createControlFlow();
-		boolean is14 = System.getProperty("java.version").indexOf("1.4") != -1;
+		boolean is14 = JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14;
 		assertEquals("Autodetection of JVM succeeded", is14, cf instanceof ControlFlowFactory.Jdk14ControlFlow);
 		return cf;
 	}

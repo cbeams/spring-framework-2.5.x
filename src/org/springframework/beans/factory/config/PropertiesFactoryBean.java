@@ -116,8 +116,8 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 		
 		if (this.properties != null) {
 			// use propertyNames enumeration to also catch default properties
-			for (Enumeration enum = this.properties.propertyNames(); enum.hasMoreElements();) {
-				String key = (String) enum.nextElement();
+			for (Enumeration en = this.properties.propertyNames(); en.hasMoreElements();) {
+				String key = (String) en.nextElement();
 				result.setProperty(key, this.properties.getProperty(key));
 			}
 		}

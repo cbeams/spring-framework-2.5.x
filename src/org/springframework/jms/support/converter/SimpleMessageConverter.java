@@ -204,9 +204,9 @@ public class SimpleMessageConverter implements MessageConverter {
 	 */
 	protected Map extractMapFromMessage(MapMessage message) throws JMSException {
 		Map map = new HashMap();
-		Enumeration enum = message.getMapNames();
-		while (enum.hasMoreElements()) {
-			String key = (String) enum.nextElement();
+		Enumeration en = message.getMapNames();
+		while (en.hasMoreElements()) {
+			String key = (String) en.nextElement();
 			map.put(key, message.getObject(key));
 		}
 		return map;

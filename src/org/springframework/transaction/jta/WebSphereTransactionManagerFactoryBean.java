@@ -90,8 +90,8 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 			}
 		}
 		try {
-			Method method = clazz.getMethod("getTransactionManager", null);
-			this.transactionManager = (TransactionManager) method.invoke(null, null);
+			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
+			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(

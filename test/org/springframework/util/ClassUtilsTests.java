@@ -45,8 +45,8 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testNoArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", null);
-		method.invoke(null, null);
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", (Class[]) null);
+		method.invoke(null, (Object[]) null);
 		assertTrue("no argument method was not invoked.",
 		    InnerClass.noArgCalled);
 	}

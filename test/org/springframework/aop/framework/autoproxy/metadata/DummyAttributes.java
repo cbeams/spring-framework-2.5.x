@@ -23,7 +23,6 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 
-
 /**
  * Hardcoded to return the same attributes as are on the TxClass and TxClassWithClassAttribute.
  * @author Rod Johnson
@@ -31,13 +30,15 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 public class DummyAttributes extends MapAttributes {
 
 	public DummyAttributes() throws Exception {
-		register(TxClassImpl.class.getMethod("defaultTxAttribute", null), 
-			new Object[] { new DefaultTransactionAttribute()});
-		Object[] echoAtts = new Object[] { 
+		register(TxClassImpl.class.getMethod("defaultTxAttribute", (Class[]) null),
+		    new Object[] { new DefaultTransactionAttribute()});
+
+		Object[] echoAtts = new Object[] {
 			new RuleBasedTransactionAttribute(),
 			new RollbackRuleAttribute("java.lang.Exception"),
 			new NoRollbackRuleAttribute("ServletException")
 		};
+
 		register(TxClassImpl.class.getMethod("echoException", new Class[] { Exception.class }), echoAtts);
 		
 		PoolingAttribute pa = new PoolingAttribute(10);
@@ -49,6 +50,5 @@ public class DummyAttributes extends MapAttributes {
 		
 		register(ModifiableTestBean.class, new Object[] { new ModifiableAttribute() });
 	}
-	
-	
+
 }

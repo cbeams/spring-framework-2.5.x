@@ -66,7 +66,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				logger.debug("Trying WebSphere 4: " + CONNECTION_PROXY_NAME_4);
 				this.webSphereConnectionClass = getClass().getClassLoader().loadClass(CONNECTION_PROXY_NAME_4);
 				this.getNativeConnectionMethod =
-						this.webSphereConnectionClass.getMethod("getPhysicalConnection", null);
+						this.webSphereConnectionClass.getMethod("getPhysicalConnection", (Class[]) null);
 				this.webSphere5 = false;
 			}
 			catch (Exception ex2) {
@@ -110,7 +110,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				}
 				else {
 					// WebSphere 4's connectionProxy.getPhysicalConnection()
-					return (Connection) this.getNativeConnectionMethod.invoke(con, null);
+					return (Connection) this.getNativeConnectionMethod.invoke(con, (Object[]) null);
 				}
 			}
 			catch (Exception ex) {

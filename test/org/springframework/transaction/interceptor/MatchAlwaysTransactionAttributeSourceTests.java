@@ -32,11 +32,13 @@ public class MatchAlwaysTransactionAttributeSourceTests extends TestCase {
   
 	public void testGetTransactionAttribute() throws Exception {
 		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
-		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode", null), null);
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode", (Class[]) null),
+		    null);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_REQUIRED == ta.getPropagationBehavior());
 		tas.setTransactionAttribute(new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
-		ta = tas.getTransactionAttribute(ServletException.class.getMethod("getMessage", null), ServletException.class);
+		ta = tas.getTransactionAttribute(ServletException.class.getMethod("getMessage", (Class[]) null),
+		    ServletException.class);
 		assertNotNull(ta);
 		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
 	}

@@ -67,8 +67,8 @@ public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean 
 					"Couldn't find the WebLogic TransactionManager factory class");
 		}
 		try {
-			Method method = clazz.getMethod("getTransactionManager", null);
-			this.transactionManager = (TransactionManager) method.invoke(null, null);
+			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
+			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(

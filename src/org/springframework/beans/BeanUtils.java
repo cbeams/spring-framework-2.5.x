@@ -47,7 +47,7 @@ public abstract class BeanUtils {
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor(null), null);
+			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +

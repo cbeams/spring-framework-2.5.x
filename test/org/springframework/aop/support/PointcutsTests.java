@@ -38,9 +38,9 @@ public class PointcutsTests extends TestCase {
 	static {
 		try {
 			TEST_BEAN_SET_AGE = TestBean.class.getMethod("setAge", new Class[] { int.class });
-			TEST_BEAN_GET_AGE = TestBean.class.getMethod("getAge", null);
-			TEST_BEAN_GET_NAME = TestBean.class.getMethod("getName", null);
-			TEST_BEAN_ABSQUATULATE = TestBean.class.getMethod("absquatulate", null);
+			TEST_BEAN_GET_AGE = TestBean.class.getMethod("getAge", (Class[]) null);
+			TEST_BEAN_GET_NAME = TestBean.class.getMethod("getName", (Class[]) null);
+			TEST_BEAN_ABSQUATULATE = TestBean.class.getMethod("absquatulate", (Class[]) null);
 		}
 		catch (Exception ex) {
 			throw new RuntimeException("Shouldn't happen: error in test suite");
