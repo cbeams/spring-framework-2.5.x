@@ -50,7 +50,19 @@ public class JdbcUtilsTests extends TestCase {
 		assertTrue(JdbcUtils.countParameterPlaceholders("The big ?? bad wolf", '?', '\'') == 2);
 		
 		assertTrue(JdbcUtils.countParameterPlaceholders("The big 'ba''ad?' ? wolf", '?', '\'') == 1);
-	}
+
+		assertTrue(JdbcUtils.countParameterPlaceholders(null, '?', "\"'") == 0);
+
+		assertTrue(JdbcUtils.countParameterPlaceholders("", '?', "\"'") == 0);
+
+		assertTrue(JdbcUtils.countParameterPlaceholders("?", '?', "\"'") == 1);
+
+		assertTrue(JdbcUtils.countParameterPlaceholders("The \"big\" ? 'bad wolf'", '?', "\"'") == 1);
+		
+		assertTrue(JdbcUtils.countParameterPlaceholders("The big ?? bad wolf", '?', "\"'") == 2);
+		
+		assertTrue(JdbcUtils.countParameterPlaceholders("The \"big?\" 'ba''ad?' ? wolf", '?', "\"'") == 1);
+}
 
 	public void testIsNumeric() {
 		assertTrue(JdbcUtils.isNumeric(Types.BIGINT));

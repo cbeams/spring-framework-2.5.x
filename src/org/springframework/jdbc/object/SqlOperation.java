@@ -49,7 +49,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 		// validate parameter count
 		int bindVarCount = 0;
 		try {
-			bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', '\'');
+			bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
 		}
 		catch (IllegalArgumentException ex) {
 			// transform JDBC-agnostic error to data access error

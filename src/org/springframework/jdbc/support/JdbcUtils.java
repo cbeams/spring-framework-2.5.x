@@ -119,7 +119,20 @@ public class JdbcUtils {
 	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
 	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
 	 * appears within a literal as determined by the <code>delim</code> that is passed in.
-	 * <p>Examples: If the delimiter is the single quote, and the character to count the
+	 * Delegates to the overloaded method that takes a String with multiple delimiters.
+	 * @param str string to search in. Returns 0 if this is null
+	 * @param placeholder the character to search for and count.
+	 * @param delim the delimiter for character literals.
+	 */
+	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
+		return countParameterPlaceholders(str, placeholder, ""+delim);
+	}
+
+	/**
+	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
+	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
+	 * appears within a literal as determined by the <code>delimiters</code> that are passed in.
+	 * <p>Examples: If one of the delimiters is the single quote, and the character to count the
 	 * occurrences of is the question mark, then:
 	 * <p><code>The big ? 'bad wolf?'</code> gives a count of one.<br>
 	 * <code>The big ?? bad wolf</code> gives a count of two.<br>
@@ -129,19 +142,29 @@ public class JdbcUtils {
 	 * be valid SQL for the target database.
 	 * @param str string to search in. Returns 0 if this is null
 	 * @param placeholder the character to search for and count.
-	 * @param delim the delimiter for character literals.
+	 * @param delimiters the delimiters for character literals.
 	 */
-	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
+	public static int countParameterPlaceholders(String str, char placeholder, String delimiters) {
 		int count = 0;
 		boolean insideLiteral = false;
+		int activeLiteral = -1;
 		for (int i = 0; str != null && i < str.length(); i++) {
 			if (str.charAt(i) == placeholder) {
 				if (!insideLiteral)
 					count++;
 			}
 			else {
-				if (str.charAt(i) == delim) {
-					insideLiteral = insideLiteral ^ true;
+				if (delimiters.indexOf(str.charAt(i)) > -1) {
+					if (!insideLiteral) {
+						insideLiteral = true;
+						activeLiteral = delimiters.indexOf(str.charAt(i));
+					}
+					else {
+						if (activeLiteral == delimiters.indexOf(str.charAt(i))) {
+							insideLiteral = false;
+							activeLiteral = -1;
+						}
+					}
 				}
 			}
 		}
