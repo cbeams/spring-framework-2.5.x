@@ -31,6 +31,10 @@ public abstract class AbstractPropertyConstraint implements PropertyConstraint {
 	public boolean tests(String propertyName) {
 		return getPropertyName().equals(propertyName);
 	}
+	
+	public boolean isCompoundRule() {
+		return false;
+	}
 
 	protected void setPropertyName(String propertyName) {
 		Assert.notNull(propertyName, "The propertyName to constrain is required");

@@ -38,9 +38,13 @@ public class CompoundPropertyConstraint implements PropertyConstraint {
 	public boolean tests(final String propertyName) {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
-				return ((PropertyConstraint)o).test(propertyName);
+				return ((PropertyConstraint)o).equals(propertyName);
 			}
 		}.anyTrue(compoundConstraint.iterator());
+	}
+	
+	public boolean isCompoundRule() {
+		return true;
 	}
 
 	public Constraint getPredicate() {

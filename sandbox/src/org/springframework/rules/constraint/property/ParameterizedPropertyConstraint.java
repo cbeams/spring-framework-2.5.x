@@ -51,6 +51,10 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 		return parameterizedExpression.test(propertyName);
 	}
 	
+	public boolean isCompoundRule() {
+		return parameterizedExpression.isCompoundRule();
+	}
+
 	public BinaryConstraint getConstraint() {
 		return getParameterizedBinaryConstraint().getConstraint();
 	}

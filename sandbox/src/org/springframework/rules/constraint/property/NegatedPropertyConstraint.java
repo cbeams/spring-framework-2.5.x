@@ -33,4 +33,9 @@ public class NegatedPropertyConstraint extends Not implements PropertyConstraint
 		return ((PropertyConstraint)super.getConstraint()).test(propertyName);
 	}
 
+	public boolean isCompoundRule() {
+		return ((PropertyConstraint)super.getConstraint()).isCompoundRule();
+	}
+
+
 }

@@ -43,6 +43,10 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
 		return getPropertyName().equals(propertyName) || ((CompoundPropertyConstraint)getConstraint()).tests(propertyName);
 	}
 
+	public boolean isCompoundRule() {
+		return true;
+	}
+
 	/**
 	 * Tests that the property is required if all or any of the "other
 	 * properties" are present.

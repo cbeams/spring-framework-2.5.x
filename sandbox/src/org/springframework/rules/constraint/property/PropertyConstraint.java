@@ -28,4 +28,10 @@ public interface PropertyConstraint extends Constraint {
 	 * @return true or false
 	 */
 	public boolean tests(String propertyName);
+
+	/**
+	 * Does this property constraint effect more than one property?
+	 * @return true if yes, false otherwise
+	 */
+	public boolean isCompoundRule();
 }

@@ -40,6 +40,11 @@ public class UniquePropertyValueConstraint extends AbstractConstraint implements
 	public boolean tests(String propertyName) {
 		return getPropertyName().equals(propertyName);
 	}
+	
+	public boolean isCompoundRule() {
+		return false;
+	}
+
 
 	/**
 	 * Returns <code>true</code> if each domain object in the provided collection has a unique
