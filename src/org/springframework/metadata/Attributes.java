@@ -2,6 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
+
 package org.springframework.metadata;
 
 import java.lang.reflect.Field;
@@ -9,17 +10,27 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * This is the interface for accessing attributes at runtime.
+ * Interface for accessing attributes at runtime.
+ * This is a facade, which can accommodate any attributes API such
+ * as Jakarta Commons Attributes, or, possibly in future,
+ * a Spring attributes implementation.
+ * <br>The purpose of using this interface is to decouple Spring code
+ * from any specific attributes implementation. Even once JSR-175 is
+ * available, there is still value in such a facade interface,
+ * as it allows for hierarchical attribute sources--for example,
+ * an XML file or properties file might override some attributes 
+ * defined in source-level metadata with JSR-175 or another framework.
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Rod Johnson
  * @since Sep 30, 2003
- * @version $Id: Attributes.java,v 1.1 2003-12-12 16:54:29 johnsonr Exp $
+ * @version $Id: Attributes.java,v 1.2 2003-12-13 00:12:14 johnsonr Exp $
  */
 public interface Attributes {
     
     /**
      * Return the class attributes of the target class
      * @param targetClass the class that contains attribute information
-     * @return a list of attributes, possibly an empty list, never null.
+     * @return a collection of attributes, possibly an empty collection, never null.
      */
     Collection getAttributes(Class targetClass);
     
@@ -39,7 +50,7 @@ public interface Attributes {
     /**
      * Return the method attributes of the target method.
      * @param targetMethod the method that contains attribute information.
-     * @return a Collection of attriubtes, possibly an empty Collection, never null.
+     * @return a Collection of attributes, possibly an empty Collection, never null.
      */
     Collection getAttributes(Method targetMethod);
  
