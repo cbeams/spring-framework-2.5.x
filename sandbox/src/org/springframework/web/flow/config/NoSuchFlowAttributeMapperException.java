@@ -19,7 +19,6 @@ import org.springframework.web.flow.ServiceLookupException;
 
 /**
  * Thrown when a flow model mapper service cannot be found.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -73,5 +72,4 @@ public class NoSuchFlowAttributeMapperException extends ServiceLookupException {
 					+ "'; make sure there is a single FlowModelMapper implementation of this type exported in the context";
 		}
 	}
-
 }

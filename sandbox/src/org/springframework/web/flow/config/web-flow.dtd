@@ -37,7 +37,7 @@
 	Transitions triggered by the action(s) lead on to other states.
 -->
 <!ELEMENT action-state (
-	action+, transition+
+	action*, transition+
 )>
 
 <!--
@@ -47,9 +47,10 @@
 
 <!--
 	Convenience attribute when the action-state executes exactly one action.
-	This is the id of the action.
+	This is the id of the action.  It may also be the fully qualified implementation
+	class of the action.
 -->
-<!ATTLIST action-state actionId CDATA #IMPLIED>
+<!ATTLIST action-state action CDATA #IMPLIED>
 
 <!--
 	Defines an action that is executed by the flow in an action state.
@@ -57,11 +58,17 @@
 <!ELEMENT action EMPTY>
 
 <!--
-	Id of the bean definition of the action in the application context
-	hierarchy linked with the flow. This is similar to the <ref bean="myBean"/>
-	notation of the Spring beans DTD.
+	id of the action implementation exported in the configured registry.
+	This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
-<!ATTLIST action id CDATA #REQUIRED>
+<!ATTLIST action id CDATA #IMPLIED>
+
+<!--
+	Implementation class of the action exported in the configured registry.
+	For "by type" action lookup to work, there must be exactly one action implementation
+	exported of that type.  If there is more than one, specify the id.
+-->
+<!ATTLIST action class CDATA #IMPLIED>
 
 <!--
 	Name of the action. This is optional. When not specified, the action will
@@ -75,7 +82,7 @@
 	Transitions triggered by the view lead on to other states.
 -->
 <!ELEMENT view-state (
-	transition*
+	transition+
 )>
 
 <!--
@@ -90,7 +97,7 @@
 	control to the client. Use this when an action has already generated
 	the response.
 -->
-<!ATTLIST view-state view-name CDATA #IMPLIED>
+<!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
 	Defines a transition to another state.
@@ -123,7 +130,7 @@
 	is triggered to continue the flow.
 -->
 <!ELEMENT subflow-state (
-	transition*
+	transition+
 )>
 
 <!--
@@ -132,9 +139,10 @@
 <!ATTLIST subflow-state id ID #REQUIRED>
 
 <!--
-	Name (unique bean id) of the sub flow that will be spawned.
+	Name (unique bean id) of the sub flow that will be spawned.  When not present,
+	the ID of the subflow-state will be treated as the ID of the subflow.
 -->
-<!ATTLIST subflow-state flow CDATA #REQUIRED>
+<!ATTLIST subflow-state flow CDATA #IMPLIED>
 
 <!--
 	Optional name (bean id) of a mapper that will map model data to and from
@@ -160,4 +168,4 @@
 	control to the client. Use this when an action has already generated
 	the response.
 -->
-<!ATTLIST end-state viewName CDATA #IMPLIED>
+<!ATTLIST end-state view CDATA #IMPLIED>

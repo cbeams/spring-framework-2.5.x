@@ -49,8 +49,12 @@ import org.xml.sax.SAXParseException;
  * 
  * <pre>
  * 
- *  &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
- *  		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
+ *  
+ *   
+ *    &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
+ *    		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
+ *    
+ *   
  *  
  * </pre>
  * 
@@ -101,10 +105,8 @@ import org.xml.sax.SAXParseException;
  * <td>Set the flow creation strategy to use.</td>
  * </tr>
  * </table>
- * 
- * @see org.springframework.web.flow.config.FlowFactoryBean
- * 
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.config.FlowFactoryBean
  */
 public class XmlFlowBuilder extends BaseFlowBuilder {
 
@@ -116,19 +118,19 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String ACTION_ELEMENT = "action";
 
-	private static final String BEAN_ATTRIBUTE = "id";
+	private static final String CLASS_ATTRIBUTE = "class";
 
 	private static final String NAME_ATTRIBUTE = "name";
 
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
-	private static final String VIEW_ATTRIBUTE = "viewName";
+	private static final String VIEW_ATTRIBUTE = "view";
 
 	private static final String SUBFLOW_STATE_ELEMENT = "subflow-state";
 
 	private static final String FLOW_ATTRIBUTE = "flow";
 
-	private static final String MODEL_MAPPER_ATTRIBUTE = "attribute-mapper";
+	private static final String ATTRIBUTE_MAPPER_ATTRIBUTE = "attribute-mapper";
 
 	private static final String END_STATE_ELEMENT = "end-state";
 
@@ -267,7 +269,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected void parseFlowDefinition() {
 		Element root = doc.getDocumentElement();
 		String id = root.getAttribute(ID_ATTRIBUTE);
-		//set the flow under construction
+		// set the flow under construction
 		setFlow(createFlow(id));
 	}
 
@@ -279,7 +281,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Element root = doc.getDocumentElement();
 		String startStateId = root.getAttribute(START_STATE_ELEMENT_ATTRIBUTE);
 
-		//get the flow under construction
+		// get the flow under construction
 		Flow flow = getFlow();
 
 		NodeList nodeList = root.getChildNodes();
@@ -341,8 +343,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
 		FlowAttributeMapper mapper = null;
-		if (element.hasAttribute(MODEL_MAPPER_ATTRIBUTE)) {
-			mapper = getFlowServiceLocator().getFlowAttributeMapper(element.getAttribute(MODEL_MAPPER_ATTRIBUTE));
+		if (element.hasAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE)) {
+			mapper = getFlowServiceLocator().getFlowAttributeMapper(element.getAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE));
 		}
 		Transition[] transitions = parseTransitions(element);
 		new SubFlowState(flow, id, subFlow, mapper, transitions);
@@ -414,8 +416,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Parse given action definition and return a corresponding Action object.
 	 */
 	protected Action parseAction(Element element) {
-		String bean = element.getAttribute(BEAN_ATTRIBUTE);
-		return getFlowServiceLocator().getAction(bean);
+		String actionId = element.getAttribute(ID_ATTRIBUTE);
+		return getFlowServiceLocator().getAction(actionId);
 	}
 
 	/**

@@ -31,7 +31,6 @@ import org.springframework.web.flow.FlowExecutionListener;
 /**
  * Abstract base implementation of a flow builder defining common functionality
  * needed by most concrete flow builder implementations.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -39,12 +38,26 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * The service locator that locates flow related artifacts by identifier or
+	 * implementation class, as needed by this builder.
+	 */
 	private FlowServiceLocator flowServiceLocator = new BeanFactoryFlowServiceLocator();
 
+	/**
+	 * The collection of default flow execution listeners to attach the flow
+	 * produced by this builder.
+	 */
 	private Collection flowExecutionListeners = new ArrayList(3);
 
+	/**
+	 * The <code>Flow</code> produced by this builder.
+	 */
 	private Flow flow;
 
+	/**
+	 * An abstract factory for flow creation.
+	 */
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 
 	/**

@@ -27,24 +27,27 @@ import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
- * A flow service locator that uses a Spring bean factory to lookup services.
- * 
+ * A flow service locator that uses a Spring bean factory to lookup flow-related
+ * services.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
+	/**
+	 * The wrapped bean factory.
+	 */
 	private BeanFactory beanFactory;
 
 	/**
-	 * Create a new service locator locating services in the bean factory
-	 * that will be passed in using the <code>setBeanFactory()</code> method. 
+	 * Create a new service locator locating services in the bean factory that
+	 * will be passed in using the <code>setBeanFactory()</code> method.
 	 */
 	public BeanFactoryFlowServiceLocator() {
 	}
 
 	/**
-	 * Create a new service locator locating services in given bean factory. 
+	 * Create a new service locator locating services in given bean factory.
 	 */
 	public BeanFactoryFlowServiceLocator(BeanFactory beanFactory) {
 		setBeanFactory(beanFactory);
@@ -140,8 +143,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId)
-			throws ServiceLookupException {
+	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 		try {
 			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
 		}

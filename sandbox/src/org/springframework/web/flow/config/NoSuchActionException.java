@@ -19,12 +19,11 @@ import org.springframework.web.flow.ServiceLookupException;
 
 /**
  * Thrown when an action cannot be found.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class NoSuchActionException extends ServiceLookupException {
-	
+
 	/**
 	 * Create a new action lookup exception.
 	 * @param serviceId The id of the service that cannot be found
@@ -71,5 +70,4 @@ public class NoSuchActionException extends ServiceLookupException {
 					+ "'; make sure there is a single Action implementation of this type exported in the context";
 		}
 	}
-
 }

@@ -16,8 +16,8 @@
 package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
@@ -26,7 +26,6 @@ import org.springframework.web.flow.ServiceLookupException;
  * <p>
  * Note that this service locator is a configuration time object. It is not used
  * during flow execution!
- * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
@@ -59,11 +58,12 @@ public interface FlowServiceLocator extends FlowLocator {
 
 	/**
 	 * Lookup a flow model mapper of specified implementation class.
-	 * @param flowAttributeMapperImplementationClass The required
-	 *        implementation class
+	 * @param flowAttributeMapperImplementationClass The required implementation
+	 *        class
 	 * @return The flow model mapper
 	 * @throws ServiceLookupException When the flow model mapper cannot be found
 	 */
-	public FlowAttributeMapper getFlowAttributeMapper(Class flowAttributeMapperImplementationClass) throws ServiceLookupException;
+	public FlowAttributeMapper getFlowAttributeMapper(Class flowAttributeMapperImplementationClass)
+			throws ServiceLookupException;
 
 }

@@ -31,26 +31,38 @@ import org.springframework.web.flow.Flow;
  * this:
  * 
  * <pre>
- * &lt;bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
- *    &lt;property name="flowBuilder"&gt;
- *        &lt;bean class="com.mycompany.myapp.web.flow.user.UserRegistrationFlowBuilder"/&gt;
- *    &lt;/property&gt;
- * &lt;/bean&gt;
+ * 
+ *  
+ *   
+ *    &lt;bean id=&quot;user.RegistrationFlow&quot; class=&quot;org.springframework.web.flow.config.FlowFactoryBean&quot;&gt;
+ *       &lt;property name=&quot;flowBuilder&quot;&gt;
+ *           &lt;bean class=&quot;com.mycompany.myapp.web.flow.user.UserRegistrationFlowBuilder&quot;/&gt;
+ *       &lt;/property&gt;
+ *    &lt;/bean&gt;
+ *    
+ *   
+ *  
  * </pre>
  * 
  * The above definition is configured with a specific, java-based FlowBuilder
  * implementation. An XmlFlowBuilder could instead be used, for example:
  * 
  * <pre>
- * &ltbean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
- *     &ltproperty name="flowBuilder"&gt;
- *         &ltbean class="org.springframework.web.flow.config.XmlFlowBuilder"&gt;
- *             &ltproperty name="resource"&gt;
- *                 &ltvalue&gt;UserRegistrationFlow.xml&lt/value&gt;
- *             &lt/property&gt;
- *         &lt/bean&gt;
- *      &lt/property&gt;
- * &lt/bean&gt;
+ * 
+ *  
+ *   
+ *    &amp;ltbean id=&quot;user.RegistrationFlow&quot; class=&quot;org.springframework.web.flow.config.FlowFactoryBean&quot;&gt;
+ *        &amp;ltproperty name=&quot;flowBuilder&quot;&gt;
+ *            &amp;ltbean class=&quot;org.springframework.web.flow.config.XmlFlowBuilder&quot;&gt;
+ *                &amp;ltproperty name=&quot;resource&quot;&gt;
+ *                    &amp;ltvalue&amp;gt;UserRegistrationFlow.xml&amp;lt/value&gt;
+ *                &amp;lt/property&gt;
+ *            &amp;lt/bean&gt;
+ *         &amp;lt/property&gt;
+ *    &amp;lt/bean&gt;
+ *    
+ *   
+ *  
  * </pre>
  * 
  * </p>
@@ -58,33 +70,45 @@ import org.springframework.web.flow.Flow;
  * factory, in a standalone, programmatic fashion:
  * 
  * <pre>
- * FlowBuilder builder = ...;
- * Flow flow = new FlowFactoryBean(builder).getFlow();
+ * 
+ *  
+ *   
+ *    FlowBuilder builder = ...;
+ *    Flow flow = new FlowFactoryBean(builder).getFlow();
+ *    
+ *   
+ *  
  * </pre>
  * 
  * <p>
  * <b>Exposed configuration properties:</b><br>
  * <table border="1">
- *  <tr>
- *      <td><b>name</b></td>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>flowBuilder</td>
- *      <td><i>null</i></td>
- *      <td>Set the builder the factory will use to build flows.
- *      This is a required property.</td>
- *  </tr>
+ * <tr>
+ * <td><b>name</b></td>
+ * <td><b>default</b></td>
+ * <td><b>description</b></td>
+ * </tr>
+ * <tr>
+ * <td>flowBuilder</td>
+ * <td><i>null</i></td>
+ * <td>Set the builder the factory will use to build flows. This is a required
+ * property.</td>
+ * </tr>
  * </table>
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowFactoryBean implements FactoryBean, InitializingBean {
-	
+
+	/**
+	 * The flow builder strategy used to assemble the flow produced by this
+	 * factory bean.
+	 */
 	private FlowBuilder flowBuilder;
 
+	/**
+	 * The flow assembled by this factory bean.
+	 */
 	private Flow flow;
 
 	/**
@@ -94,7 +118,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Create a new flow factory bean.
+	 * Create a new flow factory bean using the specified builder strategy.
 	 * @param flowBuilder The builder the factory will use to build flows.
 	 */
 	public FlowFactoryBean(FlowBuilder flowBuilder) {
@@ -148,8 +172,8 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	 */
 	public synchronized Flow getFlow() {
 		if (this.flow == null) {
-			//already set the flow handle to avoid infinite loops!
-			//e.g where Flow A spawns Flow B, which spawns Flow A again...
+			// already set the flow handle to avoid infinite loops!
+			// e.g where Flow A spawns Flow B, which spawns Flow A again...
 			this.flow = this.flowBuilder.init();
 			this.flowBuilder.buildStates();
 			this.flowBuilder.buildExecutionListeners();

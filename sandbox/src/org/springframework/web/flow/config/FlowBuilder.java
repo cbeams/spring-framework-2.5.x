@@ -27,25 +27,30 @@ import org.springframework.web.flow.Flow;
  * <p>
  * Flow builders are executed by the FlowFactoryBean, which acts as an assembler
  * (director). This is the classic GoF Builder pattern.
- * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder
  * @see org.springframework.web.flow.config.FlowFactoryBean
- * @author Keith Donald
- * @author Erwin Vervaet
  */
 public interface FlowBuilder {
 
 	/**
-	 * Initialize this builder and return a handle to the flow under construction.
-	 * This handle is needed to avoid infinite loops in the build process.
-	 * The returned flow object is still under construction and not yet ready for
-	 * use. The only property that is guaranteed to be filled is the id of the flow.
+	 * Initialize this builder and return a handle to the flow under
+	 * construction
+	 * <p>
+	 * Note: the returned <code>Flow</code> handle is needed to avoid infinite
+	 * loops in the build process. The returned flow object is still under
+	 * construction and not yet ready for use. The only property that is
+	 * guaranteed to be filled is the id of the flow.
+	 * @return the initialized (but yet to be built) flow
+	 * @throws FlowBuilderException an exception occured building the flow
 	 */
 	public Flow init() throws FlowBuilderException;
-	
+
 	/**
 	 * Creates and adds all states to the flow built by this builder.
+	 * @throws FlowBuilderException an exception occured building the flow
 	 */
 	public void buildStates() throws FlowBuilderException;
 
@@ -54,16 +59,16 @@ public interface FlowBuilder {
 	 * built by this builder. This set of listeners will be treated as the
 	 * default set associated with each execution created for the flow built by
 	 * this builder.
+	 * @throws FlowBuilderException an exception occured building the flow
 	 */
 	public void buildExecutionListeners() throws FlowBuilderException;
 
 	/**
 	 * Get the fully constructed and configured Flow object - called by the
-	 * builder's assembler (director) after assembly. Note that this method
-	 * will return the same Flow object as that returned from the
-	 * <code>init()</code> method. However, when this method is called by the
-	 * assembler, flow construction will have completed and the returned
-	 * flow is ready for use. 
+	 * builder's assembler (director) after assembly. Note that this method will
+	 * return the same Flow object as that returned from the <code>init()</code>
+	 * method. However, when this method is called by the assembler, flow
+	 * construction will have completed and the returned flow is ready for use.
 	 */
 	public Flow getResult();
 
