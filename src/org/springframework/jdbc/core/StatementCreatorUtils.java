@@ -58,7 +58,7 @@ public class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
 	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter declaredParam,
-																			 Object inValue) throws SQLException {
+			Object inValue) throws SQLException {
 		setParameterValue(ps, paramIndex, declaredParam.getSqlType(), declaredParam.getTypeName(), inValue);
 	}
 
@@ -73,12 +73,12 @@ public class StatementCreatorUtils {
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
 	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-																			 Object inValue) throws SQLException {
+			Object inValue) throws SQLException {
 		if (logger.isDebugEnabled()) {
-				logger.debug("Setting SQL statement parameter value; columnIndex=" + paramIndex +
-										 ", parameter value='" + inValue +
-										 "', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") +
-										 ", sqlType=" + sqlType);
+			logger.debug("Setting SQL statement parameter value; columnIndex=" + paramIndex +
+					", parameter value='" + inValue +
+					"', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") +
+					", sqlType=" + sqlType);
 		}
 
 		if (inValue == null) {
@@ -99,6 +99,24 @@ public class StatementCreatorUtils {
 			}
 			else if (sqlType == Types.VARCHAR) {
 				ps.setString(paramIndex, inValue.toString());
+			}
+			else if (sqlType == Types.DATE) {
+				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date)) {
+					inValue = new java.sql.Date(((java.util.Date) inValue).getTime());
+				}
+				ps.setObject(paramIndex, inValue, Types.DATE);
+			}
+			else if (sqlType == Types.TIME) {
+				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Time)) {
+					inValue = new java.sql.Time(((java.util.Date) inValue).getTime());
+				}
+				ps.setObject(paramIndex, inValue, Types.TIME);
+			}
+			else if (sqlType == Types.TIMESTAMP) {
+				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Timestamp)) {
+					inValue = new java.sql.Timestamp(((java.util.Date) inValue).getTime());
+				}
+				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
 				ps.setObject(paramIndex, inValue);
