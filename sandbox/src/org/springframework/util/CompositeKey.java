@@ -11,7 +11,8 @@ import java.util.Set;
  * Generic, immutable composite key class. Useful for storing a structure of
  * unique objects as a unified key in a Map.
  * 
- * Backed by a HashSet.
+ * Backed by a HashSet.  Objects participating in the key should implement
+ * equals and hashCode.
  * 
  * @author Keith Donald
  */
@@ -23,9 +24,15 @@ public class CompositeKey {
      * 
      * @param keys
      *            The set of keys.
+     * @throws IllegalArgumentException
+     *             if the set is null or has less than 2 elements.
      */
     public CompositeKey(Set keys) {
-        keys = new HashSet(keys);
+        Assert.notNull(keys);
+        Assert.isTrue(
+            keys.size() > 1,
+            "A composite key by definition has more than one key.");
+        this.keys = new HashSet(keys);
     }
 
     /**
@@ -35,7 +42,7 @@ public class CompositeKey {
      * @param key2
      */
     public CompositeKey(Object key1, Object key2) {
-        keys = new HashSet(2);
+        this.keys = new HashSet(2);
         keys.add(key1);
         keys.add(key2);
     }
@@ -48,7 +55,7 @@ public class CompositeKey {
      * @param key3
      */
     public CompositeKey(Object key1, Object key2, Object key3) {
-        keys = new HashSet(3);
+        this.keys = new HashSet(3);
         keys.add(key1);
         keys.add(key2);
         keys.add(key3);
