@@ -1,26 +1,25 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.92 2004-02-18 19:39:02 colins Exp $
+$Id: changelog.txt,v 1.93 2004-02-19 16:24:11 jhoeller Exp $
 
 
 Changes in version 1.0 (01.03.2003)
 -----------------------------------
 
-Small, but non backwards compatible JNDI configuration change!
- 'inContainer' property of AbstractJndiLocator and derived subclasses such as 
-  JndiObjectFactoryBean and the EJB invokers has become 'resourceRef', and the default
-  value is now false, not true. If your old JNDI locations had a scheme (i.e. started
-  with 'java:' or any 'xxxx:' value) you do not have to do anything. If your old JNDI
-  location had no scheme specified, Spring will no longer by default prepend
-  'java:comp/env' to it. To get the old behaviour, just add the resourceRef property
-  with a true value. Alternately just add the 'java:comp/env' prefix yourself to the
-  JNDI location path.
+WARNING: Small, but non-backwards-compatible JNDI configuration change!
+  'inContainer' property of AbstractJndiLocator and derived subclasses such as JndiObjectFactoryBean
+  and the EJB invokers has become 'resourceRef', and the default value is now false, not true.
+  If your old JNDI locations had a scheme (i.e. started with 'java:' or any 'xxxx:' value) you do
+  not have to do anything. If your old JNDI location had no scheme specified, Spring will no longer
+  by default prepend 'java:comp/env/' to it. To get the old behaviour, just add the resourceRef property
+  with a true value. Alternately just add the 'java:comp/env/' prefix yourself to the JNDI location path.
 
 Package org.springframework.beans
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * revised BeanFactoryLocator exception handling
 * renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
 * added PreferencesPlaceholderConfigurer, being able to resolve placeholders via J2SE 1.4 Preferences
+* reworked MethodInvocationFactoryBean to derive from org.springframework.util.MethodInvoker
 
 Package org.springframework.context
 * renamed JndiBeanFactoryLocator to ContextJndiBeanFactoryLocator
@@ -29,7 +28,7 @@ Package org.springframework.context
 * fixed "useCodeAsDefaultMessage" fallback for multiple codes in a MessageSourceResolvable
 
 Package org.springframework.jndi
-* renamed the inContainer property to resourceRef, and changed the default value from true to false.
+* renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
 
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
@@ -42,8 +41,14 @@ Package org.springframework.jdbc
 * removed "doWithResultSetXxx" methods from JdbcOperations interface
 * removed JdbcHelper and its helper classes ColumnExtractor and DefaultColumnExtractor
 
+Package org.springframework.scheduler
+* added Quartz support, for setting up Schedulers, JobDetails and Triggers in a Spring context
+* added QuartzJobBean, a convenience class that applies the Quartz job data map as bean properties
+* added MethodInvocationJobDetailFactoryBean, a convenience class for delegating a job to a business method
+
 Package org.springframework.util
 * removed package path utility methods from ClassLoaderUtils
+* added MethodInvoker, a base class for MethodInvocationFactoryBean and MethodInvocationJobDetailFactoryBean
 
 Package org.springframework.web
 * added "defaultMethodName" property to ParameterMethodNameResolver
