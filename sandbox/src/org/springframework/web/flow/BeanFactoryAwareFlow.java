@@ -49,11 +49,11 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		((BeanFactoryFlowServiceLocator)getFlowDao()).setBeanFactory(beanFactory);
+		((BeanFactoryFlowServiceLocator)getServiceLocator()).setBeanFactory(beanFactory);
 	}
 
 	protected BeanFactory getBeanFactory() {
-		return ((BeanFactoryFlowServiceLocator)getFlowDao()).getBeanFactory();
+		return ((BeanFactoryFlowServiceLocator)getServiceLocator()).getBeanFactory();
 	}
 
 	public void setBeanName(String name) {

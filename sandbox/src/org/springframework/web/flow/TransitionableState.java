@@ -36,17 +36,17 @@ import org.springframework.util.ToStringCreator;
 public abstract class TransitionableState extends AbstractState {
 	private Set transitions = new LinkedHashSet();
 
-	public TransitionableState(String id) {
-		super(id);
+	public TransitionableState(Flow flow, String id) {
+		super(flow, id);
 	}
 
-	public TransitionableState(String id, Transition transition) {
-		super(id);
+	public TransitionableState(Flow flow, String id, Transition transition) {
+		super(flow, id);
 		add(transition);
 	}
 
-	public TransitionableState(String id, Transition[] transitions) {
-		super(id);
+	public TransitionableState(Flow flow, String id, Transition[] transitions) {
+		super(flow, id);
 		addAll(transitions);
 	}
 
@@ -102,7 +102,7 @@ public abstract class TransitionableState extends AbstractState {
 					+ "' signaled");
 		}
 		sessionExecution.setLastEventId(eventId);
-		ViewDescriptor viewDescriptor = getTransition(eventId, sessionExecution.getActiveFlow()).execute(eventId, this,
+		ViewDescriptor viewDescriptor = getTransition(eventId, sessionExecution.getActiveFlow()).execute(
 				sessionExecution, request, response);
 		if (logger.isDebugEnabled()) {
 			if (sessionExecution.isActive()) {

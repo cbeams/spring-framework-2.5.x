@@ -30,12 +30,12 @@ public class EndState extends AbstractState {
 
 	private String viewName;
 
-	public EndState(String id) {
-		this(id, null);
+	public EndState(Flow flow, String id) {
+		this(flow, id, null);
 	}
 
-	public EndState(String id, String viewName) {
-		super(id);
+	public EndState(Flow flow, String id, String viewName) {
+		super(flow, id);
 		this.viewName = viewName;
 	}
 
@@ -66,13 +66,13 @@ public class EndState extends AbstractState {
 			}
 			Flow resumingParentFlow = sessionExecution.getActiveFlow();
 			SubFlowState resumingState = (SubFlowState)sessionExecution.getCurrentState();
-			if (resumingState.getAttributesMapper(resumingParentFlow) != null) {
+			if (resumingState.getAttributesMapper() != null) {
 				if (logger.isDebugEnabled()) {
 					logger
 							.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
 									+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
 				}
-				resumingState.getAttributesMapper(resumingParentFlow).mapToResumingParentFlow(endingFlowSession,
+				resumingState.getAttributesMapper().mapToResumingParentFlow(endingFlowSession,
 						sessionExecution.getActiveFlowSession());
 			}
 			else {

@@ -30,18 +30,15 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param currentStateId
 	 * @param cause
 	 */
-	public CannotExecuteStateTransitionException(Transition transition, String eventId, Flow flow,
-			String currentStateId, Throwable cause) {
-		super(flow, cause);
+	public CannotExecuteStateTransitionException(Transition transition, Throwable cause) {
+		super(transition.getSourceState().getFlow(), cause);
 		this.transition = transition;
-		this.eventId = eventId;
-		this.stateIdTransitioningFrom = currentStateId;
 	}
 
 	public String getMessage() {
 		if (transition != null) {
 			return "Could not execute transition from state '" + stateIdTransitioningFrom + "' to state '"
-					+ transition.getToState() + "' on event '" + eventId + "' in flow '" + getFlow().getId()
+					+ transition.getTargetStateId() + "' on event '" + eventId + "' in flow '" + getFlow().getId()
 					+ "' -- programmer error?";
 		}
 		else {

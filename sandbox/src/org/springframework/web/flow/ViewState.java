@@ -35,27 +35,27 @@ public class ViewState extends TransitionableState {
 	 */
 	private String viewName;
 
-	public ViewState(String id, Transition transition) {
-		this(id, new Transition[] { transition });
+	public ViewState(Flow flow, String id, Transition transition) {
+		this(flow, id, new Transition[] { transition });
 	}
 
-	public ViewState(String id, Transition[] transitions) {
-		this(id, id, transitions);
+	public ViewState(Flow flow, String id, Transition[] transitions) {
+		this(flow, id, id, transitions);
 	}
 
-	public ViewState(String id, String viewName) {
-		super(id);
+	public ViewState(Flow flow, String id, String viewName) {
+		super(flow, id);
 		setViewName(viewName);
 	}
 
-	public ViewState(String id, String viewName, Transition transition) {
-		super(id);
+	public ViewState(Flow flow, String id, String viewName, Transition transition) {
+		super(flow, id);
 		setViewName(viewName);
 		add(transition);
 	}
 
-	public ViewState(String id, String viewName, Transition[] transitions) {
-		super(id);
+	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) {
+		super(flow, id);
 		setViewName(viewName);
 		addAll(transitions);
 	}
@@ -89,7 +89,12 @@ public class ViewState extends TransitionableState {
 	 */
 	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		return new ViewDescriptor(viewName, sessionExecution.getAttributes());
+		if (viewName != null) {
+			return new ViewDescriptor(viewName, sessionExecution.getAttributes());
+		}
+		else {
+			return ViewDescriptor.NULL_OBJECT;
+		}
 	}
 
 	protected void createToString(ToStringCreator creator) {

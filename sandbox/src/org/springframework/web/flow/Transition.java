@@ -33,35 +33,47 @@ import org.springframework.util.closure.support.AbstractConstraint;
 public class Transition implements Serializable {
 	private static final Log logger = LogFactory.getLog(Transition.class);
 
-	public static final String EVENT_ID_ATTRIBUTE = "_eventId";
-
 	private Constraint eventIdCriteria;
 
-	private String toState;
+	private TransitionableState sourceState;
 
-	// constant that says match on any event
-	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
-		public boolean test(Object o) {
-			return true;
-		}
+	private AbstractState targetState;
 
-		public String toString() {
-			return "*";
-		}
-	};
+	private String targetStateId;
 
-	public Transition(String id, String toState) {
+	public Transition(String id, String targetStateId) {
 		Assert.notNull(id, "The id property is required");
-		Assert.notNull(toState, "The toState property is required");
+		Assert.notNull(targetStateId, "The targetStateId property is required");
 		this.eventIdCriteria = createDefaultEventIdCriteria(id);
-		this.toState = toState;
+		this.targetStateId = targetStateId;
 	}
 
-	public Transition(Constraint eventIdCriteria, String toState) {
+	public Transition(Constraint eventIdCriteria, String targetStateId) {
 		Assert.notNull(eventIdCriteria, "The eventIdCriteria property is required");
-		Assert.notNull(toState, "The toState property is required");
+		Assert.notNull(targetStateId, "The targetStateId property is required");
 		this.eventIdCriteria = eventIdCriteria;
-		this.toState = toState;
+		this.targetStateId = targetStateId;
+	}
+
+	protected TransitionableState getSourceState() {
+		return sourceState;
+	}
+
+	protected void setSourceState(TransitionableState owningState) {
+		this.sourceState = owningState;
+	}
+
+	protected AbstractState getTargetState() throws NoSuchFlowStateException {
+		synchronized (this) {
+			if (this.targetState != null) {
+				return this.targetState;
+			}
+		}
+		AbstractState targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
+		synchronized (this) {
+			this.targetState = targetState;
+		}
+		return this.targetState;
 	}
 
 	protected Constraint createDefaultEventIdCriteria(final String id) {
@@ -80,31 +92,37 @@ public class Transition implements Serializable {
 		return this.eventIdCriteria;
 	}
 
-	public String getToState() {
-		return toState;
+	public String getTargetStateId() {
+		return targetStateId;
 	}
 
 	public boolean matches(String eventId) {
 		return eventIdCriteria.test(eventId);
 	}
 
-	public ViewDescriptor execute(String eventId, TransitionableState fromState,
-			FlowSessionExecutionStack sessionExecution, HttpServletRequest request, HttpServletResponse response) {
-		Flow activeFlow = sessionExecution.getActiveFlow();
+	public ViewDescriptor execute(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response) {
 		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Executing transition from state '" + fromState.getId() + "' to state '" + getToState()
-						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
-			}
-			return activeFlow.getRequiredState(getToState()).enter(sessionExecution, request, response);
+			return getTargetState().enter(sessionExecution, request, response);
 		}
 		catch (NoSuchFlowStateException e) {
-			throw new CannotExecuteStateTransitionException(this, eventId, activeFlow, fromState.getId(), e);
+			throw new CannotExecuteStateTransitionException(this, e);
 		}
 	}
 
+	// constant that says match on any event
+	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
+		public boolean test(Object o) {
+			return true;
+		}
+
+		public String toString() {
+			return "*";
+		}
+	};
+
 	public String toString() {
-		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", toState)
+		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", targetStateId)
 				.toString();
 	}
 

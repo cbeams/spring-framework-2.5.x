@@ -440,7 +440,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @return
 	 */
-	public FlowServiceLocator getFlowDao() {
+	public FlowServiceLocator getServiceLocator() {
 		assertFlowDaoSet();
 		return this.flowDao;
 	}
@@ -514,7 +514,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public boolean addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
-		return add(new SubFlowState(id, subFlow, transitions));
+		return add(new SubFlowState(this, id, subFlow, transitions));
 	}
 
 	/**
@@ -552,7 +552,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public boolean addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(id, subFlowId, attributesMapperId, transitions));
+		return add(new SubFlowState(this, id, subFlowId, attributesMapperId, transitions));
 	}
 
 	/**
@@ -564,7 +564,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public boolean addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) {
-		return add(new SubFlowState(id, subFlow, attributesMapper, transitions));
+		return add(new SubFlowState(this, id, subFlow, attributesMapper, transitions));
 	}
 
 	/**
@@ -805,19 +805,19 @@ public class Flow implements FlowEventProcessor, Serializable {
 	// flow config factory methods
 
 	protected Flow spawnFlow(Class flowImplementationClass) {
-		return getFlowDao().getFlow(flowImplementationClass);
+		return getServiceLocator().getFlow(flowImplementationClass);
 	}
 
 	protected ActionBean useActionBean(Class actionBeanImplementationClass) {
-		return getFlowDao().getActionBean(actionBeanImplementationClass);
+		return getServiceLocator().getActionBean(actionBeanImplementationClass);
 	}
 
 	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix) {
-		return getFlowDao().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
+		return getServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
 	}
 
 	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass) {
-		return getFlowDao().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
+		return getServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
 	}
 
 	/**
@@ -845,7 +845,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, Transition transition) {
-		return new ViewState(view(stateIdPrefix), transition);
+		return new ViewState(this, view(stateIdPrefix), transition);
 	}
 
 	/**
@@ -855,7 +855,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
-		return new ViewState(view(stateIdPrefix), viewName, transition);
+		return new ViewState(this, view(stateIdPrefix), viewName, transition);
 	}
 
 	/**
@@ -864,7 +864,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
-		return new ViewState(view(stateIdPrefix), transitions);
+		return new ViewState(this, view(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -874,7 +874,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
-		return new ViewState(view(stateIdPrefix), viewName, transitions);
+		return new ViewState(this, view(stateIdPrefix), viewName, transitions);
 	}
 
 	/**
@@ -883,7 +883,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, Transition transition) {
-		return new ActionState(actionStateId, transition);
+		return new ActionState(this, actionStateId, transition);
 	}
 
 	/**
@@ -893,7 +893,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition transition) {
-		return new ActionState(actionStateId, actionBean, transition);
+		return new ActionState(this, actionStateId, actionBean, transition);
 	}
 
 	/**
@@ -903,7 +903,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, String actionBeanName, Transition transition) {
-		return new ActionState(actionStateId, actionBeanName, transition);
+		return new ActionState(this, actionStateId, actionBeanName, transition);
 	}
 
 	/**
@@ -912,7 +912,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, Transition[] transitions) {
-		return new ActionState(actionStateId, transitions);
+		return new ActionState(this, actionStateId, transitions);
 	}
 
 	/**
@@ -922,7 +922,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition[] transitions) {
-		return new ActionState(actionStateId, actionBean, transitions);
+		return new ActionState(this, actionStateId, actionBean, transitions);
 	}
 
 	/**
@@ -932,7 +932,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, String actionBeanName, Transition[] transitions) {
-		return new ActionState(actionStateId, actionBeanName, transitions);
+		return new ActionState(this, actionStateId, actionBeanName, transitions);
 	}
 
 	/**
@@ -942,7 +942,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, ActionBean[] actionBeans, Transition[] transitions) {
-		return new ActionState(actionStateId, actionBeans, transitions);
+		return new ActionState(this, actionStateId, actionBeans, transitions);
 	}
 
 	/**
@@ -952,7 +952,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ActionState createActionState(String actionStateId, String[] actionBeanNames, Transition[] transitions) {
-		return new ActionState(actionStateId, actionBeanNames, transitions);
+		return new ActionState(this, actionStateId, actionBeanNames, transitions);
 	}
 
 	/**
@@ -1511,11 +1511,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	public EndState createEndState(String endStateId, String viewName) {
-		return new EndState(endStateId, viewName);
+		return new EndState(this, endStateId, viewName);
 	}
 
 	public EndState createEndState(String endStateId) {
-		return new EndState(endStateId);
+		return new EndState(this, endStateId);
 	}
 
 	/**

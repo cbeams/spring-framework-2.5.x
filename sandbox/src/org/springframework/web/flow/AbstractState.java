@@ -40,9 +40,20 @@ public abstract class AbstractState implements Serializable {
 
 	private String id;
 
-	public AbstractState(String id) {
+	private Flow flow;
+
+	public AbstractState(Flow flow, String id) {
 		Assert.hasText(id, "The state must have a valid identifier");
+		setFlow(flow);
 		this.id = id;
+	}
+
+	protected void setFlow(Flow flow) {
+		this.flow = flow;
+	}
+
+	public Flow getFlow() {
+		return flow;
 	}
 
 	public boolean isTransitionable() {
@@ -67,6 +78,10 @@ public abstract class AbstractState implements Serializable {
 
 	public String getId() {
 		return id;
+	}
+
+	protected FlowServiceLocator getFlowServiceLocator() {
+		return getFlow().getServiceLocator();
 	}
 
 	public boolean equals(Object o) {

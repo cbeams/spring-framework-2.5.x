@@ -33,13 +33,13 @@ public class ActionState extends TransitionableState {
 
 	private Set actionBeans;
 
-	public ActionState(String id, Transition transition) {
-		super(id, transition);
+	public ActionState(Flow flow, String id, Transition transition) {
+		super(flow, id, transition);
 		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
-	public ActionState(String id, Transition[] transitions) {
-		super(id, transitions);
+	public ActionState(Flow flow, String id, Transition[] transitions) {
+		super(flow, id, transitions);
 		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
@@ -48,33 +48,33 @@ public class ActionState extends TransitionableState {
 		return stateId;
 	}
 
-	public ActionState(String id, ActionBean actionBean, Transition transition) {
-		super(id, transition);
+	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
+		super(flow, id, transition);
 		setActionBean(actionBean);
 	}
 
-	public ActionState(String id, ActionBean actionBean, Transition[] transitions) {
-		super(id, transitions);
+	public ActionState(Flow flow, String id, ActionBean actionBean, Transition[] transitions) {
+		super(flow, id, transitions);
 		setActionBean(actionBean);
 	}
 
-	public ActionState(String id, ActionBean[] actionBeans, Transition[] transitions) {
-		super(id, transitions);
+	public ActionState(Flow flow, String id, ActionBean[] actionBeans, Transition[] transitions) {
+		super(flow, id, transitions);
 		setActionBeans(actionBeans);
 	}
 
-	public ActionState(String id, String actionBeanName, Transition transition) {
-		super(id, transition);
+	public ActionState(Flow flow, String id, String actionBeanName, Transition transition) {
+		super(flow, id, transition);
 		setActionBeanName(actionBeanName);
 	}
 
-	public ActionState(String id, String actionBeanName, Transition[] transitions) {
-		super(id, transitions);
+	public ActionState(Flow flow, String id, String actionBeanName, Transition[] transitions) {
+		super(flow, id, transitions);
 		setActionBeanName(actionBeanName);
 	}
 
-	public ActionState(String id, String[] actionBeanNames, Transition[] transitions) {
-		super(id, transitions);
+	public ActionState(Flow flow, String id, String[] actionBeanNames, Transition[] transitions) {
+		super(flow, id, transitions);
 		setActionBeanNames(actionBeanNames);
 	}
 
@@ -213,7 +213,7 @@ public class ActionState extends TransitionableState {
 					return holder.actionBean;
 				}
 				else {
-					ActionBean actionBean = (ActionBean)flow.getFlowDao().getActionBean(holder.actionBeanName);
+					ActionBean actionBean = (ActionBean)flow.getServiceLocator().getActionBean(holder.actionBeanName);
 					Assert.notNull(actionBean, "The action bean retrieved from the registry must not be null");
 					return actionBean;
 				}
