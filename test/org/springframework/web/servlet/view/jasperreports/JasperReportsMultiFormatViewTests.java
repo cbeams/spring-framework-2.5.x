@@ -20,6 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperPrint;
+
 /**
  * @author Rob Harrop
  */
@@ -32,9 +38,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	public void testSimpleHtmlRender() throws Exception {
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
-		Map model = new HashMap();
-		model.put("ReportTitle", "Foo");
-		model.put("dataSource", getData());
+		Map model = getBaseModel();
 		model.put(getDiscriminatorKey(), "html");
 
 		view.render(model, request, response);
@@ -45,9 +49,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	public void testOverrideContentDisposition() throws Exception {
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
-		Map model = new HashMap();
-		model.put("ReportTitle", "Foo");
-		model.put("dataSource", getData());
+		Map model = getBaseModel();
 		model.put(getDiscriminatorKey(), "csv");
 
 		String headerValue = "inline; filename=foo.txt";
@@ -56,12 +58,33 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		mappings.put("csv", headerValue);
 
 
-		((JasperReportsMultiFormatView)view).setContentDispositionMappings(mappings);
+		((JasperReportsMultiFormatView) view).setContentDispositionMappings(mappings);
 
 		view.render(model, request, response);
 
 		assertEquals("Invalid Content-Disposition header value", headerValue,
 				response.getHeader("Content-Disposition"));
+	}
+
+	public void testExporterParametersAreCarriedAcross() throws Exception {
+		JasperReportsMultiFormatView view = (JasperReportsMultiFormatView) getView(UNCOMPILED_REPORT);
+
+		Properties mappings = new Properties();
+		mappings.put("test", ExporterParameterTestView.class.getName());
+
+		Map exporterParameters = new HashMap();
+
+		// test view class performs the assertions - robh
+		exporterParameters.put(ExporterParameterTestView.TEST_PARAM, "foo");
+
+		view.setExporterParameters(exporterParameters);
+		view.setFormatMappings(mappings);
+		view.initApplicationContext();
+
+		Map model = getBaseModel();
+		model.put(getDiscriminatorKey(), "test");
+
+		view.render(model, request, response);
 	}
 
 	protected String getDiscriminatorKey() {
@@ -75,6 +98,25 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 	protected String getDesiredContentType() {
 		return "text/csv";
+	}
+
+	private Map getBaseModel() {
+		Map model = new HashMap();
+		model.put("ReportTitle", "Foo");
+		model.put("dataSource", getData());
+		return model;
+	}
+
+	public static class ExporterParameterTestView extends AbstractJasperReportsView {
+
+		public static final String TEST_PARAM = "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI";
+
+		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response)
+				throws Exception {
+
+			assertNotNull("Exporter parameters are null", this.exporterParameters);
+			assertEquals("Incorrect number of exporter parameters", 1, this.exporterParameters.size());
+		}
 	}
 
 }

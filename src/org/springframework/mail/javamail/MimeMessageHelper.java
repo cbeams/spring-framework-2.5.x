@@ -111,6 +111,11 @@ public class MimeMessageHelper {
 
 	private boolean validateAddresses = false;
 
+	/**
+	 * <code>FileTypeMap</code> used to find the MIME-type of a file.
+	 */
+	private FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
+
 
 	/**
 	 * Create a new MimeMessageHelper for the given MimeMessage,
@@ -257,6 +262,14 @@ public class MimeMessageHelper {
 		}
 	}
 
+	/**
+	 * Sets the <code>FileTypeMap</code> to use when adding attachments and inline content to
+	 * the message.
+	 */
+	public void setFileTypeMap(FileTypeMap fileTypeMap) {
+		Assert.notNull(fileTypeMap, "FileTypeMap must not be null");
+		this.fileTypeMap = fileTypeMap;
+	}
 
 	public void setFrom(InternetAddress from) throws MessagingException {
 		Assert.notNull(from, "From address must not be null");
@@ -604,7 +617,9 @@ public class MimeMessageHelper {
 	 */
 	public void addInline(String contentId, File file) throws MessagingException {
 		Assert.notNull(file, "File must not be null");
-		addInline(contentId, new FileDataSource(file));
+		FileDataSource dataSource = new FileDataSource(file);
+		dataSource.setFileTypeMap(fileTypeMap);
+		addInline(contentId, dataSource);
 	}
 
 	/**
@@ -629,7 +644,7 @@ public class MimeMessageHelper {
 	 */
 	public void addInline(String contentId, Resource resource) throws MessagingException {
 		Assert.notNull(resource, "Resource must not be null");
-		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(resource.getFilename());
+		String contentType = fileTypeMap.getContentType(resource.getFilename());
 		addInline(contentId, resource, contentType);
 	}
 
@@ -706,7 +721,9 @@ public class MimeMessageHelper {
 	 */
 	public void addAttachment(String attachmentFilename, File file) throws MessagingException {
 		Assert.notNull(file, "File must not be null");
-		addAttachment(attachmentFilename, new FileDataSource(file));
+		FileDataSource dataSource = new FileDataSource(file);
+		dataSource.setFileTypeMap(fileTypeMap);
+		addAttachment(attachmentFilename, dataSource);
 	}
 
 	/**
@@ -736,7 +753,7 @@ public class MimeMessageHelper {
 					"Passed-in Resource contains an open stream: invalid argument. " +
 					"JavaMail requires an InputStreamSource that creates a fresh stream for every call.");
 		}
-		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(attachmentFilename);
+		String contentType = fileTypeMap.getContentType(attachmentFilename);
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
 		addAttachment(attachmentFilename, dataSource);
 	}

@@ -30,8 +30,8 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 
 		Properties props = new Properties();
 		props.setProperty("comma-separated", JasperReportsCsvView.class.getName());
-    props.setProperty("html", JasperReportsHtmlView.class.getName());
-		
+		props.setProperty("html", JasperReportsHtmlView.class.getName());
+
 		view.setFormatMappings(props);
 		return view;
 	}

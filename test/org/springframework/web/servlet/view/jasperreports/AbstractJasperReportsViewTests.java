@@ -16,17 +16,19 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
-import net.sf.jasperreports.engine.JRDataSourceProvider;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JRException;
+import javax.sql.DataSource;
+
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
@@ -40,7 +42,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	protected abstract AbstractJasperReportsView getViewImplementation();
 
 	protected abstract String getDesiredContentType();
-	
+
 	protected AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
 		view.setUrl(url);
@@ -195,7 +197,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		AbstractJasperReportsView view = getView(SUB_REPORT_PARENT);
 		view.setReportDataKey("dataSource");
 		view.setSubReportUrls(subReports);
-		view.setSubReportDataKeys(new String[] {"SubReportData"});
+		view.setSubReportDataKeys(new String[]{"SubReportData"});
 		view.initApplicationContext();
 		view.render(model, request, response);
 
@@ -212,7 +214,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		AbstractJasperReportsView view = getView(SUB_REPORT_PARENT);
 		view.setReportDataKey("dataSource");
 		view.setSubReportUrls(subReports);
-		view.setSubReportDataKeys(new String[] {"SubReportData"});
+		view.setSubReportDataKeys(new String[]{"SubReportData"});
 
 		try {
 			view.initApplicationContext();
@@ -232,7 +234,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		AbstractJasperReportsView view = getView(SUB_REPORT_PARENT);
 		view.setSubReportUrls(subReports);
-		view.setSubReportDataKeys(new String[] {"SubReportData"});
+		view.setSubReportDataKeys(new String[]{"SubReportData"});
 
 		try {
 			view.initApplicationContext();
@@ -276,6 +278,51 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertNotNull("Header not present", response.getHeader(key));
 		assertEquals("Invalid header value", value, response.getHeader(key));
 
+	}
+
+	public void testWithSqlDataSource() throws Exception {
+
+		DataSource ds = getMockSqlDataSource();
+
+		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
+		view.setDataSource(ds);
+
+		Map model = getModel();
+		model.remove("dataSource");
+
+		try {
+			view.render(model, request, response);
+			fail("DataSource was not used as report DataSource");
+		}
+		catch (SQLException e) {
+			assertTrue(true);
+		}
+	}
+
+	public void testJRDataSourceOverridesDataSource() throws Exception {
+		DataSource ds = getMockSqlDataSource();
+
+		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
+		view.setDataSource(ds);
+
+
+		try {
+			view.render(getModel(), request, response);
+		} catch(SQLException ex) {
+			fail("javax.sql.DataSource was used when JRDataSource should have overriden it");
+		}
+	}
+
+	private DataSource getMockSqlDataSource() throws SQLException {
+		MockControl ctl = MockControl.createControl(DataSource.class);
+
+		DataSource ds = (DataSource) ctl.getMock();
+		ds.getConnection();
+		ctl.setThrowable(new SQLException());
+
+		ctl.replay();
+
+		return ds;
 	}
 
 	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
