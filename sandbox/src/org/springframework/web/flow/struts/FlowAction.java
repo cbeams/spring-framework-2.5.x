@@ -60,32 +60,12 @@ import org.springframework.web.util.WebUtils;
  * Flow-action that fronts a single top-level flow:
  * 
  * <pre>
- * 
- *  
- *   
- *    
- *     
- *      
- *       
- *        
- *         
- *          
  *           &lt;action path=&quot;/userRegistration&quot;
  *               type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
  *               name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
  *               className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
  *                   &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
  *           &lt;/action&gt;
- *           
- *          
- *         
- *        
- *       
- *      
- *     
- *    
- *   
- *  
  * </pre>
  * 
  * This example associates the logical request URL
@@ -125,11 +105,10 @@ import org.springframework.web.util.WebUtils;
  * capability integrated with Struts, with a consistent-approach to POJO-based
  * binding and validation that addresses the proliferation of
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
- * 
- * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
- * @see org.springframework.web.struts.BindingActionForm
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
+ * @see org.springframework.web.struts.BindingActionForm
  */
 public class FlowAction extends TemplateAction {
 
