@@ -38,7 +38,7 @@ import org.springframework.util.ToStringCreator;
  * <p>
  * Structurally, a Flow is composed of a set of states. A state is a point in
  * the flow where something happens; for instance, showing a view, executing an
- * action, or spawning a subflow.
+ * action, or spawning a sub flow.
  * <p>
  * Each state has one or more transitions that are used to move to another
  * state. A transition is triggered by an event. An event is a string identifier
@@ -117,8 +117,15 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Returns the default set of flow execution listeners for all executions
+	 * Returns the <i>default</i> set of flow execution listeners for all executions
 	 * created for this flow. The set returned is a mutable list object.
+	 * <p>
+	 * This is really a convenience feature since flow execution listeners are
+	 * managed and notified by a <code>FlowExecution</code> and not by the flow
+	 * itself! You can use this when you want certain listeners to always be notified
+	 * when a flow execution is created for this flow, irrespective of the web
+	 * controller that is driving the execution.
+	 *  
 	 * @return The set of flow execution listeners
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
