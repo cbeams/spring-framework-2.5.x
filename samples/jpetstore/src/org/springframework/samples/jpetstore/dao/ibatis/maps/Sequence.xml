@@ -19,7 +19,7 @@
   </mapped-statement>
 
   <mapped-statement name="updateSequence">
-    update sequence set nextid = #nextid# where name = #name#
+    update sequence set nextid = #nextId# where name = #name#
   </mapped-statement>
 
 </sql-map>
