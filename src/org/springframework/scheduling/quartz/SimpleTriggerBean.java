@@ -102,6 +102,10 @@ public class SimpleTriggerBean extends SimpleTrigger
 	 * constant in the SimpleTrigger class. Default is
 	 * MISFIRE_INSTRUCTION_SMART_POLICY.
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT
+	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT
 	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
 	 */
 	public void setMisfireInstructionName(String constantName) {
