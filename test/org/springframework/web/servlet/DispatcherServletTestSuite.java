@@ -83,10 +83,12 @@ public class DispatcherServletTestSuite extends TestCase {
 
 			assertTrue("hasn't RequestContext attribute", request.getAttribute("rc") == null);
 			assertTrue("Correct WebApplicationContext", RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext);
-			assertTrue("Correct Locale", Locale.CANADA.equals(RequestContextUtils.getLocale(request)));
-			assertTrue("Correct Theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
+			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
+			assertTrue("Correct locale", Locale.CANADA.equals(RequestContextUtils.getLocale(request)));
+			assertTrue("Correct theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null)));
 
+			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
@@ -139,8 +141,9 @@ public class DispatcherServletTestSuite extends TestCase {
 
 			RequestContext rc = (RequestContext) request.getAttribute("rc");
 			assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());
-			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() instanceof ComplexWebApplicationContext);
-			assertTrue("Correct Locale", Locale.CANADA.equals(rc.getLocale()));
+			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexControllerServlet.getWebApplicationContext());
+			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
+			assertTrue("Correct locale", Locale.CANADA.equals(rc.getLocale()));
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);

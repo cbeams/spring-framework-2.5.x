@@ -76,6 +76,15 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the context path of the current request,
+	 * i.e. the path that indicates the current web application.
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath
+	 */
+	public String getContextPath() {
+		return request.getContextPath();
+	}
+
+	/**
 	 * Return the current WebApplicationContext.
 	 */
 	public WebApplicationContext getWebApplicationContext() {
@@ -83,7 +92,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * (De)active default HTML escaping for messages and errors.
+	 * (De)activate default HTML escaping for messages and errors.
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
