@@ -208,38 +208,28 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			ctrlConnection.setReturnValue(mockPreparedStatement);
 
 			for (int i = 0; i < dbResults.length; i++) {
-				ctrlCountResultSetMetaData[i] =
-					MockControl.createControl(ResultSetMetaData.class);
-				mockCountResultSetMetaData[i] =
-					(ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
+				ctrlCountResultSetMetaData[i] = MockControl.createControl(ResultSetMetaData.class);
+				mockCountResultSetMetaData[i] = (ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
 				mockCountResultSetMetaData[i].getColumnCount();
 				ctrlCountResultSetMetaData[i].setReturnValue(1);
-				mockCountResultSetMetaData[i].getColumnType(1);
-				ctrlCountResultSetMetaData[i].setReturnValue(Types.NUMERIC);
 
-				ctrlCountResultSet[i] =
-					MockControl.createControl(ResultSet.class);
-				mockCountResultSet[i] =
-					(ResultSet) ctrlCountResultSet[i].getMock();
+				ctrlCountResultSet[i] = MockControl.createControl(ResultSet.class);
+				mockCountResultSet[i] = (ResultSet) ctrlCountResultSet[i].getMock();
 				mockCountResultSet[i].getMetaData();
-				ctrlCountResultSet[i].setReturnValue(
-					mockCountResultSetMetaData[i]);
+				ctrlCountResultSet[i].setReturnValue(mockCountResultSetMetaData[i]);
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(true);
-				mockCountResultSet[i].getInt(1);
-				ctrlCountResultSet[i].setReturnValue(1);
+				mockCountResultSet[i].getObject(1);
+				ctrlCountResultSet[i].setReturnValue(new Integer(1));
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(false);
 				mockCountResultSet[i].close();
 				ctrlCountResultSet[i].setVoidCallable();
 
-				ctrlCountPreparedStatement[i] =
-					MockControl.createControl(PreparedStatement.class);
-				mockCountPreparedStatement[i] =
-					(PreparedStatement) ctrlCountPreparedStatement[i].getMock();
+				ctrlCountPreparedStatement[i] = MockControl.createControl(PreparedStatement.class);
+				mockCountPreparedStatement[i] = (PreparedStatement) ctrlCountPreparedStatement[i].getMock();
 				mockCountPreparedStatement[i].executeQuery();
-				ctrlCountPreparedStatement[i].setReturnValue(
-					mockCountResultSet[i]);
+				ctrlCountPreparedStatement[i].setReturnValue(mockCountResultSet[i]);
 				mockCountPreparedStatement[i].getWarnings();
 				ctrlCountPreparedStatement[i].setReturnValue(null);
 				mockCountPreparedStatement[i].close();
@@ -275,11 +265,9 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		JdbcTemplate helper = new JdbcTemplate(mockDataSource);
 		for (int i = 0; i < results.length; i++) {
 			// BREAKS ON ' in name
-			int dbCount =
-				helper.queryForInt(
-					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='"
-						+ results[i]
-						+ "'", null);
+			int dbCount = helper.queryForInt(
+					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" +
+					results[i] + "'", null);
 			assertTrue("found in db", dbCount == 1);
 		}
 
@@ -935,7 +923,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		values.put(new Integer(2), "Thomas");
 		List customers = query.execute(2, values);
 	}
-	
+
+
 	private static class Customer {
 
 		private int id;

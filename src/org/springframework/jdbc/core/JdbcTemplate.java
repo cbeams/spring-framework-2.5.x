@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.31 2004-03-04 08:05:02 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.32 2004-03-04 21:36:45 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -226,11 +226,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql) throws DataAccessException {
-		return ((Long) queryForObject(sql, Long.class)).longValue();
+		return ((Number) queryForObject(sql, Number.class)).longValue();
 	}
 
 	public int queryForInt(String sql) throws DataAccessException {
-		return ((Integer) queryForObject(sql, Integer.class)).intValue();
+		return ((Number) queryForObject(sql, Number.class)).intValue();
 	}
 
 
@@ -373,11 +373,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
-		return ((Long) queryForObject(sql, args, Long.class)).longValue();
+		return ((Number) queryForObject(sql, args, Number.class)).longValue();
 	}
 
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
-		return ((Integer) queryForObject(sql, args, Integer.class)).intValue();
+		return ((Number) queryForObject(sql, args, Number.class)).intValue();
 	}
 
 
@@ -842,18 +842,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (!rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not empty ResultSet");
 			}
-			Object result = null;
-			if (JdbcUtils.isNumeric(rsmd.getColumnType(1))) {
-				if (this.requiredType.equals(Long.class)) {
-					result = new Long(rs.getLong(1));
-				}
-				else if (this.requiredType.equals(Integer.class)) {
-					result = new Integer(rs.getInt(1));
-				}
-			}
-			if (result == null) {
-				result = rs.getObject(1);
-			}
+			Object result = rs.getObject(1);
 			if (rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
 			}
