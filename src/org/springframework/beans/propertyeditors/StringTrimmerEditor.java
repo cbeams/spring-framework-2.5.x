@@ -20,7 +20,7 @@ import java.beans.PropertyEditorSupport;
 
 /**
  * Property editor that trims Strings.
- * Allows to transform an empty string into a null value.
+ * Optionally allows transforming an empty string into a null value.
  * Needs to be explictly registered, e.g. for command binding.
  * @author Juergen Hoeller
  * @see org.springframework.validation.DataBinder#registerCustomEditor
