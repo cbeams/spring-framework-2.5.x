@@ -27,6 +27,9 @@ public abstract class AbstractBeanDefinitionReader {
 	/**
 	 * Set the class loader to use for bean classes.
 	 * Default is the thread context class loader.
+	 * <p>Setting this to null suggests to not load bean classes but just register
+	 * bean definitions with class names, for example when just registering beans
+	 * in a registry but not actually instantiating them in a factory.
 	 * @see java.lang.Thread#getContextClassLoader
 	 */
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {

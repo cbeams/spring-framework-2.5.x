@@ -1,6 +1,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * Interface for registries that hold bean definitions,
@@ -11,7 +12,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
- * @version $Id: BeanDefinitionRegistry.java,v 1.4 2004-01-13 18:12:07 jhoeller Exp $
+ * @version $Id: BeanDefinitionRegistry.java,v 1.5 2004-01-20 11:26:43 jhoeller Exp $
  */
 public interface BeanDefinitionRegistry {
 
@@ -29,6 +30,13 @@ public interface BeanDefinitionRegistry {
 	String[] getBeanDefinitionNames();
 
 	/**
+	 * Check if this registry contains a bean definition with the given name.
+	 * @param name the name of the bean to look for
+	 * @return if this bean factory contains a bean definition with the given name
+	 */
+	boolean containsBeanDefinition(String name);
+
+	/**
 	 * Return the bean definition for the given bean name.
 	 * @param name name of the bean to find a definition for
 	 * @return the BeanDefinition for this prototype name. Must never return null.
@@ -37,13 +45,6 @@ public interface BeanDefinitionRegistry {
 	 * @throws BeansException in case of errors
 	 */
 	AbstractBeanDefinition getBeanDefinition(String name) throws BeansException;
-
-	/**
-	 * Check if this registry contains a bean definition with the given name.
-	 * @param name the name of the bean to look for
-	 * @return if this bean factory contains a bean definition with the given name
-	 */
-	boolean containsBeanDefinition(String name);
 
 	/**
 	 * Register a new bean definition with this registry.
@@ -56,6 +57,15 @@ public interface BeanDefinitionRegistry {
 	 */
 	void registerBeanDefinition(String name, AbstractBeanDefinition beanDefinition)
 			throws BeansException;
+
+	/**
+	 * Return the aliases for the given bean name, if defined.
+	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * @param name the bean name to check for aliases
+	 * @return the aliases, or an empty array if none
+	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 */
+	String[] getAliases(String name) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to

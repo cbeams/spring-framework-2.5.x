@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Static factory that allows to register existing singleton instances programmatically.
  * @author Rod Johnson
  * @since 06-Jan-03
- * @version $Id: StaticListableBeanFactory.java,v 1.7 2003-12-11 18:20:45 jhoeller Exp $
+ * @version $Id: StaticListableBeanFactory.java,v 1.8 2004-01-20 11:26:43 jhoeller Exp $
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
@@ -33,7 +33,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				return ((FactoryBean) bean).getObject();
 			}
 			catch (Exception ex) {
-				throw new FatalBeanException("Could not get object from FactoryBean", ex);
+				throw new BeanCreationException("FactoryBean threw exception on object creation", ex);
 			}
 		}
 		if (bean == null)

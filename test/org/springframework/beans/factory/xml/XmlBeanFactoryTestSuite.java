@@ -17,9 +17,9 @@ import junit.framework.TestCase;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -35,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.30 2004-01-17 17:02:21 colins Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.31 2004-01-20 11:26:44 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -231,14 +231,14 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
-	public void testPropertyWithBeanIdLocalAttrSubelement() throws Exception {
+	public void testPropertyWithIdRefLocalAttrSubelement() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		TestBean verbose = (TestBean) xbf.getBean("verbose2");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 	
-	public void testPropertyWithBeanIdBeanAttrSubelement() throws Exception {
+	public void testPropertyWithIdRefBeanAttrSubelement() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		TestBean verbose = (TestBean) xbf.getBean("verbose3");
@@ -514,7 +514,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			xbf.getBean("init-method2");
 			fail();
 		}
-		catch (MethodInvocationException ex) {
+		catch (BeanCreationException ex) {
 			assertTrue(ex.getRootCause() instanceof ServletException);
 		}
 	}
@@ -567,7 +567,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		try {
 			xbf.getBean("lazy-and-bad");
 		}
-		catch (MethodInvocationException ex) {
+		catch (BeanCreationException ex) {
 			assertTrue(ex.getRootCause() instanceof ServletException);
 		}
 	}
@@ -793,7 +793,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod7");
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (BeanDefinitionStoreException ex) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 	}
@@ -834,6 +834,32 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(PreparingBean2.prepared);
 		assertTrue(PreparingBean2.destroyed);
 		assertTrue(DependingBean.destroyed);
+	}
+
+	public void testClassNotFoundWithDefault() {
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("classNotFound.xml", getClass()));
+			// should have thrown BeanDefinitionStoreException
+		}
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getRootCause() instanceof ClassNotFoundException);
+			// expected
+		}
+	}
+
+	public void testClassNotFoundWithNoBeanClassLoader() {
+		try {
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
+			reader.setBeanClassLoader(null);
+			reader.loadBeanDefinitions(new ClassPathResource("classNotFound.xml", getClass()));
+			assertTrue(bf.getBeanDefinition("classNotFound") instanceof RootBeanDefinition);
+			assertEquals(((RootBeanDefinition) bf.getBeanDefinition("classNotFound")).getBeanClassName(),
+									 "org.springframework.beans.TestBeana");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			fail("Should not have thrown BeanDefinitionStoreException");
+		}
 	}
 
 

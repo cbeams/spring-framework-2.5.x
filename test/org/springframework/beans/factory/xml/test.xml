@@ -6,7 +6,7 @@
 	<bean id="rod" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>31</value></property>
-		<property name="spouse"><ref external="father"/></property>
+		<property name="spouse"><ref bean="father"/></property>
 	</bean>
 
 	<bean id="roderick" parent="rod">

@@ -16,7 +16,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -67,14 +66,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String INDEX_ATTRIBUTE = "index";
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String REF_ELEMENT = "ref";
-	public static final String BEANID_ELEMENT = "beanid";
+	public static final String IDREF_ELEMENT = "idref";
 	public static final String LIST_ELEMENT = "list";
 	public static final String MAP_ELEMENT = "map";
 	public static final String KEY_ATTRIBUTE = "key";
 	public static final String ENTRY_ELEMENT = "entry";
 	public static final String BEAN_REF_ATTRIBUTE = "bean";
 	public static final String LOCAL_REF_ATTRIBUTE = "local";
-	public static final String EXTERNAL_REF_ATTRIBUTE = "external";
 	public static final String VALUE_ELEMENT = "value";
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
@@ -99,6 +97,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private ClassLoader beanClassLoader;
 
+	private Resource resource;
+
 	private String defaultLazyInit;
 
 	private String defaultDependencyCheck;
@@ -107,9 +107,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 
 	public void registerBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
-	                                Document doc, Resource resource) {
+																			Document doc, Resource resource) {
 		this.beanFactory = beanFactory;
 		this.beanClassLoader = beanClassLoader;
+		this.resource = resource;
 
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
@@ -168,19 +169,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		if (nameAttr != null && !"".equals(nameAttr)) {
 			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
 		}
+
+		if (id == null || "".equals(id) && !aliases.isEmpty()) {
+			id = (String) aliases.remove(0);
+			logger.debug("No XML 'id' specified - using '" + id + "' as ID and " + aliases + " as aliases");
+		}
+
 		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
 		if (id == null || "".equals(id)) {
-			if (!aliases.isEmpty()) {
-				id = (String) aliases.remove(0);
-				logger.debug("No XML id specified - using '" + id + "' as id and " + aliases + " as aliases");
-			}
-			else if (beanDefinition instanceof RootBeanDefinition) {
+			if (beanDefinition instanceof RootBeanDefinition) {
 				id = ((RootBeanDefinition) beanDefinition).getBeanClass().getName();
-				logger.debug("Neither XML id nor name specified - using bean class name [" + id + "] as id");
+				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
 			else {
-				throw new BeanDefinitionStoreException(beanDefinition + " has neither id nor name nor bean class");
+				throw new BeanDefinitionStoreException(this.resource, "", "Child bean definition has neither 'id' nor 'name'");
 			}
 		}
 
@@ -205,16 +208,23 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				parent = ele.getAttribute(PARENT_ATTRIBUTE);
 			}
 			if (className == null && parent == null) {
-				throw new FatalBeanException("No class or parent in bean definition '" + beanName + "'", null);
+				throw new BeanDefinitionStoreException(this.resource, beanName, "Either 'class' or 'parent' is required");
 			}
 
 			AbstractBeanDefinition bd = null;
-			PropertyValues pvs = getPropertyValueSubElements(ele);
+			PropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
 			if (className != null) {
-				Class clazz = Class.forName(className, true, this.beanClassLoader);
-				ConstructorArgumentValues cargs = getConstructorArgSubElements(ele);
-				RootBeanDefinition rbd = new RootBeanDefinition(clazz, cargs, pvs);
+				ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
+				RootBeanDefinition rbd = null;
+
+				if (this.beanClassLoader != null) {
+					Class clazz = Class.forName(className, true, this.beanClassLoader);
+					rbd = new RootBeanDefinition(clazz, cargs, pvs);
+				}
+				else {
+					rbd = new RootBeanDefinition(className, cargs, pvs);
+				}
 
 				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -259,24 +269,25 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
+			bd.setResourceDescription(this.resource.getDescription());
+
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException("Error creating bean with name '" + beanName + "'; " +
-					"class name was [" + className + "]", ex);
+			throw new BeanDefinitionStoreException(this.resource, beanName, "Class [" + className + "] not found", ex);
 		}
 	}
 
 	/**
 	 * Parse constructor argument subelements of the given bean element.
 	 */
-	protected ConstructorArgumentValues getConstructorArgSubElements(Element beanEle) {
+	protected ConstructorArgumentValues getConstructorArgSubElements(String beanName, Element beanEle) {
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && CONSTRUCTOR_ARG_ELEMENT.equals(node.getNodeName())) {
-				parseConstructorArgElement(cargs, (Element) node);
+				parseConstructorArgElement(beanName, cargs, (Element) node);
 			}
 		}
 		return cargs;
@@ -285,13 +296,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse property value subelements of the given bean element.
 	 */
-	protected PropertyValues getPropertyValueSubElements(Element beanEle) {
+	protected PropertyValues getPropertyValueSubElements(String beanName, Element beanEle) {
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && PROPERTY_ELEMENT.equals(node.getNodeName())) {
-				parsePropertyElement(pvs, (Element) node);
+				parsePropertyElement(beanName, pvs, (Element) node);
 			}
 		}
 		return pvs;
@@ -300,19 +311,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a constructor-arg element.
 	 */
-	protected void parseConstructorArgElement(ConstructorArgumentValues cargs, Element ele) throws DOMException {
-		Object val = getPropertyValue(ele);
+	protected void parseConstructorArgElement(String beanName, ConstructorArgumentValues cargs, Element ele)
+			throws DOMException {
+		Object val = getPropertyValue(ele, beanName);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		if (!"".equals(indexAttr)) {
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
-					throw new FatalBeanException("'index' cannot be lower than 0");
+					throw new BeanDefinitionStoreException(this.resource, beanName, "'index' cannot be lower than 0");
 				}
 				cargs.addIndexedArgumentValue(index, val);
 			}
 			catch (NumberFormatException ex) {
-				throw new FatalBeanException("Attribute 'index' of tag 'constructor-arg' must be an integer");
+				throw new BeanDefinitionStoreException(this.resource, beanName,
+																							 "Attribute 'index' of tag 'constructor-arg' must be an integer");
 			}
 		}
 		else {
@@ -323,12 +336,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a property element.
 	 */
-	protected void parsePropertyElement(MutablePropertyValues pvs, Element ele) throws DOMException {
+	protected void parsePropertyElement(String beanName, MutablePropertyValues pvs, Element ele)
+			throws DOMException {
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if ("".equals(propertyName)) {
-			throw new BeanDefinitionStoreException("Tag 'property' must have a 'name' attribute");
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "Tag 'property' must have a 'name' attribute");
 		}
-		Object val = getPropertyValue(ele);
+		Object val = getPropertyValue(ele, beanName);
 		pvs.addPropertyValue(new PropertyValue(propertyName, val));
 	}
 
@@ -336,7 +351,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Get the value of a property element. May be a list.
 	 * @param ele property element
 	 */
-	protected Object getPropertyValue(Element ele) {
+	protected Object getPropertyValue(Element ele, String beanName) {
 		// should only have one element child: value, ref, collection
 		NodeList nl = ele.getChildNodes();
 		Element valueRefOrCollectionElement = null;
@@ -355,77 +370,76 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		if (valueRefOrCollectionElement == null) {
 			throw new BeanDefinitionStoreException("<property> element must have a value, ref, or collection subelement");
 		}
-		return parsePropertySubelement(valueRefOrCollectionElement);
+		return parsePropertySubelement(valueRefOrCollectionElement, beanName);
 	}
 
 	/**
 	 * Parse a value, ref or collection subelement of a property element
 	 * @param ele subelement of property element; we don't know which yet
 	 */
-	protected Object parsePropertySubelement(Element ele) {
+	protected Object parsePropertySubelement(Element ele, String beanName) {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
 			return parseBeanDefinition(ele, "(inner bean definition)");
 		}
 		else if (ele.getTagName().equals(REF_ELEMENT)) {
 			// a generic reference to any name of any bean
-			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
-			if ("".equals(beanName)) {
+			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			if ("".equals(beanRef)) {
 				// a reference to the id of another bean in the same XML file
-				beanName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if ("".equals(beanName)) {
-					// a reference to a bean in a different XML file
-					beanName = ele.getAttribute(EXTERNAL_REF_ATTRIBUTE);
-					if ("".equals(beanName)) {
-						throw new FatalBeanException("Either 'bean' or 'local' or 'external' is required for a reference");
-					}
+				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				if ("".equals(beanRef)) {
+					throw new BeanDefinitionStoreException(this.resource, beanRef,
+																								 "Either 'bean' or 'local' is required for a reference");
 				}
 			}
-			return new RuntimeBeanReference(beanName);
+			return new RuntimeBeanReference(beanRef);
 		}
-		else if (ele.getTagName().equals(BEANID_ELEMENT)) {
+		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
 			// a generic reference to any name of any bean
-			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
-			if ("".equals(beanName)) {
+			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			if ("".equals(beanRef)) {
 				// a reference to the id of another bean in the same XML file
-				beanName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if ("".equals(beanName)) {
-					throw new FatalBeanException("Either 'bean' or 'local' is required for a beanid");
+				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				if ("".equals(beanRef)) {
+					throw new BeanDefinitionStoreException(this.resource, beanRef,
+																								 "Either 'bean' or 'local' is required for an idref");
 				}
 			}
-			return beanName;
+			return beanRef;
 		}
 		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
 			// it's a literal value
-			return getTextValue(ele);
+			return getTextValue(ele, beanName);
 		}
 		else if (ele.getTagName().equals(LIST_ELEMENT)) {
-			return getList(ele);
+			return getList(ele, beanName);
 		}
 		else if (ele.getTagName().equals(MAP_ELEMENT)) {
-			return getMap(ele);
+			return getMap(ele, beanName);
 		}
 		else if (ele.getTagName().equals(PROPS_ELEMENT)) {
-			return getProps(ele);
+			return getProps(ele, beanName);
 		}
-		throw new BeanDefinitionStoreException("Unknown subelement of <property>: <" + ele.getTagName() + ">", null);
+		throw new BeanDefinitionStoreException(this.resource, beanName,
+																					 "Unknown subelement of <property>: <" + ele.getTagName() + ">");
 	}
 
 	/**
 	 * Return list of collection.
 	 */
-	protected List getList(Element collectionEle) {
+	protected List getList(Element collectionEle, String beanName) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList l = new ManagedList();
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				l.add(parsePropertySubelement(ele));
+				l.add(parsePropertySubelement(ele, beanName));
 			}
 		}
 		return l;
 	}
 
-	protected Map getMap(Element mapEle) {
+	protected Map getMap(Element mapEle, String beanName) {
 		ManagedMap m = new ManagedMap();
 		List l = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		for (int i = 0; i < l.size(); i++) {
@@ -433,7 +447,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			String key = entryEle.getAttribute(KEY_ATTRIBUTE);
 			// TODO hack: make more robust
 			NodeList subEles = entryEle.getElementsByTagName("*");
-			m.put(key, parsePropertySubelement((Element) subEles.item(0)));
+			m.put(key, parsePropertySubelement((Element) subEles.item(0), beanName));
 		}
 		return m;
 	}
@@ -454,13 +468,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return nodes;
 	}
 
-	protected Properties getProps(Element propsEle) {
+	protected Properties getProps(Element propsEle, String beanName) {
 		Properties p = new Properties();
 		NodeList nl = propsEle.getElementsByTagName(PROP_ELEMENT);
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element propEle = (Element) nl.item(i);
 			String key = propEle.getAttribute(KEY_ATTRIBUTE);
-			String value = getTextValue(propEle);
+			String value = getTextValue(propEle, beanName);
 			p.setProperty(key, value);
 		}
 		return p;
@@ -470,15 +484,16 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Make the horrible DOM API slightly more bearable:
 	 * get the text value we know this element contains
 	 */
-	protected String getTextValue(Element ele) {
+	protected String getTextValue(Element ele, String beanName) {
 		NodeList nl = ele.getChildNodes();
 		if (nl.item(0) == null) {
 			// treat empty value as empty String
 			return "";
 		}
 		if (nl.getLength() != 1 || !(nl.item(0) instanceof Text)) {
-			throw new FatalBeanException("Unexpected element or type mismatch: expected single node of " +
-																	 nl.item(0).getClass() + " to be of type Text: " + "found " + ele, null);
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "Unexpected element or type mismatch: expected single node of " +
+																						 nl.item(0).getClass() + " to be of type Text: " + "found " + ele, null);
 		}
 		Text t = (Text) nl.item(0);
 		// This will be a String

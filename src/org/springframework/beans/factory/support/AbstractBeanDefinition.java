@@ -20,15 +20,19 @@ import org.springframework.beans.PropertyValues;
  * to return direct references to objects defined by BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.8 2004-01-14 07:36:59 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: AbstractBeanDefinition.java,v 1.9 2004-01-20 11:26:43 jhoeller Exp $
  */
 public abstract class AbstractBeanDefinition {
-	
+
 	private PropertyValues propertyValues;
 
 	private boolean singleton = true;
 
 	private boolean lazyInit = false;
+
+	private String resourceDescription;
+
 
 	/**
 	 * Set the PropertyValues to be applied to a new instance of this bean.
@@ -90,6 +94,14 @@ public abstract class AbstractBeanDefinition {
 	 */
 	public boolean isLazyInit() {
 		return lazyInit;
+	}
+
+	public void setResourceDescription(String resourceDescription) {
+		this.resourceDescription = resourceDescription;
+	}
+
+	public String getResourceDescription() {
+		return resourceDescription;
 	}
 
 	/**

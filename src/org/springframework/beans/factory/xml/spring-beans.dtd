@@ -31,7 +31,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.18 2004-01-17 17:02:10 colins Exp $
+	$Id: spring-beans.dtd,v 1.19 2004-01-20 11:26:43 jhoeller Exp $
 -->
 
 <!--
@@ -211,7 +211,7 @@
 -->
 <!ELEMENT property (
         description?,
-        (bean | ref | list | map | props | value | beanid)
+        (bean | ref | idref | list | map | props | value)
 )>
 
 <!--
@@ -234,13 +234,29 @@
 	Local references, using the "local" attribute, have to use bean ids;
 	they can be checked by this DTD, thus should be preferred for references
 	within the same bean factory XML file.
-	The "external" attribute can be used to explictly indicate a reference to
-	a bean outside the current XML file; they can be checked only at runtime,
-	just like the generic "bean" attribute.
 -->
 <!ATTLIST ref bean CDATA #IMPLIED>
 <!ATTLIST ref local IDREF #IMPLIED>
-<!ATTLIST ref external CDATA #IMPLIED>
+
+<!--
+	Defines a string property value, which must also be the id of another
+	bean in this factory or an external factory (parent or included factory).
+	While a regular 'value' element could instead be used for the same effect,
+	using idref in this case allows validation of local bean ids by the xml
+	parser, and name completion by helper tools.
+-->
+<!ELEMENT idref EMPTY>
+
+<!--
+	ID refs must specify a name of the target bean.
+	The "bean" attribute can reference any name from any bean in the context,
+	to be checked at runtime by future Spring implementations.
+	Local references, using the "local" attribute, have to use bean ids;
+	they can be checked by this DTD, thus should be preferred for references
+	within the same bean factory XML file.
+-->
+<!ATTLIST idref bean CDATA #IMPLIED>
+<!ATTLIST idref local IDREF #IMPLIED>
 
 <!--
 	A list can contain multiple inner bean, ref, collection, or value elements.
@@ -250,7 +266,7 @@
 	is automatically performed by AbstractBeanFactory. 
 -->
 <!ELEMENT list (
-        (bean | ref | list | map | props | value | beanid)*
+        (bean | ref | idref | list | map | props | value)*
 )>
 
 <!--
@@ -266,7 +282,7 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (bean | ref | list | map | props | value | beanid)
+        (bean | ref | idref | list | map | props | value)
 )>
 
 <!ATTLIST entry key CDATA #REQUIRED>
@@ -306,23 +322,3 @@
 	properties to references to other beans.
 -->
 <!ELEMENT value (#PCDATA)>
-
-<!--
-	Defines a string property value, which must also be the id of another
-	bean in this factory or an external factory (parent or included factory).
-	While a regular 'value' element could instead be used for the same effect,
-	using beanid in this case allows validation of local bean ids by the xml
-	parser, and name completion by helper tools.
--->
-<!ELEMENT beanid EMPTY>
-
-<!--
-	Beanids must specify a name of the target bean.
-	The "bean" attribute can reference any name from any bean in the context,
-	to be checked at runtime by future Spring implementations.
-	Local references, using the "local" attribute, have to use bean ids;
-	they can be checked by this DTD, thus should be preferred for references
-	within the same bean factory XML file.
--->
-<!ATTLIST beanid bean CDATA #IMPLIED>
-<!ATTLIST beanid local IDREF #IMPLIED>

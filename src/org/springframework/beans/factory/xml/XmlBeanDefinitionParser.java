@@ -26,6 +26,9 @@ public interface XmlBeanDefinitionParser {
 	 * and register them with the given bean factory.
 	 * @param beanFactory the bean factory to register the bean definitions with
 	 * @param beanClassLoader class loader to use for bean classes
+	 * (null suggests to not load bean classes but just register bean definitions
+	 * with class names, for example when just registering beans in a registry
+	 * but not actually instantiating them in a factory)
 	 * @param doc the DOM document
 	 * @param resource descriptor of the original XML resource
 	 * (useful for displaying parse errors)

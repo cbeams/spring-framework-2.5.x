@@ -90,7 +90,7 @@
 				<ref local="david"/>
 				<value>literal</value>
 				<ref local="jenny" />
-				<beanid local="rod" />
+				<idref local="rod" />
 			</list>
 		</property>
 	</bean>
@@ -100,11 +100,11 @@
 	</bean>
 	
 	<bean id="verbose2" class="org.springframework.beans.TestBean">	
-		<property name="name"><beanid local="verbose"/></property>
+		<property name="name"><idref local="verbose"/></property>
 	</bean>
 
 	<bean id="verbose3" class="org.springframework.beans.TestBean">	
-		<property name="name"><beanid bean="verbose"/></property>
+		<property name="name"><idref bean="verbose"/></property>
 	</bean>
 
 	<!--
@@ -148,7 +148,7 @@
 			<map>
 				<entry key="foo"><value>bar</value></entry>
 				<entry key="jenny"><ref local="jenny"/></entry>
-				<entry key="david"><beanid bean="david"/></entry>
+				<entry key="david"><idref bean="david"/></entry>
 			</map>
 		</property>
 	</bean>

@@ -17,7 +17,6 @@ import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -39,7 +38,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.4 2004-01-01 23:45:50 jhoeller Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.5 2004-01-20 11:26:43 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -128,8 +127,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				if (is != null)
 					is.close();
 			}
-			catch (IOException ex) {
-				throw new FatalBeanException("IOException closing stream for XML document from " + resource, ex);
+			catch (IOException ignore) {
 			}
 		}
 	}
