@@ -3,8 +3,6 @@
 <!--
   Build file for the Spring Framework.
 
-  $Id: build.xml,v 1.77 2004-08-16 15:25:33 jhoeller Exp $
-
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
 
@@ -430,6 +428,7 @@
 				<include name="lib/jdo/**"/>
 				<include name="lib/jdom/**"/>
 				<include name="lib/jotm/**"/>
+				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/ojb/**"/>
