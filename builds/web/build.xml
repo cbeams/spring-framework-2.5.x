@@ -57,8 +57,8 @@
 	</target>
 
 	<!-- copy business/persistence layer configuration files -->
-	<target name="build.conf" depends="build.prepare" if="conf.exists" description="Copy configuration files to WEB-INF if they exist.">
-		<copy todir="${target.webinf.dir}" filtering="on">
+	<target name="build.conf" depends="build.prepare, toplevel.build.conf" if="conf.exists" description="Copy configuration files to WEB-INF if they exist.">
+		<copy todir="${target.webinf.dir}/classes" filtering="on">
 			<fileset dir="${target.conf.dir}">
 				<patternset refid="webroot.config.files" />
 			</fileset>
