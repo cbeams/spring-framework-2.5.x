@@ -120,7 +120,7 @@ TT {
 }
 
 PRE {
-    font-size: 70%;
+    font-size: 90%;
     padding: 5px;
     border-style: solid;
     border-width: 1px;
@@ -157,5 +157,9 @@ HR  {
     font-weight:bold;
 }
 
+.mediaobject {
+    padding-top: 30px; 
+    padding-bottom: 30px; 
+}
 
     
