@@ -85,6 +85,9 @@
 			<fileset dir="${spring.root}/lib/aopalliance">
 				<include name="aopalliance.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/c3p0">
+				<include name="c3p0*.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/cos">
 				<include name="cos.jar"/>
 			</fileset>
@@ -92,11 +95,8 @@
 				<include name="freemarker.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-collections.jar"/>
-				<include name="commons-dbcp.jar"/>
 				<include name="commons-fileupload.jar"/>
 				<include name="commons-logging.jar"/>
-				<include name="commons-pool.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="activation.jar"/>
