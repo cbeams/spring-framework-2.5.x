@@ -23,13 +23,17 @@ public interface FormModel {
 
     public void removeValidationListener(ValidationListener listener);
 
+    public void addValueListener(String formProperty, ValueListener listener);
+
+    public void removeValueListener(String formProperty, ValueListener listener);
+
     public Object getFormObject();
-    
+
     public ValueModel getFormObjectHolder();
 
-    public Object getValue(String domainObjectProperty);
-    
-    public ValueModel getValueModel(String domainObjectProperty);
+    public Object getValue(String formProperty);
+
+    public ValueModel getValueModel(String formProperty);
 
     public boolean hasErrors();
 

@@ -79,6 +79,30 @@ public class DefaultFormModel implements MutableFormModel {
         throw new UnsupportedOperationException();
     }
 
+    public void addValueListener(String formProperty,
+            ValueListener valueListener) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        valueModel.addValueListener(valueListener);
+    }
+
+    public void removeValueListener(String formProperty,
+            ValueListener valueListener) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        valueModel.removeValueListener(valueListener);
+    }
+
+    private void assertValueModelNotNull(ValueModel valueModel,
+            String formProperty) {
+        Assert
+                .isTrue(
+                        valueModel != null,
+                        "The property '"
+                                + formProperty
+                                + "' has not been added to this form model (or to any parents.)");
+    }
+
     public ValueModel add(String domainObjectProperty) {
         return add(domainObjectProperty, this.bufferChanges);
     }
@@ -108,10 +132,10 @@ public class DefaultFormModel implements MutableFormModel {
         return formValueModel;
     }
 
-    public ValueModel add(String domainObjectProperty,
-            ValueModel formValueModel) {
+    public ValueModel add(String domainObjectProperty, ValueModel formValueModel) {
         if (formValueModel instanceof BufferedValueModel) {
-            ((BufferedValueModel)formValueModel).setCommitTrigger(commitTrigger);
+            ((BufferedValueModel)formValueModel)
+                    .setCommitTrigger(commitTrigger);
         }
         formValueModel = onPreProcessNewFormValueModel(domainObjectProperty,
                 formValueModel);
@@ -130,19 +154,14 @@ public class DefaultFormModel implements MutableFormModel {
 
     }
 
-    public Object getValue(String domainObjectProperty) {
-        ValueModel valueModel = getValueModel(domainObjectProperty);
-        Assert
-                .isTrue(
-                        valueModel != null,
-                        "The property '"
-                                + domainObjectProperty
-                                + "' value model has not been added to this form model (or to any parents.)");
+    public Object getValue(String formProperty) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
         return valueModel.get();
     }
 
-    public ValueModel getValueModel(String domainObjectProperty) {
-        return getValueModel(domainObjectProperty, true);
+    public ValueModel getValueModel(String formProperty) {
+        return getValueModel(formProperty, true);
     }
 
     public ValueModel getValueModel(String domainObjectProperty,
@@ -189,7 +208,7 @@ public class DefaultFormModel implements MutableFormModel {
     public void commit() {
         if (bufferChanges) {
             if (hasErrors()) { throw new IllegalStateException(
-                    "Form has errors; submit not allowed"); }
+                    "Form has errors; submit not allowed."); }
             commitTrigger.set(Boolean.TRUE);
             commitTrigger.set(null);
         }

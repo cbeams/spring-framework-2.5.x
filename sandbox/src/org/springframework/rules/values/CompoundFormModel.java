@@ -64,7 +64,8 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName) {
         Assert.isTrue(getChildFormModel(childFormModelName) == null,
-                "Child model by name '" + childFormModelName + "' already exists");
+                "Child model by name '" + childFormModelName
+                        + "' already exists");
         ValidatingFormModel childModel = new ValidatingFormModel(
                 domainObjectAccessStrategy, bufferChanges);
         childModel.setRulesSource(rulesSource);
@@ -73,9 +74,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return childModel;
     }
 
-    /**
-     * @see org.springframework.rules.values.FormModel#addValidationListener(org.springframework.rules.values.ValidationListener)
-     */
     public void addValidationListener(final ValidationListener listener) {
         Algorithms.instance().forEach(formModels.values(),
                 new UnaryProcedure() {
@@ -85,32 +83,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
-    public Object getValue(String domainObjectProperty) {
-        ValueModel valueModel = getValueModel(domainObjectProperty);
-        Assert.isTrue(valueModel != null,
-                "Value model does not exist on any child form models for property "
-                        + domainObjectProperty);
-        return valueModel.get();
-    }
-
-    public ValueModel getValueModel(String domainObjectProperty) {
-        return findValueModelFor(null, domainObjectProperty);
-    }
-
-    public ValueModel findValueModelFor(FormModel delegatingChild, String domainObjectProperty) {
-        Iterator it = formModels.values().iterator();
-        while (it.hasNext()) {
-            NestableFormModel formModel = (NestableFormModel)it.next();
-            if (delegatingChild != null && formModel == delegatingChild) {
-                continue;
-            }
-            ValueModel valueModel = formModel
-                    .getValueModel(domainObjectProperty, false);
-            if (valueModel != null) { return valueModel; }
-        }
-        return null;
-    }
-    
     public void addValidationListener(ValidationListener listener,
             String childModelName) {
         FormModel model = getChildFormModel(childModelName);
@@ -131,9 +103,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return (FormModel)formModels.get(childModelName);
     }
 
-    /**
-     * @see org.springframework.rules.values.FormModel#removeValidationListener(org.springframework.rules.values.ValidationListener)
-     */
     public void removeValidationListener(final ValidationListener listener) {
         Algorithms.instance().forEach(formModels.values(),
                 new UnaryProcedure() {
@@ -144,6 +113,55 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
+    public void addValueListener(String formProperty,
+            ValueListener valueListener) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        valueModel.addValueListener(valueListener);
+    }
+
+    public void removeValueListener(String formProperty,
+            ValueListener valueListener) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        valueModel.removeValueListener(valueListener);
+    }
+
+    private void assertValueModelNotNull(ValueModel valueModel,
+            String formProperty) {
+        Assert
+                .isTrue(
+                        valueModel != null,
+                        "The property '"
+                                + formProperty
+                                + "' has not been added to this form model (or to any parents.)");
+    }
+
+    public Object getValue(String formProperty) {
+        ValueModel valueModel = getValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        return valueModel.get();
+    }
+
+    public ValueModel getValueModel(String formProperty) {
+        return findValueModelFor(null, formProperty);
+    }
+
+    public ValueModel findValueModelFor(FormModel delegatingChild,
+            String domainObjectProperty) {
+        Iterator it = formModels.values().iterator();
+        while (it.hasNext()) {
+            NestableFormModel formModel = (NestableFormModel)it.next();
+            if (delegatingChild != null && formModel == delegatingChild) {
+                continue;
+            }
+            ValueModel valueModel = formModel.getValueModel(
+                    domainObjectProperty, false);
+            if (valueModel != null) { return valueModel; }
+        }
+        return null;
+    }
+
     public Object getFormObject() {
         return domainObjectAccessStrategy.getDomainObject();
     }
@@ -152,9 +170,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return domainObjectAccessStrategy.getDomainObjectHolder();
     }
 
-    /**
-     * @see org.springframework.rules.values.FormModel#hasErrors()
-     */
     public boolean hasErrors() {
         return Algorithms.instance().areAnyTrue(formModels.values(),
                 new UnaryPredicate() {
@@ -171,9 +186,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         return model.hasErrors();
     }
 
-    /**
-     * @see org.springframework.rules.values.FormModel#commit()
-     */
     public void commit() {
         Algorithms.instance().forEach(formModels.values(),
                 new UnaryProcedure() {
@@ -183,9 +195,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
-    /**
-     * @see org.springframework.rules.values.FormModel#revert()
-     */
     public void revert() {
         Algorithms.instance().forEach(formModels.values(),
                 new UnaryProcedure() {
