@@ -26,6 +26,7 @@ import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * <p>Variant of SingletonBeanFactoryLocator which creates its internal bean
@@ -78,6 +79,12 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * definition.
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws BeansException {
+		
+		// for backwards compatibility, we prepend 'classpath*:' to the selector name if there
+		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix
+		if (selector.indexOf(':') == -1)
+			selector = ResourcePatternResolver.CLASSPATH_URL_PREFIX + selector;
+		
 		synchronized (instances) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +

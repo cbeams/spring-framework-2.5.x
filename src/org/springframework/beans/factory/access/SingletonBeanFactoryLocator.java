@@ -309,6 +309,12 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * or multiple fragments with this name must form a valid BeanFactory definition.
 	 */
 	public static BeanFactoryLocator getInstance(String selector) throws FatalBeanException {
+		
+		// for backwards compatibility, we prepend 'classpath*:' to the selector name if there
+		// is no other prefix (i.e. classpath*:, classpath:, or some URL prefix
+		if (selector.indexOf(':') == -1)
+			selector = ResourcePatternResolver.CLASSPATH_URL_PREFIX + selector;
+		
 		synchronized (instances) {
 			// debugging trace only
 			//if (logger.isDebugEnabled()) {
