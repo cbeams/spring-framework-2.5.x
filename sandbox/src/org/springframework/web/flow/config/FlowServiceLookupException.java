@@ -1,21 +1,37 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow.config;
 
 import org.springframework.util.StringUtils;
 
 /**
+ * Abstract superclass of all flow service lookup exceptions.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
-public class FlowServiceLookupException extends RuntimeException {
+public abstract class FlowServiceLookupException extends RuntimeException {
 
 	private String serviceId;
 
 	private Class serviceImplementationClass;
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceId The id of the service that cannot be found
 	 */
 	public FlowServiceLookupException(String serviceId) {
 		super();
@@ -23,7 +39,9 @@ public class FlowServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceId The id of the service that cannot be found
+	 * @param cause The underlying cause of this exception
 	 */
 	public FlowServiceLookupException(String serviceId, Throwable cause) {
 		super(cause);
@@ -31,7 +49,10 @@ public class FlowServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceId The id of the service that cannot be found
+	 * @param message Descriptive message
+	 * @param cause The underlying cause of this exception
 	 */
 	public FlowServiceLookupException(String serviceId, String message, Throwable cause) {
 		super(message, cause);
@@ -39,7 +60,9 @@ public class FlowServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceImplementationClass The required implementation class of
+	 *        the service that cannot be found
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass) {
 		super();
@@ -47,7 +70,10 @@ public class FlowServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceImplementationClass The required implementation class of
+	 *        the service that cannot be found
+	 * @param cause The underlying cause of this exception
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass, Throwable cause) {
 		super(cause);
@@ -55,7 +81,11 @@ public class FlowServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * 
+	 * Create a new service lookup exception
+	 * @param serviceImplementationClass The required implementation class of
+	 *        the service that cannot be found
+	 * @param message Descriptive message
+	 * @param cause The underlying cause of this exception
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
 		super(message, cause);
@@ -78,18 +108,30 @@ public class FlowServiceLookupException extends RuntimeException {
 		}
 	}
 
+	/**
+	 * @return true if lookup by service id failed, false otherwise
+	 */
 	public boolean isServiceIdLookupFailure() {
 		return StringUtils.hasText(serviceId);
 	}
 
+	/**
+	 * @return true if lookup by service type failed, false otherwise
+	 */
 	public boolean isServiceTypeLookupFailure() {
 		return serviceImplementationClass != null;
 	}
 
+	/**
+	 * @return the id of the service that cannot be found
+	 */
 	public String getServiceId() {
 		return serviceId;
 	}
 
+	/**
+	 * @return the required implementation class of the service that cannot be found
+	 */
 	public Class getServiceImplementationClass() {
 		return serviceImplementationClass;
 	}

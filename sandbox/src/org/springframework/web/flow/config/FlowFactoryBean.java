@@ -1,5 +1,17 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.web.flow.config;
 
@@ -11,7 +23,17 @@ import org.springframework.web.flow.Flow;
 /**
  * Factory bean that acts as a director for assembling flows, delegating to a
  * builder to construct the Flow.
+ * 
+ * <p>
+ * This factory bean can also be used outside of a Spring bean factory, in 
+ * a standalone fashion:
+ * <pre>
+ * FlowBuilder builder=...;
+ * Flow flow=new FlowFactoryBean(builder).getFlow();
+ * </pre>
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
@@ -19,14 +41,30 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
 	private Flow flow;
 
+	/**
+	 * Create a new flow factory bean.
+	 */
 	public FlowFactoryBean() {
-
 	}
 
+	/**
+	 * Create a new flow factory bean.
+	 * @param flowBuilder The builder the factory will use to build flows.
+	 */
 	public FlowFactoryBean(FlowBuilder flowBuilder) {
 		setFlowBuilder(flowBuilder);
 	}
+	
+	/**
+	 * @return The builder the factory uses to build flows.
+	 */
+	protected FlowBuilder getFlowBuilder() {
+		return this.flowBuilder;
+	}
 
+	/**
+	 * @param flowBuilder The builder the factory will use to build flows.
+	 */
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
 		this.flowBuilder = flowBuilder;
 	}
@@ -52,14 +90,13 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 		return getFlowBuilder().getClass().equals(builderImplementationClass);
 	}
 
-	protected FlowBuilder getFlowBuilder() {
-		return this.flowBuilder;
-	}
-	
 	public Object getObject() throws Exception {
 		return getFlow();
 	}
 
+	/**
+	 * @return The flow built by this factory.
+	 */
 	public Flow getFlow() {
 		if (this.flow == null) {
 			new FlowAssembler(this.flowBuilder).assemble();
@@ -76,6 +113,9 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 		return true;
 	}
 
+	/**
+	 * Helper class to direct flow construction using the builder.
+	 */
 	private static class FlowAssembler {
 		private FlowBuilder builder;
 

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.web.flow.config;
 
 import java.io.IOException;
@@ -10,6 +25,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
@@ -29,7 +45,59 @@ import org.xml.sax.SAXParseException;
 
 /**
  * Flow builder that builds a flow based on the definitions found in an XML
- * file.
+ * file. The XML files read by this class should use the following doctype:
+ * <pre>
+ * &lt;!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
+ * 		"http://www.springframework.org/dtd/web-flow.dtd"&gt;
+ * </pre>
+ * 
+ * <p>
+ * Consult the web flow DTD for more information on the XML definition format.
+ * 
+ * <p>
+ * An object of this class is normally configured in the Spring application
+ * context.<br>
+ * <b>Exposed configuration properties</b><br>
+ * <table border="1">
+ *  <tr>
+ *      <td><b>name</b></td>
+ *      <td><b>default</b></td>
+ *      <td><b>description</b></td>
+ *  </tr>
+ *  <tr>
+ *      <td>resource</td>
+ *      <td><i>null</i></td>
+ *      <td>Specifies the resource from which the flow definition is loaded.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>validating</td>
+ *      <td><i>true</i></td>
+ *      <td>Set if the XML parser should validate the document and thus enforce a DTD.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>entityResolver</td>
+ *      <td><i>FlowDtdResolver</i></td>
+ *      <td>Set a SAX entity resolver to be used for parsing.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>flowServiceLocator</td>
+ *      <td><i>BeanFactoryFlowServiceLocator</i></td>
+ *      <td>Set the flow service location strategy to use.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>flowExecutionListeners</td>
+ *      <td><i>empty</i></td>
+ *      <td>Set the default listeners that will be associated with each execution
+ *          of the flow created by this builder.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>flowCreator</td>
+ *      <td><i>DefaultFlowCreator</i></td>
+ *      <td>Set the flow creation strategy to use.</td>
+ *  </tr>
+ * </table>
+ * 
+ * @see org.springframework.web.flow.config.FlowFactoryBean
  * 
  * @author Erwin Vervaet
  */
@@ -75,20 +143,40 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private EntityResolver entityResolver = new FlowDtdResolver();
 
+	/**
+	 * Create a new XML flow builder.
+	 */
 	public XmlFlowBuilder() {
 	}
 
+	/**
+	 * Create a new XML flow builder.
+	 * @param resource Resource to read XML flow definitions from
+	 */
 	public XmlFlowBuilder(Resource resource) {
 		this.resource = resource;
 	}
 
+	/**
+	 * Create a new XML flow builder.
+	 * @param resource Resource to read XML flow definitions from
+	 * @param flowServiceLocator The flow service location strategy to use
+	 */
+	public XmlFlowBuilder(Resource resource, FlowServiceLocator flowServiceLocator) {
+		this.resource = resource;
+		setFlowServiceLocator(flowServiceLocator);
+	}
+
+	/**
+	 * Set the resource from which XML flow definitions will be read. 
+	 */
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
 
 	/**
 	 * Set if the XML parser should validate the document and thus enforce a
-	 * DTD.
+	 * DTD. Defaults to true.
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
@@ -99,13 +187,17 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * FlowDtdResolver will be used. Can be overridden for custom entity
 	 * resolution, for example relative to some specific base path.
 	 * 
-	 * @see FlowDtdResolver
+	 * @see org.springframework.web.flow.config.FlowDtdResolver
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
 	}
-
+	
 	public void init() throws FlowBuilderException {
+		Assert.notNull(resource, "resource is a required property");
+		Assert.notNull(getFlowServiceLocator(), "flowServiceLocator is a required property");
+		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
+		
 		try {
 			doc = loadFlowDefinition();
 		}
@@ -124,6 +216,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		setFlow(parseFlowDefinition(doc));
 	}
 
+	/**
+	 * Load the flow definition from the configured resource. 
+	 */
 	protected Document loadFlowDefinition() throws IOException, ParserConfigurationException, SAXException {
 		InputStream is = null;
 		try {
@@ -159,6 +254,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
+	/**
+	 * Parse given XML flow definitions and construct a Flow object.
+	 */
 	protected Flow parseFlowDefinition(Document doc) {
 		Element root = doc.getDocumentElement();
 		String id = root.getAttribute(ID_ATTRIBUTE);
@@ -191,6 +289,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return flow;
 	}
 
+	/**
+	 * Parse given action state definition and add a corresponding state
+	 * to given flow. 
+	 */
 	protected void parseAndAddActionState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String[] actionNames = parseActionNames(element);
@@ -199,6 +301,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		new ActionState(flow, id, actionNames, actions, transitions);
 	}
 
+	/**
+	 * Parse given view state definition and add a corresponding state
+	 * to given flow. 
+	 */
 	protected void parseAndAddViewState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String viewName = parseViewName(element);
@@ -206,6 +312,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		new ViewState(flow, id, viewName, transitions);
 	}
 
+	/**
+	 * Parse given sub flow state definition and add a corresponding state
+	 * to given flow. 
+	 */
 	protected void parseAndAddSubFlowState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
@@ -218,12 +328,22 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		new SubFlowState(flow, id, subFlow, mapper, transitions);
 	}
 
+	/**
+	 * Parse given end state definition and add a corresponding state
+	 * to given flow. 
+	 */
 	protected void parseAndAddEndState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String viewName = parseViewName(element);
 		new EndState(flow, id, viewName);
 	}
 	
+	/**
+	 * Find all action names (for named actions) in given action state definition. 
+	 * Unnamed actions have a [null] action name.
+	 * The returned array should contain a name (or [null]) for each Action returned
+	 * by the <code>parseActions()</code> method.
+	 */
 	protected String[] parseActionNames(Element element) {
 		List actionNames = new LinkedList();
 		
@@ -246,6 +366,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return (String[])actionNames.toArray(new String[actionNames.size()]);
 	}
 
+	/**
+	 * Find all action definitions in given action state definition and
+	 * obtain corresponding Action objects.
+	 */
 	protected Action[] parseActions(Element element) {
 		List actions = new LinkedList();
 
@@ -262,11 +386,18 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return (Action[])actions.toArray(new Action[actions.size()]);
 	}
 
+	/**
+	 * Parse given action definition and return a corresponding Action object.
+	 */
 	protected Action parseAction(Element element) {
 		String bean = element.getAttribute(BEAN_ATTRIBUTE);
 		return getFlowServiceLocator().getAction(bean);
 	}
 
+	/**
+	 * Find all transition definitions in given state definition and return 
+	 * a list of corresponding Transition objects.
+	 */
 	protected Transition[] parseTransitions(Element element) {
 		List transitions = new LinkedList();
 
@@ -283,12 +414,20 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
 
+	/**
+	 * Parse a transition definition and return a corresponding Transition object.
+	 */
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
 		return new Transition(event, to);
 	}
 
+	/**
+	 * Obtain a logical view name from given state definition. Could return
+	 * null if there is no logical view name specified (that is, the state
+	 * definition defines a <i>marker</i> state).
+	 */
 	protected String parseViewName(Element element) {
 		String viewName = element.getAttribute(ID_ATTRIBUTE);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {

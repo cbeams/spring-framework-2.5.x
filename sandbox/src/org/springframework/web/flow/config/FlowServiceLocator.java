@@ -24,58 +24,68 @@ import org.springframework.web.flow.FlowAttributesMapper;
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  */
 public interface FlowServiceLocator {
 
 	/**
-	 * @param actionId
-	 * @return
-	 * @throws NoSuchActionException
+	 * Lookup an action with specified id.
+	 * @param actionId The action id
+	 * @return The action
+	 * @throws FlowServiceLookupException When the action cannot be found
 	 */
 	public Action getAction(String actionId) throws FlowServiceLookupException;
 
 	/**
-	 * @param actionImplementationClass
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup an action of specified implementation class.
+	 * @param actionImplementationClass The required implementation class
+	 * @return the action
+	 * @throws FlowServiceLookupException When the action cannot be found
 	 */
 	public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException;
 
 	/**
-	 * @param flowDefinitionId
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup a flow with specified id.
+	 * @param flowDefinitionId The flow id
+	 * @return The flow
+	 * @throws FlowServiceLookupException When the flow cannot be found
 	 */
 	public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException;
 
 	/**
-	 * @param flowDefinitionId
-	 * @param requiredFlowBuilderImplementationClass
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup a flow build by specified type of flow builder.
+	 * @param flowDefinitionId the flow id
+	 * @param requiredFlowBuilderImplementationClass The required builder type
+	 * @return the flow
+	 * @throws FlowServiceLookupException When the flow cannot be found
 	 */
 	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
 			throws FlowServiceLookupException;
 
 	/**
-	 * @param flowDefinitionImplementationClass
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup a flow of specified implementation class.
+	 * @param flowDefinitionImplementationClass The required implementation class.
+	 * @return The flow
+	 * @throws FlowServiceLookupException When the flow cannot be found
 	 */
 	public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException;
 
 	/**
-	 * @param flowAttributesMapperId
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup a flow attributes mapper with specified id.
+	 * @param flowAttributesMapperId The flow attributes mapper id
+	 * @return The flow attributes mapper
+	 * @throws FlowServiceLookupException When the flow attributes mapper cannot
+	 *         be found
 	 */
 	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
 			throws FlowServiceLookupException;
 
 	/**
-	 * @param subFlowAttributesMapperId
-	 * @return
-	 * @throws FlowServiceLookupException
+	 * Lookup a flow attributes mapper of specified implementation class.
+	 * @param flowAttributesMapperId The required implementation class
+	 * @return The flow attributes mapper
+	 * @throws FlowServiceLookupException When the flow attributes mapper cannot
+	 *         be found
 	 */
 	public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
 			throws FlowServiceLookupException;
