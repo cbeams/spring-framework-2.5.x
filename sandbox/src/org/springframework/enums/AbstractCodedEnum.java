@@ -37,25 +37,6 @@ public abstract class AbstractCodedEnum implements CodedEnum,
 
     private String label;
 
-    /**
-     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>
-     */
-    public static final Comparator LABEL_ORDER = new Comparator() {
-        public int compare(Object o1, Object o2) {
-            AbstractCodedEnum e1 = (AbstractCodedEnum)o1;
-            AbstractCodedEnum e2 = (AbstractCodedEnum)o2;
-            Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
-            return c.compare(e1.getLabel(), e2.getLabel());
-        }
-    };
-
-    /**
-     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>, then
-     * natural order.
-     */
-    public static final Comparator DEFAULT_ORDER = new CompoundComparator(
-            new Comparator[] { LABEL_ORDER, ComparableComparator.instance() });
-
     protected AbstractCodedEnum(Comparable code) {
         this(code, null);
     }
