@@ -43,8 +43,8 @@ public abstract class AlgorithmsAccessor {
         return getAlgorithms().findAll(collection, constraint);
     }
 
-    public Object findAll(Iterator it, Constraint constraint) {
-        return getAlgorithms().findFirst(it, constraint);
+    public Collection findAll(Iterator it, Constraint constraint) {
+        return getAlgorithms().findAll(it, constraint);
     }
 
     public boolean allTrue(Collection collection, Constraint constraint) {

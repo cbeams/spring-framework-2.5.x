@@ -44,7 +44,7 @@ public abstract class AbstractConstraint extends AlgorithmsAccessor
 		return findAll(collection, this);
 	}
 
-	public Object findAll(Iterator it) {
+	public Collection findAll(Iterator it) {
 		return findAll(it, this);
 	}
 
