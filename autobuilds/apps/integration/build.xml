@@ -66,6 +66,7 @@
   <!-- Destination locations for the build -->
   <property name="target.dir" location="target"/>
   <property name="target.classes.java.dir" location="${target.dir}/classes"/>
+  <property name="target.classes.test.dir" location="${target.dir}/test-classes"/>
   <property name="target.classes.cactus.dir" location="${target.dir}/cactus-classes"/>
   <property name="target.webapp.dir" location="${target.dir}/web"/>
   <property name="target.testreports.dir" location="${target.dir}/test-reports"/>
@@ -146,7 +147,6 @@
       </fileset>
     </copy>
 
-    <echo>debug=${debug}</echo>
 	<javac destdir="${target.classes.java.dir}"
         deprecation="${deprecation}" optimize="${optimize}" debug="${debug}">
       <src path="${src.java.dir}"/>
