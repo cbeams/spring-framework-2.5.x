@@ -21,7 +21,7 @@
 	</bean>
 
 	<!-- Configurer that sets up a VelocityEngine for Velocity views -->
-	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreemarkerConfigurer">
+	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="templateLoaderPath"><value>WEB-INF/views/</value></property>
 	</bean>
 
@@ -34,7 +34,7 @@
 	<!-- Uncomment this and comment out the above to switch to the FreeMarker view -->
 	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<property name="viewClass"><value>org.springframework.web.servlet.view.freemarker.FreemarkerView</value></property>
+		<property name="viewClass"><value>org.springframework.web.servlet.view.freemarker.FreeMarkerView</value></property>
 		<property name="suffix"><value>.fm</value></property>
 	</bean>
 	-->
