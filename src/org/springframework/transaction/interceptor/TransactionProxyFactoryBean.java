@@ -1,14 +1,15 @@
 package org.springframework.transaction.interceptor;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
+import org.springframework.aop.framework.AbstractMethodPointcut;
+import org.springframework.aop.framework.AlwaysInvoked;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultProxyConfig;
 import org.springframework.aop.framework.InvokerInterceptor;
+import org.springframework.aop.framework.MethodPointcut;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
@@ -23,16 +24,23 @@ import org.springframework.transaction.PlatformTransactionManager;
  * transaction demarcation: wrapping a target class with a transactional proxy,
  * without any other interceptors. Internally, an own TransactionInterceptor
  * instance is used, but the user of this class does not have to care.
+ * 
+ * <p>Optionaly MethodPointcut property could be set to cause a conditional
+ * invokation of the underlying TransactionInterceptor. AlwaysInvoked MethodPointcut
+ * is the default pointcut wrapping TransactionInterceptor
  *
  * <p>In contrast to TransactionInterceptor, the transaction attributes are
  * specified as properties, with method names as keys and transaction attribute
  * descriptors as values. Method names are always applied to the target class.
  *
  * @author Juergen Hoeller
+ * @author Dmitriy Kopylenko
  * @since 21.08.2003
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
+ * @see MethodPointcut
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.3 2003-08-22 15:32:28 dkopylenko Exp $
  */
 public class TransactionProxyFactoryBean extends DefaultProxyConfig implements FactoryBean, InitializingBean {
 
@@ -45,6 +53,8 @@ public class TransactionProxyFactoryBean extends DefaultProxyConfig implements F
 	private Properties transactionAttributes;
 
 	private Object proxy;
+
+	private MethodPointcut methodPointcut;
 
 	/**
 	 * Set the transaction manager. This will perform actual
@@ -60,6 +70,15 @@ public class TransactionProxyFactoryBean extends DefaultProxyConfig implements F
 	 */
 	public void setTarget(Object target) {
 		this.target = target;
+	}
+
+	/**
+	 * Set MethodPointcut, i.e the bean that can cause
+ 	 * conditional invocation of this TransactionInterceptor depending on
+ 	 * the method, and attributes passed. The default MethodPointcut is {@link AlwaysInvoked}
+	 */
+	public void setMethodPointcut(MethodPointcut pointcut) {
+		this.methodPointcut = pointcut;
 	}
 
 	/**
@@ -92,10 +111,10 @@ public class TransactionProxyFactoryBean extends DefaultProxyConfig implements F
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		TransactionAttributeEditor tae = new TransactionAttributeEditor();
 		for (Iterator it = transactionAttributes.keySet().iterator(); it.hasNext();) {
-			String methodName = (String) it.next();
+			String methodName = (String)it.next();
 			String value = transactionAttributes.getProperty(methodName);
 			tae.setAsText(value);
-			TransactionAttribute attr = (TransactionAttribute) tae.getValue();
+			TransactionAttribute attr = (TransactionAttribute)tae.getValue();
 			tas.addTransactionalMethod(methodName, attr);
 		}
 
@@ -103,8 +122,13 @@ public class TransactionProxyFactoryBean extends DefaultProxyConfig implements F
 		transactionInterceptor.setTransactionManager(this.transactionManager);
 		transactionInterceptor.setTransactionAttributeSource(tas);
 		transactionInterceptor.afterPropertiesSet();
-
-		addInterceptor(transactionInterceptor);
+		
+		if (this.methodPointcut == null)
+			this.methodPointcut = new AlwaysInvoked(transactionInterceptor);
+		else
+			((AbstractMethodPointcut)this.methodPointcut).setInterceptor(transactionInterceptor);
+		
+		addMethodPointcut(this.methodPointcut);
 		addInterceptor(new InvokerInterceptor(this.target));
 		if (this.proxyInterfacesOnly) {
 			setInterfaces(BeanUtils.getAllInterfaces(this.target));
