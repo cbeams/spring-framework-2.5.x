@@ -61,7 +61,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.63 2004-08-02 13:44:56 johnsonr Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -476,17 +475,19 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * object type (including subclasses), or an empty array if none
 	 */
 	public String[] getSingletonNames(Class type) {
-		Set keys = this.singletonCache.keySet();
-		Set matches = new HashSet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String name = (String) itr.next();
-			Object singletonObject = this.singletonCache.get(name);
-			if (type == null || type.isAssignableFrom(singletonObject.getClass())) {
-				matches.add(name);
+		synchronized (this.singletonCache) {
+			Set keys = this.singletonCache.keySet();
+			Set matches = new HashSet();
+			Iterator itr = keys.iterator();
+			while (itr.hasNext()) {
+				String name = (String) itr.next();
+				Object singletonObject = this.singletonCache.get(name);
+				if (type == null || type.isAssignableFrom(singletonObject.getClass())) {
+					matches.add(name);
+				}
 			}
+			return (String[]) matches.toArray(new String[matches.size()]);
 		}
-		return (String[]) matches.toArray(new String[matches.size()]);
 	}
 
 	/**
