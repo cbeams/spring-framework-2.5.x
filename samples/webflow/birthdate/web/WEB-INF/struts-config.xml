@@ -15,9 +15,11 @@
 
 	<action-mappings>
 
+		<action path="/home" forward="/WEB-INF/index.jsp"/>
+		
 		<!-- flow actions -->
 		
-		<action path="/birthDate.do"
+		<action path="/birthDate"
 			type="org.springframework.web.flow.struts.FlowAction"
 			name="bindingActionForm" scope="request" 
 			className="org.springframework.web.flow.struts.FlowActionMapping">

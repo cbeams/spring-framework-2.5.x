@@ -233,7 +233,7 @@ public abstract class TemplateAction extends Action {
 		// down before reload, especially in WebLogic
 		if (actionServlet != null) {
 			ServletContext servletContext = actionServlet.getServletContext();
-			this.webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+			this.webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 		}
 	}
 }

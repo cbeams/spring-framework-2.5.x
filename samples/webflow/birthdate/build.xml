@@ -27,6 +27,7 @@
 			<fileset file="${commons.collections.jar}" />
 			<fileset file="${commons.digester.jar}" />
 			<fileset file="${commons.validator}" />
+			<fileset file="${jakarta.oro.jar}" />
 			<fileset file="${struts.jar}" />
 		</copy>
 	</target>

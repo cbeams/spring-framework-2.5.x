@@ -38,7 +38,7 @@ public abstract class DependencyInjectedAction extends TemplateAction {
 
 		// ActionServlet may be null when an application is closed
 		// down before reload, especially in WebLogic
-		if (actionServlet != null) {
+		if (actionServlet != null && getWebApplicationContext() != null) {
 			Assert.state((getWebApplicationContext() instanceof ConfigurableWebApplicationContext),
 					"Cannot use this Action except with a ConfigurableWebApplicationContext");
 
