@@ -56,7 +56,7 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * HTML escaping setting for the current page.
 	 * @see HtmlEscapeTag#setDefaultHtmlEscape
 	 */
-	public final void setHtmlEscape(String htmlEscape) throws JspException {
+	public final void setHtmlEscape(String htmlEscape) {
 		this.htmlEscape =	htmlEscape;
 	}
 

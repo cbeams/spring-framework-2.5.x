@@ -26,15 +26,16 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * Tag useful for transforming reference data values from form controllers and
+ * Tag for transforming reference data values from form controllers and
  * other objects inside a <code>spring:bind</code> tag.
  *
- * <p>The bind tag has a PropertyEditor that it used to transform the property
- * of bean to a String, useable in HTML forms. This tag uses that PropertyEditor
+ * <p>The BindTag has a PropertyEditor that it uses to transform properties of
+ * a bean to a String, useable in HTML forms. This tag uses that PropertyEditor
  * to transform objects passed into this tag.
  *
  * @author Alef Arendsen
  * @since 20.09.2003
+ * @see BindTag
  */
 public class TransformTag extends RequestContextAwareTag {
 
@@ -48,39 +49,41 @@ public class TransformTag extends RequestContextAwareTag {
 	private String scope = TagUtils.SCOPE_PAGE;
 
 	/**
-	 * Set the value to finally transform using the appropriate property editor
-	 * that has to be found in the BindTag.
-	 * @param value the value
-	 * @throws JspException if expression evaluation fails
+	 * Set the value to finally transform using the appropriate
+	 * PropertyEditor from the BindTag.
 	 */
-	public void setValue(String value) throws JspException {
+	public void setValue(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Set the name of the variable to which to export the result of the transformation.
-	 * @param var the name of the variable
+	 * Set PageContext attribute name under which to expose
+	 * a variable that contains the result of the transformation.
+	 * @see #setScope
+	 * @see javax.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setVar(String var) {
 		this.var = var;
 	}
 
 	/**
-	 * Set the scope to which to export the variable indicated.
-	 * If the scope isn't one of the allowed scope, it'll be the default (SCOPE_PAGE).
-	 * @param scope the scope (SCOPE_PAGE, SCOPE_REQUEST, SCOPE_APPLICATION or SCOPE_SESSION)
+	 * Set the scope to export the variable to.
+	 * Default is SCOPE_PAGE ("page").
+	 * @see #setVar
+	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
+	 * @see javax.servlet.jsp.PageContext#setAttribute
 	 */
-	public void setScope(String scope) throws JspException {
+	public void setScope(String scope) {
 		this.scope = scope;
 	}
 
 	public int doStartTagInternal() throws JspException {
 		Object resolvedValue = ExpressionEvaluationUtils.evaluate("value", this.value, Object.class, pageContext);
 		if (resolvedValue != null) {
-			// find the bingtag (if applicable)
-			BindTag tag = (BindTag) TagSupport.findAncestorWithClass(this, org.springframework.web.servlet.tags.BindTag.class);
+			// find the BingTag (if applicable)
+			BindTag tag = (BindTag) TagSupport.findAncestorWithClass(this, BindTag.class);
 			if (tag == null) {
-				// the tag can only be used inside a bind tag
+				// the tag can only be used within a BindTag
 				throw new JspException("TransformTag can only be used within BindTag");
 			}
 			// ok, get the property editor
@@ -113,9 +116,6 @@ public class TransformTag extends RequestContextAwareTag {
 		return SKIP_BODY;
 	}
 
-	/**
-	 * Releasing of resources.
-	 */
 	public void release() {
 		this.scope = TagUtils.SCOPE_PAGE;
 		this.var = null;

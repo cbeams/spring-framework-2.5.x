@@ -45,14 +45,15 @@ public class HtmlEscapeTag extends TagSupport {
 
 	/**
 	 * Set the default value for HTML escaping,
-	 * to be put in the current PageContext.
+	 * to be put into the current PageContext.
 	 */
-	public void setDefaultHtmlEscape(String defaultHtmlEscape) throws JspException {
+	public void setDefaultHtmlEscape(String defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
 	}
 
 	public int doStartTag() throws JspException {
 		super.doStartTag();
+
 		boolean resolvedDefaultHtmlEscape = ExpressionEvaluationUtils.evaluateBoolean("defaultHtmlEscape",
 																																									this.defaultHtmlEscape, pageContext);
 

@@ -61,7 +61,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * Can be a bean (e.g. "person"), or a bean property
 	 * (e.g. "person.name"), also supporting nested beans.
 	 */
-	public void setPath(String path) throws JspException {
+	public void setPath(String path) {
 		this.path = path;
 	}
 
