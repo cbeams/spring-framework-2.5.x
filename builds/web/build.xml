@@ -51,7 +51,7 @@
 
 		<antcall target="build.conf" />
 
-		<copy todir="${target.webclasses.dir}" file="${devtools.templates.dir}/conf/log4j.properties" filtering="on" failonerror="false"/>
+		<copy todir="${target.webclasses.dir}" file="${devtools.templates.dir}/conf/log4j.properties" filtering="on" failonerror="false" />
 
 		<antcall target="build.webapp.libs" />
 	</target>
@@ -112,31 +112,6 @@
 
 	<target name="deploy.shared.libs">
 		<!-- Copy default dependencies shared between web apps to shared lib directory, projects may extend/override -->
-		<copy todir="${shared.weblib.deploy.dir}">
-			<fileset file="${activation.jar}" />
-			<fileset file="${antlr.jar}" />
-			<fileset file="${aopalliance.jar}" />
-			<fileset file="${commons.beanutils.jar}" />
-			<fileset file="${commons.collections.jar}" />
-			<fileset file="${commons.dbcp.jar}" />
-			<fileset file="${commons.digester.jar}" />
-			<fileset file="${commons.logging.jar}" />
-			<fileset file="${commons.pool.jar}" />
-			<fileset file="${commons.validator}" />
-			<fileset file="${log4j.jar}" />
-			<fileset file="${jakarta.taglibs.jar}" />
-			<fileset file="${jstl.jar}" />
-			<fileset file="${mail.jar}" />
-			<fileset file="${spring.jar}" />
-			<fileset file="${struts.jar}" />
-			<fileset file="${jta.jar}" />
-			<fileset file="${hibernate.jar}" />
-			<fileset file="${odmg.jar}" />
-			<fileset file="${ehcache.jar}" />
-			<fileset file="${cglib.jar}" />
-			<fileset file="${dom4j.jar}" />
-			<fileset file="${hsqldb.jar}" />
-		</copy>
 	</target>
 
 	<target name="copy.war" depends="dist" description="Manually copy .war file to deploy dir">
@@ -166,19 +141,15 @@
 
 	<!-- tomcat related taskdefs & targets (optional) -->
 
-	<!--
 	<taskdef resource="org/apache/catalina/ant/catalina.tasks" onerror="ignore">
 		<classpath>
 			<fileset file="${commons.logging.jar}" />
-			<fileset dir="${tomcat.dir}/server/lib" >
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="${tomcat.dir}/common/lib">
-				<include name="*.jar" />
-			</fileset>
+			<filelist dir="${tomcat.dir}/server/lib">
+				<file name="catalina.jar"/>
+				<file name="catalina-ant.jar"/>
+			</filelist>
 		</classpath>
 	</taskdef>
-	-->
 
 	<target name="tomcat.refresh" depends="refresh.war,tomcat.start" />
 
