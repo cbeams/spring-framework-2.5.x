@@ -1,13 +1,22 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/CompoundFormModel.java,v 1.2 2004-06-14 18:35:55 kdonald Exp $
- * $Revision: 1.2 $
- * $Date: 2004-06-14 18:35:55 $
+ * Copyright 2002-2004 the original author or authors.
  * 
- * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules.values;
 
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.rules.Algorithms;
@@ -25,7 +34,7 @@ public class CompoundFormModel implements FormModel {
 
     private boolean bufferChanges;
 
-    private Map formModels = new HashMap();
+    private Map formModels = new LinkedHashMap();
 
     private RulesSource rulesSource;
 
@@ -75,6 +84,18 @@ public class CompoundFormModel implements FormModel {
                 });
     }
 
+    public ValueModel getValueModel(final String domainObjectProperty) {
+        Iterator it = formModels.values().iterator();
+        while (it.hasNext()) {
+            FormModel formModel = (FormModel)it.next();
+            ValueModel valueModel = formModel.getValueModel(domainObjectProperty);
+            if (valueModel != null) {
+                return valueModel;
+            }
+        }
+        return null;
+    }
+    
     public void addValidationListener(ValidationListener listener,
             String childModelName) {
         FormModel model = getChildFormModel(childModelName);

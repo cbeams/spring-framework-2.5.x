@@ -26,7 +26,9 @@ public interface FormModel {
     public Object getFormObject();
     
     public ValueModel getFormObjectHolder();
-    
+
+    public ValueModel getValueModel(String domainObjectProperty);
+
     public boolean hasErrors();
 
     public void commit();

@@ -72,30 +72,6 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
         }
     }
 
-    public ValueModel getValueModel(String domainObjectProperty) {
-        return (ValueModel)formValueModels.get(domainObjectProperty);
-    }
-
-    public boolean hasErrors() {
-        return false;
-    }
-
-    public Object getFormObject() {
-        return domainObjectAccessStrategy.getDomainObject();
-    }
-    
-    public ValueModel getFormObjectHolder() {
-        return domainObjectAccessStrategy.getDomainObjectHolder();
-    }
-    
-    protected Class getFormObjectClass() {
-        return domainObjectAccessStrategy.getDomainObject().getClass();
-    }
-
-    protected MutableAspectAccessStrategy getAccessStrategy() {
-        return domainObjectAccessStrategy;
-    }
-
     public ValueModel add(String domainObjectProperty) {
         ValueModel formValueModel = new AspectAdapter(
                 domainObjectAccessStrategy, domainObjectProperty);
@@ -110,7 +86,32 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
 
     protected void onNewFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
+    }
 
+    public ValueModel getValueModel(String domainObjectProperty) {
+        ValueModel valueModel = (ValueModel)formValueModels
+                .get(domainObjectProperty);
+        return valueModel;
+    }
+
+    public boolean hasErrors() {
+        return false;
+    }
+
+    public Object getFormObject() {
+        return domainObjectAccessStrategy.getDomainObject();
+    }
+
+    public ValueModel getFormObjectHolder() {
+        return domainObjectAccessStrategy.getDomainObjectHolder();
+    }
+
+    protected Class getFormObjectClass() {
+        return domainObjectAccessStrategy.getDomainObject().getClass();
+    }
+
+    protected MutableAspectAccessStrategy getAccessStrategy() {
+        return domainObjectAccessStrategy;
     }
 
     public void commit() {

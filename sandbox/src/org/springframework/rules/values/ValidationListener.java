@@ -19,7 +19,6 @@ import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.reporting.ValidationResults;
 
 /**
- * 
  * @author Keith Donald
  */
 public interface ValidationListener {
