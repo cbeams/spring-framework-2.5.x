@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -95,7 +96,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * @see org.springframework.context.event.SimpleApplicationEventMulticaster
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
-		implements ConfigurableApplicationContext {
+		implements ConfigurableApplicationContext, DisposableBean {
 
 	/**
 	 * Name of the MessageSource bean in the factory.
@@ -445,7 +446,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #refresh
 	 */
 	protected void onRefresh() throws BeansException {
-		// for subclasses: do nothing by default
+		// For subclasses: do nothing by default.
 	}
 
 	/**
@@ -477,14 +478,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Destroy the singletons in the bean factory of this application context.
+	 * Publishes a ContextClosedEvent and destroys the singletons
+	 * in the bean factory of this application context.
+	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
 	public void close() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Closing application context [" + getDisplayName() + "]");
 		}
 
-		// publish corresponding event
+		// Publish shutdown event.
 		publishEvent(new ContextClosedEvent(this));
 
 		// Destroy all cached singletons in this context,
@@ -493,6 +496,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (beanFactory != null) {
 			beanFactory.destroySingletons();
 		}
+	}
+
+	/**
+	 * DisposableBean callback for destruction of this instance.
+	 * Only called when the ApplicationContext itself is running
+	 * as a bean in another BeanFactory or ApplicationContext,
+	 * which is rather unusual.
+	 * <p>The <code>close</code> method is the native way to
+	 * shut down an ApplicationContext.
+	 * @see #close
+	 * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
+	 */
+	public void destroy() {
+		close();
 	}
 
 
