@@ -43,7 +43,6 @@ import org.springframework.context.NoSuchMessageException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Seth Ladd
  * @see #resolveCode
  */
 public abstract class AbstractMessageSource implements HierarchicalMessageSource {
@@ -75,76 +74,88 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 
 	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
-		try {
-			return getMessage(code, args, locale);
+		String msg = getMessageInternal(code, args, locale);
+		if (msg != null) {
+			return msg;
 		}
-		catch (NoSuchMessageException ex) {
-			return defaultMessage;
+		if (this.parentMessageSource != null) {
+			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
 		}
+		if (defaultMessage == null && this.useCodeAsDefaultMessage) {
+			return code;
+		}
+		return defaultMessage;
 	}
 
 	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
-		try {
-			return getMessageInternal(code, args, locale);
+		String msg = getMessageInternal(code, args, locale);
+		if (msg != null) {
+			return msg;
 		}
-		catch (NoSuchMessageException ex) {
-			if (this.useCodeAsDefaultMessage) {
-				return code;
-			}
-			else {
-				throw ex;
-			}
+		if (this.parentMessageSource != null) {
+			return this.parentMessageSource.getMessage(code, args, locale);
 		}
+		if (this.useCodeAsDefaultMessage) {
+			return code;
+		}
+		throw new NoSuchMessageException(code, locale);
 	}
 
 	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
 		String[] codes = resolvable.getCodes();
+		if (codes == null) {
+			throw new NoSuchMessageException(null, locale);
+		}
 		for (int i = 0; i < codes.length; i++) {
-			try {
-				return getMessageInternal(codes[i], resolvable.getArguments(), locale);
+			String msg = getMessageInternal(codes[i], resolvable.getArguments(), locale);
+			if (msg != null) {
+				return msg;
 			}
-			catch (NoSuchMessageException ex) {
-				// swallow it, we'll retry the other codes
-			}
+		}
+		if (this.parentMessageSource != null) {
+			return this.parentMessageSource.getMessage(resolvable, locale);
 		}
 		if (resolvable.getDefaultMessage() != null) {
 			return resolvable.getDefaultMessage();
 		}
-		else if (this.useCodeAsDefaultMessage && codes.length > 0) {
+		if (this.useCodeAsDefaultMessage && codes.length > 0) {
 			return codes[0];
 		}
-		else {
-			throw new NoSuchMessageException(codes[codes.length - 1], locale);
-		}
+		throw new NoSuchMessageException(codes.length > 0 ? codes[codes.length - 1] : null, locale);
 	}
 
 	/**
 	 * Resolve the given code and arguments as message in the given Locale,
-	 * throwing a NoSuchMessageException if not found. Does <i>not</i> fall
-	 * back to the code as default message. Invoked by getMessage methods.
+	 * returning null if not found. Does <i>not</i> fall back to the code
+	 * as default message. Invoked by getMessage methods.
+	 * @param code the code to lookup up, such as 'calculator.noRateSet'. Users of
+	 * this class are encouraged to base message names on the relevant fully
+	 * qualified class name, thus avoiding conflict and ensuring maximum clarity.
+	 * @param args array of arguments that will be filled in for params within
+	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
+	 * or null if none.
+	 * @param locale the Locale in which to do the lookup
+	 * @return the resolved message, or null if not found
+	 * @see #getMessage(String, Object[], String, Locale)
 	 * @see #getMessage(String, Object[], Locale)
 	 * @see #getMessage(MessageSourceResolvable, Locale)
 	 * @see #setUseCodeAsDefaultMessage
 	 */
-	protected String getMessageInternal(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	protected String getMessageInternal(String code, Object[] args, Locale locale) {
 		if (locale == null) {
 			locale = Locale.getDefault();
+		}
+		if (code == null) {
+			return null;
 		}
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
 			return messageFormat.format(resolveArguments(args, locale));
 		}
-		else {
-			if (this.parentMessageSource != null) {
-				return this.parentMessageSource.getMessage(code, args, locale);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not resolve message code [" + code + "] in locale [" + locale + "]");
-				}
-				throw new NoSuchMessageException(code, locale);
-			}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Could not resolve message code [" + code + "] in locale [" + locale + "]");
 		}
+		return null;
 	}
 
 	/**
