@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core.support;
 
@@ -55,7 +55,20 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Set the JDBC DataSource to be used by this DAO.
 	 */
 	public final void setDataSource(DataSource dataSource) {
-	  this.jdbcTemplate = new JdbcTemplate(dataSource);
+	  this.jdbcTemplate = createJdbcTemplate(dataSource);
+	}
+
+	/**
+	 * Create a JdbcTemplate for the given DataSource.
+	 * Only invoked if populating the DAO with a DataSource reference!
+	 * <p>Can be overridden in subclasses to provide a JdbcTemplate instance
+	 * with different configuration, or a custom JdbcTemplate subclass.
+	 * @param dataSource the JDBC DataSource to create a JdbcTemplate for
+	 * @return the new JdbcTemplate instance
+	 * @see #setDataSource
+	 */
+	protected JdbcTemplate createJdbcTemplate(DataSource dataSource) {
+		return new JdbcTemplate(dataSource);
 	}
 
 	/**
