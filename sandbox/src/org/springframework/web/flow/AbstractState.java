@@ -40,13 +40,17 @@ import org.springframework.util.ToStringCreator;
  */
 public abstract class AbstractState implements Serializable {
 
-	public static final String CURRENT_STATE_ID_ATTRIBUTE = "_currentStateId";
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private String id;
-
+	/**
+	 * The state's owning flow.
+	 */
 	private Flow flow;
+
+	/**
+	 * The state identifier, unique to the owning flow.
+	 */
+	private String id;
 
 	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
@@ -193,6 +197,11 @@ public abstract class AbstractState implements Serializable {
 		return creator.toString();
 	}
 
+	/**
+	 * Method subclasses may override to insert toStringification of their
+	 * properties.
+	 * @param creator
+	 */
 	protected void createToString(ToStringCreator creator) {
 
 	}
