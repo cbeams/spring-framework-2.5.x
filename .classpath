@@ -22,7 +22,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/regexp/jakarta-oro-2.0.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
@@ -59,7 +58,6 @@
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/poi/poi-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/itext/itext-1.02b.jar"/>
 	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
@@ -82,10 +80,12 @@
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/itext/pdfbox-0.6.5.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api-2.1rc1.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler-2.1rc1.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-6.jar"/>
 	<classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="lib/oro/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
