@@ -24,15 +24,14 @@ import org.springframework.web.util.HtmlUtils;
 
 /**
  * Custom tag to look up a message in the scope of this page.
- * Messages are looked up using the ApplicationContext, and thus
- * should support internationalization.
+ * Messages are looked up using the ApplicationContext, and thus should
+ * support internationalization.
  *
  * <p>Regards a HTML escaping setting, either on this tag instance,
  * the page level, or the web.xml level.
  *
- * <p>If "code" isn't set or cannot be resolved, "text" will be
- * used as default message. Thus, this tag can also be used for
- * HTML escaping of any texts.
+ * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
+ * message. Thus, this tag can also be used for HTML escaping of any texts.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -67,18 +66,17 @@ public class MessageTag extends RequestContextAwareTag {
 	}
 	
 	/**
-	 * Setting of the var String under which to bind the variable
+	 * Set othe var String under which to bind the variable.
 	 */
 	public final void setVar(String var)  throws JspException {
 		this.var = ExpressionEvaluationUtils.evaluateString("var", var, pageContext);
 	}
 	
 	/**
-	 * Setting of the scope to export the var to
+	 * Set the scope to export the var to.
 	 */
 	public final void setScope(String scope) throws JspException {
-		String tmpScope = ExpressionEvaluationUtils.evaluateString(
-			"scope", var, pageContext);
+		String tmpScope = ExpressionEvaluationUtils.evaluateString("scope", this.var, pageContext);
 		this.scope = TagUtils.getScope(tmpScope);
 	}
 
@@ -93,17 +91,20 @@ public class MessageTag extends RequestContextAwareTag {
 				if (this.text != null) {
 					msg = messageSource.getMessage(this.code, null, this.text,
 					                               getRequestContext().getLocale());
-				} else {
+				}
+				else {
 					msg = messageSource.getMessage(this.code, null,
 					                               getRequestContext().getLocale());
 				}
-			} else {
+			}
+			else {
 				msg = this.text;
 			}
 			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
-			if (var == null) {
+			if (this.var == null) {
 				writeMessage(msg);
-			} else {
+			}
+			else {
 				pageContext.setAttribute(var, msg, scope);				
 			}
 		}
@@ -131,10 +132,7 @@ public class MessageTag extends RequestContextAwareTag {
 		return ex.getMessage();
 	}
 	
-	/* (non-Javadoc)
-	 * @see javax.servlet.jsp.tagext.TagSupport#release()
-	 */
-	public void release() {		 
+	public void release() {
 		super.release();
 		this.var = null;
 		this.scope = PageContext.PAGE_SCOPE;

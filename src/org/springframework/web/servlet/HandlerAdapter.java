@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
  * DispatcherServlet. Non-Ordered instances get treated as lowest priority.
  *
  * @author Rod Johnson
+ * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
  */
 public interface HandlerAdapter extends ApplicationContextAware {
 	

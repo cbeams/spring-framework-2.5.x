@@ -17,21 +17,26 @@ import javax.servlet.ServletException;
 
 import org.springframework.context.ApplicationContextAware;
 
-/*
+/**
  * Interface to be implemented by objects that can resolve views by name.
- * View state doesn't change during the running of the application, 
+ *
+ * <p>View state doesn't change during the running of the application,
  * so implementations are free to cache views.
- * <br>Implementations are encouraged to support internationalization.
- * @author  Rod Johnson
- * @version $Revision: 1.1.1.1 $
+ *
+ * <p>Implementations are encouraged to support internationalization,
+ * i.e. localized view resolution.
+ *
+ * @author Rod Johnson
+ * @see org.springframework.web.servlet.view.InternalResourceViewResolver
+ * @see org.springframework.web.servlet.view.ResourceBundleViewResolver
  */
 public interface ViewResolver extends ApplicationContextAware {
 		
 	/** 
 	 * Resolve the given view by name.
 	 * @param viewName name of the view to resolve
-	 * @param locale Locale in which to resolve the view. ViewResolvers
-	 * that support internationalization should respect this.
+	 * @param locale Locale in which to resolve the view.
+	 * ViewResolvers that support internationalization should respect this.
 	 * @throws ServletException if the view cannot be resolved.
 	 */
 	View resolveViewName(String viewName, Locale locale) throws ServletException;

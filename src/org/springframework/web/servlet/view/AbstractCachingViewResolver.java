@@ -33,7 +33,7 @@ import org.springframework.web.servlet.ViewResolver;
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
 	/** View name --> View instance */
-	private Map viewHash = new HashMap();
+	private Map viewMap = new HashMap();
 
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
@@ -41,10 +41,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/**
 	 * Enable caching. Disable this only for debugging and development.
 	 * Default is for caching to be enabled.
-	 * <p><b>Warning: disabling caching severely impacts performance.</b>
-	 * Tests indicate that turning caching off reduces performance by at
-	 * least 20%. Increased object churn probably eventually makes the
-	 * problem even worse.
+	 * <p><b>Warning: Disabling caching severely impacts performance.</b>
+	 * Tests indicate that turning caching off reduces performance by at least 20%.
+	 * Increased object churn probably eventually makes the problem even worse.
 	 */
 	public final void setCache(boolean cache) {
 		this.cache = cache;
@@ -60,12 +59,12 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public final View resolveViewName(String viewName, Locale locale) throws ServletException {
 		View view = null;
 		if (!this.cache) {
-			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: this will severely impair performance");
+			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This will severely impair performance");
 			view = loadAndConfigureView(viewName, locale);
 		}
 		else {
 			// We're caching - don't really need synchronization
-			view = (View) this.viewHash.get(getCacheKey(viewName, locale));
+			view = (View) this.viewMap.get(getCacheKey(viewName, locale));
 			if (view == null) {
 				// Ask the subclass to load the View
 				view = loadAndConfigureView(viewName, locale);
@@ -79,17 +78,16 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Configuration means giving the View its name, and 
 	 * setting the ApplicationContext on the View if necessary.
 	 */
-	private View loadAndConfigureView(String viewname, Locale locale) throws ServletException {
+	private View loadAndConfigureView(String viewName, Locale locale) throws ServletException {
 		// Ask the subclass to load the view
-		View view = loadView(viewname, locale);
+		View view = loadView(viewName, locale);
 		if (view == null)
-			throw new ServletException("Cannot resolve view name '" + viewname + "'");
+			throw new ServletException("Cannot resolve view name '" + viewName + "'");
 			
 		// Configure view
-		view.setName(viewname);
+		view.setName(viewName);
 
-		// Give the view access to the ApplicationContext
-		// if it needs it
+		// Give the view access to the ApplicationContext if it needs it
 		if (view instanceof ApplicationContextAware) {
 			try {
 				((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
@@ -98,20 +96,20 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 				throw new ServletException("Error initializing View [" + view + "]: " + ex.getMessage(), ex);
 			}
 
-			String cacheKey = getCacheKey(viewname, locale);
+			String cacheKey = getCacheKey(viewName, locale);
 			logger.info("Cached view '" + cacheKey + "'");
-			this.viewHash.put(cacheKey, view);
+			this.viewMap.put(cacheKey, view);
 		}
 
 		return view;
 	}
 
 	/**
-	 * Return the cache key for the given viewname and the given locale.
+	 * Return the cache key for the given viewName and the given locale.
 	 * Needs to regard the locale, as a different locale can lead to a different view!
 	 */
-	private String getCacheKey(String viewname, Locale locale) {
-		return viewname + "_" + locale;
+	private String getCacheKey(String viewName, Locale locale) {
+		return viewName + "_" + locale;
 	}
 
 	/**

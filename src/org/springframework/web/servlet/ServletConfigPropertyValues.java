@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -22,13 +23,16 @@ import org.springframework.util.StringUtils;
 class ServletConfigPropertyValues implements PropertyValues {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	/** PropertyValues delegate. We use delegation rather than simply subclass
+
+	/**
+	 * PropertyValues delegate. We use delegation rather than simply subclass
 	 * MutablePropertyValues as we don't want to expose MutablePropertyValues's
 	 * update methods. This class is immutable once initialized.
 	 */
 	private MutablePropertyValues mutablePropertyValues;
 
-	/** Creates new PropertyValues object
+	/**
+	 * Create a new PropertyValues object.
 	 * @param config ServletConfig we'll use to take PropertyValues from
 	 * @throws ServletException should never be thrown from this method
 	 */
