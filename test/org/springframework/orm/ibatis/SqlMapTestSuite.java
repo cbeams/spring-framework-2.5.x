@@ -16,19 +16,14 @@ import org.easymock.MockControl;
  * @author Juergen Hoeller
  * @since 28.11.2003
  */
-public class MappedStatementTestSuite extends TestCase {
+public class SqlMapTestSuite extends TestCase {
 
 	public void testSqlMapFactoryBean() throws IOException {
-		final SqlMap sqlMap = new SqlMap();
-		SqlMapFactoryBean factory = new SqlMapFactoryBean() {
-			protected SqlMap buildSqlMap(InputStream is) {
-				assertNotNull(is);
-				return sqlMap;
-			}
-		};
+		SqlMapFactoryBean factory = new SqlMapFactoryBean();
 		factory.setConfigLocation("org/springframework/orm/ibatis/sql-map-config.xml");
 		factory.afterPropertiesSet();
-		assertTrue(factory.getObject() == sqlMap);
+		assertTrue(factory.getObject() instanceof SqlMap);
+		assertEquals(201, ((SqlMap) factory.getObject()).getStatementCacheSize());
 	}
 
 	public void testSqlMapFactoryBeanWithConfigNotFound() {
@@ -67,11 +62,11 @@ public class MappedStatementTestSuite extends TestCase {
 			}
 		};
 
-		MappedStatementTemplate template = new MappedStatementTemplate();
+		SqlMapTemplate template = new SqlMapTemplate();
 		template.setDataSource(ds);
 		template.setSqlMap(map);
 		template.afterPropertiesSet();
-		Object result = template.execute("stmt", new MappedStatementCallback() {
+		Object result = template.execute("stmt", new SqlMapCallback() {
 			public Object doInMappedStatement(MappedStatement s, Connection c) {
 				assertTrue(stmt == s);
 				assertTrue(con == c);

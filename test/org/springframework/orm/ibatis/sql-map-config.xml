@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sql-map-config
+    PUBLIC "-//iBATIS.com//DTD SQL Map Config 1.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config.dtd">
+
+<sql-map-config>
+
+  <settings
+    maxExecute="0"
+    maxExecutePerConnection="0"
+    maxTransactions="0"
+    cacheModelsEnabled="true"
+    statementCacheSize="201"
+    useBeansMetaClasses="false"
+    useGlobalTransactions="false" />
+
+</sql-map-config>

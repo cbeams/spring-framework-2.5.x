@@ -7,24 +7,21 @@ import com.ibatis.db.sqlmap.MappedStatement;
 
 /**
  * Callback interface for data access code that works on an iBATIS Database Layer
- * SqlMap. To be used with MappedStatementTemplate's execute method,
+ * SqlMap. To be used with SqlMapTemplate's execute method,
  * assumably often as anonymous classes within a method implementation.
- *
- * <p>
- *
  * @author Juergen Hoeller
  * @since 28.11.2003
  */
-public interface MappedStatementCallback {
+public interface SqlMapCallback {
 
 	/**
-	 * Gets called by MappedStatementTemplate.execute with an active JDBC Connection.
+	 * Gets called by SqlMapTemplate.execute with an active JDBC Connection.
 	 * Does not need to care about the lifecycle of the Connection or handling transactions.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
 	 * underlying JDBC connection with its transactional semantics.
-	 * If MappedStatementTemplate is configured to use a JTA-aware DataSource,
+	 * If SqlMapTemplate is configured to use a JTA-aware DataSource,
 	 * the JDBC connection and thus the callback code will be transactional
 	 * if a JTA transaction is active.
 	 *

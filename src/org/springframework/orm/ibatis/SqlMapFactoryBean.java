@@ -13,10 +13,10 @@ import org.springframework.util.ClassLoaderUtils;
 
 /**
  * FactoryBean that creates an iBATIS Database Layer SqlMap as singleton in the
- * current bean factory, possibly for use with MappedStatementTemplate.
+ * current bean factory, possibly for use with SqlMapTemplate.
  * @author Juergen Hoeller
  * @since 28.11.2003
- * @see MappedStatementTemplate#setSqlMap
+ * @see SqlMapTemplate#setSqlMap
  */
 public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 
@@ -37,22 +37,11 @@ public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 		if (this.configLocation == null) {
 			throw new IllegalArgumentException("configLocation must be set");
 		}
-		InputStream is = ClassLoaderUtils.getResourceAsStream(this.configLocation);
+		InputStream is = ClassLoaderUtils.getResourceAsStream(configLocation);
 		if (is == null) {
-			throw new IOException("Class path resource [" + this.configLocation + "] not found");
+			throw new IOException("Class path resource [" + configLocation + "] not found");
 		}
-		this.sqlMap = buildSqlMap(is);
-	}
-
-	/**
-	 * Build the SqlMap from the given config file.
-	 * Uses XmlSqlMapBuilder by default.
-	 * @param is InputStream for a config file
-	 * @return the SqlMap instance
-	 * @see com.ibatis.db.sqlmap.XmlSqlMapBuilder
-	 */
-	protected SqlMap buildSqlMap(InputStream is) {
-		return XmlSqlMapBuilder.buildSqlMap(new InputStreamReader(is));
+		this.sqlMap = XmlSqlMapBuilder.buildSqlMap(new InputStreamReader(is));
 	}
 
 	public Object getObject() {
