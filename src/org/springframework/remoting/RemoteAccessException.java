@@ -48,6 +48,10 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class RemoteAccessException extends NestedRuntimeException {
 
+	public RemoteAccessException(String msg) {
+		super(msg);
+	}
+
 	public RemoteAccessException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
