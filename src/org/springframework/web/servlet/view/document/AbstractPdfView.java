@@ -30,9 +30,10 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.web.servlet.view.AbstractView;
  
 /**
- * Abstract superclass for PDF views, using Bruno Lowagie's iText package.
+ * Abstract superclass for PDF views, using Bruno Lowagie's
+ * <a href="http://www.lowagie.com/iText">iText</a> package.
  * Application-specific view classes will extend this class.
- * The view will be held in such a subclass, not a template such as a JSP.
+ * The view will be held in the subclass itself, not in a template.
  *
  * <p>See
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
@@ -43,7 +44,7 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
- * @version $Id: AbstractPdfView.java,v 1.9 2004-07-23 08:49:18 jhoeller Exp $
+ * @version $Id: AbstractPdfView.java,v 1.10 2004-07-28 12:27:45 jhoeller Exp $
  */
 public abstract class AbstractPdfView extends AbstractView {
 	
@@ -51,7 +52,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * Sets the appropriate content type.
 	 * Note that IE won't take much notice of this, but there's not a lot we
 	 * can do about this. Generated documents should have a ".pdf" extension.
-	*/
+	 */
 	public AbstractPdfView() {
 		setContentType("application/pdf");
 	}
@@ -62,12 +63,13 @@ public abstract class AbstractPdfView extends AbstractView {
 
 		// The following simple method doesn't work in IE, which
 		// needs to know the content length.
-		// PdfWriter.getInstance(document, response.getOutputStream());
-		//document.open();
-		//doPdfDocument(model, document);
-		//document.close();
 
-		// See	http://www.lowagie.com/iText/faq.html#msie
+		// PdfWriter.getInstance(document, response.getOutputStream());
+		// document.open();
+		// doPdfDocument(model, document);
+		// document.close();
+
+		// See http://www.lowagie.com/iText/faq.html#msie
 		// for an explanation of why we can't use the obvious form above.
 
 		// IE workaround
@@ -87,19 +89,24 @@ public abstract class AbstractPdfView extends AbstractView {
 	}
 
 	/**
-	 * Return a new com.lowagie.text.Document.
-	 * <p>By default return an A4 document, but the subclass can set anything else or retrieve from properties.
+	 * Return a new document.
+	 * <p>By default returns an A4 document, but the subclass can specify any
+	 * Document, possibly parameterized via bean properties defined on the View.
 	 * @return the new created Document
+	 * @see com.lowagie.text.Document
 	 */
 	protected Document getDocument() {
 		return new Document(PageSize.A4);
 	}
 
 	/**
-	 * Return the ViewerPreferences.
-	 * <p>By default return AllowPrinting and PageLayoutSinglePage, but can be subclassed.
-	 * The subclass can either fix the preferences or retrieve them from the bean properties.
-	 * @return an int containing the bits information against PdfWriter definitions.
+	 * Return the viewer preferences.
+	 * <p>By default returns AllowPrinting and PageLayoutSinglePage, but can be
+	 * subclassed. The subclass can either have fixed preferences or retrieve
+	 * them from bean properties defined on the View.
+	 * @return an int containing the bits information against PdfWriter definitions
+	 * @see com.lowagie.text.pdf.PdfWriter#AllowPrinting
+	 * @see com.lowagie.text.pdf.PdfWriter#PageLayoutSinglePage
 	 */
 	protected int getViewerPreferences() {
 		return PdfWriter.AllowPrinting | PdfWriter.PageLayoutSinglePage;
@@ -108,9 +115,9 @@ public abstract class AbstractPdfView extends AbstractView {
 	/**
 	 * Subclasses must implement this method to create an iText PDF document,
 	 * given the model.
-	 * @param request in case we need locale etc. Shouldn't look at attributes
+	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
-	 * @throws Exception any exceptiont hat occured during document building
+	 * @throws Exception any exception that occured during document building
 	 */
 	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer,
 																					 HttpServletRequest request, HttpServletResponse response)
