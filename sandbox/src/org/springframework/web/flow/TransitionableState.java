@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -39,7 +40,7 @@ public abstract class TransitionableState extends State {
 	/**
 	 * The set of possible transitions out of this state.
 	 */
-	private Set transitions = new LinkedHashSet();
+	private Set transitions = CollectionFactory.createLinkedSetIfPossible(6);
 
 	/**
 	 * Create a new transitionable state.
