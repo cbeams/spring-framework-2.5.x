@@ -40,8 +40,8 @@ distribution/website before using any of them in your own applications.
 - DOM4J 1.4 XML parser (http://dom4j.sourceforge.net)
 - required for running Petclinic (by Hibernate)
 
-* easymock/easymock.jar
-- EasyMock 1.0.1 (http://www.easymock.org)
+* easymock/easymock.jar, easymock/easymockclassextension.jar
+- EasyMock 1.1 (http://www.easymock.org)
 - required for building the test suite
 
 * freemarker/freemarker.jar
@@ -54,7 +54,7 @@ distribution/website before using any of them in your own applications.
 - required for running Petclinic (by Hibernate)
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.2 (http://www.hibernate.org)
+- Hibernate 2.1.3 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
