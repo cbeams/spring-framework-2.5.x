@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.struts;
 
 import java.io.File;
@@ -20,12 +36,24 @@ import org.springframework.web.util.WebUtils;
  * context, falling back to the root WebApplicationContext. For typical
  * usage, i.e. accessing middle tier beans, use a root WebApplicationContext.
  *
+ * <p>For Struts DispatchActions, use the analogous
+ * {@link DispatchActionSupport DispatchActionSupport} class.
+ *
+ * <p>As an alternative approach, you can wire your Struts Actions themselves
+ * as Spring beans, passing references to them via IoC rather than looking
+ * up references in a programmatic fashion. Check out
+ * {@link DelegatingActionProxy DelegatingActionProxy} and
+ * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
+ *
  * @author Juergen Hoeller
  * @since 06.04.2004
  * @see ContextLoaderPlugIn#SERVLET_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.ContextLoaderListener
  * @see org.springframework.web.context.ContextLoaderServlet
+ * @see DispatchActionSupport
+ * @see DelegatingActionProxy
+ * @see DelegatingRequestProcessor
  */
 public abstract class ActionSupport extends Action {
 

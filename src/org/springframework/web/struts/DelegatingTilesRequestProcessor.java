@@ -16,85 +16,50 @@
 
 package org.springframework.web.struts;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
+import org.apache.struts.config.ModuleConfig;
+import org.apache.struts.tiles.TilesRequestProcessor;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Proxy for a Spring-managed Struts 1.1 Action that's defined in
- * ContextLoaderPlugIn's WebApplicationContext.
+ * Subclass of Struts' TilesRequestProcessor that looks up Spring-managed
+ * Struts 1.1 Actions defined in ContextLoaderPlugIn's WebApplicationContext.
  *
- * <p>The proxy is defined in the Struts config file, specifying this
- * class as action class. It will delegate to a Struts Action bean
- * in the ContextLoaderPlugIn context.
- *
- * <pre>
- * &lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;</pre>
- *
- * The name of the Action bean in the WebApplicationContext will be
- * determined from the mapping path and module prefix. This can be
- * customized by overriding the <code>determineActionBeanName</code> method.
- *
- * <p>Example:
- * <ul>
- * <li>mapping path "/login" -> bean name "/login"<br>
- * <li>mapping path "/login", module prefix "/mymodule" ->
- * bean name "/mymodule/login"
- * </ul>
- *
- * <p>A corresponding bean definition in the ContextLoaderPlugin
- * context looks as follows, being able to fully leverage
- * Spring's configuration facilities:
- *
- * <pre>
- * &lt;bean name="/login" class="myapp.MyAction"&gt;
- *   &lt;property name="..."&gt;...&lt;/property&gt;
- * &lt;/bean&gt;</pre>
- *
- * If you want to avoid having to specify DelegatingActionProxy as Action
- * type in your struts-config, for example to be able to generate your
- * Struts config file with XDoclet, consider
- * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
- * The latter's disadvantage is that it might conflict with the need
- * for a different RequestProcessor subclass.
+ * <p>Behaves like
+ * {@link DelegatingRequestProcessor DelegatingRequestProcessor},
+ * but also provides the Tiles functionality of the original TilesRequestProcessor.
+ * As there's just a single central class to customize in Struts, we have to provide
+ * another subclass here, covering both the Tiles and the Spring delegation aspect.
  *
  * <p>The default implementation delegates to the DelegatingActionUtils
- * class as fas as possible, to reuse as much code as possible with
- * DelegatingRequestProcessor and DelegatingTilesRequestProcessor.
- *
- * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
- * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
- * ContextLoaderPlugIn and DelegatingActionProxy constitute a clean-room
- * implementation of the same idea, essentially superseding the original plugin.
- * Many thanks to Don Brown and Matt Raible for the original work, and for the
- * agreement to reimplement the idea in standard Spring!
+ * class as fas as possible, to reuse as much code as possible despite
+ * the need to provide two RequestProcessor subclasses. If you need to
+ * subclass yet another RequestProcessor, take this class as a template,
+ * delegating to DelegatingActionUtils just like it.
  *
  * @author Juergen Hoeller
- * @since 05.04.2004
- * @see #determineActionBeanName
+ * @since 26.04.2004
  * @see DelegatingRequestProcessor
- * @see DelegatingTilesRequestProcessor
+ * @see DelegatingActionProxy
  * @see DelegatingActionUtils
- * @see ContextLoaderPlugIn
  */
-public class DelegatingActionProxy extends Action {
+public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 
 	private WebApplicationContext webApplicationContext;
 
-	/**
-	 * Initialize the WebApplicationContext for this Action.
-	 * @see #initWebApplicationContext
-	 */
-	public void setServlet(ActionServlet actionServlet) {
-		super.setServlet(actionServlet);
+	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
+		super.init(actionServlet, moduleConfig);
 		if (actionServlet != null) {
 			this.webApplicationContext = initWebApplicationContext(actionServlet);
 		}
@@ -115,20 +80,20 @@ public class DelegatingActionProxy extends Action {
 	}
 
 	/**
-	 * Return the WebApplicationContext that this proxy delegates to.
+	 * Return the WebApplicationContext that this processor delegates to.
 	 */
 	protected final WebApplicationContext getWebApplicationContext() {
 		return webApplicationContext;
 	}
 
-	/**
-	 * Pass the execute call on to the Spring-managed delegate Action.
-	 * @see #getDelegateAction
-	 */
-	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-															 HttpServletResponse response) throws Exception {
-		Action delegateAction = getDelegateAction(mapping);
-		return delegateAction.execute(mapping, form, request, response);
+	protected Action processActionCreate(HttpServletRequest request, HttpServletResponse response,
+																			 ActionMapping mapping) throws IOException {
+		try {
+			return getDelegateAction(mapping);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return super.processActionCreate(request, response, mapping);
+		}
 	}
 
 	/**
@@ -154,8 +119,8 @@ public class DelegatingActionProxy extends Action {
 	 * @param mapping the Struts ActionMapping
 	 * @return the name of the Action bean
 	 * @see DelegatingActionUtils#determineActionBeanName
-	 * @see org.apache.struts.action.ActionMapping#getPath
-	 * @see org.apache.struts.config.ModuleConfig#getPrefix
+	 * @see ActionMapping#getPath
+	 * @see ModuleConfig#getPrefix
 	 */
 	protected String determineActionBeanName(ActionMapping mapping) {
 		return DelegatingActionUtils.determineActionBeanName(mapping);
