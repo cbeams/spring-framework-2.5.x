@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.8 2003-12-02 22:46:33 johnsonr Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.9 2003-12-05 12:18:16 johnsonr Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -71,8 +71,8 @@ public class ProxyFactoryTests extends TestCase {
 		};
 		TestBeanSubclass raw = new TestBeanSubclass();
 		ProxyFactory factory = new ProxyFactory(raw);
-		assertTrue("Found 3 interfaces", factory.getProxiedInterfaces().length == 3);
-		System.out.println("Proxied interfaces are " + StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), ","));
+		assertEquals("Found correct number of interfaces", 4, factory.getProxiedInterfaces().length);
+		//System.out.println("Proxied interfaces are " + StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), ","));
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertTrue("Picked up secondary interface", tb instanceof IOther);
 				
