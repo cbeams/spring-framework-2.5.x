@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="mvc">
-  <title>Web framework</title>
+  <title>Web MVC framework</title>
 
   <sect1 id="mvc-introduction">
-    <title>Introduction to the web framework</title>
+    <title>Introduction to the web MVC framework</title>
 
-    <para>Spring's web framework is designed around a DispatcherServlet that
+    <para>Spring's web MVC framework is designed around a DispatcherServlet that
     dispatches requests to handlers, with configurable handler mappings, view
     resolution, locale and theme resolution as well as support for upload files.
     The default handler is a very simple Controller interface, just offering a
@@ -20,12 +20,12 @@
     This is a major difference to Struts.</para>
 
     <para>You can use any object as a command or form object - there's no need
-    to implement an interface or derive from a base class. Spring's data
-    binding is highly flexible, for example, it treats type mismatches as validation
+    to implement an interface or derive from a base class. Spring's data binding
+    is highly flexible, for example, it treats type mismatches as validation
     errors that can be evaluated by the application, not as system errors. So
     you don't need to duplicate your business objects' properties as Strings
     in your form objects, just to be able to handle invalid submissions, or to
-    convert the Strings properly. Instead, it's often preferable to bind
+    convert the Strings properly. Instead, it is often preferable to bind
     directly to your business objects. This is another major difference to
     Struts which is built around required base classes like
     <literal>Action</literal> and <literal>ActionForm</literal> - for every
@@ -65,10 +65,10 @@
       knowledge and experience avalailable for the Struts framework. Thus,
       if you can live with Struts' architectural flaws, it can still be a
       viable choice for the web layer. The same applies to WebWork and other
-      web frameworks.</para>
+      web MVC frameworks.</para>
 
       <para>If you don't want to use Spring's web MVC, but intend to leverage
-      other solutions that Spring offers, you can integrate the web framework
+      other solutions that Spring offers, you can integrate the web MVC framework
       of your choice with Spring easily. Simply start up a Spring root
       application context via its ContextLoaderListener, and access it via its
       ServletContext attribute (or Spring's respective helper method) from
@@ -80,7 +80,7 @@
       <para>All your registered beans and all of Spring's services can be at
       your fingertips even without Spring's web MVC. Spring doesn't compete
       with Struts or WebWork in this scenario, it just addresses the many areas
-      that the pure web frameworks don't, from bean configuration to data
+      that the pure web MVC frameworks don't, from bean configuration to data
       access and transaction handling. So you are able to enrich your
       application with a Spring middle tier and/or data access tier, even if
       you just want to use, for example, the transaction abstraction with JDBC or
@@ -133,7 +133,7 @@
           <para>Customizable handler mapping and view resolution - handler
           mapping and view resolution strategies range from simple URL-based
           configuration, to sophisticated, purpose-built resolution strategies.
-          This is more flexible than some web frameworks which mandate a
+          This is more flexible than some web MVC frameworks which mandate a
           particular technique.</para>
         </listitem>
 
@@ -160,8 +160,8 @@
   <sect1 id="mvc-servlet">
     <title>The <literal>DispatcherServlet</literal></title>
 
-    <para>Spring's web framework is, like many other web frameworks, a
-    request-driven web framework, designed around a servlet that dispatches
+    <para>Spring's web MVC framework is, like many other web MVC frameworks, a
+    request-driven web MVC framework, designed around a servlet that dispatches
     requests to controllers and offers other functionality facilitating the
     development of web applications. Spring's
     <literal>DispatcherServlet</literal> however, does more than just that. It
@@ -190,7 +190,7 @@
     <literal>.form</literal> will be handled by the DispatcherServlet. The
     DispatcherServlet now needs to be configured. As illustrated in <xref
     linkend="context-introduction" />, ApplicationContexts in Spring can be
-    scoped. In the web framework, each DispatcherServlet has its own
+    scoped. In the web MVC framework, each DispatcherServlet has its own
     <literal>WebApplicationContext</literal>, which contains the
     DispatcherServlet configuration beans. The default BeanFactory used by the
     DispatcherServlet is the <literal>XmlBeanFactory</literal> and the
@@ -598,7 +598,7 @@ public class SampleController extends AbstractController {
       <para>Spring offers a multi-action controller with which you aggregate
       multiple actions into one controller, grouping functionality together.
       The multi-action controller lives in a separate package -
-      <literal>org.springframework.web.mvc.multiaction</literal> - and is
+      <literal>org.springframework.web.servlet.mvc.multiaction</literal> - and is
       capable of mapping requests to method names and then invoking the right
       method name. Using the multi-action controller is especially handy when
       you have a lot of common functionality in one controller, but want
@@ -1141,7 +1141,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title>ViewResolvers</title>
 
       <para>As discussed in <xref linkend="mvc-controller"></xref>, all
-      controllers in the Spring web framework, return a
+      controllers in the Spring web MVC framework, return a
       <literal>ModelAndView</literal> instance. Views in Spring are addressed by
       a view name and are resolved by a view resolver. Spring comes with quite
       a few view resolvers. We'll list most of them and then provide a couple
@@ -1328,8 +1328,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <title>Using locales</title>
 
     <para>Most parts of Spring's architecture support internationalization, just
-    as the Spring web framework does. SpringWEB enables you to automatically
-    resolve messages using the client's locale. This is done with
+    as the Spring web MVC framework does. DispatcherServlet enables you to
+    automatically resolve messages using the client's locale. This is done with
     <literal>LocaleResolver</literal> objects.</para>
 
     <para>When a request comes in, the DispatcherServlet looks for a locale
