@@ -82,7 +82,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 			ps.executeUpdate();
 		}
 		catch (SQLException ex) {
-			getJdbcTemplate().getExceptionTranslator().translate("streamImage", sql, ex);
+			getExceptionTranslator().translate("streamImage", sql, ex);
 		}
 		finally {
 			lobCreator.close();
