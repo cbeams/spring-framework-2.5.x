@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.support.AbstractConstraint;
 
@@ -432,53 +431,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
 		return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
-	}
-
-	/**
-	 * @param editSubFlowIdSuffix
-	 * @param transition
-	 * @return
-	 */
-	public boolean addEditSubFlow(String editSubFlowIdSuffix, Transition transition) {
-		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), transition);
-	}
-
-	/**
-	 * @param subFlowIdSuffix
-	 * @param subFlowAttributesMapperId
-	 * @param subFlowDefaultFinishStateId
-	 * @return
-	 */
-	public boolean addEditSubFlow(String editSubFlowIdSuffix, String subFlowAttributesMapperId,
-			String subFlowDefaultFinishStateId) {
-		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
-	}
-
-	/**
-	 * @param subFlowIdSuffix
-	 * @param transitions
-	 * @return
-	 */
-	public boolean addEditSubFlow(String editSubFlowIdSuffix, Transition[] transitions) {
-		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), transitions);
-	}
-
-	/**
-	 * @param subFlowIdSuffix
-	 * @param subFlowAttributesMapperId
-	 * @param transitions
-	 * @return
-	 */
-	public boolean addEditSubFlow(String editSubFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
-		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), subFlowAttributesMapperId, transitions);
-	}
-
-	/**
-	 * @param suffix
-	 * @return
-	 */
-	protected static String buildEditFlowId(String suffix) {
-		return EDIT + StringUtils.capitalize(suffix);
 	}
 
 	/**
@@ -1211,14 +1163,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param successStateId
-	 * @return
-	 */
-	public Transition onEditStart(String editSubFlowStateIdSuffix) {
-		return onEdit(buildEditFlowId(editSubFlowStateIdSuffix));
-	}
-
-	/**
 	 * @param backStateId
 	 * @return
 	 */
@@ -1373,18 +1317,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Transition onErrorView(String viewStateIdPrefix) {
 		return onError(view(viewStateIdPrefix));
-	}
-
-	public Transition onSuccessEdit(String editFlowIdSuffix) {
-		return onSuccess(buildEditFlowId(editFlowIdSuffix));
-	}
-
-	public Transition onBackEdit(String editFlowIdSuffix) {
-		return onBack(buildEditFlowId(editFlowIdSuffix));
-	}
-
-	public Transition onFinishEdit(String editFlowIdSuffix) {
-		return onFinish(buildEditFlowId(editFlowIdSuffix));
 	}
 
 	/**
