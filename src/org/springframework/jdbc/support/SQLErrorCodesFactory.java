@@ -36,7 +36,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.5 2003-12-30 00:49:45 jhoeller Exp $
+   @version $Id: SQLErrorCodesFactory.java,v 1.6 2004-02-16 20:49:23 trisberg Exp $
  */
 public class SQLErrorCodesFactory {
 
@@ -159,11 +159,13 @@ public class SQLErrorCodesFactory {
 				DatabaseMetaData dbmd = con.getMetaData();
 				if (dbmd != null) {
 					String dbName = dbmd.getDatabaseProductName();
+					String driverVersion = dbmd.getDriverVersion();
 					// special check for DB2
 					if (dbName != null && dbName.startsWith("DB2/"))
 						dbName = "DB2";
 					if (dbName != null) {
 						logger.info("Database Product Name is " + dbName);
+						logger.info("Driver Version is " + driverVersion);
 						SQLErrorCodes sec = (SQLErrorCodes) rdbmsErrorCodes.get(dbName);
 						if (sec != null)
 							return sec;
