@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -46,6 +47,10 @@ public class MessageTag extends RequestContextAwareTag {
 	private String code = null;
 
 	private String text = null;
+	
+	private String var = null;
+	
+	private int scope = PageContext.PAGE_SCOPE;
 
 	/**
 	 * Set the message code for this tag.
@@ -60,6 +65,22 @@ public class MessageTag extends RequestContextAwareTag {
 	public final void setText(String text) throws JspException {
 		this.text = ExpressionEvaluationUtils.evaluateString("text", text, pageContext);
 	}
+	
+	/**
+	 * Setting of the var String under which to bind the variable
+	 */
+	public final void setVar(String var)  throws JspException {
+		this.var = ExpressionEvaluationUtils.evaluateString("var", var, pageContext);
+	}
+	
+	/**
+	 * Setting of the scope to export the var to
+	 */
+	public final void setScope(String scope) throws JspException {
+		String tmpScope = ExpressionEvaluationUtils.evaluateString(
+			"scope", var, pageContext);
+		this.scope = TagUtils.getScope(tmpScope);
+	}
 
 	protected final int doStartTagInternal() throws Exception {
 		MessageSource messageSource = getMessageSource();
@@ -72,16 +93,19 @@ public class MessageTag extends RequestContextAwareTag {
 				if (this.text != null) {
 					msg = messageSource.getMessage(this.code, null, this.text,
 					                               getRequestContext().getLocale());
-				}
-				else {
+				} else {
 					msg = messageSource.getMessage(this.code, null,
 					                               getRequestContext().getLocale());
 				}
-			}
-			else {
+			} else {
 				msg = this.text;
 			}
-			writeMessage(isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg);
+			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
+			if (var == null) {
+				writeMessage(msg);
+			} else {
+				pageContext.setAttribute(var, msg, scope);				
+			}
 		}
 		catch (NoSuchMessageException ex) {
 			throw new JspTagException(getNoSuchMessageExceptionDescription(ex));
@@ -90,7 +114,7 @@ public class MessageTag extends RequestContextAwareTag {
 	}
 
 	protected void writeMessage(String msg) throws IOException {
-		this.pageContext.getOut().print(msg);
+		pageContext.getOut().write(msg);
 	}
 
 	/**
@@ -105,6 +129,17 @@ public class MessageTag extends RequestContextAwareTag {
 	 */
 	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return ex.getMessage();
+	}
+	
+	/* (non-Javadoc)
+	 * @see javax.servlet.jsp.tagext.TagSupport#release()
+	 */
+	public void release() {		 
+		super.release();
+		this.var = null;
+		this.scope = PageContext.PAGE_SCOPE;
+		this.code = null;
+		this.text = null;
 	}
 
 }

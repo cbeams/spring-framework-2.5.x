@@ -1,6 +1,7 @@
 package org.springframework.web.servlet.tags;
 
 import java.util.List;
+import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspException;
 
@@ -35,6 +36,8 @@ public class BindTag extends RequestContextAwareTag {
 
 	private String property;
 
+	private PropertyEditor editor;
+
 	/**
 	 * Set the path that this tag should apply.
 	 * Can be a bean (e.g. "person"), or a bean property
@@ -45,12 +48,26 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	/**
+	 * Retrieves the path that this tag should apply to
+	 * @return the path that this tag should apply to or <code>null</code>
+	 * if it is not set
+	 * @see #setPath(String)
+	 */
+	public String getPath() {
+		return path;
+	}
+
+	/**
 	 * Retrieves the Errors instance that this tag is currently bound to.
 	 * Intended for cooperating nesting tags.
 	 * @return an instance of Errors
 	 */
 	public Errors getErrors() {
 		return errors;
+	}
+
+	public PropertyEditor getEditor() {
+		return editor;
 	}
 
 	/**
@@ -85,6 +102,7 @@ public class BindTag extends RequestContextAwareTag {
 		if (this.property != null) {
 			fes = this.errors.getFieldErrors(this.property);
 			value = this.errors.getFieldValue(this.property);
+			editor = this.errors.getCustomEditor(this.property);
 			if (isHtmlEscape() && value instanceof String) {
 				value = HtmlUtils.htmlEscape((String) value);
 			}
@@ -131,3 +149,4 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 }
+

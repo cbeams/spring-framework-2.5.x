@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -190,6 +191,16 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath.length() > 0)
 			nestedPath += ".";
 		this.nestedPath = nestedPath;
+	}
+
+	public PropertyEditor getCustomEditor(String field) {
+		field = fixedField(field);
+		FieldError fe = getFieldError(field);
+		if(fe != null) {
+			return null;
+		} else {
+			return getBeanWrapper().findCustomEditor(null, field);
+		}
 	}
 
 	/**

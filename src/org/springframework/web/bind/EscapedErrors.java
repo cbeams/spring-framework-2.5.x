@@ -3,6 +3,7 @@ package org.springframework.web.bind;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.beans.PropertyEditor;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -112,6 +113,10 @@ public class EscapedErrors implements Errors {
 
 	public void setNestedPath(String nestedPath) {
 		source.setNestedPath(nestedPath);
+	}
+
+	public PropertyEditor getCustomEditor(String property) {
+		return null;
 	}
 
 	private ObjectError escapeObjectError(ObjectError source) {

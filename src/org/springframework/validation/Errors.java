@@ -6,6 +6,7 @@
 package org.springframework.validation;
 
 import java.util.List;
+import java.beans.PropertyEditor;
 
 /**
  * Interface to be implemented by objects that can store and expose
@@ -149,5 +150,7 @@ public interface Errors {
 	 * e.g. "address" (defaults to "", null is also acceptable)
 	 */
 	void setNestedPath(String nestedPath);
+
+    PropertyEditor getCustomEditor(String property);
 
 }
