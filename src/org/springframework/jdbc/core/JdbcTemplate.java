@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.30 2004-03-03 10:45:05 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.31 2004-03-04 08:05:02 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -843,14 +843,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				throw new InvalidDataAccessApiUsageException("Expected single row, not empty ResultSet");
 			}
 			Object result = null;
-			if (requiredType.equals(Integer.class) && (
-			rsmd.getColumnType(1) == java.sql.Types.NUMERIC ||
-			rsmd.getColumnType(1) == java.sql.Types.INTEGER ||
-			rsmd.getColumnType(1) == java.sql.Types.SMALLINT ||
-			rsmd.getColumnType(1) == java.sql.Types.TINYINT))
-				result = new Integer(rs.getInt(1));
-			else
+			if (JdbcUtils.isNumeric(rsmd.getColumnType(1))) {
+				if (this.requiredType.equals(Long.class)) {
+					result = new Long(rs.getLong(1));
+				}
+				else if (this.requiredType.equals(Integer.class)) {
+					result = new Integer(rs.getInt(1));
+				}
+			}
+			if (result == null) {
 				result = rs.getObject(1);
+			}
 			if (rs.next()) {
 				throw new InvalidDataAccessApiUsageException("Expected single row, not more than one");
 			}
