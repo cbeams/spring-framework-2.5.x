@@ -144,15 +144,9 @@ public class FlowSession implements Serializable {
 	 */
 	protected void setCurrentState(State newState) {
 		Assert.notNull(newState, "The newState is required");
-		Assert.isTrue(this.flow == newState.getFlow(),
-				"The newState belongs to the flow associated with this flow session");
+		Assert.isTrue(this.flow == newState.getFlow(), "The newState belongs to the flow associated with this flow session");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState + "'");
-			if (this.currentState != null && this.currentState.equals(newState)) {
-				logger.debug(
-						"Loop detected: the previous current state of this flow session was also '"
-						+ newState + "' -- make sure this is not a bug!");
-			}
 		}
 		this.currentState = newState;
 	}

@@ -73,6 +73,13 @@ public abstract class TransitionableState extends State {
 	 */
 	protected void add(Transition transition) {
 		transition.setSourceState(this);
+		if (transition.getTargetStateId().equals(this.getId())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(
+					"Loop detected: the source and target state of transition '" + transition + "' are the same" +
+					" -- make sure this is not a bug!");
+			}
+		}
 		this.transitions.add(transition);
 	}
 
