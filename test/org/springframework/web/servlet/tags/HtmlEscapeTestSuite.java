@@ -26,7 +26,7 @@ import org.springframework.mock.web.MockServletContext;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class HtmlEscapeTestSuite extends AbstractTagTest {
+public class HtmlEscapeTestSuite extends AbstractTagTests {
 
 	public void testHtmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();

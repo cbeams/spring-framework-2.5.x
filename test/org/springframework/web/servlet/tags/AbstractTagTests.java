@@ -29,10 +29,10 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
 /**
- * Abstract test for testing tags: provides createPageContext.
+ * Abstract base class for testing tags: provides createPageContext.
  * @author Alef Arendsen
  */
-public abstract class AbstractTagTest extends TestCase {
+public abstract class AbstractTagTests extends TestCase {
 	
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();

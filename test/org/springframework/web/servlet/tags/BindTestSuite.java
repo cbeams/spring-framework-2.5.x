@@ -32,7 +32,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class BindTestSuite extends AbstractTagTest {
+public class BindTestSuite extends AbstractTagTests {
 
 	public void testBindErrorsTagWithErrors() throws JspException {
 		PageContext pc = createPageContext();

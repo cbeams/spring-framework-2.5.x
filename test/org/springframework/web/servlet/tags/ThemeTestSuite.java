@@ -32,7 +32,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class ThemeTestSuite extends AbstractTagTest {
+public class ThemeTestSuite extends AbstractTagTests {
 
 	public void testThemeTag() throws JspException {
 		PageContext pc = createPageContext();

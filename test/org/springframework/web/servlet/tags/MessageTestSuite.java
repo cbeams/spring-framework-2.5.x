@@ -31,7 +31,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class MessageTestSuite extends AbstractTagTest {
+public class MessageTestSuite extends AbstractTagTests {
 
 	public void testMessageTagWithCode1() throws JspException {
 		PageContext pc = createPageContext();

@@ -32,7 +32,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class TransformTestSuite extends AbstractTagTest {
+public class TransformTestSuite extends AbstractTagTests {
 
 	public void testTransformTagCorrectBehavior() throws JspException {
 		// first set up the pagecontext and the bean
