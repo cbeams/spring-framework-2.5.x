@@ -19,11 +19,8 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
-	private String sequenceQuery;
-
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		this.sequenceQuery = getSequenceQuery();
 	}
 
 	protected long getNextKey() throws DataAccessException {
@@ -33,7 +30,7 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 		try {
 			stmt = con.createStatement();
 			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-			rs = stmt.executeQuery(this.sequenceQuery);
+			rs = stmt.executeQuery(getSequenceQuery());
 			if (rs.next()) {
 				return rs.getLong(1);
 			}
