@@ -4,6 +4,7 @@
 package org.springframework.binding.support;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +26,18 @@ public class DefaultBeanMetadata implements BeanMetadata {
 
     private final Log logger = LogFactory.getLog(getClass());
 
+    public String getCaption() {
+        return null;
+    }
     public String getDescription() {
         return null;
     }
     
-    public PropertyMetadata[] getProperties() {
+    public Collection getPropertyMetadataCollection() {
         return null;
     }
     
-    public PropertyMetadata getProperty(String propertyPath) {
+    public PropertyMetadata getPropertyMetadata(String propertyPath) {
         return null;
     }
     

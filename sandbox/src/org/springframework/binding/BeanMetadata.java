@@ -3,19 +3,23 @@
  */
 package org.springframework.binding;
 
+import java.util.Collection;
+
 /**
  * @author Keith Donald
  */
 public interface BeanMetadata {
     public String getName();
 
+    public String getCaption();
+
     public String getDescription();
 
     public Class getType();
 
     public Object newInstance();
-    
-    public PropertyMetadata[] getProperties();
-    
-    public PropertyMetadata getProperty(String propertyPath);
+
+    public Collection getPropertyMetadataCollection();
+
+    public PropertyMetadata getPropertyMetadata(String propertyPath);
 }
