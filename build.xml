@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.33 2004-01-29 23:38:39 aarendsen Exp $
+    $Id: build.xml,v 1.34 2004-02-05 09:57:30 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -144,67 +144,86 @@
 	</target>
 
 
-	<target name="beans" depends="build,initdist" description="Create JAR file for minimal bean container">
+	<target name="modulejars" depends="build,initdist" description="Create module-specific JAR files">
 
-		<delete file="${dist.dir}/${spring-beans.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-beans.jar}">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/beans/**"/>
-				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/util/StringUtils*"/>
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="spring-*.jar"/>
 			</fileset>
-			<manifest>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
+		</delete>
 
-	</target>
-
-
-	<target name="context" depends="build,initdist" description="Create JAR file for non-J2EE application context">
-
-		<delete file="${dist.dir}/${spring-context.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-context.jar}">
+		<jar jarfile="${dist.dir}/spring-core.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
-				<include name="org/springframework/context/**"/>
 				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/metadata/**"/>
 				<include name="org/springframework/util/**"/>
-				<include name="org/springframework/ui/**"/>
-				<include name="org/springframework/validation/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
 
-	</target>
-
-
-	<target name="jdbc" depends="build,initdist" description="Create JAR file for context with JDBC support">
-
-		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
+		<jar jarfile="${dist.dir}/spring-aop.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/aop/**"/>
-				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/metadata/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-context.jar">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/context/**"/>
-				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/dao/**"/>
-				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/ejb/**"/>
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/mail/**"/>
-				<include name="org/springframework/metadata/**"/>
-				<include name="org/springframework/transaction/**"/>
-				<include name="org/springframework/validation/**"/>
+				<include name="org/springframework/remoting/**"/>
 				<include name="org/springframework/ui/**"/>
-				<include name="org/springframework/util/**"/>
 				<include name="org/springframework/validation/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-dao.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/transaction/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-orm.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-web.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/web/bind/**"/>
+				<include name="org/springframework/web/context/**"/>
+				<include name="org/springframework/web/filter/**"/>
+				<include name="org/springframework/web/multipart/**"/>
+				<include name="org/springframework/web/util/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-webmvc.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/web/servlet/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Spring-Version" value="${spring-version}"/>
@@ -214,11 +233,11 @@
 	</target>
 
 
-	<target name="fulljar" depends="build,initdist" description="Create JAR file with all Spring classes">
+	<target name="fulljar" depends="build,initdist" description="Create full JAR file with all Spring classes">
 
-		<delete file="${dist.dir}/${spring.jar}"/>
+		<delete file="${dist.dir}/spring.jar"/>
 
-		<jar jarfile="${dist.dir}/${spring.jar}">
+		<jar jarfile="${dist.dir}/spring.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
 				<include name="org/springframework/**"/>
@@ -233,9 +252,9 @@
 
 	<target name="srczip" depends="initdist" description="Create source ZIP (containing all Java sources)">
 
-		<delete file="${dist.dir}/${spring-src.zip}"/>
+		<delete file="${dist.dir}/spring-src.zip"/>
 
-		<zip zipfile="${dist.dir}/${spring-src.zip}">
+		<zip zipfile="${dist.dir}/spring-src.zip">
 			<fileset dir="${src.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
@@ -253,7 +272,7 @@
 	<!--
 		Note: Contained classes overlap, e.g. spring.jar contains everything.
 	-->
-	<target name="alljars" depends="beans,context,jdbc,fulljar,srczip" description="Create all JAR files"/>
+	<target name="alljars" depends="modulejars,fulljar,srczip" description="Create all JAR files"/>
 
 
 	<target name="javadoc" description="Generate framework Javadocs.">
@@ -521,22 +540,6 @@
 	</target>
 
 
-	<target name="metadata" depends="build,initdist" description="Create JAR file for source level matadata support">
-
-		<delete file="${dist.dir}/${spring-metadata.jar}"/>
-
-		<jar jarfile="${dist.dir}/${spring-metadata.jar}">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/metadata/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
 	<target name="docclean" description="Delete temporary and distribution directories for docs">
 
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
@@ -544,7 +547,8 @@
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
 
 	</target>
-	
+
+
 	<target name="preparedocs" description="Extra preparation for the documentation">
 		<!-- For now, no dynamic inclusion of the DTD since it looks ugly because of
 		     all the extra newlines the replace is mysteriously adding.
@@ -553,7 +557,7 @@
 		<loadfile
 			property="doc.beansdtd"
 				srcFile="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"/>
-		<copy 
+		<copy
 			file="${basedir}/${doc.ref.dir}/src/dtd-template.xml"
 			tofile="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
 		<replace
@@ -567,6 +571,7 @@
 			value=""/>
 		-->
 	</target>
+
 
 	<target name="docpdf" depends="preparedocs" description="Compile reference documentation to pdf">
 
