@@ -18,12 +18,10 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 import org.springframework.aop.InterceptionAroundAdvisor;
-import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
-import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -33,14 +31,31 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.20 2003-11-30 17:17:33 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.21 2003-11-30 18:00:35 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
+	
+	private MockTargetSource mockTargetSource = new MockTargetSource();
 
 	public AopProxyTests(String arg0) {
 		super(arg0);
 	}
+	
+	/**
+	 * Make a clean target source available if code wants to use it.
+	 * The target must be set. Verification will be automatic in tearDown
+	 * to ensure that it was used appropriately by code.
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	protected void setUp() {
+		mockTargetSource.reset();
+	}
 
+	protected void tearDown() {
+		mockTargetSource.verify();
+	}
+	
+	
 	public void testNullConfig() {
 		try {
 			AopProxy aop = new AopProxy(null);
@@ -138,7 +153,7 @@ public class AopProxyTests extends TestCase {
 		pf2.setExposeInvocation(true);
 		pf2.setExposeProxy(true);
 		assertTrue(pf2.getExposeInvocation());
-		DebugInterceptor di2 = new DebugInterceptor();
+		NopInterceptor di2 = new NopInterceptor();
 		pf2.addInterceptor(0, di2);
 		pf2.addInterceptor(1, new ProxyMatcherInterceptor());
 		pf2.addInterceptor(2, new CheckMethodInvocationIsSameInAndOutInterceptor());
@@ -377,9 +392,9 @@ public class AopProxyTests extends TestCase {
 	public void testProxyCanBeClassNotInterface() throws Throwable {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
-		SingletonTargetSource sts = new SingletonTargetSource(raw);
+		mockTargetSource.setTarget(raw);
 		AdvisedSupport pc = new AdvisedSupport(new Class[] {});
-		pc.setTargetSource(sts);
+		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = new AopProxy(pc);
 
 		Object proxy = aop.getProxy();
@@ -450,25 +465,30 @@ public class AopProxyTests extends TestCase {
 	 * TODO also test undeclared: decide what it should do!
 	 */
 	public void testDeclaredException() throws Throwable {
-		final Exception ex = new Exception();
+		final Exception expectedException = new Exception();
 		// Test return value
 		MethodInterceptor mi = new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw ex;
+				throw expectedException;
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc.setExposeInvocation(true);
 		pc.addInterceptor(mi);
+		
+		// We don't care about the object
+		mockTargetSource.setTarget(new Object());
+		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = new AopProxy(pc);
 
 		try {
 			ITestBean tb = (ITestBean) aop.getProxy();
 			// Note: exception param below isn't used
-			tb.exceptional(ex);
+			tb.exceptional(expectedException);
 			fail("Should have thrown exception raised by interceptor");
-		} catch (Exception thrown) {
-			assertTrue("exception matches: not " + thrown, ex == thrown);
+		} 
+		catch (Exception thrown) {
+			assertEquals("exception matches", expectedException, thrown);
 		}
 	}
 	
@@ -869,7 +889,8 @@ public class AopProxyTests extends TestCase {
 		// Could apply dynamically to getAge/setAge but not to getName
 		TestDynamicPointcutAdvice dp = new TestDynamicPointcutForSettersOnly(new NopInterceptor(), "Age");
 		pc.addAdvisor(dp);
-		pc.setTargetSource(new SingletonTargetSource(tb));
+		this.mockTargetSource.setTarget(tb);
+		pc.setTargetSource(mockTargetSource);
 		ITestBean it = (ITestBean) pc.getProxy();
 		assertEquals(dp.count, 0);
 		int age = it.getAge();
