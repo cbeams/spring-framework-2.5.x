@@ -18,18 +18,23 @@ package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Pointcut bean for simple method name matches,
  * as alternative to regexp patterns.
+ * Does not handle overloaded methods--that is, all methods
+ * with a given name will be eligible.
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 11.02.2004
  * @see #isMatch
- * @version $Id: NameMatchMethodPointcut.java,v 1.3 2004-07-25 12:19:31 johnsonr Exp $
+ * @version $Id: NameMatchMethodPointcut.java,v 1.4 2004-07-26 15:37:27 johnsonr Exp $
  */
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	private String[] mappedNames = new String[0];
+	private List mappedNames = new LinkedList();
 
 	/**
 	 * Convenience method when we have only a single method name
@@ -37,7 +42,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * @see #setMappedNames
 	 */
 	public void setMappedName(String mappedName) {
-		this.mappedNames = new String[] {mappedName};
+		setMappedNames(new String[] { mappedName });
 	}
 
 	/**
@@ -46,12 +51,32 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * the pointcut matches.
 	 */
 	public void setMappedNames(String[] mappedNames) {
-		this.mappedNames = mappedNames;
+		this.mappedNames = new LinkedList();
+		if (mappedNames != null) {
+			for (int i = 0; i < mappedNames.length; i++) {
+				this.mappedNames.add(mappedNames[i]);
+			}
+		}
 	}
-
+	
+	/**
+	 * Add another eligible method name, in addition
+	 * to those already named. Like the set methods, this method is for use
+	 * when configuring proxies, before a proxy is used.
+	 * <br>
+	 * <b>NB:</b> This method does not work after the proxy is in
+	 * use, as advice chains will be cached.
+	 * @param name name of the additional method that will match
+	 */
+	public void addMethodName(String name) {
+		// TODO in a future release, consider a way of letting proxies
+		// cause advice changed events
+		this.mappedNames.add(name);
+	}
+	
 	public boolean matches(Method m, Class targetClass) {
-		for (int i = 0; i<this.mappedNames.length; i++) {
-			String mappedName = this.mappedNames[i];
+		for (int i = 0; i < this.mappedNames.size(); i++) {
+			String mappedName = (String) this.mappedNames.get(i);
 			if (mappedName.equals(m.getName()) || isMatch(m.getName(), mappedName)) {
 				return true;
 			}
