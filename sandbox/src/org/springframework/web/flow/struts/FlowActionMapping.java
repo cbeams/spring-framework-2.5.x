@@ -19,10 +19,12 @@ import org.apache.struts.action.ActionMapping;
 
 /**
  * A flow action mapping object that allows FlowActions to be configured with a flowId
- * via a strut's <code><set-property/></code> definition.
+ * via a Strut's <code>&lt;set-property/&gt;</code> definition.
+ * 
  * @author Keith Donald
  */
 public class FlowActionMapping extends ActionMapping {
+	
 	private String flowId;
 
 	/**
