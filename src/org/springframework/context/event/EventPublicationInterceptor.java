@@ -21,18 +21,27 @@ import java.lang.reflect.Constructor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.support.ApplicationObjectSupport;
 
 /**
- * Interceptor that knows how to publish {@link org.springframework.context.ApplicationEvent}s to all
- * <code>ApplicationListener</code>s registered with <code>ApplicationContext</code> 
+ * Interceptor that knows how to publish ApplicationEvents to all
+ * ApplicationListeners registered with an ApplicationContext.
  * @author Dmitriy Kopylenko
- * @version $Id: EventPublicationInterceptor.java,v 1.3 2004-03-18 02:46:10 trisberg Exp $
+ * @version $Id: EventPublicationInterceptor.java,v 1.4 2004-04-01 15:09:31 jhoeller Exp $
+ * @see org.springframework.context.ApplicationEvent
+ * @see org.springframework.context.ApplicationListener
  */
-public class EventPublicationInterceptor extends ApplicationObjectSupport implements MethodInterceptor {
+public class EventPublicationInterceptor implements MethodInterceptor, ApplicationContextAware {
+
+	private ApplicationContext applicationContext;
 
 	private Class applicationEventClass;
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
 	/**
 	 * Set the application event class to publish.
@@ -49,8 +58,8 @@ public class EventPublicationInterceptor extends ApplicationObjectSupport implem
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Object retVal = invocation.proceed();
 		Constructor constructor = this.applicationEventClass.getConstructor(new Class[] {Object.class});
-		ApplicationEvent applicationEvent = (ApplicationEvent) constructor.newInstance(new Object[] {invocation.getThis()});
-		getApplicationContext().publishEvent(applicationEvent);
+		ApplicationEvent event = (ApplicationEvent) constructor.newInstance(new Object[] {invocation.getThis()});
+		this.applicationContext.publishEvent(event);
 		return retVal;
 	}
 
