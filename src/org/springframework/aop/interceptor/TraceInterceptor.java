@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * with method entry and method exit info using Commons Logging at DEBUG level.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @since 1.0.2
  */
 public class TraceInterceptor implements MethodInterceptor, Serializable {
 
@@ -44,8 +45,10 @@ public class TraceInterceptor implements MethodInterceptor, Serializable {
 			return invocation.proceed();
 		}
 		finally {
-			logger.debug("Exiting method '" + invocation.getMethod().getName() +
-			    "' in class [" + invocation.getThis().getClass().getName() + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Exiting method '" + invocation.getMethod().getName() +
+						"' in class [" + invocation.getThis().getClass().getName() + "]");
+			}
 		}
 	}
 
