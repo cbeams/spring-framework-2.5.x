@@ -16,7 +16,6 @@
 
 package org.springframework.orm.ibatis;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -32,21 +31,21 @@ import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
 /**
  * @author Juergen Hoeller
+ * @author Alef Arendsen
  * @since 09.10.2004
  */
 public class SqlMapClientTests extends TestCase {
 
-	public void testSqlMapClientFactoryBeanWithoutConfig() {
+	public void testSqlMapClientFactoryBeanWithoutConfig() throws Exception {
 		SqlMapClientFactoryBean factory = new SqlMapClientFactoryBean();
 		// explicitly set to null, don't know why ;-)
 		factory.setConfigLocation(null);
 		try {
 			factory.afterPropertiesSet();
 			fail("Should have thrown IllegalArgumentException");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException ex) {
 			// expected
-		} catch (IOException e) {
-			fail("Should have thrown IllegalArgumentException");
 		}
 	}
 
