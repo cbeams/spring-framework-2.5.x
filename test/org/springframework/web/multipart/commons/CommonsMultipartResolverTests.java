@@ -194,19 +194,31 @@ public class CommonsMultipartResolverTests extends TestCase {
 			}
 		};
 		filterConfig.setupGetServletContext(wac.getServletContext());
+
+		final MultipartFilter filter = new MultipartFilter();
+		filter.init(filterConfig);
+
 		final List files = new ArrayList();
-		MockFilterChain filterChain = new MockFilterChain() {
-			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
-				MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
+		final MockFilterChain filterChain = new MockFilterChain() {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+				MultipartHttpServletRequest request = (MultipartHttpServletRequest) servletRequest;
 				files.addAll(request.getFileMap().values());
 			}
 		};
-		MultipartFilter filter = new MultipartFilter();
-		filter.init(filterConfig);
+
+		MockFilterChain filterChain2 = new MockFilterChain() {
+			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
+			    throws IOException, ServletException {
+				filter.doFilter(servletRequest, servletResponse, filterChain);
+			}
+		};
+
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
-		filter.doFilter(originalRequest, new MockHttpServletResponse(), filterChain);
+		filter.doFilter(originalRequest, response, filterChain2);
+
 		CommonsMultipartFile file1 = (CommonsMultipartFile) files.get(0);
 		CommonsMultipartFile file2 = (CommonsMultipartFile) files.get(1);
 		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
@@ -235,6 +247,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 			}
 		};
 		filterConfig.setupGetServletContext(wac.getServletContext());
+
 		final List files = new ArrayList();
 		MockFilterChain filterChain = new MockFilterChain() {
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
@@ -244,6 +257,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 				}
 			}
 		};
+
 		MultipartFilter filter = new MultipartFilter() {
 			private boolean invoked = false;
 			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -256,6 +270,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 			}
 		};
 		filter.init(filterConfig);
+
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
@@ -280,6 +295,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 	private static class MockDiskFileUpload extends DiskFileUpload {
 
 		public List parseRequest(HttpServletRequest request) {
+			if (request instanceof MultipartHttpServletRequest) {
+				throw new IllegalStateException("Already a multipart request");
+			}
 			List fileItems = new ArrayList();
 			MockFileItem fileItem1 = new MockFileItem("field1", "type1", "field1.txt", "text1");
 			MockFileItem fileItem2 = new MockFileItem("field2", "type2", "C:/field2.txt", "text2");

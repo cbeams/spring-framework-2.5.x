@@ -57,7 +57,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Fetches a reference to the MultipartResolver via lookupMultipartResolver
+	 * Fetch a reference to the MultipartResolver via lookupMultipartResolver
 	 * and stores it for use in this filter.
 	 * @see #lookupMultipartResolver
 	 */
@@ -69,7 +69,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Looks for a MultipartResolver bean in the root web application context.
+	 * Look for a MultipartResolver bean in the root web application context.
 	 * Supports a "multipartResolverBeanName" filter init param; the default
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
@@ -83,8 +83,8 @@ public class MultipartFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Checks for a multipart request via this filter's MultipartResolver,
-	 * and wraps the original request with a MultipartHttpServletRequest if appropriate.
+	 * Check for a multipart request via this filter's MultipartResolver,
+	 * and wrap the original request with a MultipartHttpServletRequest if appropriate.
 	 * <p>All later elements in the filter chain, most importantly servlets, benefit
 	 * from proper parameter extraction in the multipart case, and are able to cast to
 	 * MultipartHttpServletRequest if they need to.
@@ -94,9 +94,15 @@ public class MultipartFilter extends OncePerRequestFilter {
 		HttpServletRequest processedRequest = request;
 		if (this.multipartResolver.isMultipart(processedRequest)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving request [" + processedRequest.getRequestURI() + "] with MultipartFilter");
+				logger.debug("Resolving multipart request [" + processedRequest.getRequestURI() +
+				             "] with MultipartFilter");
 			}
 			processedRequest = this.multipartResolver.resolveMultipart(processedRequest);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Request [" + processedRequest.getRequestURI() + "] is not a multipart request");
+			}
 		}
 		try {
 			filterChain.doFilter(processedRequest, response);

@@ -31,6 +31,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * execution but also for middle tier transactions via HibernateTransactionManager.
  * The latter will automatically use Sessions pre-bound by this filter.
  *
+ * <p>WARNING: Applying this filter to existing logic can cause issues that
+ * have not appeared before, through the use of a single Hibernate Session
+ * for the processing of an entire request. In particular, the reassociation
+ * of persistent objects with a Hibernate Session has to occur at the very
+ * beginning of request processing.
+ *
  * <p>Looks up the SessionFactory in Spring's root web application context.
  * Supports a "sessionFactoryBeanName" filter init-param; the default bean name is
  * "sessionFactory". Looks up the SessionFactory on each request, to avoid
@@ -73,6 +79,16 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return sessionFactoryBeanName;
 	}
 
+	/**
+	 * This implementation appends the SessionFactory bean name to the class name,
+	 * to be executed one per SessionFactory. Can be overridden in subclasses,
+	 * e.g. when also overriding lookupSessionFactory.
+	 * @see #lookupSessionFactory
+	 */
+	protected String getAlreadyFilteredAttributeName() {
+		return getClass().getName() + "." + this.sessionFactoryBeanName;
+	}
+
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
 		SessionFactory sessionFactory = lookupSessionFactory();
@@ -90,7 +106,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Look up the SessionFactory that this filer should use.
+	 * Look up the SessionFactory that this filter should use.
 	 * The default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
 	 * @return the SessionFactory to use
