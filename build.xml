@@ -375,7 +375,7 @@
 			<!-- EasyMock -->
 			<!-- EhCache -->
 			<!-- FOP -->
-			<link href="http://www.freemarker.org/docs/api/"/>
+			<link href="http://freemarker.sourceforge.net/docs/api/"/>
 			<!-- Groovy -->
 			<link href="http://www.hibernate.org/hib_docs/api/"/>
 			<link href="http://httpunit.sourceforge.net/doc/api/"/>
