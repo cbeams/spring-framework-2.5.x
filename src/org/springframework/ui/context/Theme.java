@@ -19,8 +19,7 @@ package org.springframework.ui.context;
 import org.springframework.context.MessageSource;
 
 /**
- * A Theme can resolve theme-specific messages, codes, file paths, etc
- * (e.g. CSS and image files in a web environment).
+ * A Theme can resolve theme-specific messages, codes, file paths, etcetera (e&#46;g&#46; CSS and image files in a web environment). 
  * The MessageSource supports parameterization and internationalization.
  * @author Juergen Hoeller
  * @since 17.06.2003
