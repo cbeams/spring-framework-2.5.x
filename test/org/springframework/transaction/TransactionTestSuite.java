@@ -22,7 +22,7 @@ public class TransactionTestSuite extends TestCase {
 		assertTrue("Must be new transaction", status2.isNewTransaction());
 
 		try {
-			TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
+			tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
 			fail("Should not have thrown NoTransactionException");
 		}
 		catch (NoTransactionException ex) {
@@ -207,6 +207,26 @@ public class TransactionTestSuite extends TestCase {
 		assertTrue("correct transaction manager set", template.getTransactionManager() == tm);
 
 		try {
+			template.setPropagationBehaviorName("TIMEOUT_DEFAULT");
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
+		assertTrue("Correct propagation behavior set", template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		try {
+			template.setPropagationBehavior(999);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
+		assertTrue("Correct propagation behavior set", template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY);
+
+		try {
 			template.setIsolationLevelName("TIMEOUT_DEFAULT");
 			fail("Should have thrown IllegalArgumentException");
 		}
@@ -217,15 +237,14 @@ public class TransactionTestSuite extends TestCase {
 		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		try {
-			template.setPropagationBehaviorName("TIMEOUT_DEFAULT");
+			template.setIsolationLevel(999);
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
-		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
-		assertTrue("Correct propagation behavior set", template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS);
-
+		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ);
 	}
 
 }
