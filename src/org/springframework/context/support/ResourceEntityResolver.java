@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import org.xml.sax.InputSource;
 
@@ -30,7 +31,7 @@ import org.springframework.core.io.Resource;
 /**
  * EntityResolver implementation that tries to resolve entity references
  * relative to the resource base of the application context, if applicable.
- * Extends BeansDtdResolver to also provide DTD lookup in the classpath.
+ * Extends BeansDtdResolver to also provide DTD lookup in the class path.
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
  * application context definition, for example to split a large XML file
@@ -59,7 +60,8 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 		if (source == null && systemId != null) {
 			String resourcePath = null;
 			try {
-				String givenUrl = new URL(systemId).toString();
+				String decodedSystemId = URLDecoder.decode(systemId);
+				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURL().toString();
 				// try relative to resource base if currently in system root
 				if (givenUrl.startsWith(systemRootUrl)) {
@@ -71,9 +73,14 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 				resourcePath = systemId;
 			}
 			if (resourcePath != null) {
-				logger.debug("Trying to locate entity [" + systemId + "] as application context resource [" + resourcePath + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Trying to locate entity [" + systemId + "] as application context resource [" +
+											 resourcePath + "]");
+				}
 				Resource resource = this.applicationContext.getResource(resourcePath);
-				logger.info("Found entity [" + systemId + "] as application context resource [" + resourcePath + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Found entity [" + systemId + "] as application context resource [" + resourcePath + "]");
+				}
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
