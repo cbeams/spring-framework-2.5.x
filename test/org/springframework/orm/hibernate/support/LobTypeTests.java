@@ -32,12 +32,15 @@ import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
+import net.sf.hibernate.Session;
+import net.sf.hibernate.SessionFactory;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.orm.hibernate.MockJtaTransaction;
+import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -93,12 +96,64 @@ public class LobTypeTests extends TestCase {
 			type.nullSafeSet(ps, "content", 1);
 			List synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
+			assertTrue(synchs.get(0).getClass().getName().endsWith("SpringLobCreatorSynchronization"));
 			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
 			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+	}
+
+	public void testClobStringTypeWithSynchronizedSession() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		lobHandler.getClobAsString(rs, 1);
+		lobHandlerControl.setReturnValue("content");
+		lobCreator.setClobAsString(ps, 1, "content");
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		ClobStringType type = new ClobStringType(lobHandler, null);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.CLOB, type.sqlTypes()[0]);
+		assertEquals(String.class, type.returnedClass());
+		assertTrue(type.equals("content", "content"));
+		assertEquals("content", type.deepCopy("content"));
+		assertFalse(type.isMutable());
+
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			SessionFactoryUtils.getSession(sf, true);
+			type.nullSafeSet(ps, "content", 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(2, synchs.size());
+			assertTrue(synchs.get(0).getClass().getName().endsWith("SpringLobCreatorSynchronization"));
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+			((TransactionSynchronization) synchs.get(1)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(1)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
 	}
 
 	public void testClobStringTypeWithFlushOnCommit() throws Exception {
@@ -478,6 +533,8 @@ public class LobTypeTests extends TestCase {
 		catch (IllegalStateException ex) {
 			// ignore: test method didn't call replay
 		}
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }
