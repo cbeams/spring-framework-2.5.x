@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import junit.framework.TestCase;
 
-public class ComparatorTest extends TestCase {
+public class ComparatorTests extends TestCase {
 
     public void testComparableComparator() {
         Comparator c = ComparableComparator.instance();
