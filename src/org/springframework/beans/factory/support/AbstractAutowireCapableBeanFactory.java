@@ -51,6 +51,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 
 /**
@@ -209,7 +210,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 
 			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
-			invokeInitMethods(bean, beanName, mergedBeanDefinition);
+			invokeInitMethods(beanName, mergedBeanDefinition, bean);
 			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
 		catch (BeanCreationException ex) {
@@ -622,7 +623,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
-			return resolveReference(mergedBeanDefinition, beanName, argName, ref);
+			return resolveReference(beanName, mergedBeanDefinition, argName, ref);
 		}
 		else if (value instanceof ManagedList) {
 			// Convert from managed list. This is a special container that may
@@ -649,7 +650,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
-	protected Object resolveReference(RootBeanDefinition mergedBeanDefinition, String beanName,
+	protected Object resolveReference(String beanName, RootBeanDefinition mergedBeanDefinition,
 																		String argName, RuntimeBeanReference ref) throws BeansException {
 		try {
 			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
@@ -679,7 +680,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	protected Set resolveManagedSet(String beanName, RootBeanDefinition mergedBeanDefinition,
-																	 String argName, ManagedSet ms) throws BeansException {
+																	String argName, ManagedSet ms) throws BeansException {
 		Set resolved = new HashSet();
 		for (Iterator it = ms.iterator(); it.hasNext();) {
 			resolved.add(resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[(set-element)]", it.next()));
@@ -709,7 +710,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bean new bean instance we may need to initialize
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 */
-	protected void invokeInitMethods(Object bean, String beanName, RootBeanDefinition mergedBeanDefinition)
+	protected void invokeInitMethods(String beanName, RootBeanDefinition mergedBeanDefinition, Object bean)
 			throws Exception {
 
 		if (bean instanceof InitializingBean) {
@@ -754,6 +755,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (dependingBeans != null) {
 			for (int i = 0; i < dependingBeans.length; i++) {
 				destroySingleton(dependingBeans[i]);
+			}
+		}
+
+		logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+		for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
+			Object beanProcessor = getBeanPostProcessors().get(i);
+			if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
+				((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
 			}
 		}
 
