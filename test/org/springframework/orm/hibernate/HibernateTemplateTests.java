@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.Criteria;
@@ -44,6 +45,7 @@ import net.sf.hibernate.TransientObjectException;
 import net.sf.hibernate.WrongClassException;
 import net.sf.hibernate.type.Type;
 import org.easymock.MockControl;
+import org.easymock.ArgumentsMatcher;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -1973,8 +1975,16 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO);
-		session.delete("from example.Example", "test", Hibernate.STRING);
-		sessionControl.setReturnValue(2);
+		session.delete("from example.Example", new String[] {"test"}, new Type[] {Hibernate.STRING});
+		sessionControl.setDefaultReturnValue(2);
+		sessionControl.setMatcher(new ArgumentsMatcher() {
+			public boolean matches(Object[] o1, Object[] o2) {
+				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
+			}
+			public String toString(Object[] objects) {
+				return null;
+			}
+		});
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();

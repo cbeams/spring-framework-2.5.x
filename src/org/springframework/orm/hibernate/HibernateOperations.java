@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -552,38 +552,6 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
 	List findByNamedQuery(String queryName, Object[] values, Type[] types)
-			throws DataAccessException;
-
-	/**
-	 * @deprecated in favor of findByNamedQueryAndNamedParam,
-	 * to avoid parameter overloading ambiguities
-	 * @see #findByNamedQueryAndNamedParam
-	 */
-	List findByNamedQuery(String queryName, String paramName, Object value)
-			throws DataAccessException;
-
-	/**
-	 * @deprecated in favor of findByNamedQueryAndNamedParam,
-	 * to avoid parameter overloading ambiguities
-	 * @see #findByNamedQueryAndNamedParam
-	 */
-	List findByNamedQuery(String queryName, String paramName, Object value, Type type)
-			throws DataAccessException;
-
-	/**
-	 * @deprecated in favor of findByNamedQueryAndNamedParam,
-	 * to avoid parameter overloading ambiguities
-	 * @see #findByNamedQueryAndNamedParam
-	 */
-	List findByNamedQuery(String queryName, String[] paramNames, Object[] values)
-			throws DataAccessException;
-
-	/**
-	 * @deprecated in favor of findByNamedQueryAndNamedParam,
-	 * to avoid parameter overloading ambiguities
-	 * @see #findByNamedQueryAndNamedParam
-	 */
-	List findByNamedQuery(String queryName, String[] paramNames, Object[] values, Type[] types)
 			throws DataAccessException;
 
 	/**
