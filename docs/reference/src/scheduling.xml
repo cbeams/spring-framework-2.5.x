@@ -5,12 +5,12 @@
   	<title>Introduction</title>
   	<para>
   		Spring features integration classes for scheduling support. Currently, Spring
-  		supports the Timer, built in in the JDK since 1.3 and the Quartz Scheduler
+  		supports the Timer, built in the JDK since 1.3 and the Quartz Scheduler
   		(<ulink url="http://www.quartzscheduler.org"/>). Both schedulers are set up
-  		using a FactoryBean with optional references to Timers respectively Triggers.
+  		using a FactoryBean with optional references to Timers or Triggers, respectively.
   		Furthermore, a convenience class for both the Quartz Scheduler and the Timer is
-  		available that allows you to invoke a method an a target object you can specify
-  		yourself (analogous to normal <literal>MethodInvokingFactoryBeans</literal>
+  		available that allows you to invoke a method an a target object that you can
+			specify yourself (analogous to normal <literal>MethodInvokingFactoryBeans</literal>).
   	</para>
   </sect1>
   
@@ -29,7 +29,7 @@
   		<para>
   			<literal>JobDetail</literal> objects contain all information needed to
   			run a job. Spring provides a so-called <literal>JobDetailBean</literal>
-  			that makes the JobDetail more of an actual with sensible defaults.
+  			that makes the JobDetail more of an actual JavaBean with sensible defaults.
   			Let's have a look at an example:
   			<programlisting><![CDATA[
 <bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
@@ -118,11 +118,11 @@ public class BusinessObject {
 		</para>
 		<para>
 			By default, Quartz Jobs are stateless, resulting in the possibility of jobs interfering
-			with eachother. If you specify two triggers for the same JobDetail, it might be possible
+			with each other. If you specify two triggers for the same JobDetail, it might be possible
 			that before the first job has finished, the second one will start. If JobDetail objects
-			implement the Stateful interface, this won't happen. The second job will not start
-			before the first one has finished. To make jobs resulting from the MethodInvokingJobDetailFactoryBEan
-			non-concurrent set the <literal>concurrent</literal> flag to <literal>false</literal>.
+			implement the Stateful interface, this won't happen. The second job will not start before
+			the first one has finished. To make jobs resulting from the MethodInvokingJobDetailFactoryBean
+			non-concurrent, set the <literal>concurrent</literal> flag to <literal>false</literal>.
 			<programlisting><![CDATA[
 <bean id="methodInvokingJobDetail"
   class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
@@ -147,7 +147,7 @@ public class BusinessObject {
 		</para>
 		<para>
 			Triggers need to be scheduled. Spring offers a SchedulerFactoryBean exposing properties
-			to set te triggers. The SchedulerFactoryBean schedules the actual triggers.
+			to set the triggers. The SchedulerFactoryBean schedules the actual triggers.
 		</para>
 		<para>
 			A couple of examples:
@@ -192,7 +192,8 @@ public class BusinessObject {
 			]]></programlisting>
 			More properties are available for the SchedulerFactoryBean for you to set, such as the
 			Calendars used by the job details, properties to customize Quartz with, etcetera. Have a look
-			at the JavaDOC (<ulink url="http://www.springframework.org/docs/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html"/>) for more information.
+			at the JavaDoc (<ulink url="http://www.springframework.org/docs/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html"/>)
+			for more information.
 		</para>
 	</sect2>
   </sect1>	
@@ -260,7 +261,7 @@ public class CheckEmailAddresses extends TimerTask {
 	<sect2>
 		<title>Using the MethodInvokingTimerTaskFactoryBean</title>
 		<para>
-			Just as the Quartz support, the Timer support also features a component that
+			Similar to the Quartz support, the Timer support also features a component that
 			allows you to periodically invoke a method:
 			<programlisting><![CDATA[
 <bean id="methodInvokingTask" 
@@ -283,13 +284,13 @@ public class BusinessObject {
 			]]></programlisting>
 			
 			Changing the reference of the above example in which the ScheduledTimerTask is mentioned to the
-			<literal>methodInvokingTask</literal> will result in this task to be executed.
+			<literal>methodInvokingTask</literal> will result in this task being executed.
 		</para>
 	</sect2>
 	<sect2>
 		<title>Wrapping up: setting up the tasks using the TimerFactoryBean</title>
 		<para>
-			The TimerFactoryBean is similar to the QuartzSchedulerFactoryBean in that is serves the same
+			The TimerFactoryBean is similar to the Quartz SchedulerFactoryBean in that it serves the same
 			purpose: setting up the actual scheduling. The TimerFactoryBean sets up an actual Timer and
 			schedules the tasks it has references to. You can specify whether or not daemon threads should
 			be used.
