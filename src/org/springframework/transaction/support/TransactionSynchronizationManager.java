@@ -219,7 +219,7 @@ public abstract class TransactionSynchronizationManager {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		return Collections.unmodifiableList((List) synchronizations.get());
+		return Collections.unmodifiableList(new ArrayList((List) synchronizations.get()));
 	}
 
 	/**
