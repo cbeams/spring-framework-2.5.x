@@ -23,11 +23,8 @@ import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
 
 import org.objectweb.asm.Type;
-import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -41,26 +38,42 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * Creates scripts
- * 
+ *  This superclass has the following responsibilities:
+ * <ol>
+ * 	<li>Provide create() methods that can be used as factory methods to create scripts.
+ *  <li>Act as an auto proxy creator to automatically proxy these beans, making the
+ * resulting proxies implement the DynamicScript interface.
+ * </ol>
+ * <p>
+ * Use: Define a concrete subclass as a bean in a context. Invoke create() methods via factory-bean/factory-method
+ * bean definitions in the same context.
  * @author Rod Johnson
+ * @since 1.2
  */
 public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator 
 	implements ScriptContext, ApplicationContextAware, BeanFactoryPostProcessor, BeanNameAware {
 
+	/**
+	 * Owning bean factory. We need this to look up bean definitions.
+	 */
 	private ConfigurableListableBeanFactory beanFactory;
 	
+	/**
+	 * The bean name this factory is defined with
+	 */
 	private String ourBeanName;
 	
+	/**
+	 * ResourceLoader to pass to scripts.
+	 */
 	private ResourceLoader resourceLoader;
 
-	/** Location to Script */
-	private Map scripts = new HashMap();
-
 	/**
-	 * Object to Script: need to bound TODO
+	 * Map of object created by a create() method to the Script that created each object.
+	 * This is used for internal communication between the create() method
+	 * and the createRefreshableTargetSource() method.
 	 */
-	private Map objectMap = new HashMap();
+	private Map createBeanToScriptMap = new HashMap();
 
 	/**
 	 * We need to know our bean name to post process bean definitions that call its
@@ -71,40 +84,50 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 		ourBeanName = beanName;
 	}
 	
+	/**
+	 * We implement this method to obtain a ResourceLoader to make available to Scripts.
+	 * The setResourceLoader() method can enable this class to work outside an application context.
+	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
+	 */
 	public void setApplicationContext(ApplicationContext ac) {
 		this.resourceLoader = ac;
 	}
 
 	/**
-	 * Alternative to ApplicationContextAware
-	 * 
+	 * Alternative to ApplicationContextAware callback
 	 * @param resourceLoader
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
+	/**
+	 * @see org.springframework.beans.factory.script.ScriptContext#getResourceLoader()
+	 */
 	public ResourceLoader getResourceLoader() {
 		return resourceLoader;
 	}
 
 
 	/**
-	 * Public method for users.
-	 * Create an object
-	 * @param className
-	 * @param interfaceNames
-	 * @return
-	 * @throws BeansException
-	 * TODO need to know config interface here
+	 * Public method for use as a factory-bean factory-method.
+	 * Create a Scripted object
+	 * @param className location of the script
+	 * @param interfaceNames interfaces to be implemented by the scripts. (FQNs.)
+	 * @return an object created from the specified script location
+	 * @throws BeansException if the script cannot be created
 	 */
 	public Object create(String className, String[] interfaceNames) throws BeansException {
-		// TODO should this throw an exception?
+		if (requiresConfigInterface()) {
+			throw new IllegalStateException("Script bean usage incorrect: must specify one or more interfaces if config interface is required");
+		}
 		return create(className, interfaceNames, null);
 	}
 	
 	/**
-	 * For private usage
+	 * For private usage. This class adds the beanName argument (which is only known at runtime
+	 * in a container) by modified the bean definition.
+	 * All other create() methods delegate to this method.
 	 * @param className
 	 * @param interfaceNames
 	 * @param bd
@@ -112,24 +135,28 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * @throws BeansException
 	 */
 	public Object create(String className, String[] interfaceNames, String beanName) throws BeansException {
-		logger.info("Create bean with name '" + beanName + "'");
 		Script script = configuredScript(className, interfaceNames);
 		if (requiresConfigInterface()) {
 			if (beanName == null) {
 				throw new IllegalArgumentException("Bean name must not be null");
 			}
+			logger.info("Create script bean with name '" + beanName + "'; will create config interface");
 			// Use the bean name to find the bean definition, which contains the properties
 			// that will be needed to the configuration interface
 			script.addInterface(createConfigInterface(beanFactory.getBeanDefinition(beanName)));
 		}
+		
+		// Now we have a script, create an object
 		Object o = script.createObject();
-		objectMap.put(o, script);
+		// Put the script in a Map, keyed by the created object
+		createBeanToScriptMap.put(o, script);
 		return o;
 	}
 	
 	/**
 	 * Post process bean definitions using the create methods on this class to make bean name
-	 * available. This is necessary to work out the config interface that may need to be implemented.
+	 * available, causing the 3-arg create method to be invoked. 
+	 * This is necessary to work out the config interface that may need to be implemented.
 	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor#postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -142,7 +169,7 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 				if (ourBeanName.equals(rbd.getFactoryBeanName()) && 
 						"create".equals(rbd.getFactoryMethodName()) && 
 						rbd.getConstructorArgumentValues().getArgumentCount() == 2) {
-					// Add beanName as third argument
+					// Add beanName as third argument, causing the 3-arg create method to be invoked
 					logger.info("Handling create() method bean name '" + names[i] + "'");
 					rbd.getConstructorArgumentValues().addGenericArgumentValue(names[i]);
 				}
@@ -151,7 +178,9 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	}
 
 	/**
-	 * Create without specifying any interfaces
+	 * Create a script object without specifying any interfaces.
+	 * Only usable by subclasses that don't require a configuration interface and,
+	 * like Groovy, can define a full Java class.
 	 * @param className
 	 * @return
 	 * @throws BeansException
@@ -164,29 +193,26 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	}
 
 	protected Script configuredScript(String location, String[] interfaceNames) throws BeansException {
-		Script script = (Script) scripts.get(location);
-		if (script == null) {
-			script = createScript(location);
+		//Script script = (Script) scripts.get(location);
+		
+		Script script = createScript(location);
 
-			// Add interfaces
-			try {
-				Class[] interfaces = AopUtils.toInterfaceArray(interfaceNames);
-				for (int i = 0; i < interfaces.length; i++) {
-					// TODO what loader
-					script.addInterface(interfaces[i]);
-				}
-				return script;
+		// Add interfaces. This will not include any config interface.
+		try {
+			Class[] interfaces = AopUtils.toInterfaceArray(interfaceNames);
+			for (int i = 0; i < interfaces.length; i++) {
+				script.addInterface(interfaces[i]);
 			}
-			catch (ClassNotFoundException ex) {
-				throw new ScriptException("No interface found", ex) {
-				};
-			}
+			return script;
 		}
-		return script;
+		catch (ClassNotFoundException ex) {
+			throw new ScriptInterfaceException(ex);
+		}
 	}
 
 	/**
-	 * Subclasses must implement this, with knowledge about specific Scripts
+	 * Subclasses must implement this, with knowledge about specific Script
+	 * classes to instantiate.
 	 */
 	protected abstract Script createScript(String location) throws BeansException;
 
@@ -197,12 +223,13 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * @return
 	 */
 	protected Script lookupScript(Object o) {
-		return (Script) objectMap.get(o);
+		return (Script) createBeanToScriptMap.get(o);
 	}
 
 	/**
 	 * Will already have the TargetSource and introduction
-	 * advisor in place
+	 * advisor in place. We need to add to the ProxyFactory
+	 * all interfaces implemented by the script.
 	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object,
 	 *      java.lang.String)
 	 */
@@ -219,17 +246,17 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 		}
 	}
 	
-	public IntroductionAdvisor getIntroductionAdvisor() {
-		return new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(this), Script.class);
-	}
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter#createRefreshableTargetSource(java.lang.Object, org.springframework.beans.factory.config.ConfigurableListableBeanFactory, java.lang.String)
 	 */
 	protected AbstractRefreshableTargetSource createRefreshableTargetSource(Object bean,
 			ConfigurableListableBeanFactory beanFactory, String beanName) {
+		// If we created this bean, create a refreshable TargetSource
+		// for it
 		Script script = lookupScript(bean);
 		if (script == null) {
+			// This bean was not created by this object: leave it alone
 			return null;
 		}
 		return new DynamicScriptTargetSource(beanFactory, beanName, script);
@@ -239,8 +266,10 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * Create a config interface based on the setter methods the BeanDefinition will require.
 	 * This interface can then be implemented by Beanshell and other scripts that require Java
 	 * interfaces to target configuration.
+	 * <br>The config interface will include a setter method taking Object for each 
+	 * property specified in the bean definition
 	 * @param bd BeanDefinition driving the current script
-	 * @return
+	 * @return a configuration interface including the necessary setter methods
 	 */
 	protected Class createConfigInterface(BeanDefinition bd) {
 		InterfaceMaker imaker = new InterfaceMaker();
@@ -257,5 +286,11 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 		return intf;
 	}
 	
+	/**
+	 * Subclasses should implement this to indicate whether they require
+	 * a configuration interface to be constructed. The configuration interface
+	 * will include all necessary setters.
+	 * @return
+	 */
 	protected abstract boolean requiresConfigInterface();
 }

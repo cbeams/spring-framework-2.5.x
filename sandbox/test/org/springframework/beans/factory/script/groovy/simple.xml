@@ -32,6 +32,26 @@
 				}
 			} 
 			</value></constructor-arg>
+		
+		<!-- We don't need to specify an interface, but it should still work -->	
+		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>		
+	</bean>
+	
+	<bean id="bogusInterface"
+		factory-bean="groovyScriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				class Test implements org.springframework.beans.factory.script.Hello {
+
+				String sayHello() {
+					"hello world inline"
+				}
+			} 
+			</value>
+		</constructor-arg>
+		<constructor-arg index="1"><value>NoSuchInterface</value></constructor-arg>
 	</bean>
 	
 	<!--
@@ -59,6 +79,7 @@
 		<!-- Property on created Groovy object -->
 		<property name="message"><value>propertyPrototype</value></property>
 	</bean>
+	
 	<bean id="twoInterfaces"
 		singleton="true"
 		factory-bean="groovyScriptFactory"

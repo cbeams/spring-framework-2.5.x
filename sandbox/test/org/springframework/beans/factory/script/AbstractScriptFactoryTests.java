@@ -33,7 +33,6 @@ public class AbstractScriptFactoryTests extends TestCase {
 	protected ClassPathXmlApplicationContext applicationContext;
 
 	public void testBadSyntax() {
-		
 		try {
 			applicationContext.getBean("bad");
 			fail();
@@ -42,6 +41,16 @@ public class AbstractScriptFactoryTests extends TestCase {
 			// Ok
 			//ex.printStackTrace();
 			//assertTrue(ex.getCause() instanceof CompilationException);
+		}
+	}
+	
+	public void testBogusInterface() {
+		try {
+			applicationContext.getBean("bogusInterface");
+			fail();
+		}
+		catch (BeanCreationException ex) {
+			//assertTrue(ex.getCause() instanceof ScriptInterfaceException);
 		}
 	}
 
