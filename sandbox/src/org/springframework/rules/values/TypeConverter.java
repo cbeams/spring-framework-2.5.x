@@ -23,7 +23,6 @@ import org.springframework.rules.UnaryFunction;
  * @author Keith Donald
  */
 public class TypeConverter implements ValueModel {
-
     private ValueModel wrappedModel;
 
     private UnaryFunction convertFrom;
@@ -58,16 +57,10 @@ public class TypeConverter implements ValueModel {
         };
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#get()
-     */
     public Object get() {
         return convertFrom.evaluate(wrappedModel.get());
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#set(java.lang.Object)
-     */
     public void set(Object value) {
         wrappedModel.set(convertTo.evaluate(value));
     }
@@ -80,16 +73,10 @@ public class TypeConverter implements ValueModel {
         return wrappedModel;
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#addValueListener(org.springframework.rules.values.ValueListener)
-     */
     public void addValueListener(ValueListener l) {
         wrappedModel.addValueListener(l);
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#removeValueListener(org.springframework.rules.values.ValueListener)
-     */
     public void removeValueListener(ValueListener l) {
         wrappedModel.removeValueListener(l);
     }

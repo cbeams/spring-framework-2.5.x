@@ -15,10 +15,11 @@
  */
 package org.springframework.rules.values;
 
-import java.util.HashMap;
+import java.beans.PropertyEditor;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +38,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     private static final Log logger = LogFactory
             .getLog(BeanPropertyAccessStrategy.class);
 
-    private Map listeners = new HashMap();
+    private Map listeners;
 
     private ValueModel beanHolder;
 
@@ -52,7 +53,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
         if (beanHolder.get() != null) {
             this.beanWrapper = new BeanWrapperImpl(beanHolder.get());
-        } else {
+        }
+        else {
             this.beanWrapper = new BeanWrapperImpl();
         }
         this.beanHolder = beanHolder;
@@ -76,7 +78,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         if (beanHolder.get() instanceof PropertyChangePublisher) {
             ValuePropertyChangeListenerMediator listener = new ValuePropertyChangeListenerMediator(
                     l, aspect, beanHolder);
-            listeners.put(createListenerKey(l, aspect), listener);
+            getListeners().put(createListenerKey(l, aspect), listener);
         }
     }
 
@@ -87,21 +89,39 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
                     .get(listenerKey);
             if (listener != null) {
                 listener.unsubscribe();
-                listeners.remove(listenerKey);
+                getListeners().remove(listenerKey);
             }
         }
     }
+    
+    protected Map getListeners() {
+        if (this.listeners == null) {
+            this.listeners = new WeakHashMap();
+        }
+        return listeners;
+    } 
 
     private Set createListenerKey(ValueListener l, String aspect) {
-        LinkedHashSet key = new LinkedHashSet();
+        LinkedHashSet key = new LinkedHashSet(2);
         key.add(l);
         key.add(aspect);
         return key;
     }
 
-    /**
-     * @see org.springframework.rules.values.MutableAspectAccessStrategy#getValue(java.lang.String)
-     */
+    public void registerCustomEditor(Class aspectType,
+            PropertyEditor propertyEditor) {
+        beanWrapper.registerCustomEditor(aspectType, propertyEditor);
+    }
+
+    public void registerCustomEditor(Class aspectType, String aspect,
+            PropertyEditor propertyEditor) {
+        beanWrapper.registerCustomEditor(aspectType, aspect, propertyEditor);
+    }
+
+    public PropertyEditor findCustomEditor(Class aspectType, String aspect) {
+        return beanWrapper.findCustomEditor(aspectType, aspect);
+    }
+
     public Object getValue(String aspect) {
         try {
             if (beanHolder.get() == null) { return null; }
@@ -117,10 +137,6 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         }
     }
 
-    /**
-     * @see org.springframework.rules.values.MutableAspectAccessStrategy#setValue(java.lang.String,
-     *      java.lang.Object)
-     */
     public void setValue(String aspect, Object value) {
         if (beanHolder.get() == null) { throw new IllegalStateException(
                 "Attempt to set property on null reference"); }

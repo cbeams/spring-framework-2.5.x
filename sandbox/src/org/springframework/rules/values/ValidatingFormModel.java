@@ -41,7 +41,6 @@ public class ValidatingFormModel extends DefaultFormModel implements
     private List validationListeners = new ArrayList();
 
     // @TODO property editor registry
-
     public ValidatingFormModel(Object domainObject) {
         super(domainObject);
     }

@@ -15,13 +15,16 @@
  */
 package org.springframework.rules.values;
 
+import java.beans.PropertyEditor;
+
 /**
  * @author Keith Donald
  */
 public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
-    public void addValueListener(ValueListener o, String aspect);
+    public void registerCustomEditor(Class aspectType, String aspect,
+            PropertyEditor propertyEditor);
 
-    public void removeValueListener(ValueListener o, String aspect);
+    public PropertyEditor findCustomEditor(Class aspectType, String aspect);
 
     public void setValue(String aspect, Object value);
 
@@ -29,4 +32,9 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
             ValueModel parentValueHolder);
 
     public ValueModel getDomainObjectHolder();
+
+    public void addValueListener(ValueListener o, String aspect);
+
+    public void removeValueListener(ValueListener o, String aspect);
+
 }

@@ -30,16 +30,10 @@ public class ValueModelWrapper implements ValueModel, ValueListener {
         this.wrappedModel.addValueListener(this);
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#get()
-     */
     public Object get() {
         return value;
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#set(java.lang.Object)
-     */
     public void set(Object value) {
         this.wrappedModel.set(value);
     }
@@ -48,16 +42,10 @@ public class ValueModelWrapper implements ValueModel, ValueListener {
         this.value = wrappedModel.get();
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#addObserver(java.util.Observer)
-     */
     public void addValueListener(ValueListener l) {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#removeObserver(java.util.Observer)
-     */
     public void removeValueListener(ValueListener l) {
         throw new UnsupportedOperationException();
     }

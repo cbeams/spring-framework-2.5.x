@@ -85,9 +85,6 @@ public class ValuePropertyChangeListenerMediator implements
         return (PropertyChangePublisher)domainObject;
     }
 
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
     public void propertyChange(PropertyChangeEvent evt) {
         if (logger.isDebugEnabled()) {
             logger

@@ -34,7 +34,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     private boolean bufferChanges;
 
-    private Map formModels = new LinkedHashMap();
+    private Map formModels = new LinkedHashMap(9);
 
     private RulesSource rulesSource;
 

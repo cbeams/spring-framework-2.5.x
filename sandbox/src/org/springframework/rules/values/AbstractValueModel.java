@@ -33,9 +33,6 @@ public abstract class AbstractValueModel implements ValueModel {
 
     private List listeners = new ArrayList();
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#addValueListener(org.springframework.rules.values.ValueListener)
-     */
     public void addValueListener(ValueListener l) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Adding value listener " + l + "]");
@@ -43,9 +40,6 @@ public abstract class AbstractValueModel implements ValueModel {
         listeners.add(l);
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueChangeable#removeValueListener(org.springframework.rules.values.ValueListener)
-     */
     public void removeValueListener(ValueListener l) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Removing value listener " + l + "]");
