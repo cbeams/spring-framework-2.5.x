@@ -228,14 +228,18 @@
       <dependency>
          <id>commons-dbcp</id>
          <version>1.0</version>
-      </dependency>      
+      </dependency>
+      <dependency>
+         <id>commons-fileupload</id>
+         <version>1.0</version>
+      </dependency>       
       <dependency>
          <id>commons-logging</id>
          <version>1.0.3</version>
       </dependency>
       <dependency>
          <id>easymock</id>
-         <version>0.8</version>
+         <version>1.0</version>
       </dependency>
       <dependency>
          <id>hibernate</id>
