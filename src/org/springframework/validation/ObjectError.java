@@ -35,20 +35,26 @@ public class ObjectError extends DefaultMessageSourceResolvable {
   private final String objectName;
 
   /**
-   * Create a new ObjectError instance, using multiple codes.
-   * @see org.springframework.context.MessageSourceResolvable#getCodes
+   * Create a new ObjectError instance.
+	 * @param objectName the name of the affected object
+	 * @param codes the codes to be used to resolve this message
+	 * @param arguments the array of arguments to be used to resolve this message
+	 * @param defaultMessage the default message to be used to resolve this message
    */
-	public ObjectError(String objectName, String[] codes, Object[] args, String defaultMessage) {
-    super(codes, args, defaultMessage);
+	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
+    super(codes, arguments, defaultMessage);
     this.objectName = objectName;
   }
 
-  public String getObjectName() {
+  /**
+	 * Return the name of the affected object.
+	 */
+	public String getObjectName() {
     return objectName;
   }
 
   public String toString() {
-    return "Error occurred in object [" + this.objectName + "]: " + resolvableToString();
+    return "Error in object '" + this.objectName + "': " + resolvableToString();
   }
 
 }
