@@ -17,19 +17,20 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.view.tiles.ComponentControllerSupport;
 
 /**
- * Controller for the news tiles that retrieves a feed mentioned in the definitions file
- * @author alef
+ * Controller for the news tile that retrieves a feed
+ * mentioned in the definitions file.
+ * @author Alef Arendsen
  */
 public class NewsFeedController extends ComponentControllerSupport {
 
 	protected void doPerform(ComponentContext componentContext, HttpServletRequest request,
 													 HttpServletResponse response) {
 
-		WebApplicationContext ctx = getWebApplicationContext();
+		ApplicationContext ctx = getApplicationContext();
 		NewsFeedConfigurer configurer = (NewsFeedConfigurer) ctx.getBean("feedConfigurer");
 		String uri = configurer.feedUri((String) componentContext.getAttribute("sourceName"));
 		NewsReader reader = new NewsReader(uri);
@@ -55,8 +56,6 @@ public class NewsFeedController extends ComponentControllerSupport {
 		private String type = null;
 
 		private static final String RSS = "rss";
-
-		private static final String RDF = "RDF";
 
 		public NewsReader(String uriString) {
 			// get and parse the feed
@@ -84,14 +83,6 @@ public class NewsFeedController extends ComponentControllerSupport {
 				return "/*/";
 			}
 		}
-
-		/*public String showTagNames() {
-			Iterator itr = feed.getRootElement().elements().iterator();
-			while (itr.hasNext()) {
-				System.out.println("itr.next = " + ((Element)itr.next()).getQualifiedName());
-			}
-			return "";
-		}*/
 
 		public int size() {
 			// todo: RDF somehow doesn't work with XPATH expression, fix it

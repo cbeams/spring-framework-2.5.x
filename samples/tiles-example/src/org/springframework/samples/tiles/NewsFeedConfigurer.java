@@ -4,8 +4,8 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * NewsFeed configurator (see tiles-servlet.xml for more info)
- * @author alef
+ * NewsFeed configurator. See tiles-servlet.xml for more info.
+ * @author Alef Arendsen.
  */
 public class NewsFeedConfigurer {
 	
