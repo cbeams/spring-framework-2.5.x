@@ -60,7 +60,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.5 2003-09-06 11:21:38 johnsonr Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.6 2003-10-04 15:57:20 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -117,7 +117,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String DEFAULT_DEPENDENCY_CHECK_VALUE = "none";
 	
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
-	
+
+
+	private boolean validating = true;
 
 	private EntityResolver entityResolver;
 
@@ -189,9 +191,16 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	}
 
 	/**
-	 * Set a SAX entity resolver to be used for parsing. By default,
-	 * BeansDtdResolver will be used. Can be overridden for custom
-	 * entity resolution, e.g. relative to some specific base path.
+	 * Set if the XML parser should validate the document and thus enforce a DTD.
+	 */
+	public void setValidating(boolean validating) {
+		this.validating = validating;
+	}
+
+	/**
+	 * Set a SAX entity resolver to be used for parsing. By default, BeansDtdResolver
+	 * will be used. Can be overridden for custom entity resolution, e.g. relative
+	 * to some specific base path.
 	 * @see BeansDtdResolver
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
@@ -229,7 +238,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			logger.info("Loading XmlBeanFactory from InputStream [" + is + "]");
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			logger.debug("Using JAXP implementation [" + factory + "]");
-			factory.setValidating(true);
+			factory.setValidating(this.validating);
 			DocumentBuilder db = factory.newDocumentBuilder();
 			db.setErrorHandler(new BeansErrorHandler());
 			db.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());

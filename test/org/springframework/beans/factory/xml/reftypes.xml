@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-<beans>
+<bones>
 	
 	<bean id="jenny" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Jenny</value></property>
@@ -39,6 +38,6 @@
 		<property name="spouse"><ref bean="ego"/></property>
 	</bean>
 
-</beans>
+</bones>
 	
 	

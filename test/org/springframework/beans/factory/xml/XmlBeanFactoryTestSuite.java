@@ -31,7 +31,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 /**
  *
  * @author Rod Johnson
-* @version $Id: XmlBeanFactoryTestSuite.java,v 1.5 2003-09-11 10:13:49 johnsonr Exp $
+* @version $Id: XmlBeanFactoryTestSuite.java,v 1.6 2003-10-04 15:57:20 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -75,7 +75,9 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 	/** Uses a separate factory */
 	public void testRefToSeparatePrototypeInstances() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory();
+		xbf.setValidating(false);
+		xbf.loadBeanDefinitions(is);
 		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
@@ -91,7 +93,9 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
 	public void testRefToSingleton() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory();
+		xbf.setValidating(false);
+		xbf.loadBeanDefinitions(is);
 		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -194,7 +198,9 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
 	public void testCircularReferences() {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory();
+		xbf.setValidating(false);
+		xbf.loadBeanDefinitions(is);
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
 		TestBean ego = (TestBean) xbf.getBean("ego");
