@@ -60,12 +60,15 @@
 		Check automatic creation of alias, to allow for
 		names that are illegal as XML ids
 	-->
-	<bean id="aliased" class="org.springframework.beans.TestBean"
-		name="I have an alias">	
+	<bean id="aliased" class="org.springframework.beans.TestBean" name="I have an alias">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 	
-	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">	
+	<bean id="multiAliased" class="org.springframework.beans.TestBean" name="alias1,alias2">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>
 			</map>

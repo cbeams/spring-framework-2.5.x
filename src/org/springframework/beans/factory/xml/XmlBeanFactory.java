@@ -32,6 +32,8 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
+import org.springframework.util.StringUtils;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -59,7 +61,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.1.1.1 2003-08-14 16:20:21 trisberg Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.2 2003-08-28 17:24:39 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -232,6 +234,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		catch (ParserConfigurationException ex) {
 			throw new BeanDefinitionStoreException("ParserConfiguration exception parsing XML", ex);
 		}
+		catch (SAXParseException ex) {
+			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document is invalid", ex);
+		}
 		catch (SAXException ex) {
 			throw new BeanDefinitionStoreException("XML document is invalid", ex);
 		}
@@ -282,9 +287,12 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 		String name = el.getAttribute(NAME_ATTRIBUTE);
 		if (name != null && !"".equals(name)) {
-			// Automatically create this alias. Used for
-			// names that aren't legal in id attributes
-			registerAlias(id, name);
+			// Automatically create aliases from the name CSV.
+			// Used for names that aren't legal in id attributes.
+			String[] aliases = StringUtils.commaDelimitedListToStringArray(name);
+			for (int i = 0; i < aliases.length; i++) {
+				registerAlias(id, aliases[i]);
+			}
 		}
 	}
 
@@ -323,7 +331,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException("Error creating bean with name [" + beanName + "]: class '" + className + "' not found", ex);
+			throw new FatalBeanException("Error creating bean with name [" + beanName + "]", ex);
 		}
 	}
 
