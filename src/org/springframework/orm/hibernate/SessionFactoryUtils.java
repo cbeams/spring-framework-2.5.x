@@ -767,13 +767,15 @@ public abstract class SessionFactoryUtils {
 						closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 					}
 					else if (this.sessionHolder.getPreviousFlushMode() != null) {
+						// In case of pre-bound Session, restore previous flush mode.
 						session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
 					}
 					return;
 				}
 			}
+			// We'll only get here if there was no specific JTA transaction to handle.
 			if (this.newSession) {
-				// default behavior: unbind and close the thread-bound Hibernate Session
+				// Default behavior: unbind and close the thread-bound Hibernate Session.
 				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 				if (this.hibernateTransactionCompletion) {
 					// Close the Hibernate Session here in case of a Hibernate TransactionManagerLookup:
@@ -784,6 +786,7 @@ public abstract class SessionFactoryUtils {
 				}
 			}
 			else if (this.sessionHolder.getPreviousFlushMode() != null) {
+				// In case of pre-bound Session, restore previous flush mode.
 				this.sessionHolder.getSession().setFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
 		}
@@ -800,6 +803,11 @@ public abstract class SessionFactoryUtils {
 				if (this.newSession) {
 					closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
+			}
+			if (!this.newSession && status != STATUS_COMMITTED) {
+				// Clear all pending inserts/updates/deletes in the Session.
+				// Necessary for pre-bound Sessions, to avoid inconsistent state.
+				this.sessionHolder.getSession().clear();
 			}
 			if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
 				this.sessionHolder.setSynchronizedWithTransaction(false);
@@ -855,8 +863,18 @@ public abstract class SessionFactoryUtils {
 		public void afterCompletion(int status) {
 			// unbind the SessionHolder from the thread
 			this.springSessionSynchronization.beforeCompletion();
-			// just reset the synchronizedWithTransaction flag
-			this.springSessionSynchronization.afterCompletion(-1);
+			// Reset the synchronizedWithTransaction flag,
+			// and clear the Hibernate Session after a rollback (if necessary).
+			switch (status) {
+				case Status.STATUS_COMMITTED:
+					this.springSessionSynchronization.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+					break;
+				case Status.STATUS_ROLLEDBACK:
+					this.springSessionSynchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+					break;
+				default:
+					this.springSessionSynchronization.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+			}
 		}
 	}
 

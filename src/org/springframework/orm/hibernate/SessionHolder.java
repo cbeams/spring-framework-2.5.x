@@ -108,4 +108,11 @@ public class SessionHolder extends ResourceHolderSupport {
 		return previousFlushMode;
 	}
 
+
+	public void clear() {
+		super.clear();
+		this.transaction = null;
+		this.previousFlushMode = null;
+	}
+
 }

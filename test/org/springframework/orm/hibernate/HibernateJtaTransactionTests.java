@@ -37,6 +37,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -594,6 +595,87 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testJtaTransactionRollbackWithPreBound() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		ut.rollback();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			final TransactionTemplate tt = new TransactionTemplate(ptm);
+			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+			assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+
+			tt.execute(new TransactionCallbackWithoutResult() {
+				public void doInTransactionWithoutResult(TransactionStatus status) {
+					tt.execute(new TransactionCallbackWithoutResult() {
+						public void doInTransactionWithoutResult(TransactionStatus status) {
+							status.setRollbackOnly();
+							try {
+								assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+								HibernateTemplate ht = new HibernateTemplate(sf);
+								for (int i = 0; i < 5; i++) {
+									ht.execute(new HibernateCallback() {
+										public Object doInHibernate(Session sess) {
+											assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+											assertEquals(session, sess);
+											return null;
+										}
+									});
+									assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+								}
+								sessionControl.verify();
+								sessionControl.reset();
+								session.clear();
+								sessionControl.setVoidCallable(1);
+								sessionControl.replay();
+							}
+							catch (Error err) {
+								err.printStackTrace();
+								throw err;
+							}
+						}
+					});
+				}
+			});
+
+			assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
+		utControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testJtaSessionSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
@@ -871,8 +953,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		//assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		//assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

@@ -464,7 +464,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().getTransaction().commit();
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
-			// assumably from commit call to underlying JDBC connection
+			// assumably from commit call to the underlying JDBC connection
 			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
 		}
 		catch (JDBCException ex) {
@@ -497,6 +497,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// shouldn't really happen, as a rollback doesn't cause a flush
 			throw convertHibernateAccessException(ex);
 		}
+		finally {
+			if (!txObject.isNewSessionHolder()) {
+				// Clear all pending inserts/updates/deletes in the Session.
+				// Necessary for pre-bound Sessions, to avoid inconsistent state.
+				txObject.getSessionHolder().getSession().clear();
+			}
+		}
 	}
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
@@ -515,7 +522,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (txObject.isNewSessionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
-		txObject.getSessionHolder().clear();
 
 		// remove the JDBC connection holder from the thread, if set
 		if (getDataSource() != null) {
@@ -541,11 +547,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Not closing pre-bound Hibernate session [" + session + "] after transaction");
 			}
-			txObject.getSessionHolder().setTransaction(null);
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
 		}
+		txObject.getSessionHolder().clear();
 	}
 
 	/**
