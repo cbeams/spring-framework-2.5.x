@@ -280,7 +280,7 @@
       </dependency>
       <dependency>
          <id>commons-dbcp</id>
-         <version>1.0</version>
+         <version>1.1</version>
       </dependency>
       <dependency>
          <id>commons-fileupload</id>
@@ -313,6 +313,11 @@
       <dependency>
          <id>itext</id>
          <version>0.99</version>
+      </dependency>
+      <dependency>
+         <groupId>jboss</groupId>
+         <artifactId>jboss-common</artifactId>
+         <version>3.2.1</version>
       </dependency>
        <dependency>
          <id>jdom</id>
