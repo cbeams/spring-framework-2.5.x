@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Bob Lee
  * @see http://www.crazybob.org
- * @version $Id: Cache.java,v 1.4 2004-04-11 00:57:10 kdonald Exp $
+ * @version $Id: Cache.java,v 1.5 2004-04-12 00:19:13 kdonald Exp $
  */
 public abstract class Cache {
     private static final Log logger = LogFactory.getLog(Cache.class);
@@ -122,7 +122,31 @@ public abstract class Cache {
     }
     
     public Iterator values() {
-        return map.values().iterator();
+        return new ValuesIterator(map.values().iterator());
+    }
+    
+    /**
+     * Delegates to the underlying values iterator, retrieving
+     * the object stored at each value reference.
+     */
+    static class ValuesIterator implements Iterator {
+        private Iterator it;
+        
+        public ValuesIterator(Iterator it) {
+            this.it = it;
+        }
+        
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        public Object next() {
+            return ((ValueReference)it.next()).get();
+        }
+
+        public void remove() {
+            it.remove();
+        }
     }
     
     public Iterator entries() {

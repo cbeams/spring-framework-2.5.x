@@ -16,8 +16,10 @@
 package org.springframework.rules;
 
 import org.springframework.rules.predicates.BeanPropertiesExpression;
+import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.BinaryFunctionResultConstraint;
+import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
 import org.springframework.rules.predicates.GreaterThanEqualTo;
@@ -171,7 +173,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static UnaryPredicate equals(
+    public static BeanPropertyExpression equals(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -189,7 +191,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static UnaryPredicate greaterThan(
+    public static BeanPropertyExpression greaterThan(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -207,7 +209,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static UnaryPredicate greaterThanEqualTo(
+    public static BeanPropertyExpression greaterThanEqualTo(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -225,7 +227,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static UnaryPredicate lessThan(
+    public static BeanPropertyExpression lessThan(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -243,7 +245,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static UnaryPredicate lessThanEqualTo(
+    public static BeanPropertyExpression lessThanEqualTo(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -261,7 +263,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static UnaryPredicate greaterThanProperty(
+    public static BeanPropertyExpression greaterThanProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -279,12 +281,12 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static UnaryPredicate equalsProperty(
+    public static BeanPropertyExpression equalsProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            EqualTo.instance(),            
+            EqualTo.instance(),
             otherPropertyName);
     }
 
@@ -297,7 +299,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static UnaryPredicate greaterThanEqualToProperty(
+    public static BeanPropertyExpression greaterThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -315,7 +317,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static UnaryPredicate lessThanProperty(
+    public static BeanPropertyExpression lessThanProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -333,7 +335,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static UnaryPredicate lessThanEqualToProperty(
+    public static BeanPropertyExpression lessThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -353,7 +355,7 @@ public class PredicateFactory {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public static UnaryPredicate inRange(
+    public static BeanPropertyExpression inRange(
         String propertyName,
         Comparable min,
         Comparable max) {
@@ -373,7 +375,7 @@ public class PredicateFactory {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public static UnaryPredicate inRangeProperty(
+    public static BeanPropertyExpression inRangeProperty(
         String propertyName,
         String minPropertyName,
         String maxPropertyName) {
@@ -387,7 +389,7 @@ public class PredicateFactory {
                 propertyName,
                 LessThanEqualTo.instance(),
                 maxPropertyName);
-        return and(min, max);
+        return new CompoundBeanPropertyExpression(and(min, max));
     }
 
     /**
