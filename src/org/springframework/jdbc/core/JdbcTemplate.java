@@ -83,7 +83,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.44 2004-05-29 21:20:22 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.45 2004-06-02 17:09:47 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -801,12 +801,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			List listOfRows = new ArrayList();
 			while (rs.next()) {
 				Map mapOfColValues = null;
-				// a LinkedHashMap will preserve column order, but is not available pre-1.4
-				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-					mapOfColValues = new HashMap(numberOfColumns);
+				// A LinkedHashMap will preserve column order, but is not available pre-1.4.
+				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+					mapOfColValues = LinkedHashMapCreator.createLinkedHashMap(numberOfColumns);
 				}
 				else {
-					mapOfColValues = new LinkedHashMap(numberOfColumns);
+					mapOfColValues = new HashMap(numberOfColumns);
 				}
 				for (int i = 1; i <= numberOfColumns; i++) {
 					mapOfColValues.put(rsmd.getColumnName(i), rs.getObject(i));
@@ -850,6 +850,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 																									this.requiredType.getName() + "]");
 			}
 			return result;
+		}
+	}
+
+
+	/**
+	 * Actual creation of a java.util.LinkedHashMap.
+	 * In separate inner class to avoid runtime dependency on JDK 1.4.
+	 */
+	private static abstract class LinkedHashMapCreator {
+
+		private static Map createLinkedHashMap(int capacity) {
+			return new LinkedHashMap(capacity);
 		}
 	}
 
