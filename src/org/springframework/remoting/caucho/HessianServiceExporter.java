@@ -26,6 +26,7 @@ import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.server.HessianSkeleton;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
@@ -48,12 +49,11 @@ import org.springframework.web.servlet.mvc.Controller;
  * @since 13.05.2003
  * @see HessianProxyFactoryBean
  */
-public class HessianServiceExporter extends RemoteExporter implements Controller {
+public class HessianServiceExporter extends RemoteExporter implements Controller, InitializingBean {
 
 	private HessianSkeleton skeleton;
 
 	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
 		try {
 			// try Hessian 3.x (with service interface argument)
 			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
@@ -62,6 +62,8 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 		catch (NoSuchMethodException ex) {
 			// fall back to Hessian 2.x (without service interface argument)
 			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
+			checkService();
+			checkServiceInterface();
 			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
 		}
 	}

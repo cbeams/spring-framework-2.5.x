@@ -29,6 +29,7 @@ import com.caucho.burlap.server.BurlapSkeleton;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Web controller that exports the specified service bean as Burlap service
@@ -48,15 +49,16 @@ import org.springframework.web.servlet.mvc.Controller;
  * @since 13.05.2003
  * @see BurlapProxyFactoryBean
  */
-public class BurlapServiceExporter extends RemoteExporter implements Controller {
+public class BurlapServiceExporter extends RemoteExporter implements Controller, InitializingBean {
 
 	private BurlapSkeleton skeleton;
 
 	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
 		try {
 			// try Burlap 3.x (with service interface argument)
 			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+			checkService();
+			checkServiceInterface();
 			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
 		}
 		catch (NoSuchMethodException ex) {

@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -41,14 +42,14 @@ import org.springframework.web.servlet.mvc.Controller;
  * @since 1.1
  * @see HttpInvokerProxyFactoryBean
  */
-public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter implements Controller {
+public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
+		implements Controller, InitializingBean {
 
 	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 
 	private Object proxy;
 
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
+	public void afterPropertiesSet() {
 		this.proxy = getProxyForService();
 	}
 

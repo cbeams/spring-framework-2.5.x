@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Abstract base class for classes that export a remote service.
@@ -33,13 +32,14 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 26.12.2003
  */
-public abstract class RemoteExporter implements InitializingBean {
+public abstract class RemoteExporter {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object service;
 
 	private Class serviceInterface;
+
 
 	/**
 	 * Set the service to export.
@@ -74,16 +74,31 @@ public abstract class RemoteExporter implements InitializingBean {
 		return serviceInterface;
 	}
 
-	public void afterPropertiesSet() throws Exception {
+
+	/**
+	 * Check whether the service reference has been set.
+	 * @see #setService
+	 */
+	protected void checkService() throws IllegalArgumentException {
 		if (this.service == null) {
 			throw new IllegalArgumentException("service is required");
 		}
+	}
+
+	/**
+	 * Check whether a service reference has been set,
+	 * and whether it matches the specified service.
+	 * @see #setServiceInterface
+	 * @see #setService
+	 */
+	protected void checkServiceInterface() throws IllegalArgumentException {
 		if (this.serviceInterface == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
 		if (!this.serviceInterface.isInstance(this.service)) {
-			throw new IllegalArgumentException("serviceInterface [" + this.serviceInterface.getName() +
-																				 "] needs to be implemented by service [" + this.service + "]");
+			throw new IllegalArgumentException(
+					"serviceInterface [" + this.serviceInterface.getName() +
+					"] needs to be implemented by service [" + this.service + "]");
 		}
 	}
 
@@ -97,9 +112,11 @@ public abstract class RemoteExporter implements InitializingBean {
 	 * @see #setServiceInterface
 	 */
 	protected Object getProxyForService() {
+		checkService();
+		checkServiceInterface();
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.addInterface(this.serviceInterface);
-		proxyFactory.setTarget(this.service);
+		proxyFactory.addInterface(getServiceInterface());
+		proxyFactory.setTarget(getService());
 		return proxyFactory.getProxy();
 	}
 
