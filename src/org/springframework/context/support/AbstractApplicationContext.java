@@ -36,7 +36,6 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventMulticaster;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ContextOptions;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NestingMessageSource;
@@ -57,9 +56,6 @@ import org.springframework.util.ClassLoaderUtils;
  * <p>This class uses the Template Method design pattern, requiring
  * concrete subclasses to implement protected abstract methods.
  *
- * <p>The context options may be supplied as a bean in the default bean factory,
- * with the name "contextOptions".
- *
  * <p>A message source may be supplied as a bean in the default bean factory,
  * with the name "messageSource". Else, message resolution is delegated to the
  * parent context.
@@ -67,20 +63,12 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
- * @see #OPTIONS_BEAN_NAME
  * @see #MESSAGE_SOURCE_BEAN_NAME
  */
 public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
-
-	/**
-	 * Name of options bean in the factory.
-	 * If none is supplied, a default ContextOptions instance will be used.
-	 * @see ContextOptions
-	 */
-	public static final String OPTIONS_BEAN_NAME = "contextOptions";
 
 	/**
 	 * Name of the MessageSource bean in the factory.
@@ -111,9 +99,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	/** System time in milliseconds when this context started */
 	private long startupTime;
-
-	/** Special bean to handle configuration */
-	private ContextOptions contextOptions;
 
 	/** MessageSource helper we delegate our implementation of this interface to */
 	private MessageSource messageSource;
@@ -150,17 +135,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	//---------------------------------------------------------------------
 
 	/**
-	 * Subclasses may call this to set parent after constructor.
-	 * Note that parent shouldn't be changed: it should only be
-	 * set later if it isn't available when an object of this
-	 * class is created.
-	 * @param ac parent context
-	 */
-	protected void setParent(ApplicationContext ac) {
-		this.parent = ac;
-	}
-
-	/**
 	 * Return the parent context, or null if there is no parent,
 	 * and this is the root of the context hierarchy.
 	 * @return the parent context, or null if there is no parent
@@ -194,11 +168,81 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
-	 * Return context options. These control reloading etc.
-	 * @return context options
+	 * Publish the given event to all listeners.
+	 * <p>Note: Listeners get initialized after the message source, to be able
+	 * to access it within listener implementations. Thus, message source
+	 * implementation cannot publish events.
+	 * @param event event to publish. The event may be application-specific,
+	 * or a standard framework event.
 	 */
-	public final ContextOptions getOptions() {
-		return this.contextOptions;
+	public final void publishEvent(ApplicationEvent event) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
+		}
+		this.eventMulticaster.onApplicationEvent(event);
+		if (this.parent != null) {
+			parent.publishEvent(event);
+		}
+	}
+
+	/**
+	 * This implementation supports fully qualified URLs, including the "classpath:"
+	 * pseudo-URL, and context-specific file paths via getResourceByPath.
+	 * Throws a FileNotFoundException if getResourceByPath returns null.
+	 * @see #getResourceByPath
+	 * @see #CLASSPATH_URL_PREFIX
+	 */
+	public final InputStream getResourceAsStream(String location) throws IOException {
+		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+			return ClassLoaderUtils.getResourceAsStream(location.substring(CLASSPATH_URL_PREFIX.length()));
+		}
+		try {
+			// try URL
+			URL url = new URL(location);
+			logger.debug("Opening as URL: " + location);
+			return url.openStream();
+		}
+		catch (MalformedURLException ex) {
+			// no URL -> try (file) path
+			InputStream in = getResourceByPath(location);
+			if (in == null) {
+				throw new FileNotFoundException("Location [" + location + "] could not be opened as file path");
+			}
+			return in;
+		}
+	}
+
+	/**
+	 * Return input stream to the resource at the given (file) path.
+	 * <p>Default implementation supports file paths, either absolute or
+	 * relative to the application's working directory. This should be
+	 * appropriate for standalone implementations but can be overridden,
+	 * e.g. for implementations targeted at a container.
+	 * @param path path to the resource
+	 * @return InputStream for the specified resource, can be null if
+	 * not found (instead of throwing an exception)
+	 * @throws IOException exception when opening the specified resource
+	 */
+	protected InputStream getResourceByPath(String path) throws IOException {
+		return new FileInputStream(path);
+	}
+
+	/**
+	 * This implementation returns the working directory of the Java VM.
+	 * This should be appropriate for standalone implementations but can
+	 * be overridden for implementations targetted at a container.
+	 */
+	public String getResourceBasePath() {
+		return (new File("")).getAbsolutePath() + File.separatorChar;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of ConfigurableApplicationContext
+	//---------------------------------------------------------------------
+
+	public void setParent(ApplicationContext parent) {
+		this.parent = parent;
 	}
 
 	/**
@@ -207,11 +251,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * be found, or if configuration has already been loaded and reloading is forbidden
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
-	public final void refresh() throws BeansException {
-		if (this.contextOptions != null && !this.contextOptions.isReloadable()) {
-			throw new ApplicationContextException("Forbidden to reload config");
-		}
-
+	public void refresh() throws BeansException {
 		this.startupTime = System.currentTimeMillis();
 
 		refreshBeanFactory();
@@ -230,9 +270,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 		// register bean processor that intercept bean creation
 		registerBeanPostProcessors();
-
-		// load options bean for this context
-		loadOptions();
 
 		// initialize message source for this context
 		initMessageSource();
@@ -288,20 +325,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
-	 * Load the options bean.
-	 * The BeanFactory must be loaded before this method is called.
-	 */
-	private void loadOptions() throws BeansException {
-		try {
-			this.contextOptions = (ContextOptions) getBean(OPTIONS_BEAN_NAME);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No options bean '" + OPTIONS_BEAN_NAME + "' found: using default");
-			this.contextOptions = new ContextOptions();
-		}
-	}
-
-	/**
 	 * Initialize the message source.
 	 * Use parent's if none defined in this context.
 	 */
@@ -324,10 +347,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	/**
 	 * Template method which can be overridden to add context-specific refresh work.
+	 * Called on initialization of special beans, before instantiation of singletons.
 	 * @throws BeansException in case of errors during refresh
 	 */
 	protected void onRefresh() throws BeansException {
-		// For subclasses: do nothing by default.
+		// for subclasses: do nothing by default
 	}
 
 	/**
@@ -346,6 +370,13 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
+	 * Add a listener. Any beans that are listeners are automatically added.
+	 */
+	protected void addListener(ApplicationListener l) {
+		this.eventMulticaster.addApplicationListener(l);
+	}
+
+	/**
 	 * Destroy the singletons in the bean factory of this application context.
 	 */
 	public void close() {
@@ -357,81 +388,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 		// publish respective event
 		publishEvent(new ContextClosedEvent(this));
-	}
-
-	/**
-	 * Publish the given event to all listeners.
-	 * <p>Note: Listeners get initialized after the message source, to be able
-	 * to access it within listener implementations. Thus, message source
-	 * implementation cannot publish events.
-	 * @param event event to publish. The event may be application-specific,
-	 * or a standard framework event.
-	 */
-	public final void publishEvent(ApplicationEvent event) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
-		}
-		this.eventMulticaster.onApplicationEvent(event);
-		if (this.parent != null) {
-			parent.publishEvent(event);
-		}
-	}
-
-	/**
-	 * Add a listener. Any beans that are listeners are automatically added.
-	 */
-	protected void addListener(ApplicationListener l) {
-		this.eventMulticaster.addApplicationListener(l);
-	}
-
-	/**
-	 * This implementation supports fully qualified URLs and appropriate
-	 * file paths, via getResourceByPath.
-	 * Throws a FileNotFoundException if getResourceByPath returns null.
-	 * @see #getResourceByPath
-	 */
-	public final InputStream getResourceAsStream(String location) throws IOException {
-		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-			return ClassLoaderUtils.getResourceAsStream(location.substring(CLASSPATH_URL_PREFIX.length()));
-		}
-		try {
-			// try URL
-			URL url = new URL(location);
-			logger.debug("Opening as URL: " + location);
-			return url.openStream();
-		}
-		catch (MalformedURLException ex) {
-			// no URL -> try (file) path
-			InputStream in = getResourceByPath(location);
-			if (in == null) {
-				throw new FileNotFoundException("Location [" + location + "] could not be opened as file path");
-			}
-			return in;
-		}
-	}
-
-	/**
-	 * Return input stream to the resource at the given (file) path.
-	 * <p>Default implementation supports file paths, either absolute or
-	 * relative to the application's working directory. This should be
-	 * appropriate for standalone implementations but can be overridden,
-	 * e.g. for implementations targeted at a container.
-	 * @param path path to the resource
-	 * @return InputStream for the specified resource, can be null if
-	 * not found (instead of throwing an exception)
-	 * @throws IOException exception when opening the specified resource
-	 */
-	protected InputStream getResourceByPath(String path) throws IOException {
-		return new FileInputStream(path);
-	}
-
-	/**
-	 * This implementation returns the working directory of the Java VM.
-	 * This should be appropriate for standalone implementations but can
-	 * be overridden for implementations targetted at a container.
-	 */
-	public String getResourceBasePath() {
-		return (new File("")).getAbsolutePath() + File.separatorChar;
 	}
 
 
@@ -531,7 +487,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		sb.append("class=[" + getClass().getName() + "]; ");
 		sb.append("beanFactory=[" + getBeanFactory() + "]; ");
 		sb.append("messageSource=[" + this.messageSource + "]; ");
-		sb.append("contextOptions=[" + this.contextOptions + "]; ");
 		sb.append("startup date=[" + new Date(this.startupTime) + "]; ");
 		if (this.parent == null)
 			sb.append("root of ApplicationContext hierarchy");

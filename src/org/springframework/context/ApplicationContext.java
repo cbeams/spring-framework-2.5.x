@@ -34,7 +34,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.6 2003-11-10 21:03:28 colins Exp $
+ * @version $Id: ApplicationContext.java,v 1.7 2003-12-09 08:41:11 jhoeller Exp $
  */
 public interface ApplicationContext extends MessageSource, ListableBeanFactory, HierarchicalBeanFactory {
 	
@@ -56,14 +56,6 @@ public interface ApplicationContext extends MessageSource, ListableBeanFactory, 
 	 * @return the timestamp (ms) when this context was first loaded
 	 */
 	long getStartupDate();
-
-	/**
-	 * Return context options. These control reloading etc.
-	 * <p>ApplicationContext implementations may subclass ContextOptions to
-	 * add additional properties. It must always be a bean.
-	 * @return context options (must not be null).
-	 */
-	ContextOptions getOptions();
 
 	/**
 	 * Notify all listeners registered with this application of an application

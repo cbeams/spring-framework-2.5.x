@@ -94,10 +94,6 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
-	public void testContextOptions() throws Exception {
-		assertTrue("contextOptions cannot be null", applicationContext.getOptions() != null);
-	}
-
 	public void testMessageSource() throws NoSuchMessageException {
 		assertEquals(applicationContext.getMessage("code1", null, Locale.getDefault()), "message1");
 		assertEquals(applicationContext.getMessage("code2", null, Locale.getDefault()), "message2");
