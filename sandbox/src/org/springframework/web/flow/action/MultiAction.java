@@ -31,7 +31,7 @@ import org.springframework.web.flow.support.FlowUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class MultiActionBean extends AbstractAction {
+public class MultiAction extends AbstractAction {
 
 	/**
 	 * @author Keith Donald
