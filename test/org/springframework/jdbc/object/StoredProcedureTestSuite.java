@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.9 2003-11-26 23:10:34 trisberg Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.10 2003-11-27 05:04:39 trisberg Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -393,7 +393,7 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 	}
 
 	public void testParameterMapper() throws Exception {
-		mockCallable.setObject(1, "$Proxy0", Types.VARCHAR);
+		mockCallable.setObject(1, "EasyMock for interface java.sql.Connection", Types.VARCHAR);
 		ctrlCallable.setVoidCallable();
 		mockCallable.registerOutParameter(2, Types.VARCHAR);
 		ctrlCallable.setVoidCallable();
@@ -607,7 +607,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 			
 			public Map createMap(Connection conn) throws SQLException {
 				Map inParms = new HashMap();
-				inParms.put("in", conn.getClass().getName());
+				String testValue = conn.toString();
+				inParms.put("in", testValue);
 				return inParms;
 			}
 		
