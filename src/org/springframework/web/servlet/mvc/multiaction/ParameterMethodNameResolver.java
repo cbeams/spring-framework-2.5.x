@@ -32,7 +32,8 @@ import javax.servlet.http.HttpServletRequest;
  * <p>The second strategy uses the very existence of a request parameter (i.e.
  * a request parameter with a certain name is found) as an indication that a 
  * method with the same name should be dispatched to. In this case, the actual
- * request parameter value is ignored.
+ * request parameter value is ignored. The list of parameter/method names may
+ * be set via the <code>methodParamNames<code> JavaBean property.
  * 
  * <p>The second resolution strategy is prmarilly expected to be used with web
  * pages containing multiple submit buttons. The 'name' attribute of each
@@ -40,8 +41,19 @@ import javax.servlet.http.HttpServletRequest;
  * is normally displayed as the button label by the browser, and will be
  * ignored by the resolver.
  * 
+ * <p>Note that the second strategy also supports the use of submit buttons of
+ * type 'image'. That is, an image submit button named 'reset' will normally be
+ * submitted by the browser as two request paramters called 'reset.x', and
+ * 'reset.y'. When checking for the existence of a paramter from the 
+ * <code>methodParamNames</code> list, to indicate that a specific method should
+ * be called, the code will look for request parameter in the "reset" form
+ * (exactly as spcified in the list), and in the "reset.x" form ('.x' appended to
+ * the name in the list). In this way it can handle both normal and image submit
+ * buttons. The actual method name resolved if there is a match will always be
+ * the bare form without the ".x". 
+ * 
  * <p>For use with either strategy, the name of a default handler method to use
- * when there is no match, can be specified as JavaBean properties.
+ * when there is no match, can be specified as a JavaBean property.
  * 
  * <p>For both resolution strategies, the method name is of course coming from
  * some sort of view code, (such as a JSP page). While this may be acceptable,
@@ -125,6 +137,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	}
 
 
+	// template method impl.
 	public String getHandlerMethodName(HttpServletRequest request) throws NoSuchRequestHandlingMethodException {
 		String methodName = null;
 
@@ -139,6 +152,11 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 			for (int i = 0; i < this.methodParamNames.length; ++i) {
 				String candidate = this.methodParamNames[i];
 				if (request.getParameter(candidate) != null) {
+					methodName = candidate;
+					break;
+				}
+				// now check for image submit button too
+				if (request.getParameter(candidate + ".x") != null) {
 					methodName = candidate;
 					break;
 				}

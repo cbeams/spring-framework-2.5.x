@@ -160,6 +160,16 @@ public class MultiActionControllerTests extends TestCase {
 		request.addParameter("colin", "whatever");
 		request.addParameter("spring", "whatever");
 		assertEquals("spring", resolver.getHandlerMethodName(request));
+		
+		// validate image button handling
+		request = new MockHttpServletRequest();
+		request.addParameter("spring.x", "whatever");
+		assertEquals("spring", resolver.getHandlerMethodName(request));
+
+		request = new MockHttpServletRequest();
+		request.addParameter("hello.x", "whatever");
+		request.addParameter("spring", "whatever");
+		assertEquals("goodbye", resolver.getHandlerMethodName(request));
 	}
 
 	public void testParameterMethodNameResolverWithDefaultMethodName() throws NoSuchRequestHandlingMethodException {
