@@ -84,7 +84,7 @@ public abstract class AbstractFormatter implements Formatter {
 
 	/**
 	 * Template method subclasses should override to encapsulate parsing logic.
-	 * @param value the value to parse
+	 * @param formattedString the formatted string to parse
 	 * @return the parsed value
 	 * @throws InvalidFormatException an exception occured parsing
 	 */
@@ -103,6 +103,7 @@ public abstract class AbstractFormatter implements Formatter {
 	protected Object getEmptyValue() {
 		return null;
 	}
+	
 	protected abstract Object doParseValue(String formattedString) throws InvalidFormatException, ParseException;
 
 	protected boolean isEmpty(Object o) {
