@@ -17,17 +17,12 @@ import org.springframework.validation.Errors;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.WebUtils;
 
 /**
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
 public class WizardFormControllerTestSuite extends TestCase {
-
-	public WizardFormControllerTestSuite(String location) {
-		super(location);
-	}
 
 	public void testNoDirtyPageChange() {
 		AbstractWizardFormController wizard = createWizard();
@@ -44,6 +39,23 @@ public class WizardFormControllerTestSuite extends TestCase {
 		params.clear();
 		params.setProperty("name", "myname");
 		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1", "value");
+		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
+		// name set -> now allowed to go to 1
+
+		params.clear();
+		params.setProperty("name", "myname");
+		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
+		// name set -> now allowed to go to 1
+
+		params.clear();
+		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1.x", "value");
+		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
+		// name set -> now allowed to go to 1
+
+		params.clear();
+		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1.y", "value");
 		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
 		// name set -> now allowed to go to 1
 
@@ -126,7 +138,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 		params.clear();
 		params.setProperty("name", "myname");
-		params.setProperty(AbstractWizardFormController.PARAM_FINISH + WebUtils.SUBMIT_IMAGE_SUFFIX, "value");
+		params.setProperty(AbstractWizardFormController.PARAM_FINISH + ".x", "value");
 		performRequest(wizard, session, params, -1, "myname", 32, null);
 		// name set -> now allowed to finish
 	}
@@ -140,10 +152,9 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 		session = performRequest(wizard, null, null, 0, null, 0, null);
 		params = new Properties();
-		params.setProperty(AbstractWizardFormController.PARAM_CANCEL + WebUtils.SUBMIT_IMAGE_SUFFIX, "value");
+		params.setProperty(AbstractWizardFormController.PARAM_CANCEL + ".y", "value");
 		performRequest(wizard, session, params, -2, null, 0, null);
 	}
-
 
 	private AbstractWizardFormController createWizard() {
 		AbstractWizardFormController wizard = new TestWizardController(TestBean.class, "tb");
@@ -185,7 +196,6 @@ public class WizardFormControllerTestSuite extends TestCase {
 			assertTrue("Has model", tb != null);
 			assertTrue("Name is " + name, (tb.getName() == name || tb.getName().equals(name)));
 			assertTrue("Age is " + age, tb.getAge() == age);
-			System.out.println("Model:" + mv.getModel().size());
 		}
 		catch (ServletException ex) {
 			fail("Should not throw ServletException: " + ex.getMessage());

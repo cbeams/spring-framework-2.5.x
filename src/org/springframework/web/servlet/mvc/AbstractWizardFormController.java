@@ -271,7 +271,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	                                                   Object command, BindException errors)
 	    throws ServletException, IOException {
 
-		int page = getCurrentPage(request);
+		int currentPage = getCurrentPage(request);
 		request.getSession().removeAttribute(getPageSessionAttributeName());
 
 		// cancel?
@@ -287,20 +287,60 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// normal submit: validate current page and show specified target page
-		logger.debug("Validating wizard page " + page + " for form bean '" + getBeanName() + "'");
-		validatePage(command, errors, page);
+		logger.debug("Validating wizard page " + currentPage + " for form bean '" + getBeanName() + "'");
+		validatePage(command, errors, currentPage);
 
-		int target = getTargetPage(request);
-		if (target != page) {
-			if (!errors.hasErrors() || (this.allowDirtyBack && target < page) ||
-				(this.allowDirtyForward && target > page)) {
+		int targetPage = getTargetPage(request, currentPage);
+		if (targetPage != currentPage) {
+			if (!errors.hasErrors() || (this.allowDirtyBack && targetPage < currentPage) ||
+				(this.allowDirtyForward && targetPage > currentPage)) {
 				// allowed to go to target page
-				return showPage(request, errors, target);
+				return showPage(request, errors, targetPage);
 			}		
 		}
 		
-		// showing current page again
-		return showPage(request, errors, page);
+		// show current page again
+		return showPage(request, errors, currentPage);
+	}
+
+	/**
+	 * Return if finish action is specified in the request.
+	 * @param request current HTTP request
+	 */
+	protected boolean isFinish(HttpServletRequest request) {
+		return WebUtils.hasSubmitParameter(request, PARAM_FINISH);
+	}
+
+	/**
+	 * Return if cancel action is specified in the request.
+	 * @param request current HTTP request
+	 */
+	protected boolean isCancel(HttpServletRequest request) {
+		return WebUtils.hasSubmitParameter(request, PARAM_CANCEL);
+	}
+
+	/**
+	 * Return the target page specified in the request.
+	 * @param request current HTTP request
+	 * @param currentPage the current page, to be returned as fallback
+	 * if no target page specified
+	 * @return the page specified in the request, or current page if not found
+	 */
+	protected int getTargetPage(HttpServletRequest request, int currentPage) {
+		Enumeration paramNames = request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
+			if (paramName.startsWith(PARAM_TARGET)) {
+				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
+					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];
+					if (paramName.endsWith(suffix)) {
+						paramName = paramName.substring(0, paramName.length() - suffix.length());
+					}
+				}
+				return Integer.parseInt(paramName.substring(PARAM_TARGET.length()));
+			}
+		}
+		return currentPage;
 	}
 
 	/**
@@ -359,39 +399,4 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	                                              Object command, BindException errors)
 	    throws ServletException, IOException;
 
-	/**
-	 * Return if finish action is specified in request.
-	 * @param request current HTTP request
-	 */
-	protected boolean isFinish(HttpServletRequest request) {
-		return WebUtils.hasSubmitParameter(request, PARAM_FINISH);
-	}
-
-	/**
-	 * Return if cancel action is specified in request.
-	 * @param request current HTTP request
-	 */
-	protected boolean isCancel(HttpServletRequest request) {
-		return WebUtils.hasSubmitParameter(request, PARAM_CANCEL);
-	}
-
-	/**
-	 * Return the page specified in request.
-	 * @param request current HTTP request
-	 * @return the page specified in request (or currentpage if not specified)
-	 */
-	protected int getTargetPage(HttpServletRequest request) {
-		Enumeration paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
-			if (paramName.startsWith(PARAM_TARGET)) {
-				if (paramName.endsWith(WebUtils.SUBMIT_IMAGE_SUFFIX)) {
-					paramName = paramName.substring(0, paramName.length() - WebUtils.SUBMIT_IMAGE_SUFFIX.length());
-				}
-				return Integer.parseInt(paramName.substring(PARAM_TARGET.length()));
-			}
-		}
-		return getCurrentPage(request);
-	}
-	
 }
