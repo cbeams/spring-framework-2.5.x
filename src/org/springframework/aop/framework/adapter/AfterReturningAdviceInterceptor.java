@@ -18,7 +18,7 @@ package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.MethodAfterReturningAdvice;
+import org.springframework.aop.AfterReturningAdvice;
 
 
 /**
@@ -28,13 +28,13 @@ import org.springframework.aop.MethodAfterReturningAdvice;
  * <br>Used internally by the AOP framework: application developers should not need
  * to use this class directly.
  * @author Rod Johnson
- * @version $Id: AfterReturningAdviceInterceptor.java,v 1.2 2004-03-18 02:46:10 trisberg Exp $
+ * @version $Id: AfterReturningAdviceInterceptor.java,v 1.3 2004-03-19 18:43:17 johnsonr Exp $
  */
 final class AfterReturningAdviceInterceptor implements MethodInterceptor {
 	
-	private MethodAfterReturningAdvice advice;
+	private AfterReturningAdvice advice;
 	
-	public AfterReturningAdviceInterceptor(MethodAfterReturningAdvice advice) {
+	public AfterReturningAdviceInterceptor(AfterReturningAdvice advice) {
 		this.advice = advice;
 	}
 

@@ -30,7 +30,7 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.MethodAfterReturningAdvice;
+import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -46,7 +46,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.23 2004-03-19 16:54:41 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.24 2004-03-19 18:43:17 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1237,7 +1237,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	
 	public void testAfterReturningAdvisorIsInvoked() {
-		class SummingAfterAdvice implements MethodAfterReturningAdvice {
+		class SummingAfterAdvice implements AfterReturningAdvice {
 			public int sum;
 			public void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable {
 				sum += ((Integer) returnValue).intValue();

@@ -18,16 +18,16 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 
-import org.springframework.aop.MethodAfterReturningAdvice;
+import org.springframework.aop.AfterReturningAdvice;
 
 
 /**
  * Simple before advice example that we can use for counting checks.
  * 
  * @author Rod Johnson
- * @version $Id: CountingAfterReturningAdvice.java,v 1.2 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: CountingAfterReturningAdvice.java,v 1.3 2004-03-19 18:43:17 johnsonr Exp $
  */
-public class CountingAfterReturningAdvice extends MethodCounter implements MethodAfterReturningAdvice {
+public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
 	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
 		count(m);
 	}
