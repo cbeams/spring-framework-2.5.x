@@ -13,6 +13,7 @@
 <!ENTITY orm						SYSTEM "orm.xml">
 <!ENTITY mvc			        	SYSTEM "mvc.xml">
 <!ENTITY integration				SYSTEM "integration.xml">
+<!ENTITY ejb						SYSTEM "ejb.xml">
 <!ENTITY background					SYSTEM "background.xml">
 ]>
 
@@ -49,7 +50,7 @@
 	    
 	    &integration;
 	    
-	    <!-- &ejb; -->
+	    &ejb;
 	    
 	    <!-- &jndi; -->
 	    
