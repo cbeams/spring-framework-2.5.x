@@ -197,7 +197,7 @@
 		<mkdir dir="${docs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="Petclinic"
-				source="1.3" author="true" version="true" use="true">
+				source="1.3" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>Petclinic</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2004.</i>]]></bottom>
 			<classpath refid="master-classpath"/>

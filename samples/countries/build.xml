@@ -110,7 +110,7 @@
 		<mkdir dir="${docs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="Countries"
-				source="1.3" author="true" version="true" use="true">
+				source="1.3" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>Countries</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Jean-Pierre Pawlak, 2003.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
