@@ -28,7 +28,7 @@ import org.springframework.web.flow.SimpleEvent;
  * 
  * @author Erwin Vervaet
  */
-public abstract class FlowExecutionRequestEvent extends SimpleEvent {
+public abstract class ExternalEvent extends SimpleEvent {
 
 	/**
 	 * Clients can send the event to be signaled in an event
@@ -41,29 +41,23 @@ public abstract class FlowExecutionRequestEvent extends SimpleEvent {
 	 * with this name ("_currentStateId").
 	 */
 	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
-	
+
 	/**
 	 * The default delimiter used when a parameter value is sent as
 	 * part of the name of an event parameter (e.g. "_eventId_value=bar").
 	 */
 	public static final String PARAMETER_VALUE_DELIMITER = "_";
-	
-	
+
 	/**
-	 * Create a new flow execution request event. Subclasses should make sure they
-	 * correctly initialize all properties: event id, state id and parameters. 
-	 * @param source the source of the event, typically the request object
-	 * 
-	 * @see SimpleEvent#setId(String)
-	 * @see SimpleEvent#setStateId(String)
-	 * @see SimpleEvent#setParameters(Map)
+	 * Creates a external event with the specified external source, for example a http request.
+	 * @param source the event source
 	 */
-	protected FlowExecutionRequestEvent(Object source) {
+	public ExternalEvent(Object source) {
 		super(source);
 	}
-	
+
 	// support methods
-	
+
 	/**
 	 * Obtain a named parameter from the event parameters. This method will
 	 * try to obtain a parameter value using the following algorithm:
@@ -113,5 +107,4 @@ public abstract class FlowExecutionRequestEvent extends SimpleEvent {
 		// we couldn't find the parameter value
 		return null;
 	}
-
 }
