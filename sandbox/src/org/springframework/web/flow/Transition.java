@@ -25,15 +25,28 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Keith Donald
  */
 public class Transition implements Serializable {
+	
 	private static final Log logger = LogFactory.getLog(Transition.class);
 
+	public static final String WILDCARD_EVENT_ID="*";
+	
+	// constant that says match on any event
+	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
+		public boolean test(Object o) {
+			return true;
+		}
+
+		public String toString() {
+			return WILDCARD_EVENT_ID;
+		}
+	};
+	
 	private Constraint eventIdCriteria;
 
 	private TransitionableState sourceState;
@@ -61,6 +74,9 @@ public class Transition implements Serializable {
 	}
 
 	protected void setSourceState(TransitionableState owningState) {
+		if (this.sourceState!=null && this.sourceState!=owningState) {
+			throw new IllegalArgumentException("You cannot change the owning state of a transition");
+		}
 		this.sourceState = owningState;
 	}
 
@@ -78,15 +94,20 @@ public class Transition implements Serializable {
 	}
 
 	protected Constraint createDefaultEventIdCriteria(final String id) {
-		return new AbstractConstraint() {
-			public boolean test(Object eventId) {
-				return id.equals(eventId);
-			}
-
-			public String toString() {
-				return id;
-			}
-		};
+		if (WILDCARD_EVENT_ID.equals(id)) {
+			return WILDCARD_EVENT_CRITERIA;
+		}
+		else {
+			return new Constraint() {
+				public boolean test(Object eventId) {
+					return id.equals(eventId);
+				}
+	
+				public String toString() {
+					return id;
+				}
+			};
+		}
 	}
 
 	public Constraint getEventIdCriteria() {
@@ -107,10 +128,9 @@ public class Transition implements Serializable {
 			ModelAndView viewDescriptor = getTargetState().enter(flowExecution, request, response);
 			if (logger.isDebugEnabled()) {
 				if (flowExecution.isActive()) {
-					logger
-							.debug("Transition '" + this + "' executed; as a result,  the new state is '"
-									+ flowExecution.getCurrentStateId() + "' in flow '"
-									+ flowExecution.getActiveFlowId() + "'");
+					logger.debug("Transition '" + this + "' executed; as a result,  the new state is '"
+							+ flowExecution.getCurrentStateId() + "' in flow '"
+							+ flowExecution.getActiveFlowId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
@@ -123,17 +143,6 @@ public class Transition implements Serializable {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
 	}
-
-	// constant that says match on any event
-	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
-		public boolean test(Object o) {
-			return true;
-		}
-
-		public String toString() {
-			return "*";
-		}
-	};
 
 	public String toString() {
 		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", targetStateId)

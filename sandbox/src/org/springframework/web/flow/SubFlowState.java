@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.Assert;
 import org.springframework.web.flow.config.NoSuchFlowAttributesMapperException;
 import org.springframework.web.flow.config.NoSuchFlowDefinitionException;
 import org.springframework.web.servlet.ModelAndView;
@@ -54,6 +55,7 @@ public class SubFlowState extends TransitionableState {
 	}
 
 	protected void setSubFlow(Flow subFlow) {
+		Assert.notNull(subFlow, "A sub flow state must have a sub flow");
 		this.subFlow = subFlow;
 	}
 

@@ -34,6 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Keith Donald
  */
 public abstract class TransitionableState extends AbstractState {
+	
 	private Set transitions = new LinkedHashSet();
 
 	public TransitionableState(Flow flow, String id) {
@@ -55,6 +56,9 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	protected void add(Transition transition) {
+		if (transition.getSourceState()!=null && transition.getSourceState()!=this) {
+			throw new IllegalArgumentException("Given transition already belongs to another state");
+		}
 		transition.setSourceState(this);
 		this.transitions.add(transition);
 	}
@@ -96,12 +100,12 @@ public abstract class TransitionableState extends AbstractState {
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
 
-	public Collection getEventIdCriterion() {
+	protected Collection getEventIdCriteria() {
 		if (transitions.isEmpty()) {
 			return Collections.EMPTY_SET;
 		}
-		Iterator it = transitionsIterator();
 		Set criterion = new LinkedHashSet(transitions.size());
+		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			criterion.add(((Transition)it.next()).getEventIdCriteria());
 		}

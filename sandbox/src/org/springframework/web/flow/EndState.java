@@ -74,9 +74,8 @@ public class EndState extends AbstractState {
 			SubFlowState resumingState = (SubFlowState)flowExecution.getCurrentState();
 			if (resumingState.getAttributesMapper() != null) {
 				if (logger.isDebugEnabled()) {
-					logger
-							.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
-									+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
+					logger.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
+							+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
 				}
 				resumingState.getAttributesMapper().mapToResumingParentFlow(endingFlowSession,
 						flowExecution.getActiveFlowSession());
