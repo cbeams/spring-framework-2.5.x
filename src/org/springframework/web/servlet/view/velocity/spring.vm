@@ -65,7 +65,7 @@
 #macro( springBind $path )
 	#*
 	 * the additional check for springHtmlEscape is required since Velocity 
-	 * variables are not typed.and simply checking for true or false will result
+	 * variables are not typed and simply checking for true or false will result
 	 * in errors if the variable doesn't exist.
 	 *#
 	#if($springHtmlEscape && ($springHtmlEscape == true || $springHtmlEscape == false))
@@ -124,6 +124,11 @@
  * Show a selectbox (dropdown) input element allowing a single value to be chosen
  * from a list of options.
  *
+ * The null check for $status.value leverages Velocity's 'quiet' notation rather
+ * than the more common #if($status.value) since this method evaluates to the 
+ * boolean 'false' if the content of $status.value is the String "false" - not
+ * what we want.
+ *
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param attributes any additional attributes for the element (such as class
@@ -134,7 +139,7 @@
 	<select name="${status.expression}" ${attributes}>
 		#foreach($option in $options.keySet())
 			<option value="${option}"
-			#if($status.value && $status.value == $option)
+			#if("$!status.value" == "$option")
 				selected="selected"
 			#end>
 			${options.get($option)}</option>
@@ -184,7 +189,7 @@
 	#springBind($path)
 	#foreach($option in $options.keySet())
 		<input type="radio" name="${status.expression}" value="${option}"
-		#if($status.value == $option)
+		#if("$!status.value" == "$option")
 			checked="checked"
 		#end
 		${attributes}
