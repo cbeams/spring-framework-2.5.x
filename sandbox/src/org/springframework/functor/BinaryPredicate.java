@@ -18,8 +18,8 @@ package org.springframework.functor;
 import java.io.Serializable;
 
 /**
- * A binary predicate is a boolean expression that takes two arguments and
- * returns a boolean result.
+ * A function object that tests two arguments and returns a single
+ * <code>boolean</code> result.
  * <p>
  * <p>
  * A binary predicate is a function object that tests two arguments against some

@@ -50,8 +50,8 @@ public abstract class ComparingBinaryPredicate implements BinaryPredicate {
 
     /**
      * Tests two arguments against a comparsion expression. This method
-     * delegates to the {@link testCompareResult} template method to evaluate
-     * the compareTo result.
+     * delegates to the {@link testCompareResult(int)}template method to
+     * evaluate the compareTo result.
      * 
      * @param argument1
      *            the first argument

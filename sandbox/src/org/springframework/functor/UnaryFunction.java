@@ -16,13 +16,12 @@
 package org.springframework.functor;
 
 /**
- * A unary function is a expression that evaluates one argument and returns a
- * result.
+ * A function object that evaluates one argument and returns a single result.
  * <p>
  * <p>
- * A unary function is a function object that evaluates a single argument
- * against some expression. For example, a "StringLength" unary function might
- * return the length of an argument's string form.
+ * A unary function evaluates a single argument against some expression. For
+ * example, a "StringLength" unary function might accept any object and return
+ * the length of the object's string form.
  * 
  * @author Keith Donald
  */
