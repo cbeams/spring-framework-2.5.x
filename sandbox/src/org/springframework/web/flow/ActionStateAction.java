@@ -23,13 +23,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A local parameter object that allows for storing abritrary properties about
- * an <code>Action</code> implementation for use within exactly one
+ * A local parameter object that allows for storing abritrary properties about a
+ * target <code>Action</code> implementation for use within exactly one
  * <code>ActionState</code> definition.
  * <p>
- * Note: it is expected that this object NOT be reused between
- * <code>ActionStates</code>. Attempting to do so will generate a
- * <code>IllegalStateException</code>.
+ * Note: this object should NOT be reused between <code>ActionStates</code>.
+ * Attempting to do so will generate a <code>IllegalStateException</code>.
  * 
  * @author Keith Donald
  */
@@ -59,58 +58,58 @@ public class ActionStateAction {
 	 * Creates a new action state info parameter object for the specified
 	 * action. No contextual properties are provided.
 	 * @param state the state
-	 * @param action The action
+	 * @param targetAction The action
 	 */
-	public ActionStateAction(ActionState state, Action action) {
+	public ActionStateAction(ActionState state, Action targetAction) {
 		this.state = state;
-		this.targetAction = action;
+		this.targetAction = targetAction;
 	}
 
 	/**
 	 * Creates a new action state info parameter object for the specified
 	 * action. No contextual properties are provided.
-	 * @param action The action
+	 * @param targetAction The action
 	 */
-	public ActionStateAction(Action action) {
-		this.targetAction = action;
+	public ActionStateAction(Action targetAction) {
+		this.targetAction = targetAction;
 	}
 
 	/**
 	 * Creates a new action state info parameter object for the specified
 	 * action. The 'name' property is provided.
-	 * @param action The action
+	 * @param targetAction The action
 	 * @param name the name of the action
 	 */
-	public ActionStateAction(Action action, String name) {
+	public ActionStateAction(Action targetAction, String name) {
 		this.properties = new HashMap(1);
 		setName(name);
-		this.targetAction = action;
+		this.targetAction = targetAction;
 	}
 
 	/**
 	 * Creates a new action state info parameter object for the specified
 	 * action. The 'name' and 'description' properties are provided.
-	 * @param action The action
+	 * @param targetAction The action
 	 * @param name the name of the action
 	 * @param description the description of the action
 	 */
-	public ActionStateAction(Action action, String name, String description) {
+	public ActionStateAction(Action targetAction, String name, String description) {
 		this.properties = new HashMap(1);
 		setName(name);
 		setDescription(description);
-		this.targetAction = action;
+		this.targetAction = targetAction;
 	}
 
 	/**
 	 * Creates a new action state info parameter object for the specified
 	 * action. The map of properties is provided.
-	 * @param action The action
+	 * @param targetAction The action
 	 * @param properties the properties describing usage of this action in this
 	 *        state
 	 */
-	public ActionStateAction(Action action, Map properties) {
+	public ActionStateAction(Action targetAction, Map properties) {
 		this.properties = new HashMap(properties);
-		this.targetAction = action;
+		this.targetAction = targetAction;
 	}
 
 	/**

@@ -32,13 +32,25 @@ import org.springframework.util.Styler;
  * until one returns a result event that matches a valid state transition for
  * this state. This is a form of the Chain of Responsibility (CoR) pattern.
  * <p>
- * Each action executed by this action state can optionally be qualified with a
- * <i>name</i> attribute. This name is used as a qualifier in determing what
+ * The results of action execution are used as grounds for a state transition
+ * out of this state. Specifically, action execution will continue until a
+ * result even triggers a valid state transition or the list of actions is
+ * exhausted and an exception is thrown.
+ * <p>
+ * Each action executed by this action state may be qualified with a set of
+ * arbitrary properties. For example, an identifying name and description.
+ * <p>
+ * By default, the name property is used as a qualifier in determining what
  * transition should be executed for a given action result event. For example,
  * if an action named "myAction" returns a "success" result, a transition for
  * Event "myAction.success" will be searched, and if found, executed. If the
  * action is not named, a transition for the base "success" event will be
  * searched, and if found, executed.
+ * <p>
+ * The name property is also used by the <code>MultiAction</code>
+ * implementation to dispatch calls on a target action instance to a particular
+ * handler method. In this case the value of the name property will map to the
+ * method name on the target action instance.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -54,7 +66,8 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param targetAction the unnamed action to execute in this state
+	 * @param targetAction the raw target action instance to execute in this
+	 *        state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -68,9 +81,9 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Create a new action state.
 	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @param action The action and any configuration properties for use within
 	 *        this state
-	 * @param action the named action to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -85,7 +98,8 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param targetAction the unnamed action to execute in this state
+	 * @param targetAction the raw target action instance to execute in this
+	 *        state
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -100,8 +114,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param actionName the name of the named action
-	 * @param action the named action to execute in this state
+	 * @param targetActions the raw actions to execute in this state
 	 * @param transitions the transitions out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -116,7 +129,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param targetActions the unnamed actions to execute in this state
+	 * @param targetActions the raw, target actions to execute in this state
 	 * @param transition the sole transition (path) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -131,7 +144,7 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param targetActions the unnamed actions to execute in this state
+	 * @param targetActions the raw actions to execute in this state
 	 * @param transitions the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -146,8 +159,8 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param actionNames the names of the named actions
-	 * @param actions the named actions to execute in this state
+	 * @param action The actions with any configuration properties for use
+	 *        within this state
 	 * @param transition the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -162,8 +175,8 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param actionNames the names of the named actions
-	 * @param actions the named actions to execute in this state
+	 * @param action The actions with any configuration properties for use
+	 *        within this state
 	 * @param transitions the transitions (paths) out of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
@@ -266,11 +279,10 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Returns the name associated with an action instance executed by this
-	 * action state.
-	 * @param targetAction the action for which the name should be looked up
-	 * @return the name of given action or <code>null</code> if the action
-	 *         does not have a name
+	 * Returns this state's action instance associated with this target action
+	 * instance.
+	 * @param targetAction the requesting target object
+	 * @return the action
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
 	 */
@@ -347,11 +359,8 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Wrapper class for actions that associates an action with its name (or
-	 * <code>null</code> if its an unnamed action).
-	 * <p>
-	 * For internal use by the ActionState.
-	 * 
+	 * Internal action executor, encapsulating a single action's execution and
+	 * result handling logic.
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
