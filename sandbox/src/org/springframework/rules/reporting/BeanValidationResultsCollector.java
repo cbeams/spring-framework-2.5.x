@@ -17,21 +17,19 @@ package org.springframework.rules.reporting;
 
 import org.springframework.rules.Rules;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
-import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.Algorithms;
 import org.springframework.util.closure.support.Block;
 import org.springframework.util.visitor.Visitor;
 
 /**
  * @author Keith Donald
  */
-public class BeanValidationResultsCollector extends ValidationResultsCollector
-		implements Visitor {
+public class BeanValidationResultsCollector extends ValidationResultsCollector implements Visitor {
 
 	private Object bean;
 
@@ -55,28 +53,24 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
 	public BeanValidationResults collectResults(Rules rules) {
 		Assert.notNull(rules, "rules is required");
 		setResultsBuilder(new BeanValidationResultsBuilder(bean));
-		Algorithms.instance().forEach(rules.iterator(),
-				new Block() {
-					public void handle(Object beanPropertyConstraint) {
-						collectPropertyResultsInternal((PropertyConstraint) beanPropertyConstraint);
-					}
-				});
+		new Block() {
+			protected void handle(Object beanPropertyConstraint) {
+				collectPropertyResultsInternal((PropertyConstraint)beanPropertyConstraint);
+			}
+		}.forEach(rules.iterator());
 		return resultsBuilder;
 	}
 
-	public PropertyResults collectPropertyResults(
-			PropertyConstraint propertyRootExpression) {
+	public PropertyResults collectPropertyResults(PropertyConstraint propertyRootExpression) {
 		Assert.notNull(propertyRootExpression, "propertyRootExpression is required");
 		setResultsBuilder(new BeanValidationResultsBuilder(this.bean));
 		return collectPropertyResultsInternal(propertyRootExpression);
 	}
 
-	private PropertyResults collectPropertyResultsInternal(
-			PropertyConstraint rootExpression) {
+	private PropertyResults collectPropertyResultsInternal(PropertyConstraint rootExpression) {
 		resultsBuilder.setCurrentBeanPropertyExpression(rootExpression);
 		setArgument(resultsBuilder.getCurrentPropertyValue());
-		boolean result = ((Boolean) visitorSupport.invokeVisit(this,
-				rootExpression)).booleanValue();
+		boolean result = ((Boolean)visitorSupport.invokeVisit(this, rootExpression)).booleanValue();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Final validation result: " + result);
 		}
@@ -90,24 +84,21 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
 
 	Boolean visit(CompoundPropertyConstraint rule) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Validating compound bean property expression ["
-					+ rule + "]...");
+			logger.debug("Validating compound bean property expression [" + rule + "]...");
 		}
-		return (Boolean) visitorSupport.invokeVisit(this, rule.getPredicate());
+		return (Boolean)visitorSupport.invokeVisit(this, rule.getPredicate());
 	}
 
 	boolean visit(PropertiesConstraint constraint) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Validating bean properties expression [" + constraint
-					+ "]...");
+			logger.debug("Validating bean properties expression [" + constraint + "]...");
 		}
 		return testBeanPropertyExpression(constraint);
 	}
 
 	boolean visit(ParameterizedPropertyConstraint constraint) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Validating parameterized bean property expression ["
-					+ constraint + "]...");
+			logger.debug("Validating parameterized bean property expression [" + constraint + "]...");
 		}
 		return testBeanPropertyExpression(constraint);
 	}
@@ -119,19 +110,16 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
 			resultsBuilder.push(constraint);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Constraint [" + constraint + "] "
-					+ (result ? "passed" : "failed"));
+			logger.debug("Constraint [" + constraint + "] " + (result ? "passed" : "failed"));
 		}
 		return result;
 	}
 
 	Boolean visit(PropertyValueConstraint valueConstraint) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Validating property value constraint ["
-					+ valueConstraint + "]...");
+			logger.debug("Validating property value constraint [" + valueConstraint + "]...");
 		}
-		return (Boolean) visitorSupport.invokeVisit(this, valueConstraint
-				.getConstraint());
+		return (Boolean)visitorSupport.invokeVisit(this, valueConstraint.getConstraint());
 	}
 
 	boolean visit(Constraint constraint) {
