@@ -23,8 +23,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 
 /**
- * FactoryBean which returns a value which is the result of a static or instance
- * method invocation.
+ * <p>FactoryBean which returns a value which is the result of a static or instance
+ * method invocation. For most use cases it is better to just use the container's 
+ * built-in factory-method support for the same purpose, since that is smarter at
+ * converting arguments. This factory bean is still useful though when you need to
+ * call a method which doesn't return any value (for example, a static class method
+ * to force some sort of initialization to happen). This use case is not supported
+ * by factory-methods, since a return value is needed to become the bean.</p.
  *
  * <p>Note that as it is expected to be used mostly for accessing
  * factory methods, this factory by default operates in a <b>singleton</b> fashion.
@@ -32,7 +37,7 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
  * a method invocation, whose return value will be cached for subsequent requests.
  * An internal {@link #setSingleton singleton} property may be set to false, to
  * cause this factory to invoke the target method each time it is asked for an
- * object.
+ * object.</p>
  *
  * <p>A static target method may be specified by setting the
  * {@link #setTargetMethod targetMethod} property to a String representing the static
@@ -41,13 +46,13 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
  * specified, by setting the {@link #setTargetObject targetObject} property as the target
  * object, and the {@link #setTargetMethod targetMethod} property as the name of the
  * method to call on that target object. Arguments for the method invocation may be
- * specified by setting the args property.
+ * specified by setting the args property.</p>
  *
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
- * all properties have been set, as per the InitializingBean contract.
+ * all properties have been set, as per the InitializingBean contract.</p>
  *
  * <p>An example (in an XML based bean factory definition) of a bean definition
- * which uses this class to call a static factory method:
+ * which uses this class to call a static factory method:</p>
  *
  * <pre>
  * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
