@@ -630,6 +630,198 @@ public class SampleDelegate {
 	
 	<sect1 id="mvc-handlermapping">
 		<title>Handler mappings</title>
+        <para>
+            Using a handler mapping you can map incoming web requests to appropriate handlers. There are some handler mapping
+            you can use, for example the <literal>SimpleUrlHandlerMapping</literal> or the <literal>BeanNameUrlHandlerMapping</literal>, but
+            let's first examine the general concept of a <literal>HandlerMapping</literal>.
+        </para>
+        
+        <para>
+            The functionality a basic <literal>HandlerMapping</literal> provides is the delivering of a <literal>HandlerExecutionChain</literal>,
+            first of all containing one handler that matched the incoming request. The second (but optional) element a
+            handler execution chain will contain is a list of handler interceptor that should be applied to the request.
+            When a request comes in, the <literal>DispatcherServlet</literal> will hand it over to the handler mapping to let it
+            inspect the request and come up with an appropriate HandlerExecutionChain. When done, the DispatcherServlet will
+            execute the handler and interceptors in the chain (if any).
+        </para>
+        
+        <para>
+            The concept of configurable handler mappings that can optionally contain interceptors (executed before or after
+            the actual handler was executed, or both) is extremely powerful. A lot of supporting functionality can be built-in
+            in custom <literal>HandlerMappings</literal>. Think of a custom handler mapping that chooses a handler not only based on
+            the URL of the request coming in, but also on a specific state of the session associated with the request.
+        </para>
+        
+        <para>
+            Let's examine the handler mappings that Spring provides.
+        </para>
+        
+        <sect2 id="mvc-handlermapping-beanname">
+            <title><literal>BeanNameUrlHandlerMapping</literal></title>
+            <para>
+                A very simple, but very powerful handlermapping is the <literal>BeanNameUrlHandlerMapping</literal>, which
+                maps incoming Http-requests to names of beans, defined in the webapplicationcontext. Let's say we want
+                to enable a user to insert an account and we've already provided an appropriate FormController
+                (see <xref linkend="mvc-controller-command"/> for more information on Command- and FormControllers) and
+                an JSP view (or Velocity template) that renders the form. When using the BeanNameUrlHandlerMapping, we could
+                map the Http-request with URL <literal>http://samples.com/editaccount.form</literal> to the appropriate
+                FormController as follows:
+                <programlisting><![CDATA[
+<beans>
+    <bean 
+            id="handlerMapping" 
+            class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+        
+    <bean 
+            name="/editaccount.form"
+            class="org.springframework.web.servlet.mvc.SimpleFormController">
+        <property name="formView"><value>account</value></property>
+        <property name="successView"><value>account-created</value></property>
+        <property name="commandName"><value>Account</value></property>
+        <property name="commandClass"><value>samples.Account</value></property>
+    </bean>
+<beans>
+                ]]></programlisting>
+                All incoming requests for the URL <literal>/editaccount.form</literal>
+                will now be handled by the FormController in the source listing above.
+                Of course we have to define a servlet-mapping in web.xml as well,
+                to let through all the requests ending with .form.
+                <programlisting><![CDATA[
+<web-app>
+    ...
+    <servlet>
+	    <servlet-name>sample</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+    </servlet>
+
+  <!-- Maps the sample dispatcher to /*.form -->
+    <servlet-mapping>
+        <servlet-name>sample</servlet-name>
+        <url-pattern>*.form</url-pattern>
+    </servlet-mapping>
+    ...
+</web-app>    
+                ]]></programlisting>
+            </para>
+            
+            <para>
+                <emphasis>NOTE: if you want to use the <literal>BeanNameUrlHandlerMapping</literal>,
+                you don't necessarily have to define it in the webapplicationcontext (as indicated above).
+                By default, if no handler mapping can be found in the context,
+                the DispatcherServlet creates a <literal>BeanNameUrlHandlerMapping</literal> for you!
+                </emphasis>
+            </para>
+        </sect2>   
+        
+        <sect2 id="mvc-handlermapping-urlhandlermapping">
+            <title><literal>SimpleUrlHandlerMapping</literal></title>
+            <para>
+                Another - and much more powerful handlermapping - is the
+                the <literal>SimpleUrlHandlerMapping</literal>. This mapping
+                is configurable in the applicationcontext and has 
+                Ant-style pathmatching capabilities (see <xref linkend="mvc-utilities-pathmatching"/>).
+                A couple of example will probably makes thing clear enough:
+                <programlisting><![CDATA[
+<web-app>
+    ...
+    <servlet>
+	    <servlet-name>sample</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+    </servlet>
+
+  <!-- Maps the sample dispatcher to /*.form -->
+    <servlet-mapping>
+        <servlet-name>sample</servlet-name>
+        <url-pattern>*.form</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>sample</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+    ...
+</web-app>    
+                ]]></programlisting>
+                Allows all requests ending with .html and .form to be handled
+                by the sample dispatcherservlet.
+                <programlisting><![CDATA[
+<beans>
+    <bean 
+            id="handlerMapping" 
+            class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">            
+        <property name="mappings">
+            <props>
+                <prop key="/*/account.form">editAccountFormController</prop>
+                <prop key="/*/editaccount.form">editAccountFormController</prop>
+                <prop key="/ex/view*.html">someViewController</prop>
+                <prop key="/**/help.html
+            </props>
+        </property>
+    </bean>
+    
+    <bean
+            id="someViewController"
+            class="org.springframework.web.servlet.mvc.FilenameViewController"/>
+    
+    <bean 
+            id="editAccountFormController"
+            class="org.springframework.web.servlet.mvc.SimpleFormController">
+        <property name="formView"><value>account</value></property>
+        <property name="successView"><value>account-created</value></property>
+        <property name="commandName"><value>Account</value></property>
+        <property name="commandClass"><value>samples.Account</value></property>
+    </bean>
+<beans>    
+                ]]></programlisting>
+                This handlermapping first of all reroutes all requests 
+                in all directories for a file named <literal>help.html</literal>
+                to the <literal>someViewController</literal>, which is a
+                FilenameViewController (more about that can be found in 
+                <xref linkend="mvc-controller"/>). Also, all requests for a 
+                resource beginning with <literal>view</literal>, ending
+                with <literal>.html</literal>, in the directory <literal>ex</literal>,
+                will be rerouted to that specific controller. Furtermore,
+                two mappings have been defined that will match with the
+                <literal>editAccountFormController</literal>
+            </para>
+        </sect2>
+        
+        <sect2 id="mvc-handlermapping-interceptor">
+            <title>Adding <literal>HandlerInterceptors</literal></title>
+            <para>
+                The handler mapping also has a notion of handler interceptors,
+                that can be extremely useful when you want to apply specific
+                functionality to all requests, for example the checking for a 
+                principal or something alike.
+            </para>
+            <para>
+                Interceptors located in the handler mapping must implement
+                <literal>HandlerInterceptor</literal> from the 
+                <literal>org.springframework.web.servlet</literal>-package. This interface
+                defines three methods, one that will be called <emphasis>before</emphasis>
+                the actual handler will be executed, one that will be 
+                called <emphasis>after</emphasis> the handler is executed, and
+                one that is called <emphasis>after the complete request
+                has finished</emphasis>. Those three methods should provide you
+                with enough flexibility to do all kinds of pre- and postprocessing.
+            </para>
+            <para>
+                The <literal>preHandle</literal> method has a boolean return value.
+                Using this value, you can tweak the behavior of the execution chain.
+                When returning <literal>true</literal>, the handler execution chain
+                will continue, when returning false, the DispatcherServlet assumes
+                the interceptor itself has taken care of requests (and  for instance
+                rendered an appropriate view) and does not continue with executing
+                the other interceptors and the actual handler in the execution chain.
+            </para>
+            
+            <para> 
+                The following example provides an interceptor that
+                intercepts all requests and reroutes the user to a specific page
+                if the time is not between 9 a.m. and 6 p.m.
+            </para>
+        </sect2>
 	</sect1>
 	
 	<sect1 id="mvc-viewresolver">
@@ -858,7 +1050,7 @@ public class FileUploadBean {
 		<sect2 id="mvc-utilities-pathmatching">
 			<title>A little story about the pathmatcher</title>
 			<para>
-				bla
+				
 			</para>
 		</sect2>
 		
