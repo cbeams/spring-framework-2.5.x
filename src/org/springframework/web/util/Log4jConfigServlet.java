@@ -24,9 +24,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author Juergen Hoeller
  * @author Darren Davison
  * @since 12.08.2003
- * @deprecated beyond Servlet 2.3 - use Log4jConfigListener in a
- * Servlet 2.4 compliant container, or a 2.3 container that initializes
- * listeners before load-on-startup servlets.
  * @see Log4jWebConfigurer
  * @see Log4jConfigListener
  * @see org.springframework.web.context.ContextLoaderServlet
