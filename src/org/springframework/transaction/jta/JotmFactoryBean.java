@@ -11,20 +11,20 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * FactoryBean that retrieves the JTA UserTransaction/TransactionManager for
- * ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve
- * an already active JOTM instance if found (e.g. if running in JOnAS),
- * else create a new local JOTM instance.
+ * ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve an
+ * already active JOTM instance if found (e.g. if running in JOnAS), else create
+ * a new local JOTM instance. The same object implements both the UserTransaction
+ * and the TransactionManager interface, as returned by this FactoryBean.
  *
- * <p>A local JOTM instance works nicely in conjunction with ObjectWeb's
- * <a href="http://xapool.experlog.com">XAPool</a>, e.g. with bean definitions
- * like the following:
+ * <p>A local JOTM instance is well-suited for working in conjunction with
+ * ObjectWeb's <a href="http://xapool.experlog.com">XAPool</a>, e.g. with bean
+ * definitions like the following:
  *
  * <p><code>
  * &lt;bean id="jotm" class="org.springframework.transaction.jta.JotmFactoryBean"/&gt;<br>
  * <br>
  * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"&gt;<br>
  * &nbsp;&nbsp;&lt;property name="userTransaction"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
- * &nbsp;&nbsp;&lt;property name="transactionManager"&gt;&lt;ref local="jotm"/&gt;&lt;/property&gt;<br>
  * &lt;/bean&gt;<br>
  * <br>
  * &lt;bean id="innerDataSource" class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;<br>
@@ -34,11 +34,12 @@ import org.springframework.beans.factory.FactoryBean;
  * <br>
  * &lt;bean id="dataSource" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource"&gt;<br>
  * &nbsp;&nbsp;&lt;property name="dataSource"&gt;&lt;ref local="innerDataSource"/&gt;&lt;/property&gt;<br>
+ * &nbsp;&nbsp;&lt;property name="maxSize"&gt;...&lt;/property&gt;<br>
  * &lt;/bean&gt;
  * </code>
  *
- * <p>Uses JOTM's static access method to obtain the JOTM Current, which
- * implements both UserTransaction and TransactionManager.
+ * <p>Uses JOTM's static access method to obtain the JOTM Current object, which
+ * implements both the UserTransaction and the TransactionManager interface.
  *
  * @author Juergen Hoeller
  * @since 21.01.2004
@@ -51,13 +52,14 @@ public class JotmFactoryBean implements FactoryBean {
 
 	public JotmFactoryBean() throws ClassNotFoundException, NoSuchMethodException,
 	    IllegalAccessException, InvocationTargetException, NamingException {
+
+		// check for already active JOTM instance
 		this.jotmCurrent = Current.getCurrent();
+
+		// if none found, create new local JOTM instance
 		if (this.jotmCurrent == null) {
 			new Jotm(true, false);
 			this.jotmCurrent = Current.getCurrent();
-			if (this.jotmCurrent == null) {
-				throw new IllegalStateException("JOTM initialized but no JOTM Current found");
-			}
 		}
 	}
 
