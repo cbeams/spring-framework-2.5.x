@@ -15,18 +15,23 @@
  */
 package org.springframework.rules.closure;
 
-import java.io.Serializable;
-
 import org.springframework.rules.NoArgClosure;
 
-public abstract class AbstractNoArgClosure implements NoArgClosure, Serializable {
+public abstract class NoArgBlock extends AbstractClosure implements NoArgClosure {
+
+    public final Object call(Object argument) {
+        return call();
+    }
+
     public Object call() {
-        return call(NULL_VALUE);
+        handle();
+        return NULL_VALUE;
     }
 
-    public Object call(Object argument) {
-        return doCallAction();
+    protected Object handle() {
+        throw new UnsupportedOperationException(
+                "You must override handle() for a block that returns no value, or "
+                        + "override call() for blocks that return a single value");
     }
 
-    protected abstract Object doCallAction();
 }

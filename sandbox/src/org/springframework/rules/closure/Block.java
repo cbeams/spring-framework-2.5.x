@@ -15,16 +15,16 @@
  */
 package org.springframework.rules.closure;
 
-import java.io.Serializable;
-
-import org.springframework.rules.Closure;
-
-public abstract class ClosureWithoutResult implements Closure, Serializable {
+public abstract class Block extends AbstractClosure {
     public Object call(Object argument) {
-        doCallAction(argument);
+        handle(argument);
         return NULL_VALUE;
     }
 
-    protected abstract void doCallAction(Object argument);
+    protected void handle(Object argument) {
+        throw new UnsupportedOperationException(
+                "You must override call(arg) for processing an arg with a return value, "
+                        + "or handle(arg) for processing a single argument with no return result.");
+    }
 
 }

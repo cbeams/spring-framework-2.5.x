@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.rules.Closure;
 import org.springframework.rules.Generator;
-import org.springframework.rules.closure.ClosureWithoutResult;
+import org.springframework.rules.closure.Block;
 import org.springframework.util.Assert;
 
 /**
@@ -54,8 +54,8 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                     .debug("Registering statically defined coded enums for class "
                             + clazz);
         }
-        new CodedEnumFieldValueGenerator(clazz).generate(new ClosureWithoutResult() {
-            protected void doCallAction(Object value) {
+        new CodedEnumFieldValueGenerator(clazz).run(new Block() {
+            protected void handle(Object value) {
                 add((CodedEnum)value);
             }
         });
@@ -78,7 +78,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
             this.clazz = clazz;
         }
 
-        public void generate(Closure fieldValueCallback) {
+        public void run(Closure fieldValueCallback) {
             Field[] fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];

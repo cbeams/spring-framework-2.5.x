@@ -15,11 +15,23 @@
  */
 package org.springframework.rules.closure;
 
-public abstract class NoArgClosureWithoutResult extends AbstractNoArgClosure {
-    protected Object doCallAction() {
-        doCallActionWithoutResult();
-        return NULL_VALUE;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.springframework.rules.Closure;
+import org.springframework.rules.support.AlgorithmsAccessorSupport;
+
+public abstract class AbstractClosure extends AlgorithmsAccessorSupport
+        implements Closure, Serializable {
+
+    public final void forEach(Collection collection) {
+        forEach(collection, this);
     }
 
-    protected abstract void doCallActionWithoutResult();
+    public final void forEach(Iterator it) {
+        forEach(it, this);
+    }
+
 }
+

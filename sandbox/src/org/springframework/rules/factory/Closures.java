@@ -17,8 +17,9 @@ package org.springframework.rules.factory;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
+import org.springframework.rules.Generator;
 import org.springframework.rules.closure.ClosureChain;
-import org.springframework.rules.closure.ConstrainedClosureWithoutResult;
+import org.springframework.rules.closure.ConstrainedBlock;
 
 /**
  * A factory for easing the construction and composition of functions.
@@ -45,7 +46,16 @@ public class Closures {
     }
 
     public Closure constrain(Closure closure, Constraint predicate) {
-        return new ConstrainedClosureWithoutResult(closure, predicate);
+        return new ConstrainedBlock(closure, predicate);
+    }
+
+    public Generator createFilteredGenerator(final Generator generator,
+            final Constraint constraint) {
+        return new Generator() {
+            public void run(Closure block) {
+                generator.run(constrain(block, constraint));
+            }
+        };
     }
 
 }

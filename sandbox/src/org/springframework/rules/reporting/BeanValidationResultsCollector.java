@@ -17,7 +17,7 @@ package org.springframework.rules.reporting;
 
 import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
-import org.springframework.rules.closure.ClosureWithoutResult;
+import org.springframework.rules.closure.Block;
 import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
 import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
 import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
@@ -55,8 +55,8 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         Assert.notNull(rules);
         setResultsBuilder(new BeanValidationResultsBuilder(bean));
         Algorithms.instance().forEach(rules.iterator(),
-                new ClosureWithoutResult() {
-                    public void doCallAction(Object beanPropertyConstraint) {
+                new Block() {
+                    public void handle(Object beanPropertyConstraint) {
                         collectPropertyResultsInternal((BeanPropertyConstraint)beanPropertyConstraint);
                     }
                 });

@@ -22,7 +22,7 @@ import org.springframework.rules.Closure;
  * 
  * @author Keith Donald
  */
-public class StringTrimmer implements Closure {
+public class StringTrimmer extends AbstractClosure {
     private static final StringTrimmer INSTANCE = new StringTrimmer();
 
     /**
@@ -37,8 +37,8 @@ public class StringTrimmer implements Closure {
     }
 
     /**
-     * Returns the shared StringTrimmer instance--this is possible as the default
-     * instance is immutable and stateless.
+     * Returns the shared StringTrimmer instance--this is possible as the
+     * default instance is immutable and stateless.
      * 
      * @return the shared instance
      */
@@ -49,6 +49,5 @@ public class StringTrimmer implements Closure {
     public String toString() {
         return "trim(arg)";
     }
-
 
 }

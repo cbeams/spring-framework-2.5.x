@@ -15,14 +15,13 @@
  */
 package org.springframework.rules.constraint;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.rules.Constraint;
-import org.springframework.rules.closure.ClosureWithoutResult;
+import org.springframework.rules.closure.Block;
 import org.springframework.rules.support.Algorithms;
 import org.springframework.util.Assert;
 
@@ -31,8 +30,7 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public abstract class CompoundConstraint implements Constraint,
-        Serializable {
+public abstract class CompoundConstraint extends AbstractConstraint {
     private List constraints = new ArrayList();
 
     /**
@@ -89,12 +87,11 @@ public abstract class CompoundConstraint implements Constraint,
      * @return A reference to this, to support chaining.
      */
     public CompoundConstraint addAll(List constraints) {
-        Algorithms.instance().forEach(constraints,
-                new ClosureWithoutResult() {
-                    public void doCallAction(Object o) {
-                        add((Constraint)o);
-                    }
-                });
+        Algorithms.instance().forEach(constraints, new Block() {
+            protected void handle(Object o) {
+                add((Constraint)o);
+            }
+        });
         return this;
     }
 
@@ -153,8 +150,7 @@ public abstract class CompoundConstraint implements Constraint,
                 return clazz.getClass().isAssignableFrom(o.getClass());
             }
         };
-        Object violator = Algorithms.instance().findFirst(constraints,
-                predicate);
+        Object violator = findFirst(constraints, predicate);
         if (violator != null) { throw new IllegalArgumentException(violator
                 .getClass()
                 + " class not allowed"); }

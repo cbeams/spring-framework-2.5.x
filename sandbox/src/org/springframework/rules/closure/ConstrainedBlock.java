@@ -23,22 +23,21 @@ import org.springframework.rules.Constraint;
  * 
  * @author keith
  */
-public class ConstrainedClosureWithoutResult extends ClosureWithoutResult {
+public class ConstrainedBlock extends Block {
     private Closure closure;
 
     private Constraint constraint;
 
-    public ConstrainedClosureWithoutResult(Closure procedure,
-            Constraint constraint) {
-        this.closure = procedure;
+    public ConstrainedBlock(Closure closure, Constraint constraint) {
+        this.closure = closure;
         this.constraint = constraint;
     }
 
     /**
-     * Will only invoke the procedure against the provided argument if the
+     * Will only invoke the wrapped closure against the provided argument if the
      * constraint permits; else no action will be taken.
      */
-    public void doCallAction(Object argument) {
+    protected void handle(Object argument) {
         if (constraint.test(argument)) {
             closure.call(argument);
         }

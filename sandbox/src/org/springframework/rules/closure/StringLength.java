@@ -23,7 +23,7 @@ import org.springframework.rules.Closure;
  * 
  * @author Keith Donald
  */
-public class StringLength implements Closure {
+public class StringLength extends AbstractClosure {
     private static final StringLength INSTANCE = new StringLength();
 
     /**
@@ -34,9 +34,7 @@ public class StringLength implements Closure {
      * @see org.springframework.rules.Closure#call(java.lang.Object)
      */
     public Object call(Object value) {
-        if (value == null) {
-            return new Integer(0);
-        }
+        if (value == null) { return new Integer(0); }
         return new Integer(String.valueOf(value).length());
     }
 
@@ -53,6 +51,5 @@ public class StringLength implements Closure {
     public String toString() {
         return "strLength(arg)";
     }
-
 
 }

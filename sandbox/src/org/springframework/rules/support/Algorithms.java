@@ -15,12 +15,14 @@
  */
 package org.springframework.rules.support;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
 import org.springframework.rules.Generator;
+import org.springframework.rules.closure.Block;
 import org.springframework.rules.factory.Closures;
 
 /**
@@ -30,15 +32,16 @@ import org.springframework.rules.factory.Closures;
  * @author Keith Donald
  */
 public class Algorithms {
-    private Closures functions = Closures.instance();
-
     private static final Algorithms INSTANCE = new Algorithms();
 
-    public Algorithms() {
-    }
+    private Closures closures = Closures.instance();
 
     public static Algorithms instance() {
         return INSTANCE;
+    }
+
+    public boolean any(Collection collection, Constraint constraint) {
+        return any(collection.iterator(), constraint);
     }
 
     /**
@@ -49,8 +52,27 @@ public class Algorithms {
      * @param constraint
      * @return true or false
      */
-    public boolean areAnyTrue(Collection collection, Constraint constraint) {
-        return findFirst(collection, constraint) != null;
+    public boolean any(Iterator it, Constraint constraint) {
+        return findFirst(it, constraint) != null;
+    }
+
+    public boolean all(Collection collection, Constraint constraint) {
+        return all(collection.iterator(), constraint);
+    }
+    
+    /**
+     * Returns true if any elements in the given collection meet the specified
+     * predicate condition.
+     * 
+     * @param collection
+     * @param constraint
+     * @return true or false
+     */
+    public boolean all(Iterator it, Constraint constraint) {
+        while (it.hasNext()) {
+            if (!constraint.test(it.next())) { return false; }
+        }
+        return true;
     }
 
     /**
@@ -64,11 +86,41 @@ public class Algorithms {
      * @return The first object match, or null if no match
      */
     public Object findFirst(Collection collection, Constraint constraint) {
-        for (Iterator i = collection.iterator(); i.hasNext();) {
-            Object o = i.next();
-            if (constraint.test(o)) { return o; }
+        return findFirst(collection.iterator(), constraint);
+    }
+
+    /**
+     * Find the first element in the collection matching the specified unary
+     * predicate.
+     * 
+     * @param collection
+     *            the collection
+     * @param constraint
+     *            the predicate
+     * @return The first object match, or null if no match
+     */
+    public Object findFirst(Iterator it, Constraint constraint) {
+        while (it.hasNext()) {
+            Object element = it.next();
+            if (constraint.test(element)) { return element; }
         }
         return null;
+    }
+
+    public Collection findAll(Collection collection, Constraint constraint) {
+        return findAll(collection.iterator(), constraint);
+    }
+
+    public Collection findAll(Iterator it, final Constraint constraint) {
+        final Collection results = new ArrayList();
+        Generator generator = closures.createFilteredGenerator(
+                new IteratorElementGenerator(it), constraint);
+        generator.run(new Block() {
+            protected void handle(Object element) {
+                results.add(element);
+            }
+        });
+        return results;
     }
 
     public void forEach(Collection collection, Closure closure) {
@@ -76,16 +128,7 @@ public class Algorithms {
     }
 
     public void forEach(Iterator it, Closure closure) {
-        new IteratorGeneratorAdapter(it).generate(closure);
-    }
-
-    public Generator select(final Generator generator,
-            final Constraint constraint) {
-        return new Generator() {
-            public void generate(Closure procedure) {
-                generator.generate(functions.constrain(procedure, constraint));
-            }
-        };
+        new IteratorElementGenerator(it).run(closure);
     }
 
 }
