@@ -158,15 +158,28 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Call this method on a new instance created by the no-arg constructor
 	 * to create an independent copy of the configuration from the other.
-	 * @param other DefaultProxyConfig to copy configuration from
+	 * @param other AdvisedSupport to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
+		copyConfigurationFrom(other, other.targetSource, other.advisors);
+	}
+
+	/**
+	 * Take interfaces and ProxyConfig configuration from the
+	 * other AdvisedSupport, but allow substitution of a fresh
+	 * TargetSource and interceptor chain
+	 * @param other other AdvisedSupport object to take
+	 * interfaces and ProxyConfig superclass configuration from
+	 * @param ts new TargetSource
+	 * @param pAdvisors new Advisor chain
+	 */
+	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource ts, List pAdvisors) {
 		copyFrom(other);
-		this.targetSource = other.targetSource;
+		this.targetSource = ts;
 		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
 		this.advisors = new LinkedList();
-		for (int i = 0; i < other.advisors.size(); i++) {
-			Advisor advice = (Advisor) other.advisors.get(i);
+		for (int i = 0; i < pAdvisors.size(); i++) {
+			Advisor advice = (Advisor) pAdvisors.get(i);
 			addAdvisor(advice);
 		}
 	}
