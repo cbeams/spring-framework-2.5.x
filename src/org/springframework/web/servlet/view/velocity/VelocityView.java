@@ -24,7 +24,6 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.io.VelocityWriter;
-import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.util.SimplePool;
 
@@ -58,14 +57,11 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.15 2003-12-12 19:43:08 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.16 2003-12-13 00:32:21 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
 public class VelocityView extends AbstractView {
-
-	/** Default encoding for the output stream */
-	public static final String DEFAULT_OUTPUT_ENCODING = "ISO-8859-1";
 
 	/** Default size for the Velocity writer pool */
 	public static final int DEFAULT_WRITER_POOL_SIZE = 40;
@@ -149,35 +145,47 @@ public class VelocityView extends AbstractView {
 			                                      "This bean may be given any name.", ex);
 		}
 
-		// TODO remove this dependence on RuntimeSingleton
-		this.encoding = RuntimeSingleton.getString(VelocityEngine.OUTPUT_ENCODING, DEFAULT_OUTPUT_ENCODING);
+		if (this.writerPool == null) {
+			this.writerPool = new SimplePool(DEFAULT_WRITER_POOL_SIZE);
+		}
 
-		// Check that we can get the template, even if we might subsequently get it again
+		this.encoding = (String) this.velocityEngine.getProperty(VelocityEngine.OUTPUT_ENCODING);
+		if (this.encoding == null) {
+			this.encoding = VelocityEngine.ENCODING_DEFAULT;
+		}
+
+		// check that we can get the template, even if we might subsequently get it again
 		loadTemplate();
 	}
 
 	/**
-	 * Load the Velocity template that is to be cached in this class.
+	 * Load the Velocity template to back this view.
 	 */
 	private void loadTemplate() throws ApplicationContextException {
-		String msg = "Velocity resource loader is '" + this.velocityEngine.getProperty("resource.loader") + "': ";
 		try {
 			this.velocityTemplate = this.velocityEngine.getTemplate(this.templateName);
 		}
 		catch (ResourceNotFoundException ex) {
-			msg += "Can't load Velocity template '" + this.templateName + "': is it available in the template directory?";
-			throw new ApplicationContextException(msg, ex);
-		} 
+			handleException("Can't load Velocity template '" + this.templateName +
+											"': is it available in the template directory?", ex);
+		}
 		catch (ParseErrorException ex) {
-			msg += "Error parsing Velocity template '" + this.templateName + "'";
-			throw new ApplicationContextException(msg, ex);
-		} 
+			handleException("Error parsing Velocity template '" + this.templateName + "'", ex);
+		}
 		catch (Exception ex) {
-			msg += "Unexpected error getting Velocity template '" + this.templateName + "'";
-			throw new ApplicationContextException(msg, ex);
+			handleException("Unexpected error getting Velocity template '" + this.templateName + "'", ex);
 		}
 	}
-	
+
+	/**
+	 * Re-throw the given exception as ApplicationContextException with proper message.
+	 */
+	private void handleException(String message, Exception ex) throws ApplicationContextException {
+		String actualMessage = "Velocity resource loader is '" +
+				this.velocityEngine.getProperty(VelocityEngine.RESOURCE_LOADER) + "': " + message;
+		throw new ApplicationContextException(actualMessage, ex);
+	}
+
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
 	                                       HttpServletResponse response) throws Exception {
 
