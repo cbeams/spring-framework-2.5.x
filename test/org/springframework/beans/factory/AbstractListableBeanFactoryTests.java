@@ -1,9 +1,3 @@
-/*
- * BeanWrapperTestSuite.java
- *
- * Created on 1 September 2001, 19:35
- */
-
 package org.springframework.beans.factory;
 
 import org.springframework.beans.TestBean;
@@ -18,8 +12,9 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	/** Subclasses must initialize this */
 	protected ListableBeanFactory getListableBeanFactory() {
 		BeanFactory bf = getBeanFactory();
-		if (!(bf instanceof ListableBeanFactory))
+		if (!(bf instanceof ListableBeanFactory)) {
 			throw new RuntimeException("ListableBeanFactory required");
+		}
 		return (ListableBeanFactory) bf;
 	}
 	
@@ -58,6 +53,11 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	public void testGetCountForFactoryClass() {
 		assertTrue("Should have 2 factories, not " + getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
 			getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
+	}
+
+	public void testContainsBeanDefinition() {
+		assertTrue(getListableBeanFactory().containsBeanDefinition("rod"));
+		assertTrue(getListableBeanFactory().containsBeanDefinition("roderick"));
 	}
 
 }

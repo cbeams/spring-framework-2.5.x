@@ -63,7 +63,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -439,6 +439,10 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	public String[] getBeanDefinitionNames(Class type) {
 		return getBeanFactory().getBeanDefinitionNames(type);
+	}
+
+	public boolean containsBeanDefinition(String name) {
+		return getBeanFactory().containsBeanDefinition(name);
 	}
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {

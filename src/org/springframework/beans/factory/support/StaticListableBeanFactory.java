@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Static factory that allows to register existing singleton instances programmatically.
  * @author Rod Johnson
  * @since 06-Jan-03
- * @version $Id: StaticListableBeanFactory.java,v 1.6 2003-12-04 18:44:21 jhoeller Exp $
+ * @version $Id: StaticListableBeanFactory.java,v 1.7 2003-12-11 18:20:45 jhoeller Exp $
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
@@ -89,6 +89,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 		}
 		return (String[]) matches.toArray(new String[matches.size()]);
+	}
+
+	public boolean containsBeanDefinition(String name) {
+		return this.beans.containsKey(name);
 	}
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {

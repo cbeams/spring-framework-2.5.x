@@ -28,7 +28,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.5 2003-11-21 15:34:32 jhoeller Exp $
+ * @version $Id: ListableBeanFactory.java,v 1.6 2003-12-11 18:20:44 jhoeller Exp $
  * @see org.springframework.beans.factory.support.BeanFactoryUtils
  */
 public interface ListableBeanFactory extends BeanFactory {
@@ -59,6 +59,14 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * (including subclasses), or an empty array if none
 	 */
 	String[] getBeanDefinitionNames(Class type);
+
+	/**
+	 * Check if this bean factory contains a bean definition with the given name.
+	 * Does not consider any hierarchy this factory may participate in.
+	 * @param name the name of the bean to look for
+	 * @return if this bean factory contains a bean definition with the given name
+	 */
+	boolean containsBeanDefinition(String name);
 
 	/**
 	 * Return the bean instances that match the given object type (including

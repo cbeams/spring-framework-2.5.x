@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.6 2003-12-10 08:54:35 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.7 2003-12-11 18:20:45 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -102,6 +102,10 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 		}
 		matches.addAll(Arrays.asList(getSingletonNames(type)));
 		return (String[]) matches.toArray(new String[matches.size()]);
+	}
+
+	public boolean containsBeanDefinition(String name) {
+		return this.beanDefinitionMap.containsKey(name);
 	}
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {
@@ -199,39 +203,26 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
-	public boolean containsBeanDefinition(String beanName) {
-		return this.beanDefinitionMap.containsKey(beanName);
-	}
-
-	/**
-	 * Subclasses or users should call this method to register new bean definitions
-	 * with this class. All other registration methods in this class use this method.
-	 * <p>This method isn't guaranteed to be threadsafe. It should be called
-	 * before any bean instances are accessed.
-	 * @param beanName name of the bean instance to register
-	 * @param beanDefinition definition of the bean instance to register
-	 * @throws BeanDefinitionStoreException in the bean definition is invalid
-	 */
-	public void registerBeanDefinition(String beanName, AbstractBeanDefinition beanDefinition)
+	public void registerBeanDefinition(String name, AbstractBeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 		try {
 			beanDefinition.validate();
 		}
 		catch (BeanDefinitionValidationException ex) {
-			throw new BeanDefinitionStoreException("Validation of bean definition with name '" + beanName + "' failed", ex);
+			throw new BeanDefinitionStoreException("Validation of bean definition with name '" + name + "' failed", ex);
 		}
-		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
+		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
 		if (oldBeanDefinition != null) {
 			if (!this.allowBeanDefinitionOverriding) {
 				throw new BeanDefinitionStoreException("Cannot register bean definition [" + beanDefinition + "] for bean '" +
-																							 beanName + "': there's already [" + oldBeanDefinition + "] bound");
+																							 name + "': there's already [" + oldBeanDefinition + "] bound");
 			}
 			else {
-				logger.info("Overriding bean definition for bean '" + beanName +
+				logger.info("Overriding bean definition for bean '" + name +
 										"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
 			}
 		}
-		this.beanDefinitionMap.put(beanName, beanDefinition);
+		this.beanDefinitionMap.put(name, beanDefinition);
 	}
 
 
