@@ -27,7 +27,7 @@ import org.springframework.binding.format.NumberFormatter;
 import org.springframework.binding.format.Style;
 import org.springframework.context.LocaleContext;
 import org.springframework.util.thread.ThreadCleanupBroadcaster;
-import org.springframework.util.thread.support.DefaultThreadLocalStorage;
+import org.springframework.util.thread.support.DefaultThreadLocalContext;
 
 public class ThreadLocalFormatterSource implements FormatterSource {
 
@@ -37,7 +37,7 @@ public class ThreadLocalFormatterSource implements FormatterSource {
 
 	private static final String DEFAULT_TIME_FORMATTER_KEY = "timeFormatter";
 
-	private DefaultThreadLocalStorage formatterStorage = new DefaultThreadLocalStorage();
+	private DefaultThreadLocalContext formatterStorage = new DefaultThreadLocalContext();
 
 	private LocaleContext localeContext;
 
