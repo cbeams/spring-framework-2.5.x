@@ -80,5 +80,7 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-2.0.1.jar"/>
+	<classpathentry kind="src" path="mock"/>
+	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
