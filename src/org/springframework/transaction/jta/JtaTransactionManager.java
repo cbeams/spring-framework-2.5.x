@@ -34,7 +34,7 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * <p>Transaction synchronization is active by default, as it will typically be
  * leveraged for transactional cache handling e.g. with Hibernate. Note that such
  * synchronization will only work when JtaTransactionManager actually drives the JTA
- * transactions. If taking part in existing transactions, e.g. in an EJB environment,
+ * transactions. If participating in existing transactions, e.g. in an EJB environment,
  * synchronization needs to be turned off to avoid dangling resource holders that
  * wait for afterTransactionCompletion callbacks.
  *
@@ -76,7 +76,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager {
 	 * A default one is used if not set.
 	 */
 	public final void setJndiTemplate(JndiTemplate jndiTemplate) {
-		if (this.jndiTemplate == null) {
+		if (jndiTemplate == null) {
 			throw new IllegalArgumentException("jndiTemplate must not be null");
 		}
 		this.jndiTemplate = jndiTemplate;
@@ -142,9 +142,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager {
 
 	/**
 	 * Initialize the given UserTransaction with the given isolation level.
-	 * <p>This standard JTA implementation simply ignores the isolation level.
-	 * To be overridden by server-specific subclasses that actually handle
-	 * the isolation level.
+	 * <p>This standard JTA implementation simply throws an exception in case
+	 * of any other isolation level than ISOLATION_DEFAULT. To be overridden
+	 * by server-specific subclasses that actually handle the isolation level.
 	 * @param ut UserTransaction instance representing the JTA transaction
 	 * @param isolationLevel the isolation level to set
 	 */
