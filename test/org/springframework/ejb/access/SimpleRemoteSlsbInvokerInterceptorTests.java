@@ -12,7 +12,6 @@ import javax.naming.NamingException;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
-import org.springframework.aop.attributes.MapAttributeRegistry;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 
@@ -92,7 +91,6 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 	
 		ProxyFactory pf = new ProxyFactory(new Class[] { RemoteInterface.class } );
-		pf.setAttributeRegistry(new MapAttributeRegistry());
 		pf.addInterceptor(si);
 		RemoteInterface target = (RemoteInterface) pf.getProxy();
 	
@@ -115,7 +113,6 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { RemoteInterface.class } );
-		pf.setAttributeRegistry(new MapAttributeRegistry());
 		pf.addInterceptor(si);
 		RemoteInterface target = (RemoteInterface) pf.getProxy();
 

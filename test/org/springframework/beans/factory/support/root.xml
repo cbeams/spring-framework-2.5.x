@@ -3,7 +3,10 @@
 
 <beans>
 
-	<bean id="defaultAttributeRegistry" class="org.springframework.aop.attributes.MapAttributeRegistry">
+	<!--
+		Just included for the count: not to mean anything in particular
+	-->
+	<bean id="something" class="org.springframework.aop.framework.DefaultInterceptionAdvice">
 
 	</bean>
 

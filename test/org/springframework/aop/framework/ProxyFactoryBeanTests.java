@@ -13,9 +13,13 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.IntroductionInterceptor;
+import org.springframework.aop.framework.support.DynamicMethodMatcherPointcutAdvice;
+import org.springframework.aop.framework.support.SimpleIntroductionAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.FatalBeanException;
@@ -33,7 +37,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.5 2003-11-04 21:38:22 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.6 2003-11-11 18:31:53 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -78,12 +82,12 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(test1.getAge(), test1_1.getAge());
 		ProxyConfig pc1 = (ProxyConfig) test1;
 		ProxyConfig pc2 = (ProxyConfig) test1_1;
-		assertEquals(pc1.getMethodPointcuts(), pc2.getMethodPointcuts());
-		int oldLength = pc1.getMethodPointcuts().size();
+		assertEquals(pc1.getAdvices(), pc2.getAdvices());
+		int oldLength = pc1.getAdvices().size();
 		DebugInterceptor di = new DebugInterceptor();
 		pc1.addInterceptor(1, di);
-		assertEquals(pc1.getMethodPointcuts(), pc2.getMethodPointcuts());
-		assertEquals(oldLength + 1, pc2.getMethodPointcuts().size());
+		assertEquals(pc1.getAdvices(), pc2.getAdvices());
+		assertEquals(oldLength + 1, pc2.getAdvices().size());
 		assertEquals(di.getCount(), 0);
 		test1.setAge(5);
 		assertEquals(test1_1.getAge(), test1.getAge());
@@ -153,7 +157,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	public void testCanGetFactoryReferenceAndManipulate() {
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
 		assertTrue(config.getExposeInvocation() == false);
-		assertTrue(config.getMethodPointcuts().size() == 2);
+		assertTrue(config.getAdvices().size() == 2);
 		
 		ITestBean tb = (ITestBean) factory.getBean("test1");
 		// no exception 
@@ -166,7 +170,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 				throw ex;
 			}
 		});
-		assertTrue(config.getMethodPointcuts().size() == 3);
+		assertTrue(config.getAdvices().size() == 3);
 		
 		tb = (ITestBean) factory.getBean("test1"); 
 		try {
@@ -195,13 +199,11 @@ public class ProxyFactoryBeanTests extends TestCase {
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
 		ti.setTime(time);
 		
-		// add to front of queue
-		int oldCount = config.getMethodPointcuts().size();
-		config.addInterceptor(0, ti);
+		// add to front of interceptor chain
+		int oldCount = config.getAdvices().size();
+		config.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
 		
-		
-		
-		assertTrue(config.getMethodPointcuts().size() == oldCount + 1);
+		assertTrue(config.getAdvices().size() == oldCount + 1);
 	
 		TimeStamped ts = (TimeStamped) factory.getBean("test1");
 		assertTrue(ts.getTimeStamp() == time);
@@ -209,7 +211,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Can remove
 		config.removeInterceptor(ti);
 
-		assertTrue(config.getMethodPointcuts().size() == oldCount);
+		assertTrue(config.getAdvices().size() == oldCount);
 	
 		try {
 			// Existing reference will fail
@@ -230,7 +232,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeInterceptor(new DebugInterceptor());
 	
-		assertTrue(config.getMethodPointcuts().size() == oldCount);
+		assertTrue(config.getAdvices().size() == oldCount);
 	
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
@@ -261,17 +263,17 @@ public class ProxyFactoryBeanTests extends TestCase {
 		long time = 666L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor();
 		ti.setTime(time);
-		// add to front of queue
-		int oldCount = config.getMethodPointcuts().size();
-		config.addInterceptor(0, ti);
-		assertTrue(config.getMethodPointcuts().size() == oldCount + 1);
+		// Add to head of interceptor chain
+		int oldCount = config.getAdvices().size();
+		config.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
+		assertTrue(config.getAdvices().size() == oldCount + 1);
 		
 		TimeStamped ts = (TimeStamped) factory.getBean("test2");
 		assertEquals(time, ts.getTimeStamp());
 		
 		// Can remove
 		config.removeInterceptor(ti);
-		assertTrue(config.getMethodPointcuts().size() == oldCount);
+		assertTrue(config.getAdvices().size() == oldCount);
 		
 		// Check no change on existing object reference
 		assertTrue(ts.getTimeStamp() == time);
@@ -285,7 +287,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeInterceptor(new DebugInterceptor());
-		assertTrue(config.getMethodPointcuts().size() == oldCount);
+		assertTrue(config.getAdvices().size() == oldCount);
 		
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
@@ -394,7 +396,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		ProxyFactoryBean pfb = (ProxyFactoryBean) factory.getBean("&validGlobals");
 		// 2 globals + 2 explicit
-		assertTrue(pfb.getMethodPointcuts().size() == 4);
+		assertTrue(pfb.getAdvices().size() == 4);
 		
 		ApplicationListener l = (ApplicationListener) factory.getBean("validGlobals");
 		agi = (AddedGlobalInterface) l;
@@ -413,7 +415,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
-	public static class PointcutForVoid implements DynamicMethodPointcut {
+	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAdvice {
 		
 		public static List methodNames = new LinkedList();
 		
@@ -421,26 +423,19 @@ public class ProxyFactoryBeanTests extends TestCase {
 			methodNames.clear();
 		}
 		
-		public MethodInterceptor getInterceptor() {
-			return new MethodInterceptor() {
+		public PointcutForVoid() {
+			super( new MethodInterceptor() {
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					methodNames.add(invocation.getMethod().getName());
 					return invocation.proceed();
 				}
-			};
+			});
 		}
 		
 		/** Should fire only if it returns null */
-		public boolean applies(Method m, Object[] args, AttributeRegistry attributeRegistry) {
+		public boolean matches(Method m, Class targetClass, Object[] args) {//, AttributeRegistry attributeRegistry) {
 			//System.out.println(mi.getMethod().getReturnType());
 			return m.getReturnType() == Void.TYPE;
-		}
-
-		/**
-		 * @see org.springframework.aop.framework.DynamicMethodPointcut#couldApply(java.lang.reflect.Method, org.aopalliance.intercept.AttributeRegistry)
-		 */
-		public boolean applies(Method m, Class clazz, AttributeRegistry attributeRegistry) {
-			return true;
 		}
 
 	}
@@ -458,8 +453,8 @@ public class ProxyFactoryBeanTests extends TestCase {
 	 * NB: Add only via global interceptors in XML file.
 	 */
 	public static class GlobalAspectInterfaceInterceptor implements IntroductionInterceptor {
-		public Class[] getIntroducedInterfaces() {
-			return new Class[] { AddedGlobalInterface.class};
+		public boolean implementsInterface(Class intf) {
+			return intf.equals(AddedGlobalInterface.class);
 		}
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			//System.out.println("GlobalAspectInterfaceInterceptor.invoke");
@@ -467,6 +462,33 @@ public class ProxyFactoryBeanTests extends TestCase {
 				return new Integer(-1);
 			return mi.proceed();
 		}
+	}
+	
+	public static class GlobalIntroductionAdvice implements IntroductionAdvice {
+		
+		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
+
+		/**
+		 * @see org.springframework.aop.IntroductionAdvice#getClassFilter()
+		 */
+		public ClassFilter getClassFilter() {
+			return ClassFilter.TRUE;
+		}
+
+		/**
+		 * @see org.springframework.aop.IntroductionAdvice#getIntroductionInterceptor()
+		 */
+		public IntroductionInterceptor getIntroductionInterceptor() {
+			return this.gi;
+		}
+
+		/**
+		 * @see org.springframework.aop.IntroductionAdvice#getInterfaces()
+		 */
+		public Class[] getInterfaces() {
+			return new Class[] { AddedGlobalInterface.class };
+		}
+		
 	}
 	
 }

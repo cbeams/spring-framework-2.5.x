@@ -5,14 +5,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aopalliance.intercept.AttributeRegistry;
-import org.springframework.aop.framework.StaticMethodPointcut;
+import org.springframework.aop.Advice;
+import org.springframework.aop.InterceptionAdvice;
+import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.Pointcut;
 
 /**
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.4 2003-10-25 18:45:51 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.5 2003-11-11 18:31:51 johnsonr Exp $
  */
 public class AopUtils {
 
@@ -76,13 +78,17 @@ public class AopUtils {
 	 * This is an important test as it can be used to optimize
 	 * out a pointcut for a class
 	 * @param pc pc static or dynamic pointcut
-	 * @param ar AttributeRegistry
 	 * @param targetClass class we're testing
 	 * @param proxyInterfaces proxy interfaces. If null, all methods
 	 * on class may be proxied
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(StaticMethodPointcut pc, AttributeRegistry ar, Class targetClass, Class[] proxyInterfaces) {
+	public static boolean canApply(Pointcut pc, Class targetClass, Class[] proxyInterfaces) {
+		if (!pc.getClassFilter().matches(targetClass)) {
+			return false;
+		}
+		
+		// It may apply to the class
 		// Check whether it can apply on any method
 		// Checks public methods, including inherited methods
 		Method[] methods = targetClass.getMethods();
@@ -93,10 +99,19 @@ public class AopUtils {
 			if (proxyInterfaces != null && !methodIsOnOneOfTheseInterfaces(m, proxyInterfaces)) {
 				continue;
 			}
-			if (pc.applies(m, targetClass, ar))
+			if (pc.getMethodMatcher().matches(m, targetClass))
 				return true;
 		}
 		return false;
+	}
+	
+	public static boolean canApply(Advice advice, Class targetClass, Class[] proxyInterfaces) {
+		if (advice instanceof IntroductionAdvice) {
+			return ((IntroductionAdvice) advice).getClassFilter().matches(targetClass);
+		}
+		
+		InterceptionAdvice interceptionAdvice = (InterceptionAdvice) advice;
+		return canApply(interceptionAdvice.getPointcut(), targetClass, proxyInterfaces);
 	}
 
 }

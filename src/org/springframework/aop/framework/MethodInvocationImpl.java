@@ -18,16 +18,18 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.*;
+import org.springframework.aop.framework.support.*;
 
 
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.2 2003-10-25 18:45:35 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.3 2003-11-11 18:31:52 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
-	/** 
+	/**  
 	 * Interface this invocation is against.
 	 * May not be the same as the method's declaring interface. 
 	 */
@@ -53,7 +55,6 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 */
 	private HashMap resources;
 	
-	private final AttributeRegistry attributeRegistry;
 	
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
@@ -67,9 +68,9 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 */
 	public MethodInvocationImpl(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
-					List pointcuts, AttributeRegistry attributeRegistry) {
-		if (pointcuts == null || pointcuts.size() == 0) 
-			throw new AopConfigException("Must provide pointcuts");				
+					List advices) {
+		if (advices == null || advices.size() == 0) 
+			throw new AopConfigException("Must provide advices");				
 						
 		this.proxy = proxy;
 		this.targetInterface = targetInterface;
@@ -81,26 +82,21 @@ public class MethodInvocationImpl implements MethodInvocation {
 		// TODO make more efficient. Could just hold indices in an int array
 		// Could cache static pointcut decisions
 		this.interceptors = new LinkedList();
-		for (Iterator iter = pointcuts.iterator(); iter.hasNext();) {
-			Object pc = iter.next();
-			if (pc instanceof DynamicMethodPointcut) {
-				DynamicMethodPointcut dpc = (DynamicMethodPointcut) pc;
-				if (dpc.applies(m, targetClass, attributeRegistry) && dpc.applies(m, arguments, attributeRegistry)) {
-					this.interceptors.add(dpc.getInterceptor());
+		for (Iterator iter = advices.iterator(); iter.hasNext();) {
+			Object advice = iter.next();
+			if (advice instanceof InterceptionAdvice) {
+				InterceptionAdvice ia = (InterceptionAdvice) advice;
+				if (Pointcuts.matches(ia.getPointcut(), m, targetClass, arguments)) {
+					this.interceptors.add(ia.getInterceptor());
 				}
 			}
-			else if (pc instanceof StaticMethodPointcut) {
-				StaticMethodPointcut spc = (StaticMethodPointcut) pc;
-				if (spc.applies(m, targetClass, attributeRegistry)) {
-					this.interceptors.add(spc.getInterceptor());
+			else if (advice instanceof IntroductionAdvice) {
+				IntroductionAdvice ia = (IntroductionAdvice) advice;
+				if (ia.getClassFilter().matches(targetClass)) {
+					this.interceptors.add(ia.getIntroductionInterceptor());
 				}
 			}
-			else {
-				throw new AspectException("Unknown pointcut type: " + pc.getClass());
-			}
-		}
-		
-		this.attributeRegistry = attributeRegistry;
+		} 
 	}
 	
 	
@@ -228,7 +224,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#getAttributeRegistry()
 	 */
 	public AttributeRegistry getAttributeRegistry() {
-		return this.attributeRegistry;
+		throw new UnsupportedOperationException("Likely to be removed from AOP Alliance API");
 	}
 
 	public void setTarget(Object object) {

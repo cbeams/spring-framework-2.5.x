@@ -8,8 +8,7 @@ package org.springframework.aop.framework;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.Interceptor;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.support.SimpleIntroductionAdvice;
 import org.springframework.aop.interceptor.AbstractQaInterceptor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.IOther;
@@ -22,7 +21,7 @@ import org.springframework.util.StringUtils;
  * Also tests DefaultProxyConfig superclass
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -85,7 +84,7 @@ public class ProxyFactoryTests extends TestCase {
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
-		factory.addInterceptor(0, ti);
+		factory.addAdvice(0, new SimpleIntroductionAdvice(ti, TimeStamped.class));
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
@@ -94,46 +93,6 @@ public class ProxyFactoryTests extends TestCase {
 		assertTrue(ts.getTimeStamp() == t);
 		// Shouldn't fail;
 		 ((IOther) ts).absquatulate();
-	}
-	
-	
-	/**
-	 * Test that we can't add another interceptor in a chain
-	 * that already has a proxy interceptor.
-	 * Note that we can end a chain with a non proxy interceptor.
-	 *
-	 */
-	public void testCantAddInterceptorsAfterProxyInterceptor() {
-		TestBean raw = new TestBean();
-		ProxyFactory factory = new ProxyFactory(raw);
-		assertTrue(factory.getMethodPointcuts().size() == 1);
-		//assertTrue(factory.getMethodPointcuts().get(0) instanceof InvokerInterceptor);
-		try {
-			factory.addInterceptor(new DebugInterceptor());
-			fail("Shouldn't be able to add an interface after a proxy interceptor");
-		}
-		catch (AopConfigException ex) {
-			// Ok
-		}
-		
-		// Should be able to continue to use it normally
-		// despite the attempt to add an interceptor invalidly
-		factory.addInterceptor(0, new DebugInterceptor());
-		factory.addInterceptor(1, new MethodInterceptor() {
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				// Check it was invoked in correct position
-				// Index must be this index now
-				//assertTrue("Index should be 1, not " + mi.getCurrentInterceptorIndex(), mi.getCurrentInterceptorIndex() == 1);
-				Object ret = mi.proceed();
-				// Index must have been incremented following this call
-				//TODO no longer possible with AOP Alliance
-				//assertTrue(mi.getCurrentInterceptorIndex() == 2);
-				return ret;
-			}
-		});
-		
-		ITestBean tb = (ITestBean) factory.getProxy();
-		assertTrue(tb.getAge() == raw.getAge());
 	}
 	
 	public void testCanOnlyAddMethodInterceptors() {

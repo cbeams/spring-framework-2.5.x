@@ -10,7 +10,6 @@ import javax.naming.NamingException;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
-import org.springframework.aop.attributes.MapAttributeRegistry;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 
@@ -84,7 +83,6 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 	
 		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterface.class } );
-		pf.setAttributeRegistry(new MapAttributeRegistry());
 		pf.addInterceptor(si);
 		LocalInterface target = (LocalInterface) pf.getProxy();
 	
@@ -107,7 +105,6 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterface.class } );
-		pf.setAttributeRegistry(new MapAttributeRegistry());
 		pf.addInterceptor(si);
 		LocalInterface target = (LocalInterface) pf.getProxy();
 

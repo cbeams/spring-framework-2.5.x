@@ -52,7 +52,7 @@
 				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
-		<property name="methodPointcut">
+		<property name="pointcut">
 			<ref local="txnInvocationCounterPointcut"/>
 		</property>
 		<property name="preInterceptors">
@@ -67,7 +67,9 @@
 		</property>
 	</bean>
 
-	<bean id="txnInvocationCounterPointcut" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"/>
+	<bean id="txnInvocationCounterPointcut" 
+		class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"
+	/>
 
 	<bean id="preInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
 

@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.3 2003-11-07 15:29:25 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.4 2003-11-11 18:31:36 johnsonr Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -76,7 +76,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public TransactionInterceptor() {
 		// Set default properties, which may be changed later
-		this.transactionAttributeSource = new AttributeRegistryTransactionAttributeSource();
+		this.transactionAttributeSource = new AttributesTransactionAttributeSource();
 	}
 
 	/**

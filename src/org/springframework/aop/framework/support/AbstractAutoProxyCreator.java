@@ -5,14 +5,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.aop.Advice;
 import org.springframework.aop.framework.InvokerInterceptor;
-import org.springframework.aop.framework.MethodPointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -39,7 +37,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.12 2003-11-07 09:16:25 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.13 2003-11-11 18:31:51 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -66,7 +64,6 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 
 	private boolean proxyInterfacesOnly = true;
 	
-	private AttributeRegistry attributeRegistry;
 
 	public final void setOrder(int order) {
 	  this.order = order;
@@ -84,13 +81,6 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 		this.interceptors = interceptors;
 	}
 	
-	public void setAttributeRegistry(AttributeRegistry attributeRegistry) {
-		this.attributeRegistry = attributeRegistry;
-	}
-	
-	protected AttributeRegistry getAttributeRegistry() {
-		return this.attributeRegistry;
-	}
 
 	/**
 	 * Set whether the common interceptors should be applied before
@@ -119,15 +109,12 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 		
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
-		if (MethodPointcut.class.isAssignableFrom(bean.getClass()) ||
-				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
-				AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass()) 
-			) {
+		if (isInfrastructureClass(bean, name) || shouldSkip(bean, name)) {
 			logger.debug("Did not attempt to autoproxy infrastructure class '" + bean.getClass() + "'");
 			return bean;
 		}
 		
-		Object[] specificInterceptors = getInterceptorsAndPointcutsForBean(bean, name);
+		Object[] specificInterceptors = getInterceptorsAndAdviceForBean(bean, name);
 		if (specificInterceptors != null) {
 			List allInterceptors = new ArrayList();
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -145,14 +132,16 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 										" common interceptors and " + specificInterceptors.length + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
-			proxyFactory.setAttributeRegistry(this.attributeRegistry);
+			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
-				Object interceptor = it.next();
-				if (interceptor instanceof MethodPointcut) {
-					proxyFactory.addMethodPointcut((MethodPointcut) interceptor);
+				Object interceptorOrAdvice = it.next();
+				if (interceptorOrAdvice instanceof Advice) {
+					//System.err.println("Found advice " + interceptorOrAdvice);
+					proxyFactory.addAdvice((Advice) interceptorOrAdvice);
 				}
-				else if (interceptor instanceof Interceptor) {
-					proxyFactory.addInterceptor((Interceptor) interceptor);
+				else if (interceptorOrAdvice instanceof Interceptor) {
+					//System.err.println("Found interceptor " + interceptorOrAdvice);
+					proxyFactory.addInterceptor((Interceptor) interceptorOrAdvice);
 				}
 			}
 			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
@@ -172,6 +161,22 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 		else {
 			return bean;
 		}
+	}
+	
+	/**
+	 * Subclasses can override this to 
+	 * @param bean
+	 * @param name
+	 * @return
+	 */
+	private boolean isInfrastructureClass(Object bean, String name) {
+		return Advice.class.isAssignableFrom(bean.getClass()) ||
+			MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
+			AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
+	}
+	
+	protected boolean shouldSkip(Object bean, String name) {
+		return false;
 	}
 
 	/**
@@ -201,7 +206,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndPointcutsForBean(Object bean, String beanName)
+	protected abstract Object[] getInterceptorsAndAdviceForBean(Object bean, String beanName)
 	    throws BeansException;
 
 }

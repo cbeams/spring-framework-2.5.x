@@ -6,14 +6,16 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedList;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.AttributeRegistry;
 import org.easymock.MockControl;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.metadata.Attributes;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -27,7 +29,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * testing the helper implementation.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TransactionInterceptorTests extends TestCase {
 
@@ -44,12 +46,12 @@ public class TransactionInterceptorTests extends TestCase {
 
 		//TransactionAttribute txatt =
 
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
-		r.getAttributes(ITestBean.class);
-		arControl.setReturnValue(null);
-		r.getAttributes(ITestBean.class.getMethod("getName", null));
-		arControl.setReturnValue(null);
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes attributes = (Attributes) arControl.getMock();
+		attributes.getAttributes(ITestBean.class);
+		arControl.setReturnValue(Collections.EMPTY_LIST);
+		attributes.getAttributes(ITestBean.class.getMethod("getName", null));
+		arControl.setReturnValue(Collections.EMPTY_LIST);
 		arControl.replay();
 
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -61,10 +63,12 @@ public class TransactionInterceptorTests extends TestCase {
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
-		assertTrue(ptm == ti.getTransactionManager());
+		assertEquals(ptm, ti.getTransactionManager());
+		TransactionAttributeSource tas = new AttributesTransactionAttributeSource(attributes);
+		ti.setTransactionAttributeSource(tas);
+		assertEquals(tas, ti.getTransactionAttributeSource());
 
 		ProxyFactory pf = new ProxyFactory(tb);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 
@@ -83,10 +87,10 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
-		r.getAttributes(m);
-		arControl.setReturnValue(new Object[] { txatt }, 1);
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes attributes = (Attributes) arControl.getMock();
+		attributes.getAttributes(m);
+		arControl.setReturnValue(Collections.singletonList(txatt), 1);
 		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
@@ -102,9 +106,9 @@ public class TransactionInterceptorTests extends TestCase {
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSource(new AttributesTransactionAttributeSource(attributes));
 
 		ProxyFactory pf = new ProxyFactory(tb);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 
@@ -124,10 +128,10 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
-		r.getAttributes(m);
-		arControl.setReturnValue(new Object[] { txatt}, 1);
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes attributes = (Attributes) arControl.getMock();
+		attributes.getAttributes(m);
+		arControl.setReturnValue(Collections.singletonList(txatt), 1);
 		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
@@ -150,11 +154,11 @@ public class TransactionInterceptorTests extends TestCase {
 		};
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSource(new AttributesTransactionAttributeSource(attributes));
 
 		ProxyFactory pf = new ProxyFactory(tb);
 		// Need to use programmatic rollback
 		pf.setExposeInvocation(true);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 
@@ -216,10 +220,10 @@ public class TransactionInterceptorTests extends TestCase {
 		};
 
 		Method m = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes r = (Attributes) arControl.getMock();
 		r.getAttributes(m);
-		arControl.setReturnValue(new Object[] { txatt }, 1);
+		arControl.setReturnValue(Collections.singletonList(txatt), 1);
 		arControl.replay();
 
 		TransactionStatus status = new TransactionStatus(null, false);
@@ -248,9 +252,9 @@ public class TransactionInterceptorTests extends TestCase {
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSource(new AttributesTransactionAttributeSource(r));
 
 		ProxyFactory pf = new ProxyFactory(tb);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 
@@ -280,10 +284,10 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("getName", null);
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
-		r.getAttributes(m);
-		arControl.setReturnValue(new Object[] { txatt }, 1);
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes attributes = (Attributes) arControl.getMock();
+		attributes.getAttributes(m);
+		arControl.setReturnValue(Collections.singletonList(txatt), 1);
 		arControl.replay();
 
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -301,9 +305,9 @@ public class TransactionInterceptorTests extends TestCase {
 		};
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSource(new AttributesTransactionAttributeSource(attributes));
 
 		ProxyFactory pf = new ProxyFactory(tb);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 
@@ -331,15 +335,15 @@ public class TransactionInterceptorTests extends TestCase {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
 		Method m = ITestBean.class.getMethod("setName", new Class[] { String.class} );
-		MockControl arControl = MockControl.createControl(AttributeRegistry.class);
-		AttributeRegistry r = (AttributeRegistry) arControl.getMock();
-		r.getAttributes(m);
-		arControl.setReturnValue(new Object[] { txatt }, 1);
+		MockControl arControl = MockControl.createControl(Attributes.class);
+		Attributes attributes = (Attributes) arControl.getMock();
+		attributes.getAttributes(m);
+		arControl.setReturnValue(Collections.singletonList(txatt), 1);
 		Method m2 = ITestBean.class.getMethod("getName", null);
-		r.getAttributes(ITestBean.class);
-		arControl.setReturnValue(null);
-		r.getAttributes(m2);
-		arControl.setReturnValue(null);
+		attributes.getAttributes(ITestBean.class);
+		arControl.setReturnValue(new LinkedList());
+		attributes.getAttributes(m2);
+		arControl.setReturnValue(new LinkedList());
 		arControl.replay();
 
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -356,9 +360,9 @@ public class TransactionInterceptorTests extends TestCase {
 		TestBean tb = new TestBean();
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
+		ti.setTransactionAttributeSource(new AttributesTransactionAttributeSource(attributes));
 
 		ProxyFactory pf = new ProxyFactory(tb);
-		pf.setAttributeRegistry(r);
 		pf.addInterceptor(0, ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
 

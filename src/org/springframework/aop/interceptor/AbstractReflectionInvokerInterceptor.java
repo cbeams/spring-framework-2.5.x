@@ -12,8 +12,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.ProxyInterceptor;
 import org.springframework.aop.framework.MethodInvocationImpl;
-import org.springframework.aop.framework.ProxyInterceptor;
 
 /**
  * Abstract implementation of Interceptor interface that 
@@ -25,7 +25,7 @@ import org.springframework.aop.framework.ProxyInterceptor;
  * from on a simple object reference, obtained from a pool or
  * held in a ThreadLocal. 
  * @author Rod Johnson
- * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.2 2003-10-07 09:35:58 johnsonr Exp $
+ * @version $Id: AbstractReflectionInvokerInterceptor.java,v 1.3 2003-11-11 18:31:53 johnsonr Exp $
  */
 public abstract class AbstractReflectionInvokerInterceptor implements MethodInterceptor, ProxyInterceptor {
 	

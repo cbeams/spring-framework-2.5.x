@@ -12,17 +12,15 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.AspectException;
-import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.attributes.MapAttributeRegistry;
 import org.springframework.beans.TestBean;
 
 /**
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -44,51 +42,48 @@ new Attrib4jAttributeRegistry());
 	}
 
 	public void testNullInterceptor() throws Exception {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		try {
 				MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, null, // could customize here
-	r);
+		m, null, null // could customize here
+	);
 			fail("Shouldn't be able to create methodInvocationImpl with null interceptors");
 		} catch (AopConfigException ex) {
 		}
 	}
 
 	public void testEmptyInterceptorList() throws Exception {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		try {
 				MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, new LinkedList(), // list
-	r);
+		m, null, new LinkedList() // list
+	);
 			fail("Shouldn't be able to create methodInvocationImpl with no interceptors");
 		} catch (AopConfigException ex) {
 		}
 	}
 
 	public void testValidInvocation() throws Throwable {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List is = new LinkedList();
-		is.add(new AlwaysInvoked(new MethodInterceptor() {
+		is.add(new DefaultInterceptionAdvice(new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
 			}
 		}));
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is, // list
-	r);
+		m, null, is // list
+	);
 		Object rv = invocation.proceed();
 		assertTrue("correct response", rv == returnValue);
 	}
+	
 
 	public void testLimits() throws Throwable {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
@@ -98,13 +93,12 @@ new Attrib4jAttributeRegistry());
 				return returnValue;
 			}
 		};
-		is.add(new AlwaysInvoked(interceptor));
+		is.add(new DefaultInterceptionAdvice(interceptor));
 
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is, // list
-	r);
+		m, null, is // list
+	);
 		assertTrue(invocation.getArgumentCount() == 0);
-		assertTrue(invocation.getAttributeRegistry() == r);
 		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
 		assertTrue(invocation.getInterceptor(0) == interceptor);
 		Object rv = invocation.proceed();
@@ -132,20 +126,19 @@ new Attrib4jAttributeRegistry());
 	}
 
 	public void testAttachments() throws Throwable {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List is = new LinkedList();
-		is.add(new AlwaysInvoked(new MethodInterceptor() {
+		is.add(new DefaultInterceptionAdvice(new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
 			}
 		}));
 
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, null, m.getDeclaringClass(), //?
-		m, null, is, // list
-	r);
+		m, null, is // list
+	);
 
 		assertTrue("no bogus attachment", invocation.getAttachment("bogus") == null);
 		String name = "foo";
@@ -163,7 +156,6 @@ new Attrib4jAttributeRegistry());
 	 * @throws Throwable
 	 */
 	public void testToStringDoesntHitTarget() throws Throwable {
-		AttributeRegistry r = new MapAttributeRegistry();
 		Object target = new TestBean() {
 			public String toString() {
 				throw new UnsupportedOperationException("toString");
@@ -171,13 +163,13 @@ new Attrib4jAttributeRegistry());
 		};
 		final Object returnValue = new Object();
 		List is = new LinkedList();
-		is.add(new AlwaysInvoked(new InvokerInterceptor(target)));
+		is.add(new DefaultInterceptionAdvice(new InvokerInterceptor(target)));
 
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
 			MethodInvocationImpl invocation = new MethodInvocationImpl(proxy, target, m.getDeclaringClass(), //?
-		m, null, is, // list
-	r);
+		m, null, is // list
+	);
 
 		// if it hits target the test will fail with the UnsupportedOpException
 		// in the inner class above

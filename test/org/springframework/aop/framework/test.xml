@@ -139,7 +139,7 @@
 		Will add aspect interface to all beans exposing globals
 	-->
 	<bean id="global_aspectInterface"
-		class="org.springframework.aop.framework.ProxyFactoryBeanTests$GlobalAspectInterfaceInterceptor">
+		class="org.springframework.aop.framework.ProxyFactoryBeanTests$GlobalIntroductionAdvice">
 	</bean>
 	
 	<bean id="target2"
