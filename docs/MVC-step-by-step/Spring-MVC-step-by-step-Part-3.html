@@ -550,8 +550,15 @@ public class PriceIncreaseValidator implements Validator {
 </TABLE>
 <P>Now we need to add an entry in the springapp-servlet.xml file to
 define the new form and controller. We define properties for command
-object and validator as well as the view that is used for the form
-and a view where output will go after successful form processing.</P>
+object and validator.  We also specify two views, one that is used for the form
+and one that we will go to after successful form processing.  The latter which is called the
+success view can be of two types.  It can be a regular view reference that is forwarded to
+one of our JSP pages.  One disadvantage with this approach is, that if the user refreshes the page,
+the form data is submitted again, and you would end up with a double priceincrease.  An alternative 
+way is to use a redirect, where a response is sent back to the users browser instructing it to redirect 
+to a new url.  The url we use in this case can't be one of our JSP pages, since they are hidden from direct access.  
+It has to be a url that is externally reachable.  I have choosen to use 'hello.htm' as my redirect url.  This
+url maps to the 'hello.jsp' page, so this should work nicely.</P>
 <TABLE WIDTH=900 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=890>
 	<TR>
@@ -587,7 +594,7 @@ and a view where output will go after successful form processing.</P>
 <FONT COLOR="#800000">        &lt;property name=&quot;commandClass&quot;&gt;&lt;value&gt;bus.PriceIncrease&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;validator&quot;&gt;&lt;ref bean=&quot;priceIncreaseValidator&quot;/&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;formView&quot;&gt;&lt;value&gt;priceincrease&lt;/value&gt;&lt;/property&gt;</FONT>
-<FONT COLOR="#800000">        &lt;property name=&quot;successView&quot;&gt;&lt;value&gt;hello&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#800000">        &lt;property name=&quot;successView&quot;&gt;&lt;value&gt;hello.htm&lt;/value&gt;&lt;/property&gt;</FONT>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManager&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodMan&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
@@ -645,8 +652,8 @@ and a view where output will go after successful form processing.</P>
 <P STYLE="margin-bottom: 0in">Next, let's take a look at the
 controller for this form. The onSubmit method gets control and does
 some logging before it calls the increasePrice method on the
-ProductManager object. It then returns a ModelAndView to the
-successView.</P>
+ProductManager object. It then returns a ModelAndView passing in a 
+new instance of a RedirectView created using the url for the successView.</P>
 <TABLE WIDTH=876 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=866>
 	<TR>
@@ -699,7 +706,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
         myModel.put(&quot;now&quot;, now);
         myModel.put(&quot;products&quot;, getProductManager().getProducts());
 
-        return new ModelAndView(getSuccessView(), &quot;model&quot;, myModel);
+        return new ModelAndView(new RedirectView(getSuccessView()));
     }
 
     protected Object formBackingObject(HttpServletRequest request) throws ServletException {
