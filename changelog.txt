@@ -13,27 +13,41 @@ Package org.springframework.aop
 * adapted AdvisedSupport to keep the order of proxy interfaces, to create JDK proxy with specified order of interfaces
 
 Package org.springframework.beans
+* ClassEditor trims class name strings and converts empty strings into null values
 * renamed FactoryBeanCircularReferenceException to FactoryBeanNotInitializedException, reflecting general causes
 
 Package org.springframework.context
 * AbstractApplicationContext uses new DelegatingMessageSource as placeholder, to avoid StaticMessageSource side effects
+* added overloaded "registerSingleton"/"registerPrototype" methods without property values to StaticApplicationContext
 
 Package org.springframework.core
 * fixed FileSystemResource's "createRelative" to correctly apply a given relative path when starting from a directory
 
 Package org.springframework.jdbc
+* DataSourceUtils only executes Connection cleanup in "beforeCompletion" synchronization if there are no open references
+* added C3P0NativeJdbcExtractor for C3P0 0.8.5 or later (for earlier C3P0 versions, use SimpleNativeJdbcExtractor)
 * added "maxRows" bean property to JdbcTemplate, allowing to specify the maximum number of rows to be fetched
 * added "fetchSize" and "maxRows" bean properties to RdbmsOperation, passing the values to the internal JdbcTemplate
 
 Package org.springframework.mock
+* upgraded MockHttpServletRequest to Servlet API 2.4 (added getRemotePort, getLocalName, getLocalAddr, getLocalPort)
+* upgraded MockPageContext to JSP API 2.0 (added getExpressionEvaluator, getVariableResolver, overloaded include)
+* added MockExpressionEvaluator for JSP 2.0, delegating to the Jakarta JSTL ExpressionEvaluatorManager
 * fixed MockHttpServletRequest to create a new HttpSession if the previous session has been invalidated
 * fixed MockHttpServletResponse to use "ISO-8859-1" as default character encoding
 
 Package org.springframework.orm
 * reworked SqlMapClientTemplate to execute calls directly on SqlMapClient in case of TransactionAwareDataSourceProxy
 * fixed AbstractLobType for Hibernate, cleaning up in afterCompletion if necessary (for HibernateTransactionManager)
+* AbstractLobType uses low order value for transaction synchronizations, to always execute before resource cleanup
+* SessionFactoryUtils/PersistenceManagerFactoryUtils/OjbFactoryUtils execute synchronizations before Connection cleanup
+
+Package org.springframework.samples
+* introduced C3P0 ComboPooledDataSource as connection pool for Image Database (to show an alternative to Commons DBCP)
 
 Package org.springframework.transaction
+* TransactionSynchronization objects can influence their execution order through implementing the Ordered interface
+* added optional reference counting to ResourceHolderSupport, to be able to check for pending resource release calls
 * MethodMap/NameMatchTransactionAttributeSource automatically convert String values to TransactionAttribute instances
 
 Package org.springframework.util
@@ -44,8 +58,15 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added "searchAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving stringified attribute values
+* reworked DispatcherServlet's fallback to default strategies, reading in default strategy names from a properties file
 * DispatcherServlet does not override "doHead" anymore, leveraging HttpServlet's default "HEAD" handling via "doGet"
 * added "HEAD" to WebContentGenerator's default set of supported methods (in addition to "GET" and "POST")
+* added SimpleServletHandlerAdapter, supporting handlers that implement the Servlet interface within DispatcherServlet
+* added SimpleServletPostProcessor, applies init and destruction callbacks to beans that implement the Servlet interface
+* added support for declarative configuration of exporter parameters to AbstractJasperReportsView
+* factored out AbstractJasperReportsSingleFormatView from AbstractJasperReportsView
+* added JasperReportsMultiFormatView, allowing to specify the output format dynamically via a discriminator in the model
+* JSP EL expressions in Spring's JSP tags will be parsed with JSP 2.0 ExpressionEvaluator on JSP 2.0 (Jakarta JSTL else)
 
 
 Changes in version 1.1.4 (31.1.2005)
