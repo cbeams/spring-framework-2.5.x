@@ -19,7 +19,7 @@ import org.springframework.aop.Advisor;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.4 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: Advised.java,v 1.5 2003-11-29 13:36:33 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -101,15 +101,6 @@ public interface Advised {
 	 * otherwise false
 	 */
 	boolean removeInterceptor(Interceptor interceptor);
-	
-	/**
-	 * Can return null if there is no target, in which case interfaces and
-	 * advice supply all behaviour. Returns true if we have
-	 * a target interceptor. A target interceptor must be the last
-	 * interceptor in the chain.
-	 * @return Object
-	 */
-	Object getTarget();
 	
 	/**
 	 * Should we proxy the target class as well as any interfaces?

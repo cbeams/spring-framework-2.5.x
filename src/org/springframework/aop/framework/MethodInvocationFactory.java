@@ -13,13 +13,13 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Factory for method invocations.
  * @author Rod Johnson
- * @version $Id: MethodInvocationFactory.java,v 1.5 2003-11-28 11:17:17 johnsonr Exp $
+ * @version $Id: MethodInvocationFactory.java,v 1.6 2003-11-29 13:36:33 johnsonr Exp $
  */
 public interface MethodInvocationFactory {
 	
-	MethodInvocation getMethodInvocation(Advised pc, Object proxy,
-								Method method, Class targetClass, Object[] args, 
-								List interceptorsAndDynamicInterceptionAdvice);
+	MethodInvocation getMethodInvocation(Object proxy, Method method,
+								Class targetClass, Object target, Object[] args, 
+								List interceptorsAndDynamicInterceptionAdvice, AdvisedSupport advised);
 	
 	void release(MethodInvocation mi);
 	

@@ -41,7 +41,7 @@ import org.springframework.aop.interceptor.InvokerInterceptor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.12 2003-11-28 12:44:44 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.13 2003-11-29 13:36:33 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -124,7 +124,7 @@ public class AopProxy implements InvocationHandler {
 			}
 			else {
 				// We need to create a method invocation...
-				invocation = advised.getMethodInvocationFactory().getMethodInvocation(this.advised, proxy, method, targetClass, args, chain);
+				invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, advised.getTarget(), args, chain, advised);
 			
 				if (this.advised.getExposeInvocation()) {
 					// Make invocation available if necessary.
