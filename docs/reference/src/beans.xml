@@ -122,11 +122,12 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
     <sect2 id="beans-definition">
       <title>The BeanDefinition</title>
 
-      <para>Bean definitions inside an XmlBeanFactory variant contain, among
-      other information, the following details: <itemizedlist
+      <para>Bean definitions inside a DefaultListableBeanFactory variant (like
+			XmlBeanFactory) are represented as BeanDefinition objects, which contain
+			(among other information) the following details: <itemizedlist
           spacing="compact">
           <listitem>
-            <para>a classname: this is normally the actual implementation
+            <para>a class name: this is normally the actual implementation
             class of the bean being described in the bean definition. However,
             if the bean is to be constructed by calling a static
             <emphasis>factory</emphasis> method instead of using a normal
@@ -158,9 +159,9 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         </itemizedlist></para>
 
       <para>The concepts listed above directly translate to a set of elements
-      the bean definition consists of. Some of these element groups are are
-      listed below, along with a link to further documentation about each of
-      them. <table frame="all">
+      the bean definition consists of. Some of these element groups are listed
+			below, along with a link to further documentation about each of them.
+      <table frame="all">
           <title>Bean definition explanation</title>
 
           <tgroup cols="2">
@@ -237,8 +238,14 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       <para>Note that a bean definition is represented by the real interface
       <literal>org.springframework.beans.factory.config.BeanDefinition</literal>,
       and its various subinterfaces and implementations. However, it is very
-      unlikely that most user code would ever work with a
-      BeanDefinition.</para>
+      unlikely that most user code would ever work with a BeanDefinition.</para>
+
+			<para>Besides bean definitions which contain information on how to create
+			a bean, a bean factory can also allow to register existing bean instances.
+			DefaultListableBeanFactory supports this through the
+			<literal>registerSingleton</literal> method, as defined by the
+			<literal>org.springframework.beans.factory.config.ConfigurableBeanFactory</literal>
+			interface. Typical applications purely work with bean definitions, though.</para>
     </sect2>
 
     <sect2 id="beans-factory-class">
@@ -323,7 +330,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         <title>Bean creation via instance factory method</title>
 
         <para>Quite similar to using a static factory method to create a bean,
-        is the the use of an instance (non-static) factory method, where a
+        is the use of an instance (non-static) factory method, where a
         factory method of an existing bean from the factory is called to
         create the new bean.</para>
 
@@ -413,7 +420,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       class="examples.ExampleBeanTwo" singleton="true"/&gt;</programlisting></para>
 
       <para>Note: when deploying a bean in the prototype mode, the lifecycle
-      of the bean changes slightly. By definition, Spring can not manage the
+      of the bean changes slightly. By definition, Spring cannot manage the
       complete lifecycle of a non-singleton/prototype bean, since after it is
       created, it is given to the client and the container does not keep track
       of it at all any longer. You can think of Spring's role when talking
@@ -471,13 +478,13 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             calling a static factory method with specific arguments, to
             construct the bean, can be considered almost equivalent, and the
             rest of this text will consider arguments to a constructor and
-            arguments to a static factory method similarily. Although Spring
+            arguments to a static factory method similarly. Although Spring
             generally advocates usage of setter-based dependency injection for
             most situations, it does fully support the constructor-based
             approach as well, since you may wish to use it with pre-existing
             beans which provide only multi-argument constructors, and no
             setters. Additionally, for simpler beans, some people prefer the
-            constructor approach as a means of ensuring beans can not be
+            constructor approach as a means of ensuring beans cannot be
             constructed in an invalid state.</para>
           </listitem>
         </itemizedlist></para>
@@ -492,7 +499,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       from one format to another. The actual values being passed around are
       done in the form of <literal>PropertyValue</literal> objects. However,
       most users of Spring will not be dealing with these classes directly
-      (i.e. programatically), but rather with an XML definition file which
+      (i.e. programmatically), but rather with an XML definition file which
       will be converted internally into instances of these classes, and used
       to load an entire BeanFactory or ApplicationContext.</para>
 
@@ -567,7 +574,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
           <listitem>
             <para>You can generally trust Spring to do the right thing. It
-            will pick up configuraton issues, including references to
+            will pick up configuration issues, including references to
             non-existent beans and circular dependencies, at BeanFactory
             load-time. It will actually set properties and resolve
             dependencies (i.e. create those dependencies if needed) as late as
@@ -583,7 +590,7 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
             you find out about configuration issues when the
             ApplicationContext is created, not later. If you wish, you can
             still override this default behavior and set any of these
-            singleton beans to lazy-load (not be preinstantiated).</para>
+            singleton beans to lazy-load (not be pre-instantiated).</para>
           </listitem>
         </orderedlist></para>
 
@@ -591,8 +598,8 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
 
       <para>First, an example of using the BeanFactory for setter-based
       dependency injection. Below is a small part of an
-      <literal>XmlBeanFactory</literal> config file specifying some bean
-      definitions. Following is the code for the actual main bean itself,
+      <literal>XmlBeanFactory</literal> configuration file specifying some
+      bean definitions. Following is the code for the actual main bean itself,
       showing the appropriate setters declared. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
     &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
     &lt;property name="beanTwo"&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/property&gt;
@@ -750,8 +757,8 @@ public class ExampleBean {
       <para>As mentioned in the previous section, bean properties and
       constructor arguments can be defined as either references to other
       managed beans (collaborators), or values defined inline. The
-      <literal>XmlBeanFactory</literal> supports a number of subelement types
-      within its <literal>property</literal> and
+      <literal>XmlBeanFactory</literal> supports a number of sub-element
+      types within its <literal>property</literal> and
       <literal>constructor-arg</literal> elements for this purpose.</para>
 
       <para>The <literal>value</literal> element specifies a property or
@@ -863,7 +870,7 @@ public class ExampleBean {
     &lt;property name="targetName"&gt;
         &lt;value&gt;theTargetBean&lt;/value&gt;
     &lt;/property&gt;
-&lt;/bean&gt;</programlisting>The main reason the first form is preferrable to
+&lt;/bean&gt;</programlisting>The main reason the first form is preferable to
       the second is that using the <literal>idref</literal> tag will allow
       Spring to validate at deployment time that the other bean actually
       exists. In the second variation, the class who's
@@ -917,7 +924,7 @@ public class ExampleBean {
       attribute allows a reference to be created to a bean which is in a
       parent BeanFactory (or ApplicationContext) of the current BeanFactory
       (or ApplicationContext). The value of the <literal>parent</literal>
-      attribute may be ther same as either the <literal>id</literal> attribute
+      attribute may be the same as either the <literal>id</literal> attribute
       of the target bean, or one of the values in the <literal>name</literal>
       attribute of the target bean, and the target bean must be in a parent
       BeanFactory or ApplicationContext to the current one. The main use of
@@ -949,9 +956,8 @@ public class ExampleBean {
       implementing<literal> BeanFactoryAware</literal>, and use programmatic
       means (as described <link linkend="beans-factory-client">here</link>) to
       ask the container via a <literal>getBean("B")</literal> call for (a new)
-      bean B every time it needs it. This is generally not a desireable
-      solution since the bean code is then aware of and coupled to
-      Spring.</para>
+      bean B every time it needs it. This is generally not a desirable solution
+      since the bean code is then aware of and coupled to Spring.</para>
 
       <para>Method Injection, an advanced feature of the BeanFactory, allows
       this use case to be handled in a clean fashion, along with some other
@@ -979,7 +985,7 @@ public class ExampleBean {
         existing implementation. In the XmlBeanFactory case, you instruct
         Spring to inject/override this method to return a particular bean from
         the container, by using the <literal>lookup-method</literal> element
-        inside the bean definition. For example:<programlisting>&lt;!-- a stateful bean deployed as a protype (non-singleton) --&gt;
+        inside the bean definition. For example:<programlisting>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;
 &lt;bean id="singleShotHelper class="..." singleton="false"&gt;
 &lt;/bean&gt;
 
@@ -1032,7 +1038,7 @@ public class MyValueCalculator {
         <para>A class implementing the
         <literal>org.springframework.beans.factory.support.MethodReplacer</literal>
         interface is needed to provide the new method
-        defintion.<programlisting>/** meant to be used to override the existing computeValue
+        definition.<programlisting>/** meant to be used to override the existing computeValue
     implementation in MyValueCalculator */
 public class ReplacementComputeValue implements MethodReplacer {
 
@@ -1055,9 +1061,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 &lt;/bean&gt;</programlisting>One or more contained
         <literal>arg-type</literal> elements within the
         <literal>replaced-method</literal> element may be used to indicate the
-        method signature of the method being overriden. Note that the
+        method signature of the method being overridden. Note that the
         signature for the arguments is actually only needed in the case that
-        the method is actually overloaded and there are mutliple variants
+        the method is actually overloaded and there are multiple variants
         within the class. For convenience, the type string for an argument may
         be a substring of the fully qualified type name. For example, all the
         following would match
@@ -1091,7 +1097,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       force one or more beans to be initialized before the bean using this
       element is initialized.</para>
 
-      <para>Following is an example config:<programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
+      <para>Following is an example configuration:<programlisting>&lt;bean id="beanOne" class="ExampleBean" depends-on="manager"&gt;
     &lt;property name="manager"&gt;&lt;ref local="manager"/&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
@@ -1319,7 +1325,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para><emphasis>Note: generally, the use of the
         <literal>InitializingBean</literal> marker interface can be avoided
-        (and is discouraged since it unecessarily couples the code to Spring).
+        (and is discouraged since it unnecessarily couples the code to Spring).
         A bean definition provides support for a generic initialization method
         to be specified. In the case of the XmlBeanFactory, this is done via
         the <literal>init-method</literal> attribute. For example, the
@@ -1358,7 +1364,7 @@ public class AnotherExampleBean implements InitializingBean {
 
         <para><emphasis>Note: generally, the use of the
         <literal>DisposableBean</literal> marker interface can be avoided (and
-        is discouraged since it unecessarily couples the code to Spring). A
+        is discouraged since it unnecessarily couples the code to Spring). A
         bean definition provides support for a generic destroy method to be
         specified. In the case of the XmlBeanFactory, this is done via the
         <literal>destroy-method</literal> attribute. For example, the
@@ -1380,7 +1386,7 @@ public class AnotherExampleBean implements DisposableBean {
 
         <para><emphasis>Important note: when deploying a bean in the prototype
         mode, the lifecycle of the bean changes slightly. By definition,
-        Spring can not manage the complete lifecycle of a
+        Spring cannot manage the complete lifecycle of a
         non-singleton/prototype bean, since after it is created, it is given
         to the client and the container does not keep track of it at all any
         longer. You can think of Spring's role when talking about a
@@ -1533,9 +1539,9 @@ public class AnotherExampleBean implements DisposableBean {
     &lt;!-- age should inherit value of 1 from parent --&gt;
 &lt;/bean&gt;</programlisting></para>
 
-    <para>the parent bean can not get instantiated on its own since it is
+    <para>the parent bean cannot get instantiated on its own since it is
     incomplete, and it's also considered abstract. When a definition is
-    considered abstract like this (explicitely or implicitly), it's usable
+    considered abstract like this (explicitly or implicitly), it's usable
     just as a pure template or abstract bean definition that will serve as
     parent definition for child definitions. Trying to use such an abstract
     parent bean on its own (by referring to it as a ref property of another
@@ -1573,8 +1579,8 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     to call: <itemizedlist spacing="compact">
         <listitem>
           <para><literal>boolean containsBean(String)</literal>: returns true
-          if the BeanFactory contains a beandefinition that matches the given
-          name</para>
+          if the BeanFactory contains a bean definition or bean instance that
+					matches the given name</para>
         </listitem>
 
         <listitem>
@@ -1585,7 +1591,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
           returned. A <literal>BeansException</literal> will be thrown when
           either the bean could not be found (in which case it'll be a
           <literal>NoSuchBeanDefinitionException</literal>), or an exception
-          occured while instantiating and preparing the bean</para>
+          occurred while instantiating and preparing the bean</para>
         </listitem>
 
         <listitem>
@@ -1599,16 +1605,16 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
 
         <listitem>
           <para><literal>boolean isSingleton(String)</literal>: determines
-          whether or not the beandefinition registered under the given name is
-          a singleton or a prototype. If the beandefinition corresponding to
-          the given name could not be found, an exception will be thrown
-          (<literal>NoSuchBeanDefinitionException</literal>)</para>
+          whether or not the bean definition or bean instance registered
+					under the given name is a singleton or a prototype. If no bean
+					corresponding to the given name could not be found, an exception
+					will be thrown (<literal>NoSuchBeanDefinitionException</literal>)</para>
         </listitem>
 
         <listitem>
           <para><literal>String[] getAliases(String)</literal>: Return the
-          aliases for the given bean name, if any were defined in the
-          BeanDefinition</para>
+          aliases for the given bean name, if any were defined in the bean
+					definition</para>
         </listitem>
       </itemizedlist></para>
 
@@ -1637,7 +1643,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     instance that is created by the BeanFactory, the post-processor will get a
     callback from the BeanFactory before any initialization methods
     (<emphasis>afterPropertiesSet</emphasis> and any declared init method) are
-    called, and also afterwards.The post-processor is free to do what it
+    called, and also afterwards. The post-processor is free to do what it
     wishes with the bean, including ignoring the callback completely. A bean
     post-processor will typically check for marker interfaces, or do something
     such as wrap a bean with a proxy. Some Spring helper classes are
@@ -1652,7 +1658,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     done other than deploying the post-processor in a similar fashion to any
     other bean. On the other hand, when using plain BeanFactories, bean
     post-processors have to manually be <emphasis>explicitly</emphasis>
-    registerd, with a code sequence such as the following:<programlisting>ConfigurableBeanFactory bf = new .....;     // create BeanFactory
+    registered, with a code sequence such as the following:<programlisting>ConfigurableBeanFactory bf = new .....;     // create BeanFactory
    ...                       // now register some beans
 // now register any needed BeanPostProcessors
 MyBeanPostProcessor pp = new MyBeanPostProcessor();
@@ -1916,7 +1922,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
             <para><literal>String getMessage (String code, Object[] args,
             Locale loc)</literal>: essentially the same as the previous
             method, but with one difference: no default message can be
-            specified; if the message can not be found, a
+            specified; if the message cannot be found, a
             <literal>NoSuchMessageException</literal> is thrown.</para>
           </listitem>
 
@@ -1934,8 +1940,8 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       the name <literal>messageSource</literal>. If such a bean is found, all
       calls to the methods desribed above will be delegated to the message
       source that was found. If no message source was found, the
-      ApplicationContext inspects attempts to see if it has a parent
-      containing a bean with the same name. If so, it uses that bean as the
+      ApplicationContext attempts to see if it has a parent containing
+      a bean with the same name. If so, it uses that bean as the
       MessageSource. If it can't find any source for messages, an empty
       <literal>StaticMessageSource</literal> will be instantiated in order to
       be able to accept calls to the methods defined above.</para>
@@ -2154,7 +2160,7 @@ public class BlackListNotifier implement ApplicationListener {
       Based upon that String, Spring will automatically choose the right
       Resource implementation for you. When asking an ApplicationContext for a
       resource first of all Spring will inspect the resource location you're
-      specifying and look for any prefixes. Depending on the implenentation of
+      specifying and look for any prefixes. Depending on the implementation of
       the ApplicationContext more or less Resource implementations are
       available. Resources can best be configured by using the ResourceEditor
       and for example the XmlBeanFactory.</para>
@@ -2247,7 +2253,7 @@ public class BlackListNotifier implement ApplicationListener {
     may be used to conveniently add support for additional PropertyEditors to
     an ApplicationContext.</para>
 
-    <para>Consier a user class <emphasis>ExoticType</emphasis>, and another
+    <para>Consider a user class <emphasis>ExoticType</emphasis>, and another
     class <emphasis>DependsOnExoticType</emphasis> which needs ExoticType set
     as a property:<programlisting>public class ExoticType {
     private String name;
@@ -2342,7 +2348,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     methods, MethodInvokingFactoryBean by default operates in a
     <emphasis>singleton</emphasis> fashion. The first request by the container
     for the factory to produce an object will cause the specified method
-    invocation, whose return value will cached and returned for the current
+    invocation, whose return value will be cached and returned for the current
     and subsequent requests. An internal <literal>singleton</literal> property
     of the factory may be set to false, to cause it to invoke the target
     method each time it is asked for an object.</para>
@@ -2445,7 +2451,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     web-apps at the top of the hierarchy, it is problematic to create an
     ApplicationContext for each web-app which consists of mostly identical
     bean definitions from lower layers, as there may be issues due to
-    increased memory usage, issues with creating mutliple copies of beans
+    increased memory usage, issues with creating multiple copies of beans
     which take a long time to initialize (i.e. a Hibernate SessionFactory),
     and possible issues due to side-effects. As an alternative, classes such
     as <literal><ulink
