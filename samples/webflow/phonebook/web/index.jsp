@@ -12,7 +12,7 @@
 				<A href="search.htm">Phone Book</A>
 			</P>
 			<P>
-				This sample application illustrates basic usage of the web flow controller.
+				This sample application illustrates core features of the web flow system.
 			</P>
 		</DIV>
 		<HR>

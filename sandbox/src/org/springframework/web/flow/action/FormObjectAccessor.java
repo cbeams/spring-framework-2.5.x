@@ -158,6 +158,7 @@ public class FormObjectAccessor {
 	public void exposeBindExceptionErrors(BindException errors, ScopeType scope) {
 		if (scope == ScopeType.FLOW) {
 			this.context.getFlowScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+			this.context.getFlowScope().setAttribute(errors.getObjectName(), errors.getTarget());
 		}
 		else {
 			this.context.getRequestScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
