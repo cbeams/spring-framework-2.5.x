@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms;
+
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,135 +29,121 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import javax.jms.Destination;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.jms.Topic;
-
 /**
- * Create a JMS Consumer from a Session.  It is creates non-singleton/prototype bean.
+ * Create a JMS Consumer from a Session.
  * Requires a JMS 1.1 provider.
- *
  * @author Mark Pollack
  */
 public class JmsConsumerFactoryBean implements FactoryBean, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	private Destination destination;
-	private MessageConsumer messageConsumer;
-	private MessageListener messageListener;
+
 	private Session session;
-	private String messageSelector;
-	private Boolean noLocal;
-	private boolean isDurableSubscriber = false;
+
+	private Destination destination;
+
 	private String durableIdentity;
 
-	/**
-	 * Set the JMS destination to consume messages from.
-	 * @param d JMS destination.
-	 */
-	public void setDestination(Destination d) {
-		destination = d;
-	}
+	private Boolean noLocal;
 
-	public Object getObject() throws Exception {
-		return messageConsumer;
-	}
+	private String messageSelector;
 
-	public Class getObjectType() {
-		return MessageConsumer.class;
-	}
+	private MessageListener messageListener;
 
-	public boolean isSingleton() {
-		return false;
-	}
+	private MessageConsumer messageConsumer;
 
-	public void afterPropertiesSet() throws Exception {
-		if (session == null) {
-			throw new IllegalArgumentException("Did not set required JMS session property");
-		}
-
-		if (destination == null) {
-			throw new IllegalArgumentException("Did not set required JMS destination property");
-		}
-
-		logger.info("Creating JMS Consumer");
-
-		if (isDurableSubscriber) {
-			if (!(destination instanceof Topic)) {
-				throw new IllegalArgumentException("Destination must be a topic when creating a durable subscriber");
-			}
-			if (durableIdentity == null) {
-				throw new IllegalArgumentException("DurableIdentity is requred when creating a durable subscriber");
-			}
-			if (noLocal == null) {
-				messageConsumer =
-				    session.createDurableSubscriber((Topic) destination, durableIdentity);
-			}
-			else {
-				messageConsumer =
-				    session.createDurableSubscriber((Topic) destination, durableIdentity, messageSelector, noLocal.booleanValue());
-			}
-		}
-		else {
-
-			if (noLocal == null) {
-				messageConsumer =
-				    session.createConsumer(destination, messageSelector);
-			}
-			else {
-				messageConsumer =
-				    session.createConsumer(
-				        destination,
-				        messageSelector,
-				        noLocal.booleanValue());
-			}
-		}
-
-		if (messageListener != null) {
-			messageConsumer.setMessageListener(messageListener);
-		}
-
-	}
 
 	/**
-	 * The message listener to use for asynchronous receiving of messages
-	 * @param listener The messgae listener.
-	 */
-	public void setMessageListener(MessageListener listener) {
-		messageListener = listener;
-	}
-
-	/**
-	 * The message selector to apply to the consumer.
-	 * @param s message selector
-	 */
-	public void setMessageSelector(String s) {
-		messageSelector = s;
-	}
-
-	/**
-	 * Set the nolocal property, used when creating a consumer.
-	 * @param b nolocal property.
-	 */
-	public void setNoLocal(boolean b) {
-		noLocal = new Boolean(b);
-	}
-
-	/**
-	 * Set the JMS session used to create the Consumer
-	 * @param session JMS Session object
+	 * Set the JMS session used to create the Consumer.
 	 */
 	public void setSession(Session session) {
 		this.session = session;
 	}
 
 	/**
-	 * @param string
+	 * Set the JMS destination to consume messages from.
 	 */
-	public void setDurableIdentity(String string) {
-		durableIdentity = string;
+	public void setDestination(Destination destination) {
+		this.destination = destination;
+	}
+
+	public void setDurableIdentity(String durableIdentity) {
+		this.durableIdentity = durableIdentity;
+	}
+
+	/**
+	 * Set the nolocal property, used when creating a consumer.
+	 */
+	public void setNoLocal(boolean noLocal) {
+		this.noLocal = new Boolean(noLocal);
+	}
+
+	/**
+	 * Set the message selector to apply to the consumer.
+	 */
+	public void setMessageSelector(String messageSelector) {
+		this.messageSelector = messageSelector;
+	}
+
+	/**
+	 * Set the message listener to use for asynchronous receiving of messages.
+	 */
+	public void setMessageListener(MessageListener messageListener) {
+		this.messageListener = messageListener;
+	}
+
+
+	public void afterPropertiesSet() throws JMSException {
+		if (this.session == null) {
+			throw new IllegalArgumentException("session is required");
+		}
+		if (this.destination == null) {
+			throw new IllegalArgumentException("destination is required");
+		}
+
+		logger.info("Creating JMS Consumer");
+
+		if (this.durableIdentity != null) {
+			if (!(this.destination instanceof Topic)) {
+				throw new IllegalArgumentException("Destination must be a topic when creating a durable subscriber");
+			}
+			if (this.noLocal == null) {
+				this.messageConsumer =
+						this.session.createDurableSubscriber((Topic) this.destination, this.durableIdentity);
+			}
+			else {
+				this.messageConsumer =
+				    this.session.createDurableSubscriber(
+								(Topic) this.destination, this.durableIdentity, this.messageSelector, this.noLocal.booleanValue());
+			}
+		}
+
+		else {
+			if (this.noLocal == null) {
+				this.messageConsumer = this.session.createConsumer(this.destination, this.messageSelector);
+			}
+			else {
+				this.messageConsumer =
+				    this.session.createConsumer(this.destination, this.messageSelector, this.noLocal.booleanValue());
+			}
+		}
+
+		if (this.messageListener != null) {
+			this.messageConsumer.setMessageListener(this.messageListener);
+		}
+	}
+
+
+	public Object getObject() {
+		return this.messageConsumer;
+	}
+
+	public Class getObjectType() {
+		return (this.messageConsumer != null ? this.messageConsumer.getClass() : MessageConsumer.class);
+	}
+
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
