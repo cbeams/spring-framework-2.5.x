@@ -107,9 +107,7 @@
 	</bean>
 	-->
 	
-	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType">
-		<property name="phoneBook"><ref bean="phoneBook"/></property>
-	</bean>
+	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType"/>
 
 	<!-- A converter registry, a lightweight alternative to the PropertyEditor -->
 	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
