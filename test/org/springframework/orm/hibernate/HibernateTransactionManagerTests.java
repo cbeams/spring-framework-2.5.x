@@ -1159,6 +1159,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
+		sf.getConnectionProvider();
+		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		sf.getTransactionManager();

@@ -21,10 +21,14 @@ import java.sql.SQLException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -48,7 +52,87 @@ import org.springframework.transaction.TransactionException;
  * @see JdoAccessor#setJdoDialect
  * @see JdoTransactionManager#setJdoDialect
  */
-public class DefaultJdoDialect implements JdoDialect {
+public class DefaultJdoDialect implements JdoDialect, InitializingBean {
+
+	private PersistenceManagerFactory persistenceManagerFactory;
+
+	private SQLExceptionTranslator jdbcExceptionTranslator;
+
+
+	/**
+	 * Create a new DefaultJdoDialect.
+	 */
+	public DefaultJdoDialect() {
+	}
+
+	/**
+	 * Create a new DefaultJdoDialect.
+	 * @param pmf the JDO PersistenceManagerFactory, which is used
+	 * to initialize the default JDBC exception translator
+	 */
+	public DefaultJdoDialect(PersistenceManagerFactory pmf) {
+		setPersistenceManagerFactory(pmf);
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Set the JDO PersistenceManagerFactory, which is used to initialize
+	 * the default JDBC exception translator if none specified.
+	 * @see #setJdbcExceptionTranslator
+	 */
+	public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
+		this.persistenceManagerFactory = pmf;
+	}
+
+	/**
+	 * Return the JDO PersistenceManagerFactory that should be used to create
+	 * PersistenceManagers.
+	 */
+	public PersistenceManagerFactory getPersistenceManagerFactory() {
+		return persistenceManagerFactory;
+	}
+
+	/**
+	 * Set the JDBC exception translator for this dialect.
+	 * Applied to SQLExceptions that are the cause of JDOExceptions.
+	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
+	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
+	 * @param jdbcExceptionTranslator exception translator
+	 * @see java.sql.SQLException
+	 * @see javax.jdo.JDOException#getCause
+	 * @see PersistenceManagerFactoryUtils#newJdbcExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+	}
+
+	/**
+	 * Return the JDBC exception translator for this instance.
+	 * Creates a default one for the specified PersistenceManagerFactory if none set.
+	 */
+	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+		if (this.jdbcExceptionTranslator == null) {
+			if (this.persistenceManagerFactory != null) {
+				this.jdbcExceptionTranslator =
+						PersistenceManagerFactoryUtils.newJdbcExceptionTranslator(this.persistenceManagerFactory);
+			}
+			else {
+				this.jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+			}
+		}
+		return this.jdbcExceptionTranslator;
+	}
+
+	/**
+	 * Eagerly initialize the exception translator, creating a default one
+	 * for the specified PersistenceManagerFactory if none set.
+	 */
+	public void afterPropertiesSet() {
+		getJdbcExceptionTranslator();
+	}
+
 
 	/**
 	 * This implementation invokes the standard JDO <code>Transaction.begin</code>
@@ -100,7 +184,12 @@ public class DefaultJdoDialect implements JdoDialect {
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	public DataAccessException translateException(JDOException ex) {
-		return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+		if (ex.getCause() instanceof SQLException) {
+			return this.jdbcExceptionTranslator.translate("JDO operation", null, (SQLException) ex.getCause());
+		}
+		else {
+			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+		}
 	}
 
 }

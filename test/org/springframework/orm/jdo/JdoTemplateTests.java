@@ -44,7 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.9 2004-06-16 09:47:36 jhoeller Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.10 2004-06-17 09:46:30 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -69,6 +69,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmfControl.replay();
 		pmControl.replay();
 
@@ -93,6 +96,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.close();
@@ -120,6 +126,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
 		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		dialect.flush(pm);
 		dialectControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -150,6 +159,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.getObjectById("0", true);
@@ -170,6 +182,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newObjectIdInstance(String.class, "0");
@@ -192,6 +207,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.evict("0");
@@ -212,6 +230,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.refresh("0");
@@ -232,6 +253,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.makePersistent("0");
@@ -252,6 +276,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.deletePersistent("0");
@@ -272,6 +299,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		Collection coll = new HashSet();
@@ -295,6 +325,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class);
@@ -322,6 +355,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -349,6 +385,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -378,6 +417,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -408,6 +450,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -440,6 +485,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -470,6 +518,9 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
 		pm.newQuery(String.class, "a == b");
@@ -611,8 +662,10 @@ public class JdoTemplateTests extends TestCase {
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
-		pmfControl.setReturnValue(pm);
+		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 1);
 		tx.isActive();

@@ -27,13 +27,12 @@ import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
-import net.sf.hibernate.connection.ConnectionProvider;
-import net.sf.hibernate.engine.SessionFactoryImplementor;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -201,10 +200,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Set the JDBC exception translator for this transaction manager.
 	 * Applied to SQLExceptions (wrapped by Hibernate's JDBCException)
 	 * thrown by flushing on commit.
-	 * <p>The default exception translator evaluates the exception's SQLState.
+	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
+	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
 	 * @param jdbcExceptionTranslator exception translator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see java.sql.SQLException
+	 * @see net.sf.hibernate.JDBCException
+	 * @see SessionFactoryUtils#newJdbcExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
@@ -212,8 +215,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Return the JDBC exception translator for this transaction manager.
+	 * Creates a default one for the specified SessionFactory if none set.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+		if (this.jdbcExceptionTranslator == null) {
+			if (this.dataSource != null) {
+				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+			}
+			else {
+				this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(this.sessionFactory);
+			}
+		}
 		return this.jdbcExceptionTranslator;
 	}
 
@@ -221,16 +233,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (this.sessionFactory == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
-		
-		// check for LocalDataSourceConnectionProvider
-		if (this.dataSource == null && this.sessionFactory instanceof SessionFactoryImplementor) {
-			ConnectionProvider cp = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
-			if (cp instanceof LocalDataSourceConnectionProvider) {
-				DataSource cpds = ((LocalDataSourceConnectionProvider) cp).getDataSource();
+		getJdbcExceptionTranslator();
+
+		// check for SessionFactory's DataSource
+		if (this.dataSource == null) {
+			DataSource sfds = SessionFactoryUtils.getDataSource(this.sessionFactory);
+			if (sfds != null) {
 				// use the SessionFactory's DataSource for exposing transactions to JDBC code
-				logger.info("Using DataSource [" + cpds +
-										"] from Hibernate SessionFactory for HibernateTransactionManager");
-				this.dataSource = cpds;
+				logger.info("Using DataSource [" + sfds +
+										"] of Hibernate SessionFactory for HibernateTransactionManager");
+				this.dataSource = sfds;
 			}
 		}
 	}

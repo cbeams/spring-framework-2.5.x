@@ -155,15 +155,25 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Return the JDO dialect to use for this transaction manager.
+	 * Creates a default one for the specified PersistenceManagerFactory if none set.
 	 */
 	public JdoDialect getJdoDialect() {
-		return jdoDialect;
+		if (this.jdoDialect == null) {
+			this.jdoDialect = new DefaultJdoDialect(this.persistenceManagerFactory);
+		}
+		return this.jdoDialect;
 	}
 
+	/**
+	 * Eagerly initialize the JDO dialect, creating a default one
+	 * for the specified PersistenceManagerFactory if none set.
+	 * Auto-detect the PersistenceManagerFactory's DataSource, if any.
+	 */
 	public void afterPropertiesSet() {
 		if (this.persistenceManagerFactory == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
+		getJdoDialect();
 
 		// check for DataSource as connection factory
 		if (this.dataSource == null) {
@@ -171,7 +181,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			if (pmfcf instanceof DataSource) {
 				// use the PersistenceManagerFactory's DataSource for exposing transactions to JDBC code
 				logger.info("Using DataSource [" + pmfcf +
-										"] from JDO PersistenceManagerFactory for JdoTransactionManager");
+										"] of JDO PersistenceManagerFactory for JdoTransactionManager");
 				this.dataSource = (DataSource) pmfcf;
 			}
 		}
@@ -214,7 +224,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		try {
 
 			// delegate to JdoDialect for actual transaction begin
-			this.jdoDialect.beginTransaction(pm.currentTransaction(), definition);
+			getJdoDialect().beginTransaction(pm.currentTransaction(), definition);
 
 			// register transaction timeout
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -223,7 +233,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 			// register the JDO PersistenceManager's JDBC Connection for the DataSource, if set
 			if (this.dataSource != null) {
-				ConnectionHandle conHandle = this.jdoDialect.getJdbcConnection(pm, definition.isReadOnly());
+				ConnectionHandle conHandle = getJdoDialect().getJdbcConnection(pm, definition.isReadOnly());
 				if (conHandle != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
 					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -239,7 +249,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect ["
-												 + this.jdoDialect + "] does not support JDBC connection retrieval");
+												 + getJdoDialect() + "] does not support JDBC connection retrieval");
 					}
 				}
 			}
@@ -344,7 +354,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			ConnectionHolder conHolder =
 					(ConnectionHolder) TransactionSynchronizationManager.unbindResource(this.dataSource);
 			try {
-				this.jdoDialect.releaseJdbcConnection(conHolder.getConnectionHandle(),
+				getJdoDialect().releaseJdbcConnection(conHolder.getConnectionHandle(),
 				                                      txObject.getPersistenceManagerHolder().getPersistenceManager());
 			}
 			catch (Exception ex) {
@@ -386,7 +396,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	protected DataAccessException convertJdoAccessException(JDOException ex) {
-		return this.jdoDialect.translateException(ex);
+		return getJdoDialect().translateException(ex);
 	}
 
 

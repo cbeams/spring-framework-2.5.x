@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate;
 
+import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
@@ -37,6 +38,7 @@ import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
 import net.sf.hibernate.UnresolvableObjectException;
 import net.sf.hibernate.WrongClassException;
+import net.sf.hibernate.connection.ConnectionProvider;
 import net.sf.hibernate.engine.SessionFactoryImplementor;
 import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
@@ -46,7 +48,9 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -75,6 +79,43 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public abstract class SessionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
+
+	/**
+	 * Determine the DataSource of the given SessionFactory.
+	 * @param sessionFactory the SessionFactory to check
+	 * @return the DataSource, or null if none found
+	 * @see net.sf.hibernate.engine.SessionFactoryImplementor#getConnectionProvider
+	 * @see LocalDataSourceConnectionProvider
+	 */
+	public static DataSource getDataSource(SessionFactory sessionFactory) {
+		if (sessionFactory instanceof SessionFactoryImplementor) {
+			ConnectionProvider cp = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
+			if (cp instanceof LocalDataSourceConnectionProvider) {
+				return ((LocalDataSourceConnectionProvider) cp).getDataSource();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Create an appropriate SQLExceptionTranslator for the given SessionFactory.
+	 * If a DataSource is found, a SQLErrorCodeSQLExceptionTranslator for the DataSource
+	 * is created; else, a SQLStateSQLExceptionTranslator as fallback.
+	 * @param sessionFactory the SessionFactory to create the translator for
+	 * @return the SQLExceptionTranslator
+	 * @see #getDataSource
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	public static SQLExceptionTranslator newJdbcExceptionTranslator(SessionFactory sessionFactory) {
+		DataSource ds = getDataSource(sessionFactory);
+		if (ds != null) {
+			return new SQLErrorCodeSQLExceptionTranslator(ds);
+		}
+		else {
+			return new SQLStateSQLExceptionTranslator();
+		}
+	}
 
 	/**
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will

@@ -25,6 +25,7 @@ import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -52,6 +56,29 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public abstract class PersistenceManagerFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(PersistenceManagerFactoryUtils.class);
+
+	/**
+	 * Create an appropriate SQLExceptionTranslator for the given PersistenceManagerFactory.
+	 * If a DataSource is found, create a SQLErrorCodeSQLExceptionTranslator for the
+	 * DataSource; else, fall back to a SQLStateSQLExceptionTranslator.
+	 * @param pmf the PersistenceManagerFactory to create the translator for
+	 * @return the SQLExceptionTranslator
+	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	public static SQLExceptionTranslator newJdbcExceptionTranslator(PersistenceManagerFactory pmf) {
+		SQLExceptionTranslator jdbcExceptionTranslator = null;
+		// check for PersistenceManagerFactory's DataSource
+		Object cf = pmf.getConnectionFactory();
+		if (cf instanceof DataSource) {
+			jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator((DataSource) cf);
+		}
+		else {
+			jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+		}
+		return jdbcExceptionTranslator;
+	}
 
 	/**
 	 * Get a JDO PersistenceManager via the given factory. Is aware of a

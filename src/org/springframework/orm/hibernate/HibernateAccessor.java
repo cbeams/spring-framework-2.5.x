@@ -30,7 +30,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
 /**
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
@@ -89,7 +88,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	private Interceptor entityInterceptor;
 
-	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private int flushMode = FLUSH_AUTO;
 
@@ -136,11 +135,15 @@ public abstract class HibernateAccessor implements InitializingBean {
 	/**
 	 * Set the JDBC exception translator for this instance.
 	 * Applied to SQLExceptions thrown by callback code, be it direct
-	 * SQLExceptions or wrapped HibernateJDBCExceptions.
-	 * <p>The default exception translator evaluates the exception's SQLState.
+	 * SQLExceptions or wrapped Hibernate JDBCExceptions.
+	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
+	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
 	 * @param jdbcExceptionTranslator exception translator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see java.sql.SQLException
+	 * @see net.sf.hibernate.JDBCException
+	 * @see SessionFactoryUtils#newJdbcExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
@@ -148,8 +151,12 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Return the JDBC exception translator for this instance.
+	 * Creates a default one for the specified SessionFactory if none set.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+		if (this.jdbcExceptionTranslator == null) {
+			this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(this.sessionFactory);
+		}
 		return this.jdbcExceptionTranslator;
 	}
 
@@ -183,10 +190,15 @@ public abstract class HibernateAccessor implements InitializingBean {
 		return flushMode;
 	}
 
+	/**
+	 * Eagerly initialize the exception translator, creating a default one
+	 * for the specified SessionFactory if none set.
+	 */
 	public void afterPropertiesSet() {
 		if (this.sessionFactory == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
+		getJdbcExceptionTranslator();
 	}
 
 
@@ -234,12 +246,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * @see #setJdbcExceptionTranslator
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		if (this.jdbcExceptionTranslator != null) {
-			return this.jdbcExceptionTranslator.translate("HibernateAccessor", null, ex);
-		}
-		else {
-			return new HibernateJdbcException(ex);
-		}
+		return this.jdbcExceptionTranslator.translate("Hibernate operation", null, ex);
 	}
 
 }
