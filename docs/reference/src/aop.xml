@@ -1928,7 +1928,7 @@ System.out.println(&#34;Max pool size is &#34; + conf.getMaxSize());</programlis
 
       <para><programlisting>&#60;bean id=&#34;prototypeTargetSource&#34; 
     class=&#34;org.springframework.aop.target.PrototypeTargetSource&#34;&#62;
-    &#60;property name=&#34;targetBeanName&#34;&#62;&#60;value&#62;businessObject&#60;/value&#62;&#60;/property&#62;
+    &#60;property name=&#34;targetBeanName&#34;&#62;&#60;value&#62;businessObjectTarget&#60;/value&#62;&#60;/property&#62;
 &#60;/bean&#62;</programlisting></para>
 
       <para>There&#39;s only one property: the name of the target bean.
