@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.7 2004-03-19 07:41:09 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.8 2004-03-19 17:52:29 jhoeller Exp $
  */
 
 /*
@@ -23,8 +23,10 @@ package org.springframework.beans;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -52,6 +54,8 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	private String touchy;
 
 	private Collection friends = new LinkedList();
+
+	private Set someSet = new HashSet();
 
 	private Map someMap = new HashMap();
 
@@ -219,6 +223,14 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	 */
 	public void setFriends(Collection friends) {
 		this.friends = friends;
+	}
+
+	public Set getSomeSet() {
+		return someSet;
+	}
+
+	public void setSomeSet(Set someSet) {
+		this.someSet = someSet;
 	}
 
 	public Map getSomeMap() {

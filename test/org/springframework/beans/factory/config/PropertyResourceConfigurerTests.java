@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import junit.framework.TestCase;
@@ -28,8 +29,10 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
@@ -61,30 +64,45 @@ public class PropertyResourceConfigurerTests extends TestCase {
 
 	public void testPropertyPlaceholderConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
 		pvs.addPropertyValue("name", "name${var}${");
-		pvs.addPropertyValue("touchy", "${os.name}");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb1", TestBean.class, pvs);
+
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		cas.addIndexedArgumentValue(1, "${age}");
 		cas.addGenericArgumentValue("${var}name${age}");
+
+		pvs = new MutablePropertyValues();
 		List friends = new ManagedList();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
-		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("friends", friends);
+
+		Set someSet = new ManagedSet();
+		someSet.add("na${age}me");
+		someSet.add(new RuntimeBeanReference("${ref}"));
+		pvs.addPropertyValue("someSet", someSet);
+
 		Map someMap = new ManagedMap();
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
+		MutablePropertyValues innerPvs = new MutablePropertyValues();
+		innerPvs.addPropertyValue("touchy", "${os.name}");
+		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
+		someMap.put("key4", new ChildBeanDefinition("tb1", innerPvs));
 		pvs.addPropertyValue("someMap", someMap);
+
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
 		ac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
+
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
+
 		TestBean tb1 = (TestBean) ac.getBean("tb1");
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
 		assertEquals(98, tb1.getAge());
@@ -95,10 +113,20 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());
 		assertEquals(tb2, ((List) tb2.getFriends()).get(1));
-		assertEquals(2, tb2.getSomeMap().size());
+		assertEquals(2, tb2.getSomeSet().size());
+		assertTrue(tb2.getSomeSet().contains("na98me"));
+		assertTrue(tb2.getSomeSet().contains(tb2));
+		assertEquals(4, tb2.getSomeMap().size());
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));
-		assertEquals(System.getProperty("os.name"), tb1.getTouchy());
+		TestBean inner1 = (TestBean) tb2.getSomeMap().get("key3");
+		TestBean inner2 = (TestBean) tb2.getSomeMap().get("key4");
+		assertEquals(0, inner1.getAge());
+		assertEquals(null, inner1.getName());
+		assertEquals(System.getProperty("os.name"), inner1.getTouchy());
+		assertEquals(98, inner2.getAge());
+		assertEquals("namemyvar${", inner2.getName());
+		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
 	}
 
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyFallback() {

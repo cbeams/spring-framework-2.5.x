@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.Constants;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -87,7 +89,7 @@ import org.springframework.core.Constants;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.9 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.10 2004-03-19 17:52:29 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -180,45 +182,34 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 			throws BeansException {
 		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
-			MutablePropertyValues pvs = beanFactory.getPropertyValues(beanNames[i]);
-			if (pvs != null) {
-				parsePropertyValues(props, pvs);
+			BeanDefinition bd = beanFactory.getBeanDefinition(beanNames[i]);
+			try {
+				parseBeanDefinition(props, bd);
 			}
-			ConstructorArgumentValues cas = beanFactory.getConstructorArgumentValues(beanNames[i]);
-			if (cas != null) {
-				parseIndexedArgumentValues(props, cas.getIndexedArgumentValues());
-				parseGenericArgumentValues(props, cas.getGenericArgumentValues());
+			catch (BeanDefinitionStoreException ex) {
+				throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanNames[i], ex.getMessage());
 			}
+		}
+	}
+
+	protected void parseBeanDefinition(Properties props, BeanDefinition beanDefinition) {
+		MutablePropertyValues pvs = beanDefinition.getPropertyValues();
+		if (pvs != null) {
+			parsePropertyValues(props, pvs);
+		}
+		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
+		if (cas != null) {
+			parseIndexedArgumentValues(props, cas.getIndexedArgumentValues());
+			parseGenericArgumentValues(props, cas.getGenericArgumentValues());
 		}
 	}
 
 	protected void parsePropertyValues(Properties props, MutablePropertyValues pvs) {
 		for (int j = 0; j < pvs.getPropertyValues().length; j++) {
 			PropertyValue pv = pvs.getPropertyValues()[j];
-
-			if (pv.getValue() instanceof String) {
-				String strVal = (String) pv.getValue();
-				String newStrVal = parseValue(props, strVal, null);
-				if (!newStrVal.equals(strVal)) {
-					pvs.addPropertyValue(pv.getName(), newStrVal);
-				}
-			}
-
-			else if (pv.getValue() instanceof RuntimeBeanReference) {
-        RuntimeBeanReference ref = (RuntimeBeanReference) pv.getValue();
-        String newBeanName = parseValue(props, ref.getBeanName(), null);
-				if (!newBeanName.equals(ref.getBeanName())) {
-					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-          pvs.addPropertyValue(pv.getName(), newRef);
-				}
-			}
-
-			else if (pv.getValue() instanceof List) {
-				parseList(props, (List) pv.getValue());
-			}
-
-			else if (pv.getValue() instanceof Map) {
-				parseMap(props, (Map) pv.getValue());
+			Object newVal = parseValue(props, pv.getValue());
+			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
+				pvs.addPropertyValue(pv.getName(), newVal);
 			}
 		}
 	}
@@ -227,29 +218,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		for (Iterator it = ias.keySet().iterator(); it.hasNext();) {
 			Integer index = (Integer) it.next();
 			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) ias.get(index);
-			Object val = valueHolder.getValue();
-
-			if (val instanceof String) {
-				String strVal = (String) val;
-				String newStrVal = parseValue(props, strVal, null);
-				valueHolder.setValue(newStrVal);
-			}
-
-			else if (val instanceof RuntimeBeanReference) {
-        RuntimeBeanReference ref = (RuntimeBeanReference) val;
-        String newBeanName = parseValue(props, ref.getBeanName(), null);
-				if (!newBeanName.equals(ref.getBeanName())) {
-					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					valueHolder.setValue(newRef);
-				}
-			}
-
-			else if (val instanceof List) {
-				parseList(props, (List) val);
-			}
-
-			else if (val instanceof Map) {
-				parseMap(props, (Map) val);
+			Object newVal = parseValue(props, valueHolder.getValue());
+			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
+				valueHolder.setValue(newVal);
 			}
 		}
 	}
@@ -257,49 +228,62 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	protected void parseGenericArgumentValues(Properties props, Set gas) {
 		for (Iterator it = gas.iterator(); it.hasNext();) {
 			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
-			Object val = valueHolder.getValue();
-
-			if (val instanceof String) {
-				String strVal = (String) val;
-				String newStrVal = parseValue(props, strVal, null);
-				valueHolder.setValue(newStrVal);
-			}
-			else if (val instanceof RuntimeBeanReference) {
-				RuntimeBeanReference ref = (RuntimeBeanReference) val;
-				String newBeanName = parseValue(props, ref.getBeanName(), null);
-				if (!newBeanName.equals(ref.getBeanName())) {
-					valueHolder.setValue(new RuntimeBeanReference(newBeanName));
-				}
-			}
-			else if (val instanceof List) {
-				parseList(props, (List) val);
-			}
-			else if (val instanceof Map) {
-				parseMap(props, (Map) val);
+			Object newVal = parseValue(props, valueHolder.getValue());
+			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
+				valueHolder.setValue(newVal);
 			}
 		}
+	}
+
+	protected Object parseValue(Properties props, Object value) {
+		if (value instanceof String) {
+			return parseString(props, (String) value, null);
+		}
+		else if (value instanceof RuntimeBeanReference) {
+      RuntimeBeanReference ref = (RuntimeBeanReference) value;
+      String newBeanName = parseString(props, ref.getBeanName(), null);
+			if (!newBeanName.equals(ref.getBeanName())) {
+				return new RuntimeBeanReference(newBeanName);
+			}
+		}
+		else if (value instanceof List) {
+			parseList(props, (List) value);
+		}
+		else if (value instanceof Set) {
+			parseSet(props, (Set) value);
+		}
+		else if (value instanceof Map) {
+			parseMap(props, (Map) value);
+		}
+		else if (value instanceof BeanDefinition) {
+			parseBeanDefinition(props, (BeanDefinition) value);
+		}
+		return value;
 	}
 
 	/**
 	 * Parse the given List, exchanging its values if necessary.
 	 */
 	protected void parseList(Properties props, List listVal) {
-		for (int k = 0; k < listVal.size(); k++) {
-			Object elem = listVal.get(k);
-			if (elem instanceof String) {
-				String strVal = (String) elem;
-				String newStrVal = parseValue(props, strVal, null);
-				if (!newStrVal.equals(strVal)) {
-					listVal.set(k, newStrVal);
-				}
+		for (int i = 0; i < listVal.size(); i++) {
+			Object elem = listVal.get(i);
+			Object newVal = parseValue(props, elem);
+			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
+				listVal.set(i, newVal);
 			}
-			else if (elem instanceof RuntimeBeanReference) {
-				RuntimeBeanReference ref = (RuntimeBeanReference) elem;
-				String newBeanName = parseValue(props, ref.getBeanName(), null);
-				if (!newBeanName.equals(ref.getBeanName())) {
-					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					listVal.set(k, newRef);
-				}
+		}
+	}
+
+	/**
+	 * Parse the given Set, exchanging its values if necessary.
+	 */
+	protected void parseSet(Properties props, Set setVal) {
+		for (Iterator it = new HashSet(setVal).iterator(); it.hasNext();) {
+			Object elem = it.next();
+			Object newVal = parseValue(props, elem);
+			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
+				setVal.remove(elem);
+				setVal.add(newVal);
 			}
 		}
 	}
@@ -311,20 +295,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		for (Iterator it = new HashMap(mapVal).keySet().iterator(); it.hasNext();) {
 			Object key = it.next();
 			Object elem = mapVal.get(key);
-			if (elem instanceof String) {
-				String strVal = (String) elem;
-				String newStrVal = parseValue(props, strVal, null);
-				if (!newStrVal.equals(strVal)) {
-					mapVal.put(key, newStrVal);
-				}
-			}
-			else if (elem instanceof RuntimeBeanReference) {
-				RuntimeBeanReference ref = (RuntimeBeanReference) elem;
-				String newBeanName = parseValue(props, ref.getBeanName(), null);
-				if (!newBeanName.equals(ref.getBeanName())) {
-					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					mapVal.put(key, newRef);
-				}
+			Object newVal = parseValue(props, elem);
+			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
+				mapVal.put(key, newVal);
 			}
 		}
 	}
@@ -332,7 +305,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	/**
 	 * Parse values recursively to be able to resolve cross-references between placeholder values.
 	 */
-	protected String parseValue(Properties props, String strVal, String originalPlaceholder) throws BeansException {
+	protected String parseString(Properties props, String strVal, String originalPlaceholder)
+	    throws BeansException {
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
@@ -356,7 +330,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 					propVal = System.getProperty(placeholder);
 				}
 				if (propVal != null) {
-					propVal = parseValue(props, propVal, originalPlaceholder);
+					propVal = parseString(props, propVal, originalPlaceholder);
 					logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
 					strVal = strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
 					startIndex = strVal.indexOf(this.placeholderPrefix, startIndex + propVal.length());
