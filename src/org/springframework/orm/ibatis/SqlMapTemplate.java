@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.RowHandler;
 import com.ibatis.db.sqlmap.SqlMap;
@@ -14,24 +16,44 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 
 /**
- * Helper class that simplifies data access via the MappedStatement API of the iBATIS
- * Database Layer, and converts checked SQLExceptions into unchecked DataAccessExceptions,
- * compatible to the org.springframework.dao exception hierarchy.
- * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies data access via the MappedStatement API of the
+ * iBATIS Database Layer, and converts checked SQLExceptions into unchecked
+ * DataAccessExceptions, compatible to the org.springframework.dao exception
+ * hierarchy. Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
- * <p>The main method is executeInMappedStatement, taking the name of a mapped statement
- * defined in the iBATIS SqlMap config file and a callback implementation that
- * represents a data access action on the specified statement.
+ * <p>The main method is execute, taking the name of a mapped statement defined
+ * in the iBATIS SqlMap config file and a callback that implements a data access
+ * action on the specified statement.
  *
  * @author Juergen Hoeller
  * @since 28.11.2003
+ * @see #execute
+ * @see #setSqlMap
+ * @see #setDataSource
+ * @see #setExceptionTranslator
  */
 public class SqlMapTemplate extends JdbcAccessor {
 
 	private SqlMap sqlMap;
 
 	/**
-	 * Set the iBATIS Database Layer SqlMap to work with.
+	 * Create a new SqlMapTemplate.
+	 */
+	public SqlMapTemplate() {
+	}
+
+	/**
+	 * Create a new SqlMapTemplate.
+	 * @param dataSource JDBC DataSource to obtain connections from
+	 * @param sqlMap iBATIS SqlMap that defines the mapped statements
+	 */
+	public SqlMapTemplate(DataSource dataSource, SqlMap sqlMap) {
+		setDataSource(dataSource);
+		this.sqlMap = sqlMap;
+	}
+
+	/**
+	 * Set the iBATIS Database Layer SqlMap that defines the mapped statements.
 	 */
 	public void setSqlMap(SqlMap sqlMap) {
 		this.sqlMap = sqlMap;
@@ -43,6 +65,7 @@ public class SqlMapTemplate extends JdbcAccessor {
 	public SqlMap getSqlMap() {
 		return sqlMap;
 	}
+
 
 	/**
 	 * Execute the given data access action on the given mapped statement.
