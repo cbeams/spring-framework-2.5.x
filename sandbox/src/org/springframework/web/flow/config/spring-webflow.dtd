@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-	Web flow DTD
+	Spring Web Flow DTD
 	Authors: Erwin Vervaet, Keith Donald
 	
 	This DTD defines the web flow XML syntax. Web flows capture the page flow
@@ -9,26 +9,26 @@
 
 	XML documents that conform to this DTD should declare the following doctype:
 
-	<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-		"http://www.springframework.org/dtd/web-flow.dtd">
+	<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+		"http://www.springframework.org/dtd/spring-webflow.dtd">
 -->
 
 <!--
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT web-flow ( (action-state | view-state | subflow-state | end-state)+ )>
+<!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state)+ )>
 
 <!--
 	Unique id of the web flow.
 -->
-<!ATTLIST web-flow id ID #REQUIRED>
+<!ATTLIST webflow id ID #REQUIRED>
 
 <!--
 	Identifies the start state of the flow: the state where flow
 	execution will begin.
 -->
-<!ATTLIST web-flow start-state IDREF #REQUIRED>
+<!ATTLIST webflow start-state IDREF #REQUIRED>
 
 <!--
 	Defines an action state: a state where an action is executed.
