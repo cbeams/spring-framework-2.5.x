@@ -17,9 +17,9 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.ResultReader;
 
 /**
- * Reusable RDBMS query in which concrete subclasses must
- * implement the abstract mapRow(ResultSet, int) method to map each row
- * of the JDBC ResultSet into an object.
+ * Reusable RDBMS query in which concrete subclasses must implement
+ * the abstract mapRow(ResultSet, int) method to map each row of
+ * the JDBC ResultSet into an object.
  *
  * <p>Such manual mapping is usually preferable to "automatic"
  * mapping using reflection, which can become complex in non-trivial
@@ -70,15 +70,15 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * of the ResultSet into an object of the result type.
 	 * @param rs ResultSet we're working through
 	 * @param rowNum row number (from 0) we're up to
-	 * @return an object of the result type
-	 * @throws SQLException if there's an error extracting data.
-	 * Subclasses can simply not catch SQLExceptions, relying on the
-	 * framework to clean up.
 	 * @param parameters to the query (passed to the execute() method).
 	 * Subclasses are rarely interested in these.
 	 * It can be null if there are no parameters.
 	 * @param context passed to the execute() method.
 	 * It can be null if no contextual information is need.
+	 * @return an object of the result type
+	 * @throws SQLException if there's an error extracting data.
+	 * Subclasses can simply not catch SQLExceptions, relying on the
+	 * framework to clean up.
 	 */
 	protected abstract Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context) throws SQLException;
 
@@ -90,7 +90,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	private class ResultReaderImpl implements ResultReader {
 
 		/** List to save results in */
-		private List l;
+		private List results;
 
 		private Object[] params;
 
@@ -99,21 +99,21 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 		private int rowNum = 0;
 
 		/**
-		 * Use an array list. More efficient if we know how many results to expect.
+		 * Use an array results. More efficient if we know how many results to expect.
 		 */
 		public ResultReaderImpl(int rowsExpected, Object[] parameters, Map context) {
 			// Use the more efficient collection if we know how many rows to expect
-			this.l = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
+			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 			this.params = parameters;
 			this.context = context;
 		}
 
 		public void processRow(ResultSet rs) throws SQLException {
-			l.add(mapRow(rs, rowNum++, params, context));
+			results.add(mapRow(rs, rowNum++, params, context));
 		}
 
 		public List getResults() {
-			return l;
+			return results;
 		}
 	}
 

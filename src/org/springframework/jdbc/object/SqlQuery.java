@@ -27,7 +27,7 @@ import org.springframework.jdbc.core.ResultReader;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
- * @version $Id: SqlQuery.java,v 1.1.1.1 2003-08-14 16:20:33 trisberg Exp $
+ * @version $Id: SqlQuery.java,v 1.2 2003-08-26 17:24:44 jhoeller Exp $
  */
 public abstract class SqlQuery extends SqlOperation {
 
@@ -64,37 +64,25 @@ public abstract class SqlQuery extends SqlOperation {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Gets the number of rows expected. This can be used to ensure
-	 * efficient storage of results. The default behavior
-	 * is not to expect any specific number of rows.
-	 * @return Returns a int
-	 */
-	public int getRowsExpected() {
-		return rowsExpected;
-	}
-
-	/**
-	 * Sets the number of rows expected.
-	 * @param rowsExpected The rowsExpected to set
+	 * Set the number of rows expected. This can be used to ensure
+	 * efficient storage of results. The default behavior is not to
+	 * expect any specific number of rows.
 	 */
 	public void setRowsExpected(int rowsExpected) {
 		this.rowsExpected = rowsExpected;
 	}
 
+	/**
+	 * Get the number of rows expected.
+	 */
+	public int getRowsExpected() {
+		return rowsExpected;
+	}
+
+
 	//-------------------------------------------------------------------------
 	// Execute methods
 	//-------------------------------------------------------------------------
-	/**
-	 * Subclasses must implement this method to save a List of objects
-	 * returned by the execute() method.
-	 * @param rowsExpected If 0, we don't know how many rows to expect.
-	 * This parameter can be ignored, but may help some implementations
-	 * choose the most efficient Collection type: e.g. ArrayList
-	 * instead of LinkedList for large result sets.
-	 * @param parameters parameters to the execute() method, in case subclass is interested.
-	 * May be null if there were no parameters.
-	 */
-	protected abstract ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context);
 
 	/**
 	 * All execution goes through this method
@@ -109,7 +97,6 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public final List execute(final Object[] parameters, Map context) throws DataAccessException {
 		validateParameters(parameters);
-
 		ResultReader rr = newResultReader(this.rowsExpected, parameters, context);
 		getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
 		return rr.getResults();
@@ -123,7 +110,6 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public final List execute(final Object[] parameters) throws DataAccessException {
 		validateParameters(parameters);
-
 		return execute(parameters, null);
 	}
 
@@ -290,6 +276,23 @@ public abstract class SqlQuery extends SqlOperation {
 	public final Object findObject(long p1) throws DataAccessException {
 		return findObject(p1, null);
 	}
+
+
+	//-------------------------------------------------------------------------
+	// Methods to be implemented by subclasses
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Subclasses must implement this method to save a List of objects
+	 * returned by the execute() method.
+	 * @param rowsExpected If 0, we don't know how many rows to expect.
+	 * This parameter can be ignored, but may help some implementations
+	 * choose the most efficient Collection type: e.g. ArrayList
+	 * instead of LinkedList for large result sets.
+	 * @param parameters parameters to the execute() method, in case subclass is interested.
+	 * May be null if there were no parameters.
+	 */
+	protected abstract ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context);
 
 	/**
 	 * Subclasses can override this method to implement custom behavior on
