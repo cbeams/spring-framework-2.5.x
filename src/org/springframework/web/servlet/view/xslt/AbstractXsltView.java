@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.xslt;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -167,7 +168,10 @@ public abstract class AbstractXsltView extends AbstractView {
 			logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
 		}
 		try {
-			return new StreamSource(stylesheetLocation.getInputStream());
+			URL url = stylesheetLocation.getURL(); 
+			String urlPath = url.toString(); 
+			String systemId = urlPath.substring(0, urlPath.lastIndexOf('/') + 1); 
+			return new StreamSource(url.openStream(), systemId);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("Can't load XSLT stylesheet from " + stylesheetLocation, ex);
