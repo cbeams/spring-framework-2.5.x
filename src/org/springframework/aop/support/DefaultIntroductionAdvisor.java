@@ -40,12 +40,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	
 	private Set interfaces = new HashSet();
 	
-	public DefaultIntroductionAdvisor(IntroductionAdvice advice) {
-		this.advice = advice;
-	}
-	
 	public DefaultIntroductionAdvisor(IntroductionAdvice advice, Class clazz) {
-		this(advice);
+		this.advice = advice;
 		addInterface(clazz);
 	}
 	
@@ -53,7 +49,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * Wrap the given interceptor and introduce all interfaces.
 	 */
 	public DefaultIntroductionAdvisor(IntroductionAdviceSupport introductionAdviceSupport) {
-		this((IntroductionAdvice) introductionAdviceSupport);
+		this.advice = introductionAdviceSupport;
 		Class[] introducedInterfaces = introductionAdviceSupport.getIntroducedInterfaces();
 		if (introducedInterfaces.length == 0) {
 			throw new IllegalArgumentException("IntroductionAdviceSupport implements no interfaces");
