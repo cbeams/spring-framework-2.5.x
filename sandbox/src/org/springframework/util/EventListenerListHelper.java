@@ -451,7 +451,9 @@ public class EventListenerListHelper implements Serializable {
 		if (listeners == null) {
 			return Array.newInstance(listenerClass, 0);
 		} else {
-			return listeners.clone();
+			Object copy = Array.newInstance(listenerClass, listeners.length);
+			System.arraycopy(this.listeners, 0, copy, 0, listeners.length);
+			return copy;
 		}
 	}
 	

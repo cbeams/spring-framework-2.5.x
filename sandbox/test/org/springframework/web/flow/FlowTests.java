@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-
 import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
