@@ -94,7 +94,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -476,6 +476,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected long getLastModified(HttpServletRequest request) {
 		try {
 			HandlerExecutionChain mappedHandler = getHandler(request);
+			if (mappedHandler == null || mappedHandler.getHandler() == null) {
+				// ignore -> will reappear on doService
+				logger.debug("No handler found in getLastModified");
+				return -1;
+			}
+
 			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 			long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
 			logger.debug("Last-Modified value for [" + WebUtils.getRequestUri(request) + "] is [" + lastModified + "]");
@@ -483,7 +489,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (ServletException ex) {
 			// ignore -> will reappear on doService
-			logger.debug("Exception thrown on getLastModified", ex);
+			logger.debug("Exception thrown in getLastModified", ex);
 			return -1;
 		}
 	}
