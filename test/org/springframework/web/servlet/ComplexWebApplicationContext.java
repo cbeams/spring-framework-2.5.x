@@ -390,7 +390,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
 			if (request.getAttribute("fail") != null) {
-				throw new MaxUploadSizeExceededException("failed");
+				throw new MaxUploadSizeExceededException(1000);
 			}
 			if (request instanceof MultipartHttpServletRequest) {
 				throw new IllegalStateException("Already a multipart request");
