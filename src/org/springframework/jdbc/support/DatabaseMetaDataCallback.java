@@ -20,18 +20,17 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /** 
- * A callback interfaces used by the JdbcTemplate class. Implementations of this interface 
- * perform the actual work of extracting database meta data, but don't need to worry about 
- * exception handling. SQLExceptions will be caught and handled correctly by the 
- * JdbcUtils class.
+ * A callback interface used by the JdbcUtils class. Implementations of this
+ * interface perform the actual work of extracting database meta data, but
+ * don't need to worry about exception handling. SQLExceptions will be caught
+ * and handled correctly by the  JdbcUtils class.
  * @author Thomas Risberg
  */
-public interface DatabaseMetaDataCallbackHandler {
+public interface DatabaseMetaDataCallback {
 	
 	/** 
 	 * Implementations must implement this method to process the meta data
-	 * passed in. Exactly what the implementation chooses
-	 * to do is up to it.
+	 * passed in. Exactly what the implementation chooses to do is up to it.
 	 * @param dbmd the DatabaseMetaData to process
 	 * @throws SQLException if a SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)

@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -34,16 +35,16 @@ import org.springframework.core.io.Resource;
 
 /**
  * Factory for creating SQLErrorCodes based on the
- * databaseProductName taken from the DatabaseMetaData.
+ * "databaseProductName" taken from the DatabaseMetaData.
  *
  * <p>Returns SQLErrorCodes populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
  * Reads the default file in this package if not overridden by a file
- * in the root of the classpath (e.g. in the WEB-INF/classes directory).
+ * in the root of the classpath (e.g. in the "/WEB-INF/classes" directory).
  *
  * @author Thomas Risberg
  * @author Rod Johnson
- * @version $Id: SQLErrorCodesFactory.java,v 1.11 2004-04-21 01:12:34 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.12 2004-04-22 07:45:02 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -86,7 +87,7 @@ public class SQLErrorCodesFactory {
 	/**
 	* Create a Map to hold database product name retreived from database metadata.
 	*/
-	private Map dataSourceProductName = new HashMap(10);
+	private final Map dataSourceProductName = new HashMap(10);
 
 	/**
 	 * Not public to enforce Singleton design pattern.
@@ -159,7 +160,7 @@ public class SQLErrorCodesFactory {
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
 		logger.info("Looking up default SQLErrorCodes for DataSource");
 		
-        // Lets avoid looking up database product info if we can.
+        // Let's avoid looking up database product info if we can.
         Integer dataSourceHash = new Integer(ds.hashCode());
         if (dataSourceProductName.containsKey(dataSourceHash)) {
             String dataSourceDbName = (String)dataSourceProductName.get(dataSourceHash);
@@ -170,7 +171,7 @@ public class SQLErrorCodesFactory {
 
         // We could not find it - got to look it up.
         try {
-	        Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallbackHandler() {
+	        Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallback() {
 	        	public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
 	        		Map info = new HashMap(2);
 	        		if (dbmd != null) {

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -35,7 +36,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.8 2004-04-21 01:12:34 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.9 2004-04-22 07:45:02 jhoeller Exp $
  */
 public class JdbcUtils {
 
@@ -75,24 +76,28 @@ public class JdbcUtils {
 
 	/**
 	 * Extract database meta data.
-	 * This method will open a connection to the database and retrieve the database metadata.
+	 * <p>This method will open a connection to the database and retrieve the database metadata.
 	 * Since this method is called before the exception translation feature is configured for
 	 * a datasource, this method can not rely on the SQLException translation functionality.
-	 * Any exceptions will be wrapped in a MetaDataAccessException.  This is a checked exception
-	 * and any calling code should catch and handle this exception.  You can just log the
+	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked exception
+	 * and any calling code should catch and handle this exception. You can just log the
 	 * error and hope for the best, but there is probably a more serious error that will
-	 * reappear when you try to access the database again.   
-	 * @param call back handler that will do the actual work
+	 * reappear when you try to access the database again.
+	 * @param dataSource the DataSource to use
+	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information
 	 */
-	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallbackHandler cbh) throws MetaDataAccessException {
+	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
+			throws MetaDataAccessException {
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(dataSource);
-			if (con != null)
-				return cbh.processMetaData(con.getMetaData());
-			else
+			if (con != null) {
+				return action.processMetaData(con.getMetaData());
+			}
+			else {
 				throw new MetaDataAccessException("Error while getting connection");
+			}
 		}
 		catch (CannotGetJdbcConnectionException ex) {
 			//throw checked exception - we don't want this to be fatal?
