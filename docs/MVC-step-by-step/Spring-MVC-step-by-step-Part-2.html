@@ -1,53 +1,54 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
 	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Win32)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030828;22302900">
+	<META NAME="CHANGEDBY" CONTENT="Thomas Risberg">
+	<META NAME="CHANGED" CONTENT="20031014;23585069">
 	<STYLE>
 	<!--
-		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
-		TD P { margin-bottom: 0.21cm }
-		P { margin-bottom: 0.21cm }
+		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
+		TD P { margin-bottom: 0.08in }
+		P { margin-bottom: 0.08in }
 	-->
 	</STYLE>
 </HEAD>
-<BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
+<BODY LANG="en-US" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><FONT SIZE=4><B>Developing
 a Spring Framework MVC applicaton step-by-step</B></FONT></P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 2 – Developing and
-Configuring the Application</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 2 &ndash; Developing
+and Configuring the Application</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Thomas Risberg</B>
 <BR>July, 2003</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">This is Part 2 of a step-by-step
+<P STYLE="margin-bottom: 0in">This is Part 2 of a step-by-step
 account of how to develop a web application from scratch using the
-Spring Framework. In Part 1 (Steps 1 – 12) we configured the
+Spring Framework. In Part 1 (Steps 1 &ndash; 12) we configured the
 environment and set up a basic application that we will build upon.</P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">This is what we
+<P STYLE="margin-bottom: 0in; font-weight: medium">This is what we
 have to start with.</P>
 <OL>
-	<LI><P STYLE="margin-bottom: 0cm">An introduction page <B>index.jsp</B>.</P>
-	<LI><P STYLE="margin-bottom: 0cm; font-weight: medium">A
+	<LI><P STYLE="margin-bottom: 0in">An introduction page <B>index.jsp</B>.</P>
+	<LI><P STYLE="margin-bottom: 0in; font-weight: medium">A
 	DispatcherServlet with a corresponding <B>springapp-servlet.xml</B>
 	configuration file.</P>
-	<LI><P STYLE="margin-bottom: 0cm">A controller
+	<LI><P STYLE="margin-bottom: 0in">A controller
 	<B>springappController.java</B>.</P>
-	<LI><P STYLE="margin-bottom: 0cm">A view <B>hello.jsp</B>.</P>
+	<LI><P STYLE="margin-bottom: 0in">A view <B>hello.jsp</B>.</P>
 </OL>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">We will now
+<P STYLE="margin-bottom: 0in; font-weight: medium">We will now
 improve on these parts to build a more useful application.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 13 – Improve index.jsp</B></P>
-<P STYLE="margin-bottom: 0cm">We will make use of JSP Standard Tag
+<P STYLE="margin-bottom: 0in"><B>Step 13 &ndash; Improve index.jsp</B></P>
+<P STYLE="margin-bottom: 0in">We will make use of JSP Standard Tag
 Library (JSTL) so I will start by copying the JSTL files we need to
 our WEB-INF/lib directory. Copy jstl.jar and standard.jar from the
-spring-framework-1.0-m1/lib/jstl directory to the
-springapp/war/WEB-INF/lib directory. I am also creating a “header”
+spring-framework-1.0-m2/lib/jstl directory to the
+springapp/war/WEB-INF/lib directory. I am also creating a &ldquo;header&rdquo;
 file that will be included in every JSP page that I'm going to write.
 This will make development easier and I will be sure that I have the
 same definitions in all JSPs. I am going to put all JSPs in a
@@ -76,7 +77,7 @@ examples that will follow.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now we can change index.jsp to use this
+<P STYLE="margin-bottom: 0in">Now we can change index.jsp to use this
 include and since we are using JSTL we can use the &lt;c:redirect&gt;
 tag for redirecting to our Controller. This ties the index.jsp into
 our application framework.</P>
@@ -97,10 +98,10 @@ our application framework.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 14 – Improve the view and the
-controller</B></P>
+<P STYLE="margin-bottom: 0in"><B>Step 14 &ndash; Improve the view and
+the controller</B></P>
 <P>I am going to move the view hello.jsp to the WEB-INF/jsp
 directory. The same include that was added to index.jsp gets added to
 hello.jsp. I also add the current date and time as output that I will
@@ -130,7 +131,7 @@ tag.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">For SpringappController.java there are
+<P STYLE="margin-bottom: 0in">For SpringappController.java there are
 a few changes we need to make. Change the view to
 WEB-INF/jsp/hello.jsp since we moved the file to this new location.
 Also add a string containing the current data and time as the model. 
@@ -173,17 +174,17 @@ public class SpringappController implements Controller {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now we are ready to try this after we
+<P STYLE="margin-bottom: 0in">Now we are ready to try this after we
 build and deploy this new code. We enter
 <A HREF="http://localhost:8080/springapp">http://localhost:8080/springapp</A>
 in a browser and that should pull up index.jsp, which should redirect
 to hello.htm, which in turn gets us to the controller that sends the
 data and time to the view.</P>
-<P STYLE="margin-bottom: 0cm"><IMG SRC="Spring-MVC-step-by-step-Part-2_html_1969edd8.png" NAME="Graphic1" ALIGN=LEFT WIDTH=780 HEIGHT=540 BORDER=0><BR CLEAR=LEFT><BR>
+<P STYLE="margin-bottom: 0in"><IMG SRC="Spring-MVC-step-by-step-Part-2_html_1969edd8.png" NAME="Graphic1" ALIGN=LEFT WIDTH=780 HEIGHT=540 BORDER=0><BR CLEAR=LEFT><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 15 – Decouple the view and
-the controller</B></P>
-<P STYLE="margin-bottom: 0cm">Right now the controller specifies the
+<P STYLE="margin-bottom: 0in"><B>Step 15 &ndash; Decouple the view
+and the controller</B></P>
+<P STYLE="margin-bottom: 0in">Right now the controller specifies the
 full path of the view, which creates an unnecessary dependency
 between the controller and the view. Ideally we would like to map to
 the view using a logical name, allowing us to switch the view without
@@ -233,7 +234,7 @@ and it will also support internationalization.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">So now I can remove the prefix and
+<P STYLE="margin-bottom: 0in">So now I can remove the prefix and
 suffix from the view name in the controller. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -274,22 +275,22 @@ public class SpringappController implements Controller {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Compile and deploy and the application
+<P STYLE="margin-bottom: 0in">Compile and deploy and the application
 should still work.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 16 – Add some classes for
+<P STYLE="margin-bottom: 0in"><B>Step 16 &ndash; Add some classes for
 business logic</B></P>
-<P STYLE="margin-bottom: 0cm">So far our application is not very
+<P STYLE="margin-bottom: 0in">So far our application is not very
 useful. I would like to add a little bit of business logic in form of
 a Product class and a class that will manage all the products. I name
 this management class ProductManager. In order to separate the web
 dependent logic from the business logic I will create two separate
-packages for the Java source – web and bus. If this was an
+packages for the Java source &ndash; web and bus. If this was an
 application for a real company I would name the packages something
 like com.mycompany.web and com.mycompany.bus, but since this is just
 a demo application I will keep the package names real short. The
-Product class is implemented as a JavaBean – it has the default
+Product class is implemented as a JavaBean &ndash; it has the default
 constructor (automatically provided if we don't specify any
 constructors) and getters and setters for the two instance variables
 description and price. I also make it Serializable, not necessary for
@@ -333,7 +334,7 @@ public class Product implements Serializable {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">The ProductManager holds a List of
+<P STYLE="margin-bottom: 0in">The ProductManager holds a List of
 Products, and again this this class is implemented as a JavaBean.</P>
 <TABLE WIDTH=876 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=866>
@@ -365,9 +366,9 @@ public class ProductManager implements Serializable {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next, I modify the SpringappController
+<P STYLE="margin-bottom: 0in">Next, I modify the SpringappController
 to hold a reference to this ProductManager class. As you can see, it
-is now in a separate package called web – remember to move the
+is now in a separate package called web &ndash; remember to move the
 source to this new location. I also add code to have the controller
 pass some product information to the view. The getModelAndView now
 returns a Map with both the date and time and the product manager
@@ -431,14 +432,14 @@ public class SpringappController implements Controller {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 17 – Modify the view to
+<P STYLE="margin-bottom: 0in"><B>Step 17 &ndash; Modify the view to
 display business data and add support for message bundle</B></P>
-<P STYLE="margin-bottom: 0cm">Using the JSTL &lt;c:forEach&gt; tag, I
+<P STYLE="margin-bottom: 0in">Using the JSTL &lt;c:forEach&gt; tag, I
 add a section that displays product information. I have also replaced
 the title, heading and greeting text with a JSTL &lt;fmt:message&gt;
-tag that pulls the text to display from a provided 'message' source –
+tag that pulls the text to display from a provided 'message' source &ndash;
 I will show this source in a later step. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -468,16 +469,16 @@ I will show this source in a later step.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 18 – Add some test data to
-automatically populate some business objects</B></P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">I am not going to
+<P STYLE="margin-bottom: 0in"><B>Step 18 &ndash; Add some test data
+to automatically populate some business objects</B></P>
+<P STYLE="margin-bottom: 0in; font-weight: medium">I am not going to
 add any code to load the business objects from a database just yet.
-Instead, we can “wire up” a couple of instances using Spring's
-bean and application context support. I will simply put the data I
-need as a couple of bean entries in springapp-servlet.xml. I will
-also add the messageSource entry that will pull in the messages
+Instead, we can &ldquo;wire up&rdquo; a couple of instances using
+Spring's bean and application context support. I will simply put the
+data I need as a couple of bean entries in springapp-servlet.xml. I
+will also add the messageSource entry that will pull in the messages
 resource bundle ('messages.properties') that I will create in the
 next step.</P>
 <TABLE WIDTH=939 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -551,13 +552,13 @@ next step.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 19 – Add the message bundle
-and a 'clean' target to build.xml</B></P>
-<P STYLE="margin-bottom: 0cm">I create a 'messages.properties' file
+<P STYLE="margin-bottom: 0in"><B>Step 19 &ndash; Add the message
+bundle and a 'clean' target to build.xml</B></P>
+<P STYLE="margin-bottom: 0in">I create a 'messages.properties' file
 in the war/WEB-INF/classes directory. This properties bundle so far
 has three entries matching the keys specified in the &lt;fmt:message&gt;
 tags that we added to the hello.jsp.</P>
@@ -577,7 +578,7 @@ greeting=Greetings, it is now</PRE>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Since we moved some source files
+<P STYLE="margin-bottom: 0in">Since we moved some source files
 around, it makes sense to add a 'clean' and an 'undeploy' target to
 the build scripts. I add the following entries to the build.xml file.</P>
 <TABLE WIDTH=807 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -602,19 +603,19 @@ the build scripts. I add the following entries to the build.xml file.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now stop the Tomcat server, run the
+<P STYLE="margin-bottom: 0in">Now stop the Tomcat server, run the
 clean, undeploy and deploy targets. This should remove all old class
 files, re-build the application and deploy it. Start up Tomcat again
 and you should see the following:</P>
-<P STYLE="margin-bottom: 0cm"><IMG SRC="Spring-MVC-step-by-step-Part-2_html_m3eb7013.png" NAME="Graphic2" ALIGN=LEFT WIDTH=742 HEIGHT=536 BORDER=0><BR CLEAR=LEFT><BR>
+<P STYLE="margin-bottom: 0in"><IMG SRC="Spring-MVC-step-by-step-Part-2_html_m3eb7013.png" NAME="Graphic2" ALIGN=LEFT WIDTH=742 HEIGHT=536 BORDER=0><BR CLEAR=LEFT><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
-<A HREF="Spring-MVC-step-by-step-Part-3.html" TARGET="_self">Part 3 –
+<P STYLE="margin-bottom: 0in"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
+<A HREF="Spring-MVC-step-by-step-Part-3.html" TARGET="_self">Part 3 &ndash;
 Adding Unit Tests and a Form to the Application</A></P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>
+<P STYLE="margin-bottom: 0in">Copyright &copy; 2003, Thomas Risberg</P>
 </BODY>
 </HTML>

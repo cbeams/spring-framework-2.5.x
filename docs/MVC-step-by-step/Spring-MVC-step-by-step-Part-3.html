@@ -1,43 +1,44 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
 	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Win32)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030923;22182900">
+	<META NAME="CHANGEDBY" CONTENT="Thomas Risberg">
+	<META NAME="CHANGED" CONTENT="20031015;82467">
 	<STYLE>
 	<!--
-		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
-		TD P { margin-bottom: 0.21cm }
-		P { margin-bottom: 0.21cm }
+		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
+		TD P { margin-bottom: 0.08in }
+		P { margin-bottom: 0.08in }
 	-->
 	</STYLE>
 </HEAD>
-<BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=4><B>Developing
+<BODY LANG="en-US" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><FONT SIZE=4><B>Developing
 a Spring Framework MVC applicaton step-by-step</B></FONT></P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 3 – Adding Unit
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 3 &ndash; Adding Unit
 Tests and a Form to the Application</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Thomas Risberg</B>
 <BR>July, 2003</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">This is Part 3 of a step-by-step
+<P STYLE="margin-bottom: 0in">This is Part 3 of a step-by-step
 account of how to develop a web application from scratch using the
-Spring Framework. In Part 1 (Steps 1 – 19) we configured the
+Spring Framework. In Part 1 (Steps 1 &ndash; 19) we configured the
 environment and set up a basic application that we will build upon.
 Part 2 (Steps 13-18) improved the application in several ways. We are
 now going to add some unit tests to the application.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 20 – Add unit test for the
-SpringappController</B></P>
-<P STYLE="margin-bottom: 0cm">Before we create any unit tests, we
+<P STYLE="margin-bottom: 0in"><B>Step 20 &ndash; Add unit test for
+the SpringappController</B></P>
+<P STYLE="margin-bottom: 0in">Before we create any unit tests, we
 want to prepare Ant and our build script to be able to handle this.
 Ant has a built in JUnit target, but we need to add junit.jar to
 Ant's lib directory. I used the one that came with the Spring
-distribution spring-framework-1.0-m1/lib/junit/junit.jar. Just copy
+distribution spring-framework-1.0-m2/lib/junit/junit.jar. Just copy
 this file to the lib directory in your Ant installation. I also added
 the following target to our build script. 
 </P>
@@ -81,11 +82,11 @@ the following target to our build script.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now I add a new sub-directory in the
+<P STYLE="margin-bottom: 0in">Now I add a new sub-directory in the
 src directory that I name tests. This directory will, as you might
 have guessed, contain all the unit tests. 
 </P>
-<P STYLE="margin-bottom: 0cm">After all this, we are ready to start
+<P STYLE="margin-bottom: 0in">After all this, we are ready to start
 writing the first unit test. The SpringappController depends on both
 the HttpServletRequest, HttpServletResponse and our application
 context. Since the controller does not use the request or the
@@ -146,21 +147,77 @@ public class TestSpringappController extends TestCase {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">In the setUp method, we load the
-application context that I have copied into a WEB-INF directory in
-the src/tests directory. I create a copy just so this file will work
-during tests even if the real on is changed for some reason. It is
-always good to have a stable and isolated test environment. So, copy
-springapp/war/WEB-INF/springapp-servlet.xml to
-springapp/src/tests/WEB-INF directory. The only test is a call to
+<P STYLE="margin-bottom: 0in">The only test is a call to
 handleRequest, and we check the products that are returned in the
-model. When you run this test, you should see a lot of log messages
-from the loading of the application context.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+model.  In the setUp method, we load the application context that I
+have copied into a WEB-INF directory in the src/tests directory. I
+create a copy just so this file will work during tests with a small
+set of beans necessary for running the tests. So, copy
+springapp/war/WEB-INF/springapp-servlet.xml to
+springapp/src/tests/WEB-INF directory. Then remove the
+&ldquo;messageSource&rdquo;, &quot;urlMapping&quot; and
+&quot;viewResolver&quot; bean entries.</P>
+<TABLE WIDTH=939 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
+	<COL WIDTH=929>
+	<TR>
+		<TD WIDTH=929 VALIGN=TOP BGCOLOR="#ffcc99">
+			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/tests/WEB-INF/springapp-servlet.xml</FONT></FONT></B>
+						</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=929 VALIGN=TOP BGCOLOR="#ffffcc">
+			<PRE>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE beans PUBLIC &quot;-//SPRING//DTD BEAN//EN&quot; &quot;http://www.springframework.org/dtd/spring-beans.dtd&quot;&gt;
+
+&lt;!--
+  - Application context definition for &quot;springapp&quot; DispatcherServlet.
+  --&gt;
+
+
+&lt;beans&gt;
+    &lt;bean id=&quot;springappController&quot; class=&quot;web.SpringappController&quot;<FONT COLOR="#800000">&gt;</FONT>
+<FONT COLOR="#800000">        <FONT COLOR="#000000">&lt;property name=&quot;productManager&quot;&gt;</FONT></FONT>
+<FONT COLOR="#000000">            &lt;ref bean=&quot;prodMan&quot;/&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;prodMan&quot; class=&quot;bus.ProductManager&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;products&quot;&gt;</FONT>
+<FONT COLOR="#000000">            &lt;list&gt;</FONT>
+<FONT COLOR="#000000">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
+<FONT COLOR="#000000">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
+<FONT COLOR="#000000">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
+<FONT COLOR="#000000">            &lt;/list&gt;</FONT>
+<FONT COLOR="#000000">        &lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+<FONT COLOR="#000000">        </FONT>
+<FONT COLOR="#000000">    &lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+<FONT COLOR="#000000">    &lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">        &lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
+
+&lt;/beans&gt;        </PRE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0in">When you run this test, you should see
+a lot of log messages from the loading of the application context.</P>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 21 – Add unit test and new
-functionality for ProductManager</B></P>
-<P STYLE="margin-bottom: 0cm">Next I add a test case for the
+<P STYLE="margin-bottom: 0in"><B>Step 21 &ndash; Add unit test and
+new functionality for ProductManager</B></P>
+<P STYLE="margin-bottom: 0in">Next I add a test case for the
 ProductManager, and I also add a test for a new method to increase
 the prices that I am planning on adding to the ProductManager.</P>
 <TABLE WIDTH=908 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -221,7 +278,7 @@ public class TestProductManager extends TestCase {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">For this test, there is no need to
+<P STYLE="margin-bottom: 0in">For this test, there is no need to
 create an application context. I just create a couple of products in
 the setUp method and add them to the product manager. I add tests for
 both getProducts and increasePrice. The increasePrice method is a
@@ -269,20 +326,20 @@ public class ProductManager implements Serializable {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next I build and run the tests. As you
-can see, this test is just like any regular test – the business
+<P STYLE="margin-bottom: 0in">Next I build and run the tests. As you
+can see, this test is just like any regular test &ndash; the business
 classes don't depend on any of the servlet classes so these classes
 are very easy to test. 
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 22 – Adding a form</B></P>
-<P STYLE="margin-bottom: 0cm">To provide an interface in the web
+<P STYLE="margin-bottom: 0in"><B>Step 22 &ndash; Adding a form</B></P>
+<P STYLE="margin-bottom: 0in">To provide an interface in the web
 application, I add a form that will allow the user to enter a
-percentage value. This form uses a tag library named “spring”
+percentage value. This form uses a tag library named &ldquo;spring&rdquo;
 that is provided with the Spring Framework. We have to copy this file
 from the Spring distribution
-spring-framework-1.0-m1/samples/petclinic/war/WEB-INF/spring.tld to
+spring-framework-1.0-m2/samples/petclinic/war/WEB-INF/spring.tld to
 the springapp/war/WEB-INF directory. Now we must also add a &lt;taglib&gt;
 entry to web.xml.</P>
 <TABLE WIDTH=1004 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -326,7 +383,7 @@ entry to web.xml.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">We also have to declare this taglib in
+<P STYLE="margin-bottom: 0in">We also have to declare this taglib in
 a page directive in the jsp file. We declare a form the normal way
 with a &lt;form&gt; tag and an &lt;input&gt; text field and a submit
 button. 
@@ -375,7 +432,7 @@ button.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">The &lt;spring:bind&gt; tag is used to
+<P STYLE="margin-bottom: 0in">The &lt;spring:bind&gt; tag is used to
 bind an &lt;input&gt; form element to a command object
 PriceIncrease.java, that is used together with the form. This command
 object is later passed in to the validator and if it passes
@@ -417,7 +474,7 @@ public class PriceIncrease {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">This is a very simple JavaBean class,
+<P STYLE="margin-bottom: 0in">This is a very simple JavaBean class,
 and in our case there is a single property with a getter and setter.
 The validator class gets control after the user presses submit. The
 values entered in the form will be set on the command object by the
@@ -586,7 +643,7 @@ and a view where output will go after successful form processing.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next, let's take a look at the
+<P STYLE="margin-bottom: 0in">Next, let's take a look at the
 controller for this form. The onSubmit method gets control and does
 some logging before it calls the increasePrice method on the
 ProductManager object. It then returns a ModelAndView to the
@@ -667,7 +724,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">We are also adding some messages to the
+<P STYLE="margin-bottom: 0in">We are also adding some messages to the
 messages.properties resource file.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -691,7 +748,7 @@ greeting=Greetings, it is now
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Finally, we have to provide a link to
+<P STYLE="margin-bottom: 0in">Finally, we have to provide a link to
 the priceincrease page from the hello.jsp.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -723,22 +780,22 @@ the priceincrease page from the hello.jsp.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Compile and deploy all this and after
+<P STYLE="margin-bottom: 0in">Compile and deploy all this and after
 reloading the application we can test it. This is what the form looks
 like with errors displayed.</P>
-<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-Step22.png"><IMG SRC="Spring-MVC-Step22.png" NAME="Graphic1" ALIGN=LEFT WIDTH=728 HEIGHT=506 BORDER=0><BR CLEAR=LEFT></A><BR>
+<P STYLE="margin-bottom: 0in"><A HREF="Spring-MVC-Step22.png"><IMG SRC="Spring-MVC-Step22.png" NAME="Graphic1" ALIGN=LEFT WIDTH=728 HEIGHT=506 BORDER=0><BR CLEAR=LEFT></A><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">You can try this application at
+<P STYLE="margin-bottom: 0in">You can try this application at
 <A HREF="http://www.springframework.org/webapps/springapp">http://www.springframework.org/webapps/springapp</A>.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
-<A HREF="Spring-MVC-step-by-step-Part-4.html" TARGET="_self">Part 4 –
+<P STYLE="margin-bottom: 0in"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
+<A HREF="Spring-MVC-step-by-step-Part-4.html" TARGET="_self">Part 4 &ndash;
 Implementing Database Persistence</A></P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>
+<P STYLE="margin-bottom: 0in">Copyright &copy; 2003, Thomas Risberg</P>
 </BODY>
 </HTML>

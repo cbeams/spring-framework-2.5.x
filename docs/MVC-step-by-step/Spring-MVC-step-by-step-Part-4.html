@@ -1,31 +1,32 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
 	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Win32)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030829;13421100">
+	<META NAME="CHANGEDBY" CONTENT="Thomas Risberg">
+	<META NAME="CHANGED" CONTENT="20031015;33802">
 	<STYLE>
 	<!--
-		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
-		TD P { margin-bottom: 0.21cm }
-		P { margin-bottom: 0.21cm }
+		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
+		TD P { margin-bottom: 0.08in }
+		P { margin-bottom: 0.08in }
 	-->
 	</STYLE>
 </HEAD>
-<BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>Developing
-a Spring Framework MVC application step-by-step</FONT></B></P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 4 – Implementing
-Database Persistence</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
+<BODY LANG="en-US" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><FONT SIZE=4><B>Developing
+a Spring Framework MVC application step-by-step</B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 4 &ndash;
+Implementing Database Persistence</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Thomas Risberg</B>
 <BR>August, 2003</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">This is Part 4 of a step-by-step
+<P STYLE="margin-bottom: 0in">This is Part 4 of a step-by-step
 account of how to develop a web application from scratch using the
-Spring Framework. In Part 1 (Steps 1 – 12) we configured the
+Spring Framework. In Part 1 (Steps 1 &ndash; 12) we configured the
 environment and set up a basic application that we will build upon.
 Part 2 (Steps 13-18) improved the application in several ways. Part 3
 (Steps 19-22) Added some unit tests to the application and we also
@@ -33,30 +34,32 @@ added a Form for performing a price increase. In Part 4 it is time to
 deal with database persistence. We saw in the earlier parts how we
 loaded some business objects using bean definitions in a
 configuration file. It is obvious that this would never work in real
-life – whenever we re-start the server we are back to the original
-prices. We need to add code to actually persist these changes to a
-database.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+life &ndash; whenever we re-start the server we are back to the
+original prices. We need to add code to actually persist these
+changes to a database.</P>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<DIV ID="Section1" STYLE="background: #e6e6ff">
-	<P STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>NOTE:</FONT></B><I> If
+<DIV ID="Section1" DIR="LTR" STYLE="background: #e6e6ff">
+	<P STYLE="margin-bottom: 0in"><B><FONT SIZE=4>NOTE:</FONT></B> <I>If
 	you started this project based on the 'spring-framework-0.9'
-	release, then there are a few changes you will have to make. In the
-	'spring-framework-1.0-m1' release, we have changed the package names
-	and the name of the the TLD.</I></P>
+	release, then there are a few changes you will have to make. Since
+	the 'spring-framework-1.0-m1' release, we have changed the package
+	names and the name of the the TLD.  These instructions assume that
+	you now are using the latest 'spring-framework-1.0-m2' release.</I></P>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>We need to replace Spring's
-		distribution jar file - copy </I>spring-framework-1.0-m1/dist/spring.jar<I>
-		to replace </I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
+		<LI><P STYLE="margin-bottom: 0in"><I>We need to replace Spring's
+		distribution jar file - copy
+		</I>spring-framework-1.0-m2/dist/spring.jar <I>to replace
+		</I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
 	</UL>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>We also need to replace the
+		<LI><P STYLE="margin-bottom: 0in"><I>We also need to replace the
 		TLD file - copy
-		</I>spring-framework-1.0-m1/samples/petclinic/war/WEB-INF/spring.tld<I>
-		to replace </I>springapp/war/WEB-INF/i21.tld.</P>
+		</I>spring-framework-1.0-m2/samples/petclinic/war/WEB-INF/spring.tld
+		<I>to replace </I>springapp/war/WEB-INF/i21.tld.</P>
 	</UL>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>Do a global change from
+		<LI><P STYLE="margin-bottom: 0in"><I>Do a global change from
 		'com.interface21' to 'org.springframework' in the following files</I>:</P>
 	</UL>
 	<PRE><FONT COLOR="#000000">        src/bus/PriceIncreaseValidator.java</FONT>
@@ -67,35 +70,35 @@ database.</P>
 <FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
 <FONT COLOR="#000000">        war/WEB-INF/springapp-servlet.xml</FONT></PRE>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>Do a global change from 'i21'
+		<LI><P STYLE="margin-bottom: 0in"><I>Do a global change from 'i21'
 		to 'spring' in the following files: </I>
 		</P>
 	</UL>
-	<PRE STYLE="font-style: normal"><FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
+	<PRE><FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
 <FONT COLOR="#000000">        war/WEB-INF/jsp/priceincrease.jsp</FONT></PRE>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm"><I>Remove i21.tld and
+		<LI><P STYLE="margin-bottom: 0in"><I>Remove i21.tld and
 		spring-full-0.9.jar from the deployment directory for Tomcat. I
 		removed the following files: </I>
 		</P>
 	</UL>
 	<PRE><FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/i21.tld</FONT>
-<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-full-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0cm; font-style: normal">
+<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-full-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0in; font-style: normal">
 	<FONT COLOR="#000000">After all these changes, deploy and test the
 	application.</FONT></P>
 </DIV>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 23 – Add Ant tasks to create
-and load test data</B></P>
-<P STYLE="margin-bottom: 0cm">Before we can start developing the
+<P STYLE="margin-bottom: 0in"><B>Step 23 &ndash; Add Ant tasks to
+create and load test data</B></P>
+<P STYLE="margin-bottom: 0in">Before we can start developing the
 persistence code, we should create the database tables that we need
 for our development and testing. We also need a database. I am
 planning on using HSQL, which is a good open source database written
 in Java. This database is distributed with Spring's Petclinic sample
 application, so we can just copy the jar file to the web apps lib
 directory. Copy
-spring-framework-1.0-m1/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
+spring-framework-1.0-m2/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
 to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a
 standalone mode to begin with. That way we don't have to worry about
 starting up a separate database server every time we use it. The URL
@@ -131,7 +134,7 @@ tomcat.manager.password=tomcat
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next I add the targets I need to the
+<P STYLE="margin-bottom: 0in">Next I add the targets I need to the
 build script. There are targets to create and delete tables and to
 load and delete test data. 
 </P>
@@ -219,10 +222,10 @@ load and delete test data.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now I execute some of these tasks to
+<P STYLE="margin-bottom: 0in">Now I execute some of these tasks to
 set up the test database. This will create a db folder under the
-springapp directory. Run 'ant createTables loadData printData' – I
-have included my output below.</P>
+springapp directory. Run 'ant createTables loadData printData' &ndash;
+I have included my output below.</P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -255,16 +258,16 @@ have included my output below.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 24 – Create a Data Access
+<P STYLE="margin-bottom: 0in"><B>Step 24 &ndash; Create a Data Access
 Object (DAO) implementation for JDBC.</B></P>
-<P STYLE="margin-bottom: 0cm">I begin with creating a new
+<P STYLE="margin-bottom: 0in">I begin with creating a new
 'springapp/src/db' directory to contain any classes that are used for
 database access. In this directory I create a new interface called
 'ProductManagerDao.java'. This will be the interface that defines the
-functionality that the DAO implementation classes will provide – we
-could choose to have more than one implementation. 
+functionality that the DAO implementation classes will provide &ndash;
+we could choose to have more than one implementation. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -291,7 +294,7 @@ could choose to have more than one implementation.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">I'll follow this with a class called
+<P STYLE="margin-bottom: 0in">I'll follow this with a class called
 'ProductManagerDaoJdbc.java' that will be the JDBC implementation of
 this interface. Spring provides a JDBC abstraction framework that we
 will make use of. The biggest difference between using straight JDBC
@@ -380,7 +383,7 @@ level.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Lets go over the two DAO methods in
+<P STYLE="margin-bottom: 0in">Lets go over the two DAO methods in
 this class. First, <FONT COLOR="#000000">getProductList()</FONT>
 creates a query object that will retrieve all the products. This
 query is executed and the results are passed back as a list of
@@ -405,22 +408,22 @@ from the current row of the resultset. You should not call getNext on
 the resultset, it is all handled by the framework. This is another
 example of an Inversion of Control solution. 
 </P>
-<P STYLE="margin-bottom: 0cm">The second method increasePrice is
+<P STYLE="margin-bottom: 0in">The second method increasePrice is
 utilizing an SqlUpdate class. This class is passed the data source
 and an SQL update statement with placeholders for parameters. Same
 syntax as a prepared statement in JDBC. In fact, that is what
 SqlUpdate creates behind the scenes. For the parameters, we have to
 give them a name and declare what type they are so that the framework
 can set them before the prepared statement is executed. After all
-parameters have been declared, we “compile” the statement in JDO
-fashion. This will signal that we are done declaring parameters, and
-the framework will check to make sure that we have a matching
-declaration for each placeholder in the SQL statement. Next we
-declare an Object array that will hold the parameter values that we
-are going to pass in to the prepared statement. This array gets
+parameters have been declared, we &ldquo;compile&rdquo; the statement
+in JDO fashion. This will signal that we are done declaring
+parameters, and the framework will check to make sure that we have a
+matching declaration for each placeholder in the SQL statement. Next
+we declare an Object array that will hold the parameter values that
+we are going to pass in to the prepared statement. This array gets
 passed into the update method of SqlUpdate. The update method does
 return the count of rows affected.</P>
-<P STYLE="margin-bottom: 0cm">I need to store the value of the
+<P STYLE="margin-bottom: 0in">I need to store the value of the
 primary key for each product in the Product class. This key will be
 used when I persist any changes to the object back to the database.
 To hold this key I add a private field named 'id' complete with
@@ -473,7 +476,7 @@ setters and getters to Product.java.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now it is time to test this whole DAO
+<P STYLE="margin-bottom: 0in">Now it is time to test this whole DAO
 setup. Actually, we probably should have written the tests first, but
 since this is a tutorial style document I think it makes more sense
 to introduce the actual code before the tests. I decided to test with
@@ -512,7 +515,7 @@ will have a consistent starting point for our tests.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next, I add a
+<P STYLE="margin-bottom: 0in">Next, I add a
 TestProductManagerDaoJdbc.java to our collection of unit tests. In
 the setup part I create a data source that will be used for testing. 
 </P>
@@ -571,14 +574,14 @@ the setup part I create a data source that will be used for testing.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">When we pass the unit tests, we can
+<P STYLE="margin-bottom: 0in">When we pass the unit tests, we can
 move on and modify the web application to make use of these new
 database persistence capabilities.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 25 – Modify web application
-to use database persistence.</B></P>
-<P STYLE="margin-bottom: 0cm">If we structured our application
+<P STYLE="margin-bottom: 0in"><B>Step 25 &ndash; Modify web
+application to use database persistence.</B></P>
+<P STYLE="margin-bottom: 0in">If we structured our application
 properly, we should only have to change the business classes to take
 advantage of the database persistence. The view and controller
 classes should not have to be modified, since they should be unaware
@@ -613,9 +616,9 @@ option.</P>
 <FONT COLOR="#800000">        this.pmd = pmd;</FONT>
 <FONT COLOR="#800000">    }</FONT>
 
-<FONT COLOR="#800000">    <STRIKE>public void setProducts(List p) {</STRIKE></FONT>
-<FONT COLOR="#800000">        <STRIKE>products = p;</STRIKE></FONT>
-<FONT COLOR="#800000">    <STRIKE>}</STRIKE></FONT>
+<FONT COLOR="#800000">    public void setProducts(List p) {</FONT>
+<FONT COLOR="#800000">        products = p;</FONT>
+<FONT COLOR="#800000">    }</FONT>
 
 <FONT COLOR="#000000">    public List getProducts() {</FONT>
 <FONT COLOR="#800000">        products = pmd.getProductList();</FONT>
@@ -637,13 +640,14 @@ option.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">We will no longer rely on the product
+<P STYLE="margin-bottom: 0in">We will no longer rely on the product
 list that we have in memory. Every time getProducts is called, we
 will go out and query the database. The increasePrice method will now
 delegate to the DAO to increase the price and the new price will be
 reflected the next time we call the getProducts method.</P>
-<P STYLE="margin-bottom: 0cm">Next we need to modify the
-configuration file for the web application – springapp-servlet.xml.</P>
+<P STYLE="margin-bottom: 0in">Next we need to modify the
+configuration file for the web application &ndash;
+springapp-servlet.xml.</P>
 <TABLE WIDTH=955 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=945>
 	<TR>
@@ -752,7 +756,7 @@ configuration file for the web application – springapp-servlet.xml.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">I remove the population of a set of
+<P STYLE="margin-bottom: 0in">I remove the population of a set of
 products that were passed in to the ProductManager. I replace this by
 adding beans for a DataSource and a ProductManagerDaoJdbc
 implementation. The URL provided for the datasource includes the full
@@ -760,7 +764,7 @@ path for the database location
 (/home/trisberg/workspace/springapp2/db/test). You will of course
 have to adjust this to match your setup. 
 </P>
-<P STYLE="margin-bottom: 0cm">Now we can build and deploy the
+<P STYLE="margin-bottom: 0in">Now we can build and deploy the
 modified application. Run 'ant undeploy deploy' to clean out any of
 the old classes and replace them with the new ones. Then fire up
 Tomcat and pull up the application. The only difference you should
@@ -768,15 +772,16 @@ see is the decimals limited to two positions due to the column being
 declared that way in the database. Also, you should see any price
 increases remaining in effect even after you cycle the application
 server.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 26 – Fix the broken tests.</B></P>
-<P STYLE="margin-bottom: 0cm">We have radically changed the
-ProductManager implementation – we pushed all the functionality
+<P STYLE="margin-bottom: 0in"><B>Step 26 &ndash; Fix the broken
+tests.</B></P>
+<P STYLE="margin-bottom: 0in">We have radically changed the
+ProductManager implementation &ndash; we pushed all the functionality
 down to the ProductManagerDao implementation, so now the old tests
 fail. To fix this I will create a mock implementation of the
-ProductManagerDao.  This implementation will basically mimic the
-functionality we had in the original <SPAN LANG="en-US">ProductManager.</SPAN></P>
+ProductManagerDao. This implementation will basically mimic the
+functionality we had in the original ProductManager.</P>
 <TABLE WIDTH=907 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=897>
 	<TR>
@@ -814,16 +819,15 @@ functionality we had in the original <SPAN LANG="en-US">ProductManager.</SPAN></
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Now we have to make sure to configure
+<P STYLE="margin-bottom: 0in">Now we have to make sure to configure
 the 'TestSpringappController' and 'TestProductManager' tests to use
-this mock implementation.  For the 'TestSpringappController' I will
+this mock implementation. For the 'TestSpringappController' I will
 modify the 'springapp-servlet.xml' file that I copied into the
-tests/WEB-INF directory (I knew it<SPAN LANG="en-US"> would </SPAN>be
-a good idea to make a copy of this file).  Do not modify the one
-located in war/WEB-INF – we need that one to stay as is so we can
-run the application in Tomcat.<SPAN STYLE="font-weight: medium">  We
-move the list of products from the ProductManager to the
-ProductManagerDao and give ProductManager a reference to this DAO.</SPAN></P>
+tests/WEB-INF directory (I knew it would be a good idea to make a
+copy of this file). Do not modify the one located in war/WEB-INF &ndash;
+we need that one to stay as is so we can run the application in
+Tomcat. We move the list of products from the ProductManager to the
+ProductManagerDao and give ProductManager a reference to this DAO.</P>
 <TABLE WIDTH=966 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=956>
 	<TR>
@@ -863,13 +867,13 @@ ProductManagerDao and give ProductManager a reference to this DAO.</SPAN></P>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#800000">        <STRIKE>&lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">            <STRIKE>&lt;list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">                <STRIKE>&lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">            <STRIKE>&lt;/list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000">        <STRIKE>&lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#800000">        &lt;property name=&quot;products&quot;&gt;</FONT>
+<FONT COLOR="#800000">            &lt;list&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
+<FONT COLOR="#800000">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
+<FONT COLOR="#800000">            &lt;/list&gt;</FONT>
+<FONT COLOR="#800000">        &lt;/property&gt;</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
 <FONT COLOR="#000000">    &lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
@@ -908,7 +912,7 @@ ProductManagerDao and give ProductManager a reference to this DAO.</SPAN></P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">For the TestProductManager test case we
+<P STYLE="margin-bottom: 0in">For the TestProductManager test case we
 will make similar modifications to the setUp method.</P>
 <TABLE WIDTH=908 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=898>
@@ -945,7 +949,7 @@ public class TestProductManager extends TestCase {
         p.setDescription(&quot;Table&quot;);
         p.setPrice(new Double(&quot;150.10&quot;));
         al.add(p);
-<FONT COLOR="#800000">        <STRIKE>pm.setProducts(al);</STRIKE></FONT>
+<FONT COLOR="#800000">        pm.setProducts(al);</FONT>
 <FONT COLOR="#800000">        MockProductManagerDaoImpl pmdao = new MockProductManagerDaoImpl();</FONT>
 <FONT COLOR="#800000">        pmdao.setProducts(al);</FONT>
 <FONT COLOR="#800000">        pm.setProductManagerDao(pmdao);</FONT>
@@ -973,24 +977,24 @@ public class TestProductManager extends TestCase {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Compile everything and run the tests. 
-They should run<SPAN LANG="en-US"> successfully </SPAN>now.</P>
-<P STYLE="margin-bottom: 0cm">There are still a few things I would
+<P STYLE="margin-bottom: 0in">Compile everything and run the tests.
+They should run successfully now.</P>
+<P STYLE="margin-bottom: 0in">There are still a few things I would
 like to improve upon. To begin with, we are not using a connection
 pool which is a must for any serious web application deployment. We
 are also using HSQL in a standalone mode, which is limiting us to one
 connection at a time. This of course will not scale. Another issue
-that we are not dealing with is<SPAN LANG="en-US"> concurrency.  </SPAN>Two
-users could increase prices simultaneously and they would be a bit<SPAN LANG="en-US">
-surprised </SPAN>by seeing the combined effect of their actions. 
-I'll leave these improvements up to you for now – I might add them
-in an additional part to this document in the future.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+that we are not dealing with is concurrency. Two users could increase
+prices simultaneously and they would be a bit surprised by seeing the
+combined effect of their actions. I'll leave these improvements up to
+you for now &ndash; I might add them in an additional part to this
+document in the future.</P>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
+<P STYLE="margin-bottom: 0in"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>
+<P STYLE="margin-bottom: 0in">Copyright &copy; 2003, Thomas Risberg</P>
 </BODY>
 </HTML>
