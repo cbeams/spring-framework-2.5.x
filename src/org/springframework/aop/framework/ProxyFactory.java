@@ -14,7 +14,7 @@ import org.aopalliance.intercept.Interceptor;
  * AOP proxies in code.
  * @since 14-Mar-2003
  * @author Rod Johnson
- * @version $Id: ProxyFactory.java,v 1.2 2003-10-06 13:42:08 jhoeller Exp $
+ * @version $Id: ProxyFactory.java,v 1.3 2003-10-10 13:09:09 jhoeller Exp $
  */
 public class ProxyFactory extends DefaultProxyConfig {
 
@@ -25,7 +25,11 @@ public class ProxyFactory extends DefaultProxyConfig {
 	 * Proxy all interfaces of the given target.
 	 */
 	public ProxyFactory(Object target) throws AopConfigException {
-		addTarget(target);
+		if (target == null) {
+			throw new AopConfigException("Can't proxy null object");
+		}
+		setInterfaces(AopUtils.getAllInterfaces(target));
+		addInterceptor(new InvokerInterceptor(target));
 	}
 	
 	/**
@@ -33,15 +37,6 @@ public class ProxyFactory extends DefaultProxyConfig {
 	 */
 	public ProxyFactory(Class[] interfaces) {
 		setInterfaces(interfaces);
-	}
-
-	public void addTarget(Object target) throws AopConfigException {
-		if (target == null) {
-			throw new AopConfigException("Can't proxy null object");
-		}
-		setInterfaces(AopUtils.getAllInterfaces(target));
-		InvokerInterceptor ii = new InvokerInterceptor(target);
-		addInterceptor(ii);
 	}
 
 	/**
