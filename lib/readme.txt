@@ -78,7 +78,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's AbstractPdfView
 
 * j2ee/activation.jar
-- JavaBeans Activation Framework 1.0.1 (http://java.sun.com/products/javabeans/glasgow/jaf.html)
+- JavaBeans Activation Framework 1.0.2 (http://java.sun.com/products/javabeans/glasgow/jaf.html)
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
@@ -117,7 +117,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JtaTransactionManager
 
 * j2ee/mail.jar
-- JavaMail 1.2 (http://java.sun.com/products/javamail)
+- JavaMail 1.3.1 (http://java.sun.com/products/javamail)
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
