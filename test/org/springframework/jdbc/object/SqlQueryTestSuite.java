@@ -51,9 +51,9 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 	}
 
 	protected void tearDown() throws Exception {
-		super.tearDown();
-		ctrlPreparedStatement.verify();
-		ctrlResultSet.verify();
+		//super.tearDown();
+		//ctrlPreparedStatement.verify();
+		//ctrlResultSet.verify();
 	}
 
 	protected void replay() {
@@ -62,30 +62,25 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		ctrlResultSet.replay();
 	}
 
-	public void testQueryWithoutParams() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt(1);
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testQueryWithoutParams() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -171,84 +166,76 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		String[] dbResults = new String[] { "alpha", "beta", "charlie" };
 
 		MockControl[] ctrlCountResultSetMetaData = new MockControl[3];
-		ResultSetMetaData[] mockCountResultSetMetaData =
-			new ResultSetMetaData[3];
+		ResultSetMetaData[] mockCountResultSetMetaData = new ResultSetMetaData[3];
 		MockControl[] ctrlCountResultSet = new MockControl[3];
 		ResultSet[] mockCountResultSet = new ResultSet[3];
 		MockControl[] ctrlCountPreparedStatement = new MockControl[3];
-		PreparedStatement[] mockCountPreparedStatement =
-			new PreparedStatement[3];
+		PreparedStatement[] mockCountPreparedStatement = new PreparedStatement[3];
 
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getString(1);
-			ctrlResultSet.setReturnValue(dbResults[0]);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getString(1);
-			ctrlResultSet.setReturnValue(dbResults[1]);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getString(1);
-			ctrlResultSet.setReturnValue(dbResults[2]);
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue(dbResults[0]);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue(dbResults[1]);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue(dbResults[2]);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_FORENAME);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.prepareStatement(SELECT_FORENAME);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
-			for (int i = 0; i < dbResults.length; i++) {
-				ctrlCountResultSetMetaData[i] = MockControl.createControl(ResultSetMetaData.class);
-				mockCountResultSetMetaData[i] = (ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
-				mockCountResultSetMetaData[i].getColumnCount();
-				ctrlCountResultSetMetaData[i].setReturnValue(1);
+		for (int i = 0; i < dbResults.length; i++) {
+			ctrlCountResultSetMetaData[i] = MockControl.createControl(ResultSetMetaData.class);
+			mockCountResultSetMetaData[i] = (ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
+			mockCountResultSetMetaData[i].getColumnCount();
+			ctrlCountResultSetMetaData[i].setReturnValue(1);
 
-				ctrlCountResultSet[i] = MockControl.createControl(ResultSet.class);
-				mockCountResultSet[i] = (ResultSet) ctrlCountResultSet[i].getMock();
-				mockCountResultSet[i].getMetaData();
-				ctrlCountResultSet[i].setReturnValue(mockCountResultSetMetaData[i]);
-				mockCountResultSet[i].next();
-				ctrlCountResultSet[i].setReturnValue(true);
-				mockCountResultSet[i].getObject(1);
-				ctrlCountResultSet[i].setReturnValue(new Integer(1));
-				mockCountResultSet[i].next();
-				ctrlCountResultSet[i].setReturnValue(false);
-				mockCountResultSet[i].close();
-				ctrlCountResultSet[i].setVoidCallable();
+			ctrlCountResultSet[i] = MockControl.createControl(ResultSet.class);
+			mockCountResultSet[i] = (ResultSet) ctrlCountResultSet[i].getMock();
+			mockCountResultSet[i].getMetaData();
+			ctrlCountResultSet[i].setReturnValue(mockCountResultSetMetaData[i]);
+			mockCountResultSet[i].next();
+			ctrlCountResultSet[i].setReturnValue(true);
+			mockCountResultSet[i].getObject(1);
+			ctrlCountResultSet[i].setReturnValue(new Integer(1));
+			mockCountResultSet[i].next();
+			ctrlCountResultSet[i].setReturnValue(false);
+			mockCountResultSet[i].close();
+			ctrlCountResultSet[i].setVoidCallable();
 
-				ctrlCountPreparedStatement[i] = MockControl.createControl(PreparedStatement.class);
-				mockCountPreparedStatement[i] = (PreparedStatement) ctrlCountPreparedStatement[i].getMock();
-				mockCountPreparedStatement[i].executeQuery();
-				ctrlCountPreparedStatement[i].setReturnValue(mockCountResultSet[i]);
-				mockCountPreparedStatement[i].getWarnings();
-				ctrlCountPreparedStatement[i].setReturnValue(null);
-				mockCountPreparedStatement[i].close();
-				ctrlCountPreparedStatement[i].setVoidCallable();
+			ctrlCountPreparedStatement[i] = MockControl.createControl(PreparedStatement.class);
+			mockCountPreparedStatement[i] = (PreparedStatement) ctrlCountPreparedStatement[i].getMock();
+			mockCountPreparedStatement[i].executeQuery();
+			ctrlCountPreparedStatement[i].setReturnValue(mockCountResultSet[i]);
+			mockCountPreparedStatement[i].getWarnings();
+			ctrlCountPreparedStatement[i].setReturnValue(null);
+			mockCountPreparedStatement[i].close();
+			ctrlCountPreparedStatement[i].setVoidCallable();
 
-				mockConnection.prepareStatement(
-					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='"
-						+ dbResults[i]
-						+ "'");
-				ctrlConnection.setReturnValue(mockCountPreparedStatement[i]);
+			mockConnection.prepareStatement(
+				"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='"
+					+ dbResults[i]
+					+ "'");
+			ctrlConnection.setReturnValue(mockCountPreparedStatement[i]);
 
-				ctrlCountResultSetMetaData[i].replay();
-				ctrlCountResultSet[i].replay();
-				ctrlCountPreparedStatement[i].replay();
-			}
-
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
+			ctrlCountResultSetMetaData[i].replay();
+			ctrlCountResultSet[i].replay();
+			ctrlCountPreparedStatement[i].replay();
 		}
 
 		replay();
@@ -278,31 +265,25 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		}
 	}
 
-	public void testStringQueryWithoutResults() throws Exception {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testStringQueryWithoutResults() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_FORENAME_EMPTY);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_FORENAME_EMPTY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
-		StringQuery query =
-			new StringQuery(mockDataSource, SELECT_FORENAME_EMPTY);
+		StringQuery query =	new StringQuery(mockDataSource, SELECT_FORENAME_EMPTY);
 		String[] results = query.run();
 		assertTrue("Array is non null", results != null);
 		assertTrue("Found 0 results", results.length == 0);
@@ -363,36 +344,31 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		*/
 	}
 
-	public void testFindCustomerIntInt() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testFindCustomerIntInt() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -426,34 +402,29 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			cust.getForename().equals("rod"));
 	}
 
-	public void testFindCustomerString() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testFindCustomerString() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setString(1, "rod");
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(1, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -486,66 +457,60 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			cust.getForename().equals("rod"));
 	}
 
-	public void testFindCustomerMixed() {
+	public void testFindCustomerMixed() throws SQLException {
 		MockControl ctrlResultSet2;
 		ResultSet mockResultSet2;
 		MockControl ctrlPreparedStatement2;
 		PreparedStatement mockPreparedStatement2;
 
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setObject(1, new Integer(1), Types.INTEGER);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.setString(2, "rod");
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(1, new Integer(1), Types.INTEGER);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(2, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			ctrlResultSet2 = MockControl.createControl(ResultSet.class);
-			mockResultSet2 = (ResultSet) ctrlResultSet2.getMock();
-			mockResultSet2.next();
-			ctrlResultSet2.setReturnValue(false);
-			mockResultSet2.close();
-			ctrlResultSet2.setVoidCallable();
+		ctrlResultSet2 = MockControl.createControl(ResultSet.class);
+		mockResultSet2 = (ResultSet) ctrlResultSet2.getMock();
+		mockResultSet2.next();
+		ctrlResultSet2.setReturnValue(false);
+		mockResultSet2.close();
+		ctrlResultSet2.setVoidCallable();
 
-			ctrlPreparedStatement2 =
-				MockControl.createControl(PreparedStatement.class);
-			mockPreparedStatement2 =
-				(PreparedStatement) ctrlPreparedStatement2.getMock();
-			mockPreparedStatement2.setObject(1, new Integer(1), Types.INTEGER);
-			ctrlPreparedStatement2.setVoidCallable();
-			mockPreparedStatement2.setString(2, "Roger");
-			ctrlPreparedStatement2.setVoidCallable();
-			mockPreparedStatement2.executeQuery();
-			ctrlPreparedStatement2.setReturnValue(mockResultSet2);
-			mockPreparedStatement2.getWarnings();
-			ctrlPreparedStatement2.setReturnValue(null);
-			mockPreparedStatement2.close();
-			ctrlPreparedStatement2.setVoidCallable();
+		ctrlPreparedStatement2 =
+			MockControl.createControl(PreparedStatement.class);
+		mockPreparedStatement2 =
+			(PreparedStatement) ctrlPreparedStatement2.getMock();
+		mockPreparedStatement2.setObject(1, new Integer(1), Types.INTEGER);
+		ctrlPreparedStatement2.setVoidCallable();
+		mockPreparedStatement2.setString(2, "Roger");
+		ctrlPreparedStatement2.setVoidCallable();
+		mockPreparedStatement2.executeQuery();
+		ctrlPreparedStatement2.setReturnValue(mockResultSet2);
+		mockPreparedStatement2.getWarnings();
+		ctrlPreparedStatement2.setReturnValue(null);
+		mockPreparedStatement2.close();
+		ctrlPreparedStatement2.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-			mockConnection.prepareStatement(SELECT_ID_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement2);
-
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.prepareStatement(SELECT_ID_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement2);
 
 		ctrlResultSet2.replay();
 		ctrlPreparedStatement2.replay();
@@ -585,40 +550,35 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		assertTrue("No customer found", cust2 == null);
 	}
 
-	public void testFindTooManyCustomers() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(2);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testFindTooManyCustomers() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setString(1, "rod");
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(1, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -652,42 +612,37 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		}
 	}
 
-	public void testListCustomersIntInt() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(2);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("dave");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testListCustomersIntInt() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("dave");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -718,40 +673,35 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		}
 	}
 
-	public void testListCustomersString() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(2);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("dave");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testListCustomersString() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("dave");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setString(1, "one");
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(1, "one");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -781,40 +731,37 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		}
 	}
 
-	public void testFancyCustomerQuery() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.getString("forename");
-			ctrlResultSet.setReturnValue("rod");
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
+	public void testFancyCustomerQuery() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-			mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
+
 		class CustomerQuery extends MappingSqlQuery {
 
 			public CustomerQuery(DataSource ds) {
 				super(ds, SELECT_ID_FORENAME_WHERE);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
 				declareParameter(new SqlParameter(Types.NUMERIC));
 				compile();
 			}
@@ -840,66 +787,39 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			cust.getForename().equals("rod"));
 	}
 
-	private static class StringQuery extends MappingSqlQuery {
+	public void testUpdateCustomers() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.updateString(2, "Rod");
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.updateRow();
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.updateString(2, "Thomas");
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.updateRow();
+		ctrlResultSet.setVoidCallable();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
 
-		public StringQuery(DataSource ds, String sql) {
-			super(ds, sql);
-			compile();
-		}
+		mockPreparedStatement.setObject(1, new Integer(2), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
 
-		/*
-		 * @see CustomExtractionQueryCommand#extract(ResultSet, int)
-		 */
-		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
-			return rs.getString(1);
-		}
-
-		public String[] run() {
-			List list = execute();
-			String[] results = (String[]) list.toArray(new String[list.size()]);
-			return results;
-		}
-	}
-
-	public void testUpdateCustomers() {
-		try {
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(1);
-			mockResultSet.updateString(2, "Rod");
-			ctrlResultSet.setVoidCallable();
-			mockResultSet.updateRow();
-			ctrlResultSet.setVoidCallable();
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(true);
-			mockResultSet.getInt("id");
-			ctrlResultSet.setReturnValue(2);
-			mockResultSet.updateString(2, "Thomas");
-			ctrlResultSet.setVoidCallable();
-			mockResultSet.updateRow();
-			ctrlResultSet.setVoidCallable();
-			mockResultSet.next();
-			ctrlResultSet.setReturnValue(false);
-			mockResultSet.close();
-			ctrlResultSet.setVoidCallable();
-
-			mockPreparedStatement.setObject(1, new Integer(2), Types.NUMERIC);
-			ctrlPreparedStatement.setVoidCallable();
-			mockPreparedStatement.executeQuery();
-			ctrlPreparedStatement.setReturnValue(mockResultSet);
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-			mockPreparedStatement.close();
-			ctrlPreparedStatement.setVoidCallable();
-
-			mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			ctrlConnection.setReturnValue(mockPreparedStatement);
-			
-		}
-		catch (SQLException sex) {
-			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
-		}
+		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
 
@@ -922,6 +842,25 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 		values.put(new Integer(1), "Rod");
 		values.put(new Integer(2), "Thomas");
 		List customers = query.execute(2, values);
+	}
+
+
+	private static class StringQuery extends MappingSqlQuery {
+
+		public StringQuery(DataSource ds, String sql) {
+			super(ds, sql);
+			compile();
+		}
+
+		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+			return rs.getString(1);
+		}
+
+		public String[] run() {
+			List list = execute();
+			String[] results = (String[]) list.toArray(new String[list.size()]);
+			return results;
+		}
 	}
 
 
