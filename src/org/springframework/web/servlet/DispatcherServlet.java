@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -96,7 +96,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.32 2004-05-04 17:28:53 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.33 2004-05-17 11:01:57 luke_t Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -254,9 +254,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the LocaleResolver used by this class.
+	 * Initialize the ThemeResolver used by this class.
 	 * If no bean is defined with the given name in the BeanFactory
-	 * for this namespace, we default to a AcceptHeaderLocaleResolver.
+	 * for this namespace, we default to a FixedThemeResolver.
 	 */
 	private void initThemeResolver() throws BeansException {
 		try {
