@@ -23,8 +23,13 @@
 <book>
 
     <bookinfo>
-        <title>Spring - java/j2ee Application Framework</title>
-        <subtitle>Reference Documentation (Work in progress.)</subtitle>
+        <title>Spring - Java/J2EE Application Framework</title>
+        <subtitle>
+          Reference Documentation
+        </subtitle>
+        <edition>
+          (Work in progress.)
+        </edition>
         <releaseinfo>1.0</releaseinfo>
         
         <authorgroup>

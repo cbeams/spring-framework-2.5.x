@@ -39,13 +39,20 @@
                     <fo:table-row>
                         <fo:table-cell text-align="center">
                             <fo:block>
-                                <fo:external-graphic src="file:images/logo.gif"/>
+                                <fo:external-graphic src="file:images/logo.jpg"/>
                             </fo:block>
                             <fo:block font-family="Helvetica" font-size="22pt" padding-before="10mm">
                                 <xsl:value-of select="bookinfo/subtitle"/> 
                             </fo:block>
                             <fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
                                 Version: <xsl:value-of select="bookinfo/releaseinfo"/>  
+                            </fo:block>
+                        </fo:table-cell>
+                    </fo:table-row>
+                    <fo:table-row>
+                        <fo:table-cell text-align="center">
+                            <fo:block font-family="Helvetica" font-size="22pt" padding="10mm">
+                                <xsl:value-of select="bookinfo/edition"/> 
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
