@@ -16,7 +16,6 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -30,7 +29,12 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * SessionFactoryUtils and HibernateTemplate are aware of thread-bound
  * Sessions and take part in such transactions automatically. Using either
  * is required for proper Hibernate access code supporting this transaction
- * handling mechanism. Supports custom isolation levels but not timeouts.
+ * handling mechanism.
+ *
+ * <p>Supports custom isolation levels, and timeouts that get applied as
+ * appropriate Hibernate query timeouts. To support the latter, application
+ * code must either use HibernateTemplate.find or call SessionFactoryUtils'
+ * applyTransactionTimeout method for each created Hibernate Query object.
  *
  * <p>This implementation is appropriate for applications that solely use
  * Hibernate for transactional data access, but it also supports direct
@@ -71,10 +75,14 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see SessionFactoryUtils#getSession
+ * @see SessionFactoryUtils#applyTransactionTimeout
  * @see SessionFactoryUtils#closeSessionIfNecessary
  * @see HibernateTemplate#execute
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -182,33 +190,42 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
-		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-			throw new InvalidTimeoutException("HibernateTransactionManager does not support timeouts", definition.getTimeout());
-		}
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+		Session session = txObject.getSessionHolder().getSession();
 		logger.debug("Beginning Hibernate transaction");
 		try {
-			Session session = txObject.getSessionHolder().getSession();
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
 				txObject.setPreviousIsolationLevel(new Integer(session.connection().getTransactionIsolation()));
 				session.connection().setTransactionIsolation(definition.getIsolationLevel());
 			}
+
 			// apply read-only
 			if (definition.isReadOnly()) {
 				session.setFlushMode(FlushMode.NEVER);
 				session.connection().setReadOnly(true);
 			}
+
 			// add the Hibernate transaction to the session holder
 			txObject.getSessionHolder().setTransaction(session.beginTransaction());
+
+			// register transaction timeout
+			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+			}
+
+			// bind the session holder to the thread
 			if (txObject.isNewSessionHolder()) {
-				// bind the session holder to the thread
 				SessionFactoryUtils.getThreadObjectManager().bindThreadObject(this.sessionFactory, txObject.getSessionHolder());
 			}
+
 			// register the Hibernate Session's JDBC Connection for the DataSource, if set
 			if (this.dataSource != null) {
 				ConnectionHolder conHolder = new ConnectionHolder(session.connection());
+				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+					conHolder.setTimeoutInSeconds(definition.getTimeout());
+				}
 				DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, conHolder);
 			}
 		}
@@ -271,24 +288,28 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	private void closeSession(HibernateTransactionObject txObject) {
+		// remove the session holder from the thread
 		if (txObject.isNewSessionHolder()) {
-			// remove the session holder from the thread
 			SessionFactoryUtils.getThreadObjectManager().removeThreadObject(this.sessionFactory);
 		}
+
 		// remove the JDBC connection holder from the thread, if set
 		if (this.dataSource != null) {
 			DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
 		}
+
 		try {
 			Connection con = txObject.getSessionHolder().getSession().connection();
+
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
 				logger.debug("Resetting isolation level to " + txObject.getPreviousIsolationLevel());
 				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
 			}
+
 			// reset read-only
 			if (con.isReadOnly()) {
-				con.setReadOnly(true);
+				con.setReadOnly(false);
 			}
 		}
 		catch (HibernateException ex) {

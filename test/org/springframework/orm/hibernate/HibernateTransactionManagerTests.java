@@ -15,18 +15,17 @@ import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
-
+import net.sf.hibernate.Query;
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
+
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -46,6 +45,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = EasyMock.controlFor(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		final List list = new ArrayList();
+		list.add("test");
 		con.getTransactionIsolation();
 		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
 		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -60,6 +63,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(tx, 1);
 		session.connection();
 		sessionControl.setReturnValue(con, 4);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setTimeout(10);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.commit();
@@ -69,12 +78,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.activate();
 		sessionControl.activate();
 		txControl.activate();
+		queryControl.activate();
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf, ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
-		final List l = new ArrayList();
-		l.add("test");
+		tt.setTimeout(10);
 		assertTrue("Hasn't thread session", !SessionFactoryUtils.getThreadObjectManager().hasThreadObject(sf));
 		assertTrue("Hasn't thread connection", !DataSourceUtils.getThreadObjectManager().hasThreadObject(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isActive());
@@ -85,14 +94,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 					assertTrue("Has thread session", SessionFactoryUtils.getThreadObjectManager().hasThreadObject(sf));
 					assertTrue("Has thread connection", DataSourceUtils.getThreadObjectManager().hasThreadObject(ds));
 					HibernateTemplate ht = new HibernateTemplate(sf);
-					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
-							return l;
-						}
-					});
+					return ht.find("some query string");
 				}
 			});
-			assertTrue("Correct result list", result == l);
+			assertTrue("Correct result list", result == list);
 		}
 		catch (RuntimeException ex) {
 			fail("Should not have thrown RuntimeException");
@@ -106,6 +111,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
+		queryControl.verify();
 	}
 
 	public void testTransactionRollback() throws HibernateException, SQLException {
@@ -387,34 +393,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
-	}
-
-	public void testInvalidTimeout() throws HibernateException {
-		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = EasyMock.controlFor(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		sfControl.activate();
-		sessionControl.activate();
-
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf, null);
-		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.setTimeout(10);
-		try {
-			tt.execute(new TransactionCallbackWithoutResult() {
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-				}
-			});
-			fail("Should have thrown InvalidTimeoutException");
-		}
-		catch (InvalidTimeoutException ex) {
-			// expected
-		}
-
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testJtaTransactionCommit() throws Exception {

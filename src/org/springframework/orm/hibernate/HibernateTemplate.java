@@ -8,6 +8,7 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.Query;
 import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
@@ -121,6 +122,8 @@ public class HibernateTemplate extends HibernateAccessor {
 	 * object or a collection of domain objects.
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
 	 * Use an appropriate transaction manager like HibernateTransactionManager.
+	 * Generally, callback code must not touch any Session lifecycle methods,
+	 * like close, disconnect, or reconnect, to let the template do its work.
 	 * @param action action object that specifies the Hibernate action
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException in case of Hibernate errors
@@ -152,72 +155,6 @@ public class HibernateTemplate extends HibernateAccessor {
 		finally {
 			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
 		}
-	}
-
-	/**
-	 * Execute the specified action assuming that the result object is a List.
-	 * This is a convenience method for executing Hibernate find calls within
-	 * an action.
-	 * @param action action object that specifies the Hibernate action
-	 * @return a result object returned by the action, or null
-	 * @throws DataAccessException in case of Hibernate errors
-	 * the action object
-	 */
-	public List executeFind(HibernateCallback action) throws DataAccessException {
-		return (List) execute(action);
-	}
-
-	/**
-	 * Execute a query for persistent instances.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.find.
-	 * @param query a query expressed in Hibernate's query language
-	 * @return the List of persistent instances
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
-	 */
-	public List find(final String query) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return session.find(query);
-			}
-		});
-	}
-
-	/**
-	 * Execute a query for persistent instances,
-	 * binding one value to a "?" parameter in the query.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.find.
-	 * @param query a query expressed in Hibernate's query language
-	 * @return the List of persistent instances
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
-	 */
-	public List find(final String query, final Object value, final Type type) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return session.find(query, value, type);
-			}
-		});
-	}
-
-	/**
-	 * Execute a query for persistent instances,
-	 * binding a number of values to "?" parameters in the query.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.find.
-	 * @param query a query expressed in Hibernate's query language
-	 * @return the List of persistent instances
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#find(String)
-	 */
-	public List find(final String query, final Object[] values, final Type[] types) throws DataAccessException {
-		return (List) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return session.find(query, values, types);
-			}
-		});
 	}
 
 	/**
@@ -314,6 +251,350 @@ public class HibernateTemplate extends HibernateAccessor {
 				return null;
 			}
 		});
+	}
+
+	/**
+	 * Execute the specified action assuming that the result object is a List.
+	 * <p>This is a convenience method for executing Hibernate find calls
+	 * within an action.
+	 * @param action action object that specifies the Hibernate action
+	 * @return a result object returned by the action, or null
+	 * @throws DataAccessException in case of Hibernate errors
+	 */
+	public List executeFind(HibernateCallback action) throws DataAccessException {
+		return (List) execute(action);
+	}
+
+	/**
+	 * Execute a query for persistent instances.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public List find(final String queryString) throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a query for persistent instances, binding
+	 * one value to a "?" parameter in the query string.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public List find(final String queryString, final Object value) throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				queryObject.setParameter(0, value);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a query for persistent instances, binding one value
+	 * to a "?" parameter of the given type in the query string.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param value the value of the parameter
+	 * @param type Hibernate type of the parameter
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public List find(final String queryString, final Object value, final Type type)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				queryObject.setParameter(0, value, type);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a query for persistent instances, binding a
+	 * number of values to "?" parameters in the query string.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public List find(final String queryString, final Object[] values) throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(i, value);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a query for persistent instances, binding a number of
+	 * values to "?" parameters of the given types in the query string.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param values the values of the parameters
+	 * @param types Hibernate types of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 */
+	public List find(final String queryString, final Object[] values, final Type[] types)
+			throws DataAccessException {
+		if (values.length != types.length) {
+			throw new IllegalArgumentException("Length of values array must match length of types array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(i, value, types[i]);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a query for persistent instances, binding the properties
+	 * of the given bean to <i>named</i> parameters in the query string.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Query.setProperties. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryString a query expressed in Hibernate's query language
+	 * @param valueBean the values of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#createQuery
+	 * @see net.sf.hibernate.Query#setProperties
+	 */
+	public List findByValueBean(final String queryString, final Object valueBean)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = createQuery(session, queryString);
+				queryObject.setProperties(valueBean);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find for named queries. Use a custom HibernateCallback
+	 * implementation to leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 */
+	public List findByNamedQuery(final String queryName) throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances, binding
+	 * one value to a "?" parameter in the query string.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find for named queries. Use a custom HibernateCallback
+	 * implementation to leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 */
+	public List findByNamedQuery(final String queryName, final Object value)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				queryObject.setParameter(0, value);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances, binding
+	 * one value to a "?" parameter in the query string.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find for named queries. Use a custom HibernateCallback
+	 * implementation to leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param type Hibernate type of the parameter
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 */
+	public List findByNamedQuery(final String queryName, final Object value, final Type type)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				queryObject.setParameter(0, value, type);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances, binding a
+	 * number of values to "?" parameters in the query string.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find for named queries. Use a custom HibernateCallback
+	 * implementation to leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param values the values of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 */
+	public List findByNamedQuery(final String queryName, final Object[] values)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(i, value);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances, binding a
+	 * number of values to "?" parameters in the query string.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Session.find for named queries. Use a custom HibernateCallback
+	 * implementation to leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param values the values of the parameters
+	 * @param types Hibernate types of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 */
+	public List findByNamedQuery(final String queryName, final Object[] values, final Type[] types)
+			throws DataAccessException {
+		if (values.length != types.length) {
+			throw new IllegalArgumentException("Length of values array must match length of types array");
+		}
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				for (int i = 0; i < values.length; i++) {
+					Object value = values[i];
+					queryObject.setParameter(i, value, types[i]);
+				}
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Execute a named query for persistent instances, binding the properties
+	 * of the given bean to <i>named</i> parameters in the query string.
+	 * A named query is defined in a Hibernate mapping file.
+	 * <p>This is a convenience method for single step actions, mirroring
+	 * Query.setProperties. Use a custom HibernateCallback implementation to
+	 * leverage the full power of Hibernate's Query API.
+	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param valueBean the values of the parameters
+	 * @return the List of persistent instances
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#find(String)
+	 * @see net.sf.hibernate.Session#getNamedQuery(String)
+	 * @see net.sf.hibernate.Query#setProperties
+	 */
+	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
+			throws DataAccessException {
+		return executeFind(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				Query queryObject = getNamedQuery(session, queryName);
+				queryObject.setProperties(valueBean);
+				return queryObject.list();
+			}
+		});
+	}
+
+	/**
+	 * Create a Query object for the given Session and the given query string.
+	 * @param session current Hibernate Session
+	 * @param queryString the HQL query string
+	 * @return the Query object
+	 * @throws HibernateException if the query could not be created
+	 */
+	private Query createQuery(Session session, String queryString) throws HibernateException {
+		Query queryObject = session.createQuery(queryString);
+		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
+		return queryObject;
+	}
+
+	/**
+	 * Create a named Query object for the given Session and the given query name.
+	 * @param session current Hibernate Session
+	 * @param queryName the name of the query in the Hibernate mapping file
+	 * @return the Query object
+	 * @throws HibernateException if the query could not be created
+	 */
+	private Query getNamedQuery(Session session, String queryName) throws HibernateException {
+		Query queryObject = session.getNamedQuery(queryName);
+		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
+		return queryObject;
 	}
 
 }

@@ -1,16 +1,17 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
+
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -24,10 +25,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since 04.07.2003
  */
 public class DataSourceTransactionManagerTests extends TestCase {
-
-	public DataSourceTransactionManagerTests(String msg) {
-		super(msg);
-	}
 
 	public void testDataSourceTransactionManagerWithCommit() throws Exception {
 		MockControl conControl = EasyMock.controlFor(Connection.class);
@@ -191,37 +188,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.verify();
 	}
 
-	public void testDataSourceTransactionManagerWithTimeout() throws Exception {
-		MockControl conControl = EasyMock.controlFor(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
-		conControl.activate();
-		dsControl.activate();
-
-		DataSourceTransactionManager tm = new DataSourceTransactionManager();
-		tm.setDataSource(ds);
-		assertTrue("Correct DataSource set", tm.getDataSource() == ds);
-
-		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.setTimeout(10);
-		assertTrue("Hasn't thread connection", !DataSourceUtils.getThreadObjectManager().hasThreadObject(ds));
-		try {
-			tt.execute(new TransactionCallbackWithoutResult() {
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					// something transactional
-				}
-			});
-			fail("Should have thrown InvalidTimeoutException");
-		}
-		catch (InvalidTimeoutException ex) {
-			// expected
-			assertTrue("Hasn't thread connection", !DataSourceUtils.getThreadObjectManager().hasThreadObject(ds));
-		}
-	}
-
 	public void testDataSourceTransactionManagerWithIsolation() throws Exception {
 		MockControl conControl = EasyMock.controlFor(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
@@ -258,6 +224,55 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		});
 
 		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testDataSourceTransactionManagerWithTimeout() throws Exception {
+		MockControl conControl = EasyMock.controlFor(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
+		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.setAutoCommit(false);
+		conControl.setVoidCallable(1);
+		con.prepareStatement("some SQL statement");
+		conControl.setReturnValue(ps, 1);
+		ps.setQueryTimeout(10);
+		psControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.setAutoCommit(true);
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+		conControl.activate();
+		dsControl.activate();
+		psControl.activate();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setTimeout(10);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				try {
+					Connection con = DataSourceUtils.getConnection(ds);
+					PreparedStatement ps = con.prepareStatement("some SQL statement");
+					DataSourceUtils.applyTransactionTimeout(ps, ds);
+				}
+				catch (SQLException ex) {
+					throw new DataAccessResourceFailureException("", ex);
+				}
+			}
+		});
+
+		conControl.verify();
+		dsControl.verify();
+		psControl.verify();
 	}
 
 	public void testDataSourceTransactionManagerWithExceptionOnBegin() throws Exception {

@@ -2,6 +2,8 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 
+import org.springframework.util.ExpiringObject;
+
 /**
  * Connection holder, wrapping a JDBC Connection.
  * Features rollback-only support for nested JDBC transactions.
@@ -17,7 +19,7 @@ import java.sql.Connection;
  * @see DataSourceTransactionObject
  * @see DataSourceUtils
  */
-public class ConnectionHolder {
+public class ConnectionHolder extends ExpiringObject {
 
 	private final Connection connection;
 

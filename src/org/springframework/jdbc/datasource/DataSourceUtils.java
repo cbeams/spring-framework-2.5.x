@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -36,7 +37,7 @@ import org.springframework.util.ThreadObjectManager;
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.1.1.1 2003-08-14 16:20:31 trisberg Exp $
+ * @version $Id: DataSourceUtils.java,v 1.2 2003-08-17 20:37:14 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -139,11 +140,24 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
+	 * Apply the current transaction timeout, if any,
+	 * to the given JDBC Statement object.
+	 * @param stmt the JDBC Statement object
+	 * @param ds DataSource that the connection came from
+	 */
+	public static void applyTransactionTimeout(Statement stmt, DataSource ds) throws SQLException {
+		ConnectionHolder holder = (ConnectionHolder) getThreadObjectManager().getThreadObject(ds);
+		if (holder != null && holder.getDeadline() != null) {
+			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
+		}
+	}
+
+	/**
 	 * Close the given connection if necessary, i.e. if it is not bound to the thread
 	 * and it is not created by a SmartDataSource returning shouldClose=false.
 	 * @param con connection to close if necessary
 	 * (if this is null, the call will be ignored)
-	 * @param ds DataSource that the connection came from (can be null)
+	 * @param ds DataSource that the connection came from
 	 * @throws CannotCloseJdbcConnectionException if the attempt to close the
 	 * Connection failed
 	 */

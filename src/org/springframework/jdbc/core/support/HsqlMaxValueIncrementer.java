@@ -37,7 +37,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.1.1.1 2003-08-14 16:20:30 trisberg Exp $
+ * @version $Id: HsqlMaxValueIncrementer.java,v 1.2 2003-08-17 20:37:14 jhoeller Exp $
  */
 
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
@@ -170,16 +170,17 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 				* returned the correct value)
 				*/
 				Connection con = null;
-				Statement st = null;
+				Statement stmt = null;
 				ResultSet rs = null;
 				try {
 					con = DataSourceUtils.getConnection(getDataSource());
-					st = con.createStatement();
+					stmt = con.createStatement();
+					DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 					valueCache = new long[getCacheSize()];
 					nextValueIx = 0;
 					for (int i = 0; i < getCacheSize(); i++) {
-						st.executeUpdate(insertSql);
-						rs = st.executeQuery(valueSql);
+						stmt.executeUpdate(insertSql);
+						rs = stmt.executeQuery(valueSql);
 						if (rs.next()) {
 							valueCache[i] = rs.getLong(1);
 						}
@@ -187,7 +188,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 							throw new InternalErrorException("last_insert_id() failed after executing an update");
 					}
 					long maxValue = valueCache[(valueCache.length - 1)];
-					st.executeUpdate(deleteSql + maxValue);
+					stmt.executeUpdate(deleteSql + maxValue);
 					logger.info("Delete SQL is : " + deleteSql + maxValue);
 				}
 				catch (SQLException ex) {
@@ -201,9 +202,9 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 						catch (SQLException e) {
 						}
 					}
-					if (null != st) {
+					if (null != stmt) {
 						try {
-							st.close();
+							stmt.close();
 						}
 						catch (SQLException e) {
 						}

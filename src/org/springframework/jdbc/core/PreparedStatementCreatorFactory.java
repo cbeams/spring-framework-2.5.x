@@ -15,57 +15,10 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * PreparedStatementCreator objects with different
  * parameters based on a SQL statement and a single set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.1.1.1 2003-08-14 16:20:27 trisberg Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.2 2003-08-17 20:37:03 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory { 
 
-	//---------------------------------------------------------------------
-	// Class methods
-	//---------------------------------------------------------------------
-	/**
-	 * Convenient method to return a PreparedStatementCreator that has no arguments
-	 */
-	public static PreparedStatementCreator newPreparedStatementCreator(final String sql) {
-		return new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-				PreparedStatement ps = conn.prepareStatement(sql);
-				return ps;
-			}
-
-			public String getSql() {
-				return sql;
-			}
-
-		};
-	}
-	
-	/**
-	 * Convenient method to declare variables and parameters in a single operation.
-	 * If issuing multiple statements with the same parameters, construct an instance of
-	 * PreparedStatementCreatorFactory to hold the parameters instead.
-	 */
-	public static PreparedStatementCreator newPreparedStatementCreator(String sql, int[] types, Object[] params) {
-		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sql, types);
-		return pscf.newPreparedStatementCreator(params);
-	}
-	
-	/**
-	 * Convert a list of JDBC types, as defined in the java.sql.Types class,
-	 * to a List of SqlParameter objects as used in this package
-	 */
-	public static List sqlTypesToAnonymousParameterList(int[] types) {
-		List l = new LinkedList();
-		if (types != null) {
-			for (int i = 0; i < types.length; i++) {
-				l.add(new SqlParameter(types[i]));
-			}
-		}
-		return l;
-	}
-
-	//---------------------------------------------------------------------
-	// Instance data
-	//---------------------------------------------------------------------
 	/**
 	 * List of SqlParameter objects. May not be null.
 	 */
@@ -74,9 +27,6 @@ public class PreparedStatementCreatorFactory {
 	/** The Sql, which won't change when the parameters change. */
 	private String sql;
 
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
 	/**
 	 * Create a new factory. Will need to add parameters
 	 * via the addParameter() method or have no parameters
@@ -91,7 +41,7 @@ public class PreparedStatementCreatorFactory {
 	 * @param types int array of JDBC types
 	 */
 	public PreparedStatementCreatorFactory(String sql, int[] types) {
-		this(sql, sqlTypesToAnonymousParameterList(types) );
+		this(sql, SqlParameter.sqlTypesToAnonymousParameterList(types));
 	}
 
 	/**
@@ -104,7 +54,6 @@ public class PreparedStatementCreatorFactory {
 		this.declaredParameters = declaredParameters;
 	}
 
-
 	/**
 	 * Add a new declared parameter
 	 * Order of parameter addition is significant
@@ -113,10 +62,6 @@ public class PreparedStatementCreatorFactory {
 		declaredParameters.add(p);
 	}
 	
-	
-	//---------------------------------------------------------------------
-	// Factory methods
-	//---------------------------------------------------------------------
 	/**
 	 * Return a new PreparedStatementCreator given these parameters
 	 * @param params parameter array. May be null.
@@ -132,13 +77,10 @@ public class PreparedStatementCreatorFactory {
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : new LinkedList());
 	}
-	
 
-	//---------------------------------------------------------------------
-	// Inner classes
-	//---------------------------------------------------------------------
+
 	/**
-	 * PreparedStatementCreator implementation returned by this class
+	 * PreparedStatementCreator implementation returned by this class.
 	 */
 	private class PreparedStatementCreatorImpl implements PreparedStatementCreator {
 		private List parameters;

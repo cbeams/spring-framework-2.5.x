@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
@@ -19,7 +18,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * PlatformTransactionManager implementation for single data sources.
  * Binds a JDBC connection from the specified data source to the thread,
  * potentially allowing for one thread connection per data source.
- * Supports custom isolation levels but not timeouts.
  *
  * <p>Application code is required to retrieve the JDBC connection via
  * DataSourceUtils.getConnection(DataSource) instead of J2EE's standard
@@ -29,16 +27,23 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * If not used with this transaction manager, the lookup strategy
  * behaves exactly like the common one - it can thus be used in any case.
  *
+ * <p>Supports custom isolation levels, and timeouts that get applied as
+ * appropriate JDBC statement query timeouts. To support the latter,
+ * application code must either use JdbcTemplate or call DataSourceUtils'
+ * applyTransactionTimeout method for each created statement.
+ *
  * <p>This implementation can be used instead of JtaTransactionManager
  * in the single resource case, as it does not require the container to
  * support JTA. Switching between both is just a matter of configuration,
- * if you stick to the required connection lookup pattern.
+ * if you stick to the required connection lookup pattern. Note that JTA
+ * does not support custom isolation levels!
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see DataSourceUtils#getConnection
- * @see SingleConnectionDataSource
- * @see org.springframework.util.ThreadObjectManager
+ * @see DataSourceUtils#applyTransactionTimeout
+ * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -101,9 +106,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * This implementation sets the isolation level but ignores the timeout.
 	 */
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-			throw new InvalidTimeoutException("DataSourceTransactionManager does not support timeouts", definition.getTimeout());
-		}
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		Connection con = txObject.getConnectionHolder().getConnection();
 		logger.debug("Switching JDBC connection [" + con + "] to manual commit");
@@ -114,17 +116,26 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
 				con.setTransactionIsolation(definition.getIsolationLevel());
 			}
+
 			// apply read-only
 			if (definition.isReadOnly()) {
 				con.setReadOnly(true);
 			}
+
 			// switch to manual commit
 			con.setAutoCommit(false);
+
+			// register transaction timeout
+			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
+			}
+
+			// bind the connection holder to the thread
+			DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, txObject.getConnectionHolder());
 		}
 		catch (SQLException ex) {
 			throw new CannotCreateTransactionException("Cannot configure connection", ex);
 		}
-		DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, txObject.getConnectionHolder());
 	}
 
 	protected void doCommit(TransactionStatus status) {

@@ -3,6 +3,8 @@ package org.springframework.orm.hibernate;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.Transaction;
 
+import org.springframework.util.ExpiringObject;
+
 /**
  * Session holder, wrapping a Hibernate Session and a Hibernate Transaction.
  * Features rollback-only support for nested Hibernate transactions.
@@ -18,7 +20,7 @@ import net.sf.hibernate.Transaction;
  * @see HibernateTransactionObject
  * @see SessionFactoryUtils
  */
-public class SessionHolder {
+public class SessionHolder extends ExpiringObject {
 
 	private final Session session;
 
@@ -34,7 +36,7 @@ public class SessionHolder {
 		return session;
 	}
 
-	protected void setTransaction(Transaction transaction) {
+	public void setTransaction(Transaction transaction) {
 		this.transaction = transaction;
 	}
 

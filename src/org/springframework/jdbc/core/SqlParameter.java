@@ -5,6 +5,9 @@
 
 package org.springframework.jdbc.core;
 
+import java.util.List;
+import java.util.LinkedList;
+
 /**
  * Object to represent a SQL parameter definition.
  * Parameters may be anonymous, in which case name is null.
@@ -55,4 +58,20 @@ public class SqlParameter {
 	public String getTypeName() {
 		return typeName;
 	}
+
+
+	/**
+	 * Convert a list of JDBC types, as defined in the java.sql.Types class,
+	 * to a List of SqlParameter objects as used in this package
+	 */
+	public static List sqlTypesToAnonymousParameterList(int[] types) {
+		List l = new LinkedList();
+		if (types != null) {
+			for (int i = 0; i < types.length; i++) {
+				l.add(new SqlParameter(types[i]));
+			}
+		}
+		return l;
+	}
+
 }

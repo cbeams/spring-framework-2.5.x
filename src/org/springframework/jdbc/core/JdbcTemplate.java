@@ -56,7 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.1.1.1 2003-08-14 16:20:27 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.2 2003-08-17 20:37:03 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -217,21 +217,22 @@ public class JdbcTemplate implements InitializingBean {
 			throw new InvalidDataAccessApiUsageException("Cannot execute '" + sql + "' as a static query: it contains bind variables");
 
 		Connection con = null;
-		Statement s = null;
+		Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
-			s = con.createStatement();
-			rs = s.executeQuery(sql);
+			stmt = con.createStatement();
+			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
+			rs = stmt.executeQuery(sql);
 
 			if (logger.isInfoEnabled())
 				logger.info("Executing static SQL query '" + sql + "' using a java.sql.Statement");
 
 			rse.extractData(rs);
 
-			SQLWarning warning = s.getWarnings();
+			SQLWarning warning = stmt.getWarnings();
 			rs.close();
-			s.close();
+			stmt.close();
 
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
 		}
@@ -315,6 +316,7 @@ public class JdbcTemplate implements InitializingBean {
 			query(new PreparedStatementCreator() {
 				public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 					PreparedStatement ps = conn.prepareStatement(sql);
+					DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 					pss.setValues(ps);
 					return ps;
 				}
@@ -342,7 +344,17 @@ public class JdbcTemplate implements InitializingBean {
 	public int update(final String sql) throws DataAccessException {
 		if (logger.isInfoEnabled())
 			logger.info("Running SQL update '" + sql + "'");
-		return update(PreparedStatementCreatorFactory.newPreparedStatementCreator(sql));
+
+		return update(new PreparedStatementCreator() {
+			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+				PreparedStatement ps = conn.prepareStatement(sql);
+				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+				return ps;
+			}
+			public String getSql() {
+				return sql;
+			}
+		});
 	}
 
 	/**
@@ -412,6 +424,7 @@ public class JdbcTemplate implements InitializingBean {
 		return update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 				PreparedStatement ps = conn.prepareStatement(sql);
+				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 				pss.setValues(ps);
 				return ps;
 			}
@@ -437,6 +450,7 @@ public class JdbcTemplate implements InitializingBean {
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			PreparedStatement ps = con.prepareStatement(sql);
+			DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 			int batchSize = setter.getBatchSize();
 			for (int i = 0; i < batchSize; i++) {
 				setter.setValues(ps, i);

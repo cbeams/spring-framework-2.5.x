@@ -39,7 +39,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: MySQLMaxValueIncrementer.java,v 1.1.1.1 2003-08-14 16:20:30 trisberg Exp $
+ * @version $Id: MySQLMaxValueIncrementer.java,v 1.2 2003-08-17 20:37:14 jhoeller Exp $
  */
 
 public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
@@ -169,15 +169,16 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 				* returned the correct value)
 				*/
 				Connection con = null;
-				Statement st = null;
+				Statement stmt = null;
 				ResultSet rs = null;
 				try {
 					con = DataSourceUtils.getConnection(getDataSource());
-					st = con.createStatement();
+					stmt = con.createStatement();
+					DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 					// Increment the sequence column
-					st.executeUpdate(insertSql);
+					stmt.executeUpdate(insertSql);
 					// Retrieve the new max of the sequence column
-					rs = st.executeQuery(updateSql);
+					rs = stmt.executeQuery(updateSql);
 					if (rs.next()) {
 						maxId = rs.getLong(1);
 						if (logger.isInfoEnabled())
@@ -201,9 +202,9 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 						catch (SQLException e) {
 						}
 					}
-					if (null != st) {
+					if (null != stmt) {
 						try {
-							st.close();
+							stmt.close();
 						}
 						catch (SQLException e) {
 						}

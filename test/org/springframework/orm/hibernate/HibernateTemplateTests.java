@@ -5,22 +5,23 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
-import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.ObjectDeletedException;
 import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.PersistentObjectException;
+import net.sf.hibernate.Query;
 import net.sf.hibernate.QueryException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
+import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.type.Type;
-
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
+
 import org.springframework.beans.TestBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -32,7 +33,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
  */
 public class HibernateTemplateTests extends TestCase {
 
-	public void testTemplateExecuteWithNewSession() {
+	public void testExecuteWithNewSession() {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -65,7 +66,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateExecuteWithNewSessionAndFlushNever() {
+	public void testExecuteWithNewSessionAndFlushNever() {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -97,7 +98,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateExecuteWithNotAllowCreate() {
+	public void testExecuteWithNotAllowCreate() {
 		HibernateTemplate ht = new HibernateTemplate();
 		ht.setAllowCreate(false);
 		try {
@@ -113,7 +114,7 @@ public class HibernateTemplateTests extends TestCase {
 		}
 	}
 
-	public void testTemplateExecuteWithNotAllowCreateAndThreadBound() {
+	public void testExecuteWithNotAllowCreateAndThreadBound() {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -137,7 +138,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateExecuteWithThreadBoundAndFlushEager() throws HibernateException {
+	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -164,7 +165,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateExecuteWithEntityInterceptor() throws HibernateException {
+	public void testExecuteWithEntityInterceptor() throws HibernateException {
 		MockControl interceptorControl = EasyMock.controlFor(net.sf.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
 		interceptorControl.activate();
@@ -195,81 +196,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateFind1() throws HibernateException {
-		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = EasyMock.controlFor(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.find("some query");
-		sessionControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.activate();
-		sessionControl.activate();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query");
-		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
-	}
-
-	public void testTemplateFind2() throws HibernateException {
-		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = EasyMock.controlFor(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.find("some query", "myvalue", Hibernate.STRING);
-		sessionControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.activate();
-		sessionControl.activate();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query", "myvalue", Hibernate.STRING);
-		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
-	}
-
-	public void testTemplateFind3() throws HibernateException {
-		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = EasyMock.controlFor(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		List list = new ArrayList();
-		Object[] values = new Object[] {"myvalue1", new Integer(2)};
-		Type[] types = new Type[]{Hibernate.STRING, Hibernate.INTEGER};
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.find("some query", values, types);
-		sessionControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.activate();
-		sessionControl.activate();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query", values, types);
-		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
-	}
-
-	public void testTemplateLoad() throws HibernateException {
+	public void testLoad() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -293,7 +220,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateLoadWithNotFound() throws HibernateException {
+	public void testLoadWithNotFound() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -316,7 +243,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateSaveOrUpdate() throws HibernateException {
+	public void testSaveOrUpdate() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -339,7 +266,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateSave() throws HibernateException {
+	public void testSave() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -362,7 +289,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateUpdate() throws HibernateException {
+	public void testUpdate() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -385,7 +312,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateDelete() throws HibernateException {
+	public void testDelete() throws HibernateException {
 		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = EasyMock.controlFor(Session.class);
@@ -408,7 +335,427 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testTemplateExceptions() {
+	public void testFind() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.find("some query string");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindWithParameter() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue");
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.find("some query string", "myvalue");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindWithParameterAndType() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.find("some query string", "myvalue", Hibernate.STRING);
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindWithParameters() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1");
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2));
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.find("some query string", new Object[] {"myvalue1", new Integer(2)});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindWithParametersAndTypes() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.find("some query string",
+													new Object[] {"myvalue1", new Integer(2)},
+													new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindWithParametersAndTypesForInvalidArguments() {
+		HibernateTemplate ht = new HibernateTemplate();
+		try {
+			ht.find("some query string",
+							new Object[] {"myvalue1", new Integer(2)},
+							new Type[] {Hibernate.STRING});
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFindByValueBean() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		TestBean tb = new TestBean();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setProperties(tb);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByValueBean("some query string", tb);
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQuery() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithParameter() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue");
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", "myvalue");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithParameterAndType() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", "myvalue", Hibernate.STRING);
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithParameters() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1");
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2));
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name", new Object[] {"myvalue1", new Integer(2)});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithParametersAndTypes() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setParameter(0, "myvalue1", Hibernate.STRING);
+		queryControl.setReturnValue(query, 1);
+		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQuery("some query name",
+																			new Object[] {"myvalue1", new Integer(2)},
+																			new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithParametersAndTypesForInvalidArguments() {
+		HibernateTemplate ht = new HibernateTemplate();
+		try {
+			ht.findByNamedQuery("some query string",
+													new Object[] {"myvalue1", new Integer(2)},
+													new Type[] {Hibernate.STRING});
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFindByNamedQueryAndValueBean() throws HibernateException {
+		MockControl sfControl = EasyMock.controlFor(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = EasyMock.controlFor(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl queryControl = EasyMock.controlFor(Query.class);
+		Query query = (Query) queryControl.getMock();
+		TestBean tb = new TestBean();
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setProperties(tb);
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.activate();
+		sessionControl.activate();
+		queryControl.activate();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		List result = ht.findByNamedQueryAndValueBean("some query name", tb);
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+		sessionControl.verify();
+		queryControl.verify();
+	}
+
+	public void testExceptions() {
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {

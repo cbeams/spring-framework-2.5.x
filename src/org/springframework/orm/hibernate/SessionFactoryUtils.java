@@ -10,6 +10,7 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
+import net.sf.hibernate.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,6 +125,19 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (HibernateException ex) {
 			throw new DataAccessResourceFailureException("Cannot not open Hibernate session", ex);
+		}
+	}
+
+	/**
+	 * Apply the current transaction timeout, if any,
+	 * to the given Hibernate Query object.
+	 * @param query the Hibernate Query object
+	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
+	 */
+	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
+		SessionHolder sessionHolder = (SessionHolder) threadObjectManager.getThreadObject(sessionFactory);
+		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
+			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
