@@ -815,7 +815,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
 			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state transition event to " + flowLifecycleListeners.getListenerCount() + " listeners");
+			logger.debug("Publishing flow state transitioned event to " + flowLifecycleListeners.getListenerCount() + " listeners");
 		}
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
