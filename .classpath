@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" output=".classes" path="src"/>
+    <classpathentry kind="src" output="target/classes" path="src"/>
     <classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry exported="true" kind="lib" path="lib/j2ee/ejb.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
@@ -23,10 +23,10 @@
     <classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/itext-pdf/iText.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
-    <classpathentry kind="src" output=".testclasses" path="test"/>
+    <classpathentry kind="src" output="target/test-classes" path="test"/>
     <classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
-    <classpathentry kind="src" output=".loadclasses" path="load"/>
+    <classpathentry kind="src" output="target/load-classes" path="load"/>
     <classpathentry kind="src" path="sandbox"/>
     <classpathentry kind="src" path="samples/countries/src"/>
     <classpathentry kind="src" path="samples/petclinic/src"/>
@@ -49,5 +49,5 @@
     <classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
     <classpathentry kind="lib" path="lib/ant/ant.jar"/>
     <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
-    <classpathentry kind="output" path="bin"/>
+    <classpathentry kind="output" path="target/other-classes"/>
 </classpath>

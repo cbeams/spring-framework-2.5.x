@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.10 2003-11-11 22:30:28 colins Exp $
+    $Id: build.xml,v 1.11 2003-11-13 17:43:53 colins Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -15,6 +15,7 @@
 <project name="spring-core" default="usage" basedir=".">
 
 	<property file="build.properties"/>
+	<property file="project.properties"/>
 
 	<path id="master-classpath">
 
@@ -42,31 +43,32 @@
 
 	<target name="clean" description="Clean output dirs (build, dist, test, clover)">
 
-		<delete dir="${build.dir}"/>
+		<delete dir="${target.classes.dir}"/>
 		<delete dir="${dist.dir}"/>
-		<delete dir="${docs.dir}"/>
-		<delete dir="${release.dir}"/>
-		<delete dir="${testbuild.dir}"/>
-		<delete dir="${livetestbuild.dir}"/>
-		<delete dir="${clover.build.dir}"/>
-		<delete dir="${junit.reports.dir}"/>
+		<delete dir="${javadocs.dir}"/>
+		<delete dir="${target.clover.dir}"/>
+		<delete dir="${target.junit.reports.dir}"/>
+		<delete dir="${target.livetestlasses.dir}"/>
+		<delete dir="${target.otherclasses.dir}"/>
+		<delete dir="${target.release.dir}"/>
+		<delete dir="${target.testclasses.dir}"/>
 
 	</target>
 
 
 	<target name="build" description="Compile main source tree java files into class files (no-jarring)">
 
-		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${target.classes.dir}"/>
 
-		<javac destdir="${build.dir}" target="1.3" debug="${debug}"
+		<javac destdir="${target.classes.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
 		</javac>
 
-		<rmic base="${build.dir}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
 
-		<copy todir="${build.dir}" preservelastmodified="true">
+		<copy todir="${target.classes.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
@@ -88,7 +90,7 @@
 		<delete file="${dist.dir}/${spring-beans.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring-beans.jar}">
-			<fileset dir="${build.dir}">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/ClassLoaderUtils*"/>
@@ -107,7 +109,7 @@
 		<delete file="${dist.dir}/${spring-context.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring-context.jar}">
-			<fileset dir="${build.dir}">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/context/**"/>
@@ -129,7 +131,7 @@
 		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
-			<fileset dir="${build.dir}">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/aop/**"/>
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/context/**"/>
@@ -156,7 +158,7 @@
 		<delete file="${dist.dir}/${spring.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring.jar}">
-			<fileset dir="${build.dir}">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/**"/>
 				<exclude name="org/springframework/enterpriseservices/**"/>
 				<exclude name="org/springframework/metadata/**"/>
@@ -195,9 +197,9 @@
 
 	<target name="javadoc" description="Generate framework Javadocs.">
 
-		<mkdir dir="${docs.dir}"/>
+		<mkdir dir="${javadocs.dir}"/>
 
-		<javadoc sourcepath="src" destdir="${docs.dir}" windowtitle="Spring Framework"
+		<javadoc sourcepath="src" destdir="${javadocs.dir}" windowtitle="Spring Framework"
 			defaultexcludes="yes"	author="true" version="true" use="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
@@ -214,11 +216,11 @@
 
 	<target name="release" depends="alljars,javadoc" description="Generate release zip file">
 
-		<mkdir dir="${release.dir}"/>
+		<mkdir dir="${target.release.dir}"/>
 
-		<delete file="${release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release.zip}"/>
 
-		<zip zipfile="${release.dir}/${release.zip}">
+		<zip zipfile="${target.release.dir}/${release.zip}">
 			<zipfileset dir="." prefix="${release.path}">
 				<include name="dist/*.jar"/>
 				<include name="dist/*.tld"/>
@@ -254,17 +256,17 @@
 
 	<target name="buildtests" depends="build" description="Compile test source tree Java files into class files">
 
-		<mkdir dir="${testbuild.dir}"/>
+		<mkdir dir="${target.testclasses.dir}"/>
 
-		<javac destdir="${testbuild.dir}" target="1.3" debug="${debug}"
+		<javac destdir="${target.testclasses.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${test.dir}"/>
 			<classpath refid="master-classpath"/>
-			<classpath location="${build.dir}"/>
+			<classpath location="${target.classes.dir}"/>
 		</javac>
 
 		<!-- Pick up logging config from test directory -->
-		<copy todir="${testbuild.dir}" preservelastmodified="true">
+		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
 			<fileset dir="${test.dir}">
 				<include name="**/*.properties"/>
 			</fileset>
@@ -281,15 +283,15 @@
 	-->
 	<target name="tests" depends="buildtests" description="Run tests.">
 
-		<property name="reports.dir" value="${junit.reports.dir}"/>
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
 
 		<mkdir dir="${reports.dir}"/>
 
 		<junit printsummary="yes" haltonfailure="yes">
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
-			<classpath location="${testbuild.dir}"/>
-			<classpath location="${build.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
@@ -299,7 +301,7 @@
 			<formatter type="plain"/>
 
 			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${testbuild.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
@@ -309,13 +311,13 @@
 
 	<target name="buildlivetests" depends="build" description="Compile live test source tree java files into class files">
 
-		<mkdir dir="${livetestbuild.dir}"/>
+		<mkdir dir="${target.livetestlasses.dir}"/>
 
-		<javac destdir="${livetestbuild.dir}" target="1.3" debug="${debug}"
+		<javac destdir="${target.livetestlasses.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${livetest.dir}"/>
 			<classpath refid="master-classpath"/>
-			<classpath location="${build.dir}"/>
+			<classpath location="${target.classes.dir}"/>
 		</javac>
 
 	</target>
@@ -326,15 +328,15 @@
 		<!-- switch on Clover by specifying it as the compiler to use -->
 		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
 
-		<mkdir dir="${clover.build.dir}"/>
+		<mkdir dir="${target.clover.dir}"/>
 
-		<javac destdir="${clover.build.dir}" target="1.3" debug="${debug}"
+		<javac destdir="${target.clover.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
 		</javac>
 
-		<copy todir="${clover.build.dir}" preservelastmodified="true">
+		<copy todir="${target.clover.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml"/>
 				<include name="**/*.dtd"/>
@@ -349,8 +351,8 @@
 		<junit printsummary="yes" haltonfailure="yes">
 
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
-			<classpath location="${testbuild.dir}"/>
-			<classpath location="${clover.build.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.clover.dir}"/>
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
@@ -358,7 +360,7 @@
 			<classpath refid="master-classpath"/>
 
 			<batchtest fork="yes">
-				<fileset dir="${testbuild.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
 		</junit>
@@ -389,7 +391,7 @@
 	<target name="clover.html" depends="clover.tests" description="Generate Clover HTML coverage reports from an existing Clover database">
 
 		<java classname="com.cortexeb.tools.clover.reporters.html.HtmlReporter" fork="yes">
-			<arg line="-o '${clover.html.outdir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
+			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
 			<classpath refid="master-classpath"/>
 		</java>
 
@@ -398,22 +400,22 @@
 
 	<target name="loadjar" depends="buildtests" description="Build load test jar">
 
-		<mkdir dir="${loadbuild.dir}"/>
+		<mkdir dir="${target.loadclasses.dir}"/>
 
-		<javac destdir="${loadbuild.dir}" target="1.3" debug="${debug}"
+		<javac destdir="${target.loadclasses.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="false">
 			<src path="load"/>
 
 			<classpath refid="master-classpath"/>
 
 			<!-- For load -->
-			<classpath location="${build.dir}"/>
+			<classpath location="${target.classes.dir}"/>
 
-			<classpath location="${testbuild.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
 
 		</javac>
 
-		<copy todir="${loadbuild.dir}" preservelastmodified="true">
+		<copy todir="${target.loadclasses.dir}" preservelastmodified="true">
 			<fileset dir="load">
 				<include name="**/*.xml"/>
 				<include name="**/*.properties"/>
@@ -421,7 +423,7 @@
 		</copy>
 
 		<jar jarfile="${dist.dir}/${spring-load.jar}">
-			<fileset dir="${loadbuild.dir}">
+			<fileset dir="${target.loadclasses.dir}">
 				<include name="org/springframework/load/**" />
 			</fileset>
 		</jar>
@@ -433,7 +435,7 @@
 		<delete file="${dist.dir}/${spring-metadata.jar}"/>
 
 		<jar jarfile="${dist.dir}/${spring-metadata.jar}">
-			<fileset dir="${build.dir}">
+			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/metadata/**"/>
 			</fileset>
 			<manifest>
