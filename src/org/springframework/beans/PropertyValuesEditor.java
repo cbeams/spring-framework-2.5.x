@@ -1,9 +1,10 @@
-package org.springframework.beans.propertyeditors;
+package org.springframework.beans;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Properties;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.propertyeditors.PropertiesEditor;
 
 /**
  * Editor for PropertyValues objects. Not
@@ -21,7 +22,7 @@ public class PropertyValuesEditor extends PropertyEditorSupport {
 	
 	
 	/**
-	 * @see java.beans.PropertyEditor#setAsText(String)
+	 * @see java.beans.PropertyEditor#setAsText(java.lang.String)
 	 */
 	public void setAsText(String s) throws IllegalArgumentException {
 		PropertiesEditor pe = new PropertiesEditor();
