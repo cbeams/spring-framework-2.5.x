@@ -42,19 +42,18 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * @param defaultMessage the default message to be used to resolve this message
    */
 	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
-    super(codes, arguments, defaultMessage);
-    this.objectName = objectName;
-  }
+		super(codes, arguments, defaultMessage);
+		this.objectName = objectName;
+	}
 
   /**
 	 * Return the name of the affected object.
 	 */
 	public String getObjectName() {
-    return objectName;
-  }
+		return objectName;
+	}
 
-  public String toString() {
-    return "Error in object '" + this.objectName + "': " + resolvableToString();
-  }
-
+	public String toString() {
+  		return "Error in object '" + this.objectName + "': " + resolvableToString();
+  	}
 }

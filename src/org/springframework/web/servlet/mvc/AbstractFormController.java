@@ -227,10 +227,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		if (isFormSubmission(request)) {
-		  if (isSessionForm() && request.getSession().getAttribute(getFormSessionAttributeName()) == null) {
-			  // cannot submit a session form if no form object is in the session
-			  return handleInvalidSubmit(request, response);
-		  }
+			if (isSessionForm() && request.getSession().getAttribute(getFormSessionAttributeName()) == null) {
+				// cannot submit a session form if no form object is in the session
+				return handleInvalidSubmit(request, response);
+			}
 			// process submit
 			Object command = getCommand(request);
 			ServletRequestDataBinder binder = bindAndValidate(request, command);
@@ -264,7 +264,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of an invalid new form object
 	 */
 	protected final ModelAndView showNewForm(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+			throws Exception {
 		// show new form
 		logger.debug("Displaying new form");
 		Object formObject = formBackingObject(request);
@@ -338,7 +338,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName)
-	    throws Exception {
+	    	throws Exception {
 		return showForm(request, errors, viewName, null);
 	}
 
@@ -356,8 +356,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return the prepared form view
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ModelAndView showForm(
-			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
+	protected final ModelAndView showForm(HttpServletRequest request, BindException errors,
+			String viewName, Map controlModel) throws Exception {
 		if (isSessionForm()) {
 			request.getSession().setAttribute(getFormSessionAttributeName(), errors.getTarget());
 		}
@@ -406,7 +406,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #setBindOnNewForm
 	 */
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+			throws Exception {
 		Object command = formBackingObject(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
 		return processFormSubmission(request, response, command, binder.getErrors());
@@ -461,8 +461,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView processFormSubmission(
-			HttpServletRequest request,	HttpServletResponse response, Object command, BindException errors)
+	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,
+			HttpServletResponse response, Object command, BindException errors)
 			throws Exception;
 
 }

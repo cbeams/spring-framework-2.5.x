@@ -229,8 +229,8 @@ public class DataBinder {
 					String field = this.requiredFields[i];
 					this.errors.addError(
 							new FieldError(this.errors.getObjectName(), field, "", true,
-														 this.errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, field),
-														 getArgumentsForBindingError(field), "Field '" + field + "' is required"));
+							this.errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, field),
+							getArgumentsForBindingError(field), "Field '" + field + "' is required"));
 				}
 			}
 		}
@@ -246,8 +246,8 @@ public class DataBinder {
 				String field = exs[i].getPropertyChangeEvent().getPropertyName();
 				this.errors.addError(
 						new FieldError(this.errors.getObjectName(), field, exs[i].getPropertyChangeEvent().getNewValue(), true,
-													 this.errors.resolveMessageCodes(exs[i].getErrorCode(), field),
-													 getArgumentsForBindingError(field), exs[i].getLocalizedMessage()));
+						this.errors.resolveMessageCodes(exs[i].getErrorCode(), field),
+						getArgumentsForBindingError(field), exs[i].getLocalizedMessage()));
 			}
 		}
 	}
@@ -289,8 +289,8 @@ public class DataBinder {
 	 */
 	protected Object[] getArgumentsForBindingError(String field) {
 		return new Object[] {
-			new DefaultMessageSourceResolvable(new String[] {getObjectName() + Errors.NESTED_PATH_SEPARATOR + field, field},
-																				 null, field)
+				new DefaultMessageSourceResolvable(new String[] {getObjectName() + Errors.NESTED_PATH_SEPARATOR + field, field},
+				null, field)
 		};
 	}
 
