@@ -26,7 +26,8 @@ import org.springframework.context.NoSuchMessageException;
  * <p>This class does not implement caching, thus subclasses can
  * dynamically change messages over time.
  *
- * <p>NOTE: Some methods of this class are based on code from Struts 1.1b3 implementation.
+ * <p>Note: Some methods of this class are based on code from
+ * Struts 1.1b3 implementation.
  * 
  * @author Rod Johnson
  * @see #resolve
@@ -154,21 +155,23 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 	 * Compute and return a key to be used in caching information by a Locale.
 	 * <strong>NOTE</strong>: The locale key for the default Locale in our
 	 * environment is a zero length String.
-	 * @param locale The locale for which a key is desired
+	 * @param locale the locale for which a key is desired
 	 */
 	protected String localeKey(Locale locale) {
-		if (locale == null || locale.equals(Locale.getDefault()))
-			return ("");
-		else
+		if (locale == null || locale.equals(Locale.getDefault())) {
+			return "";
+		}
+		else {
 			return locale.toString();
+		}
 	}
 
 	/**
-	 * Subclasses must implement this method to resolve a message
+	 * Subclasses must implement this method to resolve a message.
 	 * @return the message, or null if not found
 	 * @param code code of the message to resolve
-	 * @param locale locale to resolve the code for. Subclasses
-	 * are encouraged to support internationalization.
+	 * @param locale locale to resolve the code for.
+	 * Subclasses are encouraged to support internationalization.
 	 */
 	protected abstract String resolve(String code, Locale locale);
 

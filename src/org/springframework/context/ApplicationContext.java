@@ -35,7 +35,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.8 2003-12-10 09:00:33 jhoeller Exp $
+ * @version $Id: ApplicationContext.java,v 1.9 2003-12-12 19:26:37 jhoeller Exp $
  */
 public interface ApplicationContext extends AutowireCapableBeanFactory, HierarchicalBeanFactory, MessageSource {
 	
@@ -67,7 +67,7 @@ public interface ApplicationContext extends AutowireCapableBeanFactory, Hierarch
 	void publishEvent(ApplicationEvent event);
 
 	/**
-	 * Open an InputStream to the specified resource:
+	 * Open an InputStream to the specified resource.
 	 * <ul>
 	 * <li>Must support fully qualified URLs, e.g. "file:C:/test.dat".
 	 * <li>Should support relative file paths, e.g. "WEB-INF/test.dat".
@@ -87,10 +87,10 @@ public interface ApplicationContext extends AutowireCapableBeanFactory, Hierarch
 	 * application context. Normally, this path will be the same as the one
 	 * that getResourceAsStream uses for evaluating relative paths.
 	 * <p>Note that this method returns null if this application context
-	 * does not have a dedicated base path. Accordingly, getResourceAsStream
-	 * may not support relative paths at all, or use more than one base path
+	 * does not have a dedicated resource base. Accordingly, getResourceAsStream
+	 * may not support relative paths at all, or use more than one resource base
 	 * for evaluating relative paths.
-	 * @return the resource base path (ending with a separator), or null
+	 * @return the resource base as java.io.File, or null
 	 */
 	File getResourceBase();
 
