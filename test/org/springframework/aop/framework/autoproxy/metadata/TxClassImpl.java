@@ -32,9 +32,13 @@ public class TxClassImpl implements TxClass {
 	/**
 	 * Don't put a space before string values...
 	 * We don't need FQN because we imported this package.
+	 * The first RollbackRuleAttribute shows the preferred constructor,
+	 * taking a Class rather than a String. Normally this class wouldn't
+	 * need to be imported, as it would be imported for use in the business method.
+	 * Note that both FQN and relying on the import above work.
 	 * 
-	 * @RuleBasedTransactionAttribute ()
-	 * @org.springframework.transaction.interceptor.RollbackRuleAttribute ("java.lang.Exception")
+	 * @RuleBasedTransactionAttribute()
+	 * @RollbackRuleAttribute (Exception.class)
 	 * @org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
 	 */
 	public void echoException(Exception ex) throws Exception {

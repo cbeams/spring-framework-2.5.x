@@ -10,13 +10,14 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.beans.FatalBeanException;
 
 /**
  * 
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RollbackRuleTests extends TestCase {
 
@@ -28,8 +29,13 @@ public class RollbackRuleTests extends TestCase {
 		super(arg0);
 	}
 
-	public void testFoundImmediately() {
+	public void testFoundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Exception");
+		assertTrue(rr.getDepth(new Exception()) == 0);
+	}
+	
+	public void testFoundImmediatelyWithClass() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
 	
@@ -52,6 +58,16 @@ public class RollbackRuleTests extends TestCase {
 		assertTrue(rr.getDepth(new ServletException()) > 0);
 		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
 		assertTrue(rr.getDepth(new RuntimeException()) > 0);
+	}
+	
+	public void testConstructorArgMustBeAThrowableClass() {
+		try {
+			new RollbackRuleAttribute(StringBuffer.class);
+			fail("Can't construct a RollbackRuleAttribute without a throwable");
+		}
+		catch (AopConfigException ex) {
+			// Ok
+		}
 	}
 
 }

@@ -45,7 +45,7 @@ public class TxClassWithClassAttribute {
 
 	/**
 	 * @org.springframework.transaction.interceptor.RuleBasedTransactionAttribute ()
-	 * @org.springframework.transaction.interceptor.RollbackRuleAttribute ("java.lang.Exception")
+	 * @org.springframework.transaction.interceptor.RollbackRuleAttribute (Exception.class)
 	 * @org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
 	 */
 	public void echoException(Exception ex) throws Exception {

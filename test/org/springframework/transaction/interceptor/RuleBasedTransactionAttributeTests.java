@@ -6,6 +6,7 @@
 package org.springframework.transaction.interceptor;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import org.springframework.transaction.TransactionDefinition;
  * 
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
 
@@ -62,11 +63,20 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		assertTrue(rta.rollbackOn(new ServletException()));
 	}
 	
-	public void testRuleForSelectiveRollbackOnChecked() {
+	public void testRuleForSelectiveRollbackOnCheckedWithString() {
 		List l = new LinkedList();
 		l.add(new RollbackRuleAttribute("java.rmi.RemoteException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		testRuleForSelectiveRollbackOnChecked(rta);
+	}
 	
+	public void testRuleForSelectiveRollbackOnCheckedWithClass() {
+		List l = Collections.singletonList(new RollbackRuleAttribute(RemoteException.class));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
+		testRuleForSelectiveRollbackOnChecked(rta);
+	}
+	
+	private void testRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
 		assertTrue(!rta.rollbackOn(new Exception()));

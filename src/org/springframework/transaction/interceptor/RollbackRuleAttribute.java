@@ -5,12 +5,14 @@
  
 package org.springframework.transaction.interceptor;
 
+import org.springframework.aop.framework.AopConfigException;
+
 /**
  * Rule determining whether or not a given exception (and any subclasses) should
  * cause a rollback. Multiple such rules can be applied to determine whether a
  * transaction should commit or rollback after an exception has been thrown.
  * @since 09-Apr-2003
- * @version $Id: RollbackRuleAttribute.java,v 1.4 2003-11-27 18:36:18 jhoeller Exp $
+ * @version $Id: RollbackRuleAttribute.java,v 1.5 2003-12-23 08:44:53 johnsonr Exp $
  * @author Rod Johnson
  * @see NoRollbackRuleAttribute
  */
@@ -24,6 +26,19 @@ public class RollbackRuleAttribute {
 	 * whether to roll back a transaction following an exception?
 	 */
 	private final String exceptionName;
+	
+	/**
+	 * Preferred way to construct a RollbackRule, matching
+	 * the exception class and subclasses. The exception class must be
+	 * Throwable or a subclass of Throwable.
+	 * @param clazz throwable class
+	 */
+	public RollbackRuleAttribute(Class clazz) {
+		if (!Throwable.class.isAssignableFrom(clazz))
+			throw new AopConfigException("Cannot construct rollback rule from " + clazz + "; " +
+					"it's not a Throwable");
+		this.exceptionName = clazz.getName();
+	}
 
 	/**
 	 * Construct a new RollbackRule for the given exception name.

@@ -10,9 +10,17 @@ package org.springframework.transaction.interceptor;
  * RollbackRule superclass.
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Id: NoRollbackRuleAttribute.java,v 1.3 2003-11-27 18:36:18 jhoeller Exp $
+ * @version $Id: NoRollbackRuleAttribute.java,v 1.4 2003-12-23 08:44:53 johnsonr Exp $
  */
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
+	
+	/**
+	 * Constrct a new NoRollbackRule for the given throwable class.
+	 * @param clazz throwable class
+	 */
+	public NoRollbackRuleAttribute(Class clazz) {
+		super(clazz);
+	}
 
 	/**
 	 * Construct a new NoRollbackRule for the given exception name.
