@@ -20,15 +20,15 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodBeforeAdvice;
 
-
 /**
  * Simple before advice example that we can use for counting checks.
- * 
  * @author Rod Johnson
- * @version $Id: CountingBeforeAdvice.java,v 1.2 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: CountingBeforeAdvice.java,v 1.3 2004-06-09 16:15:50 jhoeller Exp $
  */
 public class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
+
 	public void before(Method m, Object[] args, Object target) throws Throwable {
 		count(m);
 	}
+
 }

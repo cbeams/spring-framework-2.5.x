@@ -39,7 +39,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	/**
 	 * This will hold the DataSource to use for the currently configured
 	 * Hibernate SessionFactory. It will be set just before initialization
-	 * of the respective SessionFactory, and reset immediately afterwards.
+	 * of the SessionFactory, and reset immediately afterwards.
 	 */
 	protected static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
@@ -49,7 +49,8 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		this.dataSource = (DataSource) configTimeDataSourceHolder.get();
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
-			throw new HibernateException("No local DataSource found for configuration - dataSource property must be set on LocalSessionFactoryBean");
+			throw new HibernateException("No local DataSource found for configuration - " +
+			                             "dataSource property must be set on LocalSessionFactoryBean");
 		}
 	}
 
@@ -78,13 +79,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 			JDBCExceptionReporter.logExceptions(sqle);
 			throw sqle;
 		}
-	}
-
-	/**
-	 * Only used in Hibernate 2.0's ConnectionProvider.
-	 */
-	public boolean isStatementCache() {
-		return true;
 	}
 
 	public void close() {

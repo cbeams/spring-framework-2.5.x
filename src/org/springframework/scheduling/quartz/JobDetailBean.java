@@ -76,15 +76,15 @@ public class JobDetailBean extends JobDetail implements BeanNameAware, Applicati
 	 * Set the key of an ApplicationContext reference to expose in the JobDataMap,
 	 * for example "applicationContext". Default is none.
 	 * Only applicable when running in a Spring ApplicationContext.
-	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
-	 * database, do not put an ApplicationContext reference into the JobDataMap
-	 * but rather into the SchedulerContext.
 	 * <p>In case of a QuartzJobBean, the reference will be applied to the Job
 	 * instance as bean property. An "applicationContext" attribute will correspond
 	 * to a "setApplicationContext" method in that scenario.
 	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
 	 * are not automatically applied to Quartz Job instances, because Quartz
 	 * itself is reponsible for the lifecycle of its Jobs.
+	 * <p><b>Note: When using persistent job stores where JobDetail contents will
+	 * be kept in the database, do not put an ApplicationContext reference into
+	 * the JobDataMap but rather into the SchedulerContext.</b>
 	 * @see SchedulerFactoryBean#setApplicationContextSchedulerContextKey
 	 * @see org.springframework.context.ApplicationContext
 	 */

@@ -39,6 +39,11 @@ import org.springframework.util.MethodInvoker;
  * <p>Derived from MethodInvoker to share common properties and
  * behavior with MethodInvokingFactoryBean.
  *
+ * <p><b>Note: JobDetails created via this FactoryBean are <i>not</i>
+ * serializable and thus not suitable for persistent job stores.</b>
+ * You need to implement your own Quartz Job as a thin wrapper for
+ * each case where you want to delegate to an external method.
+ *
  * @author Juergen Hoeller
  * @since 18.02.2004
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
@@ -82,6 +87,7 @@ public class MethodInvokingJobDetailFactoryBean extends MethodInvoker
 		this.jobDetail = new JobDetail(this.name != null ? this.name : this.beanName,
 		                               this.group, MethodInvokingJob.class);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
+		this.jobDetail.setVolatility(true);
 	}
 
 	public Object getObject() {

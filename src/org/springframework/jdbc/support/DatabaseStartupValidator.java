@@ -34,7 +34,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  * SessionFactory or custom data access objects that access a DataSource directly.
  *
  * <p>Useful to defer application initialization until a database has started up.
- * Particularly appropriate for waiting on a slow-starting Oracle database.
+ * Particularly appropriate for waiting on a slowly starting Oracle database.
  *
  * @author Juergen Hoeller
  * @since 18.12.2003
@@ -80,8 +80,8 @@ public class DatabaseStartupValidator implements InitializingBean {
 	}
 
 	/**
-	 * Set the timeout after which a fatal exception will be thrown.
-	 * Default is 60.
+	 * Set the timeout (in seconds) after which a fatal exception
+	 * will be thrown. Default is 60.
 	 */
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
