@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.config;
 
-import org.springframework.context.MessageSource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
@@ -41,20 +40,31 @@ import org.springframework.web.flow.action.MultiAction;
  * MVC's simple form controller:
  * 
  * <pre>
- * public class EditCustomerDetailsFlowBuilder extends AbstractFlowBuilder {
- * 	public static final String CUSTOMER_DETAILS = &quot;customerDetails&quot;;
+ * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  * 
  * 	protected String flowId() {
- * 		return CUSTOMER_DETAILS;
+ * 		return &quot;customer.Detail&quot;;
  * 	}
  * 
- * 	public void buildStates() {
- * 		addGetState(CUSTOMER_DETAILS);
- * 		addViewState(CUSTOMER_DETAILS);
- * 		addBindAndValidateState(CUSTOMER_DETAILS);
- * 		addFinishEndState();
- * 	}
- * }
+ *  public void buildStates() {
+ *      // get customer information
+ *   	addActionState(&quot;getDetails&quot;,
+ *                     action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                     on(success(), &quot;viewDetails&quot;));
+ *      // view customer information               
+ *   	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                   on(submit(), &quot;bindAndValidate&quot;);
+ *      // bind and validate customer information updates 
+ *   	addActionState(&quot;bindAndValidate&quot;,
+ *                     action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                     new Transition[] {
+ *                         on(error(), &quot;viewDetails&quot;),
+ *                         on(success(), &quot;finish&quot;)
+ *                     }
+ *      // finish
+ *   	addEndState(&quot;finish&quot;);
+ *  }
+ * 
  * </pre>
  * 
  * What this Java-based FlowBuilder implementation does is add four states to a
@@ -64,54 +74,53 @@ import org.springframework.web.flow.action.MultiAction;
  * state (<code>EndState</code>).
  * 
  * The first state, an action state, will be assigned the indentifier
- * <code>customerDetails.get</code>. This action state will automatically be
+ * <code>getDetails</code>. This action state will automatically be
  * configured with the following defaults:
  * <ol>
- * <li>The action bean identifier <code>customerDetails.get</code>; this is
- * the name of the <code>Action</code> implementation that will execute when
- * this state is entered. In this example, that <code>Action</code> will go
- * out to the DB, load the Customer, and put it in the Flow's data model.
+ * <li>An auto-wired action instance of GetCustomerDetails.class. This is he
+ * <code>Action</code> implementation that will execute when this state is
+ * entered. In this example, that <code>Action</code> will go out to the DB,
+ * load the Customer, and put it in the Flow's request context.
  * <li>A <code>success</code> transition to a default view state, called
- * <ocde>customerDetails.view'</code> This means when the get <code>Action
- * </code> returns a <code>success</code> result event (aka outcome), the
- * <code>customerDetails.view</code> state will be entered.
+ * <ocde>viewDetails</code> This means when the get <code>Action </code>
+ * returns a <code>success</code> result event (aka outcome), the <code>viewDetails</code>
+ * state will be entered.
  * <li>It will act as the start state for this flow (by default, the first
  * state added to a flow during the build process is treated as the start
  * state.)
  * </ol>
  * 
- * The second state, a view state, will be identified as <code>
- * customerDetails.view</code> This view state will automatically be configured
- * with the following defaults:
+ * The second state, a view state, will be identified as <code> viewDetails</code>
+ * This view state will automatically be configured with the following defaults:
  * <ol>
- * <li>A view name called <code>customerDetails.view</code>-- this is the
+ * <li>A view name called <code>customer.Detail.view</code>-- this is the
  * logical name of a view resource. This logical view name gets mapped to a
  * physical view resource (jsp, etc.) by the calling front controller (via a
  * spring view resolver, or a struts action forward, for example.)
  * <li>A <code>submit</code> transition to a bind and validate action state,
- * indentified by the default ID <code>customerDetails.bindAndValidate</code>.
- * This means when a <code>submit</code> event is signaled by the view (for
- * example, on a submit button click), the bindAndValidate action state will be
- * entered and the <code>customerDetails.bindAndValidate</code> <code>Action
- * </code> implementation will be executed.
+ * indentified by the default ID <code>"bindAndValidate"</code>. This means
+ * when a <code>submit</code> event is signaled by the view (for example, on a
+ * submit button click), the bindAndValidate action state will be entered and
+ * the <code>customerDetails.bindAndValidate</code> <code>Action </code>
+ * implementation will be executed.
  * </ol>
  * 
  * The third state, an action state, will be indentified as <code>
- * customerDetails.bindAndValidate</code>. This action state will
- * automatically be configured with the following defaults:
+ * bindAndValidate</code>. This action state will automatically be configured
+ * with the following defaults:
  * <ol>
- * <li>An action bean named <code>customerDetails.bindAndValidate</code>-
- * this is the name of the <code>Action</code> implementation exported in the
- * application context that will execute when this state is entered. In this
- * example, the <code>Action</code> will bind form input in the HTTP request
- * to a backing Customer form object, validate it, and update the DB.
+ * <li>An action bean named <code>bindAndValidate</code>- this is the name
+ * of the <code>Action</code> implementation exported in the application
+ * context that will execute when this state is entered. In this example, the
+ * <code>Action</code> will bind form input in the HTTP request to a backing
+ * Customer form object, validate it, and update the DB.
  * <li>A <code>success</code> transition to a default end state, called
  * <code>finish</code>. This means if the <code>Action</code> returns a
  * <code>success</code> result, the <code>finish</code> end state will be
  * transitioned to and the flow will terminate.
  * <li>A <code>error</code> transition back to the form view. This means if
  * the <code>Action</code> returns a <code>error</code> event, the <code>
- * customerDetails.view</code> view state will be transitioned back to.
+ * viewDetails</code> view state will be transitioned back to.
  * </ol>
  * 
  * The fourth and last state, an end state, will be indentified with the default
@@ -132,8 +141,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * The default attribute mapper ID suffix ("attributeMapper").
 	 */
 	public static final String ATTRIBUTE_MAPPER_ID_SUFFIX = "attributeMapper";
-
-	private MessageSource messageSource;
 
 	/**
 	 * Create an instance of a abstract flow builder; default constructor.
@@ -198,8 +205,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
 	 * state triggers the rendering of a view template when entered.
 	 * 
-	 * @param stateIdPrefix The <code>ViewState</code> id - must be locally unique
-	 *        to the flow built by this builder.
+	 * @param stateIdPrefix The <code>ViewState</code> id - must be locally
+	 *        unique to the flow built by this builder.
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -241,10 +248,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * assumes the HTTP response has already been written when entered. The
 	 * marker notes that control should be returned to the HTTP client.
 	 * <p>
-	 * @param stateId The <code>ViewState</code> id prefix; note: the
-	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g.
-	 *        customerDetails.view)
+	 * @param stateId The <code>ViewState</code> id
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
@@ -716,53 +720,105 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return new Transition(Transition.WILDCARD_TRANSITION_CRITERIA, stateId);
 	}
 
+	/**
+	 * Creates the <code>success</code> event id. "Success" indicates that an
+	 * action completed successfuly.
+	 * @return the event id.
+	 */
 	protected String success() {
 		return eventId("success");
 	}
 
+	/**
+	 * Creates the <code>error</code> event id. "Error" indicates that an
+	 * action completed with an error status.
+	 * @return the event id.
+	 */
 	protected String error() {
 		return eventId("error");
 	}
 
+	/**
+	 * Creates the <code>submit</code> event id. "Submit" indicates the user
+	 * wants submitted a request (form) for processing.
+	 * @return the event id.
+	 */
 	protected String submit() {
 		return eventId("submit");
 	}
 
+	/**
+	 * Creates the <code>back</code> event id. "Back" indicates the user wants
+	 * to go to the previous step in the flow.
+	 * @return the event id.
+	 */
 	protected String back() {
 		return eventId("back");
 	}
 
+	/**
+	 * Creates the <code>cancel</code> event id. "Cancel" indicates the flow
+	 * was aborted because the user changed their mind.
+	 * @return the event id.
+	 */
 	protected String cancel() {
 		return eventId("cancel");
 	}
 
+	/**
+	 * Creates the <code>finish</code> event id. "Finish" indicates an object
+	 * was selected for processing or display.
+	 * @return the event id.
+	 */
 	protected String finish() {
 		return eventId("finish");
 	}
 
+	/**
+	 * Creates the <code>select</code> event id. "Select" indicates an object
+	 * was selected for processing or display.
+	 * @return the event id.
+	 */
 	protected String select() {
 		return eventId("select");
 	}
 
+	/**
+	 * Creates the <code>edit</code> event id. "Edit" indicates an object was
+	 * selected for creation or updating.
+	 * @return the event id.
+	 */
 	protected String edit() {
 		return eventId("edit");
 	}
 
+	/**
+	 * Creates the <code>delete</code> event id. "Add" indicates a child
+	 * object is being added to a parent collection.
+	 * @return the event id.
+	 */
 	protected String add() {
 		return eventId("add");
 	}
 
+	/**
+	 * Creates the <code>delete</code> event id. "Delete" indicates a object
+	 * is being removed.
+	 * @return the event id.
+	 */
 	protected String delete() {
-		return eventId("success");
+		return eventId("delete");
 	}
 
+	/**
+	 * Factory method for producing a event id given a string key identifier.
+	 * Default implementation does nothing, returning the key as the
+	 * <code>eventId</code>. Subclasses may override.
+	 * @param key The event id key
+	 * @return the event id
+	 */
 	protected String eventId(String key) {
-		if (messageSource != null) {
-			return messageSource.getMessage(key, null, null);
-		}
-		else {
-			return key;
-		}
+		return key;
 	}
 
 	/**
