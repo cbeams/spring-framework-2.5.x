@@ -19,28 +19,23 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * InvocationHandler implementation for the Spring AOP framework,
- * based on CGLIB1 proxies.
+ * AopProxy based on CGLIB MethodInterceptor implementation.
  *
- * <p>Objects of this type should be obtained through proxy factories,
+ * <p>Objects of this type are obtained through proxy factories,
  * configured by a AdvisedSupport implementation. This class is internal
  * to the Spring framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class can be threadsafe if the
+ * <p>Proxies created using this class are threadsafe if the
  * underlying (target) class is threadsafe.
- * 
- * 
- * CGLIB method filter that can be used to achieve selective overrides.
+ * <p>
+ * This class's method filter is used to achieve selective overrides.
  * Methods with no advice will not be overridden. This optimization isn't enabled
  * by default on AdvisedSupport, as it can break dynamic advice updates, but
  * it produces around 2.5x performance boost on methods with no advice,
  * so it's strongly recommend to enable it on AdvisedSupport for performance critical
  * applications.
-	
- *
  * @author Rod Johnson
- * @author Juergen Hoeller
- * @version $Id: OptimizedCglib1AopProxy.java,v 1.3 2003-12-05 15:19:24 johnsonr Exp $
+ * @version $Id: OptimizedCglib1AopProxy.java,v 1.4 2003-12-10 11:23:56 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilter {
@@ -112,13 +107,13 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
 			
 			// We need to create a method invocation...
-			// Chain can't be empty as empty chains were optimized out earlier...
+			// Chain can't be empty as empty chains were optimized out when we generated the "enhanced" class
 			
 			invocation = new OptimizedCglibMethodInvocation(proxy, target, targetClass, method, args, 
 							targetClass, chain, methodProxy);
 
 		
-			if (this.advised.getExposeInvocation()) {
+			if (this.advised.exposeInvocation) {
 				// Make invocation available if necessary.
 				// Save the old value to reset when this method returns
 				// so that we don't blow away any existing state
@@ -129,7 +124,7 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 				setInvocationContext = true;
 			}
 			
-			if (this.advised.getExposeProxy()) {
+			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;

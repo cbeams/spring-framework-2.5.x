@@ -32,7 +32,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.5 2003-12-10 10:39:24 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.6 2003-12-10 11:23:56 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -81,7 +81,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
 	
-		TargetSource targetSource = advised.getTargetSource();
+		TargetSource targetSource = advised.targetSource;
 		Class targetClass = null;
 		Object target = null;		
 		
@@ -108,19 +108,19 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				targetClass = target.getClass();
 			}
 			
-			if (this.advised.getExposeProxy()) {
+			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;
 			}
 		
 			// Get the interception chain for this method
-			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
+			List chain = advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
 			
 			// Check whether we have any advice. If we don't, we can fallback on
 			// direct reflective invocation of the target, and avoid creating a MethodInvocation
 			// We can only do this if the AdvisedSupport config object lets us.
-			if (chain.isEmpty() && !advised.getExposeInvocation()) {
+			if (chain.isEmpty() && !advised.exposeInvocation) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -132,7 +132,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				
 				invocation = new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(), method, args, targetClass, chain);
 			
-				if (this.advised.getExposeInvocation()) {
+				if (this.advised.exposeInvocation) {
 					// Make invocation available if necessary.
 					// Save the old value to reset when this method returns
 					// so that we don't blow away any existing state

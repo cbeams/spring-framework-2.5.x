@@ -36,7 +36,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.5 2003-12-05 13:23:39 johnsonr Exp $
+ * @version $Id: Cglib1AopProxy.java,v 1.6 2003-12-10 11:23:56 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
@@ -78,7 +78,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		boolean setInvocationContext = false;
 		boolean setProxyContext = false;
 	
-		TargetSource targetSource = advised.getTargetSource();
+		TargetSource targetSource = advised.targetSource;
 		Class targetClass = null;//targetSource.getTargetClass();
 		Object target = null;		
 		
@@ -106,7 +106,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 				targetClass = target.getClass();
 			}
 			
-			if (this.advised.getExposeProxy()) {
+			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;
@@ -117,7 +117,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
 			// We can only do this if the Advised config object lets us.
-			if (chain.isEmpty() && !advised.getExposeInvocation()) {
+			if (chain.isEmpty() && !advised.exposeInvocation) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
@@ -128,7 +128,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 				invocation = new CglibMethodInvocation(proxy, target, targetClass, method, args, 
 							targetClass, chain, methodProxy);
 			
-				if (this.advised.getExposeInvocation()) {
+				if (this.advised.exposeInvocation) {
 					// Make invocation available if necessary.
 					// Save the old value to reset when this method returns
 					// so that we don't blow away any existing state
@@ -173,6 +173,9 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		}
 	}	// intercept
 	
+	/**
+	 * Is the given method the equals method?
+	 */
 	protected final boolean isEqualsMethod(Method m) {
 		return "equals".equals(m.getName()) && 
 				m.getParameterTypes().length == 1 && 

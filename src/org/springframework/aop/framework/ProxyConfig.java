@@ -9,11 +9,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Convenience superclass for configuration to do with creating proxies.
+ * Convenience superclass for configuration used in creating proxies.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.3 2003-12-02 09:36:46 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.4 2003-12-10 11:23:56 johnsonr Exp $
  */
 public class ProxyConfig {
+	
+	/*
+	 * Note that some of the instance variables in this class and AdvisedSupport
+	 * are protected, rather than private, as is usually preferred in Spring
+	 * (following "Expert One-on-One J2EE Design and Development", Chapter 4).
+	 * This allows direct field access in the AopProxy implementations, which
+	 * produces a 10-20% reduction in AOP performance overhead compared with method
+	 * access. - RJ, December 10, 2003.
+	 */
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -27,9 +36,9 @@ public class ProxyConfig {
 	 * The default is false, as enabling this property may
 	 * impair performance.
 	 */
-	private boolean exposeInvocation;
+	protected boolean exposeInvocation;
 
-	private boolean exposeProxy;
+	protected boolean exposeProxy;
 
 	
 	public ProxyConfig() {
