@@ -265,6 +265,24 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
+	 * Handle an invalid submit request, e.g. when in session form mode but no form object
+	 * was found in the session (like in case of an invalid resubmit by the browser).
+	 * <p>Default implementation for wizard form controllers simply shows the initial page
+	 * of a new wizard form. If you want to show some "invalid submit" message, you need
+	 * to override this method.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a prepared view, or null if handled directly
+	 * @throws Exception in case of errors
+	 * @see #showNewForm
+	 * @see #setBindOnNewForm
+	 */
+	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		return showNewForm(request, response);
+	}
+
+	/**
 	 * Apply wizard workflow: finish, cancel, page change.
 	 */
 	protected final ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,

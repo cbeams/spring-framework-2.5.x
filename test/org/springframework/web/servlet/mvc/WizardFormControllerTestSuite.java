@@ -24,7 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class WizardFormControllerTestSuite extends TestCase {
 
-	public void testNoDirtyPageChange() {
+	public void testNoDirtyPageChange() throws Exception {
 		AbstractWizardFormController wizard = createWizard();
 		wizard.setAllowDirtyBack(false);
 		wizard.setAllowDirtyForward(false);
@@ -75,7 +75,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 		performRequest(wizard, session, params, -1, "myname", 32, null);
 	}
 
-	public void testDirtyBack() {
+	public void testDirtyBack() throws Exception {
 		AbstractWizardFormController wizard = createWizard();
 		wizard.setAllowDirtyBack(true);
 		wizard.setAllowDirtyForward(false);
@@ -109,7 +109,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 		// age set -> now allowed to finish
 	}
 
-	public void testDirtyForward() {
+	public void testDirtyForward() throws Exception {
 		AbstractWizardFormController wizard = createWizard();
 		wizard.setAllowDirtyBack(false);
 		wizard.setAllowDirtyForward(true);
@@ -143,7 +143,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 		// name set -> now allowed to finish
 	}
 
-	public void testAbort() {
+	public void testAbort() throws Exception {
 		AbstractWizardFormController wizard = createWizard();
 		HttpSession session = performRequest(wizard, null, null, 0, null, 0, null);
 		Properties params = new Properties();
@@ -156,6 +156,33 @@ public class WizardFormControllerTestSuite extends TestCase {
 		performRequest(wizard, session, params, -2, null, 0, null);
 	}
 
+	public void testInvalidSubmit() throws Exception {
+		AbstractWizardFormController wizard = createWizard();
+		wizard.setAllowDirtyBack(false);
+		wizard.setAllowDirtyForward(false);
+		wizard.setPageAttribute("currentPage");
+		HttpSession session = performRequest(wizard, null, null, 0, null, 0, "currentPage");
+
+		Properties params = new Properties();
+		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1", "value");
+		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
+
+		params.clear();
+		params.setProperty("age", "32");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "0", "value");
+		performRequest(wizard, session, params, 0, "myname", 32, "currentPage");
+
+		params.clear();
+		params.setProperty(AbstractWizardFormController.PARAM_FINISH, "value");
+		performRequest(wizard, session, params, -1, "myname", 32, null);
+
+		params.clear();
+		params.setProperty(AbstractWizardFormController.PARAM_FINISH, "value");
+		performRequest(wizard, session, params, 0, null, 0, "currentPage");
+		// returned to initial page of new wizard form
+	}
+
 	private AbstractWizardFormController createWizard() {
 		AbstractWizardFormController wizard = new TestWizardController(TestBean.class, "tb");
 		wizard.setPages(new String[] {"page0", "page1"});
@@ -163,7 +190,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 	}
 
 	private HttpSession performRequest(Controller wizard, HttpSession session, Properties params,
-	                                   int target, String name, int age, String pageAttr) {
+	                                   int target, String name, int age, String pageAttr) throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(null, (params != null ? "POST" : "GET"), "/wizard");
 		if (params != null) {
 			for (Iterator it = params.keySet().iterator(); it.hasNext();) {
@@ -173,33 +200,29 @@ public class WizardFormControllerTestSuite extends TestCase {
 		}
 		request.setSession(session);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			ModelAndView mv = wizard.handleRequest(request, response);
-			if (target >= 0) {
-				assertTrue("Page " + target + " returned", ("page" + target).equals(mv.getViewName()));
-				if (pageAttr != null) {
-					assertTrue("Page attribute set", (new Integer(target)).equals(mv.getModel().get(pageAttr)));
-					assertTrue("Correct model size", mv.getModel().size() == 3);
-				} else {
-					assertTrue("Correct model size", mv.getModel().size() == 2);
-				}
+		ModelAndView mv = wizard.handleRequest(request, response);
+		if (target >= 0) {
+			assertTrue("Page " + target + " returned", ("page" + target).equals(mv.getViewName()));
+			if (pageAttr != null) {
+				assertTrue("Page attribute set", (new Integer(target)).equals(mv.getModel().get(pageAttr)));
+				assertTrue("Correct model size", mv.getModel().size() == 3);
 			}
-			else if (target == -1) {
-				assertTrue("Success target returned", "success".equals(mv.getViewName()));
-				assertTrue("Correct model size", mv.getModel().size() == 1);
+			else {
+				assertTrue("Correct model size", mv.getModel().size() == 2);
 			}
-			else if (target == -2) {
-				assertTrue("Abort view returned", "abort".equals(mv.getViewName()));
-				assertTrue("Correct model size", mv.getModel().size() == 1);
-			}
-			TestBean tb = (TestBean) mv.getModel().get("tb");
-			assertTrue("Has model", tb != null);
-			assertTrue("Name is " + name, (tb.getName() == name || tb.getName().equals(name)));
-			assertTrue("Age is " + age, tb.getAge() == age);
 		}
-		catch (Exception ex) {
-			fail("Should not throw Exception: " + ex.getMessage());
+		else if (target == -1) {
+			assertTrue("Success target returned", "success".equals(mv.getViewName()));
+			assertTrue("Correct model size", mv.getModel().size() == 1);
 		}
+		else if (target == -2) {
+			assertTrue("Abort view returned", "abort".equals(mv.getViewName()));
+			assertTrue("Correct model size", mv.getModel().size() == 1);
+		}
+		TestBean tb = (TestBean) mv.getModel().get("tb");
+		assertTrue("Has model", tb != null);
+		assertTrue("Name is " + name, (tb.getName() == name || name.equals(tb.getName())));
+		assertTrue("Age is " + age, tb.getAge() == age);
 		return request.getSession(false);
 	}
 
