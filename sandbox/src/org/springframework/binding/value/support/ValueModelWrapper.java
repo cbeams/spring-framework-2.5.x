@@ -43,13 +43,22 @@ public abstract class ValueModelWrapper implements BoundValueModel {
         this.wrappedModel.setValue(value);
     }
 
-    public ValueModel getWrappedModel() {
+    protected ValueModel getWrappedModel() {
         return wrappedModel;
     }
 
-    public Object getWrappedValue() {
+    public ValueModel getInnerMostValueModel() {
         if (wrappedModel instanceof ValueModelWrapper) {
-            return ((ValueModelWrapper)wrappedModel).getWrappedValue();
+            return ((ValueModelWrapper)wrappedModel).getInnerMostValueModel();
+        }
+        else {
+            return wrappedModel;
+        }
+    }
+
+    public Object getInnerMostValue() {
+        if (wrappedModel instanceof ValueModelWrapper) {
+            return ((ValueModelWrapper)wrappedModel).getInnerMostValue();
         }
         else {
             return wrappedModel.getValue();
