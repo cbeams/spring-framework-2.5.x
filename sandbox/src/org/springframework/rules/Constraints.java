@@ -46,14 +46,15 @@ public class Constraints {
     public Constraints() {
 
     }
-    
+
     public static Constraints instance() {
         return INSTANCE;
     }
 
     /**
-     * Bind the specified parameter to the second argument of a BinaryPredicate,
-     * returning a UnaryPredicate which will test a single variable argument
+     * Bind the specified parameter to the second argument of the
+     * <code>BinaryPredicate</code>. The result is a
+     * <code>UnaryPredicate</code> which will test a single variable argument
      * against the constant parameter.
      * 
      * @param predicate
@@ -65,6 +66,70 @@ public class Constraints {
     public UnaryPredicate bind(BinaryPredicate predicate, Object parameter) {
         return new ParameterizedBinaryPredicate(predicate, parameter);
     }
+
+    /**
+     * Bind the specified <code>int</code> parameter to the second argument of
+     * the <code>BinaryPredicate</code>. The result is a
+     * <code>UnaryPredicate</code> which will test a single variable argument
+     * against the constant <code>int</code> parameter.
+     * 
+     * @param predicate
+     *            the binary predicate to bind to
+     * @param parameter
+     *            the <code>int</code> parameter value (constant)
+     * @return The unary predicate
+     */
+    public UnaryPredicate bind(BinaryPredicate predicate, int parameter) {
+        return new ParameterizedBinaryPredicate(predicate, parameter);
+    }
+
+    /**
+     * Bind the specified <code>float</code> parameter to the second argument of
+     * the <code>BinaryPredicate</code>. The result is a
+     * <code>UnaryPredicate</code> which will test a single variable argument
+     * against the constant <code>float</code> parameter.
+     * 
+     * @param predicate
+     *            the binary predicate to bind to
+     * @param parameter
+     *            the <code>float</code> parameter value (constant)
+     * @return The unary predicate
+     */
+    public UnaryPredicate bind(BinaryPredicate predicate, float parameter) {
+        return new ParameterizedBinaryPredicate(predicate, parameter);
+    }
+
+    /**
+     * Bind the specified <code>double</code> parameter to the second argument of
+     * the <code>BinaryPredicate</code>. The result is a
+     * <code>UnaryPredicate</code> which will test a single variable argument
+     * against the constant <code>double</code> parameter.
+     * 
+     * @param predicate
+     *            the binary predicate to bind to
+     * @param parameter
+     *            the <code>double</code> parameter value (constant)
+     * @return The unary predicate
+     */
+    public UnaryPredicate bind(BinaryPredicate predicate, double parameter) {
+        return new ParameterizedBinaryPredicate(predicate, parameter);
+    }
+
+    /**
+     * Bind the specified <code>boolean</code> parameter to the second argument of
+     * the <code>BinaryPredicate</code>. The result is a
+     * <code>UnaryPredicate</code> which will test a single variable argument
+     * against the constant <code>boolean</code> parameter.
+     * 
+     * @param predicate
+     *            the binary predicate to bind to
+     * @param parameter
+     *            the <code>boolean</code> parameter value (constant)
+     * @return The unary predicate
+     */
+    public UnaryPredicate bind(BinaryPredicate predicate, boolean parameter) {
+        return new ParameterizedBinaryPredicate(predicate, parameter);
+    }    
 
     /**
      * Attaches a predicate that tests the result returned by evaluating the
