@@ -192,7 +192,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * <p>The returned Connection handle implements the ConnectionProxy interface,
 	 * allowing to retrieve the underlying target Connection.
 	 * @param username the per-Connection username
-	 * @param username the per-Connection password
+	 * @param password the per-Connection password
 	 * @return a lazy Connection handle
 	 * @see ConnectionProxy#getTargetConnection
 	 */
