@@ -6,15 +6,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.mockobjects.sql.MockConnection;
+import com.mockobjects.sql.MockMultiRowResultSet;
 import junit.framework.TestCase;
-
 import org.easymock.EasyMock;
 import org.easymock.MockControl;
+
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -22,21 +25,12 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.UncategorizedDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
-import com.mockobjects.sql.MockConnection;
-
 /** 
- * Mock object based tests for JdbcTemplate
+ * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.3 2003-08-22 08:18:17 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.4 2003-08-26 17:30:42 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends TestCase {
-
-
-	/** Creates new SeatingPlanTest */
-	public JdbcTemplateTestSuite(String name) {
-		super(name);
-	}
-
 
 	public void testBeanProperties() throws Exception {
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
@@ -56,7 +50,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testCannotRunStaticSqlWithBindParameters() throws Exception {
 		final String sql = "UPDATE FOO SET NAME='tony' WHERE ID > ?";
 		MockControl dsControl = EasyMock.niceControlFor(DataSource.class);
-		final int expectedRowsUpdated = 111;
 		DataSource ds = (DataSource) dsControl.getMock();
 		dsControl.activate();
 	
@@ -85,21 +78,14 @@ public class JdbcTemplateTestSuite extends TestCase {
 				ps.setInt(1, id);
 				return ps;
 			}
-			public String getSql() {
-				return sql;
-			}
 		};
-		
-		
+
 		int idParam = 11111;
 		
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-				
-		
+
 		Dispatcher d = new Dispatcher(idParam);
-		
-		
 		MockConnection con = MockConnectionFactory.updateWithPreparedStatement(sql, new Object[] { new Integer(idParam) }, 1, true);
 
 		ds.getConnection();
@@ -136,11 +122,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 				ps.setInt(1, id);
 				return ps;
 			}
-			public String getSql() {
-				return sql;
-			}
 		};
-		
 		
 		// It's because Integers aren't canonical
 		SQLException sex = new SQLException("bad update");
@@ -150,12 +132,12 @@ public class JdbcTemplateTestSuite extends TestCase {
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
-				dsControl.setReturnValue(con);
-				dsControl.activate();
+		dsControl.setReturnValue(con);
+		dsControl.activate();
 				
 		Dispatcher d = new Dispatcher(iParam);
 		JdbcTemplate template = new JdbcTemplate(ds);
-		
+
 		try {
 			int rowsAffected = template.update(d);
 			fail("Bogus update should throw exception");
@@ -164,7 +146,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 			// pass
 			System.out.println(ex);
 			assertTrue("Correct exception", ex instanceof UncategorizedSQLException);
-			UncategorizedSQLException je = (UncategorizedSQLException) ex;
 			assertTrue("Root cause is correct", ex.getRootCause() == sex);
 			//assertTrue("no update occurred", !je.getDataWasUpdated());
 		}
@@ -186,7 +167,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 		}
 		StringHandler sh = new StringHandler();
 		
-		
 		String sql  = "SELECT FORENAME FROM CUSTMR";
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
@@ -205,7 +185,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 		dsControl.activate();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
-		
 		template.query(sql, sh);
 		
 		// Match
@@ -261,9 +240,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 				ps.setInt(1, 1);
 				return ps;
 			}
-			public String getSql() {
-				return sql;
-			}
 		};
 		
 		template.query(psc, sh);
@@ -280,9 +256,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	
 	
 	public void testLeaveConnOpenOnRequest() throws Exception {
-		
 		String sql  = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
-		
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		
 		DataSource ds = (DataSource) dsControl.getMock();
@@ -290,7 +264,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		ds.getConnection();
 		dsControl.setReturnValue(con);
 		dsControl.activate();
-		
+
 		SingleConnectionDataSource scf = new SingleConnectionDataSource(ds.getConnection(), false);
 		JdbcTemplate template2 = new JdbcTemplate(scf);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
@@ -301,6 +275,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	//	scf.close();
 	
 		dsControl.verify();
+		con.verify();
 	}
 	
 
@@ -515,7 +490,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 	
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-		int rowsAffected = 2;
 		final int [] ids = new int[] { 100, 200 };
 		
 		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
@@ -571,7 +545,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 	
 			MockControl dsControl = EasyMock.controlFor(DataSource.class);
 			DataSource ds = (DataSource) dsControl.getMock();
-			int rowsAffected = 2;
 			final int [] ids = new int[] { 100, 200 };
 			
 			SQLException sex = new SQLException();
@@ -652,20 +625,19 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testPreparedStatementSetterQueryWithNullArg() throws Exception { 
 		final String sql = "SELECT * FROM FOO WHERE ID > 1"; 
 		MockControl dsControl = EasyMock.niceControlFor(DataSource.class); 
-		final int expectedRowsUpdated = 111; 
-		DataSource ds = (DataSource) dsControl.getMock(); 
+		DataSource ds = (DataSource) dsControl.getMock();
 		// Don't expect any calls 
 		dsControl.activate(); 
 
 		class MockJdbcTemplate extends JdbcTemplate { 
-				private boolean valid = false; 
-				public MockJdbcTemplate(DataSource ds) { 
-						super(ds); 
-				} 
-				// Override this so we don't need to get connection 
-				public void query(String sql, RowCallbackHandler rch) { 
-						valid = true; 
-				} 
+			private boolean valid = false;
+			public MockJdbcTemplate(DataSource ds) {
+					super(ds);
+			}
+			// Override this so we don't need to get connection
+			public void query(String sql, RowCallbackHandler rch) {
+					valid = true;
+			}
 		} 
 
 		MockJdbcTemplate mockTemplate = new MockJdbcTemplate(ds); 
@@ -682,8 +654,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testPreparedStatementSetterQueryWithNullArgButRequiringBindVariables() throws Exception { 
 		final String sql = "SELECT * FROM FOO WHERE ID > ?"; 
 		MockControl dsControl = EasyMock.niceControlFor(DataSource.class); 
-		final int expectedRowsUpdated = 111; 
-		DataSource ds = (DataSource) dsControl.getMock(); 
+		DataSource ds = (DataSource) dsControl.getMock();
 		// Don't expect any calls 
 		dsControl.activate(); 
 
@@ -703,8 +674,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testNullSqlWithPreparedStatementSetterQuery() throws Exception { 
 		final String sql = null; 
 		MockControl dsControl = EasyMock.niceControlFor(DataSource.class); 
-		final int expectedRowsUpdated = 111; 
-		DataSource ds = (DataSource) dsControl.getMock(); 
+		DataSource ds = (DataSource) dsControl.getMock();
 		// Don't expect any calls 
 		dsControl.activate(); 
 
@@ -723,14 +693,13 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testNullSqlQuery() throws Exception { 
 		final String sql = null; 
 		MockControl dsControl = EasyMock.niceControlFor(DataSource.class); 
-		final int expectedRowsUpdated = 111; 
-		DataSource ds = (DataSource) dsControl.getMock(); 
+		DataSource ds = (DataSource) dsControl.getMock();
 		// Don't expect any calls 
 		dsControl.activate(); 
 
 		JdbcTemplate mockTemplate = new JdbcTemplate(ds); 
 		try { 
-				mockTemplate.query(sql, (RowCallbackHandler) null); 
+				mockTemplate.query(sql, null);
 				fail("Null SQL isn't permitted"); 
 		} 
 		catch (InvalidDataAccessApiUsageException ex) { 
@@ -813,8 +782,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		final String name = "Gary";
 		MockControl dsControl = EasyMock.controlFor(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-		int expectedRowsUpdated = 1;
-	
+
 		SQLException sex = new SQLException();
 		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
 		PreparedStatement mockPs = (PreparedStatement) psControl.getMock();
@@ -953,7 +921,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 	 * Test that we see an SQLException translated using Error Code
 	 */
 	public void testSQLErrorCodeTranslation() throws Exception {
-		
 		final SQLException sex = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 		
@@ -964,7 +931,6 @@ public class JdbcTemplateTestSuite extends TestCase {
 			{ new Integer(1) },
 			{ new Integer(2) }
 		};
-		MockControl conControl = EasyMock.controlFor(Connection.class);
 		Connection con = MockConnectionFactory.statement(sql, results, true, null, null);
 		MockControl dbmdControl = EasyMock.controlFor(DatabaseMetaData.class);
 		DatabaseMetaData dbmd = (DatabaseMetaData) dbmdControl.getMock();
@@ -999,4 +965,75 @@ public class JdbcTemplateTestSuite extends TestCase {
 
 	}
 	
+	public void testCustomQueryExecutorInvoked() throws Exception {
+		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = EasyMock.controlFor(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl stmtControl = EasyMock.controlFor(Statement.class);
+		final Statement stmt = (Statement) stmtControl.getMock();
+		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
+		final PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		final ResultSet rs = new MockMultiRowResultSet();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 3);
+		con.getMetaData();
+		conControl.setReturnValue(null, 1);
+		con.createStatement();
+		conControl.setReturnValue(stmt, 1);
+		stmt.getWarnings();
+		stmtControl.setReturnValue(null, 1);
+		stmt.close();
+		stmtControl.setVoidCallable(1);
+		ps.getWarnings();
+		psControl.setReturnValue(null, 1);
+		ps.close();
+		psControl.setVoidCallable(1);
+		con.close();
+		conControl.setVoidCallable(3);
+		dsControl.activate();
+		conControl.activate();
+		stmtControl.activate();
+		psControl.activate();
+
+		JdbcTemplate template = new JdbcTemplate(ds);
+		template.setQueryExecutor(new QueryExecutor() {
+			public ResultSet executeQuery(Statement stmt2, String sql) throws SQLException {
+				assertEquals(stmt, stmt2);
+				assertEquals("my query", sql);
+				return rs;
+			}
+			public ResultSet executeQuery(PreparedStatement ps2) throws SQLException {
+				assertEquals(ps, ps2);
+				return rs;
+			}
+		});
+
+		template.doWithResultSetFromStaticQuery("my query",
+			new ResultSetExtractor() {
+				public void extractData(ResultSet rs2) throws SQLException {
+					assertEquals(rs, rs2);
+				}
+			}
+		);
+		template.doWithResultSetFromPreparedQuery(
+			new PreparedStatementCreator() {
+				public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+					return ps;
+				}
+			},
+			new ResultSetExtractor() {
+				public void extractData(ResultSet rs2) throws SQLException {
+					assertEquals(rs, rs2);
+				}
+			}
+		);
+
+		dsControl.verify();
+		conControl.verify();
+		stmtControl.verify();
+		psControl.verify();
+	}
+
 }

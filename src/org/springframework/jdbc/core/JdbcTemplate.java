@@ -56,7 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.4 2003-08-22 08:18:32 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.5 2003-08-26 17:30:52 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -85,11 +85,14 @@ public class JdbcTemplate implements InitializingBean {
 	 **/
 	private DataSource dataSource;
 
-	/** If this variable is false, we will throw exceptions on SQL warnings */
-	private boolean ignoreWarnings = true;
-
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
+
+	/** Custom query executor */
+	private QueryExecutor queryExecutor;
+
+	/** If this variable is false, we will throw exceptions on SQL warnings */
+	private boolean ignoreWarnings = true;
 
 
 	/**
@@ -128,6 +131,45 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
+	 * Set the exception translator used in this class.
+	 * If no custom translator is provided, a default is used
+	 * which examines the SQLException's SQLState code.
+	 * @param exceptionTranslator custom exception translator
+	 */
+	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
+		this.exceptionTranslator = exceptionTranslator;
+	}
+
+	/**
+	 * Return the exception translator for this instance.
+	 * Creates a default one for the specified DataSource if none set.
+	 */
+	public synchronized SQLExceptionTranslator getExceptionTranslator() {
+		if (this.exceptionTranslator == null) {
+			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
+		}
+		return this.exceptionTranslator;
+	}
+
+	/**
+	 * Set a custom QueryExecutor implementation.
+	 */
+	public void setQueryExecutor(QueryExecutor queryExecutor) {
+		this.queryExecutor = queryExecutor;
+	}
+
+	/**
+	 * Return the QueryExecutor implementation for this instance.
+	 * Creates a default one in none set.
+	 */
+	public synchronized QueryExecutor getQueryExecutor() {
+		if (this.queryExecutor == null) {
+			this.queryExecutor = new DefaultQueryExecutor();
+		}
+		return queryExecutor;
+	}
+
+	/**
 	 * Set whether or not we want to ignore SQLWarnings.
 	 * Default is true.
 	 */
@@ -144,27 +186,6 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
-	 * Set the exception translator used in this class.
-	 * If no custom translator is provided, a default is used
-	 * which examines the SQLException's SQLState code.
-	 * @param exceptionTranslator custom exception translator
-	 */
-	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
-		this.exceptionTranslator = exceptionTranslator;
-	}
-
-	/**
-	 * Return the exception translator for this instance.
-	 * Creates a default one for the specified DataSource if none set.
-	 */
-	protected synchronized SQLExceptionTranslator getExceptionTranslator() {
-		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
-		}
-		return this.exceptionTranslator;
-	}
-
-	/**
 	 * Eagerly initialize the exception translator,
 	 * creating a default one for the specified DataSource if none set.
 	 */
@@ -172,6 +193,7 @@ public class JdbcTemplate implements InitializingBean {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
+		getQueryExecutor();
 		getExceptionTranslator();
 	}
 
@@ -182,19 +204,18 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Execute a query given static SQL.
-	 * Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
 	 * a static query with a PreparedStatement, use the overloaded query method
-	 * with a the PREPARE_STATEMENT PreparedStatementSetter constant as a parameter.
-	 * <br>
-	 * In most cases the query() method should be preferred to the parallel
-	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods
-	 * are included to allow full control over the extraction of data
-	 * from ResultSets and to facilitate integration with third-party
-	 * software.
+	 * with the PREPARE_STATEMENT constant as PreparedStatementSetter argument.
+	 * <p>In most cases the query() method should be preferred to the parallel
+	 * doWithResultSetXXXX() method. The doWithResultSetXXXX() methods are
+	 * included to allow full control over the extraction of data from ResultSets
+	 * and to facilitate integration with third-party software.
 	 * @param sql SQL query to execute
 	 * @param callbackHandler object that will extract results
-	 * @throws DataAccessException if there is any problem executing
-	 * the query
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
+	 * @see #PREPARE_STATEMENT
 	 */
 	public void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException {
 		doWithResultSetFromStaticQuery(sql, new RowCallbackHandlerResultSetExtractor(callbackHandler));
@@ -223,11 +244,11 @@ public class JdbcTemplate implements InitializingBean {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			stmt = con.createStatement();
 			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
-			rs = stmt.executeQuery(sql);
 
 			if (logger.isInfoEnabled())
 				logger.info("Executing static SQL query '" + sql + "' using a java.sql.Statement");
 
+			rs = getQueryExecutor().executeQuery(stmt, sql);
 			rse.extractData(rs);
 
 			SQLWarning warning = stmt.getWarnings();
@@ -283,10 +304,11 @@ public class JdbcTemplate implements InitializingBean {
 		try {
 			con = DataSourceUtils.getConnection(this.dataSource);
 			ps = psc.createPreparedStatement(con);
+
 			if (logger.isInfoEnabled())
 				logger.info("Executing SQL query using PreparedStatement: [" + psc + "]");
-			rs = ps.executeQuery();
 
+			rs = getQueryExecutor().executeQuery(ps);
 			rse.extractData(rs);
 
 			SQLWarning warning = ps.getWarnings();
@@ -345,10 +367,6 @@ public class JdbcTemplate implements InitializingBean {
 					pss.setValues(ps);
 					return ps;
 				}
-
-				public String getSql() {
-					return sql;
-				}
 			}, callbackHandler);
 		}
 	}
@@ -376,9 +394,6 @@ public class JdbcTemplate implements InitializingBean {
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 				return ps;
 			}
-			public String getSql() {
-				return sql;
-			}
 		});
 	}
 
@@ -394,9 +409,9 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
-	 * Issue multiple updates using multiple PreparedStatementCreators to provide SQL and any required
-	 * parameters
-	 * @param pscs array of helpers: callback object that provides SQL and any necessary parameters
+	 * Issue multiple updates using multiple PreparedStatementCreators to provide SQL
+	 * and any required parameters.
+	 * @param pscs array of callback objects that provide SQL and any necessary parameters
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
@@ -446,7 +461,6 @@ public class JdbcTemplate implements InitializingBean {
 	 * we run an update with static SQL
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
-	 * TODO add a similar query method
 	 */
 	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
 		if (pss == null) {
@@ -459,10 +473,6 @@ public class JdbcTemplate implements InitializingBean {
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
 				pss.setValues(ps);
 				return ps;
-			}
-
-			public String getSql() {
-				return sql;
 			}
 		});
 	}
@@ -511,8 +521,8 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
-	 * Convenience method to throw a JdbcSqlWarningException if we're
-	 * not ignoring warnings
+	 * Convenience method to throw an SQLWarningException if we're
+	 * not ignoring warnings.
 	 * @param warning warning from current statement. May be null,
 	 * in which case this method does nothing.
 	 */
@@ -529,12 +539,28 @@ public class JdbcTemplate implements InitializingBean {
 
 
 	/**
+	 * Default implementation of the QueryExecutor interface.
+	 * Simply executes the respective query on the given statement.
+	 */
+	private static final class DefaultQueryExecutor implements QueryExecutor {
+
+		public ResultSet executeQuery(Statement stmt, String sql) throws SQLException {
+			return stmt.executeQuery(sql);
+		}
+
+		public ResultSet executeQuery(PreparedStatement ps) throws SQLException {
+			return ps.executeQuery();
+		}
+	}
+
+
+	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a
 	 * ResultSetExtractor. Uses a  regular ResultSet, so we have
 	 * to be careful when using it, so we don't use it for navigating
 	 * since this could lead to unpreditable consequences.
 	 */
-	private final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
+	private static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
 		/**
 		 * RowCallbackHandler to use to extract data
@@ -549,9 +575,6 @@ public class JdbcTemplate implements InitializingBean {
 			this.callbackHandler = callbackHandler;
 		}
 
-		/**
-		 * @see org.springframework.jdbc.core.ResultSetExtractor#extractData(java.sql.ResultSet)
-		 */
 		public void extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
 				this.callbackHandler.processRow(rs);
