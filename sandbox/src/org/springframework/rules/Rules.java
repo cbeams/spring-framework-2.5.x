@@ -99,6 +99,14 @@ public class Rules implements UnaryPredicate, Validator {
         return new Rules(beanClass);
     }
 
+    /**
+     * Adds the provided bean property expression (constraint) to the list of
+     * constraints for the constrained property.
+     * 
+     * @param expression
+     *            the bean property expression
+     * @return this, to support chaining.
+     */
     public Rules add(BeanPropertyExpression expression) {
         UnaryAnd and = (UnaryAnd)propertyRules
                 .get(expression.getPropertyName());
@@ -108,6 +116,33 @@ public class Rules implements UnaryPredicate, Validator {
             and.add(expression);
         }
         return this;
+    }
+
+    /**
+     * Adds a value constraint for the specified property.
+     * 
+     * @param propertyName
+     *            The property name.
+     * @param valueConstraint
+     *            The value constraint.
+     */
+    public void add(String propertyName, UnaryPredicate valueConstraint) {
+        add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
+    }
+
+    /**
+     * Adds the provided compound predicate, composed of BeanPropertyExpression
+     * objects, as a bean property constraint.
+     * 
+     * @param compoundPredicate
+     */
+    public void add(UnaryPredicate compoundPredicate) {
+        Assert
+                .isTrue(
+                        compoundPredicate instanceof CompoundUnaryPredicate,
+                        "Argument must be a compound predicate composed of BeanPropertyExpression objects.");
+        add(new CompoundBeanPropertyExpression(
+                (CompoundUnaryPredicate)compoundPredicate));
     }
 
     /**
@@ -142,18 +177,6 @@ public class Rules implements UnaryPredicate, Validator {
                 results.collectResults(rule);
             }
         });
-    }
-
-    /**
-     * Adds a value constraint for the specified property.
-     * 
-     * @param propertyName
-     *            The property name.
-     * @param valueConstraint
-     *            The value constraint.
-     */
-    public void add(String propertyName, UnaryPredicate valueConstraint) {
-        add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
     }
 
     public String toString() {

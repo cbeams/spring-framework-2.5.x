@@ -39,6 +39,7 @@ public class CompoundBeanPropertyExpression implements BeanPropertyExpression {
      */
     public CompoundBeanPropertyExpression(CompoundUnaryPredicate compoundPredicate) {
         this.compoundPredicate = compoundPredicate;
+        this.compoundPredicate.validateTypeSafety(BeanPropertyExpression.class);
     }
 
     /**

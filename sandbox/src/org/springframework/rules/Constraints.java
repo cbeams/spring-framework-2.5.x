@@ -2,16 +2,16 @@
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules;
 
@@ -47,9 +47,9 @@ public class Constraints {
     }
 
     /**
-     * Bind the specified parameter to the second argument of a
-     * BinaryPredicate, returning a UnaryPredicate which will test a single
-     * variable argument against the constant parameter.
+     * Bind the specified parameter to the second argument of a BinaryPredicate,
+     * returning a UnaryPredicate which will test a single variable argument
+     * against the constant parameter.
      * 
      * @param predicate
      *            the binary predicate to bind to
@@ -57,9 +57,8 @@ public class Constraints {
      *            the parameter value (constant)
      * @return The unary predicate
      */
-    public static UnaryPredicate bind(
-        BinaryPredicate predicate,
-        Object parameter) {
+    public static UnaryPredicate bind(BinaryPredicate predicate,
+            Object parameter) {
         return new ParameterizedBinaryPredicate(predicate, parameter);
     }
 
@@ -75,9 +74,8 @@ public class Constraints {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static UnaryPredicate result(
-        UnaryFunction function,
-        UnaryPredicate constraint) {
+    public static UnaryPredicate onResult(UnaryFunction function,
+            UnaryPredicate constraint) {
         return new UnaryFunctionResultConstraint(function, constraint);
     }
 
@@ -86,17 +84,76 @@ public class Constraints {
      * specified binary function. This effectively attaches a constraint on the
      * function return value.
      * 
-     * @param constraint
-     *            the predicate to test the function result
      * @param function
      *            the function
+     * @param constraint
+     *            the predicate to test the function result
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static BinaryPredicate result(
-        UnaryPredicate constraint,
-        BinaryFunction function) {
-        return new BinaryFunctionResultConstraint(constraint, function);
+    public static BinaryPredicate onResult(BinaryFunction function,
+            UnaryPredicate constraint) {
+        return new BinaryFunctionResultConstraint(function, constraint);
+    }
+
+    /**
+     * AND two predicates.
+     * 
+     * @param predicate1
+     *            the first predicate
+     * @param predicate2
+     *            the second predicate
+     * @return The compound AND predicate
+     */
+    public static UnaryPredicate and(UnaryPredicate predicate1,
+            UnaryPredicate predicate2) {
+        return new UnaryAnd(predicate1, predicate2);
+    }
+
+    /**
+     * Return the conjunction (all constraint) for all predicates.
+     * 
+     * @param predicates
+     *            the predicates
+     * @return The compound AND predicate
+     */
+    public static UnaryPredicate all(UnaryPredicate[] predicates) {
+        return new UnaryAnd(predicates);
+    }
+
+    /**
+     * Returns a new, empty unary conjunction prototype, capable of composing
+     * individual predicates where 'ALL' must test true.
+     * 
+     * @return the UnaryAnd
+     */
+    public static UnaryAnd conjunction() {
+        return new UnaryAnd();
+    }
+
+    /**
+     * OR two predicates.
+     * 
+     * @param predicate1
+     *            the first predicate
+     * @param predicate2
+     *            the second predicate
+     * @return The compound OR predicate
+     */
+    public static UnaryPredicate or(UnaryPredicate predicate1,
+            UnaryPredicate predicate2) {
+        return new UnaryOr(predicate1, predicate2);
+    }
+
+    /**
+     * Return the disjjunction (any constraint) for all predicates.
+     * 
+     * @param predicates
+     *            the predicates
+     * @return The compound AND predicate
+     */
+    public static UnaryPredicate any(UnaryPredicate[] predicates) {
+        return new UnaryOr(predicates);
     }
 
     /**
@@ -114,16 +171,6 @@ public class Constraints {
     }
 
     /**
-     * Returns a new, empty unary conjunction prototype, capable of composing
-     * individual predicates where 'ALL' must test true.
-     * 
-     * @return the UnaryAnd
-     */
-    public static UnaryAnd conjunction() {
-        return new UnaryAnd();
-    }
-
-    /**
      * Returns a new, empty unary disjunction prototype, capable of composing
      * individual predicates where 'ANY' must test true.
      * 
@@ -131,264 +178,6 @@ public class Constraints {
      */
     public static UnaryOr disjunction() {
         return new UnaryOr();
-    }
-
-    /**
-     * AND two predicates.
-     * 
-     * @param predicate1
-     *            the first predicate
-     * @param predicate2
-     *            the second predicate
-     * @return The compound AND predicate
-     */
-    public static UnaryPredicate and(
-        UnaryPredicate predicate1,
-        UnaryPredicate predicate2) {
-        return new UnaryAnd(predicate1, predicate2);
-    }
-
-    /**
-     * OR two predicates.
-     * 
-     * @param predicate1
-     *            the first predicate
-     * @param predicate2
-     *            the second predicate
-     * @return The compound OR predicate
-     */
-    public static UnaryPredicate or(
-        UnaryPredicate predicate1,
-        UnaryPredicate predicate2) {
-        return new UnaryOr(predicate1, predicate2);
-    }
-
-    /**
-     * Apply a "equal to" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param propertyValue
-     *            The constraint value
-     * @return The predicate
-     */
-    public static BeanPropertyExpression eq(
-        String propertyName,
-        Object propertyValue) {
-        return new ParameterizedBeanPropertyExpression(
-            propertyName,
-            EqualTo.instance(),
-            propertyValue);
-    }
-
-    /**
-     * Apply a "greater than" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param propertyValue
-     *            The constraint value
-     * @return The predicate
-     */
-    public static BeanPropertyExpression gt(
-        String propertyName,
-        Object propertyValue) {
-        return new ParameterizedBeanPropertyExpression(
-            propertyName,
-            GreaterThan.instance(),
-            propertyValue);
-    }
-
-    /**
-     * Apply a "greater than equal to" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param propertyValue
-     *            The constraint value
-     * @return The predicate
-     */
-    public static BeanPropertyExpression gte(
-        String propertyName,
-        Object propertyValue) {
-        return new ParameterizedBeanPropertyExpression(
-            propertyName,
-            GreaterThanEqualTo.instance(),
-            propertyValue);
-    }
-
-    /**
-     * Apply a "less than" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param propertyValue
-     *            The constraint value
-     * @return The predicate
-     */
-    public static BeanPropertyExpression lt(
-        String propertyName,
-        Object propertyValue) {
-        return new ParameterizedBeanPropertyExpression(
-            propertyName,
-            LessThan.instance(),
-            propertyValue);
-    }
-
-    /**
-     * Apply a "less than equal to" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param propertyValue
-     *            The constraint value
-     * @return The predicate
-     */
-    public static BeanPropertyExpression lte(
-        String propertyName,
-        Object propertyValue) {
-        return new ParameterizedBeanPropertyExpression(
-            propertyName,
-            LessThanEqualTo.instance(),
-            propertyValue);
-    }
-
-    /**
-     * Apply a "greater than" constraint to two properties
-     * 
-     * @param propertyName
-     *            The first property
-     * @param otherPropertyName
-     *            The other property
-     * @return The predicate
-     */
-    public static BeanPropertyExpression gtProperty(
-        String propertyName,
-        String otherPropertyName) {
-        return new BeanPropertiesExpression(
-            propertyName,
-            GreaterThan.instance(),
-            otherPropertyName);
-    }
-
-    /**
-     * Apply a "equal to" constraint to two bean properties.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param otherPropertyName
-     *            The other property
-     * @return The predicate
-     */
-    public static BeanPropertyExpression eqProperty(
-        String propertyName,
-        String otherPropertyName) {
-        return new BeanPropertiesExpression(
-            propertyName,
-            EqualTo.instance(),
-            otherPropertyName);
-    }
-
-    /**
-     * Apply a "greater than or equal to" constraint to two properties.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param otherPropertyName
-     *            The other property
-     * @return The predicate
-     */
-    public static BeanPropertyExpression gteProperty(
-        String propertyName,
-        String otherPropertyName) {
-        return new BeanPropertiesExpression(
-            propertyName,
-            GreaterThanEqualTo.instance(),
-            otherPropertyName);
-    }
-
-    /**
-     * Apply a "less than" constraint to two properties.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param otherPropertyName
-     *            The other property
-     * @return The predicate
-     */
-    public static BeanPropertyExpression ltProperty(
-        String propertyName,
-        String otherPropertyName) {
-        return new BeanPropertiesExpression(
-            propertyName,
-            LessThan.instance(),
-            otherPropertyName);
-    }
-
-    /**
-     * Apply a "less than or equal to" constraint to two properties.
-     * 
-     * @param propertyName
-     *            The first property
-     * @param otherPropertyName
-     *            The other property
-     * @return The predicate
-     */
-    public static BeanPropertyExpression lteProperty(
-        String propertyName,
-        String otherPropertyName) {
-        return new BeanPropertiesExpression(
-            propertyName,
-            LessThanEqualTo.instance(),
-            otherPropertyName);
-    }
-
-    /**
-     * Apply a inclusive "range" constraint to a bean property.
-     * 
-     * @param propertyName
-     *            the property with the range constraint.
-     * @param min
-     *            the low edge of the range
-     * @param max
-     *            the high edge of the range
-     * @return The range predicate constraint
-     */
-    public static BeanPropertyExpression inRange(
-        String propertyName,
-        Comparable min,
-        Comparable max) {
-        Range range = new Range(min, max);
-        return new BeanPropertyValueConstraint(propertyName, range);
-    }
-
-    /**
-     * Apply a inclusive "range" constraint between two other properties to a
-     * bean property.
-     * 
-     * @param propertyName
-     *            the property with the range constraint.
-     * @param minPropertyName
-     *            the low edge of the range
-     * @param maxPropertyName
-     *            the high edge of the range
-     * @return The range predicate constraint
-     */
-    public static BeanPropertyExpression inRangeProperties(
-        String propertyName,
-        String minPropertyName,
-        String maxPropertyName) {
-        BeanPropertiesExpression min =
-            new BeanPropertiesExpression(
-                propertyName,
-                GreaterThanEqualTo.instance(),
-                minPropertyName);
-        BeanPropertiesExpression max =
-            new BeanPropertiesExpression(
-                propertyName,
-                LessThanEqualTo.instance(),
-                maxPropertyName);
-        return new CompoundBeanPropertyExpression(new UnaryAnd(min, max));
     }
 
     /**
@@ -420,8 +209,237 @@ public class Constraints {
      */
     public static UnaryPredicate minLength(int minLength) {
         return new StringLengthConstraint(
-            RelationalOperator.GREATER_THAN_EQUAL_TO,
-            minLength);
+                RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
+    }
+
+    /**
+     * Attach a value constraint for the provided bean property.
+     * 
+     * @param propertyName
+     *            the bean property name
+     * @param valueConstraint
+     *            the value constraint
+     * @return The bean property expression that tests the constraint
+     */
+    public static BeanPropertyExpression value(String propertyName,
+            UnaryPredicate valueConstraint) {
+        return new BeanPropertyValueConstraint(propertyName, valueConstraint);
+    }
+
+    /**
+     * Apply an "all" value constraint to the provided bean property.
+     * 
+     * @param propertyName
+     *            The bean property name
+     * @param constraints
+     *            The constraints that form a all conjunction
+     * @return
+     */
+    public static BeanPropertyExpression all(String propertyName,
+            UnaryPredicate[] constraints) {
+        return value(propertyName, all(constraints));
+    }
+
+    /**
+     * Apply an "ny" value constraint to the provided bean property.
+     * 
+     * @param propertyName
+     *            The bean property name
+     * @param constraints
+     *            The constraints that form a all disjunction
+     * @return
+     */
+    public static BeanPropertyExpression any(String propertyName,
+            UnaryPredicate[] constraints) {
+        return value(propertyName, any(constraints));
+    }
+
+    /**
+     * Apply a "equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static BeanPropertyExpression eq(String propertyName,
+            Object propertyValue) {
+        return new ParameterizedBeanPropertyExpression(propertyName, EqualTo
+                .instance(), propertyValue);
+    }
+
+    /**
+     * Apply a "greater than" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static BeanPropertyExpression gt(String propertyName,
+            Object propertyValue) {
+        return new ParameterizedBeanPropertyExpression(propertyName,
+                GreaterThan.instance(), propertyValue);
+    }
+
+    /**
+     * Apply a "greater than equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static BeanPropertyExpression gte(String propertyName,
+            Object propertyValue) {
+        return new ParameterizedBeanPropertyExpression(propertyName,
+                GreaterThanEqualTo.instance(), propertyValue);
+    }
+
+    /**
+     * Apply a "less than" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static BeanPropertyExpression lt(String propertyName,
+            Object propertyValue) {
+        return new ParameterizedBeanPropertyExpression(propertyName, LessThan
+                .instance(), propertyValue);
+    }
+
+    /**
+     * Apply a "less than equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static BeanPropertyExpression lte(String propertyName,
+            Object propertyValue) {
+        return new ParameterizedBeanPropertyExpression(propertyName,
+                LessThanEqualTo.instance(), propertyValue);
+    }
+
+    /**
+     * Apply a "greater than" constraint to two properties
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static BeanPropertyExpression gtProperty(String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertiesExpression(propertyName, GreaterThan
+                .instance(), otherPropertyName);
+    }
+
+    /**
+     * Apply a "equal to" constraint to two bean properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static BeanPropertyExpression eqProperty(String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertiesExpression(propertyName, EqualTo.instance(),
+                otherPropertyName);
+    }
+
+    /**
+     * Apply a "greater than or equal to" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static BeanPropertyExpression gteProperty(String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertiesExpression(propertyName, GreaterThanEqualTo
+                .instance(), otherPropertyName);
+    }
+
+    /**
+     * Apply a "less than" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static BeanPropertyExpression ltProperty(String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertiesExpression(propertyName, LessThan.instance(),
+                otherPropertyName);
+    }
+
+    /**
+     * Apply a "less than or equal to" constraint to two properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static BeanPropertyExpression lteProperty(String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertiesExpression(propertyName, LessThanEqualTo
+                .instance(), otherPropertyName);
+    }
+
+    /**
+     * Apply a inclusive "range" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            the property with the range constraint.
+     * @param min
+     *            the low edge of the range
+     * @param max
+     *            the high edge of the range
+     * @return The range predicate constraint
+     */
+    public static BeanPropertyExpression inRange(String propertyName,
+            Comparable min, Comparable max) {
+        Range range = new Range(min, max);
+        return value(propertyName, range);
+    }
+
+    /**
+     * Apply a inclusive "range" constraint between two other properties to a
+     * bean property.
+     * 
+     * @param propertyName
+     *            the property with the range constraint.
+     * @param minPropertyName
+     *            the low edge of the range
+     * @param maxPropertyName
+     *            the high edge of the range
+     * @return The range predicate constraint
+     */
+    public static BeanPropertyExpression inRangeProperties(String propertyName,
+            String minPropertyName, String maxPropertyName) {
+        BeanPropertiesExpression min = new BeanPropertiesExpression(
+                propertyName, GreaterThanEqualTo.instance(), minPropertyName);
+        BeanPropertiesExpression max = new BeanPropertiesExpression(
+                propertyName, LessThanEqualTo.instance(), maxPropertyName);
+        return new CompoundBeanPropertyExpression(new UnaryAnd(min, max));
     }
 
 }

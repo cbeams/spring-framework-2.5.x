@@ -33,17 +33,17 @@ public class BinaryFunctionResultConstraint implements BinaryPredicate {
      * Creates a BinaryFunctionResultTester that tests the result return from
      * evaulating the specified binary function.
      * 
-     * @param constraint
-     *            The predicate that will test the function return value.
      * @param function
      *            The function to test.
+     * @param constraint
+     *            The predicate that will test the function return value.
      */
-    public BinaryFunctionResultConstraint(UnaryPredicate constraint,
-            BinaryFunction function) {
-        Assert.notNull(constraint);
+    public BinaryFunctionResultConstraint(BinaryFunction function,
+            UnaryPredicate constraint) {
         Assert.notNull(function);
-        this.constraint = constraint;
+        Assert.notNull(constraint);
         this.function = function;
+        this.constraint = constraint;
     }
 
     /**
@@ -58,6 +58,6 @@ public class BinaryFunctionResultConstraint implements BinaryPredicate {
     }
 
     public String toString() {
-        return constraint.toString() + "(" + function.toString() + ")";
+        return "[" + constraint.toString() + " of(" + function.toString() + ")]";
     }
 }
