@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.AbstractConstraint;
 
 /**
  * @author Keith Donald
@@ -33,8 +34,6 @@ public class Transition implements Serializable {
 	private static final Log logger = LogFactory.getLog(Transition.class);
 
 	public static final String EVENT_ID_ATTRIBUTE = "_eventId";
-
-	private String id;
 
 	private Constraint eventIdCriteria;
 
@@ -50,29 +49,23 @@ public class Transition implements Serializable {
 	public Transition(String id, String toState) {
 		Assert.notNull(id, "The id property is required");
 		Assert.notNull(toState, "The toState property is required");
-		this.id = id;
-		this.eventIdCriteria = createDefaultEventIdCriteria();
+		this.eventIdCriteria = createDefaultEventIdCriteria(id);
 		this.toState = toState;
 	}
 
-	public Transition(String id, String toState, Constraint eventIdCriteria) {
-		Assert.notNull(id, "The id property is required");
+	public Transition(Constraint eventIdCriteria, String toState) {
+		Assert.notNull(eventIdCriteria, "The eventIdCriteria property is required");
 		Assert.notNull(toState, "The toState property is required");
-		this.id = id;
-		this.eventIdCriteria = createDefaultEventIdCriteria();
+		this.eventIdCriteria = eventIdCriteria;
 		this.toState = toState;
 	}
 
-	protected Constraint createDefaultEventIdCriteria() {
-		return new Constraint() {
+	protected Constraint createDefaultEventIdCriteria(final String id) {
+		return new AbstractConstraint() {
 			public boolean test(Object eventId) {
 				return id.equals(eventId);
 			}
 		};
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getToState() {
@@ -83,40 +76,15 @@ public class Transition implements Serializable {
 		return eventIdCriteria.test(eventId);
 	}
 
-	public ViewDescriptor execute(Flow flow, TransitionableState fromState, FlowSessionExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) {
-		assertActiveFlow(sessionExecution, flow);
-		updateCurrentStateIfNeccessary(sessionExecution, fromState);
-		String qualifiedActiveFlowId = null;
-		if (logger.isDebugEnabled()) {
-			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + getId() + "' within state '" + fromState.getId() + "' for flow '"
-					+ qualifiedActiveFlowId + "' signaled; processing...");
-		}
-		sessionExecution.setLastEventId(getId());
-		flow.fireEventSignaled(getId(), fromState, sessionExecution, request);
+	public ViewDescriptor execute(String eventId, Flow flow, TransitionableState fromState,
+			FlowSessionExecutionStack sessionExecution, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing transition from state '" + fromState.getId() + "' to state '" + getToState()
-						+ "' in flow '" + qualifiedActiveFlowId + "'");
+						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
 			}
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
 					response);
-			flow.fireEventProcessed(getId(), fromState, sessionExecution, request);
-			if (logger.isDebugEnabled()) {
-				if (sessionExecution.isActive()) {
-					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId() + "' for flow '"
-							+ qualifiedActiveFlowId + "' was processed; as a result, the new state is '"
-							+ sessionExecution.getCurrentStateId() + "' in flow '"
-							+ sessionExecution.getQualifiedActiveFlowId() + "'");
-				}
-				else {
-					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId() + "' for flow '"
-							+ qualifiedActiveFlowId + "' was processed; as a result, flow session execution has ended");
-				}
-			}
 			return descriptor;
 		}
 		catch (NoSuchFlowStateException e) {
@@ -124,28 +92,8 @@ public class Transition implements Serializable {
 		}
 	}
 
-	protected void assertActiveFlow(FlowSessionExecution sessionExecution, Flow flow) {
-		if (!flow.getId().equals(sessionExecution.getActiveFlowId())) {
-			throw new IllegalStateException("Assertion failed - the flow ID '" + flow.getId()
-					+ "' must equal the active flow ID '" + sessionExecution.getActiveFlowId()
-					+ "' for this flow session execution");
-		}
-	}
-
-	protected void updateCurrentStateIfNeccessary(FlowSessionExecutionStack sessionExecution,
-			TransitionableState fromState) {
-		if (!fromState.getId().equals(sessionExecution.getCurrentStateId())) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Event '" + getId() + "' in state '" + fromState.getId()
-						+ "' was signaled by client; however the current flow session execution state is '"
-						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + fromState.getId()
-						+ "'");
-			}
-			sessionExecution.setCurrentStateId(fromState.getId());
-		}
-	}
-
 	public String toString() {
-		return new ToStringCreator(this).append("id", id).append("toState", toState).toString();
+		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", toState)
+				.toString();
 	}
 }

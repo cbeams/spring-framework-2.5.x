@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.util.closure.support.Block;
 
@@ -748,7 +749,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	// lifecycle event publishers
-	
+
 	/**
 	 * @param eventId
 	 * @param fromState
@@ -1589,8 +1590,25 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param newState
 	 * @return
 	 */
-	public Transition onEvent(String eventId, String newState) {
-		return new Transition(eventId, newState);
+	public Transition onEvent(String eventId, String newStateId) {
+		return new Transition(eventId, newStateId);
+	}
+
+	/**
+	 * @param eventIdCriteria
+	 * @param newStateId
+	 * @return
+	 */
+	public Transition onEvent(Constraint eventIdCriteria, String newStateId) {
+		return new Transition(eventIdCriteria, newStateId);
+	}
+
+	/**
+	 * @param newStateId
+	 * @return
+	 */
+	public Transition onAnyEvent(String newStateId) {
+		return new Transition(Transition.WILDCARD_EVENT_CRITERIA, newStateId);
 	}
 
 	/**

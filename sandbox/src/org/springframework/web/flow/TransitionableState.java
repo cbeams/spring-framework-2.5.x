@@ -94,7 +94,50 @@ public abstract class TransitionableState extends AbstractState {
 	 */
 	public ViewDescriptor execute(String eventId, Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
-		return getTransition(eventId, flow).execute(flow, this, sessionExecution, request, response);
+		assertActiveFlow(sessionExecution, flow);
+		updateCurrentStateIfNeccessary(eventId, sessionExecution);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '"
+					+ sessionExecution.getQualifiedActiveFlowId() + "' signaled");
+		}
+		sessionExecution.setLastEventId(eventId);
+		flow.fireEventSignaled(eventId, this, sessionExecution, request);
+		ViewDescriptor viewDescriptor = getTransition(eventId, flow).execute(eventId, flow, this, sessionExecution,
+				request, response);
+		flow.fireEventProcessed(eventId, this, sessionExecution, request);
+		if (logger.isDebugEnabled()) {
+			if (sessionExecution.isActive()) {
+				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '"
+						+ sessionExecution.getQualifiedActiveFlowId()
+						+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
+						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
+			}
+			else {
+				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '"
+						+ sessionExecution.getQualifiedActiveFlowId()
+						+ "' was processed; as a result, flow session execution has ended");
+			}
+		}
+		return viewDescriptor;
+	}
+
+	protected void assertActiveFlow(FlowSessionExecution sessionExecution, Flow flow) {
+		if (!flow.getId().equals(sessionExecution.getActiveFlowId())) {
+			throw new IllegalStateException("Assertion failed - the flow ID '" + flow.getId()
+					+ "' must equal the active flow ID '" + sessionExecution.getActiveFlowId()
+					+ "' for this flow session execution");
+		}
+	}
+
+	protected void updateCurrentStateIfNeccessary(String eventId, FlowSessionExecutionStack sessionExecution) {
+		if (!getId().equals(sessionExecution.getCurrentStateId())) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Event '" + eventId + "' in state '" + getId()
+						+ "' was signaled by client; however the current flow session execution state is '"
+						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + getId() + "'");
+			}
+			sessionExecution.setCurrentStateId(getId());
+		}
 	}
 
 	public String toString() {

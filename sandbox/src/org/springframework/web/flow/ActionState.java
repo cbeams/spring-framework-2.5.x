@@ -219,22 +219,13 @@ public class ActionState extends TransitionableState {
 			}
 			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
 			beanExecutionCount++;
-			if (triggersTransition(event, flow)) {
-				return getTransition(event, flow).execute(flow, this, sessionExecution, request, response);
+			if (event != null) {
+				return execute(event.getId(), flow, sessionExecution, request, response);
 			}
 			else {
-				if (event != null) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Event '" + event + "' returned by action bean " + actionBean
-								+ "' does not map to a valid state transition for action state '" + getId()
-								+ "' in flow '" + flow.getId() + "'");
-					}
-				}
-				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
-								+ "I will attempt to proceed to the next action in the chain");
-					}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
+							+ "I will attempt to proceed to the next action in the chain");
 				}
 			}
 		}
