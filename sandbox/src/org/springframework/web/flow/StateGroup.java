@@ -46,23 +46,15 @@ public class StateGroup implements Serializable {
 		return id;
 	}
 
-	public boolean add(AbstractState state) {
-		boolean added = states.add(states);
-		if (added) {
-			state.setFlow(flow);
-		}
-		return added;
+	public void add(AbstractState state) {
+		state.setFlow(flow);
+		states.add(states);
 	}
 
-	public boolean addAll(AbstractState[] states) {
-		boolean anyAdded = false;
+	public void addAll(AbstractState[] states) {
 		for (int i = 0; i < states.length; i++) {
-			boolean added = add(states[i]);
-			if (!anyAdded && added) {
-				anyAdded = true;
-			}
+			add(states[i]);
 		}
-		return anyAdded;
 	}
 
 	public boolean equals(Object o) {

@@ -464,53 +464,38 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return id;
 	}
 
-	/**
-	 * @param state
-	 * @return
-	 */
-	public boolean add(AbstractState state) {
-		return addAll(getDefaultStateGroupId(), new AbstractState[] { state });
+	public void add(AbstractState state) {
+		addAll(getDefaultStateGroupId(), new AbstractState[] { state });
 	}
 
-	/**
-	 * @return
-	 */
 	protected String getDefaultStateGroupId() {
 		return StateGroups.DEFAULT_GROUP_ID;
 	}
 
-	/**
-	 * @param states
-	 * @return
-	 */
-	public boolean addAll(AbstractState[] states) {
-		return addAll(getDefaultStateGroupId(), states);
+	public void addAll(AbstractState[] states) {
+		addAll(getDefaultStateGroupId(), states);
 	}
 
-	/**
-	 * @param groupId
-	 * @param state
-	 * @return
-	 */
-	public boolean add(String groupId, AbstractState state) {
-		return addAll(groupId, new AbstractState[] { state });
+	public void add(String groupId, AbstractState state) {
+		addAll(groupId, new AbstractState[] { state });
 	}
 
 	/**
 	 * @param groupId
 	 * @param states
-	 * @return
 	 */
-	public boolean addAll(String groupId, AbstractState[] states) {
-		boolean firstAdd = false;
+	public void addAll(String groupId, AbstractState[] states) {
+		boolean firstAdd;
 		if (this.stateGroups.isEmpty()) {
 			firstAdd = true;
 		}
-		boolean changed = this.stateGroups.addAll(groupId, states);
-		if (changed && firstAdd) {
+		else {
+			firstAdd = true;
+		}
+		this.stateGroups.addAll(groupId, states);
+		if (firstAdd) {
 			setStartState((TransitionableState)this.stateGroups.statesIterator().next());
 		}
-		return changed;
 	}
 
 	/**
@@ -519,8 +504,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
-		return add(new SubFlowState(this, id, subFlow, transitions));
+	public void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
+		add(new SubFlowState(this, id, subFlow, transitions));
 	}
 
 	/**
@@ -530,11 +515,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, String subFlowId, String attributesMapperId,
+	public void addSubFlowState(String id, String subFlowId, String attributesMapperId,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlowState(id, subFlowId, attributesMapperId, new Transition[] {
-				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
-				onFinish(subFlowDefaultFinishStateId) });
+		addSubFlowState(id, subFlowId, attributesMapperId, new Transition[] { onBack(subFlowDefaultFinishStateId),
+				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
 
 	/**
@@ -544,9 +528,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+	public void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
+		addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
 				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
 
@@ -557,8 +541,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(this, id, subFlowId, attributesMapperId, transitions));
+	public void addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
+		add(new SubFlowState(this, id, subFlowId, attributesMapperId, transitions));
 	}
 
 	/**
@@ -568,17 +552,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
+	public void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) {
-		return add(new SubFlowState(this, id, subFlow, attributesMapper, transitions));
-	}
-
-	/**
-	 * @param stateGroup
-	 * @return
-	 */
-	public boolean add(StateGroup stateGroup) {
-		return this.stateGroups.add(stateGroup);
+		add(new SubFlowState(this, id, subFlow, attributesMapper, transitions));
 	}
 
 	/**
