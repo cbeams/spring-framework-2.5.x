@@ -12,7 +12,7 @@
 
    <!-- The version of the project under development, e.g.
         1.1, 1.2, 2.0-dev -->
-   <currentVersion>1.0-dev</currentVersion>
+   <currentVersion>1.0M3</currentVersion>
 
    <organization>
       <name>Spring Framework Inc. :-)</name>
@@ -39,8 +39,8 @@
         the connection element has the form:
         scm:<system>:<system specific connection string> -->
    <repository>
-      <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:main</connection>
-      <developerConnection>scm:cvs:ext:${maven.username}@cvs.sourceforge.net:/cvsroot/springframework</developerConnection>
+      <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/springframework:spring</connection>
+      <developerConnection>scm:cvs:ext:${maven.username}@cvs.sourceforge.net:/cvsroot/springframework:spring</developerConnection>
       <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/springframework/main/</url>
    </repository>
 
@@ -187,10 +187,8 @@
          <jar>jta.jar</jar>
       </dependency>
       <dependency>
-         <groupId>javamail</groupId>
-         <artifactId>mailapi</artifactId>
-         <jar>mailapi.jar</jar>
-         <version>1.3</version>
+         <id>mail</id>
+         <jar>mail.jar</jar>
       </dependency>
 
       <dependency>
@@ -316,11 +314,6 @@
          <jar>aopalliance.jar</jar>
       </dependency>
       <dependency>
-         <id>attrib4j</id>
-         <version>0.8.4</version>
-         <jar>attrib4j-0.8.4.jar</jar>
-      </dependency>
-      <dependency>
          <groupId>poi</groupId>
          <artifactId>poi</artifactId>
          <version>2.0-pre3-20030728</version>
@@ -371,7 +364,7 @@
       <report>maven-file-activity-plugin</report>
       <report>maven-statcvs-plugin</report>
       <report>maven-checkstyle-plugin</report> 
-      <report>maven-javadoc-plugin</report>
+      <!-- report>maven-javadoc-plugin</report -->
       <report>maven-jxr-plugin</report>
       <report>maven-junit-report-plugin</report>
       <report>maven-tasklist-plugin</report>
