@@ -1255,6 +1255,63 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <literal>removeFromCache(String viewName, Locale loc)</literal>
       method.</para>
     </sect2>
+	
+	<sect2 id="mvc-viewresolver-chaining">
+		<title>Chaining ViewResolvers</title>
+		<para>
+			Spring supports more than just one view resolver. This allows you to chain resolvers
+			and for example override specific views in certain circumstances. Chaining is view resolvers
+			is pretty straightforward: just add more than one resolver to your application context and
+			if necessary, set the <literal>order</literal> property to specify an order. Remember: the higher
+			the order property, the later the view resolver will be positioned in the chain.			
+		</para>
+		<para>
+			A chain of view resolvers for example could consist of two, one <literal>InternalResourceViewResolver</literal> (positioned
+			as the last resolver) and an <literal>XmlViewResolver</literal> specifying Excel views (those are not supported
+			by the InternalResourceViewResolver):
+		<programlisting><![CDATA[
+<bean id="jspViewResolver" 
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="order"><value>2</value></property>
+	<property name="viewClass">
+		<value>org.springframework.web.servlet.view.JstlView<value>
+	</property>
+	<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+	<property name="suffix"><value>.jsp</value></property>
+</bean>
+
+<bean id="excelViewResolver">
+		class="org.springframework.web.servlet.view.XmlViewResolver">
+	<property name="order"><value>1</value></property>
+	<property name="location"><value>/WEB-INF/views.xml</value></property>
+</bean>
+
+### views.xml
+
+<beans>
+	<bean name="report" class="org.springframework.example.ReportExcelView"/>
+</beans>
+]]></programlisting>
+		</para>
+		<para>
+			If a specific view resolver does not result in a view, Spring will
+				inspect the context to see if other view resolvers are configured. If not,
+				it'll throw an Exception. If there are additional view resolvers, it'll continue
+				to inspect those.
+		</para>
+		<para>
+			You have to keep something else in mind: the contract of a view resolver mentions
+			that a view resolver <emphasis>can</emphasis> return null to indicate the view could not
+			be found. Not all view resolvers do this however! This is because the InternalResourceViewResolver
+			for example simply cannot detect whether or not the view exists (it uses the RequestDispatcher
+			internally, and dispatching is the only way to figure out if for example a JSP exists--this can
+			only be done once). The same holds for the VelocityViewResolver and some others. Check the
+			JavaDoc for the view resolver to see if you're dealing with a view resolver that does not 
+			report non-existing views. As a result of this, putting an <literal>InternalResourceViewResolver</literal> in the chain
+			on a place other than the last, will result in the chain not being fully inspected, since the
+			<literal>InternalResourceViewResolver</literal> will <emphasis>always</emphasis> return a view!
+		</para>
+	</sect2>
   </sect1>
 
   <sect1 id="mvc-localeresolver">
