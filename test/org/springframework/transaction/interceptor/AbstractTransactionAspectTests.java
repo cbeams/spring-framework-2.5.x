@@ -42,9 +42,27 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.3 2004-07-02 21:18:59 johnsonr Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.4 2004-07-20 16:41:30 johnsonr Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
+	
+	protected Method  exceptionalMethod;
+	
+	protected Method getNameMethod;
+	
+	protected Method setNameMethod;
+	
+	public AbstractTransactionAspectTests() {
+		try {
+			// Cache the methods we'll be testing
+			exceptionalMethod = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
+			getNameMethod = ITestBean.class.getMethod("getName", null);
+			setNameMethod = ITestBean.class.getMethod("setName", new Class[] { String.class} );
+		}
+		catch (NoSuchMethodException ex) {
+			throw new RuntimeException("Shouldn't happen", ex);
+		}
+	}
 	
 	/**
 	 * Subclasses must implement this to create an advised object based on the
@@ -88,7 +106,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testTransactionShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = ITestBean.class.getMethod("getName", null);
+		Method m = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
@@ -117,7 +135,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testEnclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
+		Method m = exceptionalMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
@@ -167,8 +185,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		final TransactionAttribute outerTxatt = new DefaultTransactionAttribute();
 		final TransactionAttribute innerTxatt = new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NESTED);
 
-		Method outerMethod = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
-		Method innerMethod = ITestBean.class.getMethod("getName", null);
+		Method outerMethod = exceptionalMethod;
+		Method innerMethod = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(outerMethod, outerTxatt);
 		tas.register(innerMethod, innerTxatt);
@@ -275,7 +293,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			}
 		};
 
-		Method m = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
+		Method m = exceptionalMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
@@ -328,7 +346,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testProgrammaticRollback() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = ITestBean.class.getMethod("getName", null);
+		Method m = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
@@ -367,7 +385,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testCannotCreateTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = ITestBean.class.getMethod("getName", null);
+		Method m = getNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
@@ -404,10 +422,10 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	public void testCannotCommitTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
-		Method m = ITestBean.class.getMethod("setName", new Class[] { String.class} );
+		Method m = setNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
-		Method m2 = ITestBean.class.getMethod("getName", null);
+		Method m2 = getNameMethod;
 		// No attributes for m2
 
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
