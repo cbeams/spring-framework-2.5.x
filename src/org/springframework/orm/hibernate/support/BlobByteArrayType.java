@@ -69,20 +69,23 @@ public class BlobByteArrayType extends AbstractLobType  {
 		return byte[].class;
 	}
 
+	public boolean isMutable() {
+		return true;
+	}
+
 	public boolean equals(Object x, Object y) {
 		return (x == y) ||
 				(x instanceof byte[] && y instanceof byte[] && Arrays.equals((byte[]) x, (byte[]) y));
 	}
 
 	public Object deepCopy(Object value) {
+		if (value == null) {
+			return null;
+		}
 		byte[] original = (byte[]) value;
 		byte[] copy = new byte[original.length];
 		System.arraycopy(original, 0, copy, 0, original.length);
 		return copy;
-	}
-
-	public boolean isMutable() {
-		return true;
 	}
 
 	protected Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
