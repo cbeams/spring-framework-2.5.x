@@ -19,9 +19,11 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * Exception thrown if a form object could not be retrieved via its identifier.
- * Provides information about the persistent class and the identifier.
+ * Provides information about the form object class and the identifier.
+ * 
  * @author Keith Donald 
  * @author Juergen Hoeller
+ * @author Erwin Vervaet
  */
 public class FormObjectRetrievalFailureException extends NestedRuntimeException {
 
@@ -33,11 +35,11 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * Create a new FormObjectRetrievalFailureException for the given object,
 	 * with the default "not found" message.
 	 * @param formObjectClass the persistent class
-	 * @param formObjectName the ID of the object that should have been retrieved
+	 * @param formObjectName the id of the object that should have been retrieved
 	 */
 	public FormObjectRetrievalFailureException(Class formObjectClass, String formObjectName) {
 		this(formObjectClass, formObjectName,
-				"Form object of class [" + formObjectClass.getName() + "] with formObjectName [" + formObjectName + "]: not found",
+				"Form object of class [" + formObjectClass.getName() + "] with name [" + formObjectName + "]: not found",
 				null);
 	}
 
@@ -45,9 +47,9 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * Create a new ObjectRetrievalFailureException for the given object,
 	 * with the given explicit message and exception.
 	 * @param formObjectClass the persistent class
-	 * @param formObjectName the ID of the object that should have been retrieved
+	 * @param formObjectName the id of the object that should have been retrieved
 	 * @param msg exception message
-	 * @param ex source exception
+	 * @param cause source exception
 	 */
 	public FormObjectRetrievalFailureException(
 			Class formObjectClass, String formObjectName, String msg, Throwable cause) {
@@ -64,7 +66,7 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 */
 	public FormObjectRetrievalFailureException(String formObjectClassName, String formObjectName) {
 		this(formObjectClassName, formObjectName,
-				"Form object of class [" + formObjectClassName + "] with formObjectName [" + formObjectName + "]: not found",
+				"Form object of class [" + formObjectClassName + "] with name [" + formObjectName + "]: not found",
 				null);
 	}
 
@@ -74,11 +76,11 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * @param formObjectClassName the name of the persistent class
 	 * @param formObjectName the ID of the object that should have been retrieved
 	 * @param msg exception message
-	 * @param ex source exception
+	 * @param cause source exception
 	 */
 	public FormObjectRetrievalFailureException(
-			String formObjectClassName, String formObjectName, String msg, Throwable ex) {
-		super(msg, ex);
+			String formObjectClassName, String formObjectName, String msg, Throwable cause) {
+		super(msg, cause);
 		this.formObjectClass = formObjectClassName;
 		this.formObjectName = formObjectName;
 	}
@@ -92,7 +94,7 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	}
 
 	/**
-	 * Return the name of the persistent class of the object that was not found.
+	 * Return the name of the class of the object that was not found.
 	 * Will work for both Class objects and String names.
 	 */
 	public String getFormObjectClassName() {
@@ -101,7 +103,7 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	}
 
 	/**
-	 * Return the formObjectName of the object that was not found.
+	 * Return the name of the object that was not found.
 	 */
 	public Object getFormObjectName() {
 		return formObjectName;

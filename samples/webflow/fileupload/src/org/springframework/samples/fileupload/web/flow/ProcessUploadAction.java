@@ -17,10 +17,10 @@ package org.springframework.samples.fileupload.web.flow;
 
 import org.springframework.validation.DataBinder;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.action.BindAndValidateAction;
+import org.springframework.web.flow.action.FormAction;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
-public class ProcessUploadAction extends BindAndValidateAction {
+public class ProcessUploadAction extends FormAction {
 	
 	protected void initBinder(RequestContext context, DataBinder binder) {
 		// to actually be able to convert a multipart object to a byte[]

@@ -31,7 +31,7 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- *     public Event ${executeMethodName}(RequestContext context)
+ *     public Event ${executeMethodName}(RequestContext context) throws Exception
  * </pre>
  * 
  * By default, the ${executeMethodName} will be the name of the <b>current state</b>
@@ -47,7 +47,7 @@ import org.springframework.web.flow.RequestContext;
  * ... will execute the method:
  * 
  * <pre>
- *      public Event search(RequestContext context)
+ *      public Event search(RequestContext context) throws Exception
  * </pre>
  * 
  * <p>
