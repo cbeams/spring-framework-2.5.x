@@ -39,13 +39,12 @@ import org.springframework.validation.Errors;
 public class ValidationResults implements Visitor {
     private static final Log logger = LogFactory
             .getLog(ValidationResults.class);
-
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
     private Object bean;
     private String propertyName;
     private Errors errors;
     private Stack levels = new Stack();
-    GetProperty getProperty;
+    private GetProperty getProperty;
 
     public ValidationResults(Object bean, Errors errors) {
         this.bean = bean;
@@ -76,7 +75,6 @@ public class ValidationResults implements Visitor {
             errors.rejectValue(constraint.getPropertyName(), errorCode, errorArgs,
                     defaultMessage);
         }
-        levels.push(constraint);
         if (logger.isDebugEnabled()) {
             logger.debug("Constraint [" + constraint + "] "  
                     + (result ? "passed" : "failed"));
@@ -133,10 +131,7 @@ public class ValidationResults implements Visitor {
         while (it.hasNext()) {
             boolean result = ((Boolean)visitorSupport.invokeVisit(
                     ValidationResults.this, it.next())).booleanValue();
-            UnaryPredicate top = (UnaryPredicate)levels.pop();
             if (!result) {
-                errors.rejectValue(propertyName, getErrorCode(top),
-                        getArgs(top), getDefaultMessage(top));
                 return false;
             }
         }
@@ -156,7 +151,6 @@ public class ValidationResults implements Visitor {
         while (it.hasNext()) {
             boolean result = ((Boolean)visitorSupport.invokeVisit(
                     ValidationResults.this, it.next())).booleanValue();
-            levels.pop();
             if (result) {
                 return true;
             }
@@ -185,11 +179,14 @@ public class ValidationResults implements Visitor {
     boolean visit(UnaryPredicate constraint) {
         boolean result = constraint.test(getProperty.evaluate(propertyName));
         result = applyAnyNegation(result);
+        if (!result) {
+            errors.rejectValue(propertyName, getErrorCode(constraint),
+                    getArgs(constraint), getDefaultMessage(constraint));
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Constraint [" + constraint + "] "  
                     + (result ? "passed" : "failed"));
         }
-        levels.push(constraint);
         return result;
     }
 
