@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.130 2004-04-21 18:48:43 jhoeller Exp $
+$Id: changelog.txt,v 1.131 2004-04-22 08:35:59 jhoeller Exp $
 
 
-Changes in version 1.0.1 (21.4.2003)
+Changes in version 1.0.1 (22.4.2003)
 ------------------------------------
 
 Package org.springframework.aop
@@ -19,6 +19,7 @@ Package org.springframework.beans
 * added "getPropertyType" method to BeanWrapper/BeanWrapperImpl, capable of checking indexed/mapped elements
 * BeanWrapperImpl allows registration of custom editors for array/List/Map properties
 * BeanWrapperImpl allows registration of custom editors for specific elements of array/List/Map properties
+* fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to parse null texts as null values
 * added InputStreamEditor to standard PropertyEditors, for creating java.io.InputStream instances from String locations
 * added ByteArrayPropertyEditor to standard PropertyEditors, for turning Strings into their byte representations
 * added DestructionAwareBeanPostProcessor subinterface, adding a before-destruction callback
@@ -40,13 +41,12 @@ Package org.springframework.context
 * AbstractXmlApplicationContext resolves its config locations via "resolveConfigLocations" to allow for file patterns
 * EventPublicationInterceptor implements ApplicationContextAware rather than extending ApplicationObjectSupport
 
-Package org.springframework.jdbc.object
+Package org.springframework.jdbc
+* fixed JdbcTemplate's "queryForList" to correctly handle a single row with a single column as result
 * added "setSqlReadyForUse" method to StoredProcedure, for indicating that the SQL should be used as provided
-
-Package org.springframework.jdbc.support
-* SQLErrorCodesFactory caches database product name in a Map based on DataSource to avoid unnecessary meta data lookups
-* added "extractDatabaseMetaData" method to JdbcUtils, with a DatabaseMetaDataCallBackHandler interface as parameter
-* added property 'useSqlStateForTranslation' to SqlErrorCodes to allow for translation of PostgreSQL state codes
+* SQLErrorCodesFactory caches database product name in a Map based on DataSource to avoid unnecessary metadata lookups
+* added property "useSqlStateForTranslation" to SqlErrorCodes to allow for translation of PostgreSQL state codes
+* added "extractDatabaseMetaData" method to JdbcUtils, using the DatabaseMetaDataCallback interface as parameter
 
 Package org.springframework.orm
 * fixed Hibernate Session unbinding in case of JtaTransactionManager with flush failure im beforeCommit synchronization
@@ -57,6 +57,9 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * refined exceptions thrown by RmiClientInterceptor's "createRmiProxy" and RmiProxyFactoryBean's "afterPropertiesSet"
 * added "getApplicationContext" method to ServletEndpointSupport, as alternative to "getWebApplicationContext"
+
+Package org.springframework.scheduling
+* added "applicationContextJobDataKey" property to JobDetailBean, for exposing the ApplicationContext in the JobDataMap
 
 Package org.springframework.transaction
 * fixed AbstractPlatformTransactionManager's handling of beforeCompletion callbacks in case of beforeCommit failures

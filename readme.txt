@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.0 (March 2004)
-----------------------------------------------
+THE SPRING FRAMEWORK, release 1.0.1 (April 2004)
+------------------------------------------------
 http://www.springframework.org
 
 
@@ -55,7 +55,7 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
 Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes,
 Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, Quartz 1.3,
-JSTL 1.0, Velocity 1.3, FreeMarker 2.3, Struts-Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
+JSTL 1.0, Velocity 1.3, FreeMarker 2.3, Struts/Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -85,7 +85,7 @@ The "dist" directory contains the following distinct JAR files for use in applic
 JAR files and a JAR file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~185 KB)
+* "spring-core" (~190 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -97,23 +97,23 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~175 KB)
+* "spring-dao" (~180 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~110 KB)
+* "spring-orm" (~115 KB)
 - Contents: Hibernate support, JDO support, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, iBATIS SQL Maps)
 
-* "spring-web" (~70 KB)
-- Contents: web application context, multipart resolver, web utilities
-- Dependencies: spring-context, Servlet, (Commons FileUpload, COS)
+* "spring-web" (~80 KB)
+- Contents: web application context, multipart resolver, Struts support, web utilities
+- Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts)
 
 * "spring-webmvc" (~135 KB)
-- Contents: web MVC framework, web controllers, web views
-- Dependencies: spring-web, (JSP, JSTL, Tiles, iText, POI)
+- Contents: framework servlets, web MVC framework, web controllers, web views
+- Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~935 KB)
+* "spring" (~960 KB)
 - Contents: all of the above
 - Dependencies: all of the above
 
