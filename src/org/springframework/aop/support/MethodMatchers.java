@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
@@ -26,7 +27,7 @@ import org.springframework.aop.MethodMatcher;
  * evaluation dynamically (based on arguments at the time of method invocation).
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: MethodMatchers.java,v 1.5 2004-05-23 20:50:29 jhoeller Exp $
+ * @version $Id: MethodMatchers.java,v 1.6 2004-07-25 13:08:35 johnsonr Exp $
  */
 public abstract class MethodMatchers {
 	
@@ -39,7 +40,7 @@ public abstract class MethodMatchers {
 	}
 	
 	
-	private static class UnionMethodMatcher implements MethodMatcher {
+	private static class UnionMethodMatcher implements MethodMatcher, Serializable {
 		
 		private MethodMatcher a;
 		private MethodMatcher b;
@@ -63,7 +64,7 @@ public abstract class MethodMatchers {
 	}
 	
 
-	private static class IntersectionMethodMatcher implements MethodMatcher {
+	private static class IntersectionMethodMatcher implements MethodMatcher, Serializable {
 		
 		private MethodMatcher a;
 		private MethodMatcher b;
