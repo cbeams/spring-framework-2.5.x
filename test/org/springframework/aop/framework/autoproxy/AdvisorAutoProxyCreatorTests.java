@@ -26,7 +26,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.9 2004-01-13 14:00:26 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.10 2004-01-13 18:11:44 jhoeller Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
@@ -35,17 +35,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	private static final String TXMANAGER_BEAN_NAME = "txManager";
 	
 	/**
-	 * Constructor for ProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public AdvisorAutoProxyCreatorTests(String arg0) {
-		super(arg0);
-	}
-	
-	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
-	 * @return
-	 * @throws IOException
 	 */
 	protected BeanFactory getBeanFactory() throws IOException {
 		return new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreator.xml");
@@ -275,7 +265,6 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		rb.rollbackOnly(true);
 		assertEquals(1, txMan.rollbacks);
 	}
-
 
 	
 	/**
