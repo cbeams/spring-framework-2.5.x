@@ -115,8 +115,6 @@ public class MethodInvokingConstraint implements UnaryPredicate, TypeResolvable 
             return ((Boolean)testMethod.invoke(targetObject,
                     new Object[] { argument })).booleanValue();
         } catch (Exception e) {
-            System.out.println("argh");
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

@@ -246,9 +246,8 @@ public class Constraints {
      * @return The negated predicate.
      */
     public UnaryPredicate not(UnaryPredicate predicate) {
-        if (predicate instanceof UnaryNot) {
-            throw new IllegalArgumentException("Predicate is already negated");
-        }
+        if (predicate instanceof UnaryNot) { throw new IllegalArgumentException(
+                "Predicate is already negated"); }
         return new UnaryNot(predicate);
     }
 
@@ -336,6 +335,20 @@ public class Constraints {
      */
     public UnaryPredicate regexp(String regexp) {
         return new RegexpConstraint(regexp);
+    }
+
+    /**
+     * Creates a constraint backed by a regular expression, with a type for
+     * reporting.
+     * 
+     * @param regexp
+     *            The regular expression string.
+     * @return The constraint.
+     */
+    public UnaryPredicate regexp(String regexp, String type) {
+        RegexpConstraint c = new RegexpConstraint(regexp);
+        c.setType(type);
+        return c;
     }
 
     /**
