@@ -23,6 +23,7 @@ import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -32,7 +33,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.22 2003-12-01 10:04:16 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.23 2003-12-01 10:24:11 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 	
@@ -826,6 +827,35 @@ public class AopProxyTests extends TestCase {
 		pc.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
 		// No longer counting
 		assertEquals(2, l.adviceChanges);
+	}
+	
+	public void testExistingProxyChangesTarget() throws Throwable {
+		TestBean tb1 = new TestBean();
+		tb1.setAge(33);
+		
+		TestBean tb2 = new TestBean();
+		tb2.setAge(26);
+		TestBean tb3 = new TestBean();
+		tb3.setAge(37);
+		ProxyFactory pc = new ProxyFactory(tb1);
+		NopInterceptor nop = new NopInterceptor();
+		pc.addInterceptor(nop);
+		ITestBean proxy = (ITestBean) pc.getProxy();
+		assertEquals(nop.getCount(), 0);
+		assertEquals(tb1.getAge(), proxy.getAge());
+		assertEquals(nop.getCount(), 1);
+		// Change to a new static target
+		pc.setTarget(tb2);
+		assertEquals(tb2.getAge(), proxy.getAge());
+		assertEquals(nop.getCount(), 2);
+		// Change to a new dynamic target
+		HotSwappableTargetSource ts = new HotSwappableTargetSource(tb3);
+		pc.setTargetSource(ts);
+		assertEquals(tb3.getAge(), proxy.getAge());
+		assertEquals(nop.getCount(), 3);
+		ts.swap(tb1);
+		assertEquals(tb1.getAge(), proxy.getAge());
+		assertEquals(nop.getCount(), 4);
 	}
 	
 	
