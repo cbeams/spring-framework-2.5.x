@@ -24,8 +24,23 @@ import java.io.Serializable;
  * can be used to test proxy serialization.
  * 
  * @author Rod Johnson
- * @version $Id: SerializableNopInterceptor.java,v 1.1 2004-07-24 10:26:11 johnsonr Exp $
+ * @version $Id: SerializableNopInterceptor.java,v 1.2 2004-07-25 11:55:21 johnsonr Exp $
  */
 public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
+	
+	/**
+	 * We must override this field and the related methods as
+	 * otherwise count won't be serialized from the non-serializable
+	 * NopInterceptor superclass.
+	 */
+	private int count;
+	
+	public int getCount() {
+		return this.count;
+	}
+	
+	protected void increment() {
+		++count;
+	}
 	
 }
