@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.view.tiles;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
@@ -24,40 +25,47 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.Controller;
+import org.apache.struts.tiles.ControllerSupport;
 
-import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Convenience class for Spring-aware Tiles component controllers.
  * Provides a reference to the current Spring application context,
  * e.g. for bean lookup or resource loading.
+ *
+ * <p>Derives from Tiles' ControllerSupport class rather than
+ * implementing Tiles' Controller interface to be compatible with
+ * Struts 1.1 and 1.2. Implements both Struts 1.1's <code>perform</code>
+ * and Struts 1.2's <code>execute</code> method accordingly.
+ *
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 22.08.2003
+ * @see org.springframework.web.context.support.WebApplicationObjectSupport
  */
-public abstract class ComponentControllerSupport extends WebApplicationObjectSupport implements Controller {
+public abstract class ComponentControllerSupport extends ControllerSupport {
+
+	private WebApplicationContext webApplicationContext;
+
+	private MessageSourceAccessor messageSourceAccessor;
 
 	/**
-	 * This implementation delegates to doPerform, lazy-initializing the application context
-	 * reference if necessary, and converting non-Servlet/IO Exceptions to ServletException.
-	 * @see #doPerform
+	 * This implementation delegates to <code>execute</code>,
+	 * converting non-Servlet/IO Exceptions to ServletException.
+	 * <p>This is the only execution method available in Struts 1.1.
+	 * @see #execute
 	 */
 	public final void perform(ComponentContext componentContext, HttpServletRequest request,
 	                          HttpServletResponse response, ServletContext servletContext)
 	    throws ServletException, IOException {
-		// TODO the following is inserted because ComponentControllerSupport does NOT work when
-		// inserting tiles directly with the tiles:insert tag in JSPs, since the <tiles:insert> tag
-		// - org.apache.struts.taglib.tiles.InsertTag (line 869) - manually creates and executes
-		// controllers. For now, we'll check for the application context and set it if necessary!
-		synchronized (this) {
-			if (getWebApplicationContext() == null) {
-				setApplicationContext(RequestContextUtils.getWebApplicationContext(request));
-			}
-		}
 		try {
-			doPerform(componentContext, request, response);
+			execute(componentContext, request, response, servletContext);
 		}
 		catch (ServletException ex) {
 			throw ex;
@@ -71,9 +79,78 @@ public abstract class ComponentControllerSupport extends WebApplicationObjectSup
 	}
 
 	/**
+	 * This implementation delegates to <code>doPerform</code>,
+	 * lazy-initializing the application context reference if necessary.
+	 * <p>This is the preferred execution method in Struts 1.2.
+	 * When running with Struts 1.1, it will be called by <code>perform</code>.
+	 * @see #perform
+	 * @see #doPerform
+	 */
+	public final void execute(ComponentContext componentContext, HttpServletRequest request,
+	                          HttpServletResponse response, ServletContext servletContext)
+	    throws Exception {
+		synchronized (this) {
+			if (this.webApplicationContext == null) {
+				this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
+				this.messageSourceAccessor = new MessageSourceAccessor(this.webApplicationContext);
+			}
+		}
+		doPerform(componentContext, request, response);
+	}
+
+	/**
+	 * Subclasses can override this for custom initialization behavior.
+	 * Gets called on initialization of the context for this controller.
+	 * @throws org.springframework.context.ApplicationContextException in case of initialization errors
+	 * @throws org.springframework.beans.BeansException if thrown by application context methods
+	 */
+	protected void initApplicationContext() throws BeansException {
+	}
+
+	/**
+	 * Return the current Spring ApplicationContext.
+	 */
+	protected final ApplicationContext getApplicationContext() {
+		return this.webApplicationContext;
+	}
+
+	/**
+	 * Return the current Spring WebApplicationContext.
+	 */
+	protected final WebApplicationContext getWebApplicationContext() {
+		return this.webApplicationContext;
+	}
+
+	/**
+	 * Return a MessageSourceAccessor for the application context
+	 * used by this object, for easy message access.
+	 */
+	protected final MessageSourceAccessor getMessageSourceAccessor() {
+		return this.messageSourceAccessor;
+	}
+
+	/**
+	 * Return the current ServletContext.
+	 */
+	protected final ServletContext getServletContext() {
+		return this.webApplicationContext.getServletContext();
+	}
+
+	/**
+	 * Return the temporary directory for the current web application,
+	 * as provided by the servlet container.
+	 * @return the File representing the temporary directory
+	 */
+	protected final File getTempDir() {
+		return WebUtils.getTempDir(getServletContext());
+	}
+
+	/**
 	 * Perform the preparation for the component, allowing for any Exception to be thrown.
 	 * The ServletContext can be retrieved via getServletContext, if necessary.
 	 * The Spring WebApplicationContext can be accessed via getWebApplicationContext.
+	 * <p>This method will be called both in the Struts 1.1 and Struts 1.2 case,
+	 * by <code>perform</code> respectively <code>execute</code>.
 	 * @param componentContext current Tiles component context
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -81,6 +158,8 @@ public abstract class ComponentControllerSupport extends WebApplicationObjectSup
 	 * @see org.apache.struts.tiles.Controller#perform
 	 * @see #getServletContext
 	 * @see #getWebApplicationContext
+	 * @see #perform
+	 * @see #execute
 	 */
 	protected abstract void doPerform(ComponentContext componentContext, HttpServletRequest request,
 	                                  HttpServletResponse response) throws Exception;

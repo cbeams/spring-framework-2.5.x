@@ -117,6 +117,7 @@ public class TilesTestSuite extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
 		assertEquals("/WEB-INF/jsp/layout.jsp", response.forwarded);
