@@ -30,6 +30,7 @@ import javax.activation.FileTypeMap;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -93,6 +94,8 @@ public class MimeMessageHelper {
 	private MimeMultipart mimeMultipart;
 
 	private String encoding;
+
+	private boolean validateAddresses = false;
 
 
 	/**
@@ -182,45 +185,99 @@ public class MimeMessageHelper {
 	}
 
 
+	/**
+	 * Set whether to validate all addresses which get passed to this helper.
+	 * Default is false.
+	 * <p>Note that this is by default just available for JavaMail >= 1.3.
+	 * You can override the default validateAddress method for validation
+	 * on older JavaMail versions or for custom validation.
+	 * @see #validateAddress
+	 */
+	public void setValidateAddresses(boolean validateAddresses) {
+		this.validateAddresses = validateAddresses;
+	}
+
+	/**
+	 * Return whether this helper will validate all addresses passed to it.
+	 */
+	public boolean isValidateAddresses() {
+		return validateAddresses;
+	}
+
+	/**
+	 * Validate the given mail address.
+	 * Called by all of MimeMessageHelper's address setters and adders.
+	 * <p>Default implementation invokes <code>InternetAddress.validate()</code>,
+	 * provided that address validation is activated for the helper instance.
+	 * <p>Note that this method will just work on JavaMail >= 1.3. You can override
+	 * it for validation on older JavaMail versions or for custom validation.
+	 * @param address the address to validate
+	 * @throws AddressException if validation failed
+	 * @see #isValidateAddresses()
+	 * @see javax.mail.internet.InternetAddress#validate()
+	 */
+	protected void validateAddress(InternetAddress address) throws AddressException {
+		if (isValidateAddresses()) {
+			address.validate();
+		}
+	}
+
+	/**
+	 * Validate all given mail addresses.
+	 * Default implementation simply delegates to validateAddress for each address.
+	 * @param addresses the addresses to validate
+	 * @throws AddressException if validation failed
+	 * @see #validateAddress(InternetAddress)
+	 */
+	protected void validateAddresses(InternetAddress[] addresses) throws AddressException {
+		for (int i = 0; i < addresses.length; i++) {
+			validateAddress(addresses[i]);
+		}
+	}
+
+
 	public void setFrom(InternetAddress from) throws MessagingException {
+		validateAddress(from);
 		this.mimeMessage.setFrom(from);
 	}
 
 	public void setFrom(String from) throws MessagingException {
-		this.mimeMessage.setFrom(new InternetAddress(from));
+		setFrom(new InternetAddress(from));
 	}
 
 	public void setFrom(String from, String personal) throws MessagingException, UnsupportedEncodingException {
-		this.mimeMessage.setFrom(getEncoding() != null ?
-		                         new InternetAddress(from, personal, getEncoding()) :
-		                         new InternetAddress(from, personal));
+		setFrom(getEncoding() != null ?
+		    new InternetAddress(from, personal, getEncoding()) : new InternetAddress(from, personal));
 	}
 
 	public void setReplyTo(InternetAddress replyTo) throws MessagingException {
+		validateAddress(replyTo);
 		this.mimeMessage.setReplyTo(new InternetAddress[] {replyTo});
 	}
 
 	public void setReplyTo(String replyTo) throws MessagingException {
-		this.mimeMessage.setReplyTo(new InternetAddress[] {new InternetAddress(replyTo)});
+		setReplyTo(new InternetAddress(replyTo));
 	}
 
 	public void setReplyTo(String replyTo, String personal) throws MessagingException, UnsupportedEncodingException {
 		InternetAddress replyToAddress = (getEncoding() != null) ?
 				new InternetAddress(replyTo, personal, getEncoding()) : new InternetAddress(replyTo, personal);
-		this.mimeMessage.setReplyTo(new InternetAddress[] {replyToAddress});
+		setReplyTo(replyToAddress);
 	}
 
 
 	public void setTo(InternetAddress to) throws MessagingException {
+		validateAddress(to);
 		this.mimeMessage.setRecipient(Message.RecipientType.TO, to);
 	}
 
 	public void setTo(InternetAddress[] to) throws MessagingException {
+		validateAddresses(to);
 		this.mimeMessage.setRecipients(Message.RecipientType.TO, to);
 	}
 
 	public void setTo(String to) throws MessagingException {
-		this.mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+		setTo(new InternetAddress(to));
 	}
 
 	public void setTo(String[] to) throws MessagingException {
@@ -228,35 +285,37 @@ public class MimeMessageHelper {
 		for (int i = 0; i < to.length; i++) {
 			addresses[i] = new InternetAddress(to[i]);
 		}
-		this.mimeMessage.setRecipients(Message.RecipientType.TO, addresses);
+		setTo(addresses);
 	}
 
 	public void addTo(InternetAddress to) throws MessagingException {
+		validateAddress(to);
 		this.mimeMessage.addRecipient(Message.RecipientType.TO, to);
 	}
 
 	public void addTo(String to) throws MessagingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+		addTo(new InternetAddress(to));
 	}
 
 	public void addTo(String to, String personal) throws MessagingException, UnsupportedEncodingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.TO,
-		                              getEncoding() != null ?
-		                              new InternetAddress(to, personal, getEncoding()) :
-		                              new InternetAddress(to, personal));
+		addTo(getEncoding() != null ?
+		    new InternetAddress(to, personal, getEncoding()) :
+		    new InternetAddress(to, personal));
 	}
 
 
 	public void setCc(InternetAddress cc) throws MessagingException {
+		validateAddress(cc);
 		this.mimeMessage.setRecipient(Message.RecipientType.CC, cc);
 	}
 
 	public void setCc(InternetAddress[] cc) throws MessagingException {
+		validateAddresses(cc);
 		this.mimeMessage.setRecipients(Message.RecipientType.CC, cc);
 	}
 
 	public void setCc(String cc) throws MessagingException {
-		this.mimeMessage.setRecipient(Message.RecipientType.CC, new InternetAddress(cc));
+		setCc(new InternetAddress(cc));
 	}
 
 	public void setCc(String[] cc) throws MessagingException {
@@ -264,35 +323,37 @@ public class MimeMessageHelper {
 		for (int i = 0; i < cc.length; i++) {
 			addresses[i] = new InternetAddress(cc[i]);
 		}
-		this.mimeMessage.setRecipients(Message.RecipientType.CC, addresses);
+		setCc(addresses);
 	}
 
 	public void addCc(InternetAddress cc) throws MessagingException {
+		validateAddress(cc);
 		this.mimeMessage.addRecipient(Message.RecipientType.CC, cc);
 	}
 
 	public void addCc(String cc) throws MessagingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc));
+		addCc(new InternetAddress(cc));
 	}
 
 	public void addCc(String cc, String personal) throws MessagingException, UnsupportedEncodingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.CC,
-		                              getEncoding() != null ?
-		                              new InternetAddress(cc, personal, getEncoding()) :
-		                              new InternetAddress(cc, personal));
+		addCc(getEncoding() != null ?
+		    new InternetAddress(cc, personal, getEncoding()) :
+		    new InternetAddress(cc, personal));
 	}
 
 
 	public void setBcc(InternetAddress bcc) throws MessagingException {
+		validateAddress(bcc);
 		this.mimeMessage.setRecipient(Message.RecipientType.BCC, bcc);
 	}
 
 	public void setBcc(InternetAddress[] bcc) throws MessagingException {
+		validateAddresses(bcc);
 		this.mimeMessage.setRecipients(Message.RecipientType.BCC, bcc);
 	}
 
 	public void setBcc(String bcc) throws MessagingException {
-		this.mimeMessage.setRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
+		setBcc(new InternetAddress(bcc));
 	}
 
 	public void setBcc(String[] bcc) throws MessagingException {
@@ -300,22 +361,22 @@ public class MimeMessageHelper {
 		for (int i = 0; i < bcc.length; i++) {
 			addresses[i] = new InternetAddress(bcc[i]);
 		}
-		this.mimeMessage.setRecipients(Message.RecipientType.BCC, addresses);
+		setBcc(addresses);
 	}
 
 	public void addBcc(InternetAddress bcc) throws MessagingException {
+		validateAddress(bcc);
 		this.mimeMessage.addRecipient(Message.RecipientType.BCC, bcc);
 	}
 
 	public void addBcc(String bcc) throws MessagingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
+		addBcc(new InternetAddress(bcc));
 	}
 
 	public void addBcc(String bcc, String personal) throws MessagingException, UnsupportedEncodingException {
-		this.mimeMessage.addRecipient(Message.RecipientType.BCC,
-		                              getEncoding() != null ?
-		                              new InternetAddress(bcc, personal, getEncoding()) :
-		                              new InternetAddress(bcc, personal));
+		addBcc(getEncoding() != null ?
+		    new InternetAddress(bcc, personal, getEncoding()) :
+		    new InternetAddress(bcc, personal));
 	}
 
 
@@ -538,7 +599,7 @@ public class MimeMessageHelper {
 	 * @param name the name of the DataSource
 	 * @return the Activation Framework DataSource
 	 */
-	private static DataSource createDataSource(
+	protected DataSource createDataSource(
 	    final InputStreamSource inputStreamSource, final String contentType, final String name) {
 		return new DataSource() {
 			public InputStream getInputStream() throws IOException {
