@@ -5,15 +5,6 @@
 
 <web-app>
 	
-	<context-param>
-		<param-name>locatorFactorySelector</param-name>
-		<param-value>beanRefContext.xml</param-value>
-	</context-param>
-	<context-param>
-		<param-name>parentContextKey</param-name>
-		<param-value>servicelayer-context</param-value>
-	</context-param>
-	
 	<!--
 	  - Location of the XML file that defines the root application context.
 	  - Applied by ContextLoaderServlet.
@@ -24,6 +15,16 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+	
+    <!--  load a shared service layer parent application context -->
+	<context-param>
+		<param-name>locatorFactorySelector</param-name>
+		<param-value>beanRefContext.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>parentContextKey</param-name>
+		<param-value>servicelayer-context</param-value>
 	</context-param>
 	
 	<!--
@@ -37,7 +38,7 @@
 	   - servlet initialization as clarified in the Servlet 2.4 spec (most do)
 	 -->
 	<listener>
-		<listener-class>org.springframework.autobuilds.integration.util.ContextLoaderListener</listener-class>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
 </web-app>
