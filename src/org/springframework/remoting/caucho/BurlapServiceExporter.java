@@ -64,7 +64,7 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
 			checkService();
 			checkServiceInterface();
-			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
+			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService(), getServiceInterface()});
 		}
 		catch (NoSuchMethodException ex) {
 			// Fall back to Burlap 2.x (without service interface argument).
