@@ -24,8 +24,6 @@ import org.springframework.util.ClassUtils;
 
 /**
  * @author Colin Sampaleanu
- * 
- * TODO: need to consolidate this with ContextSingletonBeanFactoryLocatorTests!
  */
 public class SingletonBeanFactoryLocatorTests extends TestCase {
 
@@ -40,6 +38,14 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		
+		basicFunctionalityTest(facLoc);
+	}
+
+	/**
+	 * Worker method so subclass can use it too
+	 */
+	protected void basicFunctionalityTest(SingletonBeanFactoryLocator facLoc) {
+		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
 		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
@@ -52,12 +58,10 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-
 		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
 		// now verify that we can call release in any order
 		// unfortunately this doesn't validate complete release after the last one
 		bfr2.release();
@@ -75,6 +79,23 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		// try with and without 'classpath*:' prefix, and with 'classpath:' prefix
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+		getInstanceTest1(facLoc);
+		
+		facLoc = SingletonBeanFactoryLocator.getInstance(
+				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+		getInstanceTest2(facLoc);
+
+		// this will actually get another locator instance, as the key is the resource name
+		facLoc = SingletonBeanFactoryLocator.getInstance(
+				"classpath:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+		getInstanceTest3(facLoc);
+		
+	}
+
+	/**
+	 * Worker method so subclass can use it too
+	 */
+	protected void getInstanceTest1(BeanFactoryLocator facLoc) {
 		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
@@ -88,7 +109,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-
+		
 		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
@@ -98,10 +119,18 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		bfr3.release();
 		bfr2.release();
 		bfr4.release();
-		
-		facLoc = SingletonBeanFactoryLocator.getInstance(
-				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
-		
+	}
+
+	/**
+	 * Worker method so subclass can use it too
+	 */
+	protected void getInstanceTest2(BeanFactoryLocator facLoc) {
+		BeanFactoryReference bfr;
+		BeanFactory fac;
+		BeanFactoryReference bfr2;
+		TestBean tb;
+		BeanFactoryReference bfr3;
+		BeanFactoryReference bfr4;
 		bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		fac = bfr.getFactory();
 		bfr2 = facLoc.useBeanFactory("another.qualified.name");
@@ -114,21 +143,26 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-
 		bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
 		bfr.release();
 		bfr2.release();
 		bfr4.release();
 		bfr3.release();
-
-		// this will actually get another locator instance, as the key is the resource name
-		facLoc = SingletonBeanFactoryLocator.getInstance(
-				"classpath:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
-		
+	}
+	
+	/**
+	 * Worker method so subclass can use it too
+	 */
+	protected void getInstanceTest3(BeanFactoryLocator facLoc) {
+		BeanFactoryReference bfr;
+		BeanFactory fac;
+		BeanFactoryReference bfr2;
+		TestBean tb;
+		BeanFactoryReference bfr3;
+		BeanFactoryReference bfr4;
 		bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		fac = bfr.getFactory();
 		bfr2 = facLoc.useBeanFactory("another.qualified.name");
@@ -141,16 +175,13 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-
 		bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
 		bfr4.release();
 		bfr3.release();
 		bfr2.release();
 		bfr.release();
 	}
-
 }
