@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.8 2004-03-19 17:52:29 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.9 2004-06-13 15:28:05 johnsonr Exp $
  */
 
 /*
@@ -158,6 +158,8 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	}
 
 	public boolean equals(Object other) {
+		if (this == other)
+			return true;
 		if (other == null || !(other instanceof TestBean))
 			return false;
 		TestBean tb2 = (TestBean) other;
