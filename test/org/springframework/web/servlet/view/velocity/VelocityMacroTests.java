@@ -16,30 +16,31 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.jsp.JspException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+
 import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
-
+import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.tags.BindTag;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
-import org.springframework.beans.TestBean;
 
 /**
  * @author Darren Davison
@@ -118,5 +119,102 @@ public class VelocityMacroTests extends TestCase {
 			assertTrue(ex.getMessage().indexOf(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) > -1);
 		}
 	}
-
+	
+	public void testAllMacros() {
+	    DummyMacroRequestContext rc = new DummyMacroRequestContext();
+	    HashMap msgMap = new HashMap();
+	    msgMap.put("hello", "Howdy");
+	    msgMap.put("world", "Mundo");
+	    rc.setMsgMap(msgMap);
+	    rc.setContextPath("/springtest");
+		
+	    TestBean tb = new TestBean("Darren", 99);
+	    rc.setCommand(tb);
+	    
+	    HashMap names = new HashMap();
+	    names.put("Darren", "Darren Davison");
+	    names.put("John", "John Doe");
+	    names.put("Fred", "Fred Bloggs");
+	    
+	    try {
+	        VelocityConfigurer vc = new VelocityConfigurer();
+	        vc.setPreferFileSystemAccess(false);
+	        VelocityEngine ve = vc.createVelocityEngine();
+		    VelocityContext context = new VelocityContext();
+		    context.put("command", tb);
+		    context.put("springMacroRequestContext", rc);
+		    context.put("nameOptionMap", names);
+		    
+		    StringWriter sw = new StringWriter();
+		    ve.mergeTemplate(
+		        "org/springframework/web/servlet/view/velocity/test.vm", "UTF-8", context, sw
+		    );
+		    // tokenize output and ignore whitespace
+		    String output = sw.getBuffer().toString();
+		    System.out.println(output);
+		    String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
+		    
+		    for (int i=0; i<tokens.length; i++) System.out.println(tokens[i]);
+		    
+		    for (int i=0; i<tokens.length; i++) {
+			    if (tokens[i].equals("NAME")) assertEquals("Darren", tokens[i+1]);
+			    if (tokens[i].equals("AGE")) assertEquals("99", tokens[i+1]);
+			    if (tokens[i].equals("MESSAGE")) assertEquals("Howdy Mundo", tokens[i+1]);
+			    if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i+1]);
+			    if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i+1]);
+			    if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" >", tokens[i+1]);
+			    if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i+1]);
+			    if (tokens[i].equals("FORM3")) assertEquals("<textarea name=\"name\" >Darren</textarea>", tokens[i+1]);
+			    if (tokens[i].equals("FORM4")) assertEquals("<textarea name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i+1]);
+			    //TODO verify remaining output (fix whitespace)
+		    }
+	    } catch (Exception e) {
+	        fail();
+	    }
+	}
+	
+	public class DummyMacroRequestContext {
+	    Map msgMap;
+	    String contextPath;
+	    TestBean command;
+	    
+	    public String getMessage(String code) {
+	        return (String) msgMap.get(code);
+	    }
+	    public String getMessage(String code, String defaultMsg) {
+	        String msg = (String) msgMap.get(code);
+	        return (msg == null) ? defaultMsg : msg; 
+	    }
+        public DummyBindStatus getBindStatus(String path) throws IllegalStateException {
+            return new DummyBindStatus();
+    	}
+    	public DummyBindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
+    	    return new DummyBindStatus();
+    	}
+    	
+        public String getContextPath() {
+            return contextPath;
+        }
+        public void setContextPath(String contextPath) {
+            this.contextPath = contextPath;
+        }
+        public void setMsgMap(Map msgMap) {
+            this.msgMap = msgMap;
+        }
+        public TestBean getCommand() {
+            return command;
+        }
+        public void setCommand(TestBean command) {
+            this.command = command;
+        }
+	}
+	
+	public class DummyBindStatus {	    
+        public String getExpression() {
+            return "name";
+        }
+        public String getValue() {
+            return "Darren";
+        }
+	}
 }
