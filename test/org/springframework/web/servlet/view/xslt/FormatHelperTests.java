@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
  * @author Rod Johnson
  * @author Darren Davison
  * @since 26-Jul-2003
- * @version $Id: FormatHelperTests.java,v 1.3 2003-10-31 17:03:30 jhoeller Exp $
+ * @version $Id: FormatHelperTests.java,v 1.4 2003-11-03 09:47:35 johnsonr Exp $
  */
 public class FormatHelperTests extends TestCase {
 
@@ -71,7 +71,7 @@ public class FormatHelperTests extends TestCase {
 		el = (Element) e.getElementsByTagName("day-of-month").item(0);
 		assertTrue( "24".equals(el.getFirstChild().getNodeValue() ));
 		el = (Element) e.getElementsByTagName("hours").item(0);
-		assertTrue( "1".equals(el.getFirstChild().getNodeValue() ));
+		assertEquals( "12", el.getFirstChild().getNodeValue() );
 		el = (Element) e.getElementsByTagName("minutes").item(0);
 		assertTrue( "26".equals(el.getFirstChild().getNodeValue() ));
 		el = (Element) e.getElementsByTagName("am-pm").item(0);
