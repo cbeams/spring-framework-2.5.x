@@ -72,7 +72,13 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * do <i>not</i> activate "useCodeAsDefaultMessage" in the <i>parent</i>:
 	 * Else, you'll get the first code returned as message by the parent,
 	 * without attempts to check further codes.
+	 * <p>To be able to work with "useCodeAsDefaultMessage" turned on in the parent,
+	 * AbstractMessageSource and AbstractApplicationContext contain special checks
+	 * to delegate to the internal <code>getMessageInternal</code> method if available.
+	 * In general, it is recommended to just use "useCodeAsDefaultMessage" during
+	 * development and not rely on it in production in the first place, though.
 	 * @see #getMessage(String, Object[], Locale)
+	 * @see #getMessageInternal
 	 * @see org.springframework.validation.FieldError
 	 */
 	public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
