@@ -1,4 +1,4 @@
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
 import java.util.HashMap;
 import java.util.Iterator;

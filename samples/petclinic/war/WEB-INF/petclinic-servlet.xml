@@ -20,6 +20,20 @@
 	</bean>
 
 	<!--
+	  - This bean resolves specific types of exception to corresponding error views.
+		- The default behaviour of DispatcherServlet is to propagate all exceptions to the
+		- servlet container: This will happen here with all other types of exception.
+		-->
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
+				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!--
 	 - This bean is an explicit URL mapper that is used by the "petclinic" DispatcherServlet
 	 - It is used instead of the default BeanNameUrlHandlerMapping.
 	 -->
@@ -35,15 +49,6 @@
 				<prop key="/addVisit.htm">addVisitForm</prop>
 				<prop key="/addPet.htm">addPetForm</prop>
 				<prop key="/editPet.htm">editPetForm</prop>
-			</props>
-		</property>
-	</bean>
-
-	<bean id="exceptionResolver" class="org.springframework.web.servlet.support.SimpleMappingExceptionResolver">
-		<property name="exceptionMappings">
-			<props>
-				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
-				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
 			</props>
 		</property>
 	</bean>
