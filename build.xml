@@ -1,0 +1,397 @@
+<?xml version="1.0"?>
+
+<!--
+    Build file for the Spring Framework core.
+
+    $Id: build.xml,v 1.1.1.1 2003-08-14 16:14:13 trisberg Exp $
+
+    See page 594 of "Expert One-on-One J2EE" for a description
+    of the JAR files produced by this build script, and how
+    they can be deployed in applications.
+
+    This script requires a /lib directory containing the
+    necessary third party JAR files.
+
+    See build.properties for the definitions of the properties
+    used in this file.
+-->
+
+<project name="spring-core" default="usage" basedir=".">
+
+	<property file="build.properties"/>
+
+	<path id="master-classpath">
+
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="${name} build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Among the available targets are:"/>
+		<echo message=""/>
+		<echo message="build    --> build all; don't create JARs"/>
+		<echo message="alljars  --> create all JAR files"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (build, dist, test, clover)">
+
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+		<delete dir="${docs.dir}"/>
+		<delete dir="${release.dir}"/>
+		<delete dir="${testbuild.dir}"/>
+		<delete dir="${livetestbuild.dir}"/>
+		<delete dir="${clover.build.dir}"/>
+		<delete dir="${junit.reports.dir}"/>
+
+	</target>
+
+
+	<target name="build" description="Compile main source tree java files into class files (no-jarring)">
+
+		<mkdir dir="${build.dir}"/>
+
+		<javac destdir="${build.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+
+		<rmic base="${build.dir}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
+
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="initdist" description="Initialize the distribution directory">
+
+		<mkdir dir="${dist.dir}"/>
+
+	</target>
+
+
+	<target name="beans" depends="build,initdist" description="Create the bean container JAR file (for just using the Spring core)">
+
+		<delete file="${dist.dir}/${spring-beans.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-beans.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/util/*"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="jdbc" depends="build,initdist" description="Create the JDBC distribution JAR file (for using Spring as library)">
+
+		<delete file="${dist.dir}/${spring-jdbc.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-jdbc.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/orm/**"/>
+				<include name="org/springframework/transaction/**"/>
+				<include name="org/springframework/util/*"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="full" depends="build,initdist" description="Build one big JAR containing main source tree class files">
+
+		<delete file="${dist.dir}/${spring-full.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-full.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<target name="srczip" depends="initdist" description="Create source ZIP (containing all Java sources)">
+
+		<delete file="${dist.dir}/${spring-src.zip}"/>
+
+		<zip zipfile="${dist.dir}/${spring-src.zip}">
+			<fileset dir="${src.dir}">
+				<include name="**"/>
+			</fileset>
+		</zip>
+
+		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
+			todir="${dist.dir}" preservelastmodified="true"/>
+
+	</target>
+
+
+	<!--
+		Note: Contained classes overlap, e.g. spring-full contains everything.
+	-->
+	<target name="alljars" depends="beans,jdbc,full,srczip" description="Create all JAR files"/>
+
+
+	<target name="javadoc" description="Generate framework Javadocs.">
+
+		<mkdir dir="${docs.dir}"/>
+
+		<javadoc packagenames="org.springframework.*" sourcepath="src" defaultexcludes="yes"
+			destdir="${docs.dir}" author="true" version="true" use="true"
+			windowtitle="Spring Framework">
+			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
+			<classpath refid="master-classpath"/>
+		</javadoc>
+
+	</target>
+
+
+	<target name="checkstyle" description="Run the checkstyle optional task to check for adherence to coding conventions">
+
+		<taskdef name="checkstyle" classname="com.puppycrawl.tools.checkstyle.CheckStyleTask"/>
+
+		<checkstyle failureProperty="checkstyle.failure" failOnViolation="false" properties="checkstyleConventions.properties">
+			<fileset dir="${src.dir}" includes="org/springframework/beans/BeanWrapperImpl.java"/>
+		</checkstyle>
+
+	</target>
+
+
+	<target name="release" depends="alljars,javadoc" description="Generate release zip file">
+
+		<mkdir dir="${release.dir}"/>
+
+		<delete file="${release.dir}/${release.zip}"/>
+
+		<zip zipfile="${release.dir}/${release.zip}">
+			<zipfileset dir="." prefix="${release.path}">
+				<include name="dist/*.jar"/>
+				<include name="dist/*.tld"/>
+				<include name="docs/**"/>
+				<include name="src/**"/>
+				<include name="lib/ant/**"/>
+				<include name="lib/aop-alliance/**"/>
+				<include name="lib/j2ee/servlet.jar"/>
+				<include name="lib/j2ee/jdbc2_0-stdext.jar"/>
+				<include name="lib/itext-pdf/**"/>
+				<include name="lib/jstl/**"/>
+				<include name="lib/junit/**"/>
+				<include name="lib/log4j/**"/>
+				<include name="lib/poi/**"/>
+				<include name="samples/**"/>
+				<include name="*.txt"/>
+			</zipfileset>
+		</zip>
+
+	</target>
+
+
+	<target name="buildtests" depends="build" description="Compile test source tree Java files into class files">
+
+		<mkdir dir="${testbuild.dir}"/>
+
+		<javac destdir="${testbuild.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="false">
+			<src path="${test.dir}"/>
+			<classpath refid="master-classpath"/>
+			<classpath location="${build.dir}"/>
+		</javac>
+		
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${testbuild.dir}" preservelastmodified="true">
+			<fileset dir="${test.dir}">
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Run tests. This and Clover test target take their includes and excludes
+		from build.properties. However it's possible to run specific tests by passing in
+		the test.includes and (optionally) test.excludes properties through the command line, as below:
+			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
+	-->
+	<target name="tests" depends="buildtests" description="Run tests.">
+
+		<property name="reports.dir" value="${junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="yes">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${testbuild.dir}"/>
+			<classpath location="${build.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="master-classpath"/>
+
+			<formatter type="plain"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="test" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<target name="buildlivetests" depends="build" description="Compile live test source tree java files into class files">
+
+		<mkdir dir="${livetestbuild.dir}"/>
+
+		<javac destdir="${livetestbuild.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="false">
+			<src path="${livetest.dir}"/>
+			<classpath refid="master-classpath"/>
+			<classpath location="${build.dir}"/>
+		</javac>
+
+	</target>
+
+
+	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
+
+		<!-- switch on Clover by specifying it as the compiler to use -->
+		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
+
+		<mkdir dir="${clover.build.dir}"/>
+
+		<javac destdir="${clover.build.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="false">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+
+		<copy todir="${clover.build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="clover.tests" depends="buildtests,clover.build" description="Run Clover tests">
+
+		<junit printsummary="yes" haltonfailure="yes">
+
+			<!-- Must go first to ensure the jndi.properties takes precedence  -->
+			<classpath location="${testbuild.dir}"/>
+			<classpath location="${clover.build.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="master-classpath"/>
+
+			<batchtest fork="yes">
+				<fileset dir="test" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis, and bring up
+		Clover's Swing browser to display the results.
+	-->
+	<target name="clover.swing" depends="clover.tests" description="Run Clover tests and bring up Swing coverage viewer">
+
+		<echo>Launching coverage viewer</echo>
+
+		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
+			<arg value="${clover.initstring}"/>
+			<classpath refid="master-classpath"/>
+		</java>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis, and use Clover
+		to generate Javadoc/style HTML results that may be browsed later.
+	-->
+	<target name="clover.html" depends="clover.tests" description="Generate Clover HTML coverage reports from an existing Clover database">
+
+		<java classname="com.cortexeb.tools.clover.reporters.html.HtmlReporter" fork="yes">
+			<arg line="-o '${clover.html.outdir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
+			<classpath refid="master-classpath"/>
+		</java>
+
+	</target>
+	
+	
+	<!--
+		Build load test Jar
+	-->
+	<target name="loadjar" depends="build,buildtests" description="Build load test jar">
+	
+		<mkdir dir="${loadbuild.dir}"/>
+
+		<javac destdir="${loadbuild.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="false">
+			<src path="load"/>
+			
+			<classpath refid="master-classpath"/>
+			
+			<!-- For load -->
+			<classpath location="${build.dir}"/>
+			
+			<classpath location="${testbuild.dir}"/>
+			
+		</javac>
+		
+		<copy todir="${loadbuild.dir}" preservelastmodified="true">
+			<fileset dir="load">
+				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+		
+		<jar jarfile="${dist.dir}/${spring-load.jar}">
+			<fileset dir="${loadbuild.dir}">
+				<include name="org/springframework/load/**" />
+			</fileset>
+		</jar>
+
+	</target>
+	
+	
+	
+</project>
