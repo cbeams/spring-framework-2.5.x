@@ -13,6 +13,7 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.7 2003-12-11 09:02:34 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.8 2003-12-19 11:54:59 jhoeller Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -66,8 +67,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		this.advised = config;
 	}
-	
-	
+
 	/**
 	 * Implementation of InvocationHandler.invoke.
 	 * Callers will see exactly the exception thrown by the target, unless a hook
@@ -113,7 +113,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			}
 		
 			// Get the interception chain for this method
-			List chain = advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
+			List chain = this.advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+					this.advised, proxy, method, targetClass);
 			
 			// Check whether we have any advice. If we don't, we can fallback on
 			// direct reflective invocation of the target, and avoid creating a MethodInvocation
@@ -127,7 +128,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				// We need to create a method invocation...
 				//invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
 				
-				invocation = new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(), method, args, targetClass, chain);
+				invocation = new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(),
+																										method, args, targetClass, chain);
 				
 				// Proceed to the joinpoint through the interceptor chain
 				retVal = invocation.proceed();
@@ -157,8 +159,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			//	advised.getMethodInvocationFactory().release(invocation);
 			//}
 		}
-	}	// invoke
-	
+	}
 
 	/**
 	 * Creates a new Proxy object for the given object, proxying
@@ -173,13 +174,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		if (logger.isInfoEnabled())
-			logger.info("Creating J2SE proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
-		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(advised);
+		logger.debug("Creating JDK dynamic proxy");
+		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 		return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 	}
 
-	
 	/**
 	 * Equality means interceptors and interfaces and
 	 * TargetSource are equal.

@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.20 2003-12-19 10:22:02 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.21 2003-12-19 11:54:59 jhoeller Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -257,12 +257,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Add a new proxied interface.
-	 * @param newInterface additional interface to proxy.
+	 * @param newInterface additional interface to proxy
 	 */
 	public void addInterface(Class newInterface) {
 		this.interfaces.add(newInterface);
 		adviceChanged();
-		logger.info("Added new aspect interface: " + newInterface);
+		logger.debug("Added new aspect interface: " + newInterface);
 	}
 
 	/**
