@@ -47,6 +47,7 @@ public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 
 	private SqlMap sqlMap;
 
+
 	/**
 	 * Set the location of the iBATIS SqlMap config file.
 	 * A typical value is "WEB-INF/sql-map-config.xml".
@@ -63,15 +64,19 @@ public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 		this.sqlMapProperties = sqlMapProperties;
 	}
 
+
 	public void afterPropertiesSet() throws IOException {
 		if (this.configLocation == null) {
-			throw new IllegalArgumentException("configLocation must be set");
+			throw new IllegalArgumentException("configLocation is required");
 		}
+
+		// build the SqlMap
 		InputStream is = this.configLocation.getInputStream();
 		this.sqlMap = (this.sqlMapProperties != null) ?
 				XmlSqlMapBuilder.buildSqlMap(new InputStreamReader(is), this.sqlMapProperties) :
 				XmlSqlMapBuilder.buildSqlMap(new InputStreamReader(is));
 	}
+
 
 	public Object getObject() {
 		return this.sqlMap;
