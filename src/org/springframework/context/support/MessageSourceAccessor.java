@@ -60,13 +60,26 @@ public class MessageSourceAccessor {
 	}
 
 	/**
+	 * Return the default locale to use if no explicit locale has been given.
+	 * <p>Default implementation returns the default locale passed into the
+	 * corresponding constructor, or the system default locale as fallback.
+	 * Can be overridden in subclasses, for example to use a thread-bound
+	 * user locale.
+	 * @see #MessageSourceAccessor(org.springframework.context.MessageSource, java.util.Locale)
+	 * @see java.util.Locale#getDefault
+	 */
+	protected Locale getDefaultLocale() {
+		return defaultLocale;
+	}
+
+	/**
 	 * Retrieve the message for the given code and the default Locale.
 	 * @param code code of the message
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
-		return this.messageSource.getMessage(code, null, defaultMessage, this.defaultLocale);
+		return this.messageSource.getMessage(code, null, defaultMessage, getDefaultLocale());
 	}
 
 	/**
@@ -88,7 +101,7 @@ public class MessageSourceAccessor {
 	 * @return the message
 	 */
 	public String getMessage(String code, Object[] args, String defaultMessage) {
-		return this.messageSource.getMessage(code, args, defaultMessage, this.defaultLocale);
+		return this.messageSource.getMessage(code, args, defaultMessage, getDefaultLocale());
 	}
 
 	/**
@@ -110,7 +123,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, null, this.defaultLocale);
+		return this.messageSource.getMessage(code, null, getDefaultLocale());
 	}
 
 	/**
@@ -132,7 +145,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
-		return this.messageSource.getMessage(code, args, this.defaultLocale);
+		return this.messageSource.getMessage(code, args, getDefaultLocale());
 	}
 
 	/**
@@ -155,7 +168,7 @@ public class MessageSourceAccessor {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
-		return this.messageSource.getMessage(resolvable, this.defaultLocale);
+		return this.messageSource.getMessage(resolvable, getDefaultLocale());
 	}
 
 	/**
