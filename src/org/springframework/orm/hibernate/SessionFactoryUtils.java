@@ -297,10 +297,10 @@ public abstract class SessionFactoryUtils {
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
-					// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
-					// with FlushMode.NEVER, which needs to allow flushing within the transaction.
+					// Switch to FlushMode.AUTO if we're not within a read-only transaction.
 					FlushMode flushMode = sessionHolder.getSession().getFlushMode();
-					if (FlushMode.NEVER.equals(flushMode)) {
+					if (FlushMode.NEVER.equals(flushMode) &&
+							!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 						sessionHolder.getSession().setFlushMode(FlushMode.AUTO);
 						sessionHolder.setPreviousFlushMode(flushMode);
 					}
@@ -328,12 +328,16 @@ public abstract class SessionFactoryUtils {
 			    sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
 
 			if (allowSynchronization) {
+				// Set Session to FlushMode.NEVER if we're within a read-only transaction.
 				// Use same Session for further Hibernate actions within the transaction.
 				// Thread object will get removed by synchronization at transaction completion.
 				if (TransactionSynchronizationManager.isSynchronizationActive()) {
 					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
 					logger.debug("Registering Spring transaction synchronization for new Hibernate session");
 					sessionHolder = new SessionHolder(session);
+					if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+						session.setFlushMode(FlushMode.NEVER);
+					}
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true));
 					sessionHolder.setSynchronizedWithTransaction(true);
@@ -397,8 +401,7 @@ public abstract class SessionFactoryUtils {
 													sessionHolder, sessionFactory, jdbcExceptionTranslator, false),
 											jtaTm));
 							sessionHolder.setSynchronizedWithTransaction(true);
-							// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
-							// with FlushMode.NEVER, which needs to allow flushing within the transaction.
+							// Switch to FlushMode.AUTO if we're not within a read-only transaction.
 							FlushMode flushMode = sessionHolder.getSession().getFlushMode();
 							if (FlushMode.NEVER.equals(flushMode)) {
 								sessionHolder.getSession().setFlushMode(FlushMode.AUTO);

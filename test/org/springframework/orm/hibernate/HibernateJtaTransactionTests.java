@@ -142,14 +142,22 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	public void testJtaTransactionCommit() throws Exception {
-		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION);
+		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION, false);
+	}
+
+	public void testJtaTransactionCommitWithReadOnly() throws Exception {
+		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION, true);
 	}
 
 	public void testJtaTransactionCommitWithExisting() throws Exception {
-		doTestJtaTransactionCommit(Status.STATUS_ACTIVE);
+		doTestJtaTransactionCommit(Status.STATUS_ACTIVE, false);
 	}
 
-	private void doTestJtaTransactionCommit(int status) throws Exception {
+	public void testJtaTransactionCommitWithExistingAndReadOnly() throws Exception {
+		doTestJtaTransactionCommit(Status.STATUS_ACTIVE, true);
+	}
+
+	private void doTestJtaTransactionCommit(int status, final boolean readOnly) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
@@ -172,11 +180,16 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		if (status == Status.STATUS_NO_TRANSACTION && readOnly) {
+			session.setFlushMode(FlushMode.NEVER);
+			sessionControl.setVoidCallable(1);
+		}
 		sfControl.replay();
 		sessionControl.replay();
 
 		JtaTransactionManager ptm = new JtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.setReadOnly(readOnly);
 		final List l = new ArrayList();
 		l.add("test");
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -209,10 +222,12 @@ public class HibernateJtaTransactionTests extends TestCase {
 					sessionControl.verify();
 					sessionControl.reset();
 					try {
-						session.getFlushMode();
-						sessionControl.setReturnValue(FlushMode.AUTO, 1);
-						session.flush();
-						sessionControl.setVoidCallable(1);
+						if (!readOnly) {
+							session.getFlushMode();
+							sessionControl.setReturnValue(FlushMode.AUTO, 1);
+							session.flush();
+							sessionControl.setVoidCallable(1);
+						}
 						session.close();
 						sessionControl.setReturnValue(null, 1);
 					}
@@ -502,22 +517,40 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	public void testJtaTransactionCommitWithPreBound() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(false, false);
+		doTestJtaTransactionCommitWithPreBound(false, false, false);
+	}
+
+	public void testJtaTransactionCommitWithPreBoundAndReadOnly() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(false, false, true);
 	}
 
 	public void testJtaTransactionCommitWithPreBoundAndFlushModeNever() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(false, true);
+		doTestJtaTransactionCommitWithPreBound(false, true, false);
+	}
+
+	public void testJtaTransactionCommitWithPreBoundAndFlushModeNeverAndReadOnly() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(false, true, true);
 	}
 
 	public void testJtaTransactionCommitWithJtaTmAndPreBound() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(true, false);
+		doTestJtaTransactionCommitWithPreBound(true, false, false);
+	}
+
+	public void testJtaTransactionCommitWithJtaTmAndPreBoundAndReadOnly() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(true, false, true);
 	}
 
 	public void testJtaTransactionCommitWithJtaTmAndPreBoundAndFlushModeNever() throws Exception {
-		doTestJtaTransactionCommitWithPreBound(true, true);
+		doTestJtaTransactionCommitWithPreBound(true, true, false);
 	}
 
-	protected void doTestJtaTransactionCommitWithPreBound(boolean jtaTm, final boolean flushNever) throws Exception {
+	public void testJtaTransactionCommitWithJtaTmAndPreBoundAndFlushModeNeverAndReadOnly() throws Exception {
+		doTestJtaTransactionCommitWithPreBound(true, true, true);
+	}
+
+	protected void doTestJtaTransactionCommitWithPreBound(
+			boolean jtaTm, final boolean flushNever, final boolean readOnly) throws Exception {
+
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
@@ -550,8 +583,10 @@ public class HibernateJtaTransactionTests extends TestCase {
 		session.getFlushMode();
 		if (flushNever) {
 			sessionControl.setReturnValue(FlushMode.NEVER, 1);
-			session.setFlushMode(FlushMode.AUTO);
-			sessionControl.setVoidCallable(1);
+			if (!readOnly) {
+				session.setFlushMode(FlushMode.AUTO);
+				sessionControl.setVoidCallable(1);
+			}
 		}
 		else {
 			sessionControl.setReturnValue(FlushMode.AUTO, 1);
@@ -566,6 +601,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		try {
 			JtaTransactionManager ptm = new JtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
+			tt.setReadOnly(readOnly);
 			final List l = new ArrayList();
 			l.add("test");
 			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -592,13 +628,15 @@ public class HibernateJtaTransactionTests extends TestCase {
 						sessionControl.verify();
 						sessionControl.reset();
 						try {
-							session.getFlushMode();
-							sessionControl.setReturnValue(FlushMode.AUTO, 1);
-							session.flush();
-							sessionControl.setVoidCallable(1);
-							if (flushNever) {
-								session.setFlushMode(FlushMode.NEVER);
+							if (!readOnly) {
+								session.getFlushMode();
+								sessionControl.setReturnValue(FlushMode.AUTO, 1);
+								session.flush();
 								sessionControl.setVoidCallable(1);
+								if (flushNever) {
+									session.setFlushMode(FlushMode.NEVER);
+									sessionControl.setVoidCallable(1);
+								}
 							}
 							session.afterTransactionCompletion(true);
 							sessionControl.setVoidCallable(1);
@@ -1264,6 +1302,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 	}
 
 }

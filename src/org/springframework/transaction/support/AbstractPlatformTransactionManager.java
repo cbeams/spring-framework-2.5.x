@@ -287,6 +287,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating new transaction");
 			}
 			doBegin(transaction, definition);
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
 					transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
@@ -334,7 +335,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			TransactionSynchronizationManager.clearSynchronization();
 		}
-		return new SuspendedResourcesHolder(suspendedSynchronizations, holder);
+		boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+		TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+		return new SuspendedResourcesHolder(readOnly, suspendedSynchronizations, holder);
 	}
 
 	/**
@@ -348,6 +351,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void resume(Object transaction, Object suspendedResources) throws TransactionException {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
+		TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
 		if (resourcesHolder.getSuspendedSynchronizations() != null) {
 			TransactionSynchronizationManager.initSynchronization();
 			for (Iterator it = resourcesHolder.getSuspendedSynchronizations().iterator(); it.hasNext();) {
@@ -599,6 +603,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			TransactionSynchronizationManager.clearSynchronization();
 		}
 		if (status.isNewTransaction() && !status.hasSavepoint()) {
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {
@@ -793,13 +798,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private static class SuspendedResourcesHolder {
 
+		private final boolean readOnly;
+
 		private final List suspendedSynchronizations;
 
 		private final Object suspendedResources;
 
-		public SuspendedResourcesHolder(List suspendedSynchronizations, Object suspendedResources) {
+		public SuspendedResourcesHolder(boolean readOnly, List suspendedSynchronizations, Object suspendedResources) {
+			this.readOnly = readOnly;
 			this.suspendedSynchronizations = suspendedSynchronizations;
 			this.suspendedResources = suspendedResources;
+		}
+
+		public boolean isReadOnly() {
+			return readOnly;
 		}
 
 		public List getSuspendedSynchronizations() {

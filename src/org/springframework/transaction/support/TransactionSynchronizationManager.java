@@ -75,11 +75,13 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
-	private static ThreadLocal resources = new ThreadLocal();
+	private static final ThreadLocal resources = new ThreadLocal();
 
 	private static final ThreadLocal synchronizations = new ThreadLocal();
 
 	private static final Comparator synchronizationComparator = new OrderComparator();
+
+	private static final ThreadLocal currentTransactionReadOnly = new ThreadLocal();
 
 
 	//-------------------------------------------------------------------------
@@ -249,6 +251,36 @@ public abstract class TransactionSynchronizationManager {
 		}
 		logger.debug("Clearing transaction synchronization");
 		synchronizations.set(null);
+	}
+
+
+	/**
+	 * Expose a read-only flag for the current transaction.
+	 * Called by transaction manager on transaction begin and on cleanup.
+	 * @param readOnly true to mark the current transaction as read-only;
+	 * false to reset such a read-only marker
+	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly
+	 */
+	public static void setCurrentTransactionReadOnly(boolean readOnly) {
+		currentTransactionReadOnly.set(readOnly ? Boolean.TRUE : null);
+	}
+
+	/**
+	 * Return whether the current transaction is marked as read-only.
+	 * To be called by resource management code when preparing a newly
+	 * created resource (for example, a Hibernate Session).
+	 * <p>Note that transaction synchronizations receive the read-only flag
+	 * as argument for the <code>beforeCommit</code> callback, to be able
+	 * to suppress change detection on commit. The present method is meant
+	 * to be used for earlier read-only checks, for example to set the
+	 * flush mode of a Hibernate Session to FlushMode.NEVER upfront.
+	 * @see TransactionSynchronization#beforeCommit(boolean)
+	 * @see org.hibernate.Session#flush
+	 * @see org.hibernate.Session#setFlushMode
+	 * @see org.hibernate.FlushMode#NEVER
+	 */
+	public static boolean isCurrentTransactionReadOnly() {
+		return (currentTransactionReadOnly.get() != null);
 	}
 
 }

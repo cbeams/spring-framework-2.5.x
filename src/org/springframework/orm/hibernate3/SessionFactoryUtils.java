@@ -29,6 +29,8 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -48,8 +50,6 @@ import org.hibernate.WrongClassException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -298,7 +298,8 @@ public abstract class SessionFactoryUtils {
 					// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
 					// with FlushMode.NEVER, which needs to allow flushing within the transaction.
 					FlushMode flushMode = sessionHolder.getSession().getFlushMode();
-					if (FlushMode.NEVER.equals(flushMode)) {
+					if (FlushMode.NEVER.equals(flushMode) &&
+							!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 						sessionHolder.getSession().setFlushMode(FlushMode.AUTO);
 						sessionHolder.setPreviousFlushMode(flushMode);
 					}
@@ -332,6 +333,9 @@ public abstract class SessionFactoryUtils {
 					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
 					logger.debug("Registering Spring transaction synchronization for new Hibernate session");
 					sessionHolder = new SessionHolder(session);
+					if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+						session.setFlushMode(FlushMode.NEVER);
+					}
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true));
 					sessionHolder.setSynchronizedWithTransaction(true);
