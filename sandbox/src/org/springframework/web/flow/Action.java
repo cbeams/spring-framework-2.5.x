@@ -23,8 +23,8 @@ package org.springframework.web.flow;
  * (service layer).
  * <p>
  * When an action completes execution, it signals a result event describing the
- * outcome of the execution ("success", "error", etc). This result event
- * is used as grounds for a state transition in the current state.
+ * outcome of the execution ("success", "error", etc). This result event is used
+ * as grounds for a state transition in the current state.
  * <p>
  * Action implementations are typically singletons instantiated and managed by
  * Spring to take advantage of Spring's powerful configuration and dependency
@@ -54,11 +54,11 @@ public interface Action {
 	 * definition. The result of Action execution, a logical outcome event, is
 	 * used as grounds for a transition in the calling action state.
 	 * <p>
-	 * Note: The <code>RequestContext</code> argument to this method
-	 * provides access to the <b>data model</b> of the active flow execution.
-	 * Among other things, this allows this Action to access model data set by
-	 * other Actions, as well as set its own attributes it wishes to expose in a
-	 * given scope.
+	 * Note: The <code>RequestContext</code> argument to this method provides
+	 * access to the <b>data model</b> of the active flow execution in the
+	 * context of the currently executing thread. Among other things, this
+	 * allows this Action to access model data set by other Actions, as well as
+	 * set its own attributes it wishes to expose in a given scope.
 	 * <p>
 	 * All attributes set in "flow scope" exist for the life of the flow session
 	 * and will be cleaned up when the flow session ends. All attributes set in
@@ -68,14 +68,13 @@ public interface Action {
 	 * convenient access by the views when a <code>ViewState</code> is
 	 * entered.
 	 * <p>
-	 * Note: The flow scope should NOT be used as a general purpose
-	 * cache, but rather as a context for data needed locally by the flows this
-	 * action participates in. For example, it would be inappropriate to stuff
-	 * large collections of objects (like those returned to support a search
-	 * results view) into flow scope. Instead, put such result collections in
-	 * request scope, and ensure you execute this action again each time you
-	 * wish to view those results. 2nd level caches are much better cache
-	 * solutions.
+	 * Note: The flow scope should NOT be used as a general purpose cache, but
+	 * rather as a context for data needed locally by the flows this action
+	 * participates in. For example, it would be inappropriate to stuff large
+	 * collections of objects (like those returned to support a search results
+	 * view) into flow scope. Instead, put such result collections in request
+	 * scope, and ensure you execute this action again each time you wish to
+	 * view those results. 2nd level caches are much better cache solutions.
 	 * <p>
 	 * Note: as flow scoped attributes are typically managed in the HTTP
 	 * session, they must be <code>Serializable</code>.

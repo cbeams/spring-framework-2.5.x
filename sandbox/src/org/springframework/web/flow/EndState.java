@@ -129,12 +129,10 @@ public class EndState extends State {
 				}
 				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
 			}
-			
 			// actually end the subflow
 			// note that we do this at the here to make sure we can call context.getModel()
 			// above without any problems
 			context.endActiveFlowSession();
-			
 			return viewDescriptor;
 		}
 		else {
@@ -150,10 +148,8 @@ public class EndState extends State {
 			resumingState.mapSubFlowOutputAttributes(
 					context.getActiveFlowSession().getFlowScope(), parentFlowSession.getFlowScope());
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
-			
 			// actually end the subflow
 			context.endActiveFlowSession();
-			
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			context.setLastEvent(createEndingSubFlowResultEvent());
