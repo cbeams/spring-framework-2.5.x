@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.31 2004/06/28 11:45:10 johnsonr Exp $
+	$Id: spring-beans.dtd,v 1.34 2004/08/02 13:46:13 johnsonr Exp $
 -->
 
 
@@ -78,9 +78,11 @@
 
 <!--
 	Beans can be identified by an id, to enable reference checking.
+
 	There are constraints on a valid XML id: if you want to reference your bean
 	in Java code using a name that's illegal as an XML id, use the optional
-	"name" attribute. If neither given, the bean class name is used as id.
+	"name" attribute. If neither is given, the bean class name is used as id
+	(with an appended counter like "#2" if there is already a bean with that name).
 -->
 <!ATTLIST bean id ID #IMPLIED>
 
@@ -100,7 +102,7 @@
 
   A child bean definition will inherit constructor argument values,
   property values and method overrides from the parent, with the option
-  to add new values. If init method, destroy method and/or static factory
+  to add new values. If init method, destroy method, factory bean and/or factory
   method are specified, they will override the corresponding parent settings.
 
   The remaining settings will <i>always</i> be taken from the child definition:
@@ -208,16 +210,23 @@
 <!ATTLIST bean destroy-method CDATA #IMPLIED>
 
 <!--
-	Optional attribute specifying the name of a static factory method to use
+	Optional attribute specifying the name of a factory method to use
 	to create this object. Use constructor-arg elements to specify arguments
 	to the factory method, if it takes arguments. Autowiring does not
 	apply to factory methods.
-	The factory method will be on the class specified by the "class" attribute
+	
+	If the "class" attribute is present, the factory method will be 
+	a static method on the class specified by the "class" attribute
 	on this bean definition. Often this will be the same class as that of the
 	constructed object - for example, when the factory method is used as an
 	alternative to a constructor. However, it may be on a different class. In 
 	that case, the created object will *not* be of the class specified in
 	the "class" attribute. This is analogous to FactoryBean behaviour.
+	
+	If the "factory-bean" attribute is present, the "class" attribute
+	is not used, and the factory method will be an instance method on the object returned 
+	from a getBean() call with the specified bean name. The factory bean may
+	be defined as a singleton or a prototype.
 	
 	The factory method can have any number of arguments. Autowiring is not supported.
 	Use indexed constructor-arg elements in conjunction with the factory-method
@@ -230,12 +239,24 @@
 <!ATTLIST bean factory-method CDATA #IMPLIED>
 
 <!--
+	Alternative to class attribute for factory-method usage.
+	If this is specified, no class attribute should be used.
+	This should be set to the name of a bean in the current
+	or ancestor factories that contains the
+	relevant factory method. 
+	This allows the factory itself to be configured using
+	Dependency Injection, and an instance, rather than static,
+	method to be used.
+-->
+<!ATTLIST bean factory-bean CDATA #IMPLIED>
+
+<!--
 	Bean definitions can specify zero or more constructor arguments.
 	They correspond to either a specific index of the constructor argument list
 	or are supposed to be matched generically by type.
 	This is an alternative to "autowire constructor".
 	constructor-arg elements are also used in conjunction with the factory-method
-	element to construct beans using static factory methods.
+	element to construct beans using static or instance factory methods.
 -->
 <!ELEMENT constructor-arg (
         description?,
@@ -246,6 +267,13 @@
 	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
+
+	NOTE: it is highly recommended to use the index attribute, in Spring up
+	to and including 1.1. The constructor matcher is extremely greedy in 
+	matching args without an index, to the point of duplicating supplied args
+	to fill in unspecified constructor args, if they are compatible (i.e. one
+	single String arg will match a constructor with two String args, etc.).
+	The matcher should be less agressive in a future version.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
 
