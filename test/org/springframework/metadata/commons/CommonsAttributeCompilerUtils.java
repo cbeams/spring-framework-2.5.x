@@ -11,13 +11,13 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
-import org.springframework.aop.support.ControlFlowFactory;
+import org.springframework.util.ControlFlowFactory;
 
 /**
  * Programmatic support classes for compiling with Commons Attributes
  * so that tests can run within Eclipse.
  * @author Rod Johnson
- * @version $Id: CommonsAttributeCompilerUtils.java,v 1.2 2003-12-15 14:39:29 johnsonr Exp $
+ * @version $Id: CommonsAttributeCompilerUtils.java,v 1.3 2003-12-21 12:00:28 johnsonr Exp $
  */
 public class CommonsAttributeCompilerUtils {
 

@@ -3,14 +3,14 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.support;
+package org.springframework.util;
 
 import junit.framework.TestCase;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AbstractControlFlowTests.java,v 1.1 2003-12-15 14:39:11 johnsonr Exp $
+ * @version $Id: AbstractControlFlowTests.java,v 1.1 2003-12-21 11:59:57 johnsonr Exp $
  */
 public abstract class AbstractControlFlowTests extends TestCase {
 
