@@ -22,7 +22,7 @@ import org.springframework.jndi.JndiTemplate;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.2 2003-09-19 11:50:38 johnsonr Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.3 2003-09-21 09:07:16 johnsonr Exp $
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -96,6 +96,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 		fb.setJndiName(jndiName);
 		fb.setInContainer(false);	// no java:comp/env prefix
 		fb.setBusinessInterface(MyBusinessMethods.class);
+		assertEquals(fb.getBusinessInterface(), MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
 	
 		// Need lifecycle methods
@@ -112,6 +113,44 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 			assertTrue(ex.getRootCause() == cex);
 		}
 		
+		mc.verify();	
+	}
+	
+	public void testNoBusinessInterfaceSpecified() throws Exception {
+		// Will do JNDI lookup to get home but won't call create
+		// Could actually try to figure out interface from create?
+		final String jndiName = "foo";
+
+		MockControl mc = MockControl.createControl(MyHome.class);
+		final MyHome home = (MyHome) mc.getMock();
+		mc.replay();
+
+		JndiTemplate jt = new JndiTemplate() {
+			public Object lookup(String name) throws NamingException {
+				// parameterize
+				assertTrue(name.equals("java:comp/env/" + jndiName));
+				return home;
+			} 
+		};
+
+		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
+		fb.setJndiName(jndiName);
+		// Don't set business interface
+		fb.setJndiTemplate(jt);
+	
+		// Check it's a singleton
+		assertTrue(fb.isSingleton());
+
+		try {
+			fb.afterPropertiesSet();
+			fail("Should have failed to create EJB");
+		}
+		catch (IllegalArgumentException ex) {
+			// TODO more appropriate exception?
+			assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
+		}
+
+		// Expect no methods on home
 		mc.verify();	
 	}
 	
