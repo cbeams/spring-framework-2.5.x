@@ -22,6 +22,10 @@ public abstract class ShortCodedEnum extends AbstractCodedEnum {
 
     private Short code;
     
+    protected ShortCodedEnum() {
+        super();
+    }
+    
     protected ShortCodedEnum(int code) {
         this(code, null);
     }

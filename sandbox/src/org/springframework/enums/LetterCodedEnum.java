@@ -24,6 +24,10 @@ public abstract class LetterCodedEnum extends AbstractCodedEnum {
 
     private Character code;
     
+    protected LetterCodedEnum() {
+        super();
+    }
+
     protected LetterCodedEnum(char code) {
         this(code, null);
     }
