@@ -290,7 +290,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 	}
 
 
-	private static interface ITest {
+	public interface ITest {
 		void foo() throws Exception;
 	}
 
