@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.jdbc.core.QueryExecutor;
-import org.springframework.jdbc.util.JdbcUtils;
+import org.springframework.jdbc.core.support.JdbcUtils;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -23,7 +23,7 @@ import org.springframework.jdbc.util.JdbcUtils;
  * parameters.
  *
  * @author Rod Johnson
- * @version $Id: SqlOperation.java,v 1.2 2003-08-26 17:31:16 jhoeller Exp $
+ * @version $Id: SqlOperation.java,v 1.3 2003-09-19 09:03:30 johnsonr Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 

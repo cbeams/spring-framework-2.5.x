@@ -18,7 +18,7 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.util.JdbcUtils;
+import org.springframework.jdbc.core.support.JdbcUtils;
 
 /**
  * SQL function wrapper that returns a single row of results. The default

@@ -4,7 +4,6 @@ import java.sql.Types;
 
 import org.springframework.core.InternalErrorException;
 import org.springframework.jdbc.object.SqlFunction;
-import org.springframework.jdbc.util.JdbcUtils;
 
 /**
  * Abstract implementation of Classes NextMaxValueProvider used as 
@@ -13,7 +12,7 @@ import org.springframework.jdbc.util.JdbcUtils;
  * Subclasses should provide implementations of protected abstract method getNextKey(int).
  * @author <a href="mailto:jp.pawlak@tiscali.fr">Jean-Pierre Pawlak</a>
  * @author <a href="mailto:isabelle@meta-logix.com">Isabelle Muszynski</a>
- * @version $Id: AbstractNextMaxValueProvider.java,v 1.1.1.1 2003-08-14 16:20:30 trisberg Exp $
+ * @version $Id: AbstractNextMaxValueProvider.java,v 1.2 2003-09-19 09:03:30 johnsonr Exp $
  */
 public abstract class AbstractNextMaxValueProvider {
 
