@@ -7,8 +7,8 @@ Changes in version 1.1 final (16.8.2004)
 ----------------------------------------
 
 Package org.springframework.aop
-* AbstractAutoProxyCreator.getInterceptorsAndAdvisorsForBean() now takes 3rd argument, TargetSource. Simply add this parameter to existing implementations.
-* added customizeProxyFactory() hook method in AbstractAutoProxyCreator
+* added "customizeProxyFactory" hook method in AbstractAutoProxyCreator
+* AbstractAutoProxyCreator's "getInterceptorsAndAdvisorsForBean" now takes a TargetSource as third argument
 
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
@@ -21,12 +21,13 @@ Package org.springframework.beans
 * introduced BeanDefinitionReader interface, implemented by AbstractBeanDefinitionReader and subclasses
 * reworked XmlBeanDefinitionParser SPI (warning: not backwards-compatible!) to receive a bean definition reader
 
-Package org.springframework.jdbc
-* added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
-
 Package org.springframework.core
 * added "getFilename" and "createRelative" methods to Resource interface, with corresponding implementations
 * provided more efficient "equals" and "hashCode" implementations for all concrete Resource classes
+* ResourceEditor trims resource locations before passing them to ResourceLoader's "getResource" method
+
+Package org.springframework.jdbc
+* added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
 
 Package org.springframework.jms
 * fixed JmsTemplate's "doReceive" implementation to not try to acknowledge message if null returned after timeout
@@ -41,6 +42,7 @@ Package org.springframework.orm
 * deprecated Hibernate "findByNamedQuery" methods for named parameters in favor of "findByNamedQueryAndNamedParam"
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 * added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
+* LocalSessionFactoryBean trims "mappingResources" locations before passing them to the ClassPathResource constructor
 
 Package org.springframework.remoting
 * added RemoteInvocationResult class, for convenient serialization of a method invocation result
@@ -52,6 +54,9 @@ Package org.springframework.remoting
 * HttpInvokerClientInterceptor/ProxyFactoryBean support HttpInvokerRequestExecutor interface
 * added SimpleHttpInvokerRequestExecutor implementation that uses J2SE's HttpURLConnection class
 * added CommonsHttpInvokerRequestExecutor implementation that uses Jakarta Commons HttpClient
+
+Package org.springframework.scheduling
+* SchedulerFactoryBean reschedules triggers in case of "overwriteExistingJobs", to update triggers of persistent jobs
 
 Package org.springframework.transaction
 * fixed TransactionAspectSupport's after-returning behavior to always call commit even if transaction is not new
