@@ -16,6 +16,10 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -99,13 +103,19 @@ public class MethodInvokingJobDetailFactoryBean extends MethodInvoker
 	 */
 	public static class MethodInvokingJob extends QuartzJobBean {
 
+		protected static final Log logger = LogFactory.getLog(MethodInvokingJob.class);
+
 		private MethodInvoker methodInvoker;
+
+		private String errorMessage;
 
 		/**
 		 * Set the MethodInvoker to use.
 		 */
 		public void setMethodInvoker(MethodInvoker methodInvoker) {
 			this.methodInvoker = methodInvoker;
+			this.errorMessage = "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
+					"' on target object [" + this.methodInvoker.getTargetObject() + "]";
 		}
 
 		/**
@@ -115,9 +125,18 @@ public class MethodInvokingJobDetailFactoryBean extends MethodInvoker
 			try {
 				this.methodInvoker.invoke();
 			}
+			catch (InvocationTargetException ex) {
+				logger.warn(this.errorMessage + ": " + ex.getTargetException().getMessage());
+				if (ex.getTargetException() instanceof JobExecutionException) {
+					throw (JobExecutionException) ex.getTargetException();
+				}
+				Exception jobEx = (ex.getTargetException() instanceof Exception) ?
+						(Exception) ex.getTargetException() : ex;
+				throw new JobExecutionException(this.errorMessage, jobEx, false);
+			}
 			catch (Exception ex) {
-				throw new JobExecutionException("Could not invoke method '" + this.methodInvoker.getTargetMethod() +
-				                                "' of target object [" + this.methodInvoker.getTargetObject() + "]", ex, false);
+				logger.warn(this.errorMessage + ": " + ex.getMessage());
+				throw new JobExecutionException(this.errorMessage, ex, false);
 			}
 		}
 	}

@@ -16,9 +16,12 @@
 
 package org.springframework.scheduling.timer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.TimerTask;
 
-import org.springframework.beans.MethodInvocationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.MethodInvoker;
@@ -65,13 +68,20 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvoker
 	 */
 	private static class MethodInvokingTimerTask extends TimerTask {
 
+		protected final Log logger = LogFactory.getLog(getClass());
+
 		private final MethodInvoker methodInvoker;
+
+		private final String errorMessage;
 
 		/**
 		 * Create a new MethodInvokingTimerTask with the MethodInvoker to use.
 		 */
 		public MethodInvokingTimerTask(MethodInvoker methodInvoker) {
 			this.methodInvoker = methodInvoker;
+			this.errorMessage = "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
+					"' on target object [" + this.methodInvoker.getTargetObject() + "]";
+
 		}
 
 		/**
@@ -81,8 +91,13 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvoker
 			try {
 				this.methodInvoker.invoke();
 			}
+			catch (InvocationTargetException ex) {
+				logger.warn(this.errorMessage + ": " + ex.getTargetException().getMessage());
+				throw new TimerTaskExecutionException(this.errorMessage, ex.getTargetException());
+			}
 			catch (Exception ex) {
-				throw new MethodInvocationException(ex, this.methodInvoker.getTargetMethod());
+				logger.warn(this.errorMessage + ": " + ex.getMessage());
+				throw new TimerTaskExecutionException(this.errorMessage, ex);
 			}
 		}
 	}
