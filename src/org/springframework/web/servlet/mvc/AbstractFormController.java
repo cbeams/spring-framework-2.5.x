@@ -61,13 +61,13 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>binding of the {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
  *      in the request to be able to use the property editors in the form rendering
  *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)</li>
- *  <li>call to {@link #referenceData referenceData()} to allow you to bind
- *      any relevant reference data you might need when editing a form
- *      (for instance a List of Locale-object you're going to let the user
- *      select one from)<li>
  *  <li>call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
  *      to return a View that should be rendered (typically the view that renders
- *      the form). This method has be overriden in extending classes</li>
+ *      the form). This method has be overridden in extending classes</li>
+ *  <li>call to {@link #referenceData referenceData()} to allow you to bind
+ *      any relevant reference data you might need when editing a form
+ *      (for instance a List of Locale objects you're going to let the user
+ *      select one from)<li>
  *  <li>
  *  <li>XXX Return and view gets rendered. Continue after user has filled in
  *      form</li>
