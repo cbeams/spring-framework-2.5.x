@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspTagException;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.TagUtils;
@@ -48,43 +49,60 @@ import org.springframework.web.util.TagUtils;
  */
 public class MessageTag extends RequestContextAwareTag {
 
-	private String code = null;
+	private String code;
 
-	private String text = null;
+	private String arguments;
+
+	private String text;
 	
-	private String var = null;
+	private String var;
 	
 	private String scope = TagUtils.SCOPE_PAGE;
 
 	/**
 	 * Set the message code for this tag.
 	 */
-	public final void setCode(String code) throws JspException {
+	public void setCode(String code) {
 		this.code = code;
+	}
+
+	/**
+	 * Set optional message arguments for this tag,
+	 * as comma-delimited list of Strings.
+	 */
+	public void setArguments(String arguments) {
+		this.arguments = arguments;
 	}
 
 	/**
 	 * Set the message text for this tag.
 	 */
-	public final void setText(String text) throws JspException {
+	public void setText(String text) {
 		this.text = text;
 	}
 	
 	/**
-	 * Set othe var String under which to bind the variable.
+	 * Set PageContext attribute name under which to expose
+	 * a variable that contains the resolved message.
+	 * @see #setScope
+	 * @see javax.servlet.jsp.PageContext#setAttribute
 	 */
-	public final void setVar(String var)  throws JspException {
+	public void setVar(String var) {
 		this.var = var;
 	}
 	
 	/**
-	 * Set the scope to export the var to.
+	 * Set the scope to export the variable to.
+	 * Default is SCOPE_PAGE ("page").
+	 * @see #setVar
+	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
+	 * @see javax.servlet.jsp.PageContext#setAttribute
 	 */
-	public final void setScope(String scope) throws JspException {
+	public void setScope(String scope) {
 		this.scope = scope;
 	}
 
-	protected final int doStartTagInternal() throws Exception {
+	protected final int doStartTagInternal() throws JspException, IOException {
 		MessageSource messageSource = getMessageSource();
 		if (messageSource == null) {
 			throw new JspTagException("No corresponding MessageSource found");
@@ -95,12 +113,14 @@ public class MessageTag extends RequestContextAwareTag {
 		try {
 			String msg = null;
 			if (resolvedCode != null) {
+				String resolvedArguments = ExpressionEvaluationUtils.evaluateString("arguments", this.arguments, pageContext);
+				String[] argumentsArray = StringUtils.commaDelimitedListToStringArray(resolvedArguments);
 				if (resolvedText != null) {
-					msg = messageSource.getMessage(resolvedCode, null, resolvedText,
+					msg = messageSource.getMessage(resolvedCode, argumentsArray, resolvedText,
 					                               getRequestContext().getLocale());
 				}
 				else {
-					msg = messageSource.getMessage(resolvedCode, null,
+					msg = messageSource.getMessage(resolvedCode, argumentsArray,
 					                               getRequestContext().getLocale());
 				}
 			}

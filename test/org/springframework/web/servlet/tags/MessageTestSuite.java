@@ -66,6 +66,21 @@ public class MessageTestSuite extends AbstractTagTest {
 		assertTrue("Correct message", "Canadian &#38; test message".equals(message.toString()));
 	}
 
+	public void testMessageTagWithCodeAndArguments() throws JspException {
+		MockPageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) throws IOException {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testAttr");
+		tag.setArguments("arg1,arg2");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertTrue("Correct message", "test arg1 message arg2".equals(message.toString()));
+	}
+
 	public void testMessageTagWithCodeAndText1() throws JspException {
 		MockPageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();

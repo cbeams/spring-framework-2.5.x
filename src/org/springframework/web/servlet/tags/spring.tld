@@ -3,7 +3,7 @@
 
 <taglib>
 
-	<tlib-version>1.0</tlib-version>
+	<tlib-version>1.0.1</tlib-version>
 
 	<jsp-version>1.2</jsp-version>
 
@@ -12,6 +12,7 @@
 	<uri>http://www.springframework.org/tags</uri>
 
 	<description>Spring Framework JSP Tag Library. Authors: Rod Johnson, Juergen Hoeller</description>
+
 
 	<tag>
 
@@ -31,6 +32,7 @@
 
 	</tag>
 
+
 	<tag>
 
 		<name>message</name>
@@ -48,7 +50,25 @@
 		</attribute>
 
 		<attribute>
+			<name>arguments</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
 			<name>text</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>scope</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
@@ -60,6 +80,7 @@
 		</attribute>
 
 	</tag>
+
 
 	<tag>
 
@@ -78,7 +99,25 @@
 		</attribute>
 
 		<attribute>
+			<name>arguments</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
 			<name>text</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>scope</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
@@ -90,6 +129,7 @@
 		</attribute>
 
 	</tag>
+
 
 	<tag>
 
@@ -122,6 +162,7 @@
 
 	</tag>
 
+
 	<tag>
 
 		<name>bind</name>
@@ -129,7 +170,7 @@
 		<body-content>JSP</body-content>
 
 		<description>
-			Provides BindStatus instance for certain bind path.
+			Provides BindStatus object for the given bind path.
 		</description>
 
 		<!-- Note: Was "bind" in earlier version -->
@@ -152,7 +193,8 @@
 		</attribute>
 
 	</tag>
-	
+
+
 	<tag>
 
 		<name>transform</name>
@@ -160,15 +202,15 @@
 		<body-content>JSP</body-content>
 
 		<description>
-			Provides transformation of variables to Strings using appropriate
-            Custom Editor from BindTag (can only be used inside BindTag)
+			Provides transformation of variables to Strings, using appropriate
+			custom PropertyEditor from BindTag (can only be used inside BindTag).
 		</description>
 
-        <attribute>
-            <name>value</name>
-            <required>true</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
+		<attribute>
+			<name>value</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 
 		<attribute>
 			<name>var</name>
