@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.CompoundConstraint;
 import org.springframework.rules.constraint.ConstraintsAccessor;
@@ -40,7 +41,8 @@ import org.springframework.validation.Validator;
  * 
  * @author Keith Donald
  */
-public class Rules extends ConstraintsAccessor implements Constraint, Validator {
+public class Rules extends ConstraintsAccessor implements Constraint, PropertyConstraintProvider, Validator,
+		InitializingBean {
 	private static final Log logger = LogFactory.getLog(Rules.class);
 
 	private Class domainObjectClass;
@@ -48,12 +50,16 @@ public class Rules extends ConstraintsAccessor implements Constraint, Validator 
 	private Map propertiesConstraints = new HashMap();
 
 	public Rules() {
-		initRules();
+
 	}
 
 	public Rules(Class domainObjectClass) {
 		setDomainObjectClass(domainObjectClass);
-		initRules();
+	}
+
+	public Rules(Class domainObjectClass, Map propertiesConstraints) {
+		setDomainObjectClass(domainObjectClass);
+		setPropertiesConstraints(propertiesConstraints);
 	}
 
 	public void setDomainObjectClass(Class domainObjectClass) {
@@ -63,6 +69,10 @@ public class Rules extends ConstraintsAccessor implements Constraint, Validator 
 
 	public Class getDomainObjectClass() {
 		return domainObjectClass;
+	}
+
+	public void afterPropertiesSet() {
+		initRules();
 	}
 
 	protected void initRules() {
@@ -97,33 +107,14 @@ public class Rules extends ConstraintsAccessor implements Constraint, Validator 
 	}
 
 	public PropertyConstraint getPropertyConstraint(String property) {
+		if (propertiesConstraints.isEmpty()) {
+			initRules();
+		}
 		return (PropertyConstraint)propertiesConstraints.get(property);
 	}
 
 	public Iterator iterator() {
 		return propertiesConstraints.values().iterator();
-	}
-
-	/**
-	 * Factory method that creates a rules instance for a given java bean type.
-	 * 
-	 * @param propertyName
-	 * @return A rule for a given property.
-	 */
-	public static Rules createRules(Class domainObjectClass) {
-		return new Rules(domainObjectClass);
-	}
-
-	/**
-	 * Factory method that creates a rules instance for a given java bean type.
-	 * 
-	 * @param propertyName
-	 * @return A rule for a given property.
-	 */
-	public static Rules createRules(Class domainObjectClass, Map propertyConstraints) {
-		Rules r = new Rules(domainObjectClass);
-		r.setPropertiesConstraints(propertyConstraints);
-		return r;
 	}
 
 	/**
@@ -215,7 +206,7 @@ public class Rules extends ConstraintsAccessor implements Constraint, Validator 
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("beanClass", domainObjectClass).append("propertyRules",
+		return new ToStringCreator(this).append("domainObjectClass", domainObjectClass).append("propertyRules",
 				propertiesConstraints).toString();
 	}
 

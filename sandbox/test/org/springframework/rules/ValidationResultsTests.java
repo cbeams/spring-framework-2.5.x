@@ -9,6 +9,8 @@ import java.util.Locale;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.rules.constraint.CompoundConstraint;
+import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.rules.reporting.BeanValidationResults;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
@@ -50,8 +52,8 @@ public class ValidationResultsTests extends TestCase {
     public void testNestedValidationResultsPropertyConstraint() {
         Person p = new Person();
 
-        Rules rules = Rules.createRules(Person.class);
-        Constraint constraint =
+        Rules rules = new Rules(Person.class);
+        CompoundConstraint constraint =
             constraints.or(
                 constraints.all(
                     "firstName",
@@ -60,7 +62,7 @@ public class ValidationResultsTests extends TestCase {
                         constraints.minLength(2)}),
                 constraints.not(
                     constraints.eqProperty("firstName", "lastName")));
-        rules.add(constraint);
+        rules.add(new CompoundPropertyConstraint(constraint));
         BeanValidationResultsCollector c = new BeanValidationResultsCollector(p);
         c.setCollectAllErrors(true);
         BeanValidationResults r = c.collectResults(rules);

@@ -26,6 +26,7 @@ import org.springframework.rules.Rules;
 import org.springframework.rules.RulesSource;
 import org.springframework.rules.constraint.ConstraintsAccessor;
 import org.springframework.rules.constraint.property.PropertyConstraint;
+import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -37,7 +38,9 @@ import org.springframework.util.ToStringCreator;
 public class DefaultRulesSource extends ConstraintsAccessor implements RulesSource {
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Map rules = new HashMap();
+	private static final String DEFAULT_CONTEXT_ID = "default";
+
+	private Map ruleContexts = new HashMap();
 
 	/**
 	 * Add or update the rules for a single bean class.
@@ -49,7 +52,21 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding rules -> " + rules);
 		}
-		this.rules.put(rules.getDomainObjectClass(), rules);
+		addRules(DEFAULT_CONTEXT_ID, rules);
+	}
+
+	public void addRules(String contextId, Rules rules) {
+		Map context = getOrCreateRuleContext(contextId);
+		context.put(rules.getDomainObjectClass(), rules);
+	}
+
+	private Map getOrCreateRuleContext(String contextId) {
+		Map context = (Map)this.ruleContexts.get(contextId);
+		if (context == null) {
+			context = new HashMap();
+			this.ruleContexts.put(contextId, context);
+		}
+		return context;
 	}
 
 	/**
@@ -64,21 +81,33 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 		if (logger.isDebugEnabled()) {
 			logger.debug("Configuring rules in source...");
 		}
-		this.rules.clear();
+		getOrCreateRuleContext(DEFAULT_CONTEXT_ID).clear();
 		for (Iterator i = rules.iterator(); i.hasNext();) {
 			addRules((Rules)i.next());
 		}
 	}
 
 	public Rules getRules(Class bean) {
-		return (Rules)rules.get(bean);
+		return (Rules)getRules(bean, DEFAULT_CONTEXT_ID);
 	}
 
-	public PropertyConstraint getRules(Class bean, String propertyName) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving rules for bean '" + bean + "', property '" + propertyName + "'");
+	public Rules getRules(Class bean, String contextId) {
+		if (!StringUtils.hasText(contextId)) {
+			contextId = DEFAULT_CONTEXT_ID;
 		}
-		Rules rules = (Rules)this.rules.get(bean);
+		return (Rules)getOrCreateRuleContext(contextId).get(bean);
+	}
+
+	public PropertyConstraint getPropertyConstraint(Class bean, String propertyName) {
+		return getPropertyConstraint(bean, propertyName, DEFAULT_CONTEXT_ID);
+	}
+
+	public PropertyConstraint getPropertyConstraint(Class bean, String propertyName, String contextId) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving rules for bean '" + bean + "', context = " + contextId + ", property '" + propertyName
+					+ "'");
+		}
+		Rules rules = getRules(bean, contextId);
 		if (rules != null) {
 			return rules.getPropertyConstraint(propertyName);
 		}
@@ -88,7 +117,7 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("rules", rules).toString();
+		return new ToStringCreator(this).append("rules", ruleContexts).toString();
 	}
 
 }

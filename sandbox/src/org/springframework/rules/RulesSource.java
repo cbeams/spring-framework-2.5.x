@@ -15,7 +15,7 @@
  */
 package org.springframework.rules;
 
-import org.springframework.rules.constraint.property.*;
+import org.springframework.rules.constraint.property.PropertyConstraint;
 
 /**
  * Rules sources provide a mechanism for accessing rules associated with a bean
@@ -36,6 +36,8 @@ public interface RulesSource {
 	 */
 	public Rules getRules(Class bean);
 
+	public Rules getRules(Class bean, String contextId);
+
 	/**
 	 * Return the validation rules for the provided bean property.
 	 *
@@ -45,8 +47,8 @@ public interface RulesSource {
 	 *            the bean propertyName
 	 * @return The validation rules, or <code>null</code> if none exist.
 	 */
-	public PropertyConstraint getRules(Class beanClass, String propertyName);
+	public PropertyConstraint getPropertyConstraint(Class beanClass, String propertyName);
 
-	//@TODO public Rules getRules(String context, Class bean);
+	public PropertyConstraint getPropertyConstraint(Class beanClass, String propertyName, String contextId);
 
 }

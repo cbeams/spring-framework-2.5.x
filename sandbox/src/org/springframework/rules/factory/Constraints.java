@@ -176,7 +176,7 @@ public class Constraints extends AlgorithmsAccessor {
 	 *            the second constraint
 	 * @return The compound AND constraint
 	 */
-	public Constraint and(Constraint constraint1, Constraint constraint2) {
+	public And and(Constraint constraint1, Constraint constraint2) {
 		return new And(constraint1, constraint2);
 	}
 
@@ -187,7 +187,7 @@ public class Constraints extends AlgorithmsAccessor {
 	 *            the constraints
 	 * @return The compound AND constraint
 	 */
-	public Constraint all(Constraint[] constraints) {
+	public And all(Constraint[] constraints) {
 		return new And(constraints);
 	}
 
@@ -210,7 +210,7 @@ public class Constraints extends AlgorithmsAccessor {
 	 *            the second constraint
 	 * @return The compound OR constraint
 	 */
-	public Constraint or(Constraint constraint1, Constraint constraint2) {
+	public Or or(Constraint constraint1, Constraint constraint2) {
 		return new Or(constraint1, constraint2);
 	}
 
@@ -221,8 +221,18 @@ public class Constraints extends AlgorithmsAccessor {
 	 *            the constraints
 	 * @return The compound AND constraint
 	 */
-	public Constraint any(Constraint[] constraints) {
+	public Or any(Constraint[] constraints) {
 		return new Or(constraints);
+	}
+
+	/**
+	 * Returns a new, empty disjunction prototype, capable of composing
+	 * individual constraints where 'ANY' must test true.
+	 *
+	 * @return the UnaryAnd
+	 */
+	public Or disjunction() {
+		return new Or();
 	}
 
 	/**
@@ -239,16 +249,6 @@ public class Constraints extends AlgorithmsAccessor {
 		else {
 			return ((Not)constraint).getConstraint();
 		}
-	}
-
-	/**
-	 * Returns a new, empty disjunction prototype, capable of composing
-	 * individual constraints where 'ANY' must test true.
-	 *
-	 * @return the UnaryAnd
-	 */
-	public Or disjunction() {
-		return new Or();
 	}
 
 	/**
