@@ -6,8 +6,9 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 
@@ -29,7 +30,8 @@ import org.springframework.core.Ordered;
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
  */
-public abstract class PropertyResourceConfigurer extends ApplicationObjectSupport implements BeanFactoryPostProcessor, Ordered {
+public abstract class PropertyResourceConfigurer extends ApplicationObjectSupport
+    implements BeanFactoryPostProcessor, Ordered {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -64,7 +66,7 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		this.properties = properties;
 	}
 
-	public void postProcessBeanFactory(ListableBeanFactoryImpl beanFactory) throws ApplicationContextException {
+	public void postProcessBeanFactory(ListableBeanFactoryImpl beanFactory) throws BeansException {
 		Properties prop = new Properties();
 
 		if (this.location != null) {
@@ -90,6 +92,6 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		}
 	}
 
-	protected abstract void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop);
+	protected abstract void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) throws BeansException;
 
 }

@@ -7,7 +7,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * A property resource configurer that overrides bean property values in an application
@@ -40,27 +39,22 @@ import org.springframework.context.ApplicationContextException;
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
-	protected void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) {
+	protected void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) throws BeansException {
 		for (Iterator it = prop.keySet().iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			processKey(beanFactory, key, prop.getProperty(key));
 		}
 	}
 
-	protected void processKey(ListableBeanFactoryImpl factory, String key, String value) throws ApplicationContextException {
-		try {
-			int dotIndex = key.indexOf('.');
-			if (dotIndex == -1) {
-				throw new FatalBeanException("Invalid key (expected 'beanName.property')");
-			}
-			String beanName = key.substring(0, dotIndex);
-			String beanProperty = key.substring(dotIndex+1);
-			factory.overridePropertyValue(beanName, new PropertyValue(beanProperty, value));
-			logger.debug("Property '" + key + "' set to [" + value + "]");
+	protected void processKey(ListableBeanFactoryImpl factory, String key, String value) throws BeansException {
+		int dotIndex = key.indexOf('.');
+		if (dotIndex == -1) {
+			throw new FatalBeanException("Invalid key (expected 'beanName.property')");
 		}
-		catch (BeansException ex) {
-			throw new ApplicationContextException("Could not set property '" + key + "' to value '" + value + "': " + ex.getMessage());
-		}
+		String beanName = key.substring(0, dotIndex);
+		String beanProperty = key.substring(dotIndex+1);
+		factory.overridePropertyValue(beanName, new PropertyValue(beanProperty, value));
+		logger.debug("Property '" + key + "' set to [" + value + "]");
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
@@ -74,7 +75,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		this.placeholderSuffix = placeholderSuffix;
 	}
 
-	protected void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) {
+	protected void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) throws BeansException {
 		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
