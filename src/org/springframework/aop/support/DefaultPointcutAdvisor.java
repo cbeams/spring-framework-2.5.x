@@ -38,14 +38,15 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 
 	private int order = Integer.MAX_VALUE;
 
-	private Pointcut pointcut;
+	private Pointcut pointcut = Pointcut.TRUE;
 	
 	private Advice advice;
 	
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
-	 * Advice and Pointcut must be set before use using
-	 * setter methods.
+	 * Advice must be set before use using
+	 * setter methods. Pointcut will normally be set
+	 * also, but defaults to true.
 	 */
 	public DefaultPointcutAdvisor() {
 	}
