@@ -18,6 +18,9 @@ package org.springframework.jdbc.support;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
  * defining common properties like DataSource and exception translator.
@@ -29,6 +32,8 @@ import javax.sql.DataSource;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public abstract class JdbcAccessor {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Used to obtain connections throughout the lifecycle of this object */
 	private DataSource dataSource;
@@ -71,8 +76,9 @@ public abstract class JdbcAccessor {
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			if (getDataSource() != null) {
-				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
+			DataSource dataSource = getDataSource();
+			if (dataSource != null) {
+				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 			}
 			else {
 				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
