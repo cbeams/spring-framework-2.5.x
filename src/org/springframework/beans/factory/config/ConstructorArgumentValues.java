@@ -104,6 +104,8 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Add generic argument value to be matched by type.
+	 * <p>Note: A single generic argument value will just be used once,
+	 * rather than matched multiple times (as of Spring 1.1).
 	 * @param value the argument value
 	 */
 	public void addGenericArgumentValue(Object value) {
@@ -112,6 +114,8 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Add generic argument value to be matched by type.
+	 * <p>Note: A single generic argument value will just be used once,
+	 * rather than matched multiple times (as of Spring 1.1).
 	 * @param value the argument value
 	 */
 	public void addGenericArgumentValue(Object value, String type) {
@@ -213,6 +217,16 @@ public class ConstructorArgumentValues {
 		 */
 		public Object getValue() {
 			return value;
+		}
+
+		/**
+		 * Set the type of the constructor argument.
+		 * Only necessary for manipulating a registered value,
+		 * for example in BeanFactoryPostProcessors.
+		 * @see PropertyPlaceholderConfigurer
+		 */
+		public void setType(String type) {
+			this.type = type;
 		}
 
 		/**
