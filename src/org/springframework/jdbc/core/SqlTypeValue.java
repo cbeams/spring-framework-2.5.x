@@ -21,12 +21,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
-/**
  * An abstract class to be used for setting values for more complex Types not supported
  * by the standard setObject method. Implementations extending of this class perform 
  * the actual work of setting the actual values.  They must implement the callback method 
  * setTypeValue which can throw SQLExceptions that will be caught and translated by the 
- * calling code.
+ * calling code.  Method has access to the connection if that should be needed to create any
+ * database specific objects.
  *
  * <p>A usage example from a StoredProcedure:
  *
