@@ -22,14 +22,14 @@ import org.springframework.samples.countries.dao.IDaoCountry;
  * @author Jean-Pierre Pawlak
  */
 public class CountriesController extends MultiActionController {
-	static final private String COUNTRIES_ATTR = "countries";
-	static final private String HOME_VIEW = "homeView";
-	static final private String CONFIG_VIEW = "configView";
-	static final private String MAIN_VIEW = "countries_mainView";
-	static final private String DETAIL_VIEW = "countries_detailView";
-	static final private String EXCEL_VIEW = "countries_excelView";
-	static final private String PDF_VIEW = "countries_pdfView";
-	static final private String COPY_VIEW = "copyView";
+
+	private static final String COUNTRIES_ATTR = "countries";
+	private static final String HOME_VIEW = "homeView";
+	private static final String CONFIG_VIEW = "configView";
+	private static final String MAIN_VIEW = "countries_mainView";
+	private static final String DETAIL_VIEW = "countries_detailView";
+	private static final String EXCEL_VIEW = "countries_excelView";
+	private static final String PDF_VIEW = "countries_pdfView";
 
 	private IDaoCountry daoCountry;
 	private IDaoCountry secondDaoCountry;
@@ -40,7 +40,6 @@ public class CountriesController extends MultiActionController {
 	private String detailView = DETAIL_VIEW;
 	private String excelView = EXCEL_VIEW;
 	private String pdfView = PDF_VIEW;
-	private String copyView = COPY_VIEW;
 
 	// handlers
 
@@ -106,7 +105,7 @@ public class CountriesController extends MultiActionController {
 	public ModelAndView handleExcel(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		RefreshablePagedListHolder listHolder = (RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
 		if (null == listHolder) {
-			return handleMain(request, response);
+			throw new ServletException("No countries list found in session");
 		}
 		return new ModelAndView(excelView, "countries", listHolder);
 	}
@@ -120,7 +119,7 @@ public class CountriesController extends MultiActionController {
 	public ModelAndView handlePdf(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		RefreshablePagedListHolder listHolder = (RefreshablePagedListHolder) request.getSession(true).getAttribute(COUNTRIES_ATTR);
 		if (null == listHolder) {
-			return handleMain(request, response);
+			throw new ServletException("No countries list found in session");
 		}
 		return new ModelAndView(pdfView, "countries", listHolder);
 	}
@@ -156,6 +155,7 @@ public class CountriesController extends MultiActionController {
 	public IDaoCountry getSecondDaoCountry() {
 		return secondDaoCountry;
 	}
+
 	public void setDaoCountry(IDaoCountry daoCountry) {
 		this.daoCountry = daoCountry;
 	}
@@ -163,35 +163,41 @@ public class CountriesController extends MultiActionController {
 	public void setSecondDaoCountry(IDaoCountry country) {
 		secondDaoCountry = country;
 	}
+
 	public void setConfigView(String string) {
 		configView = string;
 	}
+
 	public void setDetailView(String string) {
 		detailView = string;
 	}
+
 	public void setExcelView(String string) {
 		excelView = string;
 	}
+
 	public void setHomeView(String string) {
 		homeView = string;
 	}
+
 	public void setMainView(String string) {
 		mainView = string;
 	}
+
 	public void setPdfView(String string) {
 		pdfView = string;
 	}
-	public void setCopyView(String string) {
-		copyView = string;
-	}
+
 
 	// Embedded classes
 	private class CountriesProvider implements PagedListSourceProvider {
+
 		public List loadList(Locale loc, Object filter) {
 			CountriesFilter cf = (CountriesFilter) filter;
 			return daoCountry.getFilteredCountries(cf.getName(), cf.getCode(), loc);
 		}
 	}
+
 
 	public static class CountriesFilter {
 
