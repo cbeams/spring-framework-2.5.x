@@ -1203,6 +1203,22 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param successStateId
+	 * @return
+	 */
+	public Transition onEdit(String editStateId) {
+		return onEvent(getSuccessEventId(), editStateId);
+	}
+
+	/**
+	 * @param successStateId
+	 * @return
+	 */
+	public Transition onEditStart(String editSubFlowStateIdSuffix) {
+		return onEdit(buildEditFlowId(editSubFlowStateIdSuffix));
+	}
+
+	/**
 	 * @param backStateId
 	 * @return
 	 */
@@ -1357,6 +1373,18 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Transition onErrorView(String viewStateIdPrefix) {
 		return onError(view(viewStateIdPrefix));
+	}
+
+	public Transition onSuccessEdit(String editFlowIdSuffix) {
+		return onSuccess(buildEditFlowId(editFlowIdSuffix));
+	}
+
+	public Transition onBackEdit(String editFlowIdSuffix) {
+		return onBack(buildEditFlowId(editFlowIdSuffix));
+	}
+
+	public Transition onFinishEdit(String editFlowIdSuffix) {
+		return onFinish(buildEditFlowId(editFlowIdSuffix));
 	}
 
 	/**
