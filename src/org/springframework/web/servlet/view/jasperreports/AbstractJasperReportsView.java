@@ -16,10 +16,12 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -237,15 +239,29 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected void renderReport(
 			JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
 			throws Exception {
+
+		// Prepare report for rendering.
 		JRAbstractExporter exporter = createExporter();
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
+
 		if (useWriter()) {
-			// use java.io.Writer
+			// Render report into HttpServletResponse's Writer.
 			JasperReportsUtils.render(exporter, print, response.getWriter());
 		}
+
 		else {
-			// use java.io.OutputStream
-			JasperReportsUtils.render(exporter, print, response.getOutputStream());
+			// Render report into local OutputStream.
+			// IE workaround: write into byte array first.
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			JasperReportsUtils.render(exporter, print, baos);
+
+			// Write content length (determined via byte array).
+			response.setContentLength(baos.size());
+
+			// Flush byte array to servlet output stream.
+			ServletOutputStream out = response.getOutputStream();
+			baos.writeTo(out);
+			out.flush();
 		}
 	}
 
