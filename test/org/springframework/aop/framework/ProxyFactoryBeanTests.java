@@ -11,6 +11,8 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.ServletException;
+
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -24,6 +26,7 @@ import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
+import org.springframework.aop.support.ThrowsAdviceInterceptorTests;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -38,7 +41,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.14 2003-12-11 09:01:26 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.15 2003-12-11 13:22:34 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -395,6 +398,42 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(PointcutForVoid.methodNames.get(1).equals("setName"));
 	}
 	
+	public void testCanAddThrowsAdviceWithoutAdvisor() throws Throwable {
+		InputStream is = getClass().getResourceAsStream("throwsAdvice.xml");
+		BeanFactory f = new XmlBeanFactory(is, null);
+		ThrowsAdviceInterceptorTests.MyThrowsHandler th = (ThrowsAdviceInterceptorTests.MyThrowsHandler) f.getBean("throwsAdvice");
+		CountingBeforeAdvice cba = (CountingBeforeAdvice) f.getBean("countingBeforeAdvice");
+		assertEquals(0, cba.getCalls());
+		assertEquals(0, th.getCalls());
+		ThrowsAdviceInterceptorTests.IEcho echo = (ThrowsAdviceInterceptorTests.IEcho) f.getBean("throwsAdvised");
+		int i = 12;
+		echo.setA(i);
+		assertEquals(i, echo.getA());
+		assertEquals(2, cba.getCalls());
+		assertEquals(0, th.getCalls());
+		Exception expected = new Exception();
+		try {
+			echo.echoException(1, expected);
+			fail();
+		}
+		catch (Exception ex) {
+			assertEquals(expected, ex);
+		}
+		// No throws handler method: count should still be 0
+		assertEquals(0, th.getCalls());
+		
+		// Handler knows how to handle this exception
+		expected = new ServletException();
+		try {
+			echo.echoException(1, expected);
+			fail();
+		}
+		catch (ServletException ex) {
+			assertEquals(expected, ex);
+		}
+		// One match
+		assertEquals(1, th.getCalls("servletException"));
+	}
 	
 	
 	// These two fail the whole bean factory

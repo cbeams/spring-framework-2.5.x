@@ -18,8 +18,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.ThrowsAdvice;
+import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.support.DefaultBeforeAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.support.DefaultThrowsAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -63,22 +66,25 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.15 2003-12-08 11:22:01 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.16 2003-12-11 13:22:45 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
  * @see org.springframework.aop.InterceptionAroundAdvisor
  * @see org.springframework.aop.InterceptionIntroductionAdvisor
  */
-public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, BeanFactoryAware {
+public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, BeanFactoryAware, AdvisedSupportListener {
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
 	 */
 	public static final String GLOBAL_SUFFIX = "*";
-
+	
 	private boolean singleton = true;
-
+	
+	/** If this is a singleton, the cached instance */
+	private Object singletonInstance;
+	
 	/**
 	 * Owning bean factory, which cannot be changed after this
 	 * object is initialized.
@@ -107,13 +113,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * is given, a CGLIB for the actual class will be created.
 	 */
 	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
-		Class[] interfaces = new Class[interfaceNames.length];
-		for (int i = 0; i < interfaceNames.length; i++) {
-			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
-			// Check it's an interface
-			if (!interfaces[i].isInterface())
-				throw new AspectException("Can proxy only interfaces: " + interfaces[i] + " is a class");
-		}
+		Class[] interfaces = AopUtils.toInterfaceArray(interfaceNames);
 		setInterfaces(interfaces);
 	}
 
@@ -130,6 +130,13 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 		logger.debug("Set BeanFactory. Will configure interceptor beans...");
 		createAdvisorChain();
 		logger.info("ProxyFactoryBean config: " + this);
+		if (singleton) {
+			// Eagerly initialize the shared singleton instance
+			getSingletonInstance();
+			// We must listen to superclass advice change events to recache singleton
+			// instance if necessary
+			addListener(this);
+		}
 	}
 
 
@@ -293,6 +300,9 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 		else if (next instanceof MethodBeforeAdvice) {
 			return new DefaultBeforeAdvisor((MethodBeforeAdvice) next);
 		}
+		else if (next instanceof ThrowsAdvice) {
+			return new DefaultThrowsAdvisor((ThrowsAdvice) next);
+		}
 		else if (next instanceof TargetSource) {
 			return (TargetSource) next;
 		}
@@ -306,43 +316,43 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 
 	/**
 	 * Return a proxy. Invoked when clients obtain beans
-	 * from this factory bean.
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
-	 */
-	public Object getObject() throws BeansException {
-		return createInstance();
-	}
-
-	/**
-	 * Create an instance of the AOP proxy to be returned by this factory.
+	 * from this factory bean. Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
 	 * getObject() for a proxy.
 	 * @return Object a fresh AOP proxy reflecting the current
 	 * state of this factory
+	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object createInstance() {
-		AopProxy proxy = null;
-		if (this.singleton) {
+	public Object getObject() throws BeansException {
+		return (this.singleton) ?
+			getSingletonInstance() :
+			newPrototypeInstance();
+	}
+	
+	
+	private Object getSingletonInstance() {
+		if (singletonInstance == null) {
 			// This object can configure the proxy directly if it's
 			// being used as a singleton
-			// TODO could always returned cached instance?
-			proxy = createAopProxy();
+			singletonInstance = createAopProxy().getProxy();
 		}
-		else {
-			refreshAdvisorChain();
-			refreshTarget();
-			// In the case of a prototype, we need to give the proxy
-			// an independent instance of the configuration
-			if (logger.isDebugEnabled())
-				logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
-			AdvisedSupport copy = new AdvisedSupport();
-			copy.copyConfigurationFrom(this);
-			if (logger.isDebugEnabled())
-				logger.debug("Copy has config: " + copy);
-			proxy = copy.createAopProxy();
-		}
-		return proxy.getProxy();
+		return singletonInstance;
 	}
+	
+	private Object newPrototypeInstance() {
+		refreshAdvisorChain();
+		refreshTarget();
+		// In the case of a prototype, we need to give the proxy
+		// an independent instance of the configuration
+		if (logger.isDebugEnabled())
+			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
+		AdvisedSupport copy = new AdvisedSupport();
+		copy.copyConfigurationFrom(this);
+		if (logger.isDebugEnabled())
+			logger.debug("Copy has config: " + copy);
+		return copy.createAopProxy().getProxy();
+	}
+
 
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
@@ -369,6 +379,22 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
+	}
+
+	/**
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)
+	 */
+	public void activated(AdvisedSupport advisedSupport) {
+	}
+
+	/**
+	 * Blow away and recache singleton to allow for advice changes.
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged(org.springframework.aop.framework.AdvisedSupport)
+	 */
+	public void adviceChanged(AdvisedSupport advisedSupport) {
+		logger.info("Advice has changed; recaching singleton instance");
+		this.singletonInstance = null;
+		getSingletonInstance();
 	}
 
 }
