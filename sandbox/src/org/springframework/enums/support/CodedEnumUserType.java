@@ -104,31 +104,18 @@ public class CodedEnumUserType implements UserType {
         this.enumResolver = resolver;
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#sqlTypes()
-     */
     public int[] sqlTypes() {
         return persistentType.sqlTypes(null);
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#returnedClass()
-     */
     public Class returnedClass() {
         return enumClass;
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#equals(java.lang.Object, java.lang.Object)
-     */
     public boolean equals(Object o1, Object o2) throws HibernateException {
         return ObjectUtils.nullSafeEquals(o1, o2);
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#nullSafeGet(java.sql.ResultSet,
-     *      java.lang.String[], java.lang.Object)
-     */
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
             throws HibernateException, SQLException {
         Object code;
@@ -153,10 +140,6 @@ public class CodedEnumUserType implements UserType {
         return enum;
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#nullSafeSet(java.sql.PreparedStatement,
-     *      java.lang.Object, int)
-     */
     public void nullSafeSet(PreparedStatement stmt, Object value, int index)
             throws HibernateException, SQLException {
         if ((value != null)
@@ -166,23 +149,23 @@ public class CodedEnumUserType implements UserType {
         CodedEnum enum = (CodedEnum)value;
         if (enum != null) {
             Object code = enum.getCode();
-            stmt.setObject(index, code);
+            // for some reason some characters don't map well, convert to string instead...
+            if (code instanceof Character) {
+                stmt.setString(index, ((Character)code).toString());
+            }
+            else {
+                stmt.setObject(index, code);
+            }
         }
         else {
             stmt.setNull(index, sqlTypes()[0]);
         }
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#deepCopy(java.lang.Object)
-     */
     public Object deepCopy(Object value) throws HibernateException {
         return value;
     }
 
-    /**
-     * @see net.sf.hibernate.UserType#isMutable()
-     */
     public boolean isMutable() {
         return false;
     }

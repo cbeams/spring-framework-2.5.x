@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.RulesSource;
 import org.springframework.rules.UnaryPredicate;
@@ -69,22 +70,49 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName) {
         Assert.isTrue(getChildFormModel(childFormModelName) == null,
-            "Child model by name '" + childFormModelName + "' already exists");
+                "Child model by name '" + childFormModelName
+                        + "' already exists");
         ValidatingFormModel childModel = new ValidatingFormModel(
                 domainObjectAccessStrategy, bufferChanges);
         childModel.setRulesSource(rulesSource);
+        addChildModel(childFormModelName, childModel);
+        return childModel;
+    }
+
+    public MutableFormModel createChild(String childFormModelName,
+            String parentPropertyFormObjectPath) {
+        Assert.isTrue(getChildFormModel(childFormModelName) == null,
+                "Child model by name '" + childFormModelName
+                        + "' already exists");
+        AspectAdapter valueHolder = new AspectAdapter(
+                domainObjectAccessStrategy, parentPropertyFormObjectPath);
+        if (valueHolder.get() == null) {
+            valueHolder.set(BeanUtils
+                    .instantiateClass(domainObjectAccessStrategy
+                            .getMetaAspectAccessor().getAspectClass(
+                                    parentPropertyFormObjectPath)));
+        }
+        ValidatingFormModel childModel = new ValidatingFormModel(valueHolder);
+        childModel.setBufferChangesDefault(bufferChanges);
+        childModel.setRulesSource(rulesSource);
+        addChildModel(childFormModelName, childModel);
+        return childModel;
+    }
+
+    public NestableFormModel addChildModel(String childModelName,
+            NestableFormModel childModel) {
         childModel.setParent(this);
-        formModels.put(childFormModelName, childModel);
+        formModels.put(childModelName, childModel);
         return childModel;
     }
 
     public void addValidationListener(final ValidationListener listener) {
         Algorithms.instance().forEachIn(formModels.values(),
-            new UnaryProcedure() {
-                public void run(Object formModel) {
-                    ((FormModel)formModel).addValidationListener(listener);
-                }
-            });
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        ((FormModel)formModel).addValidationListener(listener);
+                    }
+                });
     }
 
     public void addValidationListener(ValidationListener listener,
@@ -109,11 +137,12 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public void removeValidationListener(final ValidationListener listener) {
         Algorithms.instance().forEachIn(formModels.values(),
-            new UnaryProcedure() {
-                public void run(Object formModel) {
-                    ((FormModel)formModel).removeValidationListener(listener);
-                }
-            });
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        ((FormModel)formModel)
+                                .removeValidationListener(listener);
+                    }
+                });
     }
 
     public void addValueListener(String formProperty,
@@ -134,16 +163,17 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
             String formProperty) {
         Assert
                 .isTrue(
-                    valueModel != null,
-                    "The property '"
-                            + formProperty
-                            + "' has not been added to this form model (or to any parents.)");
+                        valueModel != null,
+                        "The property '"
+                                + formProperty
+                                + "' has not been added to this form model (or to any parents.)");
     }
 
     public String getDisplayValue(String formProperty) {
+        // todo
         return "";
     }
-    
+
     public Object getValue(String formProperty) {
         ValueModel valueModel = getValueModel(formProperty);
         assertValueModelNotNull(valueModel, formProperty);
@@ -151,9 +181,10 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public ValueModel getDisplayValueModel(String formProperty) {
+        // todo
         return null;
     }
-    
+
     public ValueModel getValueModel(String formProperty) {
         return findValueModelFor(null, formProperty);
     }
@@ -167,7 +198,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 continue;
             }
             ValueModel valueModel = formModel.getValueModel(
-                domainObjectProperty, false);
+                    domainObjectProperty, false);
             if (valueModel != null) { return valueModel; }
         }
         return null;
@@ -183,36 +214,37 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public boolean hasErrors() {
         return Algorithms.instance().areAnyTrue(formModels.values(),
-            new UnaryPredicate() {
-                public boolean test(Object formModel) {
-                    return ((FormModel)formModel).hasErrors();
-                }
-            });
+                new UnaryPredicate() {
+                    public boolean test(Object formModel) {
+                        return ((FormModel)formModel).hasErrors();
+                    }
+                });
     }
 
     public Map getErrors() {
         final Map allErrors = new HashMap();
         Algorithms.instance().forEachIn(formModels.values(),
-            new UnaryProcedure() {
-                public void run(Object formModel) {
-                    allErrors.putAll(((FormModel)formModel).getErrors());
-                }
-            });
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        allErrors.putAll(((FormModel)formModel).getErrors());
+                    }
+                });
         return allErrors;
     }
 
     public boolean isDirty() {
         return Algorithms.instance().areAnyTrue(formModels.values(),
-            new UnaryPredicate() {
-                public boolean test(Object formModel) {
-                    return ((FormModel)formModel).isDirty();
-                }
-            });
+                new UnaryPredicate() {
+                    public boolean test(Object formModel) {
+                        return ((FormModel)formModel).isDirty();
+                    }
+                });
     }
 
     public boolean getBufferChanges() {
         return bufferChanges;
     }
+
     public boolean hasErrors(String childModelName) {
         FormModel model = getChildFormModel(childModelName);
         Assert.notNull(model, "No child model by name " + childModelName
@@ -222,20 +254,20 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public void commit() {
         Algorithms.instance().forEachIn(formModels.values(),
-            new UnaryProcedure() {
-                public void run(Object formModel) {
-                    ((FormModel)formModel).commit();
-                }
-            });
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        ((FormModel)formModel).commit();
+                    }
+                });
     }
 
     public void revert() {
         Algorithms.instance().forEachIn(formModels.values(),
-            new UnaryProcedure() {
-                public void run(Object formModel) {
-                    ((FormModel)formModel).revert();
-                }
-            });
+                new UnaryProcedure() {
+                    public void run(Object formModel) {
+                        ((FormModel)formModel).revert();
+                    }
+                });
     }
 
 }

@@ -16,12 +16,32 @@
 package org.springframework.rules.values;
 
 /**
- * 
  * @author Keith Donald
  */
 public interface NestingFormModel extends FormModel {
+
     public ValueModel findValueModelFor(FormModel delegatingChild,
             String domainObjectProperty);
 
+    /**
+     * Create a child form model nested by this form model identified by the
+     * provided name. The form object associated with the created child model is
+     * the same form object managed by the parent.
+     * 
+     * @param childFormModelName
+     * @return The child for model.
+     */
     public MutableFormModel createChild(String childFormModelName);
+
+    /**
+     * Create a child form model nested by this form model identified by the
+     * provided name. The form object associated with the created child model is
+     * the value model at the specified parent property path.
+     * 
+     * @param childPageName
+     * @param parentPropertyFormObjectPath
+     * @return The child form model
+     */
+    public MutableFormModel createChild(String childPageName,
+            String parentPropertyFormObjectPath);
 }

@@ -16,6 +16,7 @@
 package org.springframework.rules.values;
 
 import java.beans.PropertyEditor;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -178,6 +179,18 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
         public Class getAspectClass(String aspect) {
             return beanWrapper.getPropertyDescriptor(aspect).getPropertyType();
+        }
+
+        public boolean isNumber(String aspect) {
+            Class propertyType = beanWrapper.getPropertyDescriptor(aspect)
+                    .getPropertyType();
+            return Number.class.isAssignableFrom(propertyType)
+                    || propertyType.isPrimitive();
+        }
+
+        public boolean isDate(String aspect) {
+            return Date.class.isAssignableFrom(beanWrapper
+                    .getPropertyDescriptor(aspect).getPropertyType());
         }
 
         public boolean isEnumeration(String aspect) {
