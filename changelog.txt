@@ -51,6 +51,7 @@ Package org.springframework.orm
 * added overloaded constructors that take a "persistentClassName" String to ObjectOptimisticLockingFailureException
 * added overloaded constructors that take a "persistentClassName" String to ObjectRetrievalFailureException
 * fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
+* added support for direct JTA synchronization to AbstractLobType, as alternative to Spring transaction synchronization
 * added "getReportQueryIteratorByQuery" method to OJB PersistenceBrokerOperations and PersistenceBrokerTemplate
 
 Package org.springframework.mail
@@ -131,6 +132,7 @@ Package org.springframework.orm
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 * added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
 * LocalSessionFactoryBean trims "mappingResources" locations before passing them to the ClassPathResource constructor
+* factored out AbstractLobType from ClobStringType, as common base class for Hibernate LOB types based on LobHandler
 * added BlobByteArrayType for Hibernate, mapping a BLOB to a byte array via a LobHandler (analogous to ClobStringType)
 * OpenSessionInViewFilter/Interceptor participate in existing thread-bound single session or deferred close mode
 * OpenPersistenceManagerInViewFilter/Interceptor participate in existing thread-bound single persistence manager
