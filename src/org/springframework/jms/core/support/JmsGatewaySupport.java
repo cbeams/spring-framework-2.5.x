@@ -14,25 +14,30 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jms.support;
+package org.springframework.jms.core.support;
 
 import javax.jms.ConnectionFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
- * Convenient super class for JMS access.
+ * Convenient super class for application classes that need JMS access.
  * 
- * <p>Requires a ConnectionFactory to be set.  This can be done
- * directly or by using a JmsTemplate.  This class will create
- * its own JmsTemplate if a ConnectionFactory is passed in.   
- * A custom JmsTemplate instance can be used through overriding
- * <code>createJmsTemplate</code>
+ * <p>Requires a ConnectionFactory or a JmsTemplate instance to be set.
+ * It will create its own JmsTemplate if a ConnectionFactory is passed in.
+ * A custom JmsTemplate instance can be created for a given ConnectionFactory
+ * through overriding the <code>createJmsTemplate</code> method.
  * 
  * @author Mark Pollack
+ * @since 1.1.1
+ * @see #setConnectionFactory
+ * @see #setJmsTemplate
+ * @see #createJmsTemplate
+ * @see org.springframework.jms.core.JmsTemplate
  */
 public abstract class JmsGatewaySupport implements InitializingBean {
 
@@ -41,28 +46,28 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	private JmsTemplate jmsTemplate;
 	
 	/**
-	 * Will set the JMS Connection factory to be used by the gateway.
-	 * Will automatically create a JmsTemplate for the given ConnectionFactory
+	 * Set the JMS connection factory to be used by the gateway.
+	 * Will automatically create a JmsTemplate for the given ConnectionFactory.
 	 * @see #createJmsTemplate
-	 * @see #setConnectionFactory(ConnectionFactory)
-	 * @param connFactory
+	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
+	 * @param connectionFactory
 	 */
-	public final void setConnectionFactory(ConnectionFactory connFactory) {
-		jmsTemplate = createJmsTemplate(connFactory);
+	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
+		this.jmsTemplate = createJmsTemplate(connectionFactory);
 	}
 	
 	/**
 	 * Create a JmsTemplate for the given ConnectionFactory.
-	 * Only invoked if populating the gatway with a ConnectionFactory reference.
+	 * Only invoked if populating the gateway with a ConnectionFactory reference.
 	 * <p>Can be overridden in subclasses to provide a JmsTemplate instance with
-	 * a different configuration or the 1.0.2 version, JmsTemplate102.
-	 * 
-	 * @param connFactory the JMS ConnectionFactory to create a JmsTemplate for
+	 * a different configuration or the JMS 1.0.2 version, JmsTemplate102.
+	 * @param connectionFactory the JMS ConnectionFactory to create a JmsTemplate for
 	 * @return the new JmsTemplate instance
-	 * @see #setConnectionFactory(ConnectionFactory)
+	 * @see #setConnectionFactory
+	 * @see org.springframework.jms.core.JmsTemplate102
 	 */
-	protected JmsTemplate createJmsTemplate(ConnectionFactory connFactory) {
-		return new JmsTemplate(connFactory);
+	protected JmsTemplate createJmsTemplate(ConnectionFactory connectionFactory) {
+		return new JmsTemplate(connectionFactory);
 	}
 	
 	/**
@@ -75,7 +80,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Set the JmsTemplate for the gateway.
 	 * @param jmsTemplate
-	 * @see #setConnectionFactory(ConnectionFactory)
+	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
 	public final void setJmsTemplate(JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
@@ -98,9 +103,9 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails.
-	 * @throws Exception
+	 * @throws java.lang.Exception if initialization fails
 	 */
-	protected void initGateway() throws Exception {		
+	protected void initGateway() throws Exception {
 	}
+
 }

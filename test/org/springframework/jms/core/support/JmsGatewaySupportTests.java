@@ -13,30 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.jms.support;
+package org.springframework.jms.core.support;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.jms.ConnectionFactory;
 
-import org.easymock.MockControl;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.support.JmsGatewaySupport;
-
 import junit.framework.TestCase;
+import org.easymock.MockControl;
+
+import org.springframework.jms.core.JmsTemplate;
 
 /**
- * Unit tests for JmsGatewaySupport
  * @author Mark Pollack
+ * @since 24.9.2004
  */
 public class JmsGatewaySupportTests extends TestCase {
 
 	public void testJmsGatewaySupportWithConnectionFactory() throws Exception {
-		MockControl connectionFactoryControl =
-			MockControl.createControl(ConnectionFactory.class);
-		ConnectionFactory mockConnectionFactory =
-			(ConnectionFactory) connectionFactoryControl.getMock();
+		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory mockConnectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
 		connectionFactoryControl.replay();
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
@@ -66,6 +63,4 @@ public class JmsGatewaySupportTests extends TestCase {
 		assertEquals("initGateway called", test.size(), 1);		
 	}
 
-	
-	
 }
