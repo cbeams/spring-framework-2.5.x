@@ -23,6 +23,7 @@ import java.util.Set;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.util.closure.support.Algorithms;
 
 /**
@@ -70,6 +71,38 @@ public class StateGroup implements Serializable {
 		}
 		StateGroup g = (StateGroup)o;
 		return id.equals(g.id);
+	}
+
+	public int getViewStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isViewState();
+			}
+		}.findAll(iterator()).size();
+	}
+
+	public int getActionStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isActionState();
+			}
+		}.findAll(iterator()).size();
+	}
+
+	public int getSubFlowStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isSubFlowState();
+			}
+		}.findAll(iterator()).size();
+	}
+
+	public int getEndStateCount() {
+		return new AbstractConstraint() {
+			public boolean test(Object o) {
+				return ((AbstractState)o).isEndState();
+			}
+		}.findAll(iterator()).size();
 	}
 
 	public int hashCode() {

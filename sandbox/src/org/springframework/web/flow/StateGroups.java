@@ -29,9 +29,9 @@ public class StateGroups implements Serializable {
 
 	public static final String DEFAULT_GROUP_ID = "main";
 
-	private Set stateGroups = new LinkedHashSet(6);
-
 	private Flow flow;
+
+	private Set stateGroups = new LinkedHashSet(6);
 
 	public StateGroups(Flow flow) {
 		this.flow = flow;
@@ -78,20 +78,25 @@ public class StateGroups implements Serializable {
 		return stateGroups.add(stateGroup);
 	}
 
+	public boolean isEmpty() {
+		return stateGroups.isEmpty();
+	}
+
+	public StateGroup getLastGroup() {
+		Iterator it = stateGroups.iterator();
+		StateGroup lastGroup = null;
+		while (it.hasNext()) {
+			lastGroup = (StateGroup)it.next();
+		}
+		return lastGroup;
+	}
+
+	public Iterator iterator() {
+		return stateGroups.iterator();
+	}
+
 	public Iterator statesIterator() {
 		return new StatesIterator();
-	}
-
-	public boolean equals(Object o) {
-		if (!(o instanceof StateGroups)) {
-			return false;
-		}
-		StateGroups g = (StateGroups)o;
-		return stateGroups.equals(g.stateGroups);
-	}
-
-	public int hashCode() {
-		return stateGroups.hashCode();
 	}
 
 	public class StatesIterator implements Iterator {
@@ -121,17 +126,16 @@ public class StateGroups implements Serializable {
 		}
 	}
 
-	public boolean isEmpty() {
-		return stateGroups.isEmpty();
+	public boolean equals(Object o) {
+		if (!(o instanceof StateGroups)) {
+			return false;
+		}
+		StateGroups g = (StateGroups)o;
+		return stateGroups.equals(g.stateGroups);
 	}
 
-	public StateGroup getLastGroup() {
-		Iterator it = stateGroups.iterator();
-		StateGroup lastGroup = null;
-		while (it.hasNext()) {
-			lastGroup = (StateGroup)it.next();
-		}
-		return lastGroup;
+	public int hashCode() {
+		return stateGroups.hashCode();
 	}
 
 	public String toString() {

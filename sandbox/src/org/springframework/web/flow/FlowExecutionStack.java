@@ -315,11 +315,11 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	protected ProcessTemplate getListenerIterator() {
-		return getRootFlow().getFlowSessionExecutionListenerIterator();
+		return getRootFlow().getExecutionListenerIteratorTemplate();
 	}
 
 	protected int getListenerCount() {
-		return getRootFlow().getFlowSessionExecutionListenerCount();
+		return getRootFlow().getExecutionListenerCount();
 	}
 
 	protected void fireStarted() {
@@ -381,9 +381,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution ended event to "
-					+ endingRootFlowSession.getFlow().getFlowSessionExecutionListenerCount() + " listener(s)");
+					+ endingRootFlowSession.getFlow().getExecutionListenerCount() + " listener(s)");
 		}
-		endingRootFlowSession.getFlow().getFlowSessionExecutionListenerIterator().run(new Block() {
+		endingRootFlowSession.getFlow().getExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).ended(FlowExecutionStack.this, endingRootFlowSession);
 			}

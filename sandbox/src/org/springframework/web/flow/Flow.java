@@ -29,7 +29,6 @@ import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
-import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.util.closure.support.Block;
 
 /**
@@ -681,48 +680,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return getStartStateMarker().getStartState();
 	}
 
-	/**
-	 * @return
-	 */
-	public int getViewStateCount() {
-		return new AbstractConstraint() {
-			public boolean test(Object o) {
-				return ((AbstractState)o).isViewState();
-			}
-		}.findAll(stateGroups.statesIterator()).size();
-	}
-
-	/**
-	 * @return
-	 */
-	public int getActionStateCount() {
-		return new AbstractConstraint() {
-			public boolean test(Object o) {
-				return ((AbstractState)o).isActionState();
-			}
-		}.findAll(stateGroups.statesIterator()).size();
-	}
-
-	/**
-	 * @return
-	 */
-	public int getSubFlowStateCount() {
-		return new AbstractConstraint() {
-			public boolean test(Object o) {
-				return ((AbstractState)o).isSubFlowState();
-			}
-		}.findAll(stateGroups.statesIterator()).size();
-	}
-
-	/**
-	 * @return
-	 */
-	public int getEndStateCount() {
-		return new AbstractConstraint() {
-			public boolean test(Object o) {
-				return ((AbstractState)o).isEndState();
-			}
-		}.findAll(stateGroups.statesIterator()).size();
+	public Iterator stateGroupIterator() {
+		return stateGroups.iterator();
 	}
 
 	/*
@@ -793,8 +752,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getExecutionListenerCount()
-					+ " listener(s)");
+			logger.debug("Publishing request submitted event to " + getExecutionListenerCount() + " listener(s)");
 		}
 		getExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -805,8 +763,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestProcessed(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getExecutionListenerCount()
-					+ " listener(s)");
+			logger.debug("Publishing request processed event to " + getExecutionListenerCount() + " listener(s)");
 		}
 		getExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -1902,8 +1859,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition[] onDefaultEndEventsView(String stateIdPrefix) {
-		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
-				view(stateIdPrefix));
+		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() }, view(stateIdPrefix));
 	}
 
 	/**
@@ -1911,8 +1867,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition[] onDefaultEndEventsGet(String stateIdPrefix) {
-		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
-				get(stateIdPrefix));
+		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() }, get(stateIdPrefix));
 	}
 
 	/**

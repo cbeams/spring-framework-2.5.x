@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -55,11 +54,14 @@ public abstract class TransitionableState extends AbstractState {
 	}
 
 	public void add(Transition transition) {
+		transition.setSourceState(this);
 		transitions.add(transition);
 	}
 
 	public void addAll(Transition[] transitions) {
-		this.transitions.addAll(Arrays.asList(transitions));
+		for (int i = 0; i < transitions.length; i++) {
+			add(transitions[i]);
+		}
 	}
 
 	public Collection getTransitions() {
@@ -80,8 +82,8 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
 	 *         does not map to a valid transition for this state.
 	 */
-	public ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) throws CannotExecuteStateTransitionException {
+	public ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + getFlow().getId()
