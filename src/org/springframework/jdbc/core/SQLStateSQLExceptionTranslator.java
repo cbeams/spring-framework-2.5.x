@@ -19,7 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
  * code in the SQL exception. Can't diagnose all problems, but is
  * portable between databases.
  * @author Rod Johnson
- * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.2 2003-11-03 15:10:03 johnsonr Exp $
+ * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.3 2003-11-05 09:54:10 jhoeller Exp $
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	
@@ -48,16 +48,18 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	 * @see SQLExceptionTranslator#translate(String,String,SQLException)
 	 */
 	public DataAccessException translate(String task, String sql, SQLException sqlex) {
-		logger.warn("Translating SQLException with SQLState='" + sqlex.getSQLState() + "' and errorCode=" + sqlex.getErrorCode() + 
-						" and message=" + sqlex.getMessage() + "; sql was '" + sql + "'");
-			
-		String sqlstate = sqlex.getSQLState();
-		if (sqlstate != null && sqlstate.length() >= 2) {
-			String classCode = sqlstate.substring(0, 2);
-			if (BAD_SQL_CODES.contains(classCode))
+		logger.warn("Translating SQLException with SQLState '" + sqlex.getSQLState() + "' and errorCode '" + sqlex.getErrorCode() +
+						"' and message [" + sqlex.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
+
+		String sqlState = sqlex.getSQLState();
+		if (sqlState != null && sqlState.length() >= 2) {
+			String classCode = sqlState.substring(0, 2);
+			if (BAD_SQL_CODES.contains(classCode)) {
 				return new BadSqlGrammarException("(" + task + "): SQL grammatical error '" + sql + "'", sql, sqlex);
-			if (INTEGRITY_VIOLATION_CODES.contains(classCode))
+			}
+			else if (INTEGRITY_VIOLATION_CODES.contains(classCode)) {
 				return new DataIntegrityViolationException("(" + task + "): data integrity violated by SQL '" + sql + "'", sqlex);
+			}
 		}
 		
 		// We couldn't identify it more precisely

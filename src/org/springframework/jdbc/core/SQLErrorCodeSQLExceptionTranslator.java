@@ -6,6 +6,7 @@
 package org.springframework.jdbc.core;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import javax.sql.DataSource;
 
@@ -36,7 +37,7 @@ import org.springframework.dao.DataIntegrityViolationException;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @see org.springframework.jdbc.core.SQLErrorCodesFactory
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.4 2003-11-04 23:16:43 jhoeller Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.5 2003-11-05 09:54:10 jhoeller Exp $
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
 
@@ -118,19 +119,19 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		// Now try error codes
 		String errorCode = Integer.toString(sqlex.getErrorCode());
 		if (errorCode != null) {
-			if (java.util.Arrays.binarySearch(sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
+			if (Arrays.binarySearch(sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new BadSqlGrammarException(task, sql, sqlex);
 			}
-			if (java.util.Arrays.binarySearch(sqlErrorCodes.getDataIntegrityViolationCodes() , errorCode) >= 0) {
+			else if (Arrays.binarySearch(sqlErrorCodes.getDataIntegrityViolationCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new DataIntegrityViolationException(task + ": " + sqlex.getMessage(), sqlex);
 			}
 		}
 
 		// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.
-		logger.warn("Unable to translate SQLException with errorCode=" + sqlex.getErrorCode() + 
-						", will now try the fallback translator");
+		logger.warn("Unable to translate SQLException with errorCode '" + sqlex.getErrorCode() +
+						"', will now try the fallback translator");
 		return this.fallback.translate(task, sql, sqlex);
 	}
 	
