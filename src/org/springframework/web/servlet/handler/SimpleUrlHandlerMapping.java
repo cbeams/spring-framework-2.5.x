@@ -59,17 +59,19 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	public void initApplicationContext() throws BeansException {
 		if (this.urlMap == null || this.urlMap.isEmpty()) {
-			throw new IllegalArgumentException("Either 'urlMap' or 'mappings' is required");
+			logger.info("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
 		}
-		Iterator itr = this.urlMap.keySet().iterator();
-		while (itr.hasNext()) {
-			String url = (String) itr.next();
-			Object handler = this.urlMap.get(url);
-			// prepend with slash if it's not present
-			if (!url.startsWith("/")) {
-				url = "/" + url;
+		else {
+			Iterator itr = this.urlMap.keySet().iterator();
+			while (itr.hasNext()) {
+				String url = (String) itr.next();
+				Object handler = this.urlMap.get(url);
+				// prepend with slash if it's not present
+				if (!url.startsWith("/")) {
+					url = "/" + url;
+				}
+				registerHandler(url, handler);
 			}
-			registerHandler(url, handler);
 		}
 	}
 
