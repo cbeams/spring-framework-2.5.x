@@ -40,7 +40,7 @@ public class CallableStatementCreatorFactory {
 	private final String callString;
 
 	/** List of SqlParameter objects. May not be null. */
-	private List declaredParameters = new LinkedList();
+	private final List declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
@@ -52,6 +52,7 @@ public class CallableStatementCreatorFactory {
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this.callString = callString;
+		this.declaredParameters = new LinkedList();
 	}
 
 	/**
@@ -114,33 +115,36 @@ public class CallableStatementCreatorFactory {
 	 */
 	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider {
 
+		private final ParameterMapper inParameterMapper;
+
 		private Map inParameters;
 
-		private ParameterMapper inParameterMapper;
-		
 		/**
+		 * Create a new CallableStatementCreatorImpl.
 		 * @param inParams list of SqlParameter objects. May not be null
 		 */
-		private CallableStatementCreatorImpl(final Map inParams) {
-			this.inParameters = inParams;
+		public CallableStatementCreatorImpl(Map inParams) {
 			this.inParameterMapper = null;
+			this.inParameters = inParams;
 		}
 
 		/**
-		 * @param inParamMapper ParameterMapper implementation for mapping input parameters. May not be null
+		 * Create a new CallableStatementCreatorImpl.
+		 * @param inParamMapper ParameterMapper implementation for mapping input parameters.
+		 * May not be null.
 		 */
-		private CallableStatementCreatorImpl(final ParameterMapper inParamMapper) {
-			this.inParameters = null;
+		public CallableStatementCreatorImpl(ParameterMapper inParamMapper) {
 			this.inParameterMapper = inParamMapper;
+			this.inParameters = null;
 		}
 
 		public CallableStatement createCallableStatement(Connection con) throws SQLException {
-			/* If we were given a ParameterMapper - we must let the mapper do its thing to create the Map */
-			if (inParameterMapper != null) {
-				inParameters = inParameterMapper.createMap(con);
+			// If we were given a ParameterMapper - we must let the mapper do its thing to create the Map.
+			if (this.inParameterMapper != null) {
+				this.inParameters = this.inParameterMapper.createMap(con);
 			}
 			else {
-				if (inParameters == null) {
+				if (this.inParameters == null) {
 					throw new InvalidDataAccessApiUsageException("A ParameterMapper or a Map of parameters must be provided");
 				}
 			}
@@ -156,14 +160,15 @@ public class CallableStatementCreatorFactory {
 
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
-				SqlParameter p = (SqlParameter) CallableStatementCreatorFactory.this.declaredParameters.get(i);
-				if (!inParameters.containsKey(p.getName()) && !(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
+				SqlParameter p = (SqlParameter) declaredParameters.get(i);
+				if (!this.inParameters.containsKey(p.getName()) && !(p instanceof SqlOutParameter) &&
+				    !(p instanceof SqlReturnResultSet)) {
 					throw new InvalidDataAccessApiUsageException("Required input parameter '" + p.getName() + "' is missing");
 				}
-				// The value may still be null
-				Object in = inParameters.get(p.getName());
+				// the value may still be null
+				Object in = this.inParameters.get(p.getName());
 				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
-					// Input parameters must be supplied
+					// input parameters must be supplied
 					if (in == null && p.getTypeName() != null) {
 						cs.setNull(sqlColIndx, p.getSqlType(), p.getTypeName());
 					}

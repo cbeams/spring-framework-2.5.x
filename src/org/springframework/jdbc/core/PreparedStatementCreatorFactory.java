@@ -33,12 +33,12 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.9 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.10 2004-05-27 11:56:24 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory {
 
-	/** The SQL, which won't change when the parameters change. */
-	private String sql;
+	/** The SQL, which won't change when the parameters change */
+	private final String sql;
 
 	/** List of SqlParameter objects. May not be null. */
 	private final List declaredParameters;
@@ -62,7 +62,8 @@ public class PreparedStatementCreatorFactory {
 	 * @param types int array of JDBC types
 	 */
 	public PreparedStatementCreatorFactory(String sql, int[] types) {
-		this(sql, SqlParameter.sqlTypesToAnonymousParameterList(types));
+		this.sql = sql;
+		this.declaredParameters = SqlParameter.sqlTypesToAnonymousParameterList(types);
 	}
 
 	/**
@@ -81,7 +82,7 @@ public class PreparedStatementCreatorFactory {
 	 * Order of parameter addition is significant.
 	 */
 	public void addParameter(SqlParameter param) {
-		declaredParameters.add(param);
+		this.declaredParameters.add(param);
 	}
 
 	/**
@@ -126,16 +127,16 @@ public class PreparedStatementCreatorFactory {
 	 */
 	private class PreparedStatementCreatorImpl implements PreparedStatementCreator, SqlProvider {
 
-		private List parameters;
+		private final List parameters;
 		
 		/**
 		 * Create a new PreparedStatementCreatorImpl.
 		 * @param params list of SqlParameter objects. May not be null.
 		 */
-		private PreparedStatementCreatorImpl(List params) {
+		public PreparedStatementCreatorImpl(List params) {
 			this.parameters = params;
 			if (this.parameters.size() != declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException("SQL='" + sql + "': given " + this. parameters.size() +
+				throw new InvalidDataAccessApiUsageException("SQL=[" + sql + "]: given " + this.parameters.size() +
 				                                             " parameter but expected " + declaredParameters.size());
 		}
 		
