@@ -22,7 +22,7 @@ import javax.jms.JMSException;
  * Exception thrown by the framework whenever it encounters a problem related to JMS.
  *
  * @author Andre Biryukov
- * @author <a href="mailto:les@hazlewood.com">Les Hazlewood</a>
+ * @author Les Hazlewood
  */
 public class JmsException
     extends org.springframework.core.NestedRuntimeException {
