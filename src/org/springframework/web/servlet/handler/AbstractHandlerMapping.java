@@ -26,7 +26,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private Object defaultHandler = null;
+	private Object defaultHandler;
 
 	private HandlerInterceptor[] interceptors;
 
@@ -41,6 +41,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Set the default handler for this handler mapping.
+	 * This handler will be returned if no specific mapping was found.
+	 * Default is null.
 	 * @param defaultHandler default handler instance, or null if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
