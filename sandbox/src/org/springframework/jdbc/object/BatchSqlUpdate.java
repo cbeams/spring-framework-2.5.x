@@ -23,16 +23,25 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.util.Assert;
 
 /**
- * SqlUpdate subclass that performs batch update operations.
+ * SqlUpdate subclass that performs batch update operations. Encapsulates
+ * queuing up records to be inserted, and commits them as a single batch once
+ * the <code>batchSize</code> has been met.
  * 
  * @author Keith Donald
  */
 public class BatchSqlUpdate extends SqlUpdate {
-    private int batchSize = 5000;
+
+    /**
+     * The default number of inserts to accumulate before commiting a batch.
+     */
+    public static int DEFAULT_BATCH_SIZE = 5000;
+
+    private int batchSize = DEFAULT_BATCH_SIZE;
+
     private SimplePreparedStatementSetter setter;
+
     private LinkedList queue = new LinkedList();
 
     public BatchSqlUpdate() {
@@ -69,21 +78,22 @@ public class BatchSqlUpdate extends SqlUpdate {
     public int update(Object[] args) throws InvalidDataAccessApiUsageException {
         validateParameters(args);
         queue.addFirst(args);
-        if (queue.size() == batchSize) {
-            return doBatchUpdate().length;
-        }
+        if (queue.size() == batchSize) { return doBatchUpdate().length; }
         return 0;
     }
 
     /**
-     * Trigger any queued operations to be committed as a final batch.
+     * Trigger any queued update operations to be committed as a final batch.
+     * This should always be called during normal execution to ensure any still
+     * queued records are committed.
      * 
      * @return The number of rows updated.
      */
     public int flush() {
         if (queue.size() > 0) {
             return doBatchUpdate().length;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -104,7 +114,6 @@ public class BatchSqlUpdate extends SqlUpdate {
                                 (Object[])queue.removeLast());
                     }
                 });
-        Assert.isTrue(queue.isEmpty());
         return rows;
     }
 

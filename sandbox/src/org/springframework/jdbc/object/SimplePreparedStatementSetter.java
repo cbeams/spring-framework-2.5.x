@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
 public class SimplePreparedStatementSetter implements PreparedStatementSetter {
     /** List of SqlParameter objects. May not be null. */
     private final List declaredParameters;
+
     private Object[] parameters;
 
     /**
@@ -74,17 +75,18 @@ public class SimplePreparedStatementSetter implements PreparedStatementSetter {
             // We need SQL type to be able to set null
             if (i >= parameters.length || parameters[i] == null) {
                 ps.setNull(i + 1, declaredParameter.getSqlType());
-            } else {
+            }
+            else {
                 // Documentation?
                 // PARAMETERIZE THIS TO A TYPE MAP INTERFACE?
                 switch (declaredParameter.getSqlType()) {
-                    case Types.VARCHAR:
-                        ps.setString(i + 1, (String)parameters[i]);
-                        break;
-                    default:
-                        ps.setObject(i + 1, parameters[i], declaredParameter
-                                .getSqlType());
-                        break;
+                case Types.VARCHAR:
+                    ps.setString(i + 1, (String)parameters[i]);
+                    break;
+                default:
+                    ps.setObject(i + 1, parameters[i], declaredParameter
+                            .getSqlType());
+                    break;
                 }
             }
         }
