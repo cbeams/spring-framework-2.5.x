@@ -37,7 +37,7 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
- * @version $Id: AopUtilsTests.java,v 1.3 2004-07-25 16:08:51 johnsonr Exp $
+ * @version $Id: AopUtilsTests.java,v 1.4 2004-07-26 14:26:33 johnsonr Exp $
  */
 public class AopUtilsTests extends TestCase {
 
@@ -142,6 +142,8 @@ public class AopUtilsTests extends TestCase {
 		assertSame(ClassFilter.TRUE, SerializationTestUtils.serializeAndDeserialize(ClassFilter.TRUE));
 		assertSame(Pointcut.TRUE, SerializationTestUtils.serializeAndDeserialize(Pointcut.TRUE));
 		assertSame(EmptyTargetSource.INSTANCE, SerializationTestUtils.serializeAndDeserialize(EmptyTargetSource.INSTANCE));
+		assertSame(Pointcuts.SETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.SETTERS));
+		assertSame(Pointcuts.GETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.GETTERS));
 		assertSame(ExposeInvocationInterceptor.INSTANCE, SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
 	}
 

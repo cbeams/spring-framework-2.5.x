@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PointcutsTests.java,v 1.5 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: PointcutsTests.java,v 1.6 2004-07-26 14:26:33 johnsonr Exp $
  */
 public class PointcutsTests extends TestCase {
 	
@@ -65,11 +65,7 @@ public class PointcutsTests extends TestCase {
 		}
 	};
 		
-	public static Pointcut allClassSetterPointcut = new StaticMethodMatcherPointcut() {
-		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("set");
-		}
-	};
+	public static Pointcut allClassSetterPointcut = Pointcuts.SETTERS;
 	
 	// Subclass used for matching
 	public static class MyTestBean extends TestBean {
@@ -110,11 +106,7 @@ public class PointcutsTests extends TestCase {
 		}
 	};
 	
-	public static Pointcut allClassGetterPointcut = new StaticMethodMatcherPointcut() {
-		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("get");
-		}
-	};
+	public static Pointcut allClassGetterPointcut = Pointcuts.GETTERS;
 	
 	public static Pointcut allClassGetAgePointcut = new StaticMethodMatcherPointcut() {
 		public boolean matches(Method m, Class targetClass) {

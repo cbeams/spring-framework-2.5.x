@@ -16,19 +16,52 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 
 /**
- * Static methods useful for manipulating and evaluating pointcuts.
+ * Pointcut constants for matching getters and setters,
+ * and static methods useful for manipulating and evaluating pointcuts.
  * This methods are particularly useful for composing pointcuts
  * using the union and intersection methods.
  * @author Rod Johnson
- * @version $Id: Pointcuts.java,v 1.5 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: Pointcuts.java,v 1.6 2004-07-26 14:26:33 johnsonr Exp $
  */
 public abstract class Pointcuts {
+	
+	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
+		public static SetterPointcut INSTANCE = new SetterPointcut();
+		public boolean matches(Method m, Class targetClass) {
+			return m.getName().startsWith("set");
+		}
+		private Object readResolve() {
+			return INSTANCE;
+		}
+	}
+	
+	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
+		public static GetterPointcut INSTANCE = new GetterPointcut();
+		public boolean matches(Method m, Class targetClass) {
+			return m.getName().startsWith("get");
+		}
+		private Object readResolve() {
+			return INSTANCE;
+		}
+	}
+	
+	/**
+	 * Pointcut matching all setters, in any class
+	 */
+	public static final Pointcut SETTERS = SetterPointcut.INSTANCE; 
+	
+	/**
+	 * Pointcut matching all getters, in any class
+	 */
+	public static final Pointcut GETTERS = GetterPointcut.INSTANCE; 
+	
 	
 	public static Pointcut union(Pointcut a, Pointcut b) {
 		return new UnionPointcut(a, b);
