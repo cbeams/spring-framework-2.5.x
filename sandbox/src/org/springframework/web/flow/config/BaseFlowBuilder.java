@@ -26,8 +26,16 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 
 	private Flow flow;
 
-	public FlowServiceLocator getFlowServiceLocator() {
-		return flowServiceLocator;
+	private FlowCreator flowFactory = new DefaultFlowFactory();
+
+	private static class DefaultFlowFactory implements FlowCreator {
+		public Flow createFlow(String flowId) {
+			return new Flow(flowId);
+		}
+	}
+
+	public void setFlowFactory(FlowCreator flowFactory) {
+		this.flowFactory = flowFactory;
 	}
 
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
@@ -44,6 +52,10 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
 
+	protected FlowServiceLocator getFlowServiceLocator() {
+		return flowServiceLocator;
+	}
+
 	/**
 	 * Creates and/or links applicable flow execution listeners up to the flow
 	 * built by this builder.
@@ -53,13 +65,6 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 			getFlow().getFlowExecutionListenerList().add(
 					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
 		}
-	}
-
-	/**
-	 * Get the flow being built by this builder.
-	 */
-	protected Flow getFlow() {
-		return flow;
 	}
 
 	/**
@@ -73,16 +78,24 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 		return getFlow();
 	}
 
+	/**
+	 * Get the flow being built by this builder.
+	 */
+	protected Flow getFlow() {
+		return flow;
+	}
+
 	// hooks for subclassing
 
 	/**
 	 * Create the instance of the Flow built by this builder. Subclasses may
-	 * override to return a custom Flow implementation.
+	 * override to return a custom Flow implementation, or simply pass in a
+	 * custom FlowFactory.
 	 * 
 	 * @param id The flow identifier.
 	 * @return The flow built by this builder.
 	 */
 	protected Flow createFlow(String id) {
-		return new Flow(id);
+		return this.flowFactory.createFlow(id);
 	}
 }
