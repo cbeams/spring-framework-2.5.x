@@ -89,6 +89,13 @@ public class ContextLoaderServlet extends HttpServlet {
 	}
 
 	/**
+	 * Return the ContextLoader used by this servlet. 
+	 */
+	public ContextLoader getContextLoader() {
+		return contextLoader;
+	}
+
+	/**
 	 * Close the root web application context.
 	 */
 	public void destroy() {

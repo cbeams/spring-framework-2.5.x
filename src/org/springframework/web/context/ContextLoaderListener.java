@@ -57,6 +57,13 @@ public class ContextLoaderListener implements ServletContextListener {
 	}
 
 	/**
+	 * Return the ContextLoader used by this listener.
+	 */
+	public ContextLoader getContextLoader() {
+		return contextLoader;
+	}
+
+	/**
 	 * Close the root web application context.
 	 */ 
 	public void contextDestroyed(ServletContextEvent event) {
