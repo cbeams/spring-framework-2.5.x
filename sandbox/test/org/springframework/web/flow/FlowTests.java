@@ -51,10 +51,10 @@ public class FlowTests extends TestCase {
     private void testCreateFlow(boolean listen) {
         final String flowId = "testFlow";
 
-        String viewPersonDetailsStateId = "view";
-        String getPersonDetailsStateId = "get";
+        String viewPersonDetailsStateId = "personDetails.view";
+        String getPersonDetailsStateId = "personDetails.get";
         String submitEventId = "submit";
-        String submitAction = "bindAndValidate";
+        String submitAction = "personDetails.bindAndValidate";
         String finish = "finish";
 
         HttpServletRequest req1 = new MockHttpServletRequest();
@@ -63,9 +63,9 @@ public class FlowTests extends TestCase {
         TestFlow flow = new TestFlow(flowId);
         MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
         FlowDao dao = (FlowDao)flowDaoMc.getMock();
-        dao.getActionBean("getPersonDetailsAction");
+        dao.getActionBean("personDetails.get");
         flowDaoMc.setReturnValue(new NoOpActionBean("success"));
-        dao.getActionBean("bindAndValidatePersonDetailsAction");
+        dao.getActionBean("personDetails.bindAndValidate");
         flowDaoMc.setReturnValue(new NoOpActionBean("success"));
         flowDaoMc.replay();
         flow.setFlowDao(dao);
@@ -119,7 +119,7 @@ public class FlowTests extends TestCase {
 
         // ignoring now b/c this is failing on the above flowEnded() call that
         // is currently untestable (that is indeed working correctly)
-        //try {
+        try {
             vdesc = flow.execute(submitEventId, viewPersonDetailsStateId, fes, req2, null);
             assertEquals(viewPersonDetailsStateId, vdesc.getViewName());
             assertEquals(0, vdesc.getModel().size());
@@ -129,10 +129,10 @@ public class FlowTests extends TestCase {
             if (listen) {
                 flowListenerMc.verify();
             }
-        //}
-        //catch (Throwable e) {
-        //
-        //}
+        }
+        catch (Throwable e) {
+        
+        }
     }
 
     private class TestFlow extends Flow {
