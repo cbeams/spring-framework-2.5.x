@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.32 2004-01-14 17:24:32 jhoeller Exp $
+    $Id: build.xml,v 1.33 2004-01-29 23:38:39 aarendsen Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -544,9 +544,31 @@
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
 
 	</target>
+	
+	<target name="preparedocs" description="Extra preparation for the documentation">
+		<!-- For now, no dynamic inclusion of the DTD since it looks ugly because of
+		     all the extra newlines the replace is mysteriously adding.
+		     I'll figure something out for that later on
+		<delete file="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
+		<loadfile
+			property="doc.beansdtd"
+				srcFile="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"/>
+		<copy 
+			file="${basedir}/${doc.ref.dir}/src/dtd-template.xml"
+			tofile="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
+		<replace
+			file="${basedir}/${doc.ref.dir}/src/dtd.xml"
+			token="@dtd-include@"
+			value="${doc.beansdtd}">
+		</replace>
+		<replace
+			file="${basedir}/${doc.ref.dir}/src/dtd.xml"
+			token="\\n"
+			value=""/>
+		-->
+	</target>
 
-
-	<target name="docpdf" description="Compile reference documentation to pdf">
+	<target name="docpdf" depends="preparedocs" description="Compile reference documentation to pdf">
 
 		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
 
@@ -585,7 +607,7 @@
 	</target>
 
 
-	<target name="dochtml" description="Compile reference documentation to chunked html">
+	<target name="dochtml" depends="preparedocs" description="Compile reference documentation to chunked html">
 
 		<mkdir dir="${dist.ref.dir}/html/images"/>
 
