@@ -38,12 +38,24 @@ public abstract class FlowConstants {
 	public static final String DOT_SEPARATOR = ".";
 
 	// controller constants
+	
+	/**
+	 * The id of the flow execution will be exposed to the
+	 * view in a model attribute with this name ("flowExecutionId"). 
+	 */
+	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
 
 	/**
 	 * Clients can send the flow execution id to a controller in a request
 	 * parameter with this name ("_flowExecutionId").
 	 */
 	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
+
+	/**
+	 * The current state of the flow execution will be exposed to the
+	 * view in a model attribute with this name ("currentStateId"). 
+	 */
+	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
 
 	/**
 	 * Clients can send the current state to a controller in a request
