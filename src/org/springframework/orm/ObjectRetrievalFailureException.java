@@ -26,9 +26,9 @@ import org.springframework.dao.DataRetrievalFailureException;
  */
 public class ObjectRetrievalFailureException extends DataRetrievalFailureException {
 
-	private final Object persistentClass;
+	private Object persistentClass;
 
-	private final Object identifier;
+	private Object identifier;
 
 	/**
 	 * Create a new ObjectRetrievalFailureException for the given object,

@@ -29,10 +29,19 @@ package org.springframework.dao;
  */
 public class ConcurrencyFailureException extends DataAccessException {
 
+	/**
+	 * Constructor for ConcurrencyFailureException.
+	 * @param msg message
+	 */
 	public ConcurrencyFailureException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for ConcurrencyFailureException.
+	 * @param msg message
+	 * @param ex root cause from data access API in use
+	 */
 	public ConcurrencyFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

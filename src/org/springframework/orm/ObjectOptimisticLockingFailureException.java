@@ -26,9 +26,9 @@ import org.springframework.dao.OptimisticLockingFailureException;
  */
 public class ObjectOptimisticLockingFailureException extends OptimisticLockingFailureException {
 
-	private final Object persistentClass;
+	private Object persistentClass;
 
-	private final Object identifier;
+	private Object identifier;
 
 	/**
 	 * Create a new ObjectOptimisticLockingFailureException for the given object,

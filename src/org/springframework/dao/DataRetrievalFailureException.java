@@ -25,10 +25,19 @@ package org.springframework.dao;
  */
 public class DataRetrievalFailureException extends DataAccessException {
 
+	/**
+	 * Constructor for DataRetrievalFailureException.
+	 * @param msg message
+	 */
 	public DataRetrievalFailureException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for DataRetrievalFailureException.
+	 * @param msg message
+	 * @param ex root cause from data access API in use
+	 */
 	public DataRetrievalFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -28,7 +28,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 public class UncategorizedSQLException extends UncategorizedDataAccessException {
 	
 	/** SQL that led to the problem */
-	private final String sql;
+	private String sql;
 
 	/**
 	 * Constructor for ConnectionFactoryException.

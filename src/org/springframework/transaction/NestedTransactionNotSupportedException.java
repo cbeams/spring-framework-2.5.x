@@ -24,10 +24,19 @@ package org.springframework.transaction;
  */
 public class NestedTransactionNotSupportedException extends CannotCreateTransactionException {
 
+	/**
+	 * Constructor for NestedTransactionNotSupportedException.
+	 * @param msg message
+	 */
 	public NestedTransactionNotSupportedException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for NestedTransactionNotSupportedException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public NestedTransactionNotSupportedException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -26,10 +26,19 @@ package org.springframework.mail;
  */
 public class MailPreparationException extends MailException {
 
+	/**
+	 * Constructor for MailPreparationException.
+	 * @param msg message
+	 */
 	public MailPreparationException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for MailPreparationException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailPreparationException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

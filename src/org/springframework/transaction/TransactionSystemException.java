@@ -24,10 +24,19 @@ package org.springframework.transaction;
  */
 public class TransactionSystemException extends TransactionException {
 
+	/**
+	 * Constructor for TransactionSystemException.
+	 * @param msg message
+	 */
 	public TransactionSystemException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for TransactionSystemException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public TransactionSystemException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

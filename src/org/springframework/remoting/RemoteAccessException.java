@@ -48,10 +48,19 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class RemoteAccessException extends NestedRuntimeException {
 
+	/**
+	 * Constructor for RemoteAccessException.
+	 * @param msg message
+	 */
 	public RemoteAccessException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for RemoteAccessException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public RemoteAccessException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -26,10 +26,19 @@ package org.springframework.transaction;
  */
 public class NoTransactionException extends TransactionUsageException {
 
+	/**
+	 * Constructor for NoTransactionException.
+	 * @param msg message
+	 */
 	public NoTransactionException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for NoTransactionException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public NoTransactionException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

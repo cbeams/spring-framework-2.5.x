@@ -32,10 +32,19 @@ public class MailSendException extends MailException {
 
 	private Map failedMessages = new HashMap();
 
+	/**
+	 * Constructor for MailSendException.
+	 * @param msg message
+	 */
 	public MailSendException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for MailSendException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailSendException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

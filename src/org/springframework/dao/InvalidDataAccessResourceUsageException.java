@@ -34,7 +34,7 @@ public class InvalidDataAccessResourceUsageException extends DataAccessException
 	/**
 	 * Constructor for InvalidDataAccessResourceUsageException.
 	 * @param msg message
-	 * @param ex root cause
+	 * @param ex root cause from data access API in use
 	 */
 	public InvalidDataAccessResourceUsageException(String msg, Throwable ex) {
 		super(msg, ex);

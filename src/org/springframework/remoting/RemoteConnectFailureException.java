@@ -24,6 +24,11 @@ package org.springframework.remoting;
  */
 public class RemoteConnectFailureException extends RemoteAccessException {
 
+	/**
+	 * Constructor for RemoteConnectFailureException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public RemoteConnectFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

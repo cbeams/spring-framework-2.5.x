@@ -24,10 +24,19 @@ package org.springframework.transaction;
  */
 public class CannotCreateTransactionException extends TransactionException {
 
+	/**
+	 * Constructor for CannotCreateTransactionException.
+	 * @param msg message
+	 */
 	public CannotCreateTransactionException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for CannotCreateTransactionException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public CannotCreateTransactionException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

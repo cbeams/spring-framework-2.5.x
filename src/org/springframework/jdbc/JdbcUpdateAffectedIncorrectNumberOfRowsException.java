@@ -27,21 +27,33 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {
 	
 	/** Number of rows that should have been affected */
-	private final int expected;
+	private int expected;
 	
 	/** Number of rows that actually were affected */
-	private final int actual;
+	private int actual;
 
+	/**
+	 * Constructor for JdbcUpdateAffectedIncorrectNumberOfRowsException.
+	 * @param sql SQL we were tring to execute
+	 * @param expected the expected number of rows affected
+	 * @param actual the actual number of rows affected
+	 */
 	public JdbcUpdateAffectedIncorrectNumberOfRowsException(String sql, int expected, int actual) {
 		super("SQL update '" + sql + "' affected " + actual + " rows, not " + expected + ", as expected");
 		this.expected = expected;
 		this.actual = actual;
 	}
 
+	/**
+	 * Return the number of rows that should have been affected.
+	 */
 	public int getExpectedRowsAffected() {
 		return expected;
 	}
 	
+	/**
+	 * Return the number of rows that actually were affected.
+	 */
 	public int getActualRowsAffected() {
 		return actual;
 	}

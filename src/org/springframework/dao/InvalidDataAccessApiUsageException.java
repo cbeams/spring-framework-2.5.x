@@ -39,7 +39,7 @@ public class InvalidDataAccessApiUsageException extends DataAccessException {
 	/**
 	 * Constructor for InvalidDataAccessApiUsageException.
 	 * @param msg message
-	 * @param ex root cause, from an underlying API such as JDBC
+	 * @param ex root cause from data access API in use
 	 */
 	public InvalidDataAccessApiUsageException(String msg, Throwable ex) {
 		super(msg, ex);

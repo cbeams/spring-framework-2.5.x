@@ -33,10 +33,10 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 public class BadSqlGrammarException extends InvalidDataAccessResourceUsageException {
 	
 	/** Root cause: underlying JDBC exception. */ 
-	private final SQLException ex;
+	private SQLException ex;
 	
 	/** The offending SQL. */
-	private final String sql;
+	private String sql;
 
 	/**
 	 * Constructor for BadSqlGrammarException.

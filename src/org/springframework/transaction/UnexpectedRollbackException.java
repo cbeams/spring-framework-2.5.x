@@ -18,12 +18,17 @@ package org.springframework.transaction;
 
 /**
  * Thrown when an attempt to commit a transaction resulted
- * in an unexpected rollback
+ * in an unexpected rollback.
  * @author Rod Johnson
  * @since 17-Mar-2003
  */
 public class UnexpectedRollbackException extends TransactionException {
 
+	/**
+	 * Constructor for UnexpectedRollbackException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public UnexpectedRollbackException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

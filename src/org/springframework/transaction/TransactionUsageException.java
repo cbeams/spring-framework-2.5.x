@@ -24,10 +24,19 @@ package org.springframework.transaction;
  */
 public class TransactionUsageException extends TransactionException {
 
+	/**
+	 * Constructor for TransactionUsageException.
+	 * @param msg message
+	 */
 	public TransactionUsageException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for TransactionUsageException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public TransactionUsageException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -23,14 +23,27 @@ package org.springframework.mail;
  */
 public class MailAuthenticationException extends MailException {
 
+	/**
+	 * Constructor for MailAuthenticationException.
+	 * @param msg message
+	 */
 	public MailAuthenticationException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for MailAuthenticationException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailAuthenticationException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 
+	/**
+	 * Constructor for MailAuthenticationException.
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailAuthenticationException(Throwable ex) {
 		super("Authentication failed: " + ex.getMessage(), ex);
 	}

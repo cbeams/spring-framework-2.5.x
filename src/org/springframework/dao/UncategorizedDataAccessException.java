@@ -16,7 +16,6 @@
 
 package org.springframework.dao;
 
-
 /**
  * Normal superclass when we can't distinguish anything more specific
  * than "something went wrong with the underlying resource": for example,

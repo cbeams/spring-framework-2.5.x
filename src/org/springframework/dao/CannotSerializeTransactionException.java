@@ -23,10 +23,19 @@ package org.springframework.dao;
  */
 public class CannotSerializeTransactionException extends ConcurrencyFailureException {
 
+	/**
+	 * Constructor for CannotSerializeTransactionException.
+	 * @param msg message
+	 */
 	public CannotSerializeTransactionException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for CannotSerializeTransactionException.
+	 * @param msg message
+	 * @param ex root cause from data access API in use
+	 */
 	public CannotSerializeTransactionException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

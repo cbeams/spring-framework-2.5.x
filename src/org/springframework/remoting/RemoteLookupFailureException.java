@@ -24,6 +24,11 @@ package org.springframework.remoting;
  */
 public class RemoteLookupFailureException extends RemoteAccessException {
 
+	/**
+	 * Constructor for RemoteLookupFailureException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public RemoteLookupFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

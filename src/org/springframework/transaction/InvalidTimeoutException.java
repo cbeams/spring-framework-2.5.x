@@ -24,7 +24,7 @@ package org.springframework.transaction;
  */
 public class InvalidTimeoutException extends TransactionUsageException {
 
-	private int timeout = TransactionDefinition.TIMEOUT_DEFAULT;
+	private int timeout;
 
 	public InvalidTimeoutException(String msg, int timeout) {
 		super(msg);

@@ -34,7 +34,7 @@ public class OptimisticLockingFailureException extends ConcurrencyFailureExcepti
 	/**
 	 * Constructor for OptimisticLockingFailureException.
 	 * @param msg message
-	 * @param ex root cause
+	 * @param ex root cause from data access API in use
 	 */
 	public OptimisticLockingFailureException(String msg, Throwable ex) {
 		super(msg, ex);

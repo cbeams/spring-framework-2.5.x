@@ -25,8 +25,8 @@ public class DeadlockLoserDataAccessException extends DataAccessException {
 
 	/**
 	 * Constructor for DeadlockLoserDataAccessException.
-	 * @param msg mesg
-	 * @param ex root cause
+	 * @param msg message
+	 * @param ex root cause from data access API in use
 	 */
 	public DeadlockLoserDataAccessException(String msg, Throwable ex) {
 		super(msg, ex);

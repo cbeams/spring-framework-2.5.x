@@ -24,9 +24,9 @@ package org.springframework.dao;
  */
 public class IncorrectResultSizeDataAccessException extends InvalidDataAccessApiUsageException {
 
-	private final int expectedSize;
+	private int expectedSize;
 
-	private final int actualSize;
+	private int actualSize;
 
 	/**
 	 * Constructor for IncorrectResultSizeDataAccessException.

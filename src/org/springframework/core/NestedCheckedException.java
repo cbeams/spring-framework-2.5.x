@@ -49,7 +49,7 @@ import java.io.PrintWriter;
 public abstract class NestedCheckedException extends Exception {
 
 	/** Root cause of this nested exception */
-	private final Throwable cause;
+	private Throwable cause;
 
 	/**
 	 * Construct a <code>NestedCheckedException</code> with the specified detail message.
@@ -57,7 +57,6 @@ public abstract class NestedCheckedException extends Exception {
 	 */
 	public NestedCheckedException(String msg) {
 		super(msg);
-		this.cause = null;
 	}
 
 	/**

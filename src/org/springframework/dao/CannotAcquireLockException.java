@@ -23,10 +23,19 @@ package org.springframework.dao;
  */
 public class CannotAcquireLockException extends ConcurrencyFailureException {
 
+	/**
+	 * Constructor for CannotAcquireLockException.
+	 * @param msg message
+	 */
 	public CannotAcquireLockException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for CannotAcquireLockException.
+	 * @param msg message
+	 * @param ex root cause from data access API in use
+	 */
 	public CannotAcquireLockException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

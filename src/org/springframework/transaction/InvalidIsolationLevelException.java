@@ -25,6 +25,10 @@ package org.springframework.transaction;
  */
 public class InvalidIsolationLevelException extends TransactionUsageException {
 
+	/**
+	 * Constructor for InvalidIsolationLevelException.
+	 * @param msg message
+	 */
 	public InvalidIsolationLevelException(String msg) {
 		super(msg);
 	}

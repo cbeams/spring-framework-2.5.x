@@ -25,10 +25,19 @@ package org.springframework.transaction;
  */
 public class IllegalTransactionStateException extends CannotCreateTransactionException {
 
+	/**
+	 * Constructor for IllegalTransactionStateException.
+	 * @param msg message
+	 */
 	public IllegalTransactionStateException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for IllegalTransactionStateException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public IllegalTransactionStateException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

@@ -25,10 +25,19 @@ import org.springframework.core.NestedRuntimeException;
  */
 public abstract class TransactionException extends NestedRuntimeException {
 
+	/**
+	 * Constructor for TransactionException.
+	 * @param msg message
+	 */
 	public TransactionException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for TransactionException.
+	 * @param msg message
+	 * @param ex root cause from transaction API in use
+	 */
 	public TransactionException(String msg, Throwable ex) {
 		super(msg, ex);
 	}

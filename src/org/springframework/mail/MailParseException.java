@@ -23,14 +23,27 @@ package org.springframework.mail;
  */
 public class MailParseException extends MailException {
 
+	/**
+	 * Constructor for MailParseException.
+	 * @param msg message
+	 */
 	public MailParseException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for MailParseException.
+	 * @param msg message
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailParseException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 
+	/**
+	 * Constructor for MailParseException.
+	 * @param ex root cause from remoting API in use
+	 */
 	public MailParseException(Throwable ex) {
 		super("Could not parse mail: " + ex.getMessage(), ex);
 	}
