@@ -134,6 +134,22 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
+	 * Return the wizard pages, i.e. the view names for the pages.
+	 * The array index corresponds to the page number.
+	 */
+	protected final String[] getPages() {
+		return pages;
+	}
+
+	/**
+	 * Return the number of wizard pages.
+	 * Useful to check whether the last page has been reached.
+	 */
+	protected final int getNrOfPages() {
+		return this.pages.length;
+	}
+
+	/**
 	 * Set the name of the page attribute in the model, containing
 	 * an Integer with the current page number.
 	 * <p>This will be necessary for single views rendering multiple view pages.
@@ -161,14 +177,6 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	public final void setAllowDirtyForward(boolean allowDirtyForward) {
 		this.allowDirtyForward = allowDirtyForward;
-	}
-
-	/**
-	 * Return the number of wizard pages.
-	 * Useful to check whether the last page has been reached.
-	 */
-	protected final int getNrOfPages() {
-		return this.pages.length;
 	}
 
 
