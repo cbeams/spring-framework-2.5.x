@@ -20,10 +20,24 @@
 		<property name="resourceLoaderPath"><value>WEB-INF/views/</value></property>
 	</bean>
 
+	<!-- Configurer that sets up a VelocityEngine for Velocity views -->
+	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreemarkerConfigurer">
+		<property name="templateLoaderPath"><value>WEB-INF/views/</value></property>
+	</bean>
+
 	<!-- Simple ViewResolver for Velocity, appending ".vm" to logical view names -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
 		<property name="suffix"><value>.vm</value></property>
 	</bean>
+
+	<!-- Simple ViewResolver for FreeMarker, appending ".fm" to logical view names -->
+	<!-- Uncomment this and comment out the above to switch to the FreeMarker view -->
+	<!--
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"><value>org.springframework.web.servlet.view.freemarker.FreemarkerView</value></property>
+		<property name="suffix"><value>.fm</value></property>
+	</bean>
+	-->
 
 	<!-- Simple ViewResolver for JSP, prepending "/WEB-INF/views" and appending ".jsp" to logical view names -->
 	<!-- Uncomment this and comment out the above to switch to the JSP view -->
