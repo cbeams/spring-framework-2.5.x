@@ -16,6 +16,17 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -27,21 +38,12 @@ import net.sf.jasperreports.engine.design.JRCompiler;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 
 /**
  * Base class for all JasperReports views. Applies on-the-fly compilation
@@ -83,311 +85,317 @@ import java.util.List;
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
-    /**
-     * A <code>String</code> key used to lookup the <code>JRDataSource</code> in the model.
-     */
-    private String reportDataKey;
+	/**
+	 * A <code>String</code> key used to lookup the <code>JRDataSource</code> in the model.
+	 */
+	private String reportDataKey;
 
-    /**
-     * The <code>JasperReport</code> that is used to render the view.
-     */
-    private JasperReport report;
+	/**
+	 * The <code>JasperReport</code> that is used to render the view.
+	 */
+	private JasperReport report;
 
-    /**
-     * Stores the paths to any sub-report files used by this
-     * top-level report along with the keys they are mapped to
-     * in the top-level report file.
-     */
-    private Map subReports;
+	/**
+	 * Stores the paths to any sub-report files used by this
+	 * top-level report along with the keys they are mapped to
+	 * in the top-level report file.
+	 */
+	private Map subReports;
 
-    /**
-     * Stores the names of any data source objects that need to be converted
-     * to <code>JRDataSource</code> instances and included in the report parameters
-     * to be passed on to a sub-report.
-     */
-    private List subReportDataSources;
+	/**
+	 * Stores the names of any data source objects that need to be converted
+	 * to <code>JRDataSource</code> instances and included in the report parameters
+	 * to be passed on to a sub-report.
+	 */
+	private List subReportDataSources;
 
-    /**
-     * Set the <code>List</code> of names corresponding to the model parameters
-     * that will contain data source objects for use in sub-reports. Spring will
-     * convert these objects into instances of <code>JRDataSource</code> where applicable
-     * and will then include the resulting <code>JRDataSource</code> in the parameters
-     * passed into the JasperReports engine. The name specified in the <code>List</code>
-     * should correspond to an attribute returned in the model and to a sub-report
-     * data source parameter in your report file.
-     * @param subReportDataSources A <code>List</code> of names for sub-report data source objects.
-     * @see #convertReportData(Object)
-     * @see net.sf.jasperreports.engine.JRDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
-     */
-    public void setSubReportDataSources(List subReportDataSources) {
-        this.subReportDataSources = subReportDataSources;
-    }
+	/**
+	 * Set the <code>List</code> of names corresponding to the model parameters
+	 * that will contain data source objects for use in sub-reports. Spring will
+	 * convert these objects into instances of <code>JRDataSource</code> where applicable
+	 * and will then include the resulting <code>JRDataSource</code> in the parameters
+	 * passed into the JasperReports engine. The name specified in the <code>List</code>
+	 * should correspond to an attribute returned in the model and to a sub-report
+	 * data source parameter in your report file.
+	 *
+	 * @param subReportDataSources A <code>List</code> of names for sub-report data source objects.
+	 * @see #convertReportData(Object)
+	 * @see net.sf.jasperreports.engine.JRDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
+	 */
+	public void setSubReportDataSources(List subReportDataSources) {
+		this.subReportDataSources = subReportDataSources;
+	}
 
-    /**
-     * Set the name of the model attribute that represents the report data.
-     * If not specified, the model map will be searched for a matching value type.
-     * <p>A <code>JRDataSource</code> will be taken as-is. For other types, conversion
-     * will apply: By default, a <code>java.util.Collection</code> will be converted
-     * to <code>JRBeanCollectionDataSource</code>, and an object array to
-     * <code>JRBeanArrayDataSource</code>.
-     * <p><b>Note:</b> If you pass in a Collection or object array in the model map
-     * for use as plain report parameter, rather than as report data to extract fields
-     * from, you need to specify the key for the actual report data to use, to avoid
-     * mis-detection of report data by type.
-     *
-     * @see #convertReportData
-     * @see net.sf.jasperreports.engine.JRDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
-     */
-    public void setReportDataKey(String reportDataKey) {
-        this.reportDataKey = reportDataKey;
-    }
+	/**
+	 * Set the name of the model attribute that represents the report data.
+	 * If not specified, the model map will be searched for a matching value type.
+	 * <p>A <code>JRDataSource</code> will be taken as-is. For other types, conversion
+	 * will apply: By default, a <code>java.util.Collection</code> will be converted
+	 * to <code>JRBeanCollectionDataSource</code>, and an object array to
+	 * <code>JRBeanArrayDataSource</code>.
+	 * <p><b>Note:</b> If you pass in a Collection or object array in the model map
+	 * for use as plain report parameter, rather than as report data to extract fields
+	 * from, you need to specify the key for the actual report data to use, to avoid
+	 * mis-detection of report data by type.
+	 *
+	 * @see #convertReportData
+	 * @see net.sf.jasperreports.engine.JRDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
+	 */
+	public void setReportDataKey(String reportDataKey) {
+		this.reportDataKey = reportDataKey;
+	}
 
-    /**
-     * Specify a <code>Map</code> of file paths which must be loaded as instances
-     * of <code>JasperReport</code> and passed to the JasperReports engine under
-     * the same key used in this <code>Map</code> for rendering as sub-reports.
-     */
-    public void setSubReports(Map subReports) {
-        this.subReports = subReports;
-    }
+	/**
+	 * Specify a <code>Map</code> of file paths which must be loaded as instances
+	 * of <code>JasperReport</code> and passed to the JasperReports engine under
+	 * the same key used in this <code>Map</code> for rendering as sub-reports.
+	 */
+	public void setSubReports(Map subReports) {
+		this.subReports = subReports;
+	}
 
-    /**
-     * Checks to see that a valid report file URL is supplied in the
-     * configuration. Compiles the report file is necessary.
-     */
-    protected void initApplicationContext() throws ApplicationContextException {
-        super.initApplicationContext();
+	/**
+	 * Checks to see that a valid report file URL is supplied in the
+	 * configuration. Compiles the report file is necessary.
+	 */
+	protected void initApplicationContext() throws ApplicationContextException {
+		super.initApplicationContext();
 
-        Resource mainReport = getApplicationContext().getResource(getUrl().trim());
-        this.report = loadReport(mainReport);
+		Resource mainReport = getApplicationContext().getResource(getUrl().trim());
+		this.report = loadReport(mainReport);
 
-        // load sub reports if required
-        // and check data source parameters
-        if (subReports != null) {
+		// load sub reports if required
+		// and check data source parameters
+		if (subReports != null) {
 
-            if ((subReportDataSources != null) &&
-                    (subReportDataSources.size() > 0) &&
-                    (reportDataKey == null)) {
-                throw new ApplicationContextException("Property [reportDataKey] of class [" + getClass().getName() +
-                        "] must specified when specifying a value for property [subReportDataSources].");
-            }
+			if ((subReportDataSources != null) &&
+					(subReportDataSources.size() > 0) &&
+					(reportDataKey == null)) {
+				throw new ApplicationContextException("Property [reportDataKey] of class [" + getClass().getName() +
+						"] must specified when specifying a value for property [subReportDataSources].");
+			}
 
-            loadSubreports();
-        }
-    }
+			loadSubreports();
+		}
+	}
 
-    /**
-     * Loads all the sub-reports configured in the <code>subReports</code> <code>Map</code>.
-     */
-    private void loadSubreports() {
-        for (Iterator itr = subReports.keySet().iterator(); itr.hasNext();) {
-            String key = (String) itr.next();
-            String path = (String) subReports.get(key);
+	/**
+	 * Loads all the sub-reports configured in the <code>subReports</code> <code>Map</code>.
+	 */
+	private void loadSubreports() {
+		for (Iterator itr = subReports.keySet().iterator(); itr.hasNext();) {
+			String key = (String) itr.next();
+			String path = (String) subReports.get(key);
 
-            Resource res = getApplicationContext().getResource(path);
-            subReports.put(key, loadReport(res));
-        }
-    }
+			Resource res = getApplicationContext().getResource(path);
+			subReports.put(key, loadReport(res));
+		}
+	}
 
-    /**
-     * Loads a <code>JasperReport</code> from the specified <code>Resource</code>. If
-     * the <code>Resource</code> points to an uncompiled report design file then the
-     * report file is compiled dynamically and loaded into memory.
-     *
-     * @param resource the <code>Resource</code> containing the report definition or design.
-     * @return a <code>JasperReport</code> instance.
-     */
-    private JasperReport loadReport(Resource resource) {
-        try {
-            String fileName = resource.getFilename();
-            if (fileName.endsWith(".jasper")) {
-                // load pre-compiled report
-                if (logger.isInfoEnabled()) {
-                    logger.info("Loading pre-compiled Jasper Report from " + resource);
-                }
-                return (JasperReport) JRLoader.loadObject(resource.getInputStream());
-            } else if (fileName.endsWith(".jrxml")) {
-                // compile report on-the-fly
-                if (logger.isInfoEnabled()) {
-                    logger.info("Compiling Jasper Report loaded from " + resource);
-                }
-                JasperDesign design = JRXmlLoader.load(resource.getInputStream());
-                return getReportCompiler().compileReport(design);
-            } else {
-                throw new IllegalArgumentException("Report URL [" + getUrl() + "] must end in either .jasper or .jrxml");
-            }
-        } catch (IOException ex) {
-            throw new ApplicationContextException("Could not load JasperReports report for URL [" + getUrl() + "]", ex);
-        } catch (JRException ex) {
-            throw new ApplicationContextException("Could not parse JasperReports report for URL [" + getUrl() + "]", ex);
-        }
-    }
+	/**
+	 * Loads a <code>JasperReport</code> from the specified <code>Resource</code>. If
+	 * the <code>Resource</code> points to an uncompiled report design file then the
+	 * report file is compiled dynamically and loaded into memory.
+	 *
+	 * @param resource the <code>Resource</code> containing the report definition or design.
+	 * @return a <code>JasperReport</code> instance.
+	 */
+	private JasperReport loadReport(Resource resource) {
+		try {
+			String fileName = resource.getFilename();
+			if (fileName.endsWith(".jasper")) {
+				// load pre-compiled report
+				if (logger.isInfoEnabled()) {
+					logger.info("Loading pre-compiled Jasper Report from " + resource);
+				}
+				return (JasperReport) JRLoader.loadObject(resource.getInputStream());
+			}
+			else if (fileName.endsWith(".jrxml")) {
+				// compile report on-the-fly
+				if (logger.isInfoEnabled()) {
+					logger.info("Compiling Jasper Report loaded from " + resource);
+				}
+				JasperDesign design = JRXmlLoader.load(resource.getInputStream());
+				return getReportCompiler().compileReport(design);
+			}
+			else {
+				throw new IllegalArgumentException("Report URL [" + getUrl() + "] must end in either .jasper or .jrxml");
+			}
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("Could not load JasperReports report for URL [" + getUrl() + "]", ex);
+		}
+		catch (JRException ex) {
+			throw new ApplicationContextException("Could not parse JasperReports report for URL [" + getUrl() + "]", ex);
+		}
+	}
 
-    /**
-     * Return the JasperReports compiler to use for compiling a ".jrxml"
-     * file into a a report class. Default is <code>JRBshCompiler</code>,
-     * which requires BeanShell on the class path.
-     *
-     * @see net.sf.jasperreports.engine.design.JRCompiler
-     * @see net.sf.jasperreports.engine.design.JRBshCompiler
-     */
-    protected JRCompiler getReportCompiler() {
-        return new JRBshCompiler();
-    }
-
-
-    /**
-     * Finds the report data to use for rendering the report and then invokes the
-     * <code>renderReport</code> method that should be implemented by the subclass.
-     *
-     * @param model the model map, as passed in for view renderin.
-     *              Must contain a report data value that can be converted to a <code>JRDataSource</code>,
-     *              acccording to the <code>getReportData</code> method.
-     * @see #getReportData
-     */
-    protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        JRDataSource dataSource = getReportData(model);
-        response.setContentType(getContentType());
-
-        if (subReports != null) {
-            model.putAll(subReports);
-
-            // transform any collections etc into JRDataSources
-            // for sub reports
-            if (subReportDataSources != null) {
-                for (Iterator itr = subReportDataSources.iterator(); itr.hasNext();) {
-                    String key = (String) itr.next();
-
-                    model.put(key, convertReportData(model.get(key)));
-                }
-            }
-        }
-
-        renderReport(this.report, model, dataSource, response);
-    }
-
-    /**
-     * Find an instance of <code>JRDataSource</code> in the given model map or create an
-     * appropriate JRDataSource for passed-in report data.
-     * <p>The default implementation checks for a model object under the
-     * specified "reportDataKey" first, then falls back to looking for a value
-     * of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
-     * object array (in that order).
-     *
-     * @param model the model map, as passed in for view rendering
-     * @return the JRDataSource
-     * @throws IllegalArgumentException if no JRDataSource found
-     * @see #setReportDataKey
-     * @see #convertReportData
-     * @see #getReportDataTypes
-     */
-    protected JRDataSource getReportData(Map model) throws IllegalArgumentException {
-        // Try model attribute with specified name.
-        if (this.reportDataKey != null) {
-            Object value = model.get(this.reportDataKey);
-            return convertReportData(value);
-        }
-
-        // Try to find matching attribute, of given prioritized types.
-        Object value = CollectionUtils.findValueOfType(model.values(), getReportDataTypes());
-        if (value != null) {
-            return convertReportData(value);
-        }
-
-        throw new IllegalArgumentException("No report data supplied in model " + model);
-    }
-
-    /**
-     * Convert the given report data value to a <code>JRDataSource</code>.
-     * <p>The default implementation delegates to <code>JasperReportUtils</code>.
-     * A <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
-     * is detected. The latter are converted to <code>JRBeanCollectionDataSource</code>
-     * or <code>JRBeanArrayDataSource</code>, respectively.
-     *
-     * @param value the report data value to convert
-     * @return the JRDataSource
-     * @throws IllegalArgumentException if the value could not be converted
-     * @see org.springframework.ui.jasperreports.JasperReportsUtils#convertReportData
-     * @see net.sf.jasperreports.engine.JRDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
-     * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
-     */
-    protected JRDataSource convertReportData(Object value) throws IllegalArgumentException {
-        return JasperReportsUtils.convertReportData(value);
-    }
-
-    /**
-     * Return the value types that can be converted to a JRDataSource,
-     * in prioritized order. Should only return types that the
-     * <code>convertReportData</code> method is actually able to convert.
-     * <p>Default value types are: <code>JRDataSource</code>,
-     * <code>java.util.Collection</code>, object array.
-     *
-     * @return the value types in prioritized order
-     * @see #convertReportData
-     */
-    protected Class[] getReportDataTypes() {
-        return new Class[]{JRDataSource.class, Collection.class, Object[].class};
-    }
-
-    /**
-     * Subclasses should implement this method to perform the actual rendering process.
-     *
-     * @param report     the <code>JasperReport</code> to render
-     * @param parameters the map containing report parameters
-     * @param dataSource the <code>JRDataSource</code> containing the report data
-     * @param response   the HTTP response the report should be rendered to
-     * @throws Exception if rendering failed
-     */
-    protected void renderReport(JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
-            throws Exception {
-
-        // Prepare report for rendering.
-        JRAbstractExporter exporter = createExporter();
-        JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
-
-        if (useWriter()) {
-            // Render report into HttpServletResponse's Writer.
-            JasperReportsUtils.render(exporter, print, response.getWriter());
-        } else {
-            // Render report into local OutputStream.
-            // IE workaround: write into byte array first.
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            JasperReportsUtils.render(exporter, print, baos);
-
-            // Write content length (determined via byte array).
-            response.setContentLength(baos.size());
-
-            // Flush byte array to servlet output stream.
-            ServletOutputStream out = response.getOutputStream();
-            baos.writeTo(out);
-            out.flush();
-        }
-    }
+	/**
+	 * Return the JasperReports compiler to use for compiling a ".jrxml"
+	 * file into a a report class. Default is <code>JRBshCompiler</code>,
+	 * which requires BeanShell on the class path.
+	 *
+	 * @see net.sf.jasperreports.engine.design.JRCompiler
+	 * @see net.sf.jasperreports.engine.design.JRBshCompiler
+	 */
+	protected JRCompiler getReportCompiler() {
+		return new JRBshCompiler();
+	}
 
 
-    /**
-     * Create a JasperReports exporter for a specific output format,
-     * which will be used to render the report to the HTTP response.
-     * <p>The <code>useWriter</code> method determines whether the
-     * output will be written as text or as binary content.
-     *
-     * @see #useWriter
-     */
-    protected abstract JRAbstractExporter createExporter();
+	/**
+	 * Finds the report data to use for rendering the report and then invokes the
+	 * <code>renderReport</code> method that should be implemented by the subclass.
+	 *
+	 * @param model the model map, as passed in for view rendering. Must contain a report
+	 * data value that can be converted to a <code>JRDataSource</code>, acccording to the
+	 * <code>getReportData</code> method.
+	 * @see #getReportData
+	 */
+	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		JRDataSource dataSource = getReportData(model);
+		response.setContentType(getContentType());
 
-    /**
-     * Return whether to use a <code>java.io.Writer</code> to write text content
-     * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
-     * to write binary content to the response.
-     *
-     * @see javax.servlet.ServletResponse#getWriter
-     * @see javax.servlet.ServletResponse#getOutputStream
-     */
-    protected abstract boolean useWriter();
+		if (subReports != null) {
+			model.putAll(subReports);
+
+			// transform any collections etc into JRDataSources
+			// for sub reports
+			if (subReportDataSources != null) {
+				for (Iterator itr = subReportDataSources.iterator(); itr.hasNext();) {
+					String key = (String) itr.next();
+
+					model.put(key, convertReportData(model.get(key)));
+				}
+			}
+		}
+
+		renderReport(this.report, model, dataSource, response);
+	}
+
+	/**
+	 * Find an instance of <code>JRDataSource</code> in the given model map or create an
+	 * appropriate JRDataSource for passed-in report data.
+	 * <p>The default implementation checks for a model object under the
+	 * specified "reportDataKey" first, then falls back to looking for a value
+	 * of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
+	 * object array (in that order).
+	 *
+	 * @param model the model map, as passed in for view rendering
+	 * @return the <code>JRDataSource</code>
+	 * @throws IllegalArgumentException if no JRDataSource found
+	 * @see #setReportDataKey
+	 * @see #convertReportData
+	 * @see #getReportDataTypes
+	 */
+	protected JRDataSource getReportData(Map model) throws IllegalArgumentException {
+		// Try model attribute with specified name.
+		if (this.reportDataKey != null) {
+			Object value = model.get(this.reportDataKey);
+			return convertReportData(value);
+		}
+
+		// Try to find matching attribute, of given prioritized types.
+		Object value = CollectionUtils.findValueOfType(model.values(), getReportDataTypes());
+		if (value != null) {
+			return convertReportData(value);
+		}
+
+		throw new IllegalArgumentException("No report data supplied in model " + model);
+	}
+
+	/**
+	 * Convert the given report data value to a <code>JRDataSource</code>.
+	 * <p>The default implementation delegates to <code>JasperReportUtils</code>.
+	 * A <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * is detected. The latter are converted to <code>JRBeanCollectionDataSource</code>
+	 * or <code>JRBeanArrayDataSource</code>, respectively.
+	 *
+	 * @param value the report data value to convert
+	 * @return the JRDataSource
+	 * @throws IllegalArgumentException if the value could not be converted
+	 * @see org.springframework.ui.jasperreports.JasperReportsUtils#convertReportData
+	 * @see net.sf.jasperreports.engine.JRDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
+	 * @see net.sf.jasperreports.engine.data.JRBeanArrayDataSource
+	 */
+	protected JRDataSource convertReportData(Object value) throws IllegalArgumentException {
+		return JasperReportsUtils.convertReportData(value);
+	}
+
+	/**
+	 * Return the value types that can be converted to a JRDataSource,
+	 * in prioritized order. Should only return types that the
+	 * <code>convertReportData</code> method is actually able to convert.
+	 * <p>Default value types are: <code>JRDataSource</code>,
+	 * <code>java.util.Collection</code>, object array.
+	 *
+	 * @return the value types in prioritized order
+	 * @see #convertReportData
+	 */
+	protected Class[] getReportDataTypes() {
+		return new Class[]{JRDataSource.class, Collection.class, Object[].class};
+	}
+
+	/**
+	 * Subclasses should implement this method to perform the actual rendering process.
+	 *
+	 * @param report the <code>JasperReport</code> to render
+	 * @param parameters the map containing report parameters
+	 * @param dataSource the <code>JRDataSource</code> containing the report data
+	 * @param response the HTTP response the report should be rendered to
+	 * @throws Exception if rendering failed
+	 */
+	protected void renderReport(JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
+			throws Exception {
+
+		// Prepare report for rendering.
+		JRAbstractExporter exporter = createExporter();
+		JasperPrint print = JasperFillManager.fillReport(report, parameters, dataSource);
+
+		if (useWriter()) {
+			// Render report into HttpServletResponse's Writer.
+			JasperReportsUtils.render(exporter, print, response.getWriter());
+		}
+		else {
+			// Render report into local OutputStream.
+			// IE workaround: write into byte array first.
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			JasperReportsUtils.render(exporter, print, baos);
+
+			// Write content length (determined via byte array).
+			response.setContentLength(baos.size());
+
+			// Flush byte array to servlet output stream.
+			ServletOutputStream out = response.getOutputStream();
+			baos.writeTo(out);
+			out.flush();
+		}
+	}
+
+
+	/**
+	 * Create a JasperReports exporter for a specific output format,
+	 * which will be used to render the report to the HTTP response.
+	 * <p>The <code>useWriter</code> method determines whether the
+	 * output will be written as text or as binary content.
+	 *
+	 * @see #useWriter
+	 */
+	protected abstract JRAbstractExporter createExporter();
+
+	/**
+	 * Return whether to use a <code>java.io.Writer</code> to write text content
+	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * to write binary content to the response.
+	 *
+	 * @see javax.servlet.ServletResponse#getWriter
+	 * @see javax.servlet.ServletResponse#getOutputStream
+	 */
+	protected abstract boolean useWriter();
 
 }
