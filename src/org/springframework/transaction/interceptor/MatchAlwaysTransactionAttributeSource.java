@@ -15,7 +15,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Colin Sampaleanu
  * @since 15.10.2003
- * @version $Id: MatchAlwaysTransactionAttributeSource.java,v 1.1 2003-10-15 22:30:09 colins Exp $
+ * @version $Id: MatchAlwaysTransactionAttributeSource.java,v 1.2 2003-10-21 07:43:53 jhoeller Exp $
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.support.BeanNameAutoProxyCreator
  */
@@ -24,8 +24,8 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 	TransactionAttribute _transactionAttribute;
 
 	/**
-	 * Creates an instance. Will default to PROPOGATION_REQUIRED, which may be overriden
-	 * by calling {@link setTransactionAttribute}.
+	 * Create an instance. Will default to PROPOGATION_REQUIRED, which may be overriden
+	 * by calling {@link #setTransactionAttribute}.
 	 */
 	public MatchAlwaysTransactionAttributeSource() {
 		setTransactionAttribute("PROPAGATION_REQUIRED");
@@ -43,10 +43,8 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 		_transactionAttribute = (TransactionAttribute) tae.getValue();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
-	 */
 	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
 		return _transactionAttribute;
 	}
+
 }
