@@ -1549,8 +1549,7 @@ public class AnotherExampleBean implements DisposableBean {
     singleton beans) that if you have a (parent) bean definition which you
     intend to use only as a template, and this definition specifies a class,
     you must make sure to set the <emphasis>abstract</emphasis> attribute to
-    <emphasis>true</emphasis>, otherwise the XmlBeanFactory (and possibly
-    other containers) will actually pre-instantiate it.</para>
+    <emphasis>true</emphasis>, otherwise the application context will actually pre-instantiate it.</para>
   </sect1>
 
   <sect1 id="beans-factory-client">
