@@ -16,9 +16,9 @@
 
 package org.springframework.web.struts;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -207,7 +207,7 @@ public class StrutsSupportTests extends TestCase {
 		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
 		moduleConfig.getPrefix();
-		moduleConfigControl.setReturnValue("", 3);
+		moduleConfigControl.setDefaultReturnValue("");
 		moduleConfigControl.replay();
 
 		plugin.init(actionServlet, moduleConfig);
@@ -218,9 +218,8 @@ public class StrutsSupportTests extends TestCase {
 		ActionMapping mapping = new ActionMapping();
 		mapping.setPath("/test");
 		mapping.setModuleConfig(moduleConfig);
-		ActionForward forward = proxy.execute(mapping, null,
-																					new MockHttpServletRequest(servletContext),
-																					new MockHttpServletResponse());
+		ActionForward forward = proxy.execute(
+				mapping, null, new MockHttpServletRequest(servletContext), new MockHttpServletResponse());
 		assertEquals("/test", forward.getPath());
 
 		TestAction testAction = (TestAction) plugin.getWebApplicationContext().getBean("/test");
@@ -248,7 +247,7 @@ public class StrutsSupportTests extends TestCase {
 		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
 		moduleConfig.getPrefix();
-		moduleConfigControl.setReturnValue("/module", 3);
+		moduleConfigControl.setDefaultReturnValue("/module");
 		moduleConfigControl.replay();
 
 		plugin.init(actionServlet, moduleConfig);
@@ -260,9 +259,8 @@ public class StrutsSupportTests extends TestCase {
 		ActionMapping mapping = new ActionMapping();
 		mapping.setPath("/test2");
 		mapping.setModuleConfig(moduleConfig);
-		ActionForward forward = proxy.execute(mapping, null,
-																					new MockHttpServletRequest(servletContext),
-																					new MockHttpServletResponse());
+		ActionForward forward = proxy.execute(
+				mapping, null, new MockHttpServletRequest(servletContext), new MockHttpServletResponse());
 		assertEquals("/module/test2", forward.getPath());
 
 		TestAction testAction = (TestAction) plugin.getWebApplicationContext().getBean("/module/test2");
@@ -290,13 +288,13 @@ public class StrutsSupportTests extends TestCase {
 		MockControl defaultModuleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig defaultModuleConfig = (ModuleConfig) defaultModuleConfigControl.getMock();
 		defaultModuleConfig.getPrefix();
-		defaultModuleConfigControl.setReturnValue("", 1);
+		defaultModuleConfigControl.setDefaultReturnValue("");
 		defaultModuleConfigControl.replay();
 
 		MockControl moduleConfigControl = MockControl.createControl(ModuleConfig.class);
 		ModuleConfig moduleConfig = (ModuleConfig) moduleConfigControl.getMock();
 		moduleConfig.getPrefix();
-		moduleConfigControl.setReturnValue("/module", 2);
+		moduleConfigControl.setDefaultReturnValue("/module");
 		moduleConfigControl.replay();
 
 		plugin.init(actionServlet, defaultModuleConfig);
@@ -308,9 +306,8 @@ public class StrutsSupportTests extends TestCase {
 		ActionMapping mapping = new ActionMapping();
 		mapping.setPath("/test2");
 		mapping.setModuleConfig(moduleConfig);
-		ActionForward forward = proxy.execute(mapping, null,
-																					new MockHttpServletRequest(servletContext),
-																					new MockHttpServletResponse());
+		ActionForward forward = proxy.execute(
+				mapping, null, new MockHttpServletRequest(servletContext), new MockHttpServletResponse());
 		assertEquals("/module/test2", forward.getPath());
 
 		TestAction testAction = (TestAction) plugin.getWebApplicationContext().getBean("/module/test2");
