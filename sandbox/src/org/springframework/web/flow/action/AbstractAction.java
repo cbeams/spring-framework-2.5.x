@@ -38,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  * <ul>
  * <li>Creating common events
  * <li>Accessing request parameters and session attributes
- * <li>Accessing and exporting form objects
+ * <li>Accessing and exposing form objects
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
@@ -229,7 +229,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return WebUtils.getRequiredSessionAttribute(request, name);
 	}
 	
-	//accessing and exporting form objects
+	//accessing and exposing form objects
 
 	/**
 	 * Gets the form object from the model, using the well-known attribute name
@@ -316,31 +316,31 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Export a <i>new</i> errors instance to the flow model for the form
+	 * Expose a <i>new</i> errors instance in the flow model for the form
 	 * object using name {@link #FORM_OBJECT_ATTRIBUTE}.
 	 * 
 	 * @param model The flow model
-	 * @param formObject The form object to export an errors instance for
+	 * @param formObject The form object to expose an errors instance for
 	 */
-	protected void exportErrors(MutableFlowModel model, Object formObject) {
-		exportErrors(model, formObject, FORM_OBJECT_ATTRIBUTE);
+	protected void exposeErrors(MutableFlowModel model, Object formObject) {
+		exposeErrors(model, formObject, FORM_OBJECT_ATTRIBUTE);
 	}
 
 	/**
-	 * Export a <i>new</i> errors instance to the flow model for the form
+	 * Expose a <i>new</i> errors instance in the flow model for the form
 	 * object with the specified form object name.
 	 * @param model The flow model
 	 * @param formObject The form object
 	 * @param formObjectName The name of the form object
 	 */
-	protected void exportErrors(MutableFlowModel model, Object formObject, String formObjectName) {
-		exportBindExceptionErrors(model, new BindException(formObject, formObjectName));
+	protected void exposeErrors(MutableFlowModel model, Object formObject, String formObjectName) {
+		exposeBindExceptionErrors(model, new BindException(formObject, formObjectName));
 	}
 
 	/**
-	 * Internal helper to export form object error information.
+	 * Internal helper to expose form object error information.
 	 */
-	protected void exportBindExceptionErrors(MutableFlowModel model, BindException errors) {
+	protected void exposeBindExceptionErrors(MutableFlowModel model, BindException errors) {
 		model.setAttribute(FORM_OBJECT_ATTRIBUTE, errors.getTarget());
 		model.setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE, errors);
 		model.setAttributes(errors.getModel());

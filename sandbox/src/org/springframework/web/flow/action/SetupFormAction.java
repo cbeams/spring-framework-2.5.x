@@ -79,8 +79,8 @@ public class SetupFormAction extends BindAndValidateAction {
 			}
 			binder.bind(request);
 		}
-		exportBindExceptionErrors(model, binder.getErrors());
-		exportViewPlaceholders(request, model);
+		exposeBindExceptionErrors(model, binder.getErrors());
+		exposeViewPlaceholders(request, model);
 		try {
 			setupReferenceData(request, model);
 		}
@@ -91,14 +91,14 @@ public class SetupFormAction extends BindAndValidateAction {
 	}
 
 	/**
-	 * Exports convenience 'debug' placeholders for views that have incomplete
+	 * Exposes convenience 'debug' placeholders for views that have incomplete
 	 * field mappings.
 	 * @param request The request
 	 * @param model The model
 	 */
-	protected void exportViewPlaceholders(HttpServletRequest request, MutableFlowModel model) {
+	protected void exposeViewPlaceholders(HttpServletRequest request, MutableFlowModel model) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Exporting view markers/placeholders to notify business-tier developers of "
+			logger.debug("Exposing view markers/placeholders to notify business-tier developers of "
 					+ "form fields that are missing, not mapped to backing objects, or need clarification");
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
@@ -120,7 +120,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	}
 
 	/**
-	 * Helper class used as placeholder data in the <code>exportViewPlaceholders()</code>
+	 * Helper class used as placeholder data in the <code>exposeViewPlaceholders()</code>
 	 * method.
 	 */
 	private static final class NotMappedEnum extends ShortCodedEnum {

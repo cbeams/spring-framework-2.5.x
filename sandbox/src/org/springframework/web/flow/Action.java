@@ -56,7 +56,7 @@ public interface Action {
 	 * own attributes it wishes to expose. All attributes in the flow model are
 	 * considered in "flow scope"; that is, they exist for the life of the flow
 	 * session and will be cleaned up when the flow session ends. All attributes
-	 * in the flow model are automatically exported for convenient access by the
+	 * in the flow model are automatically exposed for convenient access by the
 	 * views when a <code>ViewState</code> is entered, using a standard Spring
 	 * <code>ModelAndView</code> descriptor.
 	 * <p>

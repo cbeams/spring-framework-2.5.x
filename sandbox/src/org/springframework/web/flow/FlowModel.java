@@ -27,7 +27,7 @@ import org.springframework.util.closure.Constraint;
  * An interface that provides access to the data model of an executing flow
  * session. All attributes in the flow model are in "flow scope"; that is, they
  * exist for the life of a flow session and will be cleaned up when the flow
- * session ends. All attributes in the flow model are automatically exported for
+ * session ends. All attributes in the flow model are automatically exposed for
  * convenient access by the views.
  * <p>
  * This is a simple interface for accessing flow model attributes, typically
@@ -163,7 +163,7 @@ public interface FlowModel extends AttributeAccessor {
 	public Collection findAttributes(Constraint criteria);
 
 	/**
-	 * Returns the data model for this flow model, suitable for exporting to web
+	 * Returns the data model for this flow model, suitable for exposing to web
 	 * views.
 	 * @return Map of model attributes for this flow model.
 	 */

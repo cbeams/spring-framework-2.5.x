@@ -241,7 +241,7 @@ public class BindAndValidateAction extends AbstractAction {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		String result = bindAndValidate(request, model, binder);
-		exportBindExceptionErrors(model, binder.getErrors());
+		exposeBindExceptionErrors(model, binder.getErrors());
 		if (StringUtils.hasText(result)) {
 			return result;
 		}
