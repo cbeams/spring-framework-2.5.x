@@ -60,6 +60,11 @@ public class ActionState extends TransitionableState {
 		setActionBean(actionBean);
 	}
 
+	public ActionState(String id, ActionBean[] actionBeans, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeans(actionBeans);
+	}
+
 	public ActionState(String id, String actionBeanName, Transition transition) {
 		super(id, transition);
 		setActionBeanName(actionBeanName);
@@ -70,21 +75,23 @@ public class ActionState extends TransitionableState {
 		setActionBeanName(actionBeanName);
 	}
 
+	public ActionState(String id, String[] actionBeanNames, Transition[] transitions) {
+		super(id, transitions);
+		setActionBeanNames(actionBeanNames);
+	}
+
 	private static class ActionBeanHolder {
 		private String actionBeanName;
 
 		private ActionBean actionBean;
 
 		private ActionBeanHolder(String actionBeanName) {
+			Assert.hasText(actionBeanName, "The action bean name is required");
 			this.actionBeanName = actionBeanName;
 		}
 
 		private ActionBeanHolder(ActionBean actionBean) {
-			this.actionBean = actionBean;
-		}
-
-		private ActionBeanHolder(String actionBeanName, ActionBean actionBean) {
-			this.actionBeanName = actionBeanName;
+			Assert.notNull(actionBean, "The action bean is required");
 			this.actionBean = actionBean;
 		}
 
@@ -108,31 +115,61 @@ public class ActionState extends TransitionableState {
 	}
 
 	public void setActionBean(ActionBean actionBean) {
-		Assert.notNull(actionBean, "The action bean instance is required");
 		this.actionBeans = new HashSet(1);
-		this.actionBeans.add(new ActionBeanHolder(actionBean));
+		addActionBean(actionBean);
 	}
 
 	public void setActionBeanName(String actionBeanName) {
-		Assert.hasText(actionBeanName, "The action bean name is required");
 		this.actionBeans = new HashSet(1);
-		this.actionBeans.add(new ActionBeanHolder(actionBeanName));
+		addActionBeanName(actionBeanName);
 	}
 
 	public void setActionBeans(ActionBean[] actionBeans) {
-		Collection holders = new LinkedHashSet(actionBeans.length);
-		for (int i = 0; i < actionBeans.length; i++) {
-			holders.add(new ActionBeanHolder(actionBeans[i]));
-		}
-		this.actionBeans = new HashSet(holders);
+		this.actionBeans = new HashSet(actionBeans.length);
+		addActionBeans(actionBeans);
 	}
 
-	public void setActionBeanNames(String[] beanNames) {
-		Collection holders = new LinkedHashSet(beanNames.length);
-		for (int i = 0; i < beanNames.length; i++) {
-			holders.add(new ActionBeanHolder(beanNames[i]));
+	public void setActionBeanNames(String[] actionBeanNames) {
+		this.actionBeans = new HashSet(actionBeanNames.length);
+		addActionBeanNames(actionBeanNames);
+	}
+
+	public boolean addActionBeanName(String actionBeanName) {
+		return this.actionBeans.add(new ActionBeanHolder(actionBeanName));
+	}
+
+	public boolean addActionBean(ActionBean actionBean) {
+		return this.actionBeans.add(new ActionBeanHolder(actionBean));
+	}
+
+	public boolean addActionBeanNames(String[] actionBeanNames) {
+		Collection holders = new LinkedHashSet(actionBeanNames.length);
+		boolean changed = false;
+		for (int i = 0; i < actionBeanNames.length; i++) {
+			if (holders.add(new ActionBeanHolder(actionBeanNames[i]))) {
+				changed = true;
+			}
 		}
-		this.actionBeans = new HashSet(holders);
+		return changed;
+	}
+
+	public boolean addActionBeans(ActionBean[] actionBeans) {
+		Collection holders = new LinkedHashSet(actionBeans.length);
+		boolean changed = false;
+		for (int i = 0; i < actionBeans.length; i++) {
+			if (holders.add(new ActionBeanHolder(actionBeans[i]))) {
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
+	public boolean removeActionBeanName(String actionBeanName) {
+		return this.actionBeans.remove(new ActionBeanHolder(actionBeanName));
+	}
+
+	public boolean removeActionBean(ActionBean actionBean) {
+		return this.actionBeans.remove(new ActionBeanHolder(actionBean));
 	}
 
 	protected Iterator actionBeanIterator(final Flow flow) {
@@ -175,26 +212,44 @@ public class ActionState extends TransitionableState {
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		Iterator it = actionBeanIterator(flow);
+		int beanExecutionCount = 0;
 		while (it.hasNext()) {
 			ActionBean actionBean = (ActionBean)it.next();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean '" + actionBean + "'");
 			}
 			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
+			beanExecutionCount++;
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecution, request, response);
 			}
 			else {
-				if (event != null && logger.isWarnEnabled()) {
-					logger.warn("Event '" + event + "' returned by action bean " + actionBean
-							+ "' does not map to a valid state transition for action state '" + getId() + "' in flow '"
-							+ flow.getId() + "'");
+				if (event != null) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Event '" + event + "' returned by action bean " + actionBean
+								+ "' does not map to a valid state transition for action state '" + getId()
+								+ "' in flow '" + flow.getId() + "'");
+					}
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
+								+ "I will attempt to proceed to the next action in the chain");
+					}
 				}
 			}
 		}
-		throw new CannotExecuteStateTransitionException(flow, getId(), new IllegalStateException(
-				"No valid event was signaled by the action bean(s) that executed in this action state '" + getId()
-						+ "' of flow '" + flow.getId() + "' - programmer error?"));
+		if (beanExecutionCount > 0) {
+			throw new CannotExecuteStateTransitionException(flow, getId(), new IllegalStateException(
+					"No valid event was signaled by any of the " + beanExecutionCount
+							+ " action bean(s) that executed in this action state '" + getId() + "' of flow '"
+							+ flow.getId() + "' - programmer error?"));
+		}
+		else {
+			throw new CannotExecuteStateTransitionException(flow, getId(), new IllegalStateException(
+					"No action beans executed, thus I cannot execute any state transition "
+							+ "- programmer configuration error"));
+		}
 	}
 
 	protected boolean triggersTransition(ActionBeanEvent event, Flow flow) {
