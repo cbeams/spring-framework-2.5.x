@@ -77,4 +77,12 @@ public interface FormatterLocator {
 	 * @return the currency formatter
 	 */
 	public Formatter getCurrencyFormatter();
+	
+	/**
+	 * Returns the default formatter for the specified value class.
+	 * @param labeledEnumClass The value class
+	 * @return the formatter
+	 */
+	public Formatter getLabeledEnumFormatter(Class labeledEnumClass);
+
 }

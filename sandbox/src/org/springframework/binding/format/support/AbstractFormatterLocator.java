@@ -21,6 +21,7 @@ import org.springframework.binding.format.Formatter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.LocaleContext;
 import org.springframework.binding.format.Style;
+import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
  * FormatterLocator that caches Formatters in thread-local storage.
@@ -34,16 +35,22 @@ public abstract class AbstractFormatterLocator implements FormatterLocator {
 
 	private Style defaultTimeStyle = Style.MEDIUM;
 
+	private LabeledEnumResolver labeledEnumResolver;
+	
 	public void setLocaleContext(LocaleContext localeContext) {
 		this.localeContext = localeContext;
 	}
-	
+
 	public void setDefaultDateStyle(Style style) {
 		this.defaultDateStyle = style;
 	}
 
 	public void setDefaultTimeStyle(Style style) {
 		this.defaultTimeStyle = style;
+	}
+	
+	public void setLabeledEnumResolver(LabeledEnumResolver labeledEnumResolver) {
+		this.labeledEnumResolver = labeledEnumResolver;
 	}
 
 	protected int getDefaultDateStyleCode() {
@@ -80,5 +87,9 @@ public abstract class AbstractFormatterLocator implements FormatterLocator {
 
 	public Formatter getCurrencyFormatter() {
 		throw new UnsupportedOperationException();
+	}
+
+	public Formatter getLabeledEnumFormatter(Class valueClass) {
+		return new LabeledEnumFormatter(valueClass, true, labeledEnumResolver);
 	}
 }

@@ -15,17 +15,16 @@
  */
 package org.springframework.binding.convert.support;
 
-import org.springframework.util.StringUtils;
-import org.springframework.util.enums.LabeledEnum;
 import org.springframework.util.enums.LabeledEnumResolver;
 import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
- * Converts textual representations of <coded>CodedEnum</code> instances to a
- * specific instance of <code>CodedEnum</code>
+ * Base class for a converter that converts textual representations of
+ * <coded>CodedEnum</code> instances to a specific instance of <code>
+ * LabeledEnum</code>
  * @author Keith Donal
  */
-public class TextToLabeledEnumConverter extends AbstractConverter {
+public abstract class TextToLabeledEnumConverter extends AbstractFormattingConverter {
 
 	private LabeledEnumResolver enumResolver = StaticLabeledEnumResolver.instance();
 
@@ -37,17 +36,18 @@ public class TextToLabeledEnumConverter extends AbstractConverter {
 		return new Class[] { String.class };
 	}
 
-	public Class[] getTargetClasses() {
-		return new Class[] { LabeledEnum.class };
+	public final Class[] getTargetClasses() {
+		return getLabeledEnumClasses();
 	}
 
+	/**
+	 * Subclasses should override to return the labeled enum classes that should
+	 * be converted for your application.
+	 * @return The classes, all implementations of <code>LabeledEnum</code>
+	 */
+	protected abstract Class[] getLabeledEnumClasses();
+
 	protected Object doConvert(Object source, Class targetClass) throws Exception {
-		String text = (String)source;
-		if (StringUtils.hasText(text)) {
-			return this.enumResolver.getLabeledEnum(targetClass.getName(), (Comparable)source);
-		}
-		else {
-			return null;
-		}
+		return getFormatterLocator().getLabeledEnumFormatter(targetClass).parseValue((String)source);
 	}
 }
