@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * @author Keith Donald
  */
-public interface SubFlowAttributesMapper {
+public interface FlowAttributesMapper {
 	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes);
 
 	public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.closure.Constraint;
 
 /**
  * A user session instance of a flow.
@@ -150,14 +152,26 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		return Collections.unmodifiableCollection(attributes.keySet());
 	}
 
-	public Collection attributeEntries() {
-		return Collections.unmodifiableCollection(attributes.entrySet());
-	}
-
 	public Collection attributeValues() {
 		return Collections.unmodifiableCollection(attributes.values());
 	}
 
+	public Collection attributeEntries() {
+		return Collections.unmodifiableCollection(attributes.entrySet());
+	}
+
+	public Collection findAttributes(Constraint criteria) {
+		Iterator it = attributeEntries().iterator();
+		Collection filteredEntries = new LinkedHashSet();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry)it.next();
+			if (criteria.test(entry)) {
+				filteredEntries.add(entry);
+			}
+		}
+		return filteredEntries;
+	}
+	
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue

@@ -43,17 +43,28 @@ public class StartState implements Serializable {
 		return state;
 	}
 
-	public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-			HttpServletResponse response, Map inputAttributes) {
+	public FlowSessionExecutionStartResult enter(Flow flow, HttpServletRequest request, HttpServletResponse response,
+			Map inputAttributes) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getState()
 					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
 		}
+		FlowSessionExecutionStack sessionExecutionStack = createFlowSessionExecutionStack();
+		ViewDescriptor startingView = enter(flow, sessionExecutionStack, request, response, inputAttributes);
+		return new FlowSessionExecutionStartResult(sessionExecutionStack, startingView);
+	}
+
+	public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) {
 		sessionExecutionStack.push(flow.createSession(inputAttributes));
 		if (flow.isLifecycleListenerSet()) {
 			flow.getLifecycleListener().flowStarted(flow, sessionExecutionStack, request);
 		}
 		return getState().enter(flow, sessionExecutionStack, request, response);
+	}
+
+	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
+		return new FlowSessionExecutionStack();
 	}
 
 }

@@ -51,5 +51,5 @@ public interface FlowDao {
 	 * @param subFlowAttributesMapperId the attributes mapper id
 	 * @return The mapper
 	 */
-	public SubFlowAttributesMapper getSubFlowAttributesMapper(String subFlowAttributesMapperId) throws BeansException;
+	public FlowAttributesMapper getSubFlowAttributesMapper(String subFlowAttributesMapperId) throws BeansException;
 }

@@ -3,12 +3,28 @@
  */
 package org.springframework.web.flow;
 
+import java.io.Serializable;
+
 /**
  * @author Keith Donald
  */
-public interface FlowSessionExecutionInfo extends AttributesAccessor {
+public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializable {
 
 	public static String FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME = "flowSessionExecutionInfo";
+
+	/**
+	 * Return the id of this flow session execution. This is not a human
+	 * readable flow definition ID, but a system generated session key.
+	 * @return
+	 */
+	public String getId();
+
+	/**
+	 * Return a display string suitable for logging/printing in a console
+	 * containing info about this session execution.
+	 * @return
+	 */
+	public String getCaption();
 
 	/**
 	 * Is the flow session execution active?
@@ -62,4 +78,5 @@ public interface FlowSessionExecutionInfo extends AttributesAccessor {
 	 * @return The timestamp of the last event occurance
 	 */
 	public long getLastEventTimestamp();
+
 }

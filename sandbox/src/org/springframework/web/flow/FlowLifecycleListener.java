@@ -24,18 +24,18 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface FlowLifecycleListener {
 
-	public void flowStarted(Flow source, FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request);
+	public void flowStarted(Flow source, FlowSessionExecutionInfo sessionExecutionInfo, HttpServletRequest request);
 
 	public void flowEventSignaled(Flow source, String eventId, AbstractState state,
-			FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request);
+			FlowSessionExecutionInfo sessionExecutionInfo, HttpServletRequest request);
 
 	public void flowStateTransitioned(Flow source, AbstractState oldState, AbstractState newState,
-			FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request);
+			FlowSessionExecutionInfo sessionExecutionInfo, HttpServletRequest request);
 
 	public void flowEventProcessed(Flow source, String eventId, AbstractState state,
-			FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request);
+			FlowSessionExecutionInfo sessionExecutionInfo, HttpServletRequest request);
 
-	public void flowEnded(Flow source, FlowSession endedFlowSession, FlowSessionExecutionStack sessionExecutionStack,
+	public void flowEnded(Flow source, FlowSession endedFlowSession, FlowSessionExecutionInfo sessionExecutionInfo,
 			HttpServletRequest request);
 
 }

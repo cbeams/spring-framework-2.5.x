@@ -92,29 +92,29 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws IllegalArgumentException if the <code>eventId</code> does not
 	 *         map to a valid transition for this state.
 	 */
-	public ViewDescriptor execute(String eventId, Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	public ViewDescriptor execute(String eventId, Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
 		String qualifiedActiveFlowId = null;
 		if (logger.isDebugEnabled()) {
-			qualifiedActiveFlowId = sessionExecutionStack.getQualifiedActiveFlowId();
+			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
 					+ qualifiedActiveFlowId + "' was signaled; processing...");
 		}
 		if (flow.isLifecycleListenerSet()) {
-			flow.getFlowLifecycleListener().flowEventSignaled(flow, eventId, this, sessionExecutionStack, request);
+			flow.getFlowLifecycleListener().flowEventSignaled(flow, eventId, this, sessionExecution, request);
 		}
 
 		ViewDescriptor descriptor = getTransition(eventId, flow)
-				.execute(flow, sessionExecutionStack, request, response);
+				.execute(flow, sessionExecution, request, response);
 
 		if (logger.isDebugEnabled()) {
-			if (sessionExecutionStack.isActive()) {
+			if (sessionExecution.isActive()) {
 				logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
-						+ sessionExecutionStack.getQualifiedActiveFlowId()
+						+ sessionExecution.getQualifiedActiveFlowId()
 						+ "' was processed; as a result, the new flow state is '"
-						+ sessionExecutionStack.getCurrentStateId() + "'");
+						+ sessionExecution.getCurrentStateId() + "'");
 			}
 			else {
 				logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
@@ -122,7 +122,7 @@ public abstract class TransitionableState extends AbstractState {
 			}
 		}
 		if (flow.isLifecycleListenerSet()) {
-			flow.getFlowLifecycleListener().flowEventProcessed(flow, eventId, this, sessionExecutionStack, request);
+			flow.getFlowLifecycleListener().flowEventProcessed(flow, eventId, this, sessionExecution, request);
 		}
 		return descriptor;
 	}

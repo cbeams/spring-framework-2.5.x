@@ -93,22 +93,22 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	public final ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	public final ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		AbstractState oldState = null;
-		if (sessionExecutionStack.getCurrentStateId() != null) {
-			oldState = flow.getRequiredState(sessionExecutionStack.getCurrentStateId());
+		if (sessionExecution.getCurrentStateId() != null) {
+			oldState = flow.getRequiredState(sessionExecution.getCurrentStateId());
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
 		}
-		sessionExecutionStack.setCurrentStateId(getId());
+		sessionExecution.setCurrentStateId(getId());
 
 		// Publish state transition event if necessary
 		if (flow.getFlowLifecycleListener() != null) {
-			flow.getFlowLifecycleListener().flowStateTransitioned(flow, oldState, this, sessionExecutionStack, request);
+			flow.getFlowLifecycleListener().flowStateTransitioned(flow, oldState, this, sessionExecution, request);
 		}
-		ViewDescriptor viewDescriptor = doEnterState(flow, sessionExecutionStack, request, response);
+		ViewDescriptor viewDescriptor = doEnterState(flow, sessionExecution, request, response);
 		return viewDescriptor;
 	}
 

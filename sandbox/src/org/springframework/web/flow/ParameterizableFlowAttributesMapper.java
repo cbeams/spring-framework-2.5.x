@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
+import org.springframework.util.closure.Constraint;
 
 /**
  * Simple attributes mapper that allows mappings to be configured in the Spring
@@ -81,7 +82,7 @@ import org.springframework.util.Assert;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributesMapper, Serializable {
+public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 
@@ -294,6 +295,10 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 		}
 
 		public Collection attributeValues() {
+			throw new UnsupportedOperationException();
+		}
+
+		public Collection findAttributes(Constraint criteria) {
 			throw new UnsupportedOperationException();
 		}
 

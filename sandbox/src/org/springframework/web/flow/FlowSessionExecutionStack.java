@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
+import org.springframework.util.closure.Constraint;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
@@ -54,6 +55,10 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	public String getId() {
 		return id;
+	}
+
+	public String getCaption() {
+		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
 	}
 
 	public boolean isActive() {
@@ -94,13 +99,6 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 			}
 		}
 		return qualifiedName.toString();
-	}
-
-	/**
-	 * @return
-	 */
-	public String getQualifiedFlowSessionId() {
-		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
 	}
 
 	public Map getAttributes() {
@@ -179,12 +177,16 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return getActiveFlowSession().attributeNames();
 	}
 
+	public Collection attributeValues() {
+		return getActiveFlowSession().attributeValues();
+	}
+
 	public Collection attributeEntries() {
 		return getActiveFlowSession().attributeEntries();
 	}
 
-	public Collection attributeValues() {
-		return getActiveFlowSession().attributeValues();
+	public Collection findAttributes(Constraint criteria) {
+		return getActiveFlowSession().findAttributes(criteria);
 	}
 
 	/**
@@ -212,6 +214,10 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	}
 
 	public void setAttribute(String attributeName, Object attributeValue) {
+		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+			throw new IllegalArgumentException("Attribute name '" + FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME
+					+ "' is reserved for internal use only");
+		}
 		getActiveFlowSession().setAttribute(attributeName, attributeValue);
 	}
 

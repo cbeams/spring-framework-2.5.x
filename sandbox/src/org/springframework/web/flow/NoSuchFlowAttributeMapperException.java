@@ -6,7 +6,7 @@ package org.springframework.web.flow;
 /**
  * @author Keith Donald
  */
-public class NoSuchAttributeMapperException extends FlowNavigationException {
+public class NoSuchFlowAttributeMapperException extends FlowNavigationException {
 	private SubFlowState state;
 
 	/**
@@ -14,7 +14,7 @@ public class NoSuchAttributeMapperException extends FlowNavigationException {
 	 * @param state
 	 * @param cause
 	 */
-	public NoSuchAttributeMapperException(Flow flow, SubFlowState state, Throwable cause) {
+	public NoSuchFlowAttributeMapperException(Flow flow, SubFlowState state, Throwable cause) {
 		super(flow, cause);
 		this.state = state;
 	}

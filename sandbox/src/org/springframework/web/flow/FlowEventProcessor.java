@@ -44,8 +44,6 @@ public interface FlowEventProcessor {
 	 * Start a new session for this flow. This will cause the flow session to
 	 * enter its start state.
 	 * 
-	 * @param sessionExecutionStack The session execution stack, tracking any
-	 *        suspended parent flows that spawned this flow (as a subflow)
 	 * @param request the client http request
 	 * @param response the server http response
 	 * @param input optional input attributes to be passed to the new flow
@@ -55,15 +53,13 @@ public interface FlowEventProcessor {
 	 * @throws IllegalStateException if the event processor has not been
 	 *         configured with a valid start state.
 	 */
-	public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-			HttpServletResponse response, Map input) throws IllegalStateException;
+	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response, Map input)
+			throws IllegalStateException;
 
 	/**
 	 * Start a new session for this flow, but start it in a specified state, not
 	 * the default start state.
 	 * 
-	 * @param sessionExecutionStack The session execution stack, tracking any
-	 *        suspended parent flows that spawned this flow (as a subflow)
 	 * @param stateId The id of the state to start with. This must be a
 	 *        TransitionableState
 	 * @param request the client http request
@@ -77,8 +73,8 @@ public interface FlowEventProcessor {
 	 * @throws IllegalArgumentException if the stateId is not a
 	 *         TransitionableState
 	 */
-	public ViewDescriptor resume(FlowSessionExecutionStack sessionExecutionStack, String stateId,
-			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) throws IllegalStateException;
+	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) throws IllegalStateException;
 
 	/**
 	 * Execute the event identified by <code>eventId</code> in the state
@@ -99,7 +95,7 @@ public interface FlowEventProcessor {
 	 *         or if the <code>stateId</code> does not map to a valid flow
 	 *         state.
 	 */
-	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
+	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionInfo sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 
 }

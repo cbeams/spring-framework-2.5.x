@@ -17,6 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Collection;
 
+import org.springframework.util.closure.Constraint;
+
 /**
  * A simple interface for accessing attributes - helps prevent accidental
  * misuse/manipulation of more enabling interfaces like Map, for example --
@@ -42,7 +44,9 @@ public interface AttributesAccessor {
 
 	public Collection attributeNames();
 
+	public Collection attributeValues();
+
 	public Collection attributeEntries();
 
-	public Collection attributeValues();
+	public Collection findAttributes(Constraint criteria);
 }

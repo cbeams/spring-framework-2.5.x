@@ -70,7 +70,7 @@ public class SubFlowState extends TransitionableState {
 		return true;
 	}
 
-	protected SubFlowAttributesMapper getAttributesMapper(Flow flow) {
+	protected FlowAttributesMapper getAttributesMapper(Flow flow) {
 		if (!StringUtils.hasText(attributesMapperId)) {
 			return null;
 		}
@@ -78,11 +78,11 @@ public class SubFlowState extends TransitionableState {
 			return flow.getFlowDao().getSubFlowAttributesMapper(attributesMapperId);
 		}
 		catch (NoSuchBeanDefinitionException e) {
-			throw new NoSuchAttributeMapperException(flow, this, e);
+			throw new NoSuchFlowAttributeMapperException(flow, this, e);
 		}
 	}
 
-	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
@@ -104,7 +104,7 @@ public class SubFlowState extends TransitionableState {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			subFlowAttributes = getAttributesMapper(flow).createSpawnedSubFlowAttributesMap(sessionExecutionStack);
+			subFlowAttributes = getAttributesMapper(flow).createSpawnedSubFlowAttributesMap(sessionExecution);
 		}
 		else {
 			if (logger.isInfoEnabled()) {
@@ -114,7 +114,7 @@ public class SubFlowState extends TransitionableState {
 			}
 			subFlowAttributes = new HashMap(1);
 		}
-		return subFlow.start(sessionExecutionStack, request, response, subFlowAttributes);
+		return subFlow.spawnIn(sessionExecution, request, response, subFlowAttributes);
 	}
 
 }

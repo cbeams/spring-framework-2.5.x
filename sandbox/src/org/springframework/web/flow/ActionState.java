@@ -81,7 +81,7 @@ public class ActionState extends TransitionableState {
 		return (String)this.actionBeanNames.iterator().next();
 	}
 
-	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		Iterator it = this.actionBeanNames.iterator();
 		while (it.hasNext()) {
@@ -97,9 +97,9 @@ public class ActionState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean with name '" + actionBeanName + "'");
 			}
-			ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
+			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
 			if (triggersTransition(event, flow)) {
-				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
+				return getTransition(event, flow).execute(flow, sessionExecution, request, response);
 			}
 			else {
 				if (event != null && logger.isWarnEnabled()) {

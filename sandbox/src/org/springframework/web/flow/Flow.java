@@ -318,8 +318,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param startStateId
 	 * @param states
 	 */
-	public Flow(String id, String startStateId, AbstractState[] states) {
+	public Flow(String id, String startStateId, FlowDao flowDao, AbstractState[] states) {
 		this.id = id;
+		setFlowDao(flowDao);
 		addAll(states);
 		setStartState(startStateId);
 		initFlow();
@@ -329,7 +330,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param dao
 	 */
 	public void setFlowDao(FlowDao dao) {
-		Assert.notNull(dao, "The flow data access object is required for loading subflows and action beans");
+		Assert
+				.notNull(dao,
+						"The flow data access object is required for loading subflows, action state action beans, and attribute mappers");
 		this.flowDao = dao;
 	}
 
@@ -616,51 +619,57 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.start
 	 */
-	public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
-			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
+	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
+			Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("A new session for flow '" + getId() + "' was requested; processing...");
 		}
-		return getStartState().enter(this, sessionExecutionStack, request, response, inputAttributes);
+		return getStartState().enter(this, request, response, inputAttributes);
 	}
 
 	/*
 	 * see #FlowEventProcessor.execute
 	 */
-	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
+	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionInfo sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
-		Assert.isTrue(sessionExecutionStack.isActive(),
+		Assert.isTrue(sessionExecution.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
-		Flow activeFlow = getActiveFlow(sessionExecutionStack);
+		Flow activeFlow = getActiveFlow(sessionExecution);
 		TransitionableState currentState = activeFlow.getRequiredTransitionableState(stateId);
-		ViewDescriptor viewDescriptor = currentState.execute(eventId, activeFlow, sessionExecutionStack, request,
-				response);
+		ViewDescriptor viewDescriptor = currentState.execute(eventId, activeFlow,
+				(FlowSessionExecutionStack)sessionExecution, request, response);
 		return viewDescriptor;
 	}
 
 	// javadoc in superclass
-	public ViewDescriptor resume(FlowSessionExecutionStack sessionExecutionStack, String stateId,
-			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
+	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
 					+ "' was requested; processing...");
 		}
+		TransitionableState state = getRequiredTransitionableState(stateId);
+		return new StartState(state).enter(this, request, response, inputAttributes);
+	}
 
-		AbstractState abstractState = getRequiredState(stateId);
-		if (!(abstractState instanceof TransitionableState))
-			throw new IllegalArgumentException("Asked to resume flow at state which is not a TransitionableState: "
-					+ abstractState);
-		TransitionableState state = (TransitionableState)abstractState;
-
-		return new StartState(state).enter(this, sessionExecutionStack, request, response, inputAttributes);
+	/**
+	 * @param sessionExecutionStack
+	 * @param request
+	 * @param response
+	 * @param subFlowAttributes
+	 * @return
+	 */
+	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) {
+		return getStartState().enter(this, sessionExecution, request, response, inputAttributes);
 	}
 
 	/**
 	 * @param sessionExecutionStack
 	 * @return
 	 */
-	Flow getActiveFlow(FlowSessionExecutionStack sessionExecutionStack) {
-		String activeFlowId = sessionExecutionStack.getActiveFlowId();
+	Flow getActiveFlow(FlowSessionExecutionInfo sessionExecution) {
+		String activeFlowId = sessionExecution.getActiveFlowId();
 		if (getId().equals(activeFlowId)) {
 			return this;
 		}
@@ -1684,4 +1693,5 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return new ToStringCreator(this).append("id", id).append("startState", startState).append("stateGroups",
 				stateGroups).toString();
 	}
+
 }

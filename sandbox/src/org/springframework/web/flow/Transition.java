@@ -52,20 +52,20 @@ public class Transition implements Serializable {
 		return toState;
 	}
 
-	public ViewDescriptor execute(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	public ViewDescriptor execute(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing transition from state '" + sessionExecutionStack.getCurrentStateId()
+			logger.debug("Executing transition from state '" + sessionExecution.getCurrentStateId()
 					+ "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
 		}
 		try {
-			sessionExecutionStack.setLastEventId(getId());
-			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecutionStack, request,
+			sessionExecution.setLastEventId(getId());
+			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
 					response);
 			return descriptor;
 		}
 		catch (NoSuchFlowStateException e) {
-			throw new CannotExecuteStateTransitionException(this, flow, sessionExecutionStack.getCurrentStateId(), e);
+			throw new CannotExecuteStateTransitionException(this, flow, sessionExecution.getCurrentStateId(), e);
 		}
 	}
 

@@ -87,9 +87,9 @@ public class ViewState extends TransitionableState {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
-		return new ViewDescriptor(viewName, sessionExecutionStack.getAttributes());
+		return new ViewDescriptor(viewName, sessionExecution.getAttributes());
 	}
 
 	public String toString() {
