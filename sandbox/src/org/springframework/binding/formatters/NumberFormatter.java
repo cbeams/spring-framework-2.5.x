@@ -17,7 +17,6 @@ package org.springframework.binding.formatters;
 
 import java.text.NumberFormat;
 
-import org.springframework.binding.TypeConversionException;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
@@ -56,7 +55,7 @@ public class NumberFormatter extends AbstractFormatter {
 		Assert.isTrue(Number.class.isAssignableFrom(numberClass), "Property class must be a subclass of Number");
 	}
 
-	public String formatValue(Object number) {
+	protected String doFormatValue(Object number) {
 		if (this.numberFormat != null) {
 			// use NumberFormat for rendering value
 			return this.numberFormat.format((Number)number);
@@ -67,7 +66,7 @@ public class NumberFormatter extends AbstractFormatter {
 		}
 	}
 
-	public Object parseValue(String text) throws TypeConversionException {
+	protected Object doParseValue(String text) throws IllegalArgumentException {
 		// use given NumberFormat for parsing text
 		if (this.numberFormat != null) {
 			return NumberUtils.parseNumber((String)text, getValueClass(), this.numberFormat);

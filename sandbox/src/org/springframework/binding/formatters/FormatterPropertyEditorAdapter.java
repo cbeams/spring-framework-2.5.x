@@ -37,12 +37,12 @@ public class FormatterPropertyEditorAdapter extends AbstractFormatter {
 		return propertyEditor;
 	}
 
-	public String formatValue(Object value) {
+	protected String doFormatValue(Object value) {
 		propertyEditor.setValue(value);
 		return propertyEditor.getAsText();
 	}
 
-	public Object parseValue(String formattedValue) {
+	protected Object doParseValue(String formattedValue) {
 		propertyEditor.setAsText(formattedValue);
 		return propertyEditor.getValue();
 	}

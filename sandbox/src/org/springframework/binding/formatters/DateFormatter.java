@@ -19,8 +19,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.springframework.binding.InvalidFormatException;
-
 /**
  * Formatter that formats date objects.
  * @author Keith Donald
@@ -30,7 +28,9 @@ public class DateFormatter extends AbstractFormatter {
 	private DateFormat dateFormat;
 
 	/**
-	 * @param convertFromClass
+	 * Constructs a date formatter that will delegate to the specified date
+	 * format.
+	 * @param dateFormat
 	 */
 	public DateFormatter(DateFormat dateFormat) {
 		super(Date.class);
@@ -38,8 +38,10 @@ public class DateFormatter extends AbstractFormatter {
 	}
 
 	/**
-	 * @param convertFromClass
-	 * @param allowEmpty
+	 * Constructs a date formatter that will delegate to the specified date
+	 * format.
+	 * @param dateFormat
+	 * @param allowEmpty should this formatter allow empty input arguments?
 	 */
 	public DateFormatter(DateFormat dateFormat, boolean allowEmpty) {
 		super(Date.class, allowEmpty);
@@ -47,17 +49,12 @@ public class DateFormatter extends AbstractFormatter {
 	}
 
 	// convert from date to string
-	public String formatValue(Object date) {
+	protected String doFormatValue(Object date) {
 		return dateFormat.format((Date)date);
 	}
 
 	// convert back from string to date
-	public Object parseValue(String dateString) throws InvalidFormatException {
-		try {
-			return dateFormat.parse((String)dateString);
-		}
-		catch (ParseException ex) {
-			throw new InvalidFormatException(dateString, dateFormat.toString(), ex);
-		}
+	protected Object doParseValue(String dateString) throws ParseException {
+		return dateFormat.parse((String)dateString);
 	}
 }

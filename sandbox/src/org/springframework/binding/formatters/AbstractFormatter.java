@@ -15,8 +15,7 @@
  */
 package org.springframework.binding.formatters;
 
-import java.util.Collection;
-import java.util.Map;
+import java.text.ParseException;
 
 import org.springframework.binding.Formatter;
 import org.springframework.binding.InvalidFormatException;
@@ -37,10 +36,19 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 
 	private boolean allowEmpty;
 
+	/**
+	 * Constructs a formatted for the specified target <code>valueClass</code>
+	 * @param valueClass the value class
+	 */
 	protected AbstractFormatter(Class valueClass) {
 		this(valueClass, false);
 	}
 
+	/**
+	 * Constructs a formatted for the specified target <code>valueClass</code>
+	 * @param valueClass the value class
+	 * @param allowEmpty allow formatting of empty values
+	 */
 	protected AbstractFormatter(Class valueClass, boolean allowEmpty) {
 		Assert.notNull(valueClass, "The class of value to format is requred");
 		this.valueClass = valueClass;
@@ -53,12 +61,12 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 
 	public Object convert(Object o) throws TypeConversionException {
 		if (allowEmpty && isEmpty(o)) {
-			return "";
+			return getEmptyFormattedValue();
 		}
-		Assert.notNull(o, "Object to convert from '" + getValueClass().getName() + "' to '" + String.class
-				+ "' (or vice versa) cannot be null");
+		Assert.isTrue(!isEmpty(o), "Object to convert from '" + getValueClass().getName() + "' to '" + String.class
+				+ "' (or vice versa) cannot be empty");
 		if (getValueClass().isInstance(o)) {
-			return formatValue(o);
+			return doFormatValue(o);
 		}
 		else if (String.class.isInstance(o)) {
 			try {
@@ -74,6 +82,43 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 		}
 	}
 
+	public final String formatValue(Object value) {
+		if (allowEmpty && isEmpty(value)) {
+			return getEmptyFormattedValue();
+		}
+		Assert.isTrue(!isEmpty(value), "Object to format cannot be empty");
+		return doFormatValue(value);
+	}
+
+	/**
+	 * Template method subclasses should override to encapsulate formatting
+	 * logic.
+	 * @param value the value to format
+	 * @return the formatted string representation
+	 */
+	protected abstract String doFormatValue(Object value);
+
+	protected String getEmptyFormattedValue() {
+		return "";
+	}
+
+	/**
+	 * Template method subclasses should override to encapsulate parsing logic.
+	 * @param value the value to parse
+	 * @return the parsed value
+	 * @throws InvalidFormatException an exception occured parsing
+	 */
+	public final Object parseValue(String formattedString) throws InvalidFormatException {
+		try {
+			return doParseValue(formattedString);
+		}
+		catch (ParseException ex) {
+			throw new InvalidFormatException(formattedString, ex);
+		}
+	}
+
+	protected abstract Object doParseValue(String formattedString) throws InvalidFormatException, ParseException;
+
 	protected boolean isEmpty(Object o) {
 		if (o == null) {
 			return true;
@@ -81,15 +126,13 @@ public abstract class AbstractFormatter implements Formatter, TypeConverter, Clo
 		else if (o instanceof String) {
 			return StringUtils.hasText((String)o);
 		}
-		else if (o instanceof Collection) {
-			return ((Collection)o).isEmpty();
-		}
-		else if (o instanceof Map) {
-			return ((Map)o).isEmpty();
-		}
 		else {
 			return false;
 		}
+	}
+
+	public boolean isAllowEmpty() {
+		return allowEmpty;
 	}
 
 	public Object call(Object argument) {
