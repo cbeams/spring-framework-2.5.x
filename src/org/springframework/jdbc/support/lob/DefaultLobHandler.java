@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  * @see java.sql.PreparedStatement#setAsciiStream
  * @see java.sql.PreparedStatement#setCharacterStream
  */
-public class DefaultLobHandler implements LobHandler {
+public class DefaultLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -75,6 +75,7 @@ public class DefaultLobHandler implements LobHandler {
 	}
 
 	public LobCreator getLobCreator() {
+		logger.debug("Creating new DefaultLobCreator");
 		return new DefaultLobCreator();
 	}
 
@@ -131,6 +132,7 @@ public class DefaultLobHandler implements LobHandler {
 		}
 
 		public void close() {
+			logger.debug("Closing DefaultLobCreator");
 			// nothing to do here
 		}
 	}

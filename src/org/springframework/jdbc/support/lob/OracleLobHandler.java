@@ -73,7 +73,7 @@ import org.springframework.util.FileCopyUtils;
  * @see oracle.sql.BLOB
  * @see oracle.sql.CLOB
  */
-public class OracleLobHandler implements LobHandler {
+public class OracleLobHandler extends AbstractLobHandler {
 
 	private static final String CONNECTION_CLASS_NAME = "oracle.jdbc.OracleConnection";
 
@@ -167,31 +167,31 @@ public class OracleLobHandler implements LobHandler {
 
 
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
-		logger.debug("Returning BLOB as bytes");
+		logger.debug("Returning Oracle BLOB as bytes");
 		Blob blob = rs.getBlob(columnIndex);
 		return (blob != null ? blob.getBytes(1, (int) blob.length()) : null);
 	}
 
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
-		logger.debug("Returning BLOB as binary stream");
+		logger.debug("Returning Oracle BLOB as binary stream");
 		Blob blob = rs.getBlob(columnIndex);
 		return (blob != null ? blob.getBinaryStream() : null);
 	}
 
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
-		logger.debug("Returning CLOB as string");
+		logger.debug("Returning Oracle CLOB as string");
 		Clob clob = rs.getClob(columnIndex);
 		return (clob != null ? clob.getSubString(1, (int) clob.length()) : null);
 	}
 
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
-		logger.debug("Returning CLOB as ASCII stream");
+		logger.debug("Returning Oracle CLOB as ASCII stream");
 		Clob clob = rs.getClob(columnIndex);
 		return (clob != null ? clob.getAsciiStream() : null);
 	}
 
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
-		logger.debug("Returning CLOB as character stream");
+		logger.debug("Returning Oracle CLOB as character stream");
 		Clob clob = rs.getClob(columnIndex);
 		return (clob != null ? clob.getCharacterStream() : null);
 	}
@@ -222,12 +222,12 @@ public class OracleLobHandler implements LobHandler {
 				});
 				ps.setBlob(paramIndex, blob);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Set bytes for BLOB with length " + blob.length());
+					logger.debug("Set bytes for Oracle BLOB with length " + blob.length());
 				}
 			}
 			else {
 				ps.setBlob(paramIndex, null);
-				logger.debug("Set BLOB to null");
+				logger.debug("Set Oracle BLOB to null");
 			}
 		}
 
@@ -244,12 +244,12 @@ public class OracleLobHandler implements LobHandler {
 				});
 				ps.setBlob(paramIndex, blob);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Set binary stream for BLOB with length " + blob.length());
+					logger.debug("Set binary stream for Oracle BLOB with length " + blob.length());
 				}
 			}
 			else {
 				ps.setBlob(paramIndex, null);
-				logger.debug("Set BLOB to null");
+				logger.debug("Set Oracle BLOB to null");
 			}
 		}
 
@@ -265,12 +265,12 @@ public class OracleLobHandler implements LobHandler {
 				});
 				ps.setClob(paramIndex, clob);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Set string for CLOB with length " + clob.length());
+					logger.debug("Set string for Oracle CLOB with length " + clob.length());
 				}
 			}
 			else {
 				ps.setClob(paramIndex, null);
-				logger.debug("Set CLOB to null");
+				logger.debug("Set Oracle CLOB to null");
 			}
 		}
 
@@ -287,12 +287,12 @@ public class OracleLobHandler implements LobHandler {
 				});
 				ps.setClob(paramIndex, clob);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Set ASCII stream for CLOB with length " + clob.length());
+					logger.debug("Set ASCII stream for Oracle CLOB with length " + clob.length());
 				}
 			}
 			else {
 				ps.setClob(paramIndex, null);
-				logger.debug("Set CLOB to null");
+				logger.debug("Set Oracle CLOB to null");
 			}
 		}
 
@@ -309,12 +309,12 @@ public class OracleLobHandler implements LobHandler {
 				});
 				ps.setClob(paramIndex, clob);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Set character stream for CLOB with length " + clob.length());
+					logger.debug("Set character stream for Oracle CLOB with length " + clob.length());
 				}
 			}
 			else {
 				ps.setClob(paramIndex, null);
-				logger.debug("Set CLOB to null");
+				logger.debug("Set Oracle CLOB to null");
 			}
 		}
 
