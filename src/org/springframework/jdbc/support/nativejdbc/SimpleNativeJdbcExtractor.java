@@ -46,30 +46,37 @@ import org.apache.commons.logging.LogFactory;
  * <code>getNativeConnectionFromStatement</code> method. This usage will work
  * with almost any connection pool. Known to work are, for example:
  * <ul>
- * <li>Resin (2.1 and 3.0)
- * <li>C3P0
- * <li>Jakarta Commons DBCP
+ * <li>Caucho Resin 2.1.x, 3.0.x
+ * <li>Sun Java System Application Server 8
+ * <li>Oracle OC4J 9.0.3, 9.0.4
+ * <li>C3P0 0.8.x
+ * <li>Jakarta Commons DBCP 1.0, 1.1, 1.2 (used in Tomcat 4.1.x, 5.0.x)
+ * <li>JBoss 3.2.x
  * </ul>
  *
- * <p>For full usage with JdbcTemplate:
+ * <p>For full usage with JdbcTemplate, i.e. to also provide Statement unwrapping:
  * <ul>
- * <li>Use a default SimpleNativeJdbcExtractor for Resin (no JDBC Statement
- * objects are wrapped, therefore no special unwrapping is necessary)
+ * <li>Use a default SimpleNativeJdbcExtractor for Resin and SJSAS (no JDBC
+ * Statement objects are wrapped, therefore no special unwrapping is necessary).
  * <li>Use a SimpleNativeJdbcExtractor with all "nativeConnectionNecessaryForXxx"
- * flags set to true for C3P0 (all JDBC Statement objects are wrapped, but none
- * of the wrappers allow for unwrapping)
- * <li>Use a CommonsDbcpNativeJdbcExtractor for Jakarta Commons DBCP (all JDBC
- * Statement objects are wrapped, but all of them can be extracted by casting
- * to DBCP implementation classes)
+ * flags set to true for OC4J and C3P0 (all JDBC Statement objects are wrapped,
+ * but none of the wrappers allow for unwrapping).
+ * <li>Use a CommonsDbcpNativeJdbcExtractor for Jakarta Commons DBCP respectively
+ * a JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are wrapped,
+ * but all of them can be extracted by casting to implementation classes).
  * </ul>
  *
  * @author Juergen Hoeller
  * @since 05.12.2003
- * @see java.sql.Statement#getConnection
+ * @see java.sql.DatabaseMetaData#getConnection
+ * @see #getNativeConnection
+ * @see #setNativeConnectionNecessaryForNativeStatements
+ * @see #setNativeConnectionNecessaryForNativePreparedStatements
+ * @see #setNativeConnectionNecessaryForNativeCallableStatements
+ * @see CommonsDbcpNativeJdbcExtractor
+ * @see JBossNativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
- * @see #getNativeConnectionFromStatement
- * @see #getNativeConnection
  */
 public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
