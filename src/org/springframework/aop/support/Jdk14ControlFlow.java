@@ -15,7 +15,7 @@ import java.io.StringWriter;
  * However, they are useful in some cases.
  * This implementation uses the StackTraceElement class introduced in Java 1.4.
  * @author Rod Johnson
- * @version $Id: Jdk14ControlFlow.java,v 1.1 2003-12-15 14:39:29 johnsonr Exp $
+ * @version $Id: Jdk14ControlFlow.java,v 1.2 2003-12-21 10:57:27 johnsonr Exp $
  */
 class Jdk14ControlFlow implements ControlFlow {
 
@@ -71,6 +71,16 @@ class Jdk14ControlFlow implements ControlFlow {
 		//System.err.println(sw);
 		String stackTrace = sw.toString();
 		return stackTrace.indexOf(token) != -1;
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer("Jdk14ControlFlow: ");
+		for (int i = 0; i < stack.length; i++) {
+			if (i > 0)
+				sb.append("\n\t@");
+			sb.append(stack[i]);
+		}
+		return sb.toString();
 	}
 
 }
