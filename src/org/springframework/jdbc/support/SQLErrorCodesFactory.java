@@ -79,7 +79,7 @@ public class SQLErrorCodesFactory {
 	 * Map to hold database product name retrieved from database metadata.
 	 * Key is the DataSource, value is the database product name.
 	 */
-	private final Map dataSourceProductName = new HashMap(10);
+	private final Map dataSourceProductNames = new HashMap(10);
 
 	/**
 	 * Map to hold error codes for all databases defined in the config file.
@@ -167,7 +167,9 @@ public class SQLErrorCodesFactory {
 					errorCodes.put(ec.getDatabaseProductName(), ec);
 				}
 			}
-			logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
+			if (logger.isInfoEnabled()) {
+				logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
+			}
 		}
 		catch (BeanDefinitionStoreException ex) {
 			logger.warn("Error loading error codes from config file. Message: " + ex.getMessage());
@@ -197,13 +199,17 @@ public class SQLErrorCodesFactory {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource ds) {
-		logger.info("Looking up default SQLErrorCodes for DataSource");
-		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking up default SQLErrorCodes for DataSource [" + ds + "]");
+		}
+
 		// Let's avoid looking up database product info if we can.
-		String dataSourceDbName = (String) this.dataSourceProductName.get(ds);
+		String dataSourceDbName = (String) this.dataSourceProductNames.get(ds);
 		if (dataSourceDbName != null) {
-			logger.info("Database product name found in cache for DataSource [" +
-					ds + "]. Name is '" + dataSourceDbName + "'.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Database product name found in cache for DataSource [" + ds +
+				    "]: name is '" + dataSourceDbName + "'");
+			}
 			return getErrorCodes(dataSourceDbName);
 		}
 
@@ -256,14 +262,12 @@ public class SQLErrorCodesFactory {
 					}
 				}
 
-				this.dataSourceProductName.put(ds, dbName);
-				SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-				if (sec != null) {
-					return sec;
+				this.dataSourceProductNames.put(ds, dbName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Database product name cached for DataSource [" + ds +
+					    "]: name is '" + dbName + "'");
 				}
-				else if (logger.isInfoEnabled()) {
-					logger.info("SQL error codes for '" + dbName + "' not found");
-				}
+				return getErrorCodes(dbName);
 			}
 		}
 		catch (MetaDataAccessException ex) {
@@ -276,15 +280,21 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Return SQLErrorCodes instance for the given database.
-	 * No need for a  database metadata lookup.
+	 * No need for a database metadata lookup.
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-		if (sec == null) {
-			// could not find the database among the defined ones
-			sec = new SQLErrorCodes();
+		if (sec != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("SQL error codes for '" + dbName + "' found");
+			}
+			return sec;
 		}
-		return sec;
+		// could not find the database among the defined ones
+		if (logger.isInfoEnabled()) {
+			logger.info("SQL error codes for '" + dbName + "' not found");
+		}
+		return new SQLErrorCodes();
 	}
 
 }
