@@ -1,3 +1,7 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
 
 package org.springframework.aop.interceptor;
 
@@ -5,17 +9,12 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Trivial interceptor that can be introduced in a chain to display it.
- * 
- * (c) Rod Johnson, 2003
+ * AOP Alliance MethodInterceptor that can be introduced in a chain to display
+ * verbose information about intercepted invocations to the console.
  * @author Rod Johnson
+ * @version $Id: DebugInterceptor.java,v 1.2 2003-12-31 14:38:53 johnsonr Exp $
  */
 public class DebugInterceptor implements MethodInterceptor {
-	
-	// TODO learning interceptor?
-	// AI? learns usage pattern?
-	// code metrics
-	// param values, etc?
 	
 	private int count;
 
@@ -31,6 +30,10 @@ public class DebugInterceptor implements MethodInterceptor {
 		return rval;
 	}
 	
+	/**
+	 * Return the number of times this interceptor has been invoked
+	 * @return the number of times this interceptor has been invoked
+	 */
 	public int getCount() {
 		return this.count;
 	}
