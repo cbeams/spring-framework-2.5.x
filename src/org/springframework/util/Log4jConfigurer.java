@@ -23,6 +23,7 @@ public abstract class Log4jConfigurer {
 
 	/**
 	 * Initialize Log4J with the given configuration and the default refresh interval.
+	 * (org.apache.log4j.helpers.FileWatchdog.DEFAULT_DELAY, normally 60 seconds).
 	 * @param location location of the property config file
 	 * @throws FileNotFoundException if the location specifies an invalid file path
 	 */
