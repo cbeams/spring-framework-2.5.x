@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.17 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.18 2004-03-19 07:45:22 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -50,8 +50,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/* Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;
 
-	/** Map of BeanDefinition objects, keyed by prototype name */
+	/** Map of bean definition objects, keyed by bean name */
 	private Map beanDefinitionMap = new HashMap();
+
+	/** List of bean definition names, in registration order */
+	private List beanDefinitionNames = new ArrayList();
 
 
 	/**
@@ -95,11 +98,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * it's best used only in application initialization.
 	 */
 	public String[] getBeanDefinitionNames(Class type) {
-		Set keys = this.beanDefinitionMap.keySet();
 		Set matches = new HashSet();
-		Iterator itr = keys.iterator();
-		while (itr.hasNext()) {
-			String name = (String) itr.next();
+		Iterator it = this.beanDefinitionNames.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
 			if (type == null || type.isAssignableFrom(getMergedBeanDefinition(name, false).getBeanClass())) {
 				matches.add(name);
 			}
@@ -151,23 +153,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 
 	public void preInstantiateSingletons() {
-		// Ensure that unreferenced singletons are instantiated
 		if (logger.isInfoEnabled()) {
 			logger.info("Pre-instantiating singletons in factory [" + this + "]");
 		}
-		String[] beanNames = getBeanDefinitionNames();
-		for (int i = 0; i < beanNames.length; i++) {
-			if (containsBeanDefinition(beanNames[i])) {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanNames[i], false);
+		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
+			String beanName = (String) it.next();
+			if (containsBeanDefinition(beanName)) {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 				if (bd.isSingleton() && !bd.isLazyInit()) {
 					if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
-						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanNames[i]);
+						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 						if (factory.isSingleton()) {
-							getBean(beanNames[i]);
+							getBean(beanName);
 						}
 					}
 					else {
-						getBean(beanNames[i]);
+						getBean(beanName);
 					}
 				}
 			}
@@ -197,6 +198,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				logger.info("Overriding bean definition for bean '" + name +
 										"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
 			}
+		}
+		else {
+			this.beanDefinitionNames.add(name);
 		}
 		this.beanDefinitionMap.put(name, beanDefinition);
 	}
