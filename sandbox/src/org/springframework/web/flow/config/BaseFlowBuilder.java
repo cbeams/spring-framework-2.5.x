@@ -48,6 +48,34 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 
 	/**
+	 * Default constructor
+	 */
+	protected BaseFlowBuilder() {
+
+	}
+
+	/**
+	 * Create a base flow builder which will pull services (other flow defs,
+	 * actions, attribute mappers, etc.) from the service locator.
+	 * @param flowServiceLocator the locator
+	 */
+	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator) {
+		setFlowServiceLocator(flowServiceLocator);
+	}
+
+	/**
+	 * Create a base flow builder which will pull services from the service
+	 * locator, and delegate construction of the Flow instance to the specified
+	 * <code>FlowCreator</code>
+	 * @param flowServiceLocator the locator
+	 * @param flowCreator the flow creator
+	 */
+	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
+		setFlowServiceLocator(flowServiceLocator);
+		setFlowCreator(flowCreator);
+	}
+
+	/**
 	 * The default FlowCreator implementation. This just instantiates the
 	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
 	 * implementation, configure the BaseFlowBuilder with a custom

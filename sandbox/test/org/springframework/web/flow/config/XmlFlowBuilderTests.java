@@ -33,11 +33,7 @@ public class XmlFlowBuilderTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
-		builder.setFlowServiceLocator(new FlowServiceLocator() {
-			public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException {
-				throw new UnsupportedOperationException();
-			}
-
+		builder.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
 			public Action getAction(String actionId) throws FlowServiceLookupException {
 				if ("action1".equals(actionId) || "action2".equals(actionId)) {
 					return new Action() {
@@ -50,25 +46,11 @@ public class XmlFlowBuilderTests extends TestCase {
 				throw new NoSuchActionException(actionId);
 			}
 
-			public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException {
-				throw new UnsupportedOperationException();
-			}
-
 			public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException {
 				if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
 					return new Flow(flowDefinitionId);
 				}
 				throw new NoSuchFlowDefinitionException(flowDefinitionId);
-			}
-
-			public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-					throws FlowServiceLookupException {
-				throw new UnsupportedOperationException();
-			}
-
-			public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
-					throws FlowServiceLookupException {
-				throw new UnsupportedOperationException();
 			}
 
 			public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)

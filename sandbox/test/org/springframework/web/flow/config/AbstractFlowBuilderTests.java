@@ -21,14 +21,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.easymock.MockControl;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionResult;
+import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.action.AbstractAction;
 
 /**
+ * Test java based flow builder logic.
  * @author Keith Donald
  * @author Rod Johnson
  * @author Colin Sampaleanu
@@ -37,55 +37,56 @@ public class AbstractFlowBuilderTests extends TestCase {
 
 	private static String PERSON_DETAILS = "personDetails";
 
-	public void testCreateFlowWithListener() {
-		testCreateFlow(true);
+	public void testDependencyLookup() {
+		TestMasterFlowDependencyLookup master = new TestMasterFlowDependencyLookup();
+		master.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
+			public Action getAction(String actionId) throws FlowServiceLookupException {
+				return new NoOpAction();
+			}
+
+			public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException {
+				if (flowDefinitionId.equals(PERSON_DETAILS)) {
+					BaseFlowBuilder builder = new TestFlowDependencyLookup();
+					builder.setFlowServiceLocator(this);
+					return new FlowFactoryBean(builder).getFlow();
+				}
+				else {
+					throw new UnsupportedOperationException();
+				}
+			}
+		});
+		new FlowFactoryBean(master).getFlow();
 	}
 
-	public void testCreateFlowWithoutListener() {
-		// test for npe's implementation if no listener is set
-		testCreateFlow(false);
-	}
-
-	private void testCreateFlow(boolean listen) {
-		HttpServletRequest request = new MockHttpServletRequest();
-		HttpServletResponse response = new MockHttpServletResponse();
-
-		HttpServletRequest request2 = new MockHttpServletRequest();
-
-		TestFlowDependencyLookup flow = new TestFlowDependencyLookup();
-
-		String getStateId = PERSON_DETAILS + ".get";
-		String viewStateId = PERSON_DETAILS + ".view";
-		String bindAndValidateStateId = PERSON_DETAILS + ".bindAndValidate";
-
-		MockControl flowDaoMc = MockControl.createControl(FlowServiceLocator.class);
-		FlowServiceLocator dao = (FlowServiceLocator)flowDaoMc.getMock();
-		dao.getAction(getStateId);
-		flowDaoMc.setReturnValue(new NoOpActionBean());
-		dao.getAction(bindAndValidateStateId);
-		flowDaoMc.setReturnValue(new NoOpActionBean());
-		flowDaoMc.replay();
+	public void testNoBeanFactorySet() {
+		TestMasterFlowDependencyLookup master = new TestMasterFlowDependencyLookup();
+		try {
+			new FlowFactoryBean(master).getFlow();
+			fail("Should have failed, no bean factory set for default bean factory flow service locator");
+		}
+		catch (IllegalStateException e) {
+			// expected
+		}
 	}
 
 	private class TestMasterFlowDependencyLookup extends AbstractFlowBuilder {
 		private String PERSONS_LIST = "persons";
 
 		protected String flowId() {
-			return "test.masterFlow";
+			return PERSONS_LIST;
 		}
 
 		public void buildStates() {
 			addGetState(PERSONS_LIST);
-			addViewState(PERSONS_LIST, onSubmit(edit(PERSON_DETAILS)));
-			addSubFlowState(edit(PERSON_DETAILS), edit(PERSON_DETAILS), null, get(PERSONS_LIST));
+			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
+			addSubFlowState(PERSON_DETAILS, PERSON_DETAILS, null, get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}
 
 	private class TestFlowDependencyLookup extends AbstractFlowBuilder {
-
 		protected String flowId() {
-			return "test.detailFlow";
+			return PERSON_DETAILS;
 		}
 
 		public void buildStates() {
@@ -97,29 +98,28 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	private class TestFlowTypeSafeDependencyLookup extends AbstractFlowBuilder {
-
 		protected String flowId() {
-			return "test.detailFlow";
+			return PERSON_DETAILS;
 		}
 
 		public void buildStates() {
-			addGetState(PERSON_DETAILS, executeAction(NoOpActionBean.class));
+			addGetState(PERSON_DETAILS, executeAction(NoOpAction.class));
 			addViewState(PERSON_DETAILS);
-			addBindAndValidateState(PERSON_DETAILS, executeAction(NoOpActionBean.class));
+			addBindAndValidateState(PERSON_DETAILS, executeAction(NoOpAction.class));
 			addFinishEndState();
 		}
 	};
 
 	private class TestFlowTypeSafeDependencyInjection extends AbstractFlowBuilder {
 
-		private NoOpActionBean noOpAction;
+		private NoOpAction noOpAction;
 
-		public void setNoOpAction(NoOpActionBean noOpAction) {
+		public void setNoOpAction(NoOpAction noOpAction) {
 			this.noOpAction = noOpAction;
 		}
 
 		protected String flowId() {
-			return "test.detailFlow";
+			return PERSON_DETAILS;
 		}
 
 		public void buildStates() {
@@ -131,13 +131,12 @@ public class AbstractFlowBuilderTests extends TestCase {
 	};
 
 	/**
-	 * Action bean stub thatr does nothing, just returns "success"
+	 * Action bean stub that does nothing, just returns a "success" result
 	 */
-	private final class NoOpActionBean extends AbstractAction {
+	private final class NoOpAction extends AbstractAction {
 		public ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws Exception {
 			return success();
 		}
 	}
-
 }
