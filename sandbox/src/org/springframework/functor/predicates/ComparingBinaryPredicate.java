@@ -48,6 +48,17 @@ public abstract class ComparingBinaryPredicate implements BinaryPredicate {
         this.comparator = comparator;
     }
 
+    /**
+     * Tests two arguments against a comparsion expression. This method
+     * delegates to the {@link testCompareResult} template method to evaluate
+     * the compareTo result.
+     * 
+     * @param argument1
+     *            the first argument
+     * @param argument2
+     *            the second argument
+     * @return true if the comparsion result passes, false otherwise
+     */
     public boolean test(Object value1, Object value2) {
         Comparator c;
         if (comparator != null) {

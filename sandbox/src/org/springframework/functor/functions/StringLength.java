@@ -18,13 +18,21 @@ package org.springframework.functor.functions;
 import org.springframework.functor.UnaryFunction;
 
 /**
- * Returns the length of an object's string form, or zero if the object is null.
+ * Returns the Integer length of an object's string form, or zero if the object
+ * is null.
  * 
  * @author Keith Donald
  */
-public class StringLengthFunction implements UnaryFunction {
-    private static final StringLengthFunction INSTANCE = new StringLengthFunction();
+public class StringLength implements UnaryFunction {
+    private static final StringLength INSTANCE = new StringLength();
 
+    /**
+     * Evaluate the string form of the object returning an Integer representing
+     * the string length.
+     * 
+     * @return The string length Integer.
+     * @see org.springframework.functor.UnaryFunction#evaluate(java.lang.Object)
+     */
     public Object evaluate(Object value) {
         if (value == null) {
             return new Integer(0);
@@ -33,8 +41,8 @@ public class StringLengthFunction implements UnaryFunction {
     }
 
     /**
-     * Returns the shared instance--this is possible as the default functor for
-     * this class is immutable and stateless.
+     * Returns the shared StringLength instance--this is possible as the default
+     * instance is immutable and stateless.
      * 
      * @return the shared instance
      */

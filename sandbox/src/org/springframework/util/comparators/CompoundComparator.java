@@ -47,8 +47,8 @@ public class CompoundComparator implements Comparator, Serializable {
 
     /**
      * Construct a CompoundComparator with initially no Comparators. Clients
-     * must add at least one Comparator before calling the
-     * compare(Object,Object) method, or an IllegalStateException is thrown.
+     * must add at least one Comparator before calling the compare method or an
+     * IllegalStateException is thrown.
      */
     public CompoundComparator() {
         this(new ArrayList(), new BitSet());
@@ -68,7 +68,7 @@ public class CompoundComparator implements Comparator, Serializable {
     /**
      * Construct a CompoundComparator from the Comparators in the given List.
      * The sort order of each column will be drawn from the given BitSet. If a
-     * bit at a comparator index is <i>false </i>, the forward sort order is
+     * bit at a comparator index is <i>false</i>, the forward sort order is
      * used; else a reverse sort order is used.
      * 
      * @param list
@@ -99,7 +99,7 @@ public class CompoundComparator implements Comparator, Serializable {
      * @param comparator
      *            Comparator to add to the end of the chain
      * @param reverse
-     *            false = forward sort order; true = reverse sort order
+     *            false -> forward sort order; true -> reverse sort order
      */
     public void addComparator(Comparator comparator, boolean reverse) {
         Assert.notNull(comparator);

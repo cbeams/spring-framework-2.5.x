@@ -30,8 +30,17 @@ public class EqualTo implements BinaryPredicate {
         super();
     }
 
-    public boolean test(Object value1, Object value2) {
-        return ObjectUtils.nullSafeEquals(value1, value2);
+    /**
+     * Test if the two arguments are equal.
+     * 
+     * @param argument1
+     *            the first argument
+     * @param argument2
+     *            the second argument
+     * @return true if they are equal, false otherwise
+     */
+    public boolean test(Object argument1, Object argument2) {
+        return ObjectUtils.nullSafeEquals(argument1, argument2);
     }
 
     public static BinaryPredicate instance() {

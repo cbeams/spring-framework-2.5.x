@@ -16,6 +16,7 @@
 package org.springframework.functor.functions;
 
 import org.springframework.functor.BinaryFunction;
+import org.springframework.util.comparators.NullSafeComparator;
 
 /**
  * Returns the maximum of two <code>Comparable</code> objects.
@@ -29,15 +30,24 @@ public class Minimum implements BinaryFunction {
         super();
     }
 
-    public Object evaluate(Object value1, Object value2) {
-        int compare = ((Comparable)value1).compareTo(value2);
-        if (compare == 0) {
-            return value2;
-        } else if (compare > 0) {
-            return value2;
-        } else {
-            return value1;
+    /**
+     * Return the minimum of two Comparable objects.
+     * 
+     * @param comparable1
+     *            the first comparable
+     * @param comparable2
+     *            the second comparable
+     * @return the minimum
+     */
+    public Object evaluate(Object comparable1, Object comparable2) {
+        int result = NullSafeComparator.instance().compare(comparable1,
+                comparable2);
+        if (result < 0) {
+            return comparable1;
+        } else if (result > 0) {
+            return comparable2;
         }
+        return comparable1;
     }
 
     /**
