@@ -57,7 +57,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 
 	/**
 	 * Set the location of the EHCache config file. A typical value is "WEB-INF/ehcache.xml".
-	 * Default is "ehcache.xml" in the root of the class path (default EHCache initialization).
+	 * Default is "ehcache.xml" in the root of the class path or if not found,
+	 * "ehcache-failsafe.xml" in the ehcache class path (default EHCache initialization).
 	 */
 	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
