@@ -413,6 +413,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, no HandlerExceptionResolver is fine too.
+				this.handlerExceptionResolvers = Collections.EMPTY_LIST;
 			}
 		}
 	}
