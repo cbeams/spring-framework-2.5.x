@@ -73,7 +73,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			fail("Should have objected to bind variables");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
-			// Ok 
+			// OK
 		}
 	}
 
@@ -535,12 +535,14 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.verify();
 	}
 
-	public void testBatchExecute() throws Exception {
+	public void testBatchUpdate() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.getConnection();
+		ctrlStatement.setReturnValue(mockConnection);
 		mockStatement.addBatch(sql[0]);
 		ctrlStatement.setVoidCallable();
 		mockStatement.addBatch(sql[1]);
@@ -570,25 +572,25 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
-		int[] actualRowsAffected = template.batchExecute(sql);
+		int[] actualRowsAffected = template.batchUpdate(sql);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
 		ctrlStatement.verify();
 		ctrlDatabaseMetaData.verify();
 	}
 
-	public void testBatchExecuteWithNoBatchSupport() throws Exception {
+	public void testBatchUpdateWithNoBatchSupport() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.getConnection();
+		ctrlStatement.setReturnValue(mockConnection);
 		mockStatement.execute(sql[0]);
 		ctrlStatement.setReturnValue(false);
 		mockStatement.getUpdateCount();
 		ctrlStatement.setReturnValue(1);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
 		mockStatement.execute(sql[1]);
 		ctrlStatement.setReturnValue(false);
 		mockStatement.getUpdateCount();
@@ -616,25 +618,25 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
-		int[] actualRowsAffected = template.batchExecute(sql);
+		int[] actualRowsAffected = template.batchUpdate(sql);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
 		ctrlStatement.verify();
 		ctrlDatabaseMetaData.verify();
 	}
 
-	public void testBatchExecuteWithNoBatchSupportAndSelect() throws Exception {
+	public void testBatchUpdateWithNoBatchSupportAndSelect() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"SELECT * FROM NOSUCHTABLE"};
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.getConnection();
+		ctrlStatement.setReturnValue(mockConnection);
 		mockStatement.execute(sql[0]);
 		ctrlStatement.setReturnValue(false);
 		mockStatement.getUpdateCount();
 		ctrlStatement.setReturnValue(1);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
 		mockStatement.execute(sql[1]);
 		ctrlStatement.setReturnValue(true);
 		mockStatement.close();
@@ -659,7 +661,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		try {
-			int[] actualRowsAffected = template.batchExecute(sql);
+			int[] actualRowsAffected = template.batchUpdate(sql);
 			fail("Shouldn't have executed batch statement with a select");
 		} 
 		catch (DataAccessException ex) {
@@ -671,9 +673,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlDatabaseMetaData.verify();
 	}
 
-	public void testBatchUpdate() throws Exception {
+	public void testBatchUpdateWithPreparedStatement() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
+		final int[] rowsAffected = new int[] { 1, 2 };
 
 		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
@@ -688,7 +691,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		mockPreparedStatement.addBatch();
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(ids);
+		ctrlPreparedStatement.setReturnValue(rowsAffected);
 		mockPreparedStatement.getWarnings();
 		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
@@ -725,14 +728,17 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
 		ctrlPreparedStatement.verify();
 		ctrlDatabaseMetaData.verify();
 	}
 
-	public void testBatchUpdateWithNoBatchSupport() throws Exception {
+	public void testBatchUpdateWithPreparedStatementAndNoBatchSupport() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
+		final int[] rowsAffected = new int[] { 1, 2 };
 
 		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
@@ -741,11 +747,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		mockPreparedStatement.setInt(1, ids[0]);
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(ids[0]);
+		ctrlPreparedStatement.setReturnValue(rowsAffected[0]);
 		mockPreparedStatement.setInt(1, ids[1]);
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(ids[1]);
+		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
 		mockPreparedStatement.getWarnings();
 		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
@@ -770,6 +776,8 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
 		ctrlPreparedStatement.verify();
 	}

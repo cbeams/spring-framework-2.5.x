@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core;
 
@@ -72,17 +72,6 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem
 	 */
 	void execute(String sql) throws DataAccessException;
-
-	/**
-	 * Issue multiple SQL execute on a single Statement, using JDBC 2.0
-	 * batching.
-	 * <p>Will fall back to separate executes on a single Statement
-	 * if the JDBC driver does not support batch updates.
-	 * @param sql defining an array of SQL statements that will be executed.
-	 * @return an array of the number of rows affected by each statement
-	 * @throws DataAccessException if there is any problem executing the batch
-	 */
-	int[] batchExecute(String[] sql) throws DataAccessException;
 
 	/**
 	 * Execute a query given static SQL, reading the ResultSet with a
@@ -202,6 +191,16 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem.
 	 */
 	int update(String sql) throws DataAccessException;
+
+	/**
+	 * Issue multiple SQL updates on a single Statement, using JDBC 2.0 batching.
+	 * <p>Will fall back to separate updates on a single Statement if the JDBC
+	 * driver does not support batch updates.
+	 * @param sql defining an array of SQL statements that will be executed.
+	 * @return an array of the number of rows affected by each statement
+	 * @throws DataAccessException if there is any problem executing the batch
+	 */
+	int[] batchUpdate(String[] sql) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------

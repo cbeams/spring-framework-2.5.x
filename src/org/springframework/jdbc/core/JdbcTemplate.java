@@ -18,7 +18,6 @@ package org.springframework.jdbc.core;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -97,10 +96,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	/**
 	 * If this variable is set to a non-zero value, it will be used for setting the
-	 * fetchSize on statements used for query processing.
+	 * fetchSize property on statements used for query processing.
 	 */
 	private int fetchSize = 0;
 
+	/**
+	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * maxRows property on statements used for query processing.
+	 */
 	private int maxRows = 0;
 
 
@@ -280,87 +283,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		execute(new ExecuteStatementCallback());
 	}
 
-	public int[] batchExecute(String[] sql) throws DataAccessException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL batch update of " + sql.length + " statements");
-		}
-		boolean supportsBatchUpdates = false;
-		Connection con = DataSourceUtils.getConnection(getDataSource());
-		try {
-			DatabaseMetaData dbmd = con.getMetaData();
-			try {
-				if (dbmd != null) {
-					if (dbmd.supportsBatchUpdates()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("JDBC driver supports batch updates");
-						}
-						supportsBatchUpdates = true;
-					}
-					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("JDBC driver does not support batch updates");
-						}
-					}
-				}
-			}
-			catch (AbstractMethodError ame) {
-				logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method");
-			}
-		}
-		catch (SQLException se) {
-			throw getExceptionTranslator().translate("executing batch", "getDatabaseMetatData", se);
-		}
-		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
-		}
-		
-		int[] rowsAffected = new int[sql.length];
-
-		con = DataSourceUtils.getConnection(getDataSource());
-		String currSql = null;
-		Statement stmt = null;
-		try {
-			stmt = con.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-			
-			if (supportsBatchUpdates) {
-
-				for (int i = 0; i < sql.length; i++) {
-					currSql = sql[i];
-					stmt.addBatch(currSql);
-				}
-				rowsAffected = stmt.executeBatch();
-				SQLWarning warning = stmt.getWarnings();
-				throwExceptionOnWarningIfNotIgnoringWarnings(warning);
-				
-			}
-			else {
-				
-				for (int i = 0; i < sql.length; i++) {
-					currSql = sql[i];
-					if (!stmt.execute(currSql))
-						rowsAffected[i] = stmt.getUpdateCount();
-					else
-						throw new InvalidDataAccessApiUsageException("Invalid batch SQL statement: " + currSql);
-					SQLWarning warning = stmt.getWarnings();
-					throwExceptionOnWarningIfNotIgnoringWarnings(warning);
-				}
-
-			}
-
-		}
-		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing batch", currSql, ex);
-		}
-		finally {
-			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
-		}
-		
-		return rowsAffected;
-	}
-
-	
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
@@ -427,6 +349,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int update(final String sql) throws DataAccessException {
+		if (sql == null) {
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
@@ -443,6 +368,44 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			}
 		}
 		return ((Integer) execute(new UpdateStatementCallback())).intValue();
+	}
+
+	public int[] batchUpdate(final String[] sql) throws DataAccessException {
+		if (sql == null) {
+			throw new InvalidDataAccessApiUsageException("SQL must not be null");
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL batch update of " + sql.length + " statements");
+		}
+		class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
+			private String currSql;
+			public Object doInStatement(Statement stmt) throws SQLException, DataAccessException {
+				int[] rowsAffected = new int[sql.length];
+				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
+					for (int i = 0; i < sql.length; i++) {
+						this.currSql = sql[i];
+						stmt.addBatch(sql[i]);
+					}
+					rowsAffected = stmt.executeBatch();
+				}
+				else {
+					for (int i = 0; i < sql.length; i++) {
+						this.currSql = sql[i];
+						if (!stmt.execute(sql[i])) {
+							rowsAffected[i] = stmt.getUpdateCount();
+						}
+						else {
+							throw new InvalidDataAccessApiUsageException("Invalid batch SQL statement: " + sql[i]);
+						}
+					}
+				}
+				return rowsAffected;
+			}
+			public String getSql() {
+				return currSql;
+			}
+		}
+		return (int[]) execute(new BatchUpdateStatementCallback());
 	}
 
 
@@ -719,29 +682,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 		return (int[]) execute(sql, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
-				int batchSize = pss.getBatchSize();
-				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 				try {
-					boolean supportsBatchUpdates = false;
-					try {
-						if (dbmd != null) {
-							if (dbmd.supportsBatchUpdates()) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("JDBC driver supports batch updates");
-								}
-								supportsBatchUpdates = true;
-							}
-							else {
-								if (logger.isDebugEnabled()) {
-									logger.debug("JDBC driver does not support batch updates");
-								}
-							}
-						}
-					}
-					catch (AbstractMethodError ame) {
-						logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method");
-					}
-					if (supportsBatchUpdates) {
+					int batchSize = pss.getBatchSize();
+					if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
 							ps.addBatch();
