@@ -115,22 +115,28 @@ public class OracleLobHandler implements LobHandler {
 	 * @see oracle.sql.CLOB#DURATION_SESSION
 	 * @see oracle.sql.CLOB#MODE_READWRITE
 	 */
-	public OracleLobHandler() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-		this.connectionClass = getClass().getClassLoader().loadClass(CONNECTION_CLASS_NAME);
+	public OracleLobHandler() {
+		try {
+			this.connectionClass = getClass().getClassLoader().loadClass(CONNECTION_CLASS_NAME);
 
-		// initialize oracle.sql.BLOB class
-		this.blobClass = getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
-		this.durationSessionConstants.put(this.blobClass,
-		                                  new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
-		this.modeReadWriteConstants.put(this.blobClass,
-		                                new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+			// initialize oracle.sql.BLOB class
+			this.blobClass = getClass().getClassLoader().loadClass(BLOB_CLASS_NAME);
+			this.durationSessionConstants.put(
+					this.blobClass, new Integer(this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+			this.modeReadWriteConstants.put(
+					this.blobClass, new Integer(this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
 
-		// initialize oracle.sql.CLOB class
-		this.clobClass = getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
-		this.durationSessionConstants.put(this.clobClass,
-		                                  new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
-		this.modeReadWriteConstants.put(this.clobClass,
-		                                new Integer(this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+			// initialize oracle.sql.CLOB class
+			this.clobClass = getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
+			this.durationSessionConstants.put(
+					this.clobClass, new Integer(this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null)));
+			this.modeReadWriteConstants.put(
+					this.clobClass, new Integer(this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null)));
+		}
+		catch (Exception ex) {
+			throw new InvalidDataAccessApiUsageException(
+					"Couldn't initialize OracleLobHandler because Oracle driver classes are not available", ex);
+		}
 	}
 
 	/**

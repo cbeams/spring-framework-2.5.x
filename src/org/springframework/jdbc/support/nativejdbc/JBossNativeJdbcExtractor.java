@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for the JBoss 3.2
@@ -65,11 +66,17 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * This constructor retrieves JBoss JDBC wrapper classes,
 	 * so we can get the underlying vendor connection using reflection.
 	 */
-	public JBossNativeJdbcExtractor() throws ClassNotFoundException, NoSuchMethodException {
-		this.wrappedConnectionClass = getClass().getClassLoader().loadClass(WRAPPED_CONNECTION_NAME);
-		this.wrappedStatementClass = getClass().getClassLoader().loadClass(WRAPPED_STATEMENT_NAME);
-		this.getUnderlyingConnectionMethod = this.wrappedConnectionClass.getMethod("getUnderlyingConnection", null);
-		this.getUnderlyingStatementMethod = this.wrappedStatementClass.getMethod("getUnderlyingStatement", null);
+	public JBossNativeJdbcExtractor() {
+		try {
+			this.wrappedConnectionClass = getClass().getClassLoader().loadClass(WRAPPED_CONNECTION_NAME);
+			this.wrappedStatementClass = getClass().getClassLoader().loadClass(WRAPPED_STATEMENT_NAME);
+			this.getUnderlyingConnectionMethod = this.wrappedConnectionClass.getMethod("getUnderlyingConnection", null);
+			this.getUnderlyingStatementMethod = this.wrappedStatementClass.getMethod("getUnderlyingStatement", null);
+		}
+		catch (Exception ex) {
+			throw new InvalidDataAccessApiUsageException(
+					"Couldn't initialize JBossNativeJdbcExtractor because JBoss API classes are not available", ex);
+		}
 	}
 
 	/**

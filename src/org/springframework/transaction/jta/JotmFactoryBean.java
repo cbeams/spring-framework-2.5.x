@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.jta;
 
-import java.lang.reflect.InvocationTargetException;
-
 import javax.naming.NamingException;
 
 import org.objectweb.jotm.Current;
@@ -70,9 +68,7 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 
 	private Jotm jotm;
 
-	public JotmFactoryBean() throws ClassNotFoundException, NoSuchMethodException,
-	    IllegalAccessException, InvocationTargetException, NamingException {
-
+	public JotmFactoryBean() throws NamingException {
 		// check for already active JOTM instance
 		this.jotmCurrent = Current.getCurrent();
 

@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebLogic Server.
@@ -51,11 +52,17 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	
 	/**
 	 * This constructor retrieves the WebLogic JDBC extension interface,
-	 * so we can get the underlying  vendor connection using reflection.
+	 * so we can get the underlying vendor connection using reflection.
 	 */
-	public WebLogicNativeJdbcExtractor() throws ClassNotFoundException, NoSuchMethodException {
-		this.jdbcExtensionClass = getClass().getClassLoader().loadClass(JDBC_EXTENSION_NAME);
-		this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", null);
+	public WebLogicNativeJdbcExtractor() {
+		try {
+			this.jdbcExtensionClass = getClass().getClassLoader().loadClass(JDBC_EXTENSION_NAME);
+			this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", null);
+		}
+		catch (Exception ex) {
+			throw new InvalidDataAccessApiUsageException(
+					"Couldn't initialize WebLogicNativeJdbcExtractor because WebLogic API classes are not available", ex);
+		}
 	}
 
 	/**

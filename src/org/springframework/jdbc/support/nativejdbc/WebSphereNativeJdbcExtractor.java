@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebSphere.
@@ -39,11 +40,17 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * This constructor retrieves WebSphere JDBC adapter classes,
 	 * so we can get the underlying vendor connection using reflection.
 	 */
-	public WebSphereNativeJdbcExtractor() throws ClassNotFoundException, NoSuchMethodException {
-		this.jdbcAdapterConnectionClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_CONNECTION_NAME);
-		Class jdbcAdapterUtilClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_UTIL_NAME);
-		this.getNativeConnectionMethod =
-		    jdbcAdapterUtilClass.getMethod("getNativeConnection", new Class[] {this.jdbcAdapterConnectionClass});
+	public WebSphereNativeJdbcExtractor() {
+		try {
+			this.jdbcAdapterConnectionClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_CONNECTION_NAME);
+			Class jdbcAdapterUtilClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_UTIL_NAME);
+			this.getNativeConnectionMethod =
+					jdbcAdapterUtilClass.getMethod("getNativeConnection", new Class[] {this.jdbcAdapterConnectionClass});
+		}
+		catch (Exception ex) {
+			throw new InvalidDataAccessApiUsageException(
+					"Couldn't initialize WebSphereNativeJdbcExtractor because WebSphere API classes are not available", ex);
+		}
 	}
 
 	/**
