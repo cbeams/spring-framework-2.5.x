@@ -50,6 +50,17 @@
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
 	</bean>
+	
+	<bean id="noMatchPrototype" 
+			class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance"
+			singleton="false"
+		>
+		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+		<constructor-arg index="3"><value>bogus</value></constructor-arg>
+	</bean>
 
 	
 	<bean id="juergen" class="org.springframework.beans.TestBean">

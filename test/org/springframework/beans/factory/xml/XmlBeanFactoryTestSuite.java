@@ -65,7 +65,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.59 2004-07-29 08:41:12 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.60 2004-08-01 17:03:29 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1341,6 +1341,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		assertEquals(33, tb.getAge());
 		assertEquals("Rod", tb.getName());
+	}
+	
+	public void testFactoryMethodNoMatchingStaticMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try{
+			xbf.getBean("noMatchPrototype");
+			fail("No static method matched");
+		}
+		catch (BeanCreationException ex) {
+			// Ok
+		}
 	}
 	
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
