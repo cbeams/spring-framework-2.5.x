@@ -71,8 +71,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Note that there are special cases with EJB CMT and restrictive JTA subsystems:
  * See JtaTransactionManager's javadoc for details.
  *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
- * For using JtaTransactionManager with Hibernate, Hibernate 2.1 is required.
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003

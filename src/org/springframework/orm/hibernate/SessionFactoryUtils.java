@@ -14,6 +14,7 @@ import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
 import net.sf.hibernate.WrongClassException;
+import net.sf.hibernate.UnresolvableObjectException;
 import net.sf.hibernate.engine.SessionFactoryImplementor;
 import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
@@ -35,9 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * HibernateTransactionManager. Can also be used directly in application code,
  * e.g. in combination with HibernateInterceptor.
  *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
- * This class' SessionSynchronization mechanism requires Hibernate 2.1 because
- * of its JTA TransactionManagerLookup check.
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -149,6 +148,9 @@ public abstract class SessionFactoryUtils {
 			// SQLException during Hibernate access: only passed in here from custom code,
 			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling
 			return new HibernateJdbcException((JDBCException) ex);
+		}
+		if (ex instanceof UnresolvableObjectException) {
+			return new HibernateObjectRetrievalFailureException((UnresolvableObjectException) ex);
 		}
 		if (ex instanceof ObjectNotFoundException) {
 			return new HibernateObjectRetrievalFailureException((ObjectNotFoundException) ex);

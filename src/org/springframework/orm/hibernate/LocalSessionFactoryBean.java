@@ -62,7 +62,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * transactional JVM-level caching with local SessionFactory setup too -
  * without any configuration hassle like container-specific setup.
  *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
  * @author Juergen Hoeller
  * @since 05.05.2003

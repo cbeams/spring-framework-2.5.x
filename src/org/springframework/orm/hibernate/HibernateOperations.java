@@ -24,6 +24,10 @@ import org.springframework.dao.DataAccessException;
  */
 public interface HibernateOperations {
 
+	//-------------------------------------------------------------------------
+	// Convenience methods for load, save, update, delete
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or null if not found.
@@ -184,6 +188,11 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#delete(String)
 	 */
 	void deleteAll(final Collection entities) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Execute a query for persistent instances.
