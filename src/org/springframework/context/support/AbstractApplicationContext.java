@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,11 +51,9 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.PathMatcher;
 
 /**
  * Partial implementation of ApplicationContext. Doesn't mandate the type
@@ -82,7 +78,7 @@ import org.springframework.util.PathMatcher;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -482,70 +478,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	//---------------------------------------------------------------------
-	// Miscellaneous methods, to be used by subclasses that need them
-	//---------------------------------------------------------------------
-
-	/**
-	 * Resolve the given config locations into Resource instances.
-	 * <p>Config locations can either be suitable for the getResource method
-	 * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
-	 * relative file paths like "/WEB-INF/context.xml"), or Ant-style patterns
-	 * like "/WEB-INF/*-context.xml".
-	 * <p>In the pattern case, the locations have to be resolvable to java.io.File,
-	 * to allow for searching though the specified directory tree. In particular,
-	 * this will neither work with WAR files that are not expanded nor with
-	 * class path resources in a JAR file.
-	 * @param configLocations the location strings
-	 * @return the List of Resource instances
-	 * @throws IOException if there was an I/O error searching for resources
-	 * @see #getResource
-	 * @see org.springframework.core.io.Resource
-	 * @see org.springframework.util.PathMatcher
-	 */
-	protected List resolveConfigLocations(String[] configLocations) throws IOException {
-		if (configLocations == null) {
-			return null;
-		}
-		List configResources = new ArrayList();
-		for (int i = 0; i < configLocations.length; i++) {
-			if (PathMatcher.isPattern(configLocations[i])) {
-				String rootDirPath = PathMatcher.determineRootDir(configLocations[i]);
-				String pattern = configLocations[i].substring(rootDirPath.length());
-				File rootDir = getResource(rootDirPath).getFile().getAbsoluteFile();
-				logger.debug("Looking for bean definition files in directory tree [" + rootDir.getPath() + "]");
-				List matchingFiles = PathMatcher.retrieveMatchingFiles(rootDir, pattern);
-				logger.info("Resolved location pattern [" + configLocations[i] + "] to file paths: " + matchingFiles);
-				for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
-					File file = (File) it.next();
-					configResources.add(new FileSystemResource(file));
-				}
-			}
-			else {
-				configResources.add(getResource(configLocations[i]));
-			}
-		}
-		return configResources;
-	}
-
-	/**
-	 * Return information about this context.
-	 */
-	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
-		sb.append(": ");
-		sb.append("displayName=[").append(this.displayName).append("]; ");
-		sb.append("startup date=[").append(new Date(this.startupTime)).append("]; ");
-		if (this.parent == null) {
-			sb.append("root of ApplicationContext hierarchy");
-		}
-		else {
-			sb.append("parent=[").append(this.parent).append(']');
-		}
-		return sb.toString();
-	}
-
-
-	//---------------------------------------------------------------------
 	// Abstract methods that must be implemented by subclasses
 	//---------------------------------------------------------------------
 
@@ -563,5 +495,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @return this application context's internal bean factory
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory();
+
+
+	/**
+	 * Return information about this context.
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		sb.append(": ");
+		sb.append("displayName=[").append(this.displayName).append("]; ");
+		sb.append("startup date=[").append(new Date(this.startupTime)).append("]; ");
+		if (this.parent == null) {
+			sb.append("root of ApplicationContext hierarchy");
+		}
+		else {
+			sb.append("parent=[").append(this.parent).append(']');
+		}
+		return sb.toString();
+	}
 
 }

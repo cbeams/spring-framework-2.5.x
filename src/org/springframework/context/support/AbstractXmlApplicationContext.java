@@ -17,8 +17,6 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -27,6 +25,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Convenient abstract superclass for ApplicationContext implementations
@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
  * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -56,7 +56,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 
-	protected void refreshBeanFactory() throws BeansException {
+	protected final void refreshBeanFactory() throws BeansException {
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
@@ -74,6 +74,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		}
 	}
 
+	public final ConfigurableListableBeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
 	/**
 	 * Create the bean factory for this context.
 	 * <p>Default implementation creates a DefaultListableBeanFactory with the
@@ -85,10 +89,6 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 */
 	protected DefaultListableBeanFactory createBeanFactory() {
 		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
-	}
-
-	public ConfigurableListableBeanFactory getBeanFactory() {
-		return beanFactory;
 	}
 
 	/**
@@ -105,24 +105,37 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 
 	/**
 	 * Load the bean definitions with the given XmlBeanDefinitionReader.
-	 * <p>The lifecycle of the bean factory is handled by refreshBeanFactory;
+	 * <p>The lifecycle of the bean factory is handled by the refreshBeanFactory method;
 	 * therefore this method is just supposed to load and/or register bean definitions.
-	 * <p>Delegates to resolveConfigLocations for converting location strings
+	 * <p>Delegates to a ResourcePatternResolver for resolving location patterns
 	 * into Resource instances.
 	 * @throws BeansException in case of bean registration errors
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 * @see #getConfigLocations
-	 * @see #resolveConfigLocations
+	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
-		List configLocations = resolveConfigLocations(getConfigLocations());
+		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
-			for (Iterator it = configLocations.iterator(); it.hasNext();) {
-				Resource resource = (Resource) it.next();
-				reader.loadBeanDefinitions(resource);
+			ResourcePatternResolver resourcePatternResolver = getResourcePatternResolver();
+			for (int i = 0; i < configLocations.length; i++) {
+				Resource[] configResources = resourcePatternResolver.getResources(configLocations[i]);
+				for (int j = 0; j < configResources.length; j++) {
+					reader.loadBeanDefinitions(configResources[j]);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Return the ResourcePatternResolver to use for resolving location patterns
+	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
+	 * supporting Ant-style location patterns.
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 */
+	protected ResourcePatternResolver getResourcePatternResolver() {
+		return new PathMatchingResourcePatternResolver(this);
 	}
 
 	/**

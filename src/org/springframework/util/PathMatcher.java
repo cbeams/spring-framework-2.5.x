@@ -16,8 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -52,10 +50,6 @@ import java.util.StringTokenizer;
  * @since 16.07.2003
  */
 public abstract class PathMatcher {
-
-	//---------------------------------------------------------------------
-	// Generic path matching methods
-	//---------------------------------------------------------------------
 
 	/**
 	 * Return if the given string represents a pattern to be matched
@@ -346,83 +340,6 @@ public abstract class PathMatcher {
 			ret.add(st.nextToken());
 		}
 		return ret;
-	}
-
-
-	//---------------------------------------------------------------------
-	// Methods for retrieving files that match a path pattern
-	//---------------------------------------------------------------------
-
-	/**
-	 * Determine the root directory for the given location.
-	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a java.io.File and
-	 * passing it into <code>retrieveMatchingFiles</code>, with the
-	 * remainder of the location as pattern.
-	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
-	 * for example.
-	 * @param location the location to check
-	 * @return the part of the location that denotes the root directory
-	 * @see #retrieveMatchingFiles
-	 */
-	public static String determineRootDir(String location) {
-		int asteriskIndex = location.indexOf('*');
-		int questionMarkIndex = location.indexOf('?');
-		if (asteriskIndex != -1 || questionMarkIndex != -1) {
-			int patternStart = (asteriskIndex > questionMarkIndex ? asteriskIndex : questionMarkIndex);
-			int rootDirEnd = location.lastIndexOf('/', patternStart);
-			if (rootDirEnd != -1) {
-				return location.substring(0, rootDirEnd);
-			}
-			else {
-				return "";
-			}
-		}
-		throw new IllegalArgumentException();
-	}
-
-	/**
-	 * Retrieve files that match the given path pattern,
-	 * checking the given directory and its subdirectories.
-	 * @param rootDir the directory to start from
-	 * @param pattern the pattern to match against,
-	 * relative to the root directory
-	 * @return the List of matching File instances
-	 * @throws IOException if directory contents could not be retrieved
-	 */
-	public static List retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
-		if (!rootDir.isDirectory()) {
-			throw new IllegalArgumentException("rootDir parameter [" + rootDir + "] does not denote a directory");
-		}
-		List result = new ArrayList();
-		String fullPattern = StringUtils.replace(rootDir.getAbsolutePath() + pattern, File.separator, "/");
-		doRetrieveMatchingFiles(fullPattern, rootDir, result);
-		return result;
-	}
-
-	/**
-	 * Recursively retrieve files that match the given pattern,
-	 * adding them to the given result list.
-	 * @param fullPattern the pattern to match against,
-	 * with preprended root directory path
-	 * @param dir the current directory
-	 * @param result the list of matching files to add to
-	 * @throws IOException if directory contents could not be retrieved
-	 */
-	private static void doRetrieveMatchingFiles(String fullPattern, File dir, List result) throws IOException {
-		File[] dirContents = dir.listFiles();
-		if (dirContents == null) {
-			throw new IOException("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
-		}
-		for (int i = 0; i < dirContents.length; i++) {
-			if (dirContents[i].isDirectory()) {
-				doRetrieveMatchingFiles(fullPattern, dirContents[i], result);
-			}
-			String currPath = StringUtils.replace(dirContents[i].getAbsolutePath(), File.separator, "/");
-			if (match(fullPattern, currPath)) {
-				result.add(dirContents[i]);
-			}
-		}
 	}
 
 }
