@@ -33,11 +33,15 @@
 	  - Applied by ContextLoaderServlet.
 		-
 		- Can be set to "/WEB-INF/applicationContext-hibernate.xml" for the Hibernate
-		- implementation, or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
+		- implementation, "/WEB-INF/applicationContext-ojb.xml" for the Apache OJB one,
+		- or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
 	  -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
+		<!--
+		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
+		-->
 		<!--
 		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
 		-->

@@ -8,6 +8,7 @@
 	<property name="src.dir" value="src"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
+	<property name="webclasses.dir" value="${war.dir}/WEB-INF/classes"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="db.dir" value="db"/>
@@ -34,6 +35,9 @@
 			<include name="jdbc2_0-stdext.jar"/>
 			<include name="servlet.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/ojb">
+			<include name="db-ojb-1.0.0.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
@@ -50,7 +54,6 @@
 			<include name="aopalliance.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/cglib">
-			<include name="asm.jar"/>
 			<include name="cglib*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/dom4j">
@@ -69,9 +72,12 @@
 			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-lang.jar"/>
+			<include name="commons-dbcp.jar"/>
 			<include name="commons-collections.jar"/>
+			<include name="commons-pool.jar"/>
 		</fileset>
-		
+
 	</path>
 
 
@@ -89,7 +95,7 @@
 		<echo message="warfile  --> Build the web application archive"/>
 		<echo message="setupDB  --> Initialize the database"/>
 		<echo message="tests    --> Run tests using initialized database"/>
-		<echo message="all      --> Clean, build, docs, warfile, test"/>
+		<echo message="all      --> Clean, build, docs, warfile, tests"/>
 		<echo message=""/>
 
 	</target>
@@ -99,6 +105,12 @@
 
 		<delete dir="${build.dir}"/>
 		<delete dir="${docs.dir}"/>
+		<delete>
+			<fileset dir="${webclasses.dir}">
+				<include name="*.hbm.xml"/>
+				<include name="OJB*.*"/>
+			</fileset>
+		</delete>
 		<delete dir="${weblib.dir}"/>
 		<delete dir="${testbuild.dir}"/>
 		<delete dir="${testreports.dir}"/>
@@ -117,15 +129,20 @@
 			<classpath refid="master-classpath"/>
 		</javac>
 
-		<copy todir="${build.dir}" preservelastmodified="true">
+		<copy todir="${webclasses.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
-				<include name="**/*.xml"/>
+				<include name="*.hbm.xml"/>
+				<include name="OJB*.*"/>
 			</fileset>
 		</copy>
 
 		<mkdir dir="${weblib.dir}"/>
 
-		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
+		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
+			<fileset dir="${build.dir}">
+				<include name="**"/>
+			</fileset>
+		</jar>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${db.dir}/mysql">
@@ -135,7 +152,6 @@
 				<include name="aopalliance.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">
-				<include name="asm.jar"/>
 				<include name="cglib*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/dom4j">
@@ -155,10 +171,16 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-collections.jar"/>
+				<include name="commons-dbcp.jar"/>
+				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
+				<include name="commons-pool.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/ojb">
+				<include name="db-ojb-1.0.0.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -177,7 +199,7 @@
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" packagenames="*" private="true"
 			author="true" version="true" use="true" windowtitle="Petclinic">
 			<doctitle><![CDATA[<h1>Petclinic</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Ken Krebs and Spring contributors 2003.</i>]]></bottom>
+			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2004.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 		</javadoc>
 
@@ -185,13 +207,14 @@
 
 
 	<target name="dist" depends="warfile">
-		<!-- 
+		<!--
 			delegate to warfile target by depending on it.  dist is just to offer
 			a generic target name across all Spring sample apps that may be used
 			for autobuilds testing
 		-->
 	</target>
-	
+
+
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
@@ -200,11 +223,8 @@
 			<include name="*"/>
 			<include name="docs/**"/>
 			<include name="html/**"/>
-			<include name="WEB-INF/applicationContext*.xml"/>
-			<include name="WEB-INF/petclinic-servlet.xml"/>
-			<include name="WEB-INF/jboss-web.xml"/>
-			<include name="WEB-INF/*.properties"/>
-			<include name="WEB-INF/classes/*.properties"/>
+			<include name="WEB-INF/*.*"/>
+			<include name="WEB-INF/classes/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<exclude name="**/.*"/>
@@ -213,7 +233,7 @@
 	</target>
 
 
-	<target name="setupHSQL" description="Setup HSQL database properties" if="useHSQL">
+	<target name="setupHSQL" description="Set up HSQL database properties" if="useHSQL">
 
 		<property name="db.driver" value="${hsql.driver}"/>
 		<property name="db.url" value="${hsql.url}"/>
@@ -223,7 +243,7 @@
 	</target>
 
 
-	<target name="setupMYSQL" description="Setup MYSQL database properties" if="useMYSQL">
+	<target name="setupMYSQL" description="Set up MYSQL database properties" if="useMYSQL">
 
 		<property name="db.driver" value="${mysql.driver}"/>
 		<property name="db.url" value="${mysql.url}"/>
@@ -255,18 +275,14 @@
 			<classpath path="${spring.root}/lib/junit/junit.jar"/>
 		</javac>
 
-		<copy todir="${testbuild.dir}" preservelastmodified="true">
-			<fileset dir="${testsrc.dir}">
-				<include name="**/*.xml"/>
-			</fileset>
-		</copy>
-
 		<junit printsummary="true" fork="yes">
 			<formatter type="xml"/>
 			<test name="org.springframework.samples.petclinic.OwnerTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.jdbc.JdbcClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinicTests" todir="${testreports.dir}"/>
 			<classpath path="${build.dir}"/>
+			<classpath path="${src.dir}"/>
 			<classpath path="${testbuild.dir}"/>
 			<classpath path="${testsrc.dir}"/>
 			<classpath refid="master-classpath"/>
