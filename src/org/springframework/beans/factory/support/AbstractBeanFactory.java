@@ -70,7 +70,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.45 2004-02-09 10:11:42 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.46 2004-02-11 10:50:06 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
@@ -691,8 +691,8 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 				Constructor constructor = constructors[i];
 				if (constructor.getParameterTypes().length < minNrOfArgs) {
 					throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-							minNrOfArgs + " constructor arguments specified but no " +
-							"matching constructor found in bean '" + beanName + "'");
+							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
+							beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
 				}
 				Class[] argTypes = constructor.getParameterTypes();
 				Object[] args = new Object[argTypes.length];
