@@ -15,10 +15,30 @@
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
+	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
+		autowire="constructor"
+		dependency-check="objects">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod4" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
+		singleton="false"
+		dependency-check="objects">
+		<!-- Should not pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod5" class="org.springframework.beans.factory.xml.DependenciesBean"
+		singleton="false"
+		autowire="constructor">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
 	<bean id="spouse" class="org.springframework.beans.TestBean">
 		<property name="name">
 			<value>Kerry</value>
 		</property>
 	</bean>
+
+	<bean id="other" class="org.springframework.beans.factory.LifecycleBean"/>
 
 </beans>

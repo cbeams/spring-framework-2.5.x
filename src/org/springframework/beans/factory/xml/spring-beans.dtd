@@ -24,7 +24,7 @@
 	As the format is simple, a DTD is sufficient, and there's
 	no need for a schema at this point.
 	
-	$Id: spring-beans.dtd,v 1.9 2003-11-05 11:28:15 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.10 2003-11-09 21:38:37 jhoeller Exp $
 -->
 
 <!-- 
@@ -40,14 +40,14 @@
   Default values for all bean definitions. Can be overridden at
   the "bean" level. See those attribute definitions for details.
 -->
-<!ATTLIST beans default-dependency-check (none|objects|simple|all) "none">
-<!ATTLIST beans default-autowire (no|byName|byType) "no">
+<!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
+<!ATTLIST beans default-autowire (no | byName | byType) "no">
 
 <!--
 	Defines a single named bean.
 -->
 <!ELEMENT bean (
-        property*
+        (constructor-arg | property)*
 )>
 
 <!--
@@ -84,14 +84,14 @@
 	Singletons are most commonly used, and are ideal for multi-threaded
 	service objects.
 -->
-<!ATTLIST bean singleton (true|false) "true">
+<!ATTLIST bean singleton (true | false) "true">
 
 <!--
   If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
 -->
-<!ATTLIST bean lazy-init (true|false) "false">
+<!ATTLIST bean lazy-init (true | false) "false">
 
 <!--
 	Optional attribute controlling whether to check whether all this
@@ -101,7 +101,7 @@
 	"object" includes collaborators (other beans in the factory)
 	"all" includes both types of dependency checking
 -->
-<!ATTLIST bean dependency-check (none|objects|simple|all|default) "default">
+<!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
 <!--
 	Optional attribute controlling whether to "autowire"
@@ -133,7 +133,7 @@
 	Autowire behaviour can be combined with dependency checking, which will
 	be performed after all auto wiring has been completed.
 -->
-<!ATTLIST bean autowire (no|byName|byType|default) "default">
+<!ATTLIST bean autowire (no | byName | byType | constructor | default) "default">
 
 <!-- 
 	Optional attribute for the name of the custom initialization method
@@ -150,6 +150,16 @@
 <!ATTLIST bean destroy-method CDATA #IMPLIED>
 
 <!--
+	Bean definitions can specify zero or more constructor arguments.
+	They correspond to either a specific index of the constructor argument list
+	or are supposed to be matched generically by type.
+	This is an alternative to "autowire constructor".
+-->
+<!ELEMENT constructor-arg (
+        (value | ref | list | map | props)
+)>
+
+<!--
 	Bean definitions can have zero or more properties. 
 	Property elements correspond to JavaBean setter methods exposed
 	by the bean classes. Spring supports primitives, references to other
@@ -158,6 +168,8 @@
 <!ELEMENT property (
         (value | ref | list | map | props)
 )>
+
+<!ATTLIST constructor-arg index CDATA #IMPLIED>
 
 <!--
 	The property name attribute is the name of the JavaBean property.

@@ -6,7 +6,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +29,6 @@ import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
@@ -42,6 +42,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
@@ -62,7 +63,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.14 2003-11-07 09:09:06 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.15 2003-11-09 21:38:37 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -244,7 +245,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * method is synchronized here.
 	 * @param beanName name that may include factory dereference prefix
 	 */
-	private synchronized Object getSharedInstance(String beanName, RootBeanDefinition mergedBeanDefinition)
+	protected synchronized Object getSharedInstance(String beanName, RootBeanDefinition mergedBeanDefinition)
 			throws BeansException {
 		// Get rid of the dereference prefix if there is one
 		String name = transformedBeanName(beanName);
@@ -311,18 +312,25 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * All the other methods in this class invoke this method
-	 * although beans may be cached after being instantiated by this method.
-	 * All bean instantiation within this class is performed by this method.
-	 * Return a BeanWrapper object for a new instance of this bean.
-	 * First look up BeanDefinition for the given bean name.
-	 * Uses recursion to support instance "inheritance".
+	 * All the other methods in this class invoke this method, although beans may be cached
+	 * after being instantiated by this method. All bean instantiation within this class is
+	 * performed by this method.
+	 * <p>Returns a BeanWrapper object for a new instance of this bean. First looks up
+	 * BeanDefinition for the given bean name. Uses recursion to support instance "inheritance".
 	 * @param beanName name of the bean. Must be unique in the BeanFactory
 	 * @return a new instance of this bean
 	 */
-	private Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
 		logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
-		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
+
+		BeanWrapper instanceWrapper = null;
+		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+				mergedBeanDefinition.hasConstructorArgumentValues()) {
+			instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
+		}
+		else {
+			instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
+		}
 		Object bean = instanceWrapper.getWrappedInstance();
 
 		// Eagerly cache singletons to be able to resolve circular references
@@ -331,11 +339,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			this.singletonCache.put(beanName, bean);
 		}
 
+		// Add property values based on autowire by name if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 			autowireByName(beanName, mergedBeanDefinition, instanceWrapper);
 		}
 
-		// Add further property values based on autowire by type if it's applied
+		// Add property values based on autowire by type if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			autowireByType(beanName, mergedBeanDefinition, instanceWrapper);
 		}
@@ -351,13 +360,135 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
+	 * "autowire constructor" (with constructor arguments by type) behaviour.
+	 * Also applied if explicit constructor argument values are specified,
+	 * matching all remaining arguments with beans from the bean factory.
+	 * <p>This corresponds to PicoContainer's "Type 3 IoC" paradigm: In this mode, a Spring bean
+	 * factory is able to host components that expect constructor-based dependency resolution.
+	 * @param beanName name of the bean to autowire by type
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @return BeanWrapper for the new instance
+	 */
+	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mergedBeanDefinition) {
+		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getConstructors();
+		if (constructors.length != 1) {
+			throw new FatalBeanException("Need unique constructor in class [" + mergedBeanDefinition.getBeanClass() +
+																	 "] of bean with name '" + beanName + "'");
+		}
+		Constructor constructor = constructors[0];
+		Class[] argTypes = constructor.getParameterTypes();
+
+		ConstructorArgumentValues argValues = mergedBeanDefinition.getConstructorArgumentValues();
+		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
+		if (argValues != null) {
+			for (Iterator it = argValues.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				int index = ((Integer) entry.getKey()).intValue();
+				if (index >= argTypes.length) {
+					throw new BeanDefinitionStoreException("Invalid index " + index +
+																								 ": number of constructor arguments is " + argTypes.length);
+				}
+				String argName = "constructor argument with index " + index;
+				Object resolvedValue = resolveValueIfNecessary(beanName, argName, entry.getValue());
+				resolvedValues.addIndexedArgumentValue(index, resolvedValue);
+			}
+			for (Iterator it = argValues.getGenericArgumentValues().iterator(); it.hasNext();) {
+				Object value = it.next();
+				String argName = "constructor argument";
+				Object resolvedValue = resolveValueIfNecessary(beanName, argName, value);
+				resolvedValues.addGenericArgumentValue(resolvedValue);
+			}
+		}
+
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		Object[] args = new Object[argTypes.length];
+		for (int i = 0; i < argTypes.length; i++) {
+			args[i] = resolvedValues.getArgumentValue(i, argTypes[i]);
+			if (args[i] != null) {
+				args[i] = bw.doTypeConversionIfNecessary(null, null, args[i], argTypes[i]);
+			}
+			else {
+				if (mergedBeanDefinition.getAutowire() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+					throw new UnsatisfiedDependencyException(beanName, i, argTypes[i]);
+				}
+				Map matchingBeans = findMatchingBeans(argTypes[i]);
+				if (matchingBeans.size() != 1) {
+					throw new UnsatisfiedDependencyException(beanName, i, argTypes[i],
+							"There are " + matchingBeans.size() + " beans of type [" + argTypes[i] + "] for autowiring constructor. " +
+							"There should have been 1 to be able to autowire constructor of bean '" + beanName + "'.");
+				}
+				args[i] = matchingBeans.values().iterator().next();
+				logger.info("Autowiring by type from bean name '" + beanName +
+										"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
+			}
+		}
+		bw.setWrappedInstance(BeanUtils.instantiateClass(constructor, args));
+		return bw;
+	}
+
+	/**
+	 * Fills in any missing property values with references to
+	 * other beans in this factory if autowire is set to "byName".
+	 * @param beanName name of the bean we're wiring up.
+	 * Useful for debugging messages; not used functionally.
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 */
+	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+		String[] propertyNames = unsatisfiedObjectProperties(beanName, mergedBeanDefinition, bw);
+		for (int i = 0; i < propertyNames.length; i++) {
+			String propertyName = propertyNames[i];
+			Object bean = getBean(propertyName);
+			if (bean != null) {
+				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
+			}
+			logger.info("Added autowiring by name from bean name '" + beanName +
+				"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+		}
+	}
+
+	/**
+	 * Abstract method defining "autowire by type" (bean properties by type) behaviour.
+	 * <p>This is like PicoContainer default, in which there must be exactly one bean of the
+	 * property type in the bean factory. This makes bean factories simple to configure for small
+	 * namespaces, but doesn't work as well as standard Spring behaviour for bigger applications.
+	 * @param beanName of the bean to autowire by type
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
+	 */
+	protected void autowireByType(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
+		String[] propertyNames = unsatisfiedObjectProperties(beanName, mergedBeanDefinition, instanceWrapper);
+		for (int i = 0; i < propertyNames.length; i++) {
+			String propertyName = propertyNames[i];
+			// Look for a matching type
+			Class requiredType = instanceWrapper.getPropertyDescriptor(propertyName).getPropertyType();
+			Map matchingBeans = findMatchingBeans(requiredType);
+			if (matchingBeans.size() == 1) {
+				mergedBeanDefinition.addPropertyValue(
+				    new PropertyValue(propertyName, matchingBeans.values().iterator().next()));
+				logger.info("Autowiring by type from bean name '" + beanName +
+				            "' via property '" + propertyName + "' to bean named '" +
+				            matchingBeans.keySet().iterator().next() + "'");
+			}
+			else if (matchingBeans.size() > 1) {
+				throw new UnsatisfiedDependencyException(beanName, propertyName,
+						"There are " + matchingBeans.size() + " beans of type [" + requiredType + "] for autowire by type. " +
+						"There should have been 1 to be able to autowire property '" + propertyName + "' of bean '" + beanName + "'.");
+			}
+			else {
+				logger.info("Not autowiring property '" + propertyName + "' of bean '" + beanName +
+				            "' by type: no matching bean found");
+			}
+		}
+	}
+
+	/**
 	 * Perform a dependency check that all properties exposed have been set,
 	 * if desired. Dependency checks can be objects (collaborating beans),
 	 * simple (primitives and String), or all (both).
 	 * @param beanName name of the bean
 	 * @throws org.springframework.beans.factory.UnsatisfiedDependencyException
 	 */
-	public void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw)
+	protected void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw)
 			throws UnsatisfiedDependencyException {
 		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
 		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE)
@@ -378,26 +509,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 					throw new UnsatisfiedDependencyException(beanName, pds[i].getName());
 				}
 			}
-		}
-	}
-
-	/**
-	 * Fills in any missing property values with references to
-	 * other beans in this factory if autowire is set to "byName".
-	 * @param beanName name of the bean we're wiring up.
-	 * Useful for debugging messages; not used functionally.
-	 * @param mergedBeanDefinition bean definition to update through autowiring
-	 */
-	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
-		String[] propertyNames = unsatisfiedObjectProperties(beanName, mergedBeanDefinition, bw);
-		for (int i = 0; i < propertyNames.length; i++) {
-			String propertyName = propertyNames[i];
-			Object bean = getBean(propertyName);
-			if (bean != null) {
-				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
-			}
-			logger.info("Added autowiring by propertyName from bean propertyName '" + beanName +
-				"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
 		}
 	}
 
@@ -456,7 +567,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
 		
 		for (int i = 0; i < pvals.length; i++) {
-			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(beanName, bw, pvals[i]));
+			String argName = "property '" + pvals[i].getName() + "'";
+			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(beanName, argName, pvals[i].getValue()));
 			// Update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
@@ -483,58 +595,40 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * If the value is a simple object, but the property takes a Collection type,
 	 * the value must be placed in a list.
 	 */
-	private Object resolveValueIfNecessary(String beanName, BeanWrapper bw, PropertyValue pv)
-	    throws BeansException {
-		Object val;
-		
-		// Now we must check each PropertyValue to see whether it
+	private Object resolveValueIfNecessary(String beanName, String argName, Object value) throws BeansException {
+		// NWe must check each PropertyValue to see whether it
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
-		if (pv.getValue() != null && (pv.getValue() instanceof RuntimeBeanReference)) {
-			RuntimeBeanReference ref = (RuntimeBeanReference) pv.getValue();
-			val = resolveReference(beanName, pv.getName(), ref);
+		if (value instanceof RuntimeBeanReference) {
+			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			return resolveReference(beanName, argName, ref);
 		}	
-		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedList)) {
+		else if (value instanceof ManagedList) {
 			// Convert from managed list. This is a special container that
 			// may contain runtime bean references.
 			// May need to resolve references
-			val = resolveManagedList(beanName, pv.getName(), (ManagedList) pv.getValue());
+			return resolveManagedList(beanName, argName, (ManagedList) value);
 		}
-		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedMap)) {
+		else if (value instanceof ManagedMap) {
 			// Convert from managed map. This is a special container that
 			// may contain runtime bean references as values.
 			// May need to resolve references
-			ManagedMap mm = (ManagedMap) pv.getValue();
-			val = resolveManagedMap(beanName, pv.getName(), mm);
+			ManagedMap mm = (ManagedMap) value;
+			return resolveManagedMap(beanName, argName, mm);
 		}
 		else {
-			// It's an ordinary property. Just copy it.
-			val = pv.getValue();
+			// No need to resolve value
+			return value;
 		}
-		
-		 // If it's an array type, we may have to massage type
-		 // of collection. We'll start with ManagedList.
-		 // We may also have to convert array elements from Strings
-		 // TODO consider refactoring into BeanWrapperImpl?
-		 if (val != null && val instanceof ManagedList && bw.getPropertyDescriptor(pv.getName()).getPropertyType().isArray()) {
-			 // It's an array
-			 Class arrayClass = bw.getPropertyDescriptor(pv.getName()).getPropertyType();
-			 Class componentType = arrayClass.getComponentType();
-			 List l = (List) val;
-		
-			val = managedListToArray(bw, pv, val, componentType, l);
-		 }
-		
-		return val;
 	}
 	
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
-	private Object resolveReference(String beanName, String propertyName, RuntimeBeanReference ref) throws BeansException {
+	private Object resolveReference(String beanName, String argName, RuntimeBeanReference ref) throws BeansException {
 		try {
 			// Try to resolve bean reference
-			logger.debug("Resolving reference from property '" + propertyName + "' in bean '" +
+			logger.debug("Resolving reference from " + argName + " in bean '" +
 			             beanName + "' to bean '" + ref.getBeanName() + "'");
 			Object bean = getBean(ref.getBeanName());
 			// Create a new PropertyValue object holding the bean reference
@@ -542,7 +636,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		catch (BeansException ex) {
 			throw new FatalBeanException("Can't resolve reference to bean '" + ref.getBeanName() +
-																	 "' while setting property '" + propertyName + "' on bean '" + beanName + "'", ex);
+																	 "' while setting " + argName + " on bean '" + beanName + "'", ex);
 		}
 	}
 
@@ -550,18 +644,17 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * For each element in the ManagedMap, resolve references if necessary.
 	 * Allow ManagedLists as map entries.
 	 */
-	private ManagedMap resolveManagedMap(String beanName, String propertyName, ManagedMap mm) throws BeansException {
+	private ManagedMap resolveManagedMap(String beanName, String argName, ManagedMap mm) throws BeansException {
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
 			Object value = mm.get(key);
 			if (value instanceof RuntimeBeanReference) {
-				mm.put(key, resolveReference(beanName, propertyName, (RuntimeBeanReference) value));
+				mm.put(key, resolveReference(beanName, argName, (RuntimeBeanReference) value));
 			}
 			else if (value instanceof ManagedList) {
-				// An entry may be a ManagedList, in which case we may need to
-				// resolve references
-				mm.put(key, resolveManagedList(beanName, propertyName, (ManagedList) value));
+				// An entry may be a ManagedList, in which case we may need to resolve references
+				mm.put(key, resolveManagedList(beanName, argName, (ManagedList) value));
 			}
 		}	// for each key in the managed map
 		return mm;
@@ -570,30 +663,13 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private ManagedList resolveManagedList(String beanName, String propertyName, ManagedList l) throws BeansException {
-		for (int j = 0; j < l.size(); j++) {
-			if (l.get(j) instanceof RuntimeBeanReference) {
-				l.set(j, resolveReference(beanName, propertyName, (RuntimeBeanReference) l.get(j)));
+	private ManagedList resolveManagedList(String beanName, String argName, ManagedList ml) throws BeansException {
+		for (int j = 0; j < ml.size(); j++) {
+			if (ml.get(j) instanceof RuntimeBeanReference) {
+				ml.set(j, resolveReference(beanName, argName, (RuntimeBeanReference) ml.get(j)));
 			}
 		}
-		return l;
-	}
-	
-	private Object managedListToArray(BeanWrapper bw, PropertyValue pv, Object val, Class componentType, List l)
-	    throws NegativeArraySizeException, BeansException {
-		try {
-			Object[] arr = (Object[]) Array.newInstance(componentType, l.size());
-			for (int i = 0; i < l.size(); i++) {
-				// TODO hack: BWI cast
-				Object newval = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(bw.getWrappedInstance(), pv.getName(), null, l.get(i), componentType);
-				arr[i] = newval;
-			}
-			val = arr;
-		}
-		catch (ArrayStoreException ex) {
-			throw new BeanDefinitionStoreException("Cannot convert array element from String to " + componentType, ex);
-		}
-		return val;
+		return ml;
 	}
 	
 	/**
@@ -761,22 +837,15 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	protected abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
-	 * Abstract method defining autowire by type behaviour.
-	 * This is like PicoContainer default, in which there must be exactly
-	 * one bean of the property type in the bean factory.
-	 * This makes bean factories simple to configure for small namespaces,
-	 * but doesn't work as well as standard Spring behaviour for bigger applications.
+	 * Find bean instances that match the required type.
 	 * <p>This method is unsupported in this class, and throws UnsupportedOperationException.
 	 * Subclasses should override it if they can obtain information about bean names
-	 * by type, as a ListableBeanFactory implementation* can.
-	 * Invoked before any property setters have been applied. This method should add
-	 * more RuntimeBeanReferences to the merged bean definition's property values.
-	 * @param name name of the bean to autowire by type
-	 * @param mergedBeanDefinition bean definition to update through autowiring
-	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
+	 * by type, as a ListableBeanFactory implementation can.
+	 * @param requiredType the type of the beans to look up
+	 * @return a Map of bean names and bean instances that match the required type
 	 */
-	protected void autowireByType(String name, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
-		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type.");
+	protected Map findMatchingBeans(Class requiredType) {
+		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type");
 	}
 
 }

@@ -8,12 +8,12 @@ package org.springframework.beans.factory.xml;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,6 +41,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -64,7 +65,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.15 2003-11-05 11:28:15 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.16 2003-11-09 21:38:37 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -79,6 +80,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String NAME_ATTRIBUTE = "name";
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
 	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+	private static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
+	private static final String INDEX_ATTRIBUTE = "index";
 	private static final String PROPERTY_ELEMENT = "property";
 	private static final String REF_ELEMENT = "ref";
 	private static final String LIST_ELEMENT = "list";
@@ -102,8 +105,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	private static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
-	private static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
 	private static final String AUTOWIRE_BY_NAME_VALUE = "byName";
+	private static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
+	private static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
 
 
 	private boolean validating = true;
@@ -284,15 +288,14 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	 * If no id specified, use the first name in the name attribute as
 	 * canonical name, registering all others as aliases.
 	 */
-	private void loadBeanDefinition(Element el, String defaultDependencyCheck, String defaultAutowire) {
-		String id = el.getAttribute(ID_ATTRIBUTE);
-		String nameAttr = el.getAttribute(NAME_ATTRIBUTE);
+	private void loadBeanDefinition(Element ele, String defaultDependencyCheck, String defaultAutowire) {
+		String id = ele.getAttribute(ID_ATTRIBUTE);
+		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		List aliases = new ArrayList();
 		if (nameAttr != null && !"".equals(nameAttr)) {
 			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
 		}
-		PropertyValues pvs = getPropertyValueSubElements(el);
-		AbstractBeanDefinition beanDefinition = parseBeanDefinition(el, id, pvs, defaultDependencyCheck, defaultAutowire);
+		AbstractBeanDefinition beanDefinition = parseBeanDefinition(ele, id, defaultDependencyCheck, defaultAutowire);
 
 		if (id == null || "".equals(id)) {
 			if (aliases.isEmpty()) {
@@ -314,40 +317,44 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	/**
 	 * Parse a standard bean definition.
 	 */
-	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs,
+	private AbstractBeanDefinition parseBeanDefinition(Element ele, String beanName,
 	                                                   String defaultDependencyCheck, String defaultAutowire) {
 		try {
 			String className = null;
-			if (el.hasAttribute(CLASS_ATTRIBUTE))
-				className = el.getAttribute(CLASS_ATTRIBUTE);
+			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
+				className = ele.getAttribute(CLASS_ATTRIBUTE);
+			}
 			String parent = null;
-			if (el.hasAttribute(PARENT_ATTRIBUTE))
-				parent = el.getAttribute(PARENT_ATTRIBUTE);
+			if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
+				parent = ele.getAttribute(PARENT_ATTRIBUTE);
+			}
 			if (className == null && parent == null) {
 				throw new FatalBeanException("No class or parent in bean definition '" + beanName + "'", null);
 			}
 
 			AbstractBeanDefinition bd = null;
+			PropertyValues pvs = getPropertyValueSubElements(ele);
 
 			if (className != null) {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
-				RootBeanDefinition rbd = new RootBeanDefinition(Class.forName(className, true, cl), pvs);
+				ConstructorArgumentValues cargs = getConstructorArgSubElements(ele);
+				RootBeanDefinition rbd = new RootBeanDefinition(Class.forName(className, true, cl), cargs, pvs);
 
-				String initMethodName = el.getAttribute(INIT_METHOD_ATTRIBUTE);
+				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
 				if (!initMethodName.equals("")) {
 					rbd.setInitMethodName(initMethodName);
 				}
-				String destroyMethodName = el.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 				if (!destroyMethodName.equals("")) {
 					rbd.setDestroyMethodName(destroyMethodName);
 				}
 
-				String dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(dependencyCheck))
 					dependencyCheck = defaultDependencyCheck;
 				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
-				String autowire = el.getAttribute(AUTOWIRE_ATTRIBUTE);
+				String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(autowire))
 					autowire = defaultAutowire;
 				rbd.setAutowire(getAutowire(autowire));
@@ -358,11 +365,11 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				bd = new ChildBeanDefinition(parent, pvs);
 			}
 
-			if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
-				bd.setSingleton(TRUE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE)));
+			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
 			}
-			if (el.hasAttribute(LAZY_INIT_ATTRIBUTE)) {
-				bd.setLazyInit(TRUE_VALUE.equals(el.getAttribute(LAZY_INIT_ATTRIBUTE)));
+			if (ele.hasAttribute(LAZY_INIT_ATTRIBUTE)) {
+				bd.setLazyInit(TRUE_VALUE.equals(ele.getAttribute(LAZY_INIT_ATTRIBUTE)));
 			}
 			
 			return bd;
@@ -372,35 +379,21 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		}
 	}
 
-	private int getDependencyCheck(String att) {
-		int dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_NONE;
-		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_ALL;
+	/**
+	 * Parse constructor argument subelements of the given bean element.
+	 */
+	private ConstructorArgumentValues getConstructorArgSubElements(Element beanEle) {
+		NodeList nl = beanEle.getElementsByTagName(CONSTRUCTOR_ARG_ELEMENT);
+		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Element cargEle = (Element) nl.item(i);
+			parseConstructorArgElement(cargs, cargEle);
 		}
-		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
-		}
-		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
-		}
-		// else leave default value
-		return dependencyCheckCode;
-	}
-
-	private int getAutowire(String att) {
-		int autowire = RootBeanDefinition.AUTOWIRE_NO;
-		if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
-		}
-		else if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;
-		}
-		// else leave default value
-		return autowire;
+		return cargs;
 	}
 
 	/**
-	 * Parse property value subelements of this bean element.
+	 * Parse property value subelements of the given bean element.
 	 */
 	private PropertyValues getPropertyValueSubElements(Element beanEle) {
 		NodeList nl = beanEle.getElementsByTagName(PROPERTY_ELEMENT);
@@ -413,13 +406,36 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	}
 
 	/**
+	 * Parse a constructor-arg element.
+	 */
+	private void parseConstructorArgElement(ConstructorArgumentValues cargs, Element ele) throws DOMException {
+		Object val = getPropertyValue(ele);
+		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+		if (!"".equals(indexAttr)) {
+			try {
+				int index = Integer.parseInt(indexAttr);
+				if (index < 0) {
+					throw new FatalBeanException("'index' cannot be lower than 0");
+				}
+				cargs.addIndexedArgumentValue(index, val);
+			}
+			catch (NumberFormatException ex) {
+				throw new FatalBeanException("Attribute 'index' of tag 'constructor-arg' must be an integer");
+			}
+		}
+		else {
+			cargs.addGenericArgumentValue(val);
+		}
+	}
+
+	/**
 	 * Parse a property element.
 	 */
 	private void parsePropertyElement(MutablePropertyValues pvs, Element e) throws DOMException {
 		String propertyName = e.getAttribute(NAME_ATTRIBUTE);
-		if (propertyName == null || "".equals(propertyName))
-			throw new BeanDefinitionStoreException("Property without a name", null);
-
+		if ("".equals(propertyName)) {
+			throw new BeanDefinitionStoreException("Tag 'property' must have a 'name' attribute");
+		}
 		Object val = getPropertyValue(e);
 		pvs.addPropertyValue(new PropertyValue(propertyName, val));
 	}
@@ -427,10 +443,10 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	/**
 	 * Get the value of a property element. May be a list.
 	 */
-	private Object getPropertyValue(Element e) {
+	private Object getPropertyValue(Element ele) {
 		// Can only have one element child:
 		// value, ref, collection
-		NodeList nl = e.getChildNodes();
+		NodeList nl = ele.getChildNodes();
 		Element childEle = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
@@ -552,6 +568,36 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		Text t = (Text) nl.item(0);
 		// This will be a String
 		return t.getData();
+	}
+
+	private int getDependencyCheck(String att) {
+		int dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_NONE;
+		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_ALL;
+		}
+		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+		}
+		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+		}
+		// else leave default value
+		return dependencyCheckCode;
+	}
+
+	private int getAutowire(String att) {
+		int autowire = RootBeanDefinition.AUTOWIRE_NO;
+		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
+			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;
+		}
+		else if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
+			autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
+		}
+		else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(att)) {
+			autowire = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+		}
+		// else leave default value
+		return autowire;
 	}
 
 
