@@ -42,7 +42,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.4 2004-07-20 16:41:30 johnsonr Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.5 2004-07-24 11:25:17 johnsonr Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
@@ -110,7 +110,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
+		TransactionStatus status = transactionStatusForNewTransaction();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Expect a transaction
@@ -139,7 +139,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
+		TransactionStatus status = transactionStatusForNewTransaction();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Expect a transaction
@@ -191,8 +191,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas.register(outerMethod, outerTxatt);
 		tas.register(innerMethod, innerTxatt);
 
-		TransactionStatus outerStatus = new DefaultTransactionStatus(null, false, false, false, false, null);
-		TransactionStatus innerStatus = new DefaultTransactionStatus(null, true, false, false, false, null);
+		TransactionStatus outerStatus = transactionStatusForNewTransaction();
+		TransactionStatus innerStatus = transactionStatusForNewTransaction();
 		
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
@@ -350,7 +350,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
+		TransactionStatus status = transactionStatusForNewTransaction();
+		assertTrue(status.isNewTransaction());
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
@@ -377,6 +378,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptxControl.verify();
 	}
 	
+	/**
+	 * @return a TransactionStatus object configured
+	 * for a new transaction
+	 */
+	private TransactionStatus transactionStatusForNewTransaction() {
+		return new DefaultTransactionStatus(new Object(), true, false, false, false, null);
+	}
+
 	/**
 	 * Simulate a transaction infrastructure failure.
 	 * Shouldn't invoke target method.
@@ -431,7 +440,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
-		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
+		TransactionStatus status = transactionStatusForNewTransaction();
 		ptm.getTransaction(txatt);
 		ptxControl.setReturnValue(status);
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
