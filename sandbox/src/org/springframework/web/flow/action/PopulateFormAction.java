@@ -26,7 +26,6 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
-
 /**
  * @author Keith Donald
  * @author Colin Sampaleanu
