@@ -52,8 +52,7 @@ import javax.jms.TopicSession;
  * 
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
-public class JmsSender102 extends AbstractJmsSender
-{
+public class JmsSender102 extends AbstractJmsSender {
 
     /**
      * Construct a new JmsSender for bean usage.
@@ -62,43 +61,33 @@ public class JmsSender102 extends AbstractJmsSender
      * typically setting the ConnectionFactory via setConnectionFactory.
      * @see #setConnectionFactory
      */
-    public JmsSender102()
-    {
+    public JmsSender102() {
     }
 
     public void send(String destinationName, MessageCreator messageCreator)
-        throws JmsException
-    {
-        if (isPubSubDomain())
-        {
+        throws JmsException {
+        if (isPubSubDomain()) {
             sendPubSub(destinationName, null, false, messageCreator);
-        } else
-        {
+        } else {
             sendP2P(destinationName, null, false, messageCreator);
         }
     }
 
     public void send(Destination d, MessageCreator messageCreator)
-        throws JmsException
-    {
-        if (isPubSubDomain())
-        {
+        throws JmsException {
+        if (isPubSubDomain()) {
             sendPubSub(null, (Topic) d, true, messageCreator);
-        } else
-        {
+        } else {
             sendP2P(null, (Queue) d, true, messageCreator);
         }
     }
 
-    public void send(MessageCreator messageCreator) throws JmsException
-    {
-        if (this.getDefaultDestination() == null)
-        {
+    public void send(MessageCreator messageCreator) throws JmsException {
+        if (this.getDefaultDestination() == null) {
             logger.warn(
                 "No Default Destination was specified. Check configuration of JmsSender");
             return;
-        } else
-        {
+        } else {
             send(getDefaultDestination(), messageCreator);
         }
     }
@@ -122,11 +111,9 @@ public class JmsSender102 extends AbstractJmsSender
         String topicName,
         Topic topic,
         boolean explicitDestination,
-        MessageCreator messageCreator)
-    {
+        MessageCreator messageCreator) {
         TopicConnection topicConnection = null;
-        try
-        {
+        try {
             topicConnection =
                 ((TopicConnectionFactory) getConnectionFactory())
                     .createTopicConnection();
@@ -134,8 +121,7 @@ public class JmsSender102 extends AbstractJmsSender
                 topicConnection.createTopicSession(
                     isSessionTransacted(),
                     getSessionAcknowledgeMode());
-            if (!explicitDestination)
-            {
+            if (!explicitDestination) {
                 topic =
                     (Topic) getJmsAdmin().lookup(
                         topicName,
@@ -145,12 +131,10 @@ public class JmsSender102 extends AbstractJmsSender
             TopicPublisher publisher = topicSession.createPublisher(topic);
 
             Message message = messageCreator.createMessage(topicSession);
-            if (logger.isInfoEnabled())
-            {
+            if (logger.isInfoEnabled()) {
                 logger.info("Message created was [" + message + "]");
             }
-            if (isExplicitQosEnabled())
-            {
+            if (isExplicitQosEnabled()) {
                 publisher.publish(
                     topic,
                     message,
@@ -158,23 +142,19 @@ public class JmsSender102 extends AbstractJmsSender
                     getPriority(),
                     getTimeToLive());
 
-            } else
-            {
+            } else {
                 publisher.publish(topic, message);
             }
 
-        } catch (JMSException e)
-        {
-            throw convertJMSException("Send message on topic name = " + topicName, e);
-        } finally
-        {
-            if (topicConnection != null)
-            {
-                try
-                {
+        } catch (JMSException e) {
+            throw convertJMSException(
+                "Send message on topic name = " + topicName,
+                e);
+        } finally {
+            if (topicConnection != null) {
+                try {
                     topicConnection.close();
-                } catch (JMSException e)
-                {
+                } catch (JMSException e) {
                     logger.warn("Failed to close the topic connection", e);
                 }
             }
@@ -200,11 +180,9 @@ public class JmsSender102 extends AbstractJmsSender
         String queueName,
         Queue queue,
         boolean explicitDestination,
-        MessageCreator messageCreator)
-    {
+        MessageCreator messageCreator) {
         QueueConnection queueConnection = null;
-        try
-        {
+        try {
             queueConnection =
                 ((QueueConnectionFactory) getConnectionFactory())
                     .createQueueConnection();
@@ -213,27 +191,23 @@ public class JmsSender102 extends AbstractJmsSender
                 queueConnection.createQueueSession(
                     isSessionTransacted(),
                     getSessionAcknowledgeMode());
-            if (!explicitDestination)
-            {
+            if (!explicitDestination) {
                 queue =
                     (Queue) getJmsAdmin().lookup(
                         queueName,
                         isEnabledDynamicDestinations(),
                         isPubSubDomain());
             }
-            if (logger.isInfoEnabled())
-            {
+            if (logger.isInfoEnabled()) {
                 logger.info("Looked up queue with name [" + queueName + "]");
             }
             QueueSender queueSender = queueSession.createSender(queue);
             Message message = messageCreator.createMessage(queueSession);
             //TODO put in pretty printer.
-            if (logger.isInfoEnabled())
-            {
+            if (logger.isInfoEnabled()) {
                 logger.info("Message created was [" + message + "]");
             }
-            if (this.isExplicitQosEnabled())
-            {
+            if (this.isExplicitQosEnabled()) {
                 queueSender.send(
                     queue,
                     message,
@@ -241,24 +215,20 @@ public class JmsSender102 extends AbstractJmsSender
                     getPriority(),
                     getTimeToLive());
 
-            } else
-            {
+            } else {
                 queueSender.send(queue, message);
             }
             logger.info("Message sent OK");
 
-        } catch (JMSException e)
-        {
-            throw convertJMSException("Send message on queue name = " + queueName, e);
-        } finally
-        {
-            if (queueConnection != null)
-            {
-                try
-                {
+        } catch (JMSException e) {
+            throw convertJMSException(
+                "Send message on queue name = " + queueName,
+                e);
+        } finally {
+            if (queueConnection != null) {
+                try {
                     queueConnection.close();
-                } catch (JMSException e)
-                {
+                } catch (JMSException e) {
                     logger.warn("Failed to close the queue connection", e);
                 }
             }
@@ -271,60 +241,77 @@ public class JmsSender102 extends AbstractJmsSender
      * the specified destination type.  QueueConnectionFactory for queues
      * and TopicConnectionFactory for topics.
      */
-    public void afterPropertiesSet()
-    {
+    public void afterPropertiesSet() {
         super.afterPropertiesSet();
         //Make sure that the ConnectionFactory passed is consistent
         //with sending on the specifies destination type.
         //Some providers implementations of the ConnectionFactory implement both
         //domain interfaces under the cover, so just check if the selected
         //domain is consistent with the type of connection factory.
-        if (isPubSubDomain())
-        {
-            if (getConnectionFactory() instanceof TopicConnectionFactory)
-            {
+        if (isPubSubDomain()) {
+            if (getConnectionFactory() instanceof TopicConnectionFactory) {
                 //Do nothing, all ok.
-            } else
-            {
+            } else {
                 throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for topics but did not supply an instance of a TopicConnectionFactory");
             }
-        } else
-        {
-            if (getConnectionFactory() instanceof QueueConnectionFactory)
-            {
+        } else {
+            if (getConnectionFactory() instanceof QueueConnectionFactory) {
                 //Do nothing, all ok.
-            } else
-            {
+            } else {
                 throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 Sender for queues but did not supply an instance of a QueueConnectionFactory");
             }
         }
 
     }
 
-    public void execute(JmsSenderCallback callback)
-        throws JmsException
-    {
-        // TODO Auto-generated method stub
+    public void execute(JmsSenderCallback action) throws JmsException {
+        if (isPubSubDomain()) {
+            executeTopicJmsSenderCallback(action);
+        } else {
+            executeQueueJmsSenderCallback(action);
+        }
 
     }
 
-    public void execute(SessionCallback action) throws JmsException
-    {
-        if (isPubSubDomain())
-        {
+    public void execute(SessionCallback action) throws JmsException {
+        if (isPubSubDomain()) {
             executeTopicSessionCallback(action);
-        } else
-        {
+        } else {
             executeQueueSessionCallback(action);
         }
 
     }
 
-    private void executeTopicSessionCallback(SessionCallback action)
-    {
+    private void executeTopicJmsSenderCallback(JmsSenderCallback action) {
         TopicConnection topicConnection = null;
-        try
-        {
+        try {
+            topicConnection =
+                ((TopicConnectionFactory) getConnectionFactory())
+                    .createTopicConnection();
+            TopicSession topicSession =
+                topicConnection.createTopicSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+            TopicPublisher publisher = topicSession.createPublisher(null);
+
+            action.doInJms(topicSession, publisher);
+
+        } catch (JMSException e) {
+            throw convertJMSException("Call JmsSenderCallback", e);
+        } finally {
+            if (topicConnection != null) {
+                try {
+                    topicConnection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the topic connection", e);
+                }
+            }
+        }
+    }
+
+    private void executeTopicSessionCallback(SessionCallback action) {
+        TopicConnection topicConnection = null;
+        try {
             topicConnection =
                 ((TopicConnectionFactory) getConnectionFactory())
                     .createTopicConnection();
@@ -335,29 +322,51 @@ public class JmsSender102 extends AbstractJmsSender
 
             action.doInJms(topicSession);
 
-        } catch (JMSException e)
-        {
+        } catch (JMSException e) {
             throw convertJMSException("Call SessionCallback", e);
-        } finally
-        {
-            if (topicConnection != null)
-            {
-                try
-                {
+        } finally {
+            if (topicConnection != null) {
+                try {
                     topicConnection.close();
-                } catch (JMSException e)
-                {
+                } catch (JMSException e) {
                     logger.warn("Failed to close the topic connection", e);
                 }
             }
         }
     }
 
-    private void executeQueueSessionCallback(SessionCallback action)
-    {
+    private void executeQueueJmsSenderCallback(JmsSenderCallback action) {
         QueueConnection queueConnection = null;
-        try
-        {
+        try {
+            queueConnection =
+                ((QueueConnectionFactory) getConnectionFactory())
+                    .createQueueConnection();
+
+            QueueSession queueSession =
+                queueConnection.createQueueSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+
+            QueueSender queueSender = queueSession.createSender(null);
+
+            action.doInJms(queueSession, queueSender);
+
+        } catch (JMSException e) {
+            throw convertJMSException("Call SessionCallback", e);
+        } finally {
+            if (queueConnection != null) {
+                try {
+                    queueConnection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the queue connection", e);
+                }
+            }
+        }
+    }
+
+    private void executeQueueSessionCallback(SessionCallback action) {
+        QueueConnection queueConnection = null;
+        try {
             queueConnection =
                 ((QueueConnectionFactory) getConnectionFactory())
                     .createQueueConnection();
@@ -369,18 +378,13 @@ public class JmsSender102 extends AbstractJmsSender
 
             action.doInJms(queueSession);
 
-        } catch (JMSException e)
-        {
+        } catch (JMSException e) {
             throw convertJMSException("Call SessionCallback", e);
-        } finally
-        {
-            if (queueConnection != null)
-            {
-                try
-                {
+        } finally {
+            if (queueConnection != null) {
+                try {
                     queueConnection.close();
-                } catch (JMSException e)
-                {
+                } catch (JMSException e) {
                     logger.warn("Failed to close the queue connection", e);
                 }
             }
