@@ -13,29 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.support;
+package org.springframework.rules.constraint;
 
 import org.springframework.rules.Constraint;
-import org.springframework.rules.Rules;
-import org.springframework.rules.RulesProvider;
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.reporting.TypeResolvableSupport;
 
 /**
+ * Convenient abstract super class for predicates whose type's are resolvable,
+ * useful for mapping the type to a i18n message in a message source.
+ * 
  * @author Keith Donald
  */
-public abstract class AbstractRuleProvider extends DefaultRulesSource implements
-        RulesProvider {
-    private Rules rules = Rules.createRules(this.getClass());
+public abstract class TypeResolvableConstraint extends
+        TypeResolvableSupport implements Constraint {
 
-    protected AbstractRuleProvider() {
-        addRules(rules);
-    }
-    
-    protected void add(String property, Constraint valueConstraint) {
-        rules.add(property, valueConstraint);
+    public TypeResolvableConstraint() {
+        super();
     }
 
-    public BeanPropertyConstraint getRules(String propertyName) {
-        return getRules(this.getClass(), propertyName);
+    public TypeResolvableConstraint(String type) {
+        super(type);
     }
 }

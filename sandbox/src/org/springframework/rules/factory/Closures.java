@@ -17,8 +17,8 @@ package org.springframework.rules.factory;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.closures.ClosureChain;
-import org.springframework.rules.closures.ConstrainedClosureWithoutResult;
+import org.springframework.rules.closure.ClosureChain;
+import org.springframework.rules.closure.ConstrainedClosureWithoutResult;
 
 /**
  * A factory for easing the construction and composition of functions.

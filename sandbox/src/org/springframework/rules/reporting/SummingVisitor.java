@@ -18,11 +18,11 @@ package org.springframework.rules.reporting;
 import java.util.Iterator;
 
 import org.springframework.rules.Constraint;
-import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
-import org.springframework.rules.constraints.And;
-import org.springframework.rules.constraints.Or;
-import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
-import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.And;
+import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraint.Or;
+import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
+import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;

@@ -16,7 +16,7 @@
 package org.springframework.rules.factory;
 
 import org.springframework.rules.Constraint;
-import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
 import org.springframework.util.Assert;
 
 /**

@@ -13,13 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules;
+package org.springframework.util.comparator;
 
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import java.util.Comparator;
 
 /**
+ * Adapter that adapts a comparable to the comparator interface.
+ * 
  * @author Keith Donald
  */
-public interface RulesProvider {
-    public BeanPropertyConstraint getRules(String propertyName);
+public class ComparableComparator implements Comparator {
+
+    private static final ComparableComparator instance = new ComparableComparator();
+
+    /**
+     * Factory method that returns a shared instance of a ComparableComparator.
+     * Developers are
+     */
+    public static ComparableComparator instance() {
+        return instance;
+    }
+
+    private ComparableComparator() {
+    }
+
+    public int compare(Object o1, Object o2) {
+        return ((Comparable)o1).compareTo(o2);
+    }
+
 }

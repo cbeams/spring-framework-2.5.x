@@ -13,13 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules;
+package org.springframework.rules.constraint.bean;
 
-import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.Not;
 
 /**
  * @author Keith Donald
  */
-public interface RulesProvider {
-    public BeanPropertyConstraint getRules(String propertyName);
+public class NegatedBeanPropertyConstraint extends Not implements
+        BeanPropertyConstraint {
+    public NegatedBeanPropertyConstraint(BeanPropertyConstraint e) {
+        super(e);
+    }
+    
+    /**
+     * @see org.springframework.rules.constraint.bean.BeanPropertyConstraint#getPropertyName()
+     */
+    public String getPropertyName() {
+        return ((BeanPropertyConstraint)super.getPredicate()).getPropertyName();
+    }
 }

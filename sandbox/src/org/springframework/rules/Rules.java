@@ -22,11 +22,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.constraints.And;
-import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
-import org.springframework.rules.constraints.CompoundConstraint;
-import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
-import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.constraint.And;
+import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraint.CompoundConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.validation.Errors;

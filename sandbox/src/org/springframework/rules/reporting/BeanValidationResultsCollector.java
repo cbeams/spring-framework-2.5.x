@@ -17,11 +17,11 @@ package org.springframework.rules.reporting;
 
 import org.springframework.rules.Constraint;
 import org.springframework.rules.Rules;
-import org.springframework.rules.constraints.CompoundBeanPropertyExpression;
-import org.springframework.rules.constraints.beans.BeanPropertiesConstraint;
-import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
-import org.springframework.rules.constraints.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.constraints.beans.ParameterizedBeanPropertyConstraint;
+import org.springframework.rules.constraint.CompoundBeanPropertyExpression;
+import org.springframework.rules.constraint.bean.BeanPropertiesConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyValueConstraint;
+import org.springframework.rules.constraint.bean.ParameterizedBeanPropertyConstraint;
 import org.springframework.rules.support.Algorithms;
 import org.springframework.rules.support.ClosureWithoutResult;
 import org.springframework.util.Assert;

@@ -20,10 +20,10 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.constraints.CompoundConstraint;
-import org.springframework.rules.constraints.And;
-import org.springframework.rules.constraints.Not;
-import org.springframework.rules.constraints.Or;
+import org.springframework.rules.constraint.And;
+import org.springframework.rules.constraint.CompoundConstraint;
+import org.springframework.rules.constraint.Not;
+import org.springframework.rules.constraint.Or;
 import org.springframework.util.ToStringBuilder;
 
 /**

@@ -22,9 +22,9 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.comparators.ComparableComparator;
-import org.springframework.util.comparators.CompoundComparator;
-import org.springframework.util.comparators.NullSafeComparator;
+import org.springframework.util.comparator.ComparableComparator;
+import org.springframework.util.comparator.CompoundComparator;
+import org.springframework.util.comparator.NullSafeComparator;
 
 /**
  * Abstract base superclass for CodedEnum implementations.

@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesSource;
-import org.springframework.rules.constraints.beans.BeanPropertyConstraint;
+import org.springframework.rules.constraint.bean.BeanPropertyConstraint;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ToStringBuilder;
 

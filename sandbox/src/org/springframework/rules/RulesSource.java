@@ -15,7 +15,7 @@
  */
 package org.springframework.rules;
 
-import org.springframework.rules.constraints.beans.*;
+import org.springframework.rules.constraint.bean.*;
 
 /**
  * Rules sources provide a mechanism for accessing rules associated with a bean
