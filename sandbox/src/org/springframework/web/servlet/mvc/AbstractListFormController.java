@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.AbstractFormController;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -38,7 +37,6 @@ import org.springframework.web.util.WebUtils;
  * processSubmit, both with the action parameter.
  * 
  * If a confirmation view is used, it will have button Parameter as _cancel and _confXXX.
- *  
  *  
  * @author Jean-Pierre Pawlak
  */
@@ -81,12 +79,9 @@ public abstract class AbstractListFormController extends AbstractFormController 
 	 * or null if not in session form mode.
 	 */
 	protected final String getListSessionAttributeName() {
-		return isSessionForm() ? getClass() + ".list." + getBeanName() : null;
+		return isSessionForm() ? getClass() + ".list." + getCommandName() : null;
 	}
 
-	/**
-	 * @see org.springframework.web.servlet.mvc.AbstractFormController#processSubmit(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, org.springframework.validation.BindException)
-	 */
 	protected final ModelAndView processSubmit(
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -98,7 +93,7 @@ public abstract class AbstractListFormController extends AbstractFormController 
 		logger.info("cancel ?");
 		// cancel ?
 		if (WebUtils.hasSubmitParameter(request, PARAM_CANCEL)) {
-			logger.info("Cancelling form bean " + getBeanName());
+			logger.info("Cancelling form bean " + getCommandName());
 			return processSubmit(request, response, command, errors, CANCEL);
 		}
 		
@@ -106,11 +101,11 @@ public abstract class AbstractListFormController extends AbstractFormController 
 		// insert ?
 		if (WebUtils.hasSubmitParameter(request, PARAM_CONFIRM_INSERT) 
 			|| (!confirmInsert && WebUtils.hasSubmitParameter(request, PARAM_INSERT))) {
-			logger.info("Inserting form bean " + getBeanName());
+			logger.info("Inserting form bean " + getCommandName());
 			return processSubmit(request, response, command, errors, INSERT);
 		}
 		if (WebUtils.hasSubmitParameter(request, PARAM_INSERT)) {
-			logger.info("Confirming insert form bean " + getBeanName());
+			logger.info("Confirming insert form bean " + getCommandName());
 			// If we are here, the sessionForm is already set to true as confirmInsert is also true.
 			request.getSession().setAttribute(getFormSessionAttributeName(), command);
 			return showConfirm(request, response, command, errors, INSERT);
@@ -120,11 +115,11 @@ public abstract class AbstractListFormController extends AbstractFormController 
 		logger.info("update ?");
 		if (WebUtils.hasSubmitParameter(request, PARAM_CONFIRM_UPDATE) 
 			|| (!confirmUpdate && WebUtils.hasSubmitParameter(request, PARAM_UPDATE))) {
-			logger.info("Updating form bean " + getBeanName());
+			logger.info("Updating form bean " + getCommandName());
 			return processSubmit(request, response, command, errors, UPDATE);
 		}
 		if (WebUtils.hasSubmitParameter(request, PARAM_UPDATE)) {
-			logger.info("Confirming update form bean " + getBeanName());
+			logger.info("Confirming update form bean " + getCommandName());
 			// If we are here, the sessionForm is already set to true as confirmUpdate is also true.
 			request.getSession().setAttribute(getFormSessionAttributeName(), command);
 			return showConfirm(request, response, command, errors, UPDATE);
@@ -134,11 +129,11 @@ public abstract class AbstractListFormController extends AbstractFormController 
 		logger.info("remove ?");
 		if (WebUtils.hasSubmitParameter(request, PARAM_CONFIRM_REMOVE) 
 			|| (!confirmRemove && WebUtils.hasSubmitParameter(request, PARAM_REMOVE))) {
-			logger.info("Removing form bean " + getBeanName());
+			logger.info("Removing form bean " + getCommandName());
 			return processSubmit(request, response, command, errors, REMOVE);
 		}
 		if (WebUtils.hasSubmitParameter(request, PARAM_REMOVE)) {
-			logger.info("Confirming remove form bean " + getBeanName());
+			logger.info("Confirming remove form bean " + getCommandName());
 			// If we are here, the sessionForm is already set to true as confirmRemove is also true.
 			request.getSession().setAttribute(getFormSessionAttributeName(), command);
 			return showConfirm(request, response, command, errors, REMOVE);
@@ -146,7 +141,7 @@ public abstract class AbstractListFormController extends AbstractFormController 
 
 		// Unknown situation
 		logger.info("unknown");
-		logger.debug("Processing unknown form bean " + getBeanName());
+		logger.debug("Processing unknown form bean " + getCommandName());
 		return processSubmit(request, response, command, errors, UNKNOWN);
 	}
 
