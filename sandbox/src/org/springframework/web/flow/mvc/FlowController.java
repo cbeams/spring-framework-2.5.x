@@ -16,32 +16,30 @@ import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.util.WebUtils;
 
 /**
- * 
- * 
  * @author Erwin Vervaet
  */
 public class FlowController extends AbstractController {
-	
+
 	private Flow flow;
-	
+
 	private FlowExecutionListener[] flowExecutionListeners;
 
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
-	
+
 	protected String getFlowExecutionIdParameterName() {
 		return FlowAction.FLOW_EXECUTION_ID_PARAMETER;
 	}
-	
+
 	protected String getCurrentStateIdParameterName() {
 		return FlowAction.CURRENT_STATE_ID_PARAMETER;
 	}
-	
+
 	protected String getEventIdParameterName() {
 		return FlowAction.EVENT_ID_PARAMETER;
 	}
-	
+
 	private String getEventIdAttributeName() {
 		return FlowAction.EVENT_ID_ATTRIBUTE;
 	}
@@ -53,20 +51,19 @@ public class FlowController extends AbstractController {
 	protected String getFlowExecutionIdAttributeName() {
 		return FlowAction.FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
-	
+
 	protected String getCurrentStateIdAttributeName() {
 		return FlowAction.CURRENT_STATE_ID_ATTRIBUTE;
 	}
-	
+
 	protected String getFlowExecutionInfoAttributeName() {
 		return FlowExecutionInfo.ATTRIBUTE_NAME;
 	}
-	
-	protected ModelAndView handleRequestInternal(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		FlowExecution flowExecution;
 		ModelAndView mv;
-
 		if (RequestUtils.getStringParameter(request, getFlowExecutionIdParameterName(), null) == null) {
 			// No existing flow execution to lookup as no _flowExecutionId
 			// was provided - start a new one
@@ -103,13 +100,14 @@ public class FlowController extends AbstractController {
 								+ flowExecution.getCaption() + "' -- programmer error?");
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
-				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '" + getNotSetEventIdParameterMarker()
+				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
+						+ getNotSetEventIdParameterMarker()
 						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
 						+ getEventIdParameterName()
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
-			
+
 			// execute the signaled event within the current state
 			mv = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
@@ -131,7 +129,7 @@ public class FlowController extends AbstractController {
 				request.setAttribute(getFlowExecutionInfoAttributeName(), flowExecution);
 			}
 		}
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + mv);
 		}
@@ -141,13 +139,13 @@ public class FlowController extends AbstractController {
 	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
-	
+
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		flowExecution.addAllFlowExecutionListeners(flowExecutionListeners);
+		flowExecution.addFlowExecutionListeners(flowExecutionListeners);
 		return flowExecution;
 	}
-	
+
 	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)
 			throws NoSuchFlowExecutionException {
 		try {
@@ -157,7 +155,7 @@ public class FlowController extends AbstractController {
 			throw new NoSuchFlowExecutionException(flowExecutionId, e);
 		}
 	}
-	
+
 	protected void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving flow execution '" + flowExecution.getId() + "' in HTTP session");
@@ -171,5 +169,4 @@ public class FlowController extends AbstractController {
 		}
 		request.getSession().removeAttribute(flowExecution.getId());
 	}
-
 }

@@ -92,7 +92,7 @@ import java.util.Random;
  * @version 1.2.1 11/05/02
  * @author Marc A. Mnich
  */
-public class RandomGUID extends Object {
+public class RandomGuid extends Object {
 
     public String valueBeforeMD5 = "";
     public String valueAfterMD5 = "";
@@ -125,7 +125,7 @@ public class RandomGUID extends Object {
      * Default constructor.  With no specification of security option,
      * this constructor defaults to lower security, high performance.
      */
-    public RandomGUID() {
+    public RandomGuid() {
         getRandomGUID(false);
     }
 
@@ -135,7 +135,7 @@ public class RandomGUID extends Object {
      * strong.  Secure false defaults to the standard Random function seeded
      * with a single cryptographically strong random number.
      */
-    public RandomGUID(boolean secure) {
+    public RandomGuid(boolean secure) {
         getRandomGUID(secure);
     }
 

@@ -23,12 +23,15 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
@@ -38,7 +41,7 @@ import org.springframework.web.flow.support.FlowUtils;
  * @author Erwin Vervaet
  */
 public class FlowSession implements MutableAttributesAccessor, Serializable {
-	
+
 	private static final Log logger = LogFactory.getLog(FlowSession.class);
 
 	private Flow flow;
@@ -57,7 +60,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 	}
 
- 	public String getFlowId() {
+	public String getFlowId() {
 		return getFlow().getId();
 	}
 
@@ -83,7 +86,8 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	protected void setCurrentState(AbstractState newState) {
 		Assert.notNull(newState, "The newState is required");
-		Assert.isTrue(this.flow==newState.getFlow(), "The newState belongs to the flow associated with this flow session");
+		Assert.isTrue(this.flow == newState.getFlow(),
+				"The newState belongs to the flow associated with this flow session");
 		if (this.currentState != null) {
 			if (this.currentState.equals(newState)) {
 				throw new IllegalArgumentException("The current state is already set to '" + newState
@@ -202,21 +206,32 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		this.attributes.remove(attributeName);
 	}
-	
-	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException {
-		Assert.state(inTransaction(tokenName, tokenValue, reset));
+
+	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
+		Assert.state(FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
+				getDefaultTransactionTokenParameterName(), clear),
+				"The request is not running in the context of an application transaction");
 	}
-	
-	public boolean inTransaction(String tokenName, String tokenValue, boolean reset) {
-		return FlowUtils.isTokenValid(this, tokenName, tokenValue, reset);
+
+	public boolean inTransaction(HttpServletRequest request, boolean clear) {
+		return FlowUtils.isTokenValid(this, request, getDefaultTransactionTokenAttributeName(),
+				getDefaultTransactionTokenParameterName(), clear);
 	}
-	
-	public void setTransactionToken(String tokenName) {
-		FlowUtils.saveToken(this, tokenName);
+
+	protected String getDefaultTransactionTokenAttributeName() {
+		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
 	}
-	
-	public void clearTransactionToken(String tokenName) {
-		FlowUtils.resetToken(this, tokenName);
+
+	protected String getDefaultTransactionTokenParameterName() {
+		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
+	}
+
+	public void setTransactionToken() {
+		FlowUtils.setToken(this, getDefaultTransactionTokenAttributeName());
+	}
+
+	public void clearTransactionToken() {
+		FlowUtils.clearToken(this, getDefaultTransactionTokenAttributeName());
 	}
 
 	public String toString() {
@@ -224,5 +239,4 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 				"attributesCount", (attributes != null ? attributes.size() : 0)).append("attributes", attributes)
 				.toString();
 	}
-
 }

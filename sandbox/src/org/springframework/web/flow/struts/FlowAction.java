@@ -246,7 +246,7 @@ public class FlowAction extends TemplateAction {
 	
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		flowExecution.addAllFlowExecutionListeners(flowExecutionListeners);
+		flowExecution.addFlowExecutionListeners(flowExecutionListeners);
 		return flowExecution;
 	}
 

@@ -118,7 +118,7 @@ public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
 	 * execution.
 	 * @param listeners The collection of listeners to add.
 	 */
-	public void addAllFlowExecutionListeners(FlowExecutionListener[] listeners);
+	public void addFlowExecutionListeners(FlowExecutionListener[] listeners);
 
 	/**
 	 * Remove an existing flow execution listener; the removed listener will no

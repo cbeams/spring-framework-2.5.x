@@ -35,7 +35,7 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
-import org.springframework.web.flow.support.RandomGUID;
+import org.springframework.web.flow.support.RandomGuid;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -63,17 +63,29 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * The list of listeners that should receive event callbacks during managed
 	 * flow executions (client sessions).
 	 */
-	private transient EventListenerListHelper flowExecutionListeners =
-		new EventListenerListHelper(FlowExecutionListener.class);
+	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
+			FlowExecutionListener.class);
 
 	public FlowExecutionStack(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
-		this.id = new RandomGUID().toString();
+		this.id = new RandomGuid().toString();
 		this.rootFlow = rootFlow;
 	}
 
 	public String getId() {
 		return id;
+	}
+
+	public void addFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.add(listener);
+	}
+
+	public void addFlowExecutionListeners(FlowExecutionListener[] listeners) {
+		this.flowExecutionListeners.addAll(listeners);
+	}
+
+	public void removeFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.remove(listener);
 	}
 
 	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response) {
@@ -381,37 +393,25 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		}
 		return endingSession;
 	}
-	
-	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException {
-		getActiveFlowSession().assertInTransaction(tokenName, tokenValue, reset);
+
+	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException {
+		getActiveFlowSession().assertInTransaction(request, reset);
 	}
-	
-	public boolean inTransaction(String tokenName, String tokenValue, boolean reset) {
-		return getActiveFlowSession().inTransaction(tokenName, tokenValue, reset);
+
+	public boolean inTransaction(HttpServletRequest request, boolean reset) {
+		return getActiveFlowSession().inTransaction(request, reset);
 	}
-	
-	public void setTransactionToken(String tokenName) {
-		getActiveFlowSession().setTransactionToken(tokenName);
+
+	public void setTransactionToken() {
+		getActiveFlowSession().setTransactionToken();
 	}
-	
-	public void clearTransactionToken(String tokenName) {
-		getActiveFlowSession().clearTransactionToken(tokenName);
+
+	public void clearTransactionToken() {
+		getActiveFlowSession().clearTransactionToken();
 	}
 
 	// lifecycle event management
 
-	public void addFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.add(listener);
-	}
-	
-	public void addAllFlowExecutionListeners(FlowExecutionListener[] listeners) {
-		this.flowExecutionListeners.addAll(listeners);
-	}
-
-	public void removeFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.remove(listener);
-	}
-	
 	public Iterator getFlowExecutionListenersIterator() {
 		return this.flowExecutionListeners.iterator();
 	}
@@ -428,7 +428,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 				"Listener class must be a FlowExecutionListener");
 		return this.flowExecutionListeners.isAdded(listenerImplementationClass);
 	}
-	
+
 	/**
 	 * Is the provid FlowExecutionListener instance present in the listener
 	 * list?
@@ -460,7 +460,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerCount()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -527,7 +528,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session ended event to " + getFlowExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing sub flow session ended event to " + getFlowExecutionListenerCount()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -538,7 +540,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution ended event to " + getFlowExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing flow session execution ended event to " + getFlowExecutionListenerCount()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {

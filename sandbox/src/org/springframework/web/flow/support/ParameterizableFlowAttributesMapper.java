@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
@@ -42,36 +44,36 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * <tr>
  * <td>inputMappings</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping <i>input data</i> from the parent flow to
- * a newly spawned sub flow. The provided list contains the names of the attributes in
- * the parent to pass to the subflow for access. The same name is used in both
- * parent flow and sub flow model.</td>
+ * <td>Mappings executed when mapping <i>input data </i> from the parent flow
+ * to a newly spawned sub flow. The provided list contains the names of the
+ * attributes in the parent to pass to the subflow for access. The same name is
+ * used in both parent flow and sub flow model.</td>
  * </tr>
  * <tr>
  * <td>inputMappingsMap</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping <i>input data</i> from the parent flow to
- * a newly spawned sub flow. The keys in given map are the names of entries in the
- * parent model that will be mapped. The value associated with a key is the name
- * of the target entry that will be placed in the subflow model.</td>
+ * <td>Mappings executed when mapping <i>input data </i> from the parent flow
+ * to a newly spawned sub flow. The keys in given map are the names of entries
+ * in the parent model that will be mapped. The value associated with a key is
+ * the name of the target entry that will be placed in the subflow model.</td>
  * </tr>
  * <tr>
  * <td>outputMappings</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping subflow <i>output</i> data back to the
- * parent flow (once the subflow ends and the parent flow resumes).
- * The provided list contains the names of the attributes in the subflow to pass
- * to the parent for access. The same name is used in both parent flow and sub
- * flow model.</td>
+ * <td>Mappings executed when mapping subflow <i>output </i> data back to the
+ * parent flow (once the subflow ends and the parent flow resumes). The provided
+ * list contains the names of the attributes in the subflow to pass to the
+ * parent for access. The same name is used in both parent flow and sub flow
+ * model.</td>
  * </tr>
  * <tr>
  * <td>outputMappingsMap</td>
  * <td>empty</td>
- * <td>Mappings executed when mapping subflow <i>output</i> data back to the
- * parent flow (once the subflow ends and the parent flow resumes).
- * The keys in given map are the names of entries in the subflow model
- * that will be mapped. The value associated with a key is the name of the
- * target entry that will be placed in the parent flow model.</td>
+ * <td>Mappings executed when mapping subflow <i>output </i> data back to the
+ * parent flow (once the subflow ends and the parent flow resumes). The keys in
+ * given map are the names of entries in the subflow model that will be mapped.
+ * The value associated with a key is the name of the target entry that will be
+ * placed in the parent flow model.</td>
  * </tr>
  * </table>
  * 
@@ -99,17 +101,17 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	private boolean mapMissingAttributesToNull = false;
 
 	/**
-	 * Set the mappings that will be executed when mapping model data to
-	 * a sub flow. Each list item must be a String, a List, or a Map. If the
-	 * list item is a simple String value, the attribute will be mapped as
-	 * having the same name in the parent flow and in the sub flow. If the
-	 * list item is a Map, each map entry must be a String key naming the
-	 * attribute in the parent flow, and a String value naming the attribute in
-	 * the child flow. If the list item is itself a List, then that list is
-	 * itself evaluated recursively, and must itself contain Strings, Lists, or
-	 * Maps.
+	 * Set the mappings that will be executed when mapping model data to a sub
+	 * flow. Each list item must be a String, a List, or a Map. If the list item
+	 * is a simple String value, the attribute will be mapped as having the same
+	 * name in the parent flow and in the sub flow. If the list item is a Map,
+	 * each map entry must be a String key naming the attribute in the parent
+	 * flow, and a String value naming the attribute in the child flow. If the
+	 * list item is itself a List, then that list is itself evaluated
+	 * recursively, and must itself contain Strings, Lists, or Maps.
 	 * 
-	 * <p>Only <strong>one</strong> of setInputMappings or setInputMappingsMap
+	 * <p>
+	 * Only <strong>one </strong> of setInputMappings or setInputMappingsMap
 	 * must be called.
 	 */
 	public void setInputMappings(Collection inputMappings) {
@@ -118,14 +120,15 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	}
 
 	/**
-	 * Set the mappings that will be executed when mapping model data to
-	 * the sub flow. This is essentially just a short form of calling
-	 * @link ParameterizableFlowAttributesMapper#setInputMappings(List) with a List
-	 *       containing one item which is a Map. Each map entry must be a String
-	 *       key naming the attribute in the parent flow, and a String value
-	 *       naming the attribute in the child flow.
+	 * Set the mappings that will be executed when mapping model data to the sub
+	 * flow. This is essentially just a short form of calling
+	 * @link ParameterizableFlowAttributesMapper#setInputMappings(List) with a
+	 *       List containing one item which is a Map. Each map entry must be a
+	 *       String key naming the attribute in the parent flow, and a String
+	 *       value naming the attribute in the child flow.
 	 * 
-	 * <p>Only <strong>one</strong> of setInputMappings or setInputMappingsMap
+	 * <p>
+	 * Only <strong>one </strong> of setInputMappings or setInputMappingsMap
 	 * must be called.
 	 */
 	public void setInputMappingsMap(Map inputMappings) {
@@ -133,17 +136,17 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	}
 
 	/**
-	 * Set the mappings that will be executed when mapping model data from
-	 * the sub flow. Each list item must be a String, a List, or a Map. If
-	 * the list item is a simple String value, the attribute will be mapped as
-	 * having the same name in the parent flow and in the child flow. If the
-	 * list item is a Map, each map entry must be a String key naming the
-	 * attribute in the sub flow, and a String value naming the attribute in
-	 * the parent flow. If the list item is itself a List, then that list is
-	 * itself evaluated recursively, and must itself contain Strings, Lists, or
-	 * Maps.
+	 * Set the mappings that will be executed when mapping model data from the
+	 * sub flow. Each list item must be a String, a List, or a Map. If the list
+	 * item is a simple String value, the attribute will be mapped as having the
+	 * same name in the parent flow and in the child flow. If the list item is a
+	 * Map, each map entry must be a String key naming the attribute in the sub
+	 * flow, and a String value naming the attribute in the parent flow. If the
+	 * list item is itself a List, then that list is itself evaluated
+	 * recursively, and must itself contain Strings, Lists, or Maps.
 	 * 
-	 * <p>Only <strong>one</strong> of setOutputMappings or setOutputMappingsMap
+	 * <p>
+	 * Only <strong>one </strong> of setOutputMappings or setOutputMappingsMap
 	 * must be called.
 	 */
 	public void setOutputMappings(Collection outputMappings) {
@@ -152,14 +155,15 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	}
 
 	/**
-	 * Set the mappings that will be executed when mapping model data from
-	 * the sub flow. This is essentially just a short form of calling
+	 * Set the mappings that will be executed when mapping model data from the
+	 * sub flow. This is essentially just a short form of calling
 	 * @link ParameterizableFlowAttributesMapper#setOutputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
-	 *       String key naming the attribute in the sub flow, and a String
-	 *       value naming the attribute in the parent flow.
+	 *       String key naming the attribute in the sub flow, and a String value
+	 *       naming the attribute in the parent flow.
 	 * 
-	 * <p>Only <strong>one</strong> of setOutputMappings or setOutputMappingsMap
+	 * <p>
+	 * Only <strong>one </strong> of setOutputMappings or setOutputMappingsMap
 	 * must be called.
 	 */
 	public void setOutputMappingsMap(Map fromMappings) {
@@ -210,8 +214,7 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		return Collections.unmodifiableMap(subFlowAttributes);
 	}
 
-	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
-			MutableAttributesAccessor parentFlowModel) {
+	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel, MutableAttributesAccessor parentFlowModel) {
 		map(subFlowModel, parentFlowModel, outputMappings);
 	}
 
@@ -354,24 +357,22 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		public void removeAttribute(String attributeName) {
 			map.remove(attributeName);
 		}
-		
-		public void assertInTransaction(String tokenName, String tokenValue,
-				boolean reset) throws IllegalStateException {
+
+		public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException {
 			throw new UnsupportedOperationException();
 		}
-		
-		public boolean inTransaction(String token, String tokenValue,
-				boolean reset) {
+
+		public boolean inTransaction(HttpServletRequest request, boolean reset) {
 			throw new UnsupportedOperationException();
 		}
-		
-		public void setTransactionToken(String tokenName) {
+
+		public void setTransactionToken() {
 			throw new UnsupportedOperationException();
 		}
-		
-		public void clearTransactionToken(String tokenName) {
+
+		public void clearTransactionToken() {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	}
 }

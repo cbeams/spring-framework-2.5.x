@@ -269,6 +269,18 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
 	}
 
+	protected void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
+		exportErrors(new BindException(formObject, formObjectName), model);
+	}
+
+	protected void exportErrors(BindException errors, MutableAttributesAccessor model) {
+		// and also bind it under the local (to flow) alias, so other
+		// actions can find it easily
+		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
+		model.setAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, errors);
+		model.setAttributes(errors.getModel());
+	}
+
 	/**
 	 * 
 	 */
@@ -277,28 +289,26 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
-		ActionResult event = onPreExecute(request, response, model);
-		if (event == null) {
-			event = doExecuteAction(request, response, model);
+		ActionResult result = onPreExecute(request, response, model);
+		if (result == null) {
+			result = doExecuteAction(request, response, model);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Action '" + getClass().getName() + "' completed execution; event result is "
-						+ event);
+				logger.debug("Action '" + getClass().getName() + "' completed execution; event result is " + result);
 			}
 			onPostExecute(request, response, model);
 			if (logger.isInfoEnabled()) {
-				if (event == null) {
-					logger
-							.info("Retured action event is [null]; that's ok so long as another action associated "
-									+ "with the currently executing flow state returns a valid event");
+				if (result == null) {
+					logger.info("Retured action event is [null]; that's ok so long as another action associated "
+							+ "with the currently executing flow state returns a valid event");
 				}
 			}
 		}
 		else {
 			if (logger.isInfoEnabled()) {
-				logger.info("Action execution disallowed; event is " + event);
+				logger.info("Action execution disallowed; event is " + result);
 			}
 		}
-		return event;
+		return result;
 	}
 
 	/**

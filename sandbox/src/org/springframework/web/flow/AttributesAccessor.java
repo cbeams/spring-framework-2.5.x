@@ -17,6 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Collection;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.util.closure.Constraint;
 
 /**
@@ -88,10 +90,13 @@ public interface AttributesAccessor {
 	 */
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException;
 	
-	public void assertInTransaction(String tokenName, String tokenValue, boolean reset) throws IllegalStateException;
+	/**
+	 * @param request
+	 * @param reset
+	 * @throws IllegalStateException
+	 */
+	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException;
 	
-	public boolean inTransaction(String tokenName, String tokenValue, boolean reset);
-
 	/**
 	 * Does the attribute by the provided name exist in this model?
 	 * @param attributeName the attribute name
@@ -106,6 +111,13 @@ public interface AttributesAccessor {
 	 * @return true if so, false otherwise.
 	 */
 	public boolean containsAttribute(String attributeName, Class requiredType);
+
+	/**
+	 * @param request
+	 * @param reset
+	 * @return
+	 */
+	public boolean inTransaction(HttpServletRequest request, boolean reset);
 
 	/**
 	 * Return a collection of attribute names indexed in this model.

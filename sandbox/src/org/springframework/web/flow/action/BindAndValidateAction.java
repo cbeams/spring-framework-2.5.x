@@ -228,22 +228,6 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 		return errors.hasErrors() ? error() : success();
 	}
 
-	/**
-	 * @param errors
-	 * @param model
-	 */
-	public void exportErrors(BindException errors, MutableAttributesAccessor model) {
-		// and also bind it under the local (to flow) alias, so other
-		// actions can find it easily
-		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
-		model.setAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, errors);
-		model.setAttributes(errors.getModel());
-	}
-
-	public void exportErrors(String formObjectName, Object formObject, MutableAttributesAccessor model) {
-		exportErrors(new BindException(formObject, formObjectName), model);
-	}
-
 	protected final Object loadRequiredFormObject(HttpServletRequest request, AttributesAccessor model) {
 		try {
 			// get the form object

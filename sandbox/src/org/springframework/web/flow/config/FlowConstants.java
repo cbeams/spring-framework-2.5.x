@@ -158,6 +158,16 @@ public abstract class FlowConstants {
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
 
+	/**
+	 * Comment for <code>TRANSACTION_TOKEN_ATTRIBUTE_NAME</code>
+	 */
+	public static final String TRANSACTION_TOKEN_ATTRIBUTE_NAME = "txToken";
+
+	/**
+	 * Comment for <code>TRANSACTION_TOKEN_PARAMETER_NAME</code>
+	 */
+	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
+
 	protected FlowConstants() {
 
 	}
