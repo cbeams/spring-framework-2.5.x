@@ -1,19 +1,19 @@
 
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.15 2004-03-18 14:56:18 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.16 2004-03-19 07:40:59 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -33,15 +33,15 @@ public class BeanWrapperTestSuite extends TestCase {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		tb.setAge(11);
-		
+
 		TestBean tb2 = new TestBean();
 		bw.setWrappedInstance(tb2);
-		
+
 		bw.setPropertyValue("age", new Integer(14));
 		assertTrue("2nd changed", tb2.getAge()==14);
 		assertTrue("1 didn't change", tb.getAge() == 11);
 	}
-	
+
 	public void testToString() {
 		TestBean tb = new TestBean();
 		tb.setName("kerry");
@@ -57,7 +57,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(nr);
 		assertFalse(bw.isReadableProperty("age"));
 	}
-	
+
 	/**
 	 * Shouldn't throw an exception: should just return false
 	 */
@@ -66,7 +66,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(nr);
 		assertFalse(bw.isReadableProperty("xxxxx"));
 	}
-	
+
 	public void testIsReadablePropertyNull() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -78,7 +78,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testIsWritablePropertyNull() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -108,7 +108,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		bw.setPropertyValue("name","tom");
 		assertTrue("Set name to tom", gb.getName().equals("tom"));
 	}
-	
+
 	public void testEmptyPropertyValuesSet() {
 		TestBean t = new TestBean();
 		int age = 50;
@@ -188,11 +188,11 @@ public class BeanWrapperTestSuite extends TestCase {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.setPropertyValue("name", "ptest");
-		
+
 		// Note format...
 		String ps = "peace=war\nfreedom=slavery";
 		bw.setPropertyValue("properties", ps);
-		
+
 		assertTrue("name was set", pt.name.equals("ptest"));
 		assertTrue("props non null", pt.props != null);
 		String freedomVal = pt.props.getProperty("freedom");
@@ -200,16 +200,16 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("peace==war", peaceVal.equals("war"));
 		assertTrue("Freedom==slavery", freedomVal.equals("slavery"));
 	}
-	
+
 	public void testStringArrayProperty() throws Exception {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.setPropertyValue("stringArray", "foo,fi,fi,fum");
-		
+
 		assertTrue("stringArray was set", pt.sa != null);
 		assertTrue("stringArray length = 4", pt.sa.length == 4);
 		assertTrue("correct values", pt.sa[0].equals("foo") && pt.sa[1].equals("fi") && pt.sa[2].equals("fi") && pt.sa[3].equals("fum"));
-		
+
 		bw.setPropertyValue("stringArray", "one");
 		assertTrue("stringArray length = 1", pt.sa.length == 1);
 		assertTrue("stringArray elt is ok", pt.sa[0].equals("one"));
@@ -275,7 +275,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			fail("Shouldn't throw exception other than Type mismatch");
 		}
 	}
-	
+
 	public void testEmptyValueForPrimitiveProperty() {
 		TestBean t = new TestBean();
 		try {
@@ -293,16 +293,16 @@ public class BeanWrapperTestSuite extends TestCase {
 
 	public void testSetPropertyValuesIgnoresInvalidNestedOnRequest() {
 		ITestBean rod = new TestBean();
-		
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "rod"));
 		pvs.addPropertyValue(new PropertyValue("graceful.rubbish", "tony"));
 		pvs.addPropertyValue(new PropertyValue("more.garbage", new Object()));
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		bw.setPropertyValues(pvs, true);
-		
+
 		assertTrue("Set valid and ignored invalid", rod.getName().equals("rod"));
-		
+
 		try {
 			// Don't ignore: should fail
 			bw.setPropertyValues(pvs, false);
@@ -312,7 +312,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			// OK: but which exception??
 		}
 	}
-	
+
 	public void testGetNestedProperty() {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 35);
@@ -326,12 +326,12 @@ public class BeanWrapperTestSuite extends TestCase {
 		ITestBean spousesSpouse = (ITestBean) bw.getPropertyValue("spouse.spouse");
 		assertTrue("spousesSpouse = initial point", rod == spousesSpouse);
 	}
-	
+
 	public void testGetNestedPropertyNullValue() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 35);
 		rod.setSpouse(kerry);
-		
+
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		try {
 			bw.getPropertyValue("spouse.spouse.age");
@@ -342,14 +342,14 @@ public class BeanWrapperTestSuite extends TestCase {
 			assertTrue("it was the spouse property that was null, not " + ex.getPropertyName(), ex.getPropertyName().equals("spouse"));
 		}
 	}
-	
+
 	public void testSetNestedProperty() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 0);
-		
+
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		bw.setPropertyValue("spouse", kerry);
-		
+
 		assertTrue("nested set worked", rod.getSpouse() == kerry);
 		assertTrue("no back relation", kerry.getSpouse() == null);
 		bw.setPropertyValue(new PropertyValue("spouse.spouse", rod));
@@ -358,7 +358,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		bw.setPropertyValue(new PropertyValue("spouse.age", new Integer(35)));
 		assertTrue("Set primitive on spouse", kerry.getAge()==35);
 	}
-	
+
 	public void testSetNestedPropertyNullValue() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		BeanWrapper bw = new BeanWrapperImpl(rod);
@@ -375,21 +375,21 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testSetNestedPropertyPolymorphic() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new Employee();
-		
+
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		bw.setPropertyValue("spouse", kerry);
 		bw.setPropertyValue("spouse.age", new Integer(35));
 		bw.setPropertyValue("spouse.name", "Kerry");
 		bw.setPropertyValue("spouse.company", "Lewisham");
 		assertTrue("kerry name is Kerry", kerry.getName().equals("Kerry"));
-		
+
 		assertTrue("nested set worked", rod.getSpouse() == kerry);
 		assertTrue("no back relation", kerry.getSpouse() == null);
 		bw.setPropertyValue(new PropertyValue("spouse.spouse", rod));
 		assertTrue("nested set worked", kerry.getSpouse() == rod);
-		
+
 		BeanWrapper kbw = new BeanWrapperImpl(kerry);
-		assertTrue("spouse.spouse.spouse.spouse.company=Lewisham", 
+		assertTrue("spouse.spouse.spouse.spouse.company=Lewisham",
 			"Lewisham".equals(kbw.getPropertyValue("spouse.spouse.spouse.spouse.company")));
 	}
 
@@ -430,92 +430,6 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 	}
 
-	public void testInvokeValidVoidMethod() {
-		TestBean tb = new TestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Object ret = bw.invoke("setName", new Object[] { "invoked" });
-		assertTrue("valid void method returned null", ret == null);
-		assertTrue("invoke set name", tb.getName().equals("invoked"));
-	}
-	
-	public void testInvokeMethodThrowingException() {
-		ThrowsException te = new ThrowsException();
-		BeanWrapper bw = new BeanWrapperImpl(te);
-		
-		Exception ex = new Exception();
-		try {
-			
-			bw.invoke("doSomething", new Object[] { ex });
-			fail("Should've thrown exception");
-		}
-		catch (MethodInvocationException mie) {
-			assertTrue("Threw in exception", mie.getCause()==ex);
-		}
-		
-		RuntimeException rex = new RuntimeException();
-		try {
-
-			bw.invoke("doSomething", new Object[] { rex });
-			fail("Should've thrown exception");
-		}
-		catch (MethodInvocationException mie) {
-			assertTrue("Threw in exception", mie.getCause()==rex);
-		}
-
-	}
-
-	public void testInvokeValidGetterMethod() {
-		TestBean tb = new TestBean();
-		tb.setAge(23);
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		Object ret = bw.invoke("getAge", null);
-		assertTrue("valid int method returned non null", ret != null);
-		Integer Age = (Integer) ret;
-		assertTrue("invoke got correct age", Age.intValue() == tb.getAge());
-	}
-	
-	public void testInvokeInvalidMethod() {
-		TestBean tb = new TestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		try {
-			Object ret = bw.invoke("setxName", new Object[] { "invoked" });
-			fail("Should have thrown exception trying to invoke null method");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
-	}
-	
-	public void testInvokeNonVisibleMethod() {
-		TestBean tb = new TestBean() {
-			private void invisibleMethod() {}
-		};
-		
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		try {
-			Object ret = bw.invoke("invisibleMethod", null);
-			fail("Should have thrown exception trying to invoke non-visible method");
-		}
-		catch (BeansException ex) {
-			// Check for helpful error message
-			assertTrue(ex.getMessage().indexOf("invisibleMethod") != -1);
-		}
-	}
-	
-	public void testInvokeWithInvalidArgument() {
-		TestBean tb = new TestBean();
-	
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		try {
-			Object ret = bw.invoke("setAge", new Object[] { "" });
-			fail("Should have thrown exception trying to pass invalid argument");
-		}
-		catch (BeansException ex) {
-			assertTrue(ex.getMessage().indexOf("argument") != -1);
-			assertTrue(ex.getMessage().indexOf("setAge") != -1);
-		}
-	}
-
 	public void testNestedProperties() {
 		String doctorCompany = "";
 		String lawyerCompany = "Dr. Sueem";
@@ -534,18 +448,24 @@ public class BeanWrapperTestSuite extends TestCase {
 		TestBean tb1 = bean.getArray()[1];
 		TestBean tb2 = ((TestBean) bean.getList().get(0));
 		TestBean tb3 = ((TestBean) bean.getList().get(1));
+		TestBean tb6 = ((TestBean) bean.getSet().toArray()[0]);
+		TestBean tb7 = ((TestBean) bean.getSet().toArray()[1]);
 		TestBean tb4 = ((TestBean) bean.getMap().get("key1"));
 		TestBean tb5 = ((TestBean) bean.getMap().get("key2"));
 		assertEquals("name0", tb0.getName());
 		assertEquals("name1", tb1.getName());
 		assertEquals("name2", tb2.getName());
 		assertEquals("name3", tb3.getName());
+		assertEquals("name6", tb6.getName());
+		assertEquals("name7", tb7.getName());
 		assertEquals("name4", tb4.getName());
 		assertEquals("name5", tb5.getName());
 		assertEquals("name0", bw.getPropertyValue("array[0].name"));
 		assertEquals("name1", bw.getPropertyValue("array[1].name"));
 		assertEquals("name2", bw.getPropertyValue("list[0].name"));
 		assertEquals("name3", bw.getPropertyValue("list[1].name"));
+		assertEquals("name6", bw.getPropertyValue("set[0].name"));
+		assertEquals("name7", bw.getPropertyValue("set[1].name"));
 		assertEquals("name4", bw.getPropertyValue("map[key1].name"));
 		assertEquals("name5", bw.getPropertyValue("map[key2].name"));
 		assertEquals("name4", bw.getPropertyValue("map['key1'].name"));
@@ -556,6 +476,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		pvs.addPropertyValue("array[1].name", "name4");
 		pvs.addPropertyValue("list[0].name", "name3");
 		pvs.addPropertyValue("list[1].name", "name2");
+		pvs.addPropertyValue("set[0].name", "name8");
+		pvs.addPropertyValue("set[1].name", "name9");
 		pvs.addPropertyValue("map[key1].name", "name1");
 		pvs.addPropertyValue("map['key2'].name", "name0");
 		bw.setPropertyValues(pvs);
@@ -569,6 +491,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("name4", bw.getPropertyValue("array[1].name"));
 		assertEquals("name3", bw.getPropertyValue("list[0].name"));
 		assertEquals("name2", bw.getPropertyValue("list[1].name"));
+		assertEquals("name8", bw.getPropertyValue("set[0].name"));
+		assertEquals("name9", bw.getPropertyValue("set[1].name"));
 		assertEquals("name1", bw.getPropertyValue("map[\"key1\"].name"));
 		assertEquals("name0", bw.getPropertyValue("map['key2'].name"));
 	}
@@ -833,12 +757,16 @@ public class BeanWrapperTestSuite extends TestCase {
 		TestBean tb1 = bean.getArray()[1];
 		TestBean tb2 = ((TestBean) bean.getList().get(0));
 		TestBean tb3 = ((TestBean) bean.getList().get(1));
+		TestBean tb6 = ((TestBean) bean.getSet().toArray()[0]);
+		TestBean tb7 = ((TestBean) bean.getSet().toArray()[1]);
 		TestBean tb4 = ((TestBean) bean.getMap().get("key1"));
 		TestBean tb5 = ((TestBean) bean.getMap().get("key2"));
 		assertEquals(tb0, bw.getPropertyValue("array[0]"));
 		assertEquals(tb1, bw.getPropertyValue("array[1]"));
 		assertEquals(tb2, bw.getPropertyValue("list[0]"));
 		assertEquals(tb3, bw.getPropertyValue("list[1]"));
+		assertEquals(tb6, bw.getPropertyValue("set[0]"));
+		assertEquals(tb7, bw.getPropertyValue("set[1]"));
 		assertEquals(tb4, bw.getPropertyValue("map[key1]"));
 		assertEquals(tb5, bw.getPropertyValue("map[key2]"));
 		assertEquals(tb4, bw.getPropertyValue("map['key1']"));

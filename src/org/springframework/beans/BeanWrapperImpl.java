@@ -1,22 +1,21 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
-import java.beans.MethodDescriptor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.31 2004-03-18 14:56:18 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.32 2004-03-19 07:40:13 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -479,6 +479,20 @@ public class BeanWrapperImpl implements BeanWrapper {
 					List list = (List) value;
 					return list.get(Integer.parseInt(key));
 				}
+				else if (value instanceof Set) {
+					// apply index to Iterator in case of a Set
+					Set set = (Set) value;
+					int index = Integer.parseInt(key);
+					Iterator it = set.iterator();
+					for (int i = 0; it.hasNext(); i++) {
+						Object elem = it.next();
+						if (i == index) {
+							return elem;
+						}
+					}
+					throw new FatalBeanException("Cannot get element with index " + index + " from Set of size " +
+																			 set.size() + ", accessed using property path '" + propertyName + "'");
+				}
 				else if (value instanceof Map) {
 					Map map = (Map) value;
 					return map.get(key);
@@ -853,30 +867,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		catch (BeansException ex) {
 			// doesn't exist, so can't be writable
 			return false;
-		}
-	}
-
-
-	public Object invoke(String methodName, Object[] args) throws BeansException {
-		try {
-			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
-			if (logger.isDebugEnabled()) {
-				logger.debug("About to invoke method '" + methodName + "'");
-			}
-			Object returnVal = md.getMethod().invoke(this.object, args);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Successfully invoked method '" + methodName + "'");
-			}
-			return returnVal;
-		}
-		catch (InvocationTargetException ex) {
-			throw new MethodInvocationException(ex.getTargetException(), methodName);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to invoke method '" + methodName + "' threw exception", ex);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Illegal argument to method '" + methodName + "' threw exception", ex);
 		}
 	}
 

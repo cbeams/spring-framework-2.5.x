@@ -19,9 +19,9 @@ package org.springframework.beans;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
-import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.7 2004-03-18 02:46:12 trisberg Exp $
+*  @version $Id: CachedIntrospectionResults.java,v 1.8 2004-03-19 07:40:13 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
@@ -74,15 +74,12 @@ final class CachedIntrospectionResults {
 	private BeanInfo beanInfo;
 
 	/** Property descriptors keyed by property name */
-	private HashMap propertyDescriptorMap;
-
-	/** Property descriptors keyed by property name */
-	private HashMap methodDescriptorMap;
+	private Map propertyDescriptorMap;
 
 	/**
 	 * Create new CachedIntrospectionResults instance fot the given class.
 	 */
-	private CachedIntrospectionResults(Class clazz) throws BeansException {
+	private CachedIntrospectionResults(Class clazz) throws FatalBeanException {
 		try {
 			logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
 			this.beanInfo = Introspector.getBeanInfo(clazz);
@@ -95,15 +92,6 @@ final class CachedIntrospectionResults {
 				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
 										 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
 				this.propertyDescriptorMap.put(pds[i].getName(), pds[i]);
-			}
-
-			logger.debug("Caching MethodDescriptors for class [" + clazz.getName() + "]");
-			this.methodDescriptorMap = new HashMap();
-			// This call is slow so we do it once
-			MethodDescriptor[] mds = this.beanInfo.getMethodDescriptors();
-			for (int i = 0; i < mds.length; i++) {
-				logger.debug("Found method '" + mds[i].getName() + "' of type [" + mds[i].getMethod().getReturnType() + "]");
-				this.methodDescriptorMap.put(mds[i].getName(), mds[i]);
 			}
 		}
 		catch (IntrospectionException ex) {
@@ -125,14 +113,6 @@ final class CachedIntrospectionResults {
 			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]", null);
 		}
 		return pd;
-	}
-
-	protected MethodDescriptor getMethodDescriptor(String methodName) throws BeansException {
-		MethodDescriptor md = (MethodDescriptor) this.methodDescriptorMap.get(methodName);
-		if (md == null) {
-			throw new FatalBeanException("No method '" + methodName + "' in class [" + getBeanClass().getName() + "]", null);
-		}
-		return md;
 	}
 
 }

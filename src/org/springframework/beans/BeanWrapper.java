@@ -42,7 +42,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.11 2004-03-18 02:46:12 trisberg Exp $
+ * @version $Id: BeanWrapper.java,v 1.12 2004-03-19 07:40:12 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -200,19 +200,5 @@ public interface BeanWrapper {
 	 * @return whether this property is writable
 	 */
 	boolean isWritableProperty(String propertyName);
-
-
-	/**
-	 * Invoke the named method. This interface is designed to encourage
-	 * working with bean properties, rather than methods, so this method
-	 * shouldn't be used in most cases, but it is necessary to provide
-	 * a simple means to invoking a named method.
-	 * @param methodName name of the method to invoke
-	 * @param args args to pass
-	 * @return follows Method.invoke(). Void calls return null;
-	 * primitives are wrapped as objects.
-	 * @see java.lang.reflect.Method#invoke
-	 */
-	Object invoke(String methodName, Object[] args) throws BeansException;
 
 }
