@@ -48,11 +48,12 @@ import org.springframework.util.StringUtils;
  * resources somewhere else (for example, in the "WEB-INF" directory of a web app).
  * Otherwise changes of files in the classpath are not reflected in the application.
  *
- * <p>Note that the "basename" respectively "basenames" property has a different
- * convention here: It follows the basic ResourceBundle rule of not specifying
- * file extension or language codes, but can refer to any Spring resource location
- * (instead of being restricted to classpath resources). With a "classpath:" prefix,
- * resources can still be loaded from the classpath, but "cacheSeconds" values
+ * <p>Note that the base names set as teh "basename" and "basenames" properties are
+ * are treated in a slightly different fashion than the "basename" property of 
+ * ResourceBundleMessageSource. It follows the basic ResourceBundle rule of not
+ * specifying file extension or language codes, but can refer to any Spring resource
+ * location (instead of being restricted to classpath resources). With a "classpath:"
+ * prefix, resources can still be loaded from the classpath, but "cacheSeconds" values
  * other than "-1" (caching forever) will not work in this case.
  *
  * <p>This MessageSource implementation is usually slightly faster than
