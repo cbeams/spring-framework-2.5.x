@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jmx.assembler;
 
 import java.beans.PropertyDescriptor;
@@ -41,38 +42,99 @@ public class MetadataModelMBeanInfoAssembler extends
 		AbstractReflectionBasedModelMBeanInfoAssembler implements
 		AutodetectCapableModelMBeanInfoAssembler {
 
+	/**
+	 * Key for <code>log</code> descriptor.
+	 */
 	private static final String LOG = "log";
 
+	/**
+	 * Key for <code>logFile</code> descriptor.
+	 */
 	private static final String LOG_FILE = "logFile";
 
+	/**
+	 * Key for <code>currencyTimeLimit</code> descriptor.
+	 */
 	private static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
 
+	/**
+	 * Key for <code>default</code> descriptor.
+	 */
 	private static final String DEFAULT = "default";
 
+	/**
+	 * Key for <code>persistPolicy</code> descriptor.
+	 */
 	private static final String PERSIST_POLICY = "persistPolicy";
 
+	/**
+	 * Key for <code>persistPeriod</code> descriptor.
+	 */
 	private static final String PERSIST_PERIOD = "persistPeriod";
 
+	/**
+	 * Key for <code>persistLocation</code> descriptor.
+	 */
 	private static final String PERSIST_LOCATION = "persistLocation";
 
+	/**
+	 * Key for <code>persistName</code> descriptor.
+	 */
 	private static final String PERSIST_NAME = "persistName";
 
 
+	/**
+	 * The <code>JmxAttributeSource</code> implementation used to read
+	 * the metadata from the bean class.
+	 */
 	private JmxAttributeSource attributeSource = new CommonsJmxAttributeSource();
 
 
+	/**
+	 * Sets the <code>JmxAttributeSource</code> used to read the
+	 * metadata from the bean class.
+	 *
+	 * @param attributeSource the <code>JmxAttributeSource</code>.
+	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
 		this.attributeSource = attributeSource;
 	}
 
+	/**
+	 * Votes on the inclusion of an attribute accessor.
+	 *
+	 * @param method the accessor <code>Method</code>.
+	 * @param beanKey the key associated with the MBean in the
+	 * <code>beans</code> <code>Map</code>.
+	 * @return <code>true</code> if the <code>Method</code> has the appropriate metadata.
+	 *         Otherwise <code>false</code>.
+	 */
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
 
+	/**
+	 * Votes on the inclusion of an attribute mutator.
+	 *
+	 * @param method the mutator <code>Method</code>.
+	 * @param beanKey the key associated with the MBean in the
+	 * <code>beans</code> <code>Map</code>.
+	 * @return <code>true</code> if the <code>Method</code> has the appropriate metadata.
+	 *         Otherwise <code>false</code>.
+	 */
 	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
 
+	/**
+	 * Votes on the inclusion of an operation.
+	 *
+	 * @param method the operation <code>Method</code>.
+	 * @param beanKey the key associated with the MBean in the
+	 * <code>beans</code> <code>Map</code>.
+	 * @return <code>true</code> if the <code>Method</code> has the appropriate metadata.
+	 *         Otherwise <code>false</code>.
+	 */
 	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
@@ -83,6 +145,14 @@ public class MetadataModelMBeanInfoAssembler extends
 		}
 	}
 
+	/**
+	 * Retreives the description for the supplied <code>Method</code> from the
+	 * metadata. Uses the method name is no description is present in the
+	 * metadata.
+	 *
+	 * @param method the operation <code>Method</code>.
+	 * @return the description of the operation.
+	 */
 	protected String getOperationDescription(Method method) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
@@ -109,6 +179,9 @@ public class MetadataModelMBeanInfoAssembler extends
 	 * Creates a description for the attribute corresponding to this property
 	 * descriptor. Attempts to create the description using metadata from either
 	 * the getter or setter attributes, otherwise uses the property name.
+	 *
+	 * @param propertyDescriptor the <code>PropertyDescriptor</code> for the attribute.
+	 * @return the attribute description.
 	 */
 	protected String getAttributeDescription(PropertyDescriptor propertyDescriptor) {
 		Method readMethod = propertyDescriptor.getReadMethod();
@@ -131,12 +204,28 @@ public class MetadataModelMBeanInfoAssembler extends
 	/**
 	 * Attempts to read managed resource description from the source level metadata.
 	 * Returns an empty <code>String</code> if no description can be found.
+	 *
+	 * @param beanKey the key associated with the MBean in the
+	 * <code>beans</code> <code>Map</code>.
+	 * @param beanClass the <code>Class</code> of the managed resource.
+	 * @return the description of the managed resource.
 	 */
 	protected String getDescription(String beanKey, Class beanClass) {
 		ManagedResource mr = attributeSource.getManagedResource(beanClass);
 		return (mr != null ? mr.getDescription() : "");
 	}
 
+	/**
+	 * Adds descriptor fields from the <code>ManagedResource</code> attribute
+	 * to the MBean descriptor. Specifically, adds the <code>currencyTimeLimit</code>,
+	 * <code>persistPolicy</code>, <code>persistPeriod</code>, <code>persistLocation</code>
+	 * and <code>persistName</code> descriptor fields if they are present in the metdata.
+	 *
+	 * @param mbeanDescriptor the <code>Descriptor</code> for the MBean.
+	 * @param beanKey the key associated with the MBean in the
+	 * <code>beans</code> <code>Map</code>.
+	 * @param beanClass the <code>Class</code> of the managed resource.
+	 */
 	protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass) {
 		ManagedResource mr = attributeSource.getManagedResource(beanClass);
 		if (mr == null) {
@@ -153,6 +242,16 @@ public class MetadataModelMBeanInfoAssembler extends
 		mbeanDescriptor.setField(PERSIST_NAME, mr.getPersistName());
 	}
 
+	/**
+	 * Adds descriptor fields from the <code>ManagedAttribute</code> attribute
+	 * to the attribute descriptor. Specifically, adds the <code>currencyTimeLimit</code>,
+	 * <code>default</code>, <code>persistPolicy</code> and <code>persistPeriod</code>
+	 * descriptor fields if they are present in the metdata.
+	 *
+	 * @param descriptor the <code>Descriptor</code> for the MBean.
+	 * @param getter the accessor <code>Method</code> for the attribute.
+	 * @param setter the mutator <code>Method</code> for the attribute.
+	 */
 	protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
 		ManagedAttribute gma = (getter == null) ? ManagedAttribute.EMPTY : attributeSource.getManagedAttribute(getter);
 		ManagedAttribute sma = (setter == null) ? ManagedAttribute.EMPTY : attributeSource.getManagedAttribute(setter);
@@ -171,9 +270,12 @@ public class MetadataModelMBeanInfoAssembler extends
 	}
 
 	/**
-	 * Adds the <code>currencyTimeLimit</code> field to the supplied
-	 * <code>Descriptor</code> using the value provided in the metadata
-	 * for the supplied <code>Method</code>.
+	 * Adds descriptor fields from the <code>ManagedAttribute</code> attribute
+	 * to the attribute descriptor. Specifically, adds the <code>currencyTimeLimit</code>
+	 * descriptor field if it is present in the metdata.
+	 *
+	 * @param descriptor the <code>Descriptor</code> for the MBean.
+	 * @param method the corresponding <code>Method</code> for the operation.
 	 */
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
 		ManagedOperation mo = attributeSource.getManagedOperation(method);
@@ -191,6 +293,7 @@ public class MetadataModelMBeanInfoAssembler extends
 	 * are non-zero we use the greater of the two. This method can be used
 	 * to resolve any <code>int</code> valued descriptor where there are two
 	 * possible values.
+	 *
 	 * @param getter the <code>int</code> value associated with the getter for this attribute.
 	 * @param setter the <code>int</code> value associated with the setter for this attribute.
 	 */
@@ -210,6 +313,7 @@ public class MetadataModelMBeanInfoAssembler extends
 	 * Locates the value of a descriptor based on values attached
 	 * to both the getter and setter methods. If both have values
 	 * supplied then the value attached to the getter is preferred.
+	 *
 	 * @param getter the <code>Object</code> value associated with the get method.
 	 * @param setter the <code>Object</code> value associated with the set method.
 	 * @return The appropriate <code>Object</code> to use as the value for the descriptor.
@@ -232,6 +336,7 @@ public class MetadataModelMBeanInfoAssembler extends
 	 * supplied then the value attached to the getter is preferred.
 	 * The supplied default value is used to check to see if the value
 	 * associated with the getter has changed from the default.
+	 *
 	 * @param getter the <code>String</code> value associated with the get method.
 	 * @param setter the <code>String</code> value associated with the set method.
 	 * @param defaultValue the <code>String</code> valued default associated with this descriptor.
@@ -249,11 +354,21 @@ public class MetadataModelMBeanInfoAssembler extends
 		}
 	}
 
+	/**
+	 * Checks to see if a <code>Method</code> has the <code>ManagedAttribute</code> attribute.
+	 * @param method the <code>Method</code> to check.
+	 * @return <code>true</code> if the attribute is present, otherwise <code>false</code>.
+	 */
 	private boolean hasManagedAttribute(Method method) {
 		ManagedAttribute ma = attributeSource.getManagedAttribute(method);
 		return (ma != null);
 	}
 
+	/**
+	 * Checks to see if a <code>Method</code> has the <code>ManagedOperation</code> attribute.
+	 * @param method the <code>Method</code> to check.
+	 * @return <code>true</code> if the attribute is present, otherwise <code>false</code>.
+	 */
 	private boolean hasManagedOperation(Method method) {
 		ManagedOperation mo = attributeSource.getManagedOperation(method);
 		return (mo != null);
@@ -261,7 +376,11 @@ public class MetadataModelMBeanInfoAssembler extends
 
 	/**
 	 * Used for auto detection of beans. Checks to see if the bean's class has a
-	 * ManagedResource attribute. If so it will add it list of included beans
+	 * <code>ManagedResource</code> attribute. If so it will add it list of included beans.
+	 * @param beanName the name of the bean in the <code>BeanFactory</code>.
+	 * @param beanClass the <code>Class</code> of the managed resource.
+	 * @return <code>true</code> if the bean class has the <code>ManagedResource</code> attribute.
+	 * Otherwise <code>false</code>.
 	 */
 	public boolean includeBean(String beanName, Class beanClass) {
 		return (attributeSource.getManagedResource(beanClass) != null);

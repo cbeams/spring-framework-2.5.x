@@ -19,10 +19,18 @@ package org.springframework.jmx.metadata;
 import javax.management.JMRuntimeException;
 
 /**
+ * Thrown by the <code>MetadataModelMBeanInfoAssembler</code> when it encounters
+ * incorrect metadata on a managed resource or one of its methods.
  * @author Rob Harrop
+ * @see org.springframework.jmx.assembler.MetadataModelMBeanInfoAssembler
  */
 public class InvalidMetadataException extends JMRuntimeException {
 
+	/**
+	 * Creates a new <code>InvalidMetadataException</code> with the supplied
+	 * error message.
+	 * @param msg the error message.
+	 */
 	public InvalidMetadataException(String msg) {
 		super(msg);
 	}

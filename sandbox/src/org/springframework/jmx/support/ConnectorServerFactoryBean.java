@@ -34,19 +34,44 @@ import org.springframework.jmx.util.JmxUtils;
 import org.springframework.jmx.util.ObjectNameManager;
 
 /**
+ * Implementation <code>FactoryBean</code> that creates a JSR-160 <code>JMXConnectorServer</code>,
+ * optionally registers it with the <code>MBeanServer</code> and then starts it.
+ * <p/>
+ * The <code>JMXConnectorServer</code> can be started in a separate thread by setting the
+ * <code>threaded</code> property to <code>true</code>. You can configure this thread to be a
+ * daemon thread by setting the <code>daemon</code> property to <code>true</code>.
+ * <p/>
+ * The <code>JMXConnectorServer</code> is correctly shutdown when this class is destoryed by
+ * the <code>ApplicationContext</code>.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Marcus Brito
+ * @see	FactoryBean
+ * @see JMXConnectorServer
+ * @see MBeanServer
  */
 public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
+	/**
+	 * The default service URL.
+	 */
 	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
-
+	/**
+	 * Stores a reference to the <code>MBeanServer</code> that the connector is
+	 * exposing.
+	 */
 	private MBeanServer server;
 
+	/**
+	 * Stores the actual service URL used for the connector.
+	 */
 	private String serviceUrl = DEFAULT_SERVICE_URL;
 
+	/**
+	 * Stores the JSR-160 environment parameters to pass to the <code>JMXConnectorServerFactory</code>.
+	 */
 	private Map environment;
 
 	private String objectName;
@@ -96,8 +121,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 		JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
 
 		// Create the connector server now.
-		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
-				url, this.environment, this.server);
+		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, this.server);
 
 		// Do we want to register the connector with the MBean server?
 		if (this.objectName != null) {

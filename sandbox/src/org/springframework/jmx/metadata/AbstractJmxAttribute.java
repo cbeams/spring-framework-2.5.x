@@ -17,6 +17,7 @@
 package org.springframework.jmx.metadata;
 
 /**
+ * Base class for all JMX metadata classes.
  * @author Rob Harrop
  */
 public class AbstractJmxAttribute {
