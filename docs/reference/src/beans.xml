@@ -5,21 +5,23 @@
   <sect1 id="beans-introduction">
     <title>Introduction</title>
 
-    <para>Two of Spring's most elementary and important packages are the
+    <para>Two of the most elementary and important packages in Spring are the
     <literal>org.springframework.beans</literal> and
-    <literal>org.springframework.context</literal> package. These packages
-    provide the basis for the Spring Inversion of Control features, or
-    Dependency Injection as people have also recently started to name this
-    pattern (see <xref linkend="background-ioc" /> for some resources on this
-    topic). The <literal>BeanFactory</literal> provides an advanced
-    configuration mechanism capable of managing beans (objects) of any nature,
-    using potentially any kind of storage facility. The
-    <literal>ApplicationContext</literal> builds on top of the BeanFactory and
-    adds other functionality such as integration with Springs AOP features,
-    messaging (using <emphasis>i18n (i.e. internationalization)</emphasis>),
-    the capability of having contexts inherit from other contexts and defining
-    application-layer specific contexts, such as the
-    <literal>WebApplicationContext</literal>.</para>
+    <literal>org.springframework.context</literal> packages. Code in these
+    packages provides the basis for Spring's <emphasis>Inversion of
+    Control</emphasis> (alternately called <emphasis>Dependency
+    Injection</emphasis>) features. The <literal><ulink
+    url="http://www.springframework.org/docs/api/org/springframework/beans/factory/BeanFactory.html">BeanFactory</ulink></literal>
+    provides an advanced configuration mechanism capable of managing beans
+    (objects) of any nature, using potentially any kind of storage facility.
+    The <ulink
+    url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink>
+    builds on top of the BeanFactory and adds other functionality such as
+    easier integration with Springs AOP features, message resource handling
+    (for use in internationalization, event propogation, declarative
+    mechanisms to create the ApplicationContext and optional parent contexts,
+    and application-layer specific contexts such as the
+    <literal>WebApplicationContext</literal>, among other enhancements.</para>
 
     <para>In short, the <literal>BeanFactory</literal> provides the
     configuration framework and basic functionality, while the
@@ -33,63 +35,17 @@
     are best suited for use in a particular situation. Normally when building
     most applications in a J2EE-environment, <emphasis>the best option is to
     use the ApplicationContext</emphasis>, since it offers all the features of
-    the BeanFactory and adds on to it, allowing a more framework style usage
-    of the Spring Framework and allowing initialization using a
-    ServletContextListener such as <literal>ContextLoaderListener</literal>.
-    The main usage scenario when you might prefer to use the BeanFactory is
-    when memory usage is the greatest concern (such as in an applet), and you
-    don't need all the features of the ApplicationContext.</para>
+    the BeanFactory and adds on to it in terms of features, while also
+    allowing a more declarative approach to use of some functionality, which
+    is generally desireable. The main usage scenario when you might prefer to
+    use the BeanFactory is when memory usage is the greatest concern (such as
+    in an applet where every last kilobyte counts), and you don't need all the
+    features of the ApplicationContext.</para>
 
     <para>This chapter is roughly divided into two parts, the first part
     covering the basic principles that apply to both the BeanFactory and the
     ApplicationContext. The second part will cover some of the features that
     only apply to the ApplicationContext.</para>
-
-    <para><itemizedlist spacing="compact">
-        <listitem>
-          <para><emphasis>Bean definition</emphasis>: the description of a
-          bean managed by the BeanFactory. Each BeanFactory contains multiple
-          bean definitions, each describing the nature of a bean, its
-          properties, the methods that need to be called upon initialization
-          and destruction, whether or not the bean needs to be autowired and
-          some other aspects. There are different implementations of
-          BeanFactory. The <literal>XmlBeanFactory</literal> for example is
-          capable of reading bean definitions from an XML file, in which bean
-          properties, as well as collaborators and lifecycle methods are
-          defined in XML format.</para>
-        </listitem>
-
-        <listitem>
-          <para><emphasis>Property editors</emphasis>: part of Java's
-          JavaBeans specification is the concept of
-          <literal>PropertyEditors</literal>. Property editors in Spring are
-          used to convert properties of beans to human-readable Strings and
-          vice versa. As the PropertyEditor Javadoc (<ulink
-          url="http://java.sun.com/j2se/1.4.2/docs/api/"></ulink>) states, the
-          <literal>getAsText()</literal>method should return a human-readable
-          String representing the property the editor is (so-called) editing.
-          The <literal>setAsText()</literal>method should be able to parse the
-          same String and (using the
-          <literal>setValue(Object)</literal>-method) set the resulting value
-          of the property. PropertyEditors are heavily used in Spring, not
-          only by the BeanFactory to transform the Strings defined in the
-          XML-containing beans, to properties of those beans, but also in
-          other areas such as the web MVC framework where they assist in
-          converting request parameters submitted by a user after filling a
-          form to properties of command objects that might be of some
-          completely different type</para>
-        </listitem>
-
-        <listitem>
-          <para><emphasis>BeanWrapper</emphasis>: a special class, instances
-          of which are used to wrap JavaBeans. Managed BeanWrappers for
-          example, have features for setting and getting properties from the
-          beans they're wrapping. It's not likely you'll ever have to touch a
-          BeanWrapper yourself, but it may be handy to know about them</para>
-        </listitem>
-      </itemizedlist></para>
-
-    <para></para>
   </sect1>
 
   <sect1 id="beans-basics">
@@ -98,13 +54,15 @@
     <sect2 id="beans-factory">
       <title>The BeanFactory</title>
 
-      <para>The BeanFactory is the actual <emphasis>container</emphasis> which
-      instantiates, configures, and manages a number of beans. These beans
-      typically collaborate with one another, and thus have dependencies
-      between themselves. These dependencies are reflected in the
-      configuration data used by the BeanFactory (although some dependencies
-      may not be visible as configuration data, but rather be a function of
-      programmatic interactions between beans at runtime).</para>
+      <para>The <literal><ulink
+      url="http://www.springframework.org/docs/api/org/springframework/beans/factory/BeanFactory.html">BeanFactory</ulink></literal>
+      is the actual <emphasis>container</emphasis> which instantiates,
+      configures, and manages a number of beans. These beans typically
+      collaborate with one another, and thus have dependencies between
+      themselves. These dependencies are reflected in the configuration data
+      used by the BeanFactory (although some dependencies may not be visible
+      as configuration data, but rather be a function of programmatic
+      interactions between beans at runtime).</para>
 
       <para>A BeanFactory is represented by the interface
       <literal>org.springframework.beans.factory.BeanFactory</literal>, for
@@ -1777,15 +1735,15 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
 
     <para>While the <literal>beans</literal> package provides basic
     functionality for managing and manipulating beans, often in a programmatic
-    way, the <literal>context</literal> package adds
-    <literal>ApplicationContext</literal>, which enhances BeanFactory
-    functionality in a more <emphasis>framework-oriented style</emphasis>.
-    Many users will use ApplicationContext in a completely declarative
-    fashion, not even having to create it manually, but instead relying on
-    support classes such as ContextLoader to automatically start an
-    ApplicationContext as part of the normal startup process of a J2EE
-    web-app. Of course, it is still possible to programmatically create an
-    ApplicationContext.</para>
+    way, the <literal>context</literal> package adds <literal><ulink
+    url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink></literal>,
+    which enhances BeanFactory functionality in a more
+    <emphasis>framework-oriented style</emphasis>. Many users will use
+    ApplicationContext in a completely declarative fashion, not even having to
+    create it manually, but instead relying on support classes such as
+    ContextLoader to automatically start an ApplicationContext as part of the
+    normal startup process of a J2EE web-app. Of course, it is still possible
+    to programmatically create an ApplicationContext.</para>
 
     <para>The basis for the context package is the
     <literal>ApplicationContext</literal> interface, located in the
