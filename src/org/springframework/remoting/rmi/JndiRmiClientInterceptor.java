@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -139,12 +138,17 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	}
 
 
+	public void afterPropertiesSet() throws NamingException {
+		prepare();
+	}
+
 	/**
 	 * Fetches RMI stub on startup, if necessary.
+	 * @throws NamingException if thrown by JNDI API
 	 * @see #setLookupStubOnStartup
 	 * @see #lookupStub
 	 */
-	public void afterPropertiesSet() throws NamingException {
+	public void prepare() throws NamingException {
 		super.afterPropertiesSet();
 		// cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
@@ -173,7 +177,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 			stub = PortableRemoteObject.narrow(stub, getServiceInterface());
 		}
 		if (!(stub instanceof Remote)) {
-			throw new AspectException("Located RMI stub [" + stub + "] does not implement java.rmi.Remote");
+			throw new NamingException("Located RMI stub of class [" + stub.getClass().getName() +
+					"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
 		}
 		return (Remote) stub;
 	}

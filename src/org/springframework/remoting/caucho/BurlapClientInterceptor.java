@@ -93,7 +93,16 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor
 		this.proxyFactory.setOverloadEnabled(overloadEnabled);
 	}
 
+
 	public void afterPropertiesSet() throws MalformedURLException {
+		prepare();
+	}
+
+	/**
+	 * Create the underlying Burlap proxy for this interceptor.
+	 * @throws MalformedURLException if thrown by Burlap API
+	 */
+	public void prepare() throws MalformedURLException {
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
@@ -116,6 +125,11 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		if (this.burlapProxy == null) {
+			throw new IllegalStateException("BurlapClientInterceptor is not properly initialized - " +
+					"invoke 'prepare' before attempting any operations");
+		}
+
 		try {
 			return invocation.getMethod().invoke(this.burlapProxy, invocation.getArguments());
 		}

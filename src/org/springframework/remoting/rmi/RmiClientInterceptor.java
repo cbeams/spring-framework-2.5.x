@@ -105,12 +105,17 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 
+	public void afterPropertiesSet() throws Exception {
+		prepare();
+	}
+
 	/**
 	 * Fetches RMI stub on startup, if necessary.
+	 * @throws Exception if thrown by RMI API
 	 * @see #setLookupStubOnStartup
 	 * @see #lookupStub
 	 */
-	public void afterPropertiesSet() throws Exception {
+	public void prepare() throws Exception {
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
@@ -148,8 +153,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	protected Remote lookupStub() throws Exception {
 		Remote stub = Naming.lookup(getServiceUrl());
-		if (logger.isInfoEnabled()) {
-			logger.info("Located object with RMI URL [" + getServiceUrl() + "]: value=[" + stub + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
 		}
 		return stub;
 	}

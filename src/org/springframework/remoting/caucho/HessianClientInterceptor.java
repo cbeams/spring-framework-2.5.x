@@ -93,7 +93,16 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor
 		this.proxyFactory.setOverloadEnabled(overloadEnabled);
 	}
 
+
 	public void afterPropertiesSet() throws MalformedURLException {
+		prepare();
+	}
+
+	/**
+	 * Create the underlying Hessian proxy for this interceptor.
+	 * @throws MalformedURLException if thrown by Hessian API
+	 */
+	public void prepare() throws MalformedURLException {
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
@@ -116,6 +125,11 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		if (this.hessianProxy == null) {
+			throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " +
+					"invoke 'prepare' before attempting any operations");
+		}
+
 		try {
 			return invocation.getMethod().invoke(this.hessianProxy, invocation.getArguments());
 		}
