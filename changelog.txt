@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1 final (16.8.2004)
+Changes in version 1.1 final (17.8.2004)
 ----------------------------------------
 
 Package org.springframework.aop
@@ -50,6 +50,7 @@ Package org.springframework.orm
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 * added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
 * LocalSessionFactoryBean trims "mappingResources" locations before passing them to the ClassPathResource constructor
+* added BlobByteArrayType for Hibernate, mapping a BLOB to a byte array via a LobHandler (analogous to ClobStringType)
 * OpenSessionInViewFilter/Interceptor participate in existing thread-bound single session or deferred close mode
 * OpenPersistenceManagerInViewFilter/Interceptor participate in existing thread-bound single persistence manager
 
@@ -70,6 +71,7 @@ Package org.springframework.scheduling
 Package org.springframework.transaction
 * fixed TransactionAspectSupport's after-returning behavior to always call commit even if transaction is not new
 * TransactionSynchronizationManager returns a synchronization list copy (to allow a sync to register another sync)
+* added WebLogicJtaTransactionManager which can resume a WebLogic JTA transaction even if it was marked rollback-only
 
 Package org.springframework.validation
 * added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
