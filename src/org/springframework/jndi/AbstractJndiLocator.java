@@ -77,9 +77,9 @@ public abstract class AbstractJndiLocator extends JndiLocatorSupport implements 
 	 * at any later time.
 	 * @see #lookup
 	 */
-	public void afterPropertiesSet() throws NamingException, IllegalArgumentException {
+	public void afterPropertiesSet() throws NamingException {
 		if (!StringUtils.hasLength(getJndiName())) {
-			throw new IllegalArgumentException("'jndiName' is required");
+			throw new IllegalArgumentException("jndiName is required");
 		}
 		lookup();
 	}

@@ -24,7 +24,6 @@ import javax.naming.NamingException;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.jndi.AbstractJndiLocator;
 
 /**
@@ -74,8 +73,8 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 			this.createMethod = this.cachedHome.getClass().getMethod("create", null);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new FatalBeanException("Cannot create EJB proxy: EJB home [" + this.cachedHome +
-																	 "] has no no-arg create() method");
+			throw new AspectException(
+					"Cannot create EJB proxy: EJB home [" + this.cachedHome + "] has no no-arg create() method");
 		}
 		
 		// invoke any subclass initialization behavior
