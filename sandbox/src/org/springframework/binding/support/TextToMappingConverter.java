@@ -52,30 +52,47 @@ public class TextToMappingConverter extends AbstractConverter {
 	protected Object doConvert(Object source, Class targetClass) throws Exception {
 		//format: <sourceAttributeName>[,class][->targetAttributeName[,class]]
 		String[] sourceTarget = StringUtils.delimitedListToStringArray((String)source, "->");
-		String[] sourceMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[0]);
-		String sourceAttributeName = sourceMappingInfo[0];
-		String targetAttributeName = sourceMappingInfo[0];
-		Class sourceAttributeClass = null;
-		Class targetAttributeClass = null;
-		if (sourceMappingInfo.length == 2) {
-			sourceAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class).call(
-					sourceMappingInfo[1]);
-			targetAttributeClass = String.class;
-		}
-		if (sourceTarget.length == 2) {
-			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[1]);
-			targetAttributeName = targetMappingInfo[0];
+		if (sourceTarget.length == 1) {
+			// just target mapping info is specified
+			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[0]);
+			String sourceAttributeName = targetMappingInfo[0];
+			String targetAttributeName = targetMappingInfo[0];
+			Class targetAttributeClass = null;
 			if (targetMappingInfo.length == 2) {
 				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
 						.call(targetMappingInfo[1]);
 			}
-		}
-		if (sourceAttributeClass != null) {
-			return new Mapping(sourceAttributeName, targetAttributeName, getConversionService().getConversionExecutor(
-					sourceAttributeClass, targetAttributeClass));
+			if (targetAttributeClass != null) {
+				return new Mapping(sourceAttributeName, targetAttributeName, getConversionService()
+						.getConversionExecutor(String.class, targetAttributeClass));
+			}
+			else {
+				return new Mapping(sourceAttributeName, targetAttributeName);
+			}
 		}
 		else {
-			return new Mapping(sourceAttributeName, targetAttributeName);
+			// source and target mapping info is specified
+			String[] sourceMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[0]);
+			String sourceAttributeName = sourceMappingInfo[0];
+			Class sourceAttributeClass = String.class;
+			if (sourceMappingInfo.length == 2) {
+				sourceAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+						.call(sourceMappingInfo[1]);
+			}
+			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[1]);
+			String targetAttributeName = targetMappingInfo[0];
+			Class targetAttributeClass = null;
+			if (targetMappingInfo.length == 2) {
+				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
+						.call(targetMappingInfo[1]);
+			}
+			if (targetAttributeClass != null) {
+				return new Mapping(sourceAttributeName, targetAttributeName, getConversionService()
+						.getConversionExecutor(sourceAttributeClass, targetAttributeClass));
+			}
+			else {
+				return new Mapping(sourceAttributeName, targetAttributeName);
+			}
 		}
 	}
 }
