@@ -54,7 +54,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * JUnit assertion support class, for common assertions.
 	 */
-	private JUnitAssertSupport asserts;
+	private JUnitAssertSupport asserts=new JUnitAssertSupport();
 
 	/**
 	 * Returns the flow locator used to resolve the Flow to be tested by
@@ -75,7 +75,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Get the singleton flow definition whose execution is being tested.
 	 * @return the singleton flow definition
-	 * @throws NoSuchFlowDefinitionExeception if the flow identified by flowId()
+	 * @throws NoSuchFlowDefinitionException if the flow identified by flowId()
 	 *         could not be resolved (if <code>this.flow</code> was null)
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {

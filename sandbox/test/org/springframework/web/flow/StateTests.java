@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,7 +51,6 @@ public class StateTests extends TestCase {
 				"finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
@@ -64,14 +62,14 @@ public class StateTests extends TestCase {
 
 	public void testActionStateActionChainNoMatchingTransition() {
 		Flow flow = new Flow("myFlow");
-		ActionState state = new ActionState(flow, "actionState", new Action[] {
+		new ActionState(flow, "actionState", new Action[] {
 				new ExecutionCounterAction("not mapped result"), new ExecutionCounterAction(null),
 				new ExecutionCounterAction(""), new ExecutionCounterAction("yet another not mapped result") },
 				new Transition("success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		try {
-			ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
+			flowExecution.start(new SimpleEvent(this, "start"));
 			fail("Should not have matched to another state transition");
 		}
 		catch (CannotExecuteStateTransitionException e) {
@@ -115,7 +113,6 @@ public class StateTests extends TestCase {
 		assertTrue(state.isMarker());
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals("viewState", flowExecution.getCurrentStateId());
 		assertNull(view);
@@ -123,11 +120,11 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowState() {
 		Flow subFlow = new Flow("mySubFlow");
-		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
 				"submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
+		new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecution flowExecution = flow.createExecution();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
@@ -141,11 +138,11 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowStateModelMapping() {
 		Flow subFlow = new Flow("mySubFlow");
-		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
 				"submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(
+		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(
 				"finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecutionStack flowExecution = (FlowExecutionStack)flow.createExecution();

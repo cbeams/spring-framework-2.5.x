@@ -30,19 +30,18 @@ public class FlowTests extends TestCase {
 
 	public void testFlowExecutionListener() {
 		Flow subFlow = new Flow("mySubFlow");
-		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
 				"submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		ActionState state = new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(
+		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(
 				"success", "viewState"));
-		ViewState viewState = new ViewState(flow, "viewState", "myView", new Transition("submit", "subFlowState"));
+		new ViewState(flow, "viewState", "myView", new Transition("submit", "subFlowState"));
 		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition("finish", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals(1, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(2, flowExecutionListener.stateTransitions);
@@ -54,7 +53,7 @@ public class FlowTests extends TestCase {
 		assertEquals(6, flowExecutionListener.stateTransitions);
 	}
 
-	private class MockFlowExecutionListener implements FlowExecutionListener {
+	public class MockFlowExecutionListener implements FlowExecutionListener {
 		private int flowExecutionsStarted;
 
 		private boolean requestSubmitted;
