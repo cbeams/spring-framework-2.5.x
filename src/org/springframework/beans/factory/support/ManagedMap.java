@@ -97,4 +97,16 @@ public class ManagedMap implements Map {
 		return this.targetMap.entrySet();
 	}
 
+	public int hashCode() {
+		return this.targetMap.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		return this.targetMap.equals(obj);
+	}
+
+	public String toString() {
+		return this.targetMap.toString();
+	}
+
 }
