@@ -3,14 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (23.3.2005)
+Changes in version 1.2 RC1 (24.3.2005)
 --------------------------------------
 
 Overall
 * removed all deprecated classes and methods whose deprecation dated back to Spring <= 1.1 final
 * added AOP Alliance interfaces to spring-aop.jar and spring.jar, avoiding the need for aopalliance.jar on the classpath
-* repackaged spring-context.jar as spring-context.jar (without remoting) and spring-remoting.jar (with EJB, JMS, JMX)
-* repackaged spring-orm.jar as spring-orm.jar (without Hibernate) and spring-hibernate.jar (with Hibernate2/3 support)
+* split spring-core.jar into spring-core.jar (core utilities) and spring-beans.jar (bean support, bean container)
+* split spring-dao.jar into spring-dao.jar (DAO interfaces, transaction support) and spring-jdbc.jar (JDBC support)
+* split spring-context.jar into spring-context.jar, spring-support.jar (incl. JMX support) and spring-remoting.jar
+* split spring-orm.jar into spring-orm.jar (without Hibernate) and spring-hibernate.jar (with Hibernate2/3 support)
 
 Package org.springframework.aop
 * deprecated AopUtils' "getAllInterfaces(ForClass)AsList" methods in favor of "getAllInterfaces(ForClass)AsSet"
@@ -21,12 +23,17 @@ Package org.springframework.aop
 * added LazyInitTargetSourceCreator, automatically creating a LazyInitTargetSource for each bean marked as "lazy-init"
 
 Package org.springframework.beans
+* added protected "convertElement" hook to CustomCollectionEditor, for converting each encountered collection element
 * added InstantiationAwareBeanPostProcessor extension of BeanPostProcessor interface, intercepting before instantiation
+* added TypedStringValue class, allowing to register property values with a specific target type on a bean definition
 * PropertyOverrideConfigurer does not log invalid keys at WARN level in case of "ignoreInvalidKeys" (only at DEBUG)
 * added BeanReferenceFactoryBean, allowing for exposure of a target bean under a different name (effectively an alias)
 * refined AbstractBeanFactory's "getType" to only suppress specific exceptions like BeanCurrentlyInCreationException
 * refined AbstractAutowireCapableBeanFactory's "autowireConstructor" to only suppress UnsatisfiedDependencyException
 * XmlBeanDefinitionReader offers an "errorHandler" property and uses the factored-out SimpleSaxErrorHandler as default
+* added "value"/"ref" attributes to XML "property"/"constructor-arg" tag, as shortcut alternative to child elements
+* added "key" sub-element to XML "entry" tag for maps, allowing for inner beans, refs, values etc specified as key
+* added "key-ref" attribute to XML "entry" tag for maps, as shortcut alternative to a key element with "ref bean="
 
 Package org.springframework.context
 * fixed DelegatingMessageSource to return default message for MessageSourceResolvable, if no parent MessageSource found
@@ -34,7 +41,14 @@ Package org.springframework.context
 Package org.springframework.core
 * PathMatchingResourcePatternResolver collects resource entries in a Set and normalizes paths (to avoid double entries)
 
+Package org.springframework.dao
+* added PessimisticLockingFailureException as super class for CannotAquireLock/DeadlockLoser/CannotSerializeTransaction
+
 Package org.springframework.jdbc
+* added InvalidResultSetAccessException, typically thrown when an invalid ResultSet column index or name was specified
+* replaced "dataRetrievalFailureCodes" with "invalidResultSetAccessCodes" and SQLErrorCodes and sql-error-codes.xml
+* removed "optimisticLockingFailureCodes" from SQLErrorCodes and sql-error-codes.xml (never thrown by database itself)
+* added "deadlockLoserCodes" and "cannotSerializeTransactionCodes" to SQLErrorCodes and sql-error-codes.xml
 * added "getTargetConnection" method to DataSourceUtils, returning the innermost target Connection of a given proxy
 * refined DataSourceUtils' "closeConnectionIfNecessary" to detect given target Connection handles as transactional too
 * LazyConnectionDataSourceProxy handles "toString", "equals" and "hashCode" itself (avoiding to fetch target Connection)
@@ -45,8 +59,6 @@ Package org.springframework.jdbc
 * added "queryForRowSet" methods to JdbcTemplate, returning a SqlRowSet as generic representation of the result rows
 * added "queryForObject" convenience methods to JdbcTemplate, taking a RowMapper argument and expecting a single row
 * factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
-* added PessimisticLockingFailureException as a super class for CannotAquireLockException, CannotSerializeTransactionException and DeadlockLoserDataAccesssException
-* added error translation entries for the above mentioned exception categories - coresponding codes still have to be entered in sql-error-codes.xml
 
 Package org.springframework.jmx
 * added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
@@ -86,9 +98,11 @@ Package org.springframework.validation
 * DataBinder does not generate any further field errors for "requiredField" that has already caused missing field error
 
 Package org.springframework.web
+* UrlPathHelper accepts different case for context path in "getRequestURI" vs "getContextPath" (can happen on Resin)
 * CommonsMultipartResolver exposes query parameters in multipart requests too, not just multipart POST parameters
 * ParameterMethodNameResolver can optionally resolve methods based purely based on existence of specified parameters
 * AbstractFormController/AbstractWizardFormController perform debug logging for session attributes being added/removed
+* AbstractWizardFormController allows for dynamic pages through overriding the "getPageCount" and "getViewName" methods
 * changed MultiActionController's log level from INFO to DEBUG
 * added "prefix" and "suffix" properties to InternalPathMethodNameResolver, for common method name prefixes/suffixes
 * added "methodParamNames" property to ParameterMethodNameResolver, for params where the very existence chooses a method
