@@ -47,13 +47,15 @@
 		class="org.springframework.aop.interceptor.ThreadLocalInvokerInterceptor">	
 		<property name="targetBeanName"><value>prototypeTarget</value></property>
 	</bean>
+	-->
 	
-	<bean id="poolingInvokerInterceptor" 
-		class="org.springframework.aop.interceptor.CommonsPoolingInvokerInterceptor">	
+	<bean id="poolingTargetSource" 
+		class="org.springframework.aop.target.CommonsPoolTargetSource">	
 		<property name="targetBeanName"><value>prototypeTarget</value></property>
 		<property name="maxSize"><value>80</value></property>
 	</bean>
 	
+	<!--
 	<bean id="prototype" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="target"><ref local="prototypeInvokerInterceptor"/></property>
@@ -64,7 +66,6 @@
 			</props>
 		</property>
 	</bean>
-	
 	-->
 	
 	<!--
@@ -74,7 +75,10 @@
 	<bean id="singleton" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="proxyInterfaces"><value>org.springframework.benchmark.invokers.Service</value></property>
+		
+
 		<property name="target"><ref local="singletonTarget"/></property>
+
 
 		<!-- Force the use of CGLIB -->
 		<property name="proxyTargetClass"><value>false</value></property>
