@@ -69,7 +69,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 		// view details for selected collegue
 		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
-				attributeMapper("collegueId.attributeMapper"), new Transition[] { on(finish(), "getPerson"),
+				attributeMapper("colleagueId.attributeMapper"), new Transition[] { on(finish(), "getPerson"),
 						on(error(), "error") });
 
 		// end
