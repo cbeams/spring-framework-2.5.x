@@ -10,12 +10,13 @@ import javax.sql.DataSource;
 import org.easymock.MockControl;
 import org.springframework.dao.*;
 import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.7 2003-09-24 13:40:27 beanie42 Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.8 2003-11-03 15:14:29 johnsonr Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -653,13 +654,17 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlPreparedStatement.verify();
 	}
 
-	public void testCouldntConnect() throws Exception {
-		SQLException sex = new SQLException("foo");
+	public void testCouldntGetConnectionInOperationOrLazilyInstantiatedExceptionTranslator() throws SQLException {
+		SQLException sex = new SQLException("foo", "07xxx");
 
+		// Change behaviour in setUp() because we only expect one call to getConnection():
+		// none is necessary to get metadata for exception translator
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
 		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex);
-
-		replay();
+		// Expect two calls: make get Metadata fail also
+		ctrlDataSource.setThrowable(sex, 2);
+		ctrlDataSource.replay();
 
 		try {
 			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
@@ -668,11 +673,126 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
 				rcch);
 			fail("Shouldn't have executed query without a connection");
-		} catch (DataAccessResourceFailureException ex) {
+		} 
+		catch (CannotGetJdbcConnectionException ex) {
 			// pass
 			assertTrue("Check root cause", ex.getRootCause() == sex);
 		}
+		
+		ctrlDataSource.verify();
 	}
+	
+	
+	/**
+	 * Verify that afterPropertiesSet invokes exceception translator
+	 * @throws SQLException
+	 */
+	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized() throws SQLException {
+		SQLException sex = new SQLException("foo", "07xxx");
+
+		ctrlConnection = MockControl.createControl(Connection.class);
+		mockConnection = (Connection) ctrlConnection.getMock();
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(null, 1);
+		mockConnection.close();
+		ctrlConnection.setVoidCallable(1);
+		ctrlConnection.replay();
+		
+		// Change behaviour in setUp() because we only expect one call to getConnection():
+		// none is necessary to get metadata for exception translator
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		// Upfront call for metadata
+		ctrlDataSource.setReturnValue(mockConnection, 1);
+		// One call for operation
+		mockDataSource.getConnection();
+		ctrlDataSource.setThrowable(sex, 1);
+		ctrlDataSource.replay();
+
+		try {
+			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
+			template2.afterPropertiesSet();
+			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+			template2.query(
+				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
+				rcch);
+			fail("Shouldn't have executed query without a connection");
+		} 
+		catch (CannotGetJdbcConnectionException ex) {
+			// pass
+			assertTrue("Check root cause", ex.getRootCause() == sex);
+		}
+	
+		ctrlDataSource.verify();
+		ctrlConnection.verify();
+	}
+	
+	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty() throws Exception {
+		testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
+	}
+	
+	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet() throws Exception {
+		testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
+	}
+	
+	/**
+	 * If beanProperty is true, initialize via exception translator bean property
+	 * if false, use afterPropertiesSet()
+	 * @param beanProperty
+	 * @throws SQLException
+	 */
+	private void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty) throws SQLException {
+		SQLException sex = new SQLException("foo", "07xxx");
+
+		ctrlConnection = MockControl.createControl(Connection.class);
+		mockConnection = (Connection) ctrlConnection.getMock();
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(null, 1);
+		mockConnection.close();
+		ctrlConnection.setVoidCallable(1);
+		ctrlConnection.replay();
+	
+		// Change behaviour in setUp() because we only expect one call to getConnection():
+		// none is necessary to get metadata for exception translator
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		// Upfront call for metadata
+		ctrlDataSource.setReturnValue(mockConnection, 1);
+		// One call for operation
+		mockDataSource.getConnection();
+		ctrlDataSource.setThrowable(sex, 1);
+		ctrlDataSource.replay();
+
+		try {
+			JdbcTemplate template2 = new JdbcTemplate();
+			template2.setDataSource(mockDataSource);
+			if (beanProperty) {
+				// This will get a connection
+				template2.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(mockDataSource));
+			}
+			else {
+				// This will cause creation of default SQL translator.
+				// Note that only call should be effective
+				template2.afterPropertiesSet();
+				template2.afterPropertiesSet();
+			}
+			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+			template2.query(
+				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
+				rcch);
+			fail("Shouldn't have executed query without a connection");
+		} 
+		catch (CannotGetJdbcConnectionException ex) {
+			// pass
+			assertTrue("Check root cause", ex.getRootCause() == sex);
+		}
+
+		ctrlDataSource.verify();
+		ctrlConnection.verify();
+	}
+
 
 	public void testPreparedStatementSetterQueryWithNullArg()
 		throws Exception {
@@ -953,6 +1073,89 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlDatabaseMetaData.verify();
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
+	}
+	
+	
+	/**
+	 * Test that we see an SQLException translated using Error Code.
+	 * If we provide the SQLExceptionTranslator, we shouldn't use a connection
+	 * to get the metadata
+	 */
+	public void testUseCustomSQLErrorCodeTranslator() throws Exception {
+		// Bad SQL state
+		final SQLException sex =
+			new SQLException("I have a known problem", "07000", 1054);
+		final String sql = "SELECT ID FROM CUSTOMER";
+		Object[][] results = new Object[][] { { new Integer(1)}, {
+				new Integer(2)
+				}
+		};
+
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		MockControl ctrlStatement =
+			MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement =
+			(PreparedStatement) ctrlStatement.getMock();
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+		
+		// Change behaviour in setUp() because we only expect one call to getConnection():
+		// none is necessary to get metadata for exception translator
+		ctrlConnection = MockControl.createControl(Connection.class);
+		mockConnection = (Connection) ctrlConnection.getMock();
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement, 1);
+		mockConnection.close();
+		ctrlConnection.setVoidCallable(1);
+		ctrlConnection.replay();
+
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
+		mockDataSource.getConnection();
+		ctrlDataSource.setReturnValue(mockConnection, 1);
+		ctrlDataSource.replay();
+		///// end changed behaviour
+
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+	
+
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(mockDataSource);
+		// Set custom exception translator
+		template.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		template.afterPropertiesSet();
+		try {
+			template.query(sql, new RowCallbackHandler() {
+				public void processRow(java.sql.ResultSet rs)
+					throws SQLException {
+					throw sex;
+				}
+			});
+			fail("Should have thrown exception");
+		} catch (BadSqlGrammarException ex) {
+			assertTrue(
+				"Wanted same exception back, not " + ex,
+				sex == ex.getRootCause());
+		} 
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+		
+		// We didn't call superclass replay() so we need to check these ourselves
+		ctrlDataSource.verify();
+		ctrlConnection.verify();
 	}
 
 	public void testCustomQueryExecutorInvoked() throws Exception {
