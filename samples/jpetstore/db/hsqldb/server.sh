@@ -1,1 +1,1 @@
-java -classpath ../../../../lib/hsqldb.jar org.hsqldb.Server -database jpetstore
+java -classpath ../../../../lib/hsqldb/hsqldb.jar org.hsqldb.Server -database jpetstore
