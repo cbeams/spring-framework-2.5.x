@@ -48,10 +48,9 @@ public class SubFlowState extends TransitionableState {
 
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) {
-		super(flow, id);
+		super(flow, id, transitions);
 		setSubFlow(subFlow);
 		setAttributesMapper(attributesMapper);
-		addAll(transitions);
 	}
 
 	protected void setSubFlow(Flow subFlow) {
