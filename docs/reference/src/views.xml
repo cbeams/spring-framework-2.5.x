@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.32 2005-02-04 09:29:12 aarendsen Exp $-->
+<!--$Id: views.xml,v 1.33 2005-02-08 19:01:19 robharrop Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -1362,9 +1362,10 @@ public class PDFPage extends AbstractPdfView {
       <sect3 id="view-jasper-reports-configuration-views">
         <title>Configuring the <literal>View</literal>s</title>
 
-        <para>Spring contains four different View implementations for
-        JasperReports each of which corresponds to one of the four output
-        formats supported by JasperReports:</para>
+        <para>Spring contains five different View implementations for
+        JasperReports four of which corresponds to one of the four output
+        formats supported by JasperReports and one that allows for the format
+				to be determined at runtime:</para>
 
         <table id="view-jasper-reports-configuration-views-classes">
           <title>JasperReports <literal>View</literal> Classes</title>
@@ -1406,6 +1407,11 @@ public class PDFPage extends AbstractPdfView {
 
                 <entry>Microsoft Excel</entry>
               </row>
+							<row>
+                <entry><literal>JasperReportsMultiFormatView</literal></entry>
+
+                <entry>Decided at runtime (see <xref linkend="view-jasper-reports-configuration-multiformat-view" />)</entry>
+              </row>
             </tbody>
           </tgroup>
         </table>
@@ -1441,6 +1447,88 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
         that after a <literal>.jrxml</literal> file is compiled by Spring, the
         compiled report is cached for the life of the application. To make
         changes to the file you will need to restart your application.</para>
+      </sect3>
+			<sect3 id="view-jasper-reports-configuration-multiformat-view">
+        <title>Using <literal>JasperReportsMultiFormatView</literal></title>
+
+        <para>The <literal>JasperReportsMultiFormatView</literal> allows for report format
+				to be specified at runtime. The actual rendering of the report is delegated to
+				one of the other JasperReports view classes - the <literal>JasperReportsMultiFormatView</literal>
+				class simply adds a wrapper layer that allows for the exact implementation to be specified
+				at runtime. </para>
+				<para>The <literal>JasperReportsMultiFormatView</literal> class introduces two concepts:
+					the discriminator key and the format key. The <literal>JasperReportsMultiFormatView</literal>
+					class uses the format key to lookup the actual view implementation class and uses the
+					disriminator key to lookup the the format key. From a conding perspective you add an
+					entry your model with the discriminator key as the key and the format key as the value, for example:
+					<programlisting>public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
+		HttpServletResponse response) throws Exception {
+
+	String uri = request.getRequestURI();
+	String format = uri.substring(uri.lastIndexOf(".") + 1);
+
+	Map model = getModel();
+	model.put("format", format);
+
+	return new ModelAndView("simpleReportMulti", model);
+}
+
+					</programlisting>
+					<para>In this example, the format key is determined from the extension of the request URI and is added to the
+						model under the default discriminator key: <literal>format</literal>. If you wish to use a different
+						discriminator key then you can configure this using the <literal>discriminatorKey</literal> property of
+						the <literal>JasperReportsMultiFormatView</literal> class.</para>
+					<para>
+						By default the following format key mappings are configured in
+						<literal>JasperReportsMultiFormatView</literal>:
+						<table id="view-jasper-reports-configuration-multiformat-view-mappings">
+          <title>JasperReportsMultiFormatView Default Format Key Mappings</title>
+
+          <tgroup cols="2">
+            <colspec colname="c1" colwidth="1*" />
+
+            <colspec colname="c2" colwidth="1*" />
+
+            <thead>
+              <row>
+                <entry>Format Key</entry>
+
+                <entry>View Class</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>csv</entry>
+
+                <entry><literal>JasperReportsCsvView</literal></entry>
+              </row>
+
+              <row>
+                <entry>html</entry>
+
+                <entry><literal>JasperReportsHtmlView</literal></entry>
+              </row>
+
+              <row>
+                <entry>pdf</entry>
+
+                <entry><literal>JasperReportsPdfView</literal></entry>
+              </row>
+
+              <row>
+                <entry>xls</entry>
+
+                <entry><literal>JasperReportsXlsView</literal></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+						So in the example above a request to URI /foo/myReport.pdf would be mapped to the
+						<literal>JasperReportsPdfView</literal> class. You can override the format key to view class mappings
+						using the <literal>formatMappings</literal> property of <literal>JasperReportsMultiFormatView</literal>.
+					</para>
+				</para>
       </sect3>
     </sect2>
 
@@ -1563,5 +1651,40 @@ simpleReport.reportDataKey=myBeanData
         used in your report design file.</para>
       </sect3>
     </sect2>
+		<sect2 id="view-jasper-reports-exporter-parameters">
+			 <title>Configuring Exporter Parameters</title>
+				<para>
+					If you have special requirements for exporter configuration - perhaps you want
+					a specific page size for your PDF report, then you can configure these
+					exporter parameters declaratively in your Spring configuration file using the
+					<literal>exporterParameters</literal> property of the view class. The
+					<literal>exporterParameters</literal> property is typed as <literal>Map</literal>
+					and in your configuration the key of an entry should be the fully-qualified
+					name of a static field that contains the exporter parameter definition and the
+					value of an entry should be the value you want to assign to the parameter.
+					An example of this is shown below:
+					<programlisting>&lt;bean id="htmlReport"
+          class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView"&gt;
+  &lt;property name="url"&gt;
+    &lt;value&gt;/WEB-INF/reports/simpleReport.jrxml&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property name="exporterParameters"&gt;
+    &lt;map&gt;
+      &lt;entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER"&gt;
+        &lt;value&gt;Footer by Spring!
+          &amp;lt;/td&amp;gt;&amp;lt;td width="50%"&amp;gt;&amp;amp;nbsp; &amp;lt;/td&amp;gt;&amp;lt;/tr&amp;gt;
+          &amp;lt;/table&amp;gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;
+        &lt;/value&gt;
+      &lt;/entry&gt;
+    &lt;/map&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;
+
+					</programlisting>
+					Here you can see that the <literal>JasperReportsHtmlView</literal> is being configured with an exporter
+					parameter for <literal>net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER</literal>
+					which will output a footer in the resulting HTML.
+				</para>
+		</sect2>
   </sect1>
 </chapter>
