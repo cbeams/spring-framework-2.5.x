@@ -52,6 +52,7 @@ import java.util.List;
  * @author Juergen Hoeller
  * @since 25.05.2004
  * @see RowMapper
+ * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
 public class RowMapperResultReader implements ResultReader {
@@ -70,7 +71,7 @@ public class RowMapperResultReader implements ResultReader {
 	 * @param rowMapper the RowMapper which creates an object for each row
 	 */
 	public RowMapperResultReader(RowMapper rowMapper) {
-		this(rowMapper, -1);
+		this(rowMapper, 0);
 	}
 
 	/**
@@ -80,7 +81,8 @@ public class RowMapperResultReader implements ResultReader {
 	 * (just used for optimized collection handling)
 	 */
 	public RowMapperResultReader(RowMapper rowMapper, int rowsExpected) {
-		// use the more efficient collection if we know how many rows to expect
+		// Use the more efficient collection if we know how many rows to expect:
+		// ArrayList in case of a known row count, LinkedList if unknown
 		this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 		this.rowMapper = rowMapper;
 	}

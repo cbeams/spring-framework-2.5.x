@@ -35,7 +35,7 @@ import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException
  *
  * @author Rod Johnson
  * @author Isabelle Muszynski
- * @version $Id: SqlUpdate.java,v 1.6 2004-05-28 14:13:00 jhoeller Exp $
+ * @version $Id: SqlUpdate.java,v 1.7 2004-05-28 16:11:13 jhoeller Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
@@ -103,11 +103,11 @@ public class SqlUpdate extends SqlOperation {
 	/**
 	 * Set the maximum number of rows that may be affected by this update.
 	 * The default value is 0, which does not limit the number of rows affected.
-	 * @param max the maximum number of rows that can be affected by this
-	 * update without this class's update method considering it an error
+	 * @param maxRowsAffected the maximum number of rows that can be affected by
+	 * this update without this class's update method considering it an error
 	 */
-	public void setMaxRowsAffected(int max) {
-		this.maxRowsAffected = max;
+	public void setMaxRowsAffected(int maxRowsAffected) {
+		this.maxRowsAffected = maxRowsAffected;
 	}
 
 	/**
@@ -115,11 +115,11 @@ public class SqlUpdate extends SqlOperation {
 	 * The default value is 0, which allows any number of rows to be affected.
 	 * <p>This is an alternative to setting the <i>maximum</i> number of rows
 	 * that may be affected.
-	 * @param rowsAffected the exact number of rows that must be affected by
-	 * this update without this class's update method considering it an error
+	 * @param requiredRowsAffected the exact number of rows that must be affected
+	 * by this update without this class's update method considering it an error
 	 */
-	public void setRequiredRowsAffected(int rowsAffected) {
-		this.requiredRowsAffected = rowsAffected;
+	public void setRequiredRowsAffected(int requiredRowsAffected) {
+		this.requiredRowsAffected = requiredRowsAffected;
 	}
 
 
