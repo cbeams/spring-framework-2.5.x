@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.17 2004-06-23 10:38:31 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.18 2004-06-25 09:11:35 johnsonr Exp $
  */
 public abstract class BeanUtils {
 
@@ -195,6 +196,26 @@ public abstract class BeanUtils {
 			}
 		}
 		targetBw.setPropertyValues(values);
+	}
+	
+	/**
+	 * Is there one or more methods--with any argument types--
+	 * on this class or/and its superclasses? 
+	 * Includes non-public methods.
+	 */
+	public static boolean isAtLeastOneMethodWithName(String methodName, Class clazz) {
+		do {
+			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+				Method m = clazz.getDeclaredMethods()[i];
+				if (methodName.equals(m.getName())) {
+					//System.err.println(m + "; " + clazz);
+					return true;
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+		while (clazz != null);
+		return false;
 	}
 
 }
