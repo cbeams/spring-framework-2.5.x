@@ -188,12 +188,12 @@ public class ModelAndView {
 	public String toString() {
 		StringBuffer buf = new StringBuffer("ModelAndView: ");
 		if (isReference()) {
-			buf.append("reference to view with name [").append(this.viewName).append(']');
+			buf.append("reference to view with name '").append(this.viewName).append("'");
 		}
 		else {
 			buf.append("materialized View is [").append(this.view).append(']');
 		}
-		buf.append("; model=[").append(this.model).append(']');
+		buf.append("; model is ").append(this.model);
 		return buf.toString();
 	}
 
