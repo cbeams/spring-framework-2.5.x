@@ -32,7 +32,7 @@ import org.springframework.jdbc.support.KeyHolder;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.12 2004-07-18 23:20:32 trisberg Exp $
+ * @version $Id: JdbcOperations.java,v 1.13 2004-08-02 09:15:03 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -80,12 +80,27 @@ public interface JdbcOperations {
 	 * a static query with a PreparedStatement, use the overloaded query method
 	 * with null as PreparedStatementSetter argument.
 	 * @param sql SQL query to execute
-	 * @param rch object that will extract results
+	 * @param rch object that will extract results (potentially a ResultReader),
+	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
 	 */
 	List query(String sql, RowCallbackHandler rch) throws DataAccessException;
+
+	/**
+	 * Execute a query given static SQL, mapping each row to a Java object
+	 * via a RowMapper.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded query method
+	 * with null as PreparedStatementSetter argument.
+	 * @param sql SQL query to execute
+	 * @param rowMapper object that will map one object per row
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #query(String, PreparedStatementSetter, RowCallbackHandler)
+	 */
+	List query(String sql, RowMapper rowMapper) throws DataAccessException;
 
 	/**
 	 * Execute a query for a result list, given static SQL.
@@ -246,7 +261,7 @@ public interface JdbcOperations {
 	 * basis with a RowCallbackHandler (potentially implementing the ResultReader
 	 * sub-interface that provides a result List).
 	 * @param psc object that can create a PreparedStatement given a Connection
-	 * @param rch object that will extract results,
+	 * @param rch object that will extract results (potentially a ResultReader),
 	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if there is any problem
@@ -265,7 +280,8 @@ public interface JdbcOperations {
 	 * If this is null, the SQL will be assumed to contain no bind parameters.
 	 * Even if there are no bind parameters, this object may be used to
 	 * set fetch size and other performance options.
-	 * @param rch object that will extract results
+	 * @param rch object that will extract results (potentially a ResultReader),
+	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
 	 */
@@ -280,7 +296,8 @@ public interface JdbcOperations {
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
-	 * @param rch object that will extract results
+	 * @param rch object that will extract results (potentially a ResultReader),
+	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
 	 * @see java.sql.Types
@@ -296,11 +313,68 @@ public interface JdbcOperations {
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the respective SQL type)
-	 * @param rch object that will extract results
+	 * @param rch object that will extract results (potentially a ResultReader),
+	 * one row at a time
 	 * @return the result List in case of a ResultReader, or null else
 	 * @throws DataAccessException if the query fails
 	 */
 	List query(String sql, Object[] args, RowCallbackHandler rch)
+			throws DataAccessException;
+
+	/**
+	 * Query using a prepared statement, mapping each row to a Java object
+	 * via a RowMapper.
+	 * @param psc object that can create a PreparedStatement given a Connection
+	 * @param rowMapper object that will map one object per row
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if there is any problem
+	 */
+	List query(PreparedStatementCreator psc, RowMapper rowMapper)
+			throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * PreparedStatementSetter implementation that knows how to bind values
+	 * to the query, mapping each row to a Java objec via a RowMapper.
+	 * @param sql SQL to execute
+	 * @param pss object that knows how to set values on the prepared statement.
+	 * If this is null, the SQL will be assumed to contain no bind parameters.
+	 * Even if there are no bind parameters, this object may be used to
+	 * set fetch size and other performance options.
+	 * @param rowMapper object that will map one object per row
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if the query fails
+	 */
+	List query(String sql, PreparedStatementSetter pss, RowMapper rowMapper)
+	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, mapping each row to a Java object
+	 * via a RowMapper.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * @param argTypes SQL types of the arguments (constants from java.sql.Types)
+	 * @param rowMapper object that will map one object per row
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if the query fails
+	 * @see java.sql.Types
+	 */
+	List query(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
+	    throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, mapping each row to a Java object
+	 * via a RowMapper.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @param rowMapper object that will map one object per row
+	 * @return the result List in case of a ResultReader, or null else
+	 * @throws DataAccessException if the query fails
+	 */
+	List query(String sql, Object[] args, RowMapper rowMapper)
 			throws DataAccessException;
 
 	/**
