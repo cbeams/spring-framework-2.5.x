@@ -46,6 +46,9 @@ Package org.springframework.context
 * AbstractApplicationContext automatically registers a context-aware URLEditor now (delegating to the ResourceLoader)
 * added GenericApplicationContext class, allowing for arbitrary definition formats (via a single internal BeanFactory)
 * StaticApplicationContext derives from GenericApplicationContext now, reusing the DefaultListableBeanFactory instance
+* (Reloadable)ResourceBundleMessageSource resolves messages without arguments more efficiently (i.e. no MessageFormat)
+* ResourceBundleMessageSource's performance significantly increased through caching ResourceBundle references
+* ReloadableResourceBundleMessageSource merges properties per locale for more efficient lookup (when caching forever)
 
 Package org.springframework.core
 * ResourceEditor resolves all placeholders in a path as system properties now, not just the first one
