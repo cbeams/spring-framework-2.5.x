@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.io.Serializable;
+
 import org.springframework.aop.framework.AopConfigException;
 
 /**
@@ -23,11 +25,11 @@ import org.springframework.aop.framework.AopConfigException;
  * cause a rollback. Multiple such rules can be applied to determine whether a
  * transaction should commit or rollback after an exception has been thrown.
  * @since 09-Apr-2003
- * @version $Id: RollbackRuleAttribute.java,v 1.6 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: RollbackRuleAttribute.java,v 1.7 2004-07-30 08:02:29 johnsonr Exp $
  * @author Rod Johnson
  * @see NoRollbackRuleAttribute
  */
-public class RollbackRuleAttribute {
+public class RollbackRuleAttribute implements Serializable{
 	
 	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS = new RollbackRuleAttribute("java.lang.RuntimeException");
 	
