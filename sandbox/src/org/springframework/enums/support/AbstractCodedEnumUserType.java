@@ -98,14 +98,12 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 					+ value.getClass() + "]");
 		}
 		CodedEnum codedEnum = (CodedEnum)value;
+		Comparable code = null;
 		if (codedEnum != null) {
-			Comparable code = codedEnum.getCode();
+			code = codedEnum.getCode();
 			Assert.notNull(code, "Enum codes cannot be null, but this one is");
-			persistentType().nullSafeSet(stmt, code, index);
 		}
-		else {
-			persistentType().nullSafeSet(stmt, null, index);
-		}
+		persistentType().nullSafeSet(stmt, code, index);
 	}
 
 	public Object deepCopy(Object value) throws HibernateException {
