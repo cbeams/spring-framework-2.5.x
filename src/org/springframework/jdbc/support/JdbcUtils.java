@@ -32,6 +32,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.SqlLobValue;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -42,7 +43,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.12 2004-06-18 22:04:09 kdonald Exp $
+ * @version $Id: JdbcUtils.java,v 1.13 2004-06-25 05:01:54 trisberg Exp $
  */
 public class JdbcUtils {
 
@@ -219,11 +220,16 @@ public class JdbcUtils {
 							}
 						}
 						else {
-							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+								ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
 						}
 						break;
 					default:
-						ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+						if (inValue instanceof SqlTypeValue) {
+							((SqlTypeValue)inValue).setTypeValue(ps.getConnection(), ps, sqlColIndx, declaredParameter.getSqlType());
+						}
+						else {
+							ps.setObject(sqlColIndx, inValue, declaredParameter.getSqlType());
+						}
 						break;
 				}
 			}

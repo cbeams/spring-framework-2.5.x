@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.172 2004-06-24 14:43:32 jhoeller Exp $
+$Id: changelog.txt,v 1.173 2004-06-25 05:02:48 trisberg Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -44,6 +44,7 @@ Package org.springframework.dao
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
 
 Package org.springframework.jdbc
+* added a new SqlTypeValue abstract class with a callback method "setTypeValue" that will handle all database specific code
 * DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
 * removed CannotCloseJdbcConnectionException, as it is not used anymore
 * DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
