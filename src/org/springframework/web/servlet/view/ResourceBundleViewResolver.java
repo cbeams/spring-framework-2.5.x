@@ -17,6 +17,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.web.servlet.View;
 
 /**
@@ -120,8 +121,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 
 		ResourceBundle bundle = ResourceBundle.getBundle(this.basename, locale, Thread.currentThread().getContextClassLoader());
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(getApplicationContext());
-		lbf.setDefaultParentBean(this.defaultParentView);
-		lbf.registerBeanDefinitions(bundle);
+		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(lbf);
+		reader.setDefaultParentBean(this.defaultParentView);
+		reader.registerBeanDefinitions(bundle);
 		if (isCache()) {
 			this.cachedFactories.put(locale, lbf);
 		}

@@ -31,7 +31,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @author Rod Johnson
  * @since December 2, 2002
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @version $Id: BeanFactoryBootstrap.java,v 1.4 2003-11-22 17:20:29 jhoeller Exp $
+ * @version $Id: BeanFactoryBootstrap.java,v 1.5 2003-11-28 16:51:09 jhoeller Exp $
  */
 public class BeanFactoryBootstrap {
 	
@@ -89,8 +89,9 @@ public class BeanFactoryBootstrap {
 	 */
 	private BeanFactoryBootstrap() throws BeansException {
 		DefaultListableBeanFactory startupFactory = new DefaultListableBeanFactory();
+		PropertiesBeanDefinitionReader propReader = new PropertiesBeanDefinitionReader(startupFactory);
 		try {
-			startupFactory.registerBeanDefinitions(System.getProperties());
+			propReader.registerBeanDefinitions(System.getProperties());
 			this.bootstrapFactory = (BeanFactory) startupFactory.getBean(BEAN_FACTORY_BEAN_NAME);
 		}
 		catch (ClassCastException ex) {

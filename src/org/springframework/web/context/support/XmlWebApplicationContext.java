@@ -11,7 +11,7 @@ import java.io.InputStream;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
@@ -170,9 +170,9 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 		}
 	}
 
-	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws BeansException, IOException {
+	protected void loadBeanDefinitions(AbstractXmlBeanDefinitionReader reader) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {
-			beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
+			reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
 		}
 	}
 

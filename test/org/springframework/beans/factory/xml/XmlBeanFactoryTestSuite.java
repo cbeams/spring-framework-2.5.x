@@ -27,19 +27,21 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.21 2003-11-26 09:58:12 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.22 2003-11-28 16:54:04 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
 	/** Uses a separate factory */
 	public void testRefToSeparatePrototypeInstances() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory();
-		xbf.setValidating(false);
-		xbf.loadBeanDefinitions(is);
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(is);
 		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
@@ -55,9 +57,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 	public void testRefToSingleton() throws Exception {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory();
-		xbf.setValidating(false);
-		xbf.loadBeanDefinitions(is);
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(is);
 		assertTrue("6 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 6);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -170,9 +173,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 	public void testCircularReferences() {
 		InputStream is = getClass().getResourceAsStream("reftypes.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory();
-		xbf.setValidating(false);
-		xbf.loadBeanDefinitions(is);
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		DefaultXmlBeanDefinitionReader reader = new DefaultXmlBeanDefinitionReader(xbf);
+		reader.setValidating(false);
+		reader.loadBeanDefinitions(is);
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
 		TestBean ego = (TestBean) xbf.getBean("ego");
@@ -378,18 +382,31 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Check list
 		List l = (List) hasMap.getMap().get("list");
 		assertNotNull(l);
-		assertTrue(l.size() == 2);
+		assertTrue(l.size() == 3);
 		assertTrue(l.get(0).equals("zero"));
-		assertTrue("List element 1 should be equal to jenny bean, not " + l.get(1),
-			l.get(1).equals(jenny));
+
+		// Check nested map in list
+		Map m = (Map) l.get(1);
+		assertNotNull(m);
+		assertTrue(m.size() == 2);
+		assertTrue(m.get("fo").equals("bar"));
+		assertTrue("Map element 'jenny' should be equal to jenny bean, not " + m.get("jen"),
+			m.get("jen").equals(jenny));
+
+		// Check nested list in list
+		l = (List) l.get(2);
+		assertNotNull(l);
+		assertTrue(l.size() == 2);
+		assertTrue(l.get(0).equals(jenny));
+		assertTrue(l.get(1).equals("ba"));
 
 		// Check nested map
-		Map m = (Map) hasMap.getMap().get("map");
+		m = (Map) hasMap.getMap().get("map");
 		assertNotNull(m);
 		assertTrue(m.size() == 2);
 		assertTrue(m.get("foo").equals("bar"));
 		assertTrue("Map element 'jenny' should be equal to jenny bean, not " + m.get("jenny"),
-			l.get(1).equals(jenny));
+			m.get("jenny").equals(jenny));
 	}
 
 	public void testEmptyProps() throws Exception {
@@ -789,9 +806,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testDependsOn() {
+		PreparingBean1.prepared = false;
+		PreparingBean1.destroyed = false;
+		PreparingBean2.prepared = false;
+		PreparingBean2.destroyed = false;
+		DependingBean.destroyed = false;
 		InputStream is = getClass().getResourceAsStream("initializers.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		xbf.preInstantiateSingletons();
+		xbf.destroySingletons();
+		assertTrue(PreparingBean1.prepared);
+		assertTrue(PreparingBean1.destroyed);
+		assertTrue(PreparingBean2.prepared);
+		assertTrue(PreparingBean2.destroyed);
+		assertTrue(DependingBean.destroyed);
 	}
 
 
@@ -866,32 +894,51 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 
-	public static class PreparingBean1 {
+	public static class PreparingBean1 implements DisposableBean {
 
 		public static boolean prepared = false;
+		public static boolean destroyed = false;
 
 		public PreparingBean1() {
 			prepared = true;
 		}
-	}
 
-
-	public static class PreparingBean2 {
-
-		public static boolean prepared = false;
-
-		public PreparingBean2() {
-			prepared = true;
+		public void destroy() {
+			destroyed = true;
 		}
 	}
 
 
-	public static class DependingBean {
+	public static class PreparingBean2 implements DisposableBean {
+
+		public static boolean prepared = false;
+		public static boolean destroyed = false;
+
+		public PreparingBean2() {
+			prepared = true;
+		}
+
+		public void destroy() {
+			destroyed = true;
+		}
+	}
+
+
+	public static class DependingBean implements DisposableBean {
+
+		public static boolean destroyed = false;
 
 		public DependingBean() {
 			if (!(PreparingBean1.prepared && PreparingBean2.prepared)) {
 				throw new IllegalStateException("Need prepared PreparedBeans!");
 			}
+		}
+
+		public void destroy() {
+			if (PreparingBean1.destroyed || PreparingBean2.destroyed) {
+				throw new Error("Should not be destroyed before PreparedBeans");
+			}
+			destroyed = true;
 		}
 	}
 

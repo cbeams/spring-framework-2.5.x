@@ -143,7 +143,14 @@
 				<entry key="list">
 					<list>
 						<value>zero</value>
-						<ref local="jenny" />
+						<map>
+							<entry key="fo"><value>bar</value></entry>
+							<entry key="jen"><ref local="jenny"/></entry>
+						</map>
+						<list>
+							<ref local="jenny"/>
+							<value>ba</value>
+						</list>
 					</list>
 				</entry>
 				<entry key="map">

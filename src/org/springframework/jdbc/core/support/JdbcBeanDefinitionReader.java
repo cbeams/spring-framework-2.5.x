@@ -6,9 +6,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * ListableBeanFactory implementation that reads values from a database
@@ -16,22 +17,19 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  * as string. Formats for each are identical to the properties format
  * recognized by DefaultListableBeanFactory.
  * @author Rod Johnson
- * @version $Id: JdbcBeanFactory.java,v 1.4 2003-11-22 17:20:28 jhoeller Exp $
+ * @author Juergen Hoellre
  */
-public class JdbcBeanFactory extends DefaultListableBeanFactory {
-	
+public class JdbcBeanDefinitionReader {
+
+	private PropertiesBeanDefinitionReader propReader;
+
 	private JdbcTemplate jdbcTemplate;
 
 	/**
-	 * Create a new JdbcBeanFactory.
-	 * @param dataSource DataSource to use to obtain database connections.
-	 * The DataSource will be cached during the life of this bean factory.
-	 * @param sql SQL query to use for loading bean definitions
-	 * @see #loadBeanDefinitions
+	 * Create a new JdbcBeanDefinitionReader.
 	 */
-	public JdbcBeanFactory(DataSource dataSource, String sql) {
-		setDataSource(dataSource);
-		loadBeanDefinitions(sql);
+	public JdbcBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
+		this.propReader = new PropertiesBeanDefinitionReader(beanFactory);
 	}
 
 	/**
@@ -70,7 +68,7 @@ public class JdbcBeanFactory extends DefaultListableBeanFactory {
 				props.setProperty(beanName + "." + property, value);
 			}
 		});
-		registerBeanDefinitions(props);
+		this.propReader.registerBeanDefinitions(props);
 	}
 
 }

@@ -12,36 +12,29 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.util.ClassLoaderUtils;
 import org.springframework.web.servlet.HandlerAdapter;
 
 /**
  *
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.6 2003-11-23 22:57:51 jhoeller Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.7 2003-11-28 16:54:04 jhoeller Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
-
-	private final static String BASE_PATH = "org/springframework/beans/factory/support/";
 
 	private ListableBeanFactory listableFactory;
 
 	protected void setUp() {
 		// Interesting hierarchical factory to test counts
 		// Slow to read so we cache it
-		XmlBeanFactory grandParent = new XmlBeanFactory();
-		grandParent.loadBeanDefinitions(getClass().getResourceAsStream("root.xml"));
-		XmlBeanFactory parent = new XmlBeanFactory(grandParent);
-		parent.loadBeanDefinitions(getClass().getResourceAsStream("middle.xml"));
-		XmlBeanFactory child = new XmlBeanFactory(parent);
-		child.loadBeanDefinitions(getClass().getResourceAsStream("leaf.xml"));
+		XmlBeanFactory grandParent = new XmlBeanFactory(getClass().getResourceAsStream("root.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(getClass().getResourceAsStream("middle.xml"), grandParent);
+		XmlBeanFactory child = new XmlBeanFactory(getClass().getResourceAsStream("leaf.xml"), parent);
 		this.listableFactory = child;
 	}
 

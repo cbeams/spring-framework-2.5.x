@@ -7,11 +7,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 
 public class LBIInit {
 	
-	/** Create beans necessary to run tests
+	/**
+	 * Create beans necessary to run tests.
 	 */
 	public static void createTestBeans(DefaultListableBeanFactory lbf) throws BeansException {
 		Map m = new HashMap();
@@ -32,7 +33,6 @@ public class LBIInit {
 		// Kathy is a type
 		m.put("kathy.class", "org.springframework.beans.TestBean");
 		m.put("kathy.(singleton)", "false");
-		
 		
 		m.put("typeMismatch.class", "org.springframework.beans.TestBean");
 		m.put("typeMismatch.name", "typeMismatch");
@@ -63,9 +63,8 @@ public class LBIInit {
 		m.put("mustBeInitialized.class", "org.springframework.beans.factory.MustBeInitialized");
 		
 		m.put("lifecycle.class", "org.springframework.beans.factory.LifecycleBean");
-		
-		lbf.registerBeanDefinitions(m);
+
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(m);
 	}
 
 }
-

@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.26 2003-11-26 09:57:24 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.27 2003-11-28 16:51:09 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -183,7 +183,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * checking the parent bean factory if not found.
 	 * @param name name of the bean to retrieve
 	 */
-	public Object getBean(String name) {
+	public Object getBean(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
 		Object sharedInstance = this.singletonCache.get(beanName);
 		if (sharedInstance != null) {
@@ -305,6 +305,64 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 
 	//---------------------------------------------------------------------
+	// Implementation of ConfigurableBeanFactory interface
+	//---------------------------------------------------------------------
+
+	public PropertyValues getPropertyValues(String beanName) {
+		return getBeanDefinition(beanName).getPropertyValues();
+	}
+
+	/**
+	 * Register property value for a specific bean, overriding an existing value.
+	 * If no previous value exists, a new one will be added.
+	 * <p>This is intended for bean factory post processing, i.e. overriding
+	 * certain property values after parsing the original bean definitions.
+	 * @param beanName name of the bean
+	 * @param pv property name and value
+	 * @throws org.springframework.beans.BeansException if the property values of the specified bean are immutable
+	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
+	 */
+	public void overridePropertyValue(String beanName, PropertyValue pv) throws BeansException {
+		AbstractBeanDefinition bd = getBeanDefinition(beanName);
+		if (!(bd.getPropertyValues() instanceof MutablePropertyValues)) {
+			throw new FatalBeanException("Cannot modify immutable property values for bean '" + beanName + "'");
+		}
+		MutablePropertyValues pvs = (MutablePropertyValues) bd.getPropertyValues();
+		pvs.addPropertyValue(pv);
+	}
+
+	public void registerAlias(String beanName, String alias) throws BeansException {
+		logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
+		Object registeredName = this.aliasMap.get(alias);
+		if (registeredName != null) {
+			throw new FatalBeanException("Cannot register alias '" + alias + "' for bean name '" + beanName +
+			                             "': it's already registered for bean name '" + registeredName + "'");
+		}
+		this.aliasMap.put(alias, beanName);
+	}
+
+	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
+		Object oldObject = this.singletonCache.get(beanName);
+		if (oldObject != null) {
+			throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
+			                                       "] under bean name '" + beanName + "': there's already object [" +
+			                                       oldObject + " bound");
+		}
+		this.singletonCache.put(beanName, singletonObject);
+	}
+
+	public void destroySingletons() {
+		if (logger.isInfoEnabled()) {
+			logger.info("Destroying singletons in factory {" + this + "}");
+		}
+		Set singletonCacheKeys = new HashSet(this.singletonCache.keySet());
+		for (Iterator it = singletonCacheKeys.iterator(); it.hasNext();) {
+			destroyBean((String) it.next());
+		}
+	}
+
+
+	//---------------------------------------------------------------------
 	// Implementation methods
 	//---------------------------------------------------------------------
 
@@ -337,7 +395,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
 	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
-	    throws NoSuchBeanDefinitionException {
+	    throws BeansException {
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(beanName);
 			if (bd instanceof RootBeanDefinition) {
@@ -369,6 +427,42 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				throw ex;
 			}
 		}
+	}
+
+	/**
+	 * Autowire the given existing bean instance by name.
+	 * Also invokes lifecycle methods and applies BeanPostProcessors.
+	 * Not used internally, just available for outside callers.
+	 * @param existingBean the existing bean instance
+	 * @param dependencyCheck whether to perform a dependency check for object
+	 * @return the wired bean instance, potentially wrapped by a proxy
+	 * @throws BeansException if wiring or configuring failed
+	 */
+	public Object autowireByName(Object existingBean, boolean dependencyCheck) throws BeansException {
+		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
+		bd.setAutowire(RootBeanDefinition.AUTOWIRE_BY_NAME);
+		if (dependencyCheck) {
+			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+		}
+		return configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
+	}
+
+	/**
+	 * Autowire the given existing bean instance by type.
+	 * Also invokes lifecycle methods and applies BeanPostProcessors.
+	 * Not used internally, just available for outside callers.
+	 * @param existingBean the existing bean instance
+	 * @param dependencyCheck whether to perform a dependency check for object
+	 * @return the wired bean instance, potentially wrapped by a proxy
+	 * @throws BeansException if wiring or configuring failed
+	 */
+	public Object autowireByType(Object existingBean, boolean dependencyCheck) throws BeansException {
+		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), null);
+		bd.setAutowire(RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		if (dependencyCheck) {
+			bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+		}
+		return configureBean("(existing bean)", bd, new BeanWrapperImpl(existingBean));
 	}
 
 	/**
@@ -429,8 +523,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * All the other methods in this class invoke this method, although beans may be cached
 	 * after being instantiated by this method. All bean instantiation within this class is
 	 * performed by this method.
-	 * <p>Returns a BeanWrapper object for a new instance of this bean. First looks up
-	 * BeanDefinition for the given bean name. Uses recursion to support instance "inheritance".
 	 * @param beanName name of the bean. Must be unique in the BeanFactory
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @return a new instance of the bean
@@ -455,39 +547,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		else {
 			instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		}
-		Object bean = instanceWrapper.getWrappedInstance();
-
-		// eagerly cache singletons to be able to resolve circular references
-		// even when triggered by lifecycle interfaces like BeanFactoryAware
-		
-		if (mergedBeanDefinition.isSingleton() 
-				// We need this check because getBean on dependencies above may have materialized this bean
-				&& null == singletonCache.get(beanName)
-				) {
-			registerSingleton(beanName, bean);
-		}
-
-		// add property values based on autowire by name if it's applied
-		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
-			autowireByName(beanName, mergedBeanDefinition, instanceWrapper);
-		}
-
-		// add property values based on autowire by type if it's applied
-		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
-			autowireByType(beanName, mergedBeanDefinition, instanceWrapper);
-		}
-
-		dependencyCheck(beanName, mergedBeanDefinition, instanceWrapper);
-		applyPropertyValues(beanName, instanceWrapper, mergedBeanDefinition.getPropertyValues());
-		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, instanceWrapper);
-
-		bean = applyBeanPostProcessors(bean, beanName);
-		// re-cache the instance even if already eagerly cached in createBean,
-		// as it could have been wrapped by a BeanPostProcessor
-		if (mergedBeanDefinition.isSingleton()) {
-			this.singletonCache.put(beanName, bean);
-		}
-		return bean;
+		return configureBean(beanName, mergedBeanDefinition, instanceWrapper);
 	}
 
 	/**
@@ -634,6 +694,49 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
+	 * Configure the bean instance in the given BeanWrapper.
+	 * Also invokes lifecycle methods and applies BeanPostProcessors.
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @param bw BeanWrapper with bean instance
+	 * @return a new instance of the bean, possibly proxied
+	 */
+	protected Object configureBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+		Object bean = bw.getWrappedInstance();
+
+		// eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware
+		if (mergedBeanDefinition.isSingleton()
+				// We need this check because getBean on dependencies above may have materialized this bean
+				&& null == singletonCache.get(beanName)
+				) {
+			registerSingleton(beanName, bean);
+		}
+
+		// add property values based on autowire by name if it's applied
+		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
+			autowireByName(beanName, mergedBeanDefinition, bw);
+		}
+
+		// add property values based on autowire by type if it's applied
+		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+			autowireByType(beanName, mergedBeanDefinition, bw);
+		}
+
+		dependencyCheck(beanName, mergedBeanDefinition, bw);
+		applyPropertyValues(beanName, bw, mergedBeanDefinition.getPropertyValues());
+		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, bw);
+
+		bean = applyBeanPostProcessors(bean, beanName);
+		// re-cache the instance even if already eagerly cached in createBean,
+		// as it could have been wrapped by a BeanPostProcessor
+		if (mergedBeanDefinition.isSingleton()) {
+			this.singletonCache.put(beanName, bean);
+		}
+		return bean;
+	}
+
+	/**
 	 * Fills in any missing property values with references to
 	 * other beans in this factory if autowire is set to "byName".
 	 * @param beanName name of the bean we're wiring up.
@@ -641,14 +744,22 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param mergedBeanDefinition bean definition to update through autowiring
 	 */
 	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
-		String[] propertyNames = unsatisfiedObjectProperties(beanName, mergedBeanDefinition, bw);
+		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
-			Object bean = getBean(propertyName);
-			if (bean != null) {
+			if (containsBean(propertyName)) {
+				Object bean = getBean(propertyName);
 				mergedBeanDefinition.addPropertyValue(new PropertyValue(propertyName, bean));
-				logger.info("Added autowiring by name from bean name '" + beanName +
-					"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added autowiring by name from bean name '" + beanName +
+						"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+				}
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Not autowiring property '" + propertyName + "' of bean '" + beanName +
+											"' by name: no matching bean found");
+				}
 			}
 		}
 	}
@@ -663,7 +774,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
 	 */
 	protected void autowireByType(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
-		String[] propertyNames = unsatisfiedObjectProperties(beanName, mergedBeanDefinition, instanceWrapper);
+		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, instanceWrapper);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
 			// Look for a matching type
@@ -672,9 +783,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			if (matchingBeans.size() == 1) {
 				mergedBeanDefinition.addPropertyValue(
 				    new PropertyValue(propertyName, matchingBeans.values().iterator().next()));
-				logger.info("Autowiring by type from bean name '" + beanName +
-				            "' via property '" + propertyName + "' to bean named '" +
-				            matchingBeans.keySet().iterator().next() + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Autowiring by type from bean name '" + beanName +
+											"' via property '" + propertyName + "' to bean named '" +
+											matchingBeans.keySet().iterator().next() + "'");
+				}
 			}
 			else if (matchingBeans.size() > 1) {
 				throw new UnsatisfiedDependencyException(beanName, propertyName,
@@ -682,8 +795,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 						"There should have been 1 to be able to autowire property '" + propertyName + "' of bean '" + beanName + "'.");
 			}
 			else {
-				logger.info("Not autowiring property '" + propertyName + "' of bean '" + beanName +
-				            "' by type: no matching bean found");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Not autowiring property '" + propertyName + "' of bean '" + beanName +
+											"' by type: no matching bean found");
+				}
 			}
 		}
 	}
@@ -726,17 +841,16 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @return an array of object-type property names that are unsatisfied
 	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
 	 */
-	protected String[] unsatisfiedObjectProperties(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+	protected String[] unsatisfiedObjectProperties(RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
 		Set result = new TreeSet();
 		Set ignoreTypes = getIgnoredDependencyTypes();
-		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
 		for (int i = 0; i < pds.length; i++) {
 			String name = pds[i].getName();
 			if (pds[i].getWriteMethod() != null &&
 			    !BeanUtils.isSimpleProperty(pds[i].getPropertyType()) &&
 			    !ignoreTypes.contains(pds[i].getPropertyType()) &&
-			    pvs.getPropertyValue(name) == null) {
+			    mergedBeanDefinition.getPropertyValues().getPropertyValue(name) == null) {
 				result.add(name);
 			}
 		}
@@ -915,71 +1029,34 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		return result;
 	}
 
-	public PropertyValues getPropertyValues(String beanName) {
-		return getBeanDefinition(beanName).getPropertyValues();
-	}
-
 	/**
-	 * Register property value for a specific bean, overriding an existing value.
-	 * If no previous value exists, a new one will be added.
-	 * <p>This is intended for bean factory post processing, i.e. overriding
-	 * certain property values after parsing the original bean definitions.
-	 * @param beanName name of the bean
-	 * @param pv property name and value
-	 * @throws org.springframework.beans.BeansException if the property values of the specified bean are immutable
-	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
+	 * Destroy the bean with the given name. Only applicable for singletons.
+	 * Will destroy beans that depend on the given bean before the bean itself.
 	 */
-	public void overridePropertyValue(String beanName, PropertyValue pv) throws BeansException {
-		AbstractBeanDefinition bd = getBeanDefinition(beanName);
-		if (!(bd.getPropertyValues() instanceof MutablePropertyValues)) {
-			throw new FatalBeanException("Cannot modify immutable property values for bean '" + beanName + "'");
-		}
-		MutablePropertyValues pvs = (MutablePropertyValues) bd.getPropertyValues();
-		pvs.addPropertyValue(pv);
-	}
-
-	public void registerAlias(String beanName, String alias) throws BeansException {
-		logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		Object registeredName = this.aliasMap.get(alias);
-		if (registeredName != null) {
-			throw new FatalBeanException("Cannot register alias '" + alias + "' for bean name '" + beanName +
-			                             "': it's already registered for bean name '" + registeredName + "'");
-		}
-		this.aliasMap.put(alias, beanName);
-	}
-
-	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
-		Object oldObject = this.singletonCache.get(beanName);
-		if (oldObject != null) {
-			throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
-			                                       "] under bean name '" + beanName + "': there's already object [" +
-			                                       oldObject + " bound");
-		}
-		this.singletonCache.put(beanName, singletonObject);
-	}
-
-	public void destroySingletons() {
-		logger.info("Destroying singletons in factory {" + this + "}");
-
-		for (Iterator it = this.singletonCache.keySet().iterator(); it.hasNext();) {
-			String name = (String) it.next();
-			Object bean = this.singletonCache.get(name);
+	protected void destroyBean(String beanName) {
+		Object bean = this.singletonCache.get(beanName);
+		if (bean != null) {
+			logger.debug("Retrieving depending beans for bean '" + beanName + "'");
+			String[] dependingBeans = getDependingBeanNames(beanName);
+			for (int i = 0; i < dependingBeans.length; i++) {
+				destroyBean(dependingBeans[i]);
+			}
 
 			if (bean instanceof DisposableBean) {
-				logger.debug("Calling destroy() on bean with name '" + name + "'");
+				logger.debug("Calling destroy() on bean with name '" + beanName + "'");
 				try {
 					((DisposableBean) bean).destroy();
 				}
 				catch (Exception ex) {
-					logger.error("destroy() on bean with name '" + name + "' threw an exception", ex);
+					logger.error("destroy() on bean with name '" + beanName + "' threw an exception", ex);
 				}
 			}
 
 			try {
-				RootBeanDefinition bd = getMergedBeanDefinition(name, false);
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 				if (bd.getDestroyMethodName() != null) {
 					logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
-											 "' on bean with name '" + name + "'");
+											 "' on bean with name '" + beanName + "'");
 					BeanWrapper bw = new BeanWrapperImpl(bean);
 					try {
 						bw.invoke(bd.getDestroyMethodName(), null);
@@ -990,28 +1067,36 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				// ignore
+				// ignore, from manually registered singleton
 			}
+			this.singletonCache.remove(beanName);
 		}
-
-		this.singletonCache.clear();
 	}
 
 
 	//---------------------------------------------------------------------
-	// Abstract method to be implemented by concrete subclasses
+	// Abstract methods to be implemented by concrete subclasses
 	//---------------------------------------------------------------------
 
 	/**
-	 * This method must be defined by concrete subclasses to implement the
-	 * <b>Template Method</b> GoF design pattern.
-	 * <br>Subclasses should normally implement caching, as this method is invoked
+	 * Return the bean definition for the given bean name.
+	 * Subclasses should normally implement caching, as this method is invoked
 	 * by this class every time a bean is requested.
 	 * @param beanName name of the bean to find a definition for
 	 * @return the BeanDefinition for this prototype name. Must never return null.
 	 * @throws NoSuchBeanDefinitionException if the bean definition cannot be resolved
+	 * @throws BeansException in case of errors
 	 */
-	protected abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+	protected abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
+
+	/**
+	 * Return the names of the beans that depend on the given bean.
+	 * Called by destroyBean, to be able to destroy depending beans first.
+	 * @param beanName name of the bean to find depending beans for
+	 * @throws BeansException in case of errors
+	 * @see #destroyBean
+	 */
+	protected abstract String[] getDependingBeanNames(String beanName) throws BeansException;
 
 	/**
 	 * Find bean instances that match the required type.
@@ -1020,8 +1105,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * by type, as a ListableBeanFactory implementation can.
 	 * @param requiredType the type of the beans to look up
 	 * @return a Map of bean names and bean instances that match the required type
+	 * @throws BeansException in case of errors
 	 */
-	protected Map findMatchingBeans(Class requiredType) {
+	protected Map findMatchingBeans(Class requiredType) throws BeansException {
 		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type");
 	}
 

@@ -3,7 +3,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.AbstractXmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -50,10 +50,10 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 		refresh();
 	}
 
-	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws BeansException, IOException {
+	protected void loadBeanDefinitions(AbstractXmlBeanDefinitionReader reader) throws BeansException, IOException {
 		if (this.configLocations != null) {
 			for (int i = 0; i < this.configLocations.length; i++) {
-				beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
+				reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
 			}
 		}
 	}

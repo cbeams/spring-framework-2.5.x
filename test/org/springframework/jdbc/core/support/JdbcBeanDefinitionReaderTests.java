@@ -5,20 +5,13 @@ import java.sql.Statement;
 
 import org.easymock.MockControl;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.JdbcTestCase;
 
 /**
  * @author Rod Johnson
  */
-public class JdbcBeanFactoryTests extends JdbcTestCase {
-
-	/**
-	 * Constructor for JdbcBeanFactoryTest.
-	 * @param arg0
-	 */
-	public JdbcBeanFactoryTests(String arg0) {
-		super(arg0);
-	}
+public class JdbcBeanDefinitionReaderTests extends JdbcTestCase {
 
 	public void testValid() throws Exception {
 		String sql =
@@ -64,7 +57,10 @@ public class JdbcBeanFactoryTests extends JdbcTestCase {
 		ctrlStatement.replay();
 		replay();
 
-		JdbcBeanFactory bf = new JdbcBeanFactory(mockDataSource, sql);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		JdbcBeanDefinitionReader reader = new JdbcBeanDefinitionReader(bf);
+		reader.setDataSource(mockDataSource);
+		reader.loadBeanDefinitions(sql);
 		assertTrue(bf.getBeanDefinitionCount() == 1);
 		TestBean tb = (TestBean) bf.getBean("one");
 		assertTrue(tb.getAge() == 53);
