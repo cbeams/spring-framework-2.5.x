@@ -11,7 +11,8 @@
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">	
 	
 	<!-- Change default exclusion prefix -->
-	<property name="infrastructureBeanNamePrefix"><value>es.</value></property>
+	<property name="usePrefix"><value>true</value></property>
+	<property name="advisorBeanNamePrefix"><value>es.</value></property>
 		
 		<property name="customTargetSourceCreators">
 			<list>

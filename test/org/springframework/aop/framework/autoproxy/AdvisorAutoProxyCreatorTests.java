@@ -24,13 +24,13 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.6 2003-12-15 10:01:00 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.7 2003-12-21 12:58:10 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
 	
-	private static final String TXMANAGER_BEAN_NAME = ADVISOR_APC_BEAN_NAME + ".txManager";
+	private static final String TXMANAGER_BEAN_NAME = "txManager";
 	
 	/**
 	 * Constructor for ProxyFactoryBeanTests.
@@ -51,7 +51,8 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
 	public void testDefaultExclusionPrefix() throws Exception {
 		AdvisorAutoProxyCreator aapc = (AdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
-		assertEquals(ADVISOR_APC_BEAN_NAME + AdvisorAutoProxyCreator.SEPARATOR, aapc.getInfrastructureBeanNamePrefix() );
+		assertEquals(ADVISOR_APC_BEAN_NAME + AdvisorAutoProxyCreator.SEPARATOR, aapc.getAdvisorBeanNamePrefix() );
+		assertFalse(aapc.getUsePrefix());
 	}
 	
 	/**

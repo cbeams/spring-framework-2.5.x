@@ -7,12 +7,20 @@
 -->
 <beans>
 
+	<description>
+		Matches all Advisors in the factory: we don't use a prefix
+	</description>
+
 	<bean id="aapc"
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
 	</bean>
 
 
-	<bean id="aapc.txManager"
+	<!--
+		Often we can leave the definition of such infrastructural beans to
+		child factories
+	-->
+	<bean id="txManager"
 		class="org.springframework.transaction.CountingTxManager">
 	</bean>
 	
@@ -27,13 +35,13 @@
 	</bean>
 	
 	
-	<bean id="aapc.txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref local="aapc.txManager"/></property>
+	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"><ref local="txManager"/></property>
 		<property name="transactionAttributeSource"><ref local="tas"/></property>
 	</bean>
 	
 	
-	<bean id="aapc.txAdvice"
+	<bean id="txAdvisor"
 		autowire="constructor"
 		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor">
 	</bean>
