@@ -1,15 +1,28 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.158 2004-06-04 12:50:37 trisberg Exp $
+$Id: changelog.txt,v 1.159 2004-06-05 16:02:15 jhoeller Exp $
 
 
-Changes in version 1.0.3 (?.?.2004)
------------------------------------
+Changes in version 1.0.3 (27.6.2004)
+------------------------------------
 
+Package org.springframework.beans
+* fixed PropertiesEditor's support for converting a Map to Properties
 
 Package org.springframework.jdbc
-* added support for CLOB/BLOB to SqlUpdate and StoredProcedure
-* refactored the CallableStatement/PreparedStatement.setXxxx method invokations into its own utility method JdbcUtils.setParameters 
+* refactored Prepared/CallableStatement.setXxxx method invocations into JdbcUtils.setParameters utility method
+* added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
+* added BatchSqlUpdate class to jdbc.object package, for convenient execution of batch updates
+
+Package org.springframework.mail
+* added "replyTo" and "sentDate" fields to SimpleMailMessage
+* added "setReplyTo" and "setSentDate" methods to MimeMessageHelper
+
+Package org.springframework.orm
+* added "delete" methods to HibernateOperations/HibernateTemplate, according to the "delete" in the Session interface
+
+Package org.springframework.web
+* added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
 
 
 Changes in version 1.0.2 (3.6.2004)
