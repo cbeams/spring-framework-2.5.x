@@ -3,7 +3,7 @@
 <!--
   Build file for the Spring Framework.
 
-  $Id: build.xml,v 1.73 2004-07-26 16:20:08 jhoeller Exp $
+  $Id: build.xml,v 1.74 2004-07-27 19:09:11 jhoeller Exp $
 
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
@@ -186,6 +186,7 @@
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/context/**"/>
 				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/jms/**"/>
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/mail/**"/>
 				<include name="org/springframework/remoting/**"/>
