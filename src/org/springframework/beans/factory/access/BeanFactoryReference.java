@@ -9,10 +9,10 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Class used t track a reference to a BeanFactory obtained through
+ * Class used to track a reference to a BeanFactory obtained through
  * {@link BeanFactoryLocator}
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author colin sampaleanu
  */
 public interface BeanFactoryReference {
