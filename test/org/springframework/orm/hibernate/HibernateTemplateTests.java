@@ -807,6 +807,18 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals(sqlex, ex.getRootCause());
 		}
 
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					throw new ObjectDeletedException("", "");
+				}
+			});
+			fail("Should have thrown HibernateObjectRetrievalFailureException");
+		}
+		catch (HibernateObjectRetrievalFailureException ex) {
+			// expected
+		}
+
 		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class);
 		try {
 			createTemplate().execute(new HibernateCallback() {
@@ -871,18 +883,6 @@ public class HibernateTemplateTests extends TestCase {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
 					throw new TransientObjectException("");
-				}
-			});
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// expected
-		}
-
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
-					throw new ObjectDeletedException("", "");
 				}
 			});
 			fail("Should have thrown InvalidDataAccessApiUsageException");

@@ -124,18 +124,26 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Convert the given HibernateException to an appropriate exception from
-	 * the org.springframework.dao hierarchy.
+	 * Convert the given HibernateException to an appropriate exception from the
+	 * org.springframework.dao hierarchy. Note that it is advisable to handle JDBCException
+	 * specifically by using an SQLExceptionTranslator for the underlying SQLException.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see HibernateAccessor#convertHibernateAccessException
+	 * @see HibernateAccessor#convertJdbcAccessException
+	 * @see HibernateTemplate#execute
 	 */
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {
-			// SQLException during Hibernate access
+			// SQLException during Hibernate access: only passed in here from custom code,
+			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling
 			return new HibernateJdbcException((JDBCException) ex);
 		}
 		if (ex instanceof ObjectNotFoundException) {
 			return new HibernateObjectRetrievalFailureException((ObjectNotFoundException) ex);
+		}
+		if (ex instanceof ObjectDeletedException) {
+			return new HibernateObjectRetrievalFailureException((ObjectDeletedException) ex);
 		}
 		if (ex instanceof WrongClassException) {
 			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
@@ -150,9 +158,6 @@ public abstract class SessionFactoryUtils {
 			return new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		if (ex instanceof TransientObjectException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage());
-		}
-		if (ex instanceof ObjectDeletedException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
 		// fallback
