@@ -144,29 +144,38 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
+
+	/**
+	 * Request attribute to hold the currently chosen HandlerExecutionChain.
+	 * Only used for internal optimizations.
+	 */
+	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherServlet.class.getName() + ".HANDLER";
+
 	/**
 	 * Request attribute to hold current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
 	 * Request attribute to hold current multipart resolver, retrievable by views/binders.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getMultipartResolver
 	 */
 	public static final String MULTIPART_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".MULTIPART";
 
 	/**
 	 * Request attribute to hold current locale, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContext
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
 
 	/**
 	 * Request attribute to hold current theme, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContext
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
+
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
@@ -495,7 +504,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
-				mappedHandler = getHandler(processedRequest);
+				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					// if we didn't find a handler
 					if (pageNotFoundLogger.isWarnEnabled()) {
@@ -588,7 +597,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected long getLastModified(HttpServletRequest request) {
 		try {
-			HandlerExecutionChain mappedHandler = getHandler(request);
+			HandlerExecutionChain mappedHandler = getHandler(request, true);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
 				// ignore -> will reappear on doService
 				logger.debug("No handler found in getLastModified");
@@ -610,11 +619,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Return the handler for this request.
+	 * Return the HandlerExecutionChain for this request.
 	 * Try all handler mappings in order.
-	 * @return the handler, or null if no handler could be found
+	 * @param request current HTTP request
+	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
+	 * @return the HandlerExceutionChain, or null if no handler could be found
 	 */
-	private HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+	private HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
+		HandlerExecutionChain handler =
+				(HandlerExecutionChain) request.getAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
+		if (handler != null) {
+			if (!cache) {
+				request.removeAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
+			}
+			return handler;
+		}
+
 		Iterator it = this.handlerMappings.iterator();
 		while (it.hasNext()) {
 			HandlerMapping hm = (HandlerMapping) it.next();
@@ -622,15 +642,20 @@ public class DispatcherServlet extends FrameworkServlet {
 				logger.debug("Testing handler map [" + hm  + "] in DispatcherServlet with name '" +
 						getServletName() + "'");
 			}
-			HandlerExecutionChain handler = hm.getHandler(request);
-			if (handler != null)
+			handler = hm.getHandler(request);
+			if (handler != null) {
+				if (cache) {
+					request.setAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE, handler);
+				}
 				return handler;
+			}
 		}
 		return null;
 	}
 
 	/**
-	 * Return the HandlerAdapter for this handler class.
+	 * Return the HandlerAdapter for this handler object.
+	 * @param handler the handler object to find an adapter for
 	 * @throws ServletException if no HandlerAdapter can be found for the handler.
 	 * This is a fatal error.
 	 */
@@ -652,10 +677,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Render the given ModelAndView. This is the last stage in handling a request.
 	 * It may involve resolving the view by name.
+	 * @param mv the ModelAndView to render
+	 * @param request current HTTP servlet request
+	 * @param response current HTTP servlet response
+	 * @param locale the locale for the current request
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	private void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response, Locale locale)
+	private void render(
+			ModelAndView mv, HttpServletRequest request, HttpServletResponse response, Locale locale)
 	    throws Exception {
+
 		View view = null;
 		if (mv.isReference()) {
 			// we need to resolve the view name
@@ -676,6 +707,8 @@ public class DispatcherServlet extends FrameworkServlet {
 						"View object in servlet with name '" + getServletName() + "'");
 			}
 		}
+
+		// delegate to the View object for rendering
 		view.render(mv.getModel(), request, response);
 	}
 

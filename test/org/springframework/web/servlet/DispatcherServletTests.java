@@ -496,14 +496,14 @@ public class DispatcherServletTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/throwaway.do");
 		request.addParameter("myInt", "5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			simpleDispatcherServlet.service(request, response);
-			assertTrue("Correct response", "view5".equals(response.getForwardedUrl()));
-			assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+
+		simpleDispatcherServlet.service(request, response);
+		assertTrue("Correct response", "view5".equals(response.getForwardedUrl()));
+		assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
+
+		simpleDispatcherServlet.service(request, response);
+		assertTrue("Correct response", "view5".equals(response.getForwardedUrl()));
+		assertEquals(2, SimpleWebApplicationContext.TestThrowawayController.counter);
 	}
 
 	public void testThrowawayControllerWithBindingFailure() throws Exception {
@@ -511,6 +511,7 @@ public class DispatcherServletTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/throwaway.do");
 		request.addParameter("myInt", "5x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+
 		try {
 			simpleDispatcherServlet.service(request, response);
 			fail("Should have thrown ServletException");
