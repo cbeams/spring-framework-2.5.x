@@ -49,14 +49,49 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	private FlowSession NO_SESSION = new FlowSession();
 
+	private Flow rootFlow;
+
 	private Stack executingFlowSessions = new Stack();
 
 	private String lastEventId;
 
 	private long lastEventTimestamp;
 
-	public FlowExecutionStack() {
+	public FlowExecutionStack(Flow rootFlow) {
 		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
+		this.rootFlow = rootFlow;
+	}
+
+	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response) {
+		Assert.state(!isActive(), "This flow execution is already started");
+		activate(new FlowSession(this.rootFlow, input));
+		return this.rootFlow.getStartState().enter(this, request, response);
+	}
+
+	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
+			HttpServletResponse response) {
+		assertActive();
+		if (stateId == null) {
+			if (logger.isWarnEnabled()) {
+				logger
+						.warn("Current state id was not provided in request for flow session '"
+								+ getCaption()
+								+ "' - pulling current state id from session - "
+								+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
+			}
+			stateId = getCurrentStateId();
+		}
+		fireRequestSubmitted(request);
+		TransitionableState state = getActiveFlow().getRequiredTransitionableState(stateId);
+		ModelAndView view = state.execute(eventId, this, request, response);
+		fireRequestProcessed(request);
+		return view;
+	}
+
+	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
+		assertActive();
+		activate(new FlowSession(flow, input));
+		return getCurrentState().enter(this, request, response);
 	}
 
 	public String getId() {
@@ -289,26 +324,6 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	public void removeAttribute(String attributeName) {
 		getActiveFlowSession().removeAttribute(attributeName);
-	}
-
-	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
-			HttpServletResponse response) {
-		Assert.isTrue(isActive(), "This flow execution is not active - this should not happen");
-		if (stateId == null) {
-			if (logger.isWarnEnabled()) {
-				logger
-						.warn("Current state id was not provided in request for flow session '"
-								+ getCaption()
-								+ "' - pulling current state id from session - "
-								+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
-			}
-			stateId = getCurrentStateId();
-		}
-		fireRequestSubmitted(request);
-		TransitionableState state = getActiveFlow().getRequiredTransitionableState(stateId);
-		ModelAndView view = state.execute(eventId, this, request, response);
-		fireRequestProcessed(request);
-		return view;
 	}
 
 	protected void activate(FlowSession flowSession) {

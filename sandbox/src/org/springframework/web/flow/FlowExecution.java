@@ -3,6 +3,8 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,6 +45,14 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	public AbstractState getCurrentState();
 
 	/**
+	 * @param input
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response);
+
+	/**
 	 * @param eventId
 	 * @param currentStateId
 	 * @param request
@@ -51,4 +61,13 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 */
 	public ModelAndView signalEvent(String eventId, String currentStateId, HttpServletRequest request,
 			HttpServletResponse response);
+
+	/**
+	 * @param flow
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response);
+
 }

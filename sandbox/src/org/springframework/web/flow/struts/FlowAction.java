@@ -29,9 +29,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionFactory;
 import org.springframework.web.flow.FlowExecutionInfo;
-import org.springframework.web.flow.FlowExecutionStartResult;
+import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowSessionException;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.servlet.ModelAndView;
@@ -103,13 +102,13 @@ public class FlowAction extends TemplateAction {
 		return ACTION_FORM_ATTRIBUTE;
 	}
 
-	protected FlowExecutionFactory getFlowExecutionFactory(ActionMapping mapping) {
+	protected Flow getFlow(ActionMapping mapping) {
 		return getFlowExecutionFactory(getFlowId(mapping));
 	}
 
-	protected FlowExecutionFactory getFlowExecutionFactory(String flowId) {
+	protected Flow getFlowExecutionFactory(String flowId) {
 		Assert.hasText(flowId, "The flow id must be set to lookup the flow for this action");
-		return (Flow)getBean(flowId, FlowExecutionFactory.class);
+		return (Flow)getBean(flowId, Flow.class);
 	}
 
 	protected String getFlowId(ActionMapping mapping) {
@@ -149,9 +148,8 @@ public class FlowAction extends TemplateAction {
 		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
-			FlowExecutionStartResult startResult = getFlowExecutionFactory(mapping).start(request, response, null);
-			flowExecution = startResult.getFlowExecution();
-			viewDescriptor = startResult.getStartingView();
+			Flow flow = getFlow(mapping);
+			flowExecution = createFlowExecution(flow);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -159,13 +157,13 @@ public class FlowAction extends TemplateAction {
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(getRequiredStringParameter(request,
 					getFlowSessionIdParameterName()), request);
-			
+
 			// let client tell you what state they are in (if possible)
 			String stateId = getStringParameter(request, getCurrentStateIdParameterName());
 
 			// let client tell you what event was signaled in the current state
 			String eventId = getStringParameter(request, getEventIdParameterName());
-			
+
 			if (eventId == null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No '" + getEventIdParameterName()
@@ -239,6 +237,10 @@ public class FlowAction extends TemplateAction {
 			logger.debug("Returning selected view descriptor " + viewDescriptor);
 		}
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
+	}
+
+	protected FlowExecution createFlowExecution(Flow flow) {
+		return new FlowExecutionStack(flow);
 	}
 
 	/**

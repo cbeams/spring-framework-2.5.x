@@ -97,6 +97,6 @@ public class SubFlowState extends TransitionableState {
 			}
 			subFlowAttributes = new HashMap(1);
 		}
-		return subFlow.spawnIn(sessionExecution, request, response, subFlowAttributes);
+		return sessionExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
 	}
 }

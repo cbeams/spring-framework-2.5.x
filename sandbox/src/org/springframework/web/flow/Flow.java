@@ -301,6 +301,14 @@ public class Flow implements Serializable {
 	}
 
 	/**
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	public TransitionableState getStartState() throws IllegalStateException {
+		return startState;
+	}
+
+	/**
 	 * @param state
 	 * @throws NoSuchFlowStateException
 	 */
@@ -365,14 +373,6 @@ public class Flow implements Serializable {
 		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
 		return (TransitionableState)state;
-	}
-
-	/**
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public TransitionableState getStartState() throws IllegalStateException {
-		return startState;
 	}
 
 	public String[] getStateIds() {

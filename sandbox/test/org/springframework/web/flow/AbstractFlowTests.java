@@ -41,7 +41,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	private Flow flow;
 
-	protected FlowExecution flowSessionExecution;
+	protected FlowExecution flowExecution;
 
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "Flow is required for this test");
@@ -54,11 +54,11 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	}
 
 	protected String getCurrentStateId() {
-		return flowSessionExecution.getCurrentStateId();
+		return flowExecution.getCurrentStateId();
 	}
 
 	protected FlowExecution getFlowSessionExecution() {
-		return flowSessionExecution;
+		return flowExecution;
 	}
 
 	protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
@@ -102,14 +102,13 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flow;
 	}
 
-	protected FlowExecutionFactory getEventProcessor() {
-		return flow;
+	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
+		this.flowExecution = createFlowExecution(getFlow());
+		return this.flowExecution.start(input, request, response);
 	}
 
-	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
-		FlowExecutionStartResult result = getEventProcessor().start(request, response, input);
-		this.flowSessionExecution = (FlowExecution)result.getFlowExecution();
-		return result.getStartingView();
+	protected FlowExecution createFlowExecution(Flow flow) {
+		return new FlowExecutionStack(flow);
 	}
 
 	protected ModelAndView startFlow(Map input) {
