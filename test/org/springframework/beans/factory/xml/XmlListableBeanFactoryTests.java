@@ -81,11 +81,11 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		ITestBean father = (ITestBean) getBeanFactory().getBean("father");
 		assertTrue("Bean from root context", father != null);
 
-		ITestBean rod = (ITestBean) getBeanFactory().getBean("rod");
+		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		assertTrue("Bean from child context", "Rod".equals(rod.getName()));
 		assertTrue("Bean has external reference", rod.getSpouse() == father);
 
-		rod = (ITestBean) parent.getBean("rod");
+		rod = (TestBean) parent.getBean("rod");
 		assertTrue("Bean from root context", "Roderick".equals(rod.getName()));
 	}
 
@@ -117,6 +117,13 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		assertTrue(kathy.isPostProcessed());
 		assertTrue(factory.isPostProcessed());
 		assertTrue(factoryCreated.isPostProcessed());
+	}
+
+	public void testEmptyValues() {
+		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
+		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
+		assertTrue("Touchy is empty", "".equals(rod.getTouchy()));
+		assertTrue("Touchy is empty", "".equals(kerry.getTouchy()));
 	}
 
 }

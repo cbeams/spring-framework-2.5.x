@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.xml;
 
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Comment;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,11 +57,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
- * Parses bean definitions according to the "spring-beans" DTD. 
+ * Parses bean definitions according to the "spring-beans" DTD.
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.27 2004-06-28 11:45:10 johnsonr Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.28 2004-07-01 20:55:49 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -107,7 +108,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String TYPE_ATTRIBUTE = "type";
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
-	
+
 	public static final String REPLACED_METHOD_ELEMENT = "replaced-method";
 	public static final String REPLACER_ATTRIBUTE = "replacer";
 	public static final String ARG_TYPE_ELEMENT = "arg-type";
@@ -118,7 +119,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String BEAN_REF_ATTRIBUTE = "bean";
 	public static final String LOCAL_REF_ATTRIBUTE = "local";
 	public static final String PARENT_REF_ATTRIBUTE = "parent";
-	
+
 	public static final String LIST_ELEMENT = "list";
 	public static final String SET_ELEMENT = "set";
 	public static final String MAP_ELEMENT = "map";
@@ -380,12 +381,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		return pvs;
 	}
-	
+
 	/**
 	 * Parse lookup-override sub elements
 	 */
 	protected void getLookupOverrideSubElements(MethodOverrides overrides, String beanName, Element beanEle) {
-		NodeList nl = beanEle.getChildNodes();		
+		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && LOOKUP_METHOD_ELEMENT.equals(node.getNodeName())) {
@@ -393,28 +394,28 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
 				String beanRef = ele.getAttribute(BEAN_ELEMENT);
 				overrides.addOverride(new LookupOverride(methodName, beanRef));
-			}			
+			}
 		}
 	}
-	
+
 	protected void getReplacedMethodSubElements(MethodOverrides overrides, String beanName, Element beanEle) {
-		NodeList nl = beanEle.getChildNodes();		
+		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && REPLACED_METHOD_ELEMENT.equals(node.getNodeName())) {
 				Element replacedMethodEle = (Element) node;
 				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
-				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);		
+				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
 				ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
-				
+
 				// Look for arg-type match elements
 				NodeList argTypeNodes = replacedMethodEle.getElementsByTagName(ARG_TYPE_ELEMENT);
 				for (int j = 0; j < argTypeNodes.getLength(); j++) {
 					Element argTypeEle = (Element) argTypeNodes.item(j);
 					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
-				}				
+				}
 				overrides.addOverride(replaceOverride);
-			}			
+			}
 		}
 	}
 
@@ -635,22 +636,41 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	/**
 	 * Make the horrible DOM API slightly more bearable:
-	 * get the text value we know this element contains
+	 * get the text value we know this element contains.
 	 */
 	protected String getTextValue(Element ele, String beanName) {
 		NodeList nl = ele.getChildNodes();
-		if (nl.item(0) == null) {
+		if (nl.getLength() == 0) {
 			// treat empty value as empty String
 			return "";
 		}
-		if (nl.getLength() != 1 || !(nl.item(0) instanceof Text)) {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "Unexpected element or type mismatch: expected single node of " +
-																						 nl.item(0).getClass() + " to be of type Text: " + "found " + ele, null);
+		Text text = null;
+		for (int i = 0; i < nl.getLength(); i++) {
+			Object item = nl.item(i);
+			if (item instanceof Text) {
+				if (text != null) {
+					throw new BeanDefinitionStoreException(this.resource, beanName,
+																								 "Expected to find single node of type text " +
+																								 "as child of <value> element");
+				}
+				text = ((Text) item);
+			}
+			else if (item instanceof Comment) {
+				// ignore
+			}
+			else {
+				throw new BeanDefinitionStoreException(this.resource, beanName,
+																							 "<value> element is just allowed to have text and comment nodes, " +
+																							 "not: " + item.getClass().getName());
+			}
 		}
-		Text t = (Text) nl.item(0);
-		// This will be a String
-		return t.getData();
+		if (text != null) {
+			return text.getData();
+		}
+		else {
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "Expected to find a node of type text as child of <value> element");
+		}
 	}
 
 	protected int getDependencyCheck(String att) {

@@ -4,13 +4,14 @@
 <beans>
 
 	<bean id="rod" class="org.springframework.beans.TestBean">
-		<property name="name"><value>Rod</value></property>
+		<property name="name"><value><!-- a comment -->Rod</value></property>
 		<property name="age"><value>31</value></property>
 		<property name="spouse"><ref bean="father"/></property>
+		<property name="touchy"><value/></property>
 	</bean>
 
 	<bean id="roderick" parent="rod">
-		<property name="name"><value>Roderick</value></property>
+		<property name="name"><value>Roderick<!-- a comment --></value></property>
 		<!-- Should inherit age -->
 	</bean>
 
@@ -18,6 +19,7 @@
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref local="rod"/></property>
+		<property name="touchy"><value></value></property>
 	</bean>
 
 	<bean id="kathy" class="org.springframework.beans.TestBean" singleton="false">
