@@ -90,7 +90,7 @@ public class EndState extends AbstractState {
 			}
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
-			return resumingState.execute(getId(), sessionExecution, request, response);
+			return resumingState.signalEvent(getId(), sessionExecution, request, response);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable

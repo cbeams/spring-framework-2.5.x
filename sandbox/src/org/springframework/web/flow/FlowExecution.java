@@ -11,35 +11,31 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Subinterface of <code>FlowSessionExecutionInfo</code> that exposes mutable
- * operations. Designed for use by the <code>FlowSessionExecutionListener</code>,
- * which is a bit more privleged than pure for-management clients. This
- * interface may also be used in situations where other privileged objects need
- * access to flow definition configuration details during session execution.
- * 
- * Note: though these definitions are exposed to clients via this interface,
- * they should *not* be modified post application startup. Mutable operations on
- * mutable configuration operations should be treated as frozen after a flow's
- * session execution commences.
+ * Subinterface of <code>FlowExecutionInfo</code> that exposes mutable
+ * operations. Designed for use by the front <code>FlowController</code> and
+ * <code>FlowSessionExecutionListener</code>, which are more privleged than
+ * pure for-management clients. This interface may also be used in situations
+ * where other privileged objects need access to flow definition configuration
+ * details during session execution.
  * 
  * @author Keith Donald
  */
 public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAccessor {
 
 	/**
-	 * Returns this session execution's active flow definition.
+	 * Returns this flow execution's active flow definition.
 	 * @return The active flow definition
 	 */
 	public Flow getActiveFlow();
 
 	/**
-	 * Returns this session execution's root flow definition.
+	 * Returns this flow execution's root flow definition.
 	 * @return The root flow definition.
 	 */
 	public Flow getRootFlow();
 
 	/**
-	 * Returns this session execution's current state definition.
+	 * Returns this flow execution's current state definition.
 	 * @return the current state definition.
 	 */
 	public AbstractState getCurrentState();

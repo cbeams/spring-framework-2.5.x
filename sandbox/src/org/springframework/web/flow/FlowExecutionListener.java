@@ -32,7 +32,7 @@ public interface FlowExecutionListener {
 
 	/**
 	 * Called when a new client HTTP request is submitted to manipulate this
-	 * session execution.
+	 * flow execution.
 	 * @param flowExecution
 	 * @param request
 	 */
@@ -79,5 +79,5 @@ public interface FlowExecutionListener {
 	 * @param endedRootFlowSession
 	 */
 	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession);
-
+	
 }

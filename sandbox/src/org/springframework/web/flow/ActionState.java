@@ -95,7 +95,7 @@ public class ActionState extends TransitionableState {
 			ActionResult result = action.execute(request, response, sessionExecution);
 			executionCount++;
 			if (result != null) {
-				return execute(result.getId(), sessionExecution, request, response);
+				return signalEvent(result.getId(), sessionExecution, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {

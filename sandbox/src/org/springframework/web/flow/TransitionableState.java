@@ -79,7 +79,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
 	 *         does not map to a valid transition for this state.
 	 */
-	protected ModelAndView execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView signalEvent(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + getFlow().getId()

@@ -73,9 +73,11 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			HttpServletResponse response) {
 		assertActive();
 		if (stateId == null) {
-			if (logger.isWarnEnabled()) {
+			if (logger.isInfoEnabled()) {
 				logger
-						.warn("Current state id was not provided in request for flow session '"
+						.info("Current state id was not provided in request to signal event '"
+								+ eventId
+								+ "' in flow "
 								+ getCaption()
 								+ "' - pulling current state id from session - "
 								+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
@@ -92,7 +94,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			}
 			setCurrentState(state);
 		}
-		ModelAndView view = state.execute(eventId, this, request, response);
+		ModelAndView view = state.signalEvent(eventId, this, request, response);
 		fireRequestProcessed(request);
 		return view;
 	}
