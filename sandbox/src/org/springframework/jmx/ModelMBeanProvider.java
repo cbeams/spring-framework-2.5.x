@@ -19,11 +19,24 @@ import javax.management.MBeanException;
 import javax.management.modelmbean.ModelMBean;
 
 /**
- * Implementations of this interface are used by the <code>JmxMBeanAdapter</code>
- * class to obtain concrete implementations of the <code>ModelMBean</code> interface.
+ * Implementations of this interface are used by the
+ * <code>JmxMBeanAdapter</code> class to obtain concrete implementations of
+ * the <code>ModelMBean</code> interface.
+ * 
  * @author robh
  */
 public interface ModelMBeanProvider {
 
-   ModelMBean getModelMBean() throws MBeanException;
+    /**
+     * Return an instance of a class that implements <code>ModelMBean</code>. This
+     * method is called by the <code>JmxMBeanAdapter</code> to obtain a <code>ModelMBean</code>
+     * instance to use when registering a bean. This method is called once per bean during the
+     * registration phase and each invocation MUST return a new instance of <code>ModelMBean</code>
+     * 
+     * @return an instance of a class that implements <code>ModelMBean</code>.
+     * @throws MBeanException
+     *             indiciating an error occured whilst creating an instance of
+     *             the <code>ModelMBean</code> implementation class.
+     */
+    ModelMBean getModelMBean() throws MBeanException;
 }
