@@ -43,7 +43,12 @@ public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
 
 	public CodedEnum getEnum(String type, Comparable code, Locale locale) {
 		try {
-			return (CodedEnum) hibernateTemplate.load(ClassUtils.forName(type), (Serializable) code);
+			Class clazz = ClassUtils.forName(type);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading coded enum persistent implementation class '" + clazz.getName() + "' with id '"
+						+ code + "'");
+			}
+			return (CodedEnum)hibernateTemplate.load(clazz, (Serializable)code);
 		}
 		catch (ClassNotFoundException e) {
 			IllegalArgumentException iae = new IllegalArgumentException(
@@ -60,7 +65,11 @@ public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
 
 	public Collection getEnumsAsCollection(String type, Locale locale) {
 		try {
-			return (Collection) hibernateTemplate.loadAll(ClassUtils.forName(type));
+			Class clazz = ClassUtils.forName(type);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading all coded enum persistent implementations of class '" + clazz.getName());
+			}
+			return (Collection)hibernateTemplate.loadAll(clazz);
 		}
 		catch (ClassNotFoundException e) {
 			IllegalArgumentException iae = new IllegalArgumentException(
@@ -75,7 +84,7 @@ public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
 		final Map map = new HashMap(all.size());
 		new Block() {
 			protected void handle(Object o) {
-				CodedEnum ce = (CodedEnum) o;
+				CodedEnum ce = (CodedEnum)o;
 				map.put(ce.getCode(), ce);
 			}
 		}.forEach(all);
