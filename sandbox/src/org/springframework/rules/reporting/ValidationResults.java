@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public interface ValidationResults {
     public Map getResults();
+
     public int getViolatedCount();
+
     public PropertyResults getResults(String propertyName);
 }

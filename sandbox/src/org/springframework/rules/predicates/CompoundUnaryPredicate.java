@@ -16,8 +16,8 @@
 package org.springframework.rules.predicates;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public abstract class CompoundUnaryPredicate implements UnaryPredicate {
-    private Set predicates = new HashSet();
+    private Set predicates = new LinkedHashSet();
 
     /**
      * Constructs a compound predicate with no initial members. It is expected

@@ -83,6 +83,10 @@ public class StringLengthConstraint implements UnaryPredicate {
     public boolean test(Object argument) {
         return this.lengthConstraint.test(argument);
     }
+    
+    public UnaryPredicate getPredicate() {
+        return lengthConstraint;
+    }
 
     public String toString() {
         return lengthConstraint.toString();
