@@ -15,15 +15,14 @@ public abstract class AbstractTransactionAttributeSource implements TransactionA
 
 	/**
 	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for direct, "xxx*", and "*xxx" matches.
+	 * The default implementation checks for "xxx*" and "*xxx" matches.
 	 * Can be overridden in subclasses.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
 	 * @return if the names match
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
-		return methodName.equals(mappedName) ||
-		    (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
+		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
 				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
 	}
 

@@ -20,7 +20,7 @@ import org.springframework.transaction.TransactionUsageException;
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be stored per method in a map.
  * @since 24-Apr-2003
- * @version $Id: MethodMapTransactionAttributeSource.java,v 1.2 2003-11-07 09:07:13 jhoeller Exp $
+ * @version $Id: MethodMapTransactionAttributeSource.java,v 1.3 2003-11-07 09:17:29 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #isMatch
@@ -100,7 +100,7 @@ public class MethodMapTransactionAttributeSource extends AbstractTransactionAttr
 		Method[] methods = clazz.getDeclaredMethods();
 		List matchingMethods = new ArrayList();
 		for (int i = 0; i < methods.length; i++) {
-			if (isMatch(methods[i].getName(), mappedName)) {
+			if (methods[i].getName().equals(mappedName) || isMatch(methods[i].getName(), mappedName)) {
 				matchingMethods.add(methods[i]);
 			}
 		}
