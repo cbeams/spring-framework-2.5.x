@@ -44,29 +44,28 @@ import org.springframework.web.flow.action.MultiAction;
  * <pre>
  * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  * 
- * 	 protected String flowId() {
+ * 	protected String flowId() {
  * 		return &quot;customer.Detail&quot;;
- * 	 }
+ * 	}
  * 
- *   public void buildStates() {
- *     // get customer information
- *     addActionState(&quot;getDetails&quot;,
- *         action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *         on(success(), &quot;viewDetails&quot;));
- *     // view customer information               
- *     addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *         on(submit(), &quot;bindAndValidate&quot;);
- *     // bind and validate customer information updates 
- *     addActionState(&quot;bindAndValidate&quot;,
- *         action(&quot;customer.Detail.bindAndValidate&quot;),
- *         new Transition[] {
- *             on(error(), &quot;viewDetails&quot;),
- *             on(success(), &quot;finish&quot;)
- *         }
- *     // finish
- *     addEndState(&quot;finish&quot;);
- *   }
- * }
+ * public void buildStates() {
+ *      // get customer information
+ *      addActionState(&quot;getDetails&quot;,
+ *          action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *          on(success(), &quot;viewDetails&quot;));
+ *      // view customer information               
+ *      addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *          on(submit(), &quot;bindAndValidate&quot;);
+ *      // bind and validate customer information updates 
+ *      addActionState(&quot;bindAndValidate&quot;,
+ *          action(&quot;customer.Detail.bindAndValidate&quot;),
+ *          new Transition[] {
+ *              on(error(), &quot;viewDetails&quot;),
+ *              on(success(), &quot;finish&quot;)
+ *          }
+ *      // finish
+ *      addEndState(&quot;finish&quot;);
+ *    }}
  * 
  * </pre>
  * 
@@ -480,11 +479,39 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param id the state id, must be unique among all states of the flow built
 	 *        by this builder
 	 * @param subFlow the flow to be used as a subflow
+	 * @param transition The single supported transition out of the statre
+	 * @throws IllegalArgumentException the state id is not unique
+	 */
+	protected void addSubFlowState(String id, Flow subFlow, Transition transition) {
+		new SubFlowState(getFlow(), id, subFlow, transition);
+	}
+
+	/**
+	 * Adds a subflow state to the flow built by this builder with the specified
+	 * ID.
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder
+	 * @param subFlow the flow to be used as a subflow
 	 * @param transitions The eligible set of state transitions
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
 		new SubFlowState(getFlow(), id, subFlow, transitions);
+	}
+
+	/**
+	 * Adds a subflow state to the flow built by this builder with the specified
+	 * ID.
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder
+	 * @param subFlow the flow to be used as a subflow
+	 * @param attributeMapper The attribute mapper to map attributes between the
+	 *        flow built by this builder and the subflow
+	 * @param transition The single supported transition out of the statre
+	 * @throws IllegalArgumentException the state id is not unique
+	 */
+	protected void addSubFlowState(String id, Flow subFlow, FlowAttributeMapper attributeMapper, Transition transition) {
+		new SubFlowState(getFlow(), id, subFlow, transition);
 	}
 
 	/**

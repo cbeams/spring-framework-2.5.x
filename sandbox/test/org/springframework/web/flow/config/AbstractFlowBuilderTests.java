@@ -31,9 +31,10 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
 
 /**
@@ -44,15 +45,13 @@ import org.springframework.web.flow.ViewState;
  * @author Keith Donald
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * TODO - add back
  */
 public class AbstractFlowBuilderTests extends TestCase {
 
-	private String PERSONS_LIST = "persons";
+	private String PERSONS_LIST = "person.List";
 
-	private static String PERSON_DETAILS = "personDetails";
+	private static String PERSON_DETAILS = "person.Detail";
 
-	/*
 	public void testDependencyLookup() {
 		TestMasterFlowBuilderLookupById master = new TestMasterFlowBuilderLookupById();
 		master.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
@@ -60,7 +59,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 				return new NoOpAction();
 			}
 
-			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
+			public Flow getFlow(String flowDefinitionId, Class flowBuilderImplementation) throws ServiceLookupException {
 				if (flowDefinitionId.equals(PERSON_DETAILS)) {
 					BaseFlowBuilder builder = new TestDetailFlowBuilderLookupById();
 					builder.setFlowServiceLocator(this);
@@ -72,7 +71,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 			}
 
 			public FlowAttributeMapper getFlowAttributeMapper(String id) throws ServiceLookupException {
-				if (id.equals("personId.attributeMapper")) {
+				if (id.equals("id.attributeMapper")) {
 					return new PersonIdMapper();
 				}
 				else {
@@ -81,14 +80,14 @@ public class AbstractFlowBuilderTests extends TestCase {
 			}
 		});
 		Flow flow = new FlowFactoryBean(master).getFlow();
-		assertEquals("persons", flow.getId());
+		assertEquals("person.List", flow.getId());
 		assertTrue(flow.getStateCount() == 4);
-		assertTrue(flow.containsState("persons.get"));
-		assertTrue(flow.getState("persons.get") instanceof ActionState);
-		assertTrue(flow.containsState("persons.view"));
-		assertTrue(flow.getState("persons.view") instanceof ViewState);
-		assertTrue(flow.containsState("personDetails"));
-		assertTrue(flow.getState("personDetails") instanceof SubFlowState);
+		assertTrue(flow.containsState("getPersonList"));
+		assertTrue(flow.getState("getPersonList") instanceof ActionState);
+		assertTrue(flow.containsState("viewPersonList"));
+		assertTrue(flow.getState("viewPersonList") instanceof ViewState);
+		assertTrue(flow.containsState("person.Detail"));
+		assertTrue(flow.getState("person.Detail") instanceof SubFlowState);
 		assertTrue(flow.containsState("finish"));
 		assertTrue(flow.getState("finish") instanceof EndState);
 	}
@@ -103,19 +102,18 @@ public class AbstractFlowBuilderTests extends TestCase {
 			// expected
 		}
 	}
-*/
 
-	/*
 	public class TestMasterFlowBuilderLookupById extends AbstractFlowBuilder {
 		protected String flowId() {
 			return PERSONS_LIST;
 		}
 
 		public void buildStates() {
-			addActionState("getPersonsList", action(""));
-			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, attributeMapper("personId"), get(PERSONS_LIST));
-			addFinishEndState();
+			addActionState("getPersonList", action("noOptAction"), on(success(), "viewPersonList"));
+			addViewState("viewPersonList", "person.list.view", on(submit(), "person.Detail"));
+			addSubFlowState(PERSON_DETAILS, flow("person.Detail", TestDetailFlowBuilderLookupByType.class),
+					attributeMapper("id.attributeMapper"), onAnyEvent("getPersonList"));
+			addEndState("finish");
 		}
 	}
 
@@ -125,11 +123,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 
 		public void buildStates() {
-			addGetState(PERSONS_LIST, actionRef(NoOpAction.class));
-			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, TestDetailFlowBuilderLookupByType.class,
-					attributeMapperRef(PersonIdMapper.class), get(PERSONS_LIST));
-			addFinishEndState();
+			addActionState("getPersonList", actionRef(NoOpAction.class), on(success(), "viewPersonList"));
+			addViewState("viewPersonList", "person.list.view", on(submit(), "person.Detail"));
+			addSubFlowState(PERSON_DETAILS, flow("person.Detail", TestDetailFlowBuilderLookupByType.class),
+					attributeMapperRef(PersonIdMapper.class), onAnyEvent("getPersonList"));
+			addEndState("finish");
 		}
 	}
 
@@ -157,10 +155,10 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 
 		public void buildStates() {
-			addGetState(PERSONS_LIST, noOpAction);
-			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, subFlow, personIdMapper, get(PERSONS_LIST));
-			addFinishEndState();
+			addActionState("getPersonList", noOpAction, on(success(), "viewPersonList"));
+			addViewState("viewPersonList", "person.list.view", on(submit(), "person.Detail"));
+			addSubFlowState(PERSON_DETAILS, subFlow, personIdMapper, onAnyEvent("getPersonList"));
+			addEndState("finish");
 		}
 	}
 
@@ -181,10 +179,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 
 		public void buildStates() {
-			addGetState(PERSON_DETAILS);
-			addViewState(PERSON_DETAILS);
-			addBindAndValidateState(PERSON_DETAILS);
-			addFinishEndState();
+			addActionState("getDetails", action("noOpAction"), on(success(), "viewDetails"));
+			addViewState("viewDetails", "person.Detail.view", on(submit(), "bindAndValidateDetails"));
+			addActionState("bindAndValidateDetails", action("noOpAction"), new Transition[] {
+					on(error(), "viewDetails"), on(success(), "finish") });
+			addEndState("finish");
 		}
 	}
 
@@ -194,10 +193,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 
 		public void buildStates() {
-			addGetState(PERSON_DETAILS, actionRef(NoOpAction.class));
-			addViewState(PERSON_DETAILS);
-			addBindAndValidateState(PERSON_DETAILS, actionRef(NoOpAction.class));
-			addFinishEndState();
+			addActionState("getDetails", action(NoOpAction.class), on(success(), "viewDetails"));
+			addViewState("viewDetails", "person.Detail.view", on(submit(), "bindAndValidateDetails"));
+			addActionState("bindAndValidateDetails", actionRef(NoOpAction.class), new Transition[] {
+					on(error(), "viewDetails"), on(success(), "finish") });
+			addEndState("finish");
 		}
 	};
 
@@ -214,14 +214,14 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 
 		public void buildStates() {
-			addActionState(PERSON_DETAILS, noOpAction);
-			addViewState(PERSON_DETAILS);
-			addBindAndValidateState(PERSON_DETAILS, noOpAction);
-			addFinishEndState();
+			addActionState("getDetails", noOpAction, on(success(), "viewDetails"));
+			addViewState("viewDetails", "person.Detail.view", on(submit(), "bindAndValidateDetails"));
+			addActionState("bindAndValidateDetails", noOpAction, new Transition[] { on(error(), "viewDetails"),
+					on(success(), "finish") });
+			addEndState("finish");
 		}
 	};
-	*/
-	
+
 	/**
 	 * Action bean stub that does nothing, just returns a "success" result.
 	 */
