@@ -9,11 +9,11 @@
     <literal>org.springframework.beans</literal> and
     <literal>org.springframework.context</literal> package. These packages
     provide the basis for the Spring Inversion of Control features, or
-    Dependency Injection as people more recently call it (see <xref
-    linkend="background-ioc" /> for some resources on that). The
-    <literal>BeanFactory</literal> provides an advanced configuration
-    mechanism capable of managing beans of any kind of nature, using -
-    potentially - any kind of storage facility. The
+    Dependency Injection as people have also recently started to name this
+    pattern (see <xref linkend="background-ioc" /> for some resources on
+    that). The <literal>BeanFactory</literal> provides an advanced
+    configuration mechanism capable of managing beans of any kind of nature,
+    using - potentially - any kind of storage facility. The
     <literal>ApplicationContext</literal> builds on top of the BeanFactory and
     adds other functionality such as integration with Springs AOP features,
     messaging (using <emphasis>i18n</emphasis>), the capability of having
@@ -33,8 +33,7 @@
 
     <para>In order to get you started using the BeanFactory and the
     ApplicationContext we'll first introduce you to a couple of basic
-    principles that might be handy to know of when using the BeanFactory and
-    the ApplicationContext.</para>
+    principles that might be handy to know when using these classes.</para>
 
     <para><itemizedlist spacing="compact">
         <listitem>
@@ -42,8 +41,8 @@
           bean managed by the BeanFactory. Each BeanFactory contains bean
           definitions each describing the nature of a bean, its properties,
           the methods that need to be called upon initialization and
-          destruction, whether or not the bean needs to be autowired and more
-          things a like. The <literal>XmlBeanFactory</literal> for example is
+          destruction, whether or not the bean needs to be autowired and some
+          other aspects. The <literal>XmlBeanFactory</literal> for example is
           capalbe of reading bean definitions from an XML file, where
           properties, as well as collaborators and lifecycle methods are
           defined in XML</para>
@@ -54,7 +53,7 @@
           specification by Sun is the concept of
           <literal>PropertyEditors</literal>. Property editors in Spring are
           used to convert properties of beans to human-readable String and
-          vice versa. As the PropertyEditor JavaDOC (<ulink
+          vice versa. As the PropertyEditor Javadoc (<ulink
           url="http://java.sun.com/j2se/1.4.2/docs/api/"></ulink>) states, the
           <literal>getAsText()</literal>-method should return a human-readable
           String representing the property the editor is (so-called) editing.
@@ -63,14 +62,14 @@
           <literal>setValue(Object)</literal>-method) set the resulting value
           of the property. PropertyEditors are heavily used in Spring, not
           only by for example the BeanFactory to transform the Strings defined
-          in the XML containing beans to properties of those beans, but also
+          in the XML containing beans, to properties of those beans, but also
           by the MVC framework to convert request parameters submitted by a
           user after filling a form to properties of command objects that
           might be of some completely different type</para>
         </listitem>
 
         <listitem>
-          <para><emphasis>BeanWrapper</emphasis>: an special class of which
+          <para><emphasis>BeanWrapper</emphasis>: a special class of which
           instances wrap a bean, managed BeanWrappers for example have
           features for setting and getting properties from the beans they're
           wrapping. It's not likely you'll ever have to touch a BeanWrapper
@@ -80,11 +79,14 @@
 
     <para><emphasis>Note: there has been a lot of confusion about the use of
     the ApplicationContext as opposed to the BeanFactory. Basically when
-    building applications in a J2EE-environment, the better option would be to
-    use the ApplicationContext, since it offers a more framework style usage
-    of the Spring Framework and can be initialized using a
-    ServletContextListener like the
-    <literal>ContextLoaderListener</literal>.</emphasis></para>
+    building most applications in a J2EE-environment, the better option would
+    be to use the ApplicationContext, since it offers all the features of the
+    BeanFactory and adds on to it, allowing a more framework style usage of
+    the Spring Framework and allowing initialization using a
+    ServletContextListener like the <literal>ContextLoaderListener</literal>.
+    The main usage scenario when you might prefer to use the BeanFactory is
+    when memory usage is the greatest concern (such as in an applet), and you
+    don't need all the features of the ApplicationContext.</emphasis></para>
   </sect1>
 
   <sect1 id="beans-basics">
@@ -98,8 +100,8 @@
       <literal>ApplicationContext</literal>. Bean definitions contain the
       following information: <itemizedlist spacing="compact">
           <listitem>
-            <para>The beanclass, which is the actual implementation of the
-            bean related to the bean definition</para>
+            <para>The bean class, which is the actual implementation class of
+            the bean being described in the bean definition</para>
           </listitem>
 
           <listitem>
@@ -110,29 +112,31 @@
           </listitem>
 
           <listitem>
-            <para>Properties being configuration data for the bean. You could
-            think of the number of connections to use in a bean that manages a
-            connection pool (either specified as properties or as constructor
-            arguments), or the class that should be used to create the
-            connection pool</para>
+            <para>Property values to set in the newly created bean. An example
+            would be the number of connections to use in a bean that manages a
+            connection pool (either specified as a property or as a
+            constructor argument), or the class that should be used to create
+            the connection pool</para>
           </listitem>
 
           <listitem>
             <para>Other beans your bean needs to do its work, i.e.
             <emphasis>collaborators</emphasis> (also specified as properties
-            or as constructor arguments)</para>
+            or as constructor arguments). These can also be called
+            dependencies.</para>
           </listitem>
         </itemizedlist></para>
 
       <para>In the list above, we mentioned the use of constructor arguments,
-      as well as setters. Spring support two types of IoC, i.e. type 2 and
-      type 3. What that means is that you use both constructor arguments to
-      specify your dependencies and properties as well as setters and
-      getters.</para>
+      as well as setters. Spring support two types of IoC: type 2 and type 3.
+      What that basically means is that when new objects are constructed you
+      can set properties of the object using both regular JavaBean style
+      setter methods, and also directory as arguments which you specify to the
+      constructors..</para>
 
       <para>The concepts listed above, directly translate to a set of elements
       the bean definition consists of. These elements are listed below, along
-      with a reference to further documentation about each of them. <table
+      with a link to further documentation about each of them. <table
           frame="all">
           <title>Bean definition explanation</title>
 
@@ -207,10 +211,10 @@
 
       <para>The BeanFactory is the actual <emphasis>container</emphasis>
       (although we don't like to use the word container too much, since it
-      kind of sounds quite heavy), containing and managing your beans. A
-      BeanFactory loads BeanDefinitions and - upon request - instantiates one
-      (or possibly more) instances of the bean in question and manages it by
-      calling lifecycle methods.</para>
+      sounds kind of heavy), containing and managing your beans. A BeanFactory
+      loads BeanDefinitions and - upon request - instantiates one (or possibly
+      more) instances of the bean in question and manages it by calling
+      lifecycle methods.</para>
 
       <para>All of the features described in <xref
       linkend="beans-definition" /> will be configurable for each of your
@@ -223,21 +227,21 @@
       <title>The bean class</title>
 
       <para>Of course you need to specify the actual class of your bean, that
-      should be obvious. There's absolutely no special requirements to your
-      beanclass, it does not have to implement a special interface to make it
-      Spring compatible. Just specifying the bean class should be enough.
-      However, dependending on what type of IoC you are going to use for that
-      specific bean, you should have a default constructor.</para>
+      should be obvious. There are no special requirements as to what this
+      class is or hwo it's implemented (i.e.it does not have to implement a
+      special interface to make it Spring compatible). Just specifying the
+      bean class should be enough. However, dependending on what type of IoC
+      you are going to use for that specific bean, you should have a default
+      constructor.</para>
 
       <para>The BeanFactory cannot only manage beans, but is able to manage
       virtually <emphasis>any</emphasis> class you want it to manage. Most
       people using Spring prefer to have actual beans (having just a default
       constructor and appropriate setters and getters modelled after the
       properties) in the BeanFactory, but it it's also possible to have more
-      exotic non-bean-style classes in your BeanFactory. If, for example,
-      you're having a legacy connection pool that absolutely does not adhere
-      to the bean specification, no worries, Spring can manage it as
-      well.</para>
+      exotic non-bean-style classes in your BeanFactory. If, for example, you
+      need to user a legacy connection pool that absolutely does not adhere to
+      the bean specification, no worries, Spring can manage it as well.</para>
 
       <para>Using the XmlBeanFactory you can specify your bean class as
       follows: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
@@ -248,9 +252,16 @@
       <title>The bean identifiers (<literal>id</literal> and
       <literal>name</literal>)</title>
 
-      <para>Somehow of course you need to identifiy your beans. This can be
-      done by a name or an id. The <literal>id</literal> is to be uniquely
-      defined across all beans in a BeanFactory.</para>
+      <para>The bean is named with an id or name. This is essentially the same
+      thing; in an XmlBeanFactory you can actually use either the
+      <literal>id</literal> or <literal>name</literal> attribute to identify
+      the bean. However, the former is marked in the DTD as a real XML element
+      ID attribute, which means the XML parser can do some extra validation on
+      references, but which also means that there are a few special reserved
+      characters which are not legal for the name; this restriction does not
+      exist when using the <literal>name</literal> attribute. Generally you
+      should use <literal>id</literal> unless you need to use these special
+      characters.</para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
