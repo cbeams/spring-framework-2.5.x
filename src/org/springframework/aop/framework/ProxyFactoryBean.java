@@ -199,7 +199,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 	public Class getObjectType() {
-		return getTargetSource().getTargetClass();
+		return (this.singleton ? getSingletonInstance().getClass() : getTargetSource().getTargetClass());
 	}
 
 	public boolean isSingleton() {
