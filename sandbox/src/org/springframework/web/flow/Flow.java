@@ -33,9 +33,10 @@ import org.springframework.util.closure.ProcessTemplate;
 /**
  * Singleton definition of a web flow.
  * 
- * At a high level, a Flow captures the definition (configuration) of a logical
- * page flow within a web application. A logical page flow typically fulfills a
- * business process that takes place over a series of steps (modeled as states.)
+ * At a high level, a Flow captures the definition (configuration information)
+ * of a logical page flow within a web application. A logical page flow
+ * typically fulfills a business process that takes place over a series of steps
+ * (modeled as states.)
  * 
  * Structurally, a Flow is composed of a set of states. A state is a point in
  * the flow where something happens; for instance, showing a view, executing an
@@ -48,10 +49,8 @@ import org.springframework.util.closure.ProcessTemplate;
  * the state the Flow should transition to when a start event is signaled.
  * 
  * When a start event is signaled by a requesting client, a new
- * <code>FlowSession</code> is created, which tracks a single client instance
- * of this flow. A HTTP-session-scoped <code>FlowSessionExecution</code>
- * provides a call stack that tracks the current state of this flow session's
- * execution, including any subflows that have been spawned.
+ * <code>FlowExecution</code> is created, which tracks a single client
+ * instance of this flow.
  * 
  * To give you an example of what a web flow definition might look like, the
  * following piece of java code defines a web flow equivalent to the work flow
@@ -59,34 +58,34 @@ import org.springframework.util.closure.ProcessTemplate;
  * <p>
  * 
  * <pre>
- * public class EditPersonDetailsFlow extends Flow {
+ * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
  *
  *   public static final String PERSON_DETAILS = "personDetails";
  * 
- *   public EditPersonDetailsFlow() {
- *      super(PERSON_DETAILS);
+ *   protected String flowId() {
+ *       return PERSON_DETAILS;
  *   }
- *
- *   protected void init() {
- *      add(createGetState(PERSON_DETAILS));
- *      add(createViewState(PERSON_DETAILS));
- *      add(createBindAndValidateState(PERSON_DETAILS));
- *      add(createDefaultEndState());
+ *   
+ *   public void buildStates() {
+ *       addGetState(PERSON_DETAILS));
+ *       addViewState(PERSON_DETAILS));
+ *       addBindAndValidateState(PERSON_DETAILS));
+ *       addDefaultEndState());
  *   }
  * </pre>
  * 
- * What this does is add 4 states to the "EditPersonDetailsFlow"--a "get action"
- * state (the start state), a "view" state, a "bind and validate" action state,
- * and a end marker state.
+ * What this java-based FlowBuilder implementation does is add 4 states to the
+ * "personDetails" flow -- a "get action" state (the start state), a "view"
+ * state, a "bind and validate" action state, and a end marker state.
  * 
- * The first state, an action state, will be indentified as 'personDetails.get'.
- * This action state will automatically be configured with the following
- * defaults:
+ * The first state, an action state, will be assigned the indentifier as
+ * 'personDetails.get'. This action state will automatically be configured with
+ * the following defaults:
  * <ol>
  * <li>A action bean named 'personDetails.get' - this is the name of the
  * <code>ActionBean</code> instance that will execute when this state is
- * entered. In this example, the <code>ActionBean</code> will go out to the DB ,
- * load the Person, and put it in the Flow's data model.
+ * entered. In this example, the <code>ActionBean</code> will go out to the
+ * DB, load the Person, and put it in the Flow's data model.
  * <li>An "success" transition to a default view state, called
  * 'personDetails.view'. This means when <code>ActionBean</code> returns a
  * "success" result event (aka outcome), the 'viewPersonDetails' state will be
@@ -123,21 +122,28 @@ import org.springframework.util.closure.ProcessTemplate;
  * 
  * The fourth and last state, a end state, will be indentified with the default
  * end state ID 'finish'. This end state is a marker that signals the end of the
- * flow. When entered, the flow terminates, and if this flow is acting as a root
- * flow in the current flow session execution, any flow-allocated resources will
- * be cleaned up. A end state can optionally be configured with a logical view
- * name to forward to when entered. It will also trigger a state transition in a
- * resuming parent flow, if this flow was participating as a spawned 'subflow'
- * within a suspended parent flow.
+ * flow. When entered, the flow session terminates, and if this flow is acting
+ * as a root flow in the current flow execution, any flow-allocated resources
+ * will be cleaned up. An end state can optionally be configured with a logical
+ * view name to forward to when entered. It will also trigger a state transition
+ * in a resuming parent flow, if this flow was participating as a spawned
+ * 'subflow' within a suspended parent flow.
  * 
- * This class is directly instantitable as it is fully configurable for use -
- * either externally or via a specific subclass. It has been designed with
- * minimal dependencies on other parts of Spring, easily usable in a standalone
- * fashion.
+ * Instances of class are typically built by a FlowBuilder implementation, but
+ * may also be subclassed. It, and the rest of the web.flow syste, has been
+ * designed with minimal dependencies on other parts of Spring, easily usable in
+ * a standalone fashion.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
- * @see FlowExecutionFactory
+ * @see ActionState
+ * @see ViewState
+ * @see SubFlowState
+ * @see EndState
+ * @see Transition
+ * @see FlowExecution
+ * @see FlowBuilder
+ * @see AbstractFlowBuilder
  */
 public class Flow implements Serializable {
 
@@ -265,16 +271,13 @@ public class Flow implements Serializable {
 	 * 
 	 * @param state The state, if already added noting happens, if another
 	 *        instance is added with the same id, an exception is thrown
-	 * @throws IllegalArgumentException when the state cannot be added to the flow 
+	 * @throws IllegalArgumentException when the state cannot be added to the
+	 *         flow
 	 */
 	protected void add(AbstractState state) throws IllegalArgumentException {
-		if (this!=state.getFlow()) {
-			throw new IllegalArgumentException(
-					"State "
-						+ state
-						+ " cannot be added to this flow '"
-						+ getId()
-						+ "' - it already belongs to a different flow");
+		if (this != state.getFlow()) {
+			throw new IllegalArgumentException("State " + state + " cannot be added to this flow '" + getId()
+					+ "' - it already belongs to a different flow");
 		}
 		if (containsInstance(state)) {
 			return;
@@ -282,13 +285,13 @@ public class Flow implements Serializable {
 		if (containsState(state.getId())) {
 			throw new IllegalArgumentException(
 					"This flow '"
-						+ getId()
-						+ "' already contains a state with id '"
-						+ state.getId()
-						+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
-						+ DefaultObjectStyler.call(getStateIds()));
+							+ getId()
+							+ "' already contains a state with id '"
+							+ state.getId()
+							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
+							+ DefaultObjectStyler.call(getStateIds()));
 		}
-		boolean firstAdd=states.isEmpty();
+		boolean firstAdd = states.isEmpty();
 		this.states.add(state);
 		if (firstAdd) {
 			if (state.isTransitionable()) {
