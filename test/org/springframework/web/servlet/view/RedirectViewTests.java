@@ -20,11 +20,11 @@ import org.easymock.MockControl;
  * Uses mock objects.
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: RedirectViewTests.java,v 1.4 2004-02-25 00:56:49 kdonald Exp $
+ * @version $Id: RedirectViewTests.java,v 1.5 2004-03-09 08:27:28 jhoeller Exp $
  */
 public class RedirectViewTests extends TestCase {
 
-	private void test(final Map m, String url, String expectedUrlForEncoding, String afterEncoding) throws Exception {
+	private void test(final Map m, String url, boolean contextRelative, String expectedUrlForEncoding) throws Exception {
 		class TestRedirectView extends RedirectView {
 			public boolean valid;
 			
@@ -37,13 +37,19 @@ public class RedirectViewTests extends TestCase {
 				valid = true;
 				return super.queryProperties(model);
 			}
-
 		}
+
 		TestRedirectView rv = new TestRedirectView();
 		rv.setUrl(url);
-		
+		rv.setContextRelative(contextRelative);
+
 		MockControl rc = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) rc.getMock();
+		if (contextRelative) {
+			expectedUrlForEncoding = "/context" + expectedUrlForEncoding;
+			request.getContextPath();
+			rc.setReturnValue("/context");
+		}
 		rc.replay();
 		
 		MockControl mc = MockControl.createControl(HttpServletResponse.class);
@@ -60,10 +66,15 @@ public class RedirectViewTests extends TestCase {
 	}
 	
 	public void testEmptyMap() throws Exception {
-		String url = "http://url.somewhere.com";
-		test(new HashMap(), url, url, url);
+		String url = "/myUrl";
+		test(new HashMap(), url, false, url);
 	}
 	
+	public void testEmptyMapWithContextRelative() throws Exception {
+		String url = "/myUrl";
+		test(new HashMap(), url, true, url);
+	}
+
 	public void testSingleParam() throws Exception {
 		String url = "http://url.somewhere.com";
 		String key = "foo";
@@ -71,7 +82,7 @@ public class RedirectViewTests extends TestCase {
 		Map m = new HashMap();
 		m.put(key, val);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val;
-		test(m, url, expectedUrlForEncoding, expectedUrlForEncoding + ".");
+		test(m, url, false, expectedUrlForEncoding);
 	}
 	
 	public void testTwoParams() throws Exception {
@@ -84,7 +95,7 @@ public class RedirectViewTests extends TestCase {
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;
-		test(m, url, expectedUrlForEncoding, expectedUrlForEncoding + ".");
+		test(m, url, false, expectedUrlForEncoding);
 	}
 	
 	public void testObjectConversion() throws Exception {
@@ -97,7 +108,7 @@ public class RedirectViewTests extends TestCase {
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;
-		test(m, url, expectedUrlForEncoding, expectedUrlForEncoding + ".");
+		test(m, url, false, expectedUrlForEncoding);
 	}
 	
 	public void testNoUrlSet() throws Exception {
