@@ -134,7 +134,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 * This is primarily a test for the efficiency of our
 	 * usage of CGLIB. If we create too many classes with
 	 * CGLIB this will be slow or will run out of memory.
-	 * TODO reenable this
 	 */
 	public void testManyProxies() {
 		int howmany = 10000;
@@ -143,11 +142,10 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		testManyProxies(howmany);
 		sw.stop();
 		System.out.println(sw);
-		// Set a performance benchmark
+		// Set a performance benchmark.
 		// It's pretty generous so as not to cause failures
-		// on slow machines
-		assertTrue("Proxy creation was too slow", 
-			sw.getTotalTimeSeconds() < 20);
+		// on slow machines.
+		assertTrue("Proxy creation was too slow",  sw.getTotalTimeSeconds() < 20);
 	}
 	
 	private void testManyProxies(int howmany) {
@@ -163,8 +161,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			assertEquals(age1, proxies[i].getAge());
 		}
 	}
-	
-	
+
 	public void testSerializationAdviceAndTargetNotSerializable() throws Exception {
 		TestBean tb = new TestBean();
 		assertFalse(SerializationTestUtils.isSerializable(tb));

@@ -20,13 +20,12 @@ import java.io.Serializable;
 
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * Serializable implementation of the Person interface.
- * 
  * @author Rod Johnson
  */
 public class SerializablePerson implements Person, Serializable {
+
 	private String name;
 	private int age;
 
@@ -54,9 +53,11 @@ public class SerializablePerson implements Person, Serializable {
 	}
 	
 	public boolean equals(Object other) {
-		if (!(other instanceof SerializablePerson))
+		if (!(other instanceof SerializablePerson)) {
 			return false;
+		}
 		SerializablePerson p = (SerializablePerson) other;
 		return p.age == age && ObjectUtils.nullSafeEquals(name, p.name);
 	}
+
 }
