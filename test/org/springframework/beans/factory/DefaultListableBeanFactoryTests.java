@@ -32,6 +32,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -680,6 +681,32 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(0, tb.getAge());
 		lbf.applyBeanPropertyValues(tb, "test");
 		assertEquals(99, tb.getAge());
+	}
+
+	public void testBeanDefinitionWithInterface() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ITestBean.class, null));
+		try {
+			lbf.getBean("test");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getMessage().toLowerCase().indexOf("interface") != -1);
+		}
+	}
+
+	public void testBeanDefinitionWithAbstractClass() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(AbstractBeanFactory.class, null));
+		try {
+			lbf.getBean("test");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getMessage().toLowerCase().indexOf("abstract") != -1);
+		}
 	}
 
 

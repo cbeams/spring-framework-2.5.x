@@ -46,6 +46,10 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
+		if (clazz.isInterface()) {
+			throw new FatalBeanException(
+					"Class [" + clazz.getName() + "] cannot be instantiated: it is an interface");
+		}
 		try {
 			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
 		}
@@ -74,7 +78,7 @@ public abstract class BeanUtils {
 		}
 		catch (InstantiationException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
-					"]: Is it an interface or an abstract class?", ex);
+					"]: Is it an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
