@@ -1,9 +1,9 @@
 /*
- *	$Id: CountingTestBean.java,v 1.1 2005-03-16 14:19:12 jhoeller Exp $
+ *	$Id: CountingTestBean.java,v 1.2 2005-03-25 09:28:17 jhoeller Exp $
  */
 
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

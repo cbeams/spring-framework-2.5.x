@@ -230,7 +230,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		 * and EasyMock always seem to return the same hashCode regardles when/where/how it is created.  
 		 * This messes up the meta data calls - calling classes don't think they have to call since they 
 		 * erroneously think it is the same data source.
-		 */ 
+		 */
 		//MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
 		//DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
 		//mockDataSource.getConnection();
@@ -255,7 +255,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	
 	/* 
 	 * Stand in for the EasyMock mock object - see comment above.
-	 */ 
+	 */
 	private class SpringMockDataSource extends AbstractDataSource {
 		String productName;
 		Connection conn;

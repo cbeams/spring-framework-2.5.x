@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 08.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
- *  @version $Id: DefaultTransactionDefinition.java,v 1.10 2005-03-13 12:33:33 jhoeller Exp $
+ *  @version $Id: DefaultTransactionDefinition.java,v 1.11 2005-03-25 09:27:49 jhoeller Exp $
  */
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 

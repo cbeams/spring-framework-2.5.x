@@ -1,9 +1,9 @@
 /*
- *	$Id: TestBean.java,v 1.17 2005-01-14 17:09:51 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.18 2005-03-25 09:28:21 jhoeller Exp $
  */
 
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

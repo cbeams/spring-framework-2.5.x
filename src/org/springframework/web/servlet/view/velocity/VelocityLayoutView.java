@@ -149,7 +149,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
      * The default key is "layout" as highlighted above.
      * @param layoutKey the name of the key you wish to use in your
      * screen content templates to override the layout template.
-     */ 
+     */
     public void setLayoutKey(String layoutKey) {
         this.layoutKey = layoutKey;
     }
