@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 1.0 RC1 (February 2004)
+THE SPRING FRAMEWORK, release 1.0 RC2 (February 2004)
 -----------------------------------------------------
 http://www.springframework.org
 
@@ -54,8 +54,8 @@ about it immediately.
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
 Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes,
-Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, JSTL 1.0,
-Velocity 1.3, Struts-Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
+Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, Quartz 1.3,
+JSTL 1.0, Velocity 1.3, Struts-Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -74,6 +74,7 @@ Latest info is available at the public website: http://www.springframework.org
 Project info at the SourceForge site: http://sourceforge.net/projects/springframework
 
 The Spring Framework is released under the terms of the Apache Software License (see license.txt).
+All libraries included in the "-with-dependencies" download are subject to their respective licenses.
 This product includes software developed by the Apache Software Foundation (http://www.apache.org).
 This product includes software developed by Clinton Begin (http://www.ibatis.com).
 
@@ -84,7 +85,7 @@ The "dist" directory contains the following distinct JAR files for use in applic
 JAR files and a JAR file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~170 KB)
+* "spring-core" (~175 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -92,11 +93,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-beans, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~135 KB)
-- Contents: application context, validation framework, UI support, JNDI, mail, remoting, EJB
-- Dependencies: spring-beans, (JavaMail, EJB, JAX-RPC, Hessian, Burlap)
+* "spring-context" (~150 KB)
+- Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
+- Dependencies: spring-beans, (JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~175 KB)
+* "spring-dao" (~180 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-beans, (spring-aop, spring-context, JTA)
 
@@ -112,7 +113,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web MVC framework, web controllers, web views
 - Dependencies: spring-web, (JSP, JSTL, Velocity, iText, POI)
 
-* "spring" (~870 KB)
+* "spring" (~890 KB)
 - Contents: all of the above
 - Dependencies: all of the above
 
@@ -128,12 +129,8 @@ the JSTL (standard.jar) has to be available in the class path. Else, any JSTL im
 
 Documentation can be found in the "docs" directory:
 * the Spring reference documentation
-* "The Spring Framework - A Lightweight Container"
-* "Data Access and Transaction Abstraction with the Spring Framework"
-* "Container Resources vs Local Resources"
-* "Web MVC with the Spring Framework"
-* "Developing a Spring Framework MVC application step-by-step"
 * various configuration and integration tutorials
+* various Spring-related articles
 
 Documented sample applications and skeletons can be found in "samples":
 * "countries"
@@ -144,14 +141,14 @@ Documented sample applications and skeletons can be found in "samples":
 * "webapp-minimal"
 * "webapp-typical"
 
-Release 1.0 M2 introduced a reworked version of Petclinic, now featuring alternative DAO implementations and
-application configurations for JDBC and Hibernate, on HSQL and MySQL. The default Petclinic configuration is
-Hibernate on HSQL; to be able to build and run it, the Spring distribution comes with Hibernate JAR files now.
+Petclinic features alternative DAO implementations and application configurations for JDBC and Hibernate,
+on HSQL and MySQL. The default Petclinic configuration is Hibernate on HSQL; to be able to build and run it,
+the Spring distribution comes with Hibernate JAR files.
 
-Release 1.0 M4 introduced the Spring JPetStore, an adapted version of Clinton Begin's JPetStore (as available
-at http://www.ibatis.com). It leverages Spring's new support for the iBATIS Database Layer to improve the
-original JPetStore in terms of internal structure and wiring. On top of a Spring-managed middle tier, it offers
-two alternative web tier implementations: one on Spring's web MVC plus JSTL, and one on Struts 1.1 plus JSTL.
+The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
+It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of
+internal structure and wiring. On top of a Spring-managed middle tier, it offers two alternative web
+tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL.
 
 "Expert One-on-One J2EE Design and Development" discusses many of Spring's design ideas in detail.
 Note: The code examples in the book refer to the original framework version that came with the book.
