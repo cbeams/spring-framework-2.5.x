@@ -69,8 +69,8 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	protected Object lookup(String jndiName) throws NamingException {
 		String jndiNameToUse = convertJndiName(jndiName);
 		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse);
-		if (logger.isInfoEnabled()) {
-			logger.info("Located object with JNDI name [" + jndiNameToUse + "]: value=[" + jndiObject + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Located object with JNDI name [" + jndiNameToUse + "]");
 		}
 		return jndiObject;
 	}
