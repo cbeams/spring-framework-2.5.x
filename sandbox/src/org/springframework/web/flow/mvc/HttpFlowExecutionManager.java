@@ -26,6 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.RequestUtils;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
@@ -156,7 +158,7 @@ public class HttpFlowExecutionManager {
 				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 			}
 			if (!StringUtils.hasText(eventId)) {
-				eventId = getRequestParameter(request, getEventIdParameterName());
+				eventId = searchForRequestParameter(request, getEventIdParameterName());
 				if (!StringUtils.hasText(eventId)) {
 					throw new IllegalArgumentException(
 							"The '"
@@ -191,10 +193,9 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Obtain a flow to use from given request.
 	 */
-	protected Flow getFlow(HttpServletRequest request) {
+	protected Flow getFlow(HttpServletRequest request) throws ServletRequestBindingException {
 		Assert.notNull("The flow service locator is required to lookup flows to execute by id");
-		return flowServiceLocator.getFlow(getRequestParameter(request, getFlowIdParameterName(),
-				getParameterValueDelimiter()));
+		return flowServiceLocator.getFlow(RequestUtils.getRequiredStringParameter(request, getFlowIdParameterName()));
 	}
 
 	/**
@@ -218,7 +219,7 @@ public class HttpFlowExecutionManager {
 	 * @return true or false
 	 */
 	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
-		return getRequestParameter(request, getFlowExecutionIdParameterName(), getParameterValueDelimiter()) == null;
+		return request.getParameter(getFlowExecutionIdParameterName()) == null;
 	}
 
 	/**
@@ -238,12 +239,9 @@ public class HttpFlowExecutionManager {
 	 * @throws NoSuchFlowExecutionException If there is no flow execution in the
 	 *         HTTP session associated with given request.
 	 */
-	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
-		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName());
-		if (!StringUtils.hasText(flowExecutionId)) {
-			throw new IllegalStateException("The '" + getFlowExecutionIdParameterName()
-					+ "' parameter is not present in the request; not enough information to lookup flow execution");
-		}
+	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException,
+			ServletRequestBindingException {
+		String flowExecutionId = RequestUtils.getRequiredStringParameter(request, getFlowExecutionIdParameterName());
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
 		}
@@ -263,8 +261,8 @@ public class HttpFlowExecutionManager {
 		request.getSession(false).removeAttribute(flowExecution.getId());
 	}
 
-	protected String getRequestParameter(HttpServletRequest request, String logicalName) {
-		return getRequestParameter(request, logicalName, null);
+	protected String searchForRequestParameter(HttpServletRequest request, String logicalName) {
+		return searchForRequestParameter(request, logicalName, getParameterValueDelimiter());
 	}
 
 	/**
@@ -293,14 +291,11 @@ public class HttpFlowExecutionManager {
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request
 	 */
-	protected String getRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
+	protected String searchForRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
 		//first try to get it as a normal name=value parameter
 		String value = request.getParameter(logicalName);
 		if (value != null) {
 			return value;
-		}
-		if (!StringUtils.hasText(delimiter)) {
-			delimiter = getParameterValueDelimiter();
 		}
 		//if no value yet, try to get it as a name_value=xyz parameter
 		String prefix = logicalName + delimiter;
