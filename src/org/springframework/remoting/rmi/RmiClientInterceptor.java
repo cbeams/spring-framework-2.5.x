@@ -16,19 +16,20 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
- * Interceptor for accessing transparent RMI services.
+ * Interceptor for accessing conventional or transparent RMI services.
  * The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
  *
- * <p>Transparent means that RMI communication works on the RemoteInvocationHandler
- * level, needing only one stub for any service. Service interfaces do not have to
- * extend java.rmi.Remote or throw RemoteException on all methods, but in and out
- * parameters have to be serializable.
- *
- * <p>This interceptor can only access RMI objects that got exported with a
- * RemoteInvocationWrapper, i.e. working on the RemoteInvocationHandler level.
+ * <p>"Transparent RMI" works at the RemoteInvocationHandler level, needing only one
+ * stub for any service. Service interfaces do not have to extend java.rmi.Remote or
+ * throw RemoteException; Spring's unchecked RemoteAccessException will be thrown on
+ * remote invocation failure. Of course, in and out parameters have to be serializable.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
+ * @see RmiServiceExporter
+ * @see org.springframework.remoting.RemoteAccessException
+ * @see java.rmi.RemoteException
+ * @see java.rmi.Remote
  */
 public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
 
@@ -45,13 +46,13 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 		else if (getServiceInterface() != null) {
 			boolean isImpl = getServiceInterface().isInstance(remoteObj);
 			logger.info("Using service interface [" + getServiceInterface().getName() + "] for RMI object [" +
-									getServiceUrl() + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+									getServiceUrl() + "] - " + (!isImpl ? "not " : "") + "directly implemented");
 		}
 		this.rmiProxy = remoteObj;
 	}
 
 	/**
-	 * Create the RMI proxy. Default implementations looks up the service URL
+	 * Create the RMI proxy. Default implementation looks up the service URL
 	 * via java.rmi.Naming. Can be overridden in subclasses.
 	 * @see java.rmi.Naming#lookup
 	 */
@@ -107,8 +108,8 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 				throw targetException;
 			}
 		}
-		catch (Throwable t) {
-			throw new AspectException("Failed to invoke RMI service [" + getServiceUrl() + "]", t);
+		catch (Throwable ex) {
+			throw new AspectException("Failed to invoke RMI service [" + getServiceUrl() + "]", ex);
 		}
 	}
 
