@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow.action;
 
-import java.beans.PropertyEditor;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.binding.format.InvalidFormatException;
@@ -24,6 +22,7 @@ import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
+import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.PropertyEditorRegistrar;
 import org.springframework.validation.ValidationUtils;
@@ -469,12 +468,10 @@ public class FormAction extends MultiAction implements InitializingBean {
 			}
 			try {
 				return createFormObject(context);
-			}
-			catch (InstantiationException e) {
+			} catch (InstantiationException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to instantiate form object", e);
-			}
-			catch (IllegalAccessException e) {
+			} catch (IllegalAccessException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to access form object class constructor", e);
 			}
@@ -544,11 +541,15 @@ public class FormAction extends MultiAction implements InitializingBean {
 					+ binder.getTarget() + "'");
 		}
 		if (getValidators() != null && isValidateOnBinding() && !suppressValidation(context)) {
-			for (int i = 0; i < getValidators().length; i++) {
-				ValidationUtils.invokeValidator(getValidators()[i], binder.getTarget(), binder.getErrors());
-			}
+			validate(context, binder.getTarget(), binder.getErrors());
 		}
 		return onBindAndValidate(context, binder.getTarget(), binder.getErrors());
+	}
+	
+	protected void validate(RequestContext context, Object formObject, Errors errors) {
+		for (int i = 0; i < getValidators().length; i++) {
+			ValidationUtils.invokeValidator(getValidators()[i], formObject, errors);
+		}
 	}
 
 	/**
@@ -579,7 +580,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	// subclassing hook methods
-	
+
 	/**
 	 * Return whether to suppress validation for the given action execution
 	 * context.
@@ -671,8 +672,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *        data in "flow scope" or "request scope"
 	 * @param binder new binder instance
 	 * @see #createBinder(RequestContext, Object)
-	 * @see org.springframework.validation.DataBinder#registerCustomEditor(Class,
-	 *      PropertyEditor)
 	 */
 	protected void initBinder(RequestContext context, DataBinder binder) {
 		if (propertyEditorRegistrar != null) {
