@@ -454,15 +454,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlow
-	 * @param transition
-	 * @return
-	 */
-	public boolean addSubFlowState(Flow subFlow, Transition[] transitions) {
-		return add(new SubFlowState(subFlow, transitions));
-	}
-
-	/**
 	 * @param subFlowStateId
 	 * @param transition
 	 * @return
@@ -515,16 +506,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public boolean addSubFlowState(String id, String attributesMapperId, Transition[] transitions) {
 		return add(new SubFlowState(id, attributesMapperId, transitions));
-	}
-
-	/**
-	 * @param subFlow
-	 * @param attributesMapper
-	 * @param transitions
-	 * @return
-	 */
-	public boolean addSubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
-		return add(new SubFlowState(subFlow, attributesMapper, transitions));
 	}
 
 	/**

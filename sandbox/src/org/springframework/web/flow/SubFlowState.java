@@ -113,7 +113,13 @@ public class SubFlowState extends TransitionableState {
 		else {
 			try {
 				Flow subFlow = flow.getFlowDao().getFlow(this.subFlowId);
-				Assert.notNull(subFlow, "The subflow is required");
+				Assert.notNull(subFlow, "The subflow retrieved must be non-null");
+				if (logger.isInfoEnabled()) {
+					if (!subFlow.getId().equals(this.subFlowId)) {
+						logger.info("The subflow definition exported in the registry under id '" + this.subFlowId + "' has an id of '"
+								+ subFlow.getId() + "' -- these ids are NOT equal; is this OK?");
+					}
+				}
 				return subFlow;
 			}
 			catch (NoSuchBeanDefinitionException e) {
@@ -150,12 +156,6 @@ public class SubFlowState extends TransitionableState {
 			logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
 		}
 		Flow subFlow = getSubFlow(flow);
-		if (logger.isInfoEnabled()) {
-			if (!subFlow.getId().equals(this.subFlowId)) {
-				logger.info("The subflow definition exported in the context under ID '" + this.subFlowId + "' has ID '"
-						+ subFlow.getId() + "' -- these ID values are NOT equal; is this OK?");
-			}
-		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + flow.getId() + "'");
 		}
