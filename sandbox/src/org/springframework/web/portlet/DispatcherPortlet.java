@@ -83,7 +83,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Id: DispatcherPortlet.java,v 1.2 2004-05-07 16:00:56 wgthom Exp $
+ * @version $Id: DispatcherPortlet.java,v 1.3 2004-05-07 20:18:17 wgthom Exp $
  * @see ControllerMapping
  * @see ControllerAdapter
  * @see ViewResolver
@@ -257,7 +257,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
 		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, mv.getModel());
-		request.setAttribute(ViewRendererServlet.DISPATCHER_PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletContextAttributeName());
+		request.setAttribute(ViewRendererServlet.DISPATCHER_PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
 		PortletRequestDispatcher prd = getPortletContext().getRequestDispatcher(getViewRendererServlet());
 		prd.include(request, response);
 	}
