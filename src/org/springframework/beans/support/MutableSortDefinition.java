@@ -36,6 +36,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 
 	private boolean toggleAscendingOnProperty = false;
 
+
 	public MutableSortDefinition() {
 	}
 
@@ -55,6 +56,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		this.toggleAscendingOnProperty = toggleAscendingOnSameProperty;
 	}
 
+
 	/**
 	 * Set the sort property.
 	 * If the property was the same as the current, the sort is reversed if
@@ -68,7 +70,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 			// implicit toggling of ascending?
 			if (this.toggleAscendingOnProperty) {
 				if (property.equals(this.property)) {
-					ascending = !ascending;
+					this.ascending = !this.ascending;
 				}
 				else {
 					this.ascending = true;
@@ -105,6 +107,7 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 	public boolean isToggleAscendingOnProperty() {
 		return toggleAscendingOnProperty;
 	}
+
 
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SortDefinition)) {

@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.23 2004-06-24 14:33:17 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.24 2004-07-23 13:15:42 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -221,8 +221,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 																							 name + "': there's already [" + oldBeanDefinition + "] bound");
 			}
 			else {
-				logger.info("Overriding bean definition for bean '" + name +
-										"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+				if (logger.isInfoEnabled()) {
+					logger.info("Overriding bean definition for bean '" + name +
+											"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+				}
 			}
 		}
 		else {

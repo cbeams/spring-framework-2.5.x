@@ -35,7 +35,6 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 01.05.2004
  * @see #CLASSPATH_URL_PREFIX
- * @see ClassPathResourcePatternResolver
  * @see PathMatchingResourcePatternResolver
  */
 public interface ResourcePatternResolver {
@@ -46,7 +45,6 @@ public interface ResourcePatternResolver {
 	 * retrieves all matching resources for a given name (e.g. "/beans.xml"),
 	 * for example in the root of all deployed JAR files.
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
-	 * @see ClassPathResourcePatternResolver
 	 */
 	String CLASSPATH_URL_PREFIX = "classpath*:";
 
