@@ -1,5 +1,7 @@
 package org.springframework.web.servlet.tags;
 
+import java.beans.PropertyEditorSupport;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
@@ -8,6 +10,7 @@ import com.mockobjects.servlet.MockPageContext;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BindException;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
 
 /**
@@ -53,7 +56,7 @@ public class BindTestSuite extends AbstractTagTest {
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
-		tag.setPath("tb");		
+		tag.setPath("tb");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertTrue("Has status variable", status != null);
@@ -106,7 +109,7 @@ public class BindTestSuite extends AbstractTagTest {
 		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessage()));
 		assertTrue("Correct errorMessagesAsString", "message1".equals(status.getErrorMessagesAsString(",")));
 	}
-	
+
 	public void testBindStatusGetErrorMessagesAsString() throws JspException {
 		// one error (should not include delimiter)
 		MockPageContext pc = createPageContext();
@@ -115,12 +118,12 @@ public class BindTestSuite extends AbstractTagTest {
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
-		tag.setPath("tb");	
-		tag.doStartTag();	
+		tag.setPath("tb");
+		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("Error messages String should be 'message1'",
-			status.getErrorMessagesAsString(","), "message1");
-			
+								 status.getErrorMessagesAsString(","), "message1");
+
 		// two errors
 		pc = createPageContext();
 		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
@@ -130,11 +133,11 @@ public class BindTestSuite extends AbstractTagTest {
 		tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
-		tag.doStartTag();		
+		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("Error messages String should be 'message1,message2'",
-			status.getErrorMessagesAsString(","), "message1,message2");
-			
+								 status.getErrorMessagesAsString(","), "message1,message2");
+
 		// no errors
 		pc = createPageContext();
 		errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
@@ -142,10 +145,10 @@ public class BindTestSuite extends AbstractTagTest {
 		tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
-		tag.doStartTag();		
+		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("Error messages String should be ''",
-			status.getErrorMessagesAsString(","), "");
+								 status.getErrorMessagesAsString(","), "");
 	}
 
 	public void testBindTagWithFieldErrors() throws JspException {
@@ -321,6 +324,33 @@ public class BindTestSuite extends AbstractTagTest {
 		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
 	}
 
+	public void testBindTagWithIndexedPropertiesAndCustomEditor() throws JspException {
+		MockPageContext pc = createPageContext();
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		binder.registerCustomEditor(TestBean.class, null,
+																new PropertyEditorSupport() {
+																	public String getAsText() {
+																		return "something";
+																	}
+																});
+		BindException errors = binder.getErrors();
+		errors.rejectValue("array[0]", "code1", "message1");
+		errors.rejectValue("array[0]", "code2", "message2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.array[0]");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "array[0]".equals(status.getExpression()));
+		// because of the custom editor getValue() should return a String
+		assertTrue("Value is TestBean", status.getValue() instanceof String);
+		assertTrue("Correct value", "something".equals(status.getValue()));
+	}
+
 	public void testBindTagWithoutBean() throws JspException {
 		MockPageContext pc = createPageContext();
 		BindTag tag = new BindTag();
@@ -334,4 +364,5 @@ public class BindTestSuite extends AbstractTagTest {
 			// expected
 		}
 	}
+
 }

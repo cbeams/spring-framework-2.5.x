@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.26 2004-03-03 18:34:49 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.27 2004-03-04 21:34:42 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -236,23 +236,31 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		if (propertyName != null) {
 			// check property-specific editor first
-			PropertyDescriptor descriptor = getPropertyDescriptor(propertyName);
-			PropertyEditor editor = (PropertyEditor) this.customEditors.get(propertyName);
-			if (editor != null) {
-				// consistency check
-				if (requiredType != null) {
-					if (!descriptor.getPropertyType().isAssignableFrom(requiredType)) {
-						throw new IllegalArgumentException("Types do not match: required=" + requiredType.getName() +
-																							 ", found=" + descriptor.getPropertyType());
+			PropertyDescriptor descriptor = null;
+			try {
+				descriptor = getPropertyDescriptor(propertyName);
+				PropertyEditor editor = (PropertyEditor) this.customEditors.get(propertyName);
+				if (editor != null) {
+					// consistency check
+					if (requiredType != null) {
+						if (!descriptor.getPropertyType().isAssignableFrom(requiredType)) {
+							throw new IllegalArgumentException("Types do not match: required=" + requiredType.getName() +
+																								 ", found=" + descriptor.getPropertyType());
+						}
+					}
+					return editor;
+				}
+				else {
+					if (requiredType == null) {
+						// try property type
+						requiredType = descriptor.getPropertyType();
 					}
 				}
-				return editor;
 			}
-			else {
-				if (requiredType == null) {
-					// try property type
-					requiredType = descriptor.getPropertyType();
-				}
+			catch (BeansException ex) {
+				// probably an indexed or mapped property
+				// we need to retrieve the value to determine the type
+				requiredType = getPropertyValue(propertyName).getClass();
 			}
 		}
 		// no property-specific editor -> check type-specific editor
@@ -305,6 +313,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Recursively navigate to return a BeanWrapper for the nested property path.
+	 * In case of an indexed or mapped property, all BeanWrappers that apply will
+	 * be returned.
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
 	 */
