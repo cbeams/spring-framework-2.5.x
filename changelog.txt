@@ -36,13 +36,32 @@ Package org.springframework.orm
 * renamed HibernateOperations/HibernateTemplate's "find" methods for named parameters to "findByNamedParam"
 * deprecated Hibernate "findByNamedQuery" methods for named parameters in favor of "findByNamedQueryAndNamedParam"
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
+* added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
+
+Package org.springframework.remoting
+* added RemoteInvocationResult class, for convenient serialization of a method invocation result
+* factored out RemoteInvocationFactory and RemoteInvocationExecutor interfaces, for custom invocation contexts
+* added RemoteInvocationBasedAccessor and RemoteInvocationBasedExporter base classes for accessors resp. exporters
+* RmiClientInterceptor/ProxyFactoryBean and RmiServiceExporter support RemoteInvocationFactory/Executor interfaces
+* added HTTP invoker remoting strategy, providing HTTP-bases remoting via Java serialization
+* HttpInvokerClientInterceptor/ProxyFactoryBean and HttpInvokerServiceExporter support RemoteInvocationFactory/Executor
+* HttpInvokerClientInterceptor/ProxyFactoryBean support HttpInvokerRequestExecutor interface
+* added SimpleHttpInvokerRequestExecutor implementation that uses J2SE's HttpURLConnection class
+* added CommonsHttpInvokerRequestExecutor implementation that uses Jakarta Commons HttpClient
+
+Package org.springframework.transaction
+* fixed TransactionAspectSupport's after-returning behavior to always call commit even if transaction is not new
 
 Package org.springframework.validation
 * added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
+* fixed BindException's "getFieldValue" implementation to correctly apply nested paths to field error checks
 
 Package org.springframework.web
 * WebContentGenerator throws RequestMethodNotSupportedException / SessionRequiredException rather than ServletException
 * MultiActionController logs NoSuchRequestHandlingMethodException and sends HTTP code 404, rather than rethrowing it
+* consider explicit finish and cancel request as form submissions in AbstractWizardFormController, even if not POST
+* turned AbstractWizardFormController's "validatePage" and "processCancel" non-abstract with empty implementations
+* added overloaded "validatePage" method with "finish" flag to AbstractWizardFormController
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
 * introduced JSF support in the form of a DelegatingVariableResolver that can resolve variable names as Spring beans
 
