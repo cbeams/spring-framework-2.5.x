@@ -24,8 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesSource;
+import org.springframework.rules.constraint.ConstraintsAccessor;
 import org.springframework.rules.constraint.property.PropertyConstraint;
-import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -34,63 +34,61 @@ import org.springframework.util.ToStringCreator;
  * 
  * @author Keith Donald
  */
-public class DefaultRulesSource extends Constraints implements RulesSource {
-    private static final Log logger = LogFactory
-            .getLog(DefaultRulesSource.class);
+public class DefaultRulesSource extends ConstraintsAccessor implements RulesSource {
+	private static final Log logger = LogFactory.getLog(DefaultRulesSource.class);
 
-    private Map rules = new HashMap();
+	private Map rules = new HashMap();
 
-    /**
-     * Add or update the rules for a single bean class.
-     * 
-     * @param rules
-     *            The rules.
-     */
-    public void addRules(Rules rules) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding rules -> " + rules);
-        }
-        this.rules.put(rules.getBeanClass(), rules);
-    }
+	/**
+	 * Add or update the rules for a single bean class.
+	 * 
+	 * @param rules
+	 *            The rules.
+	 */
+	public void addRules(Rules rules) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Adding rules -> " + rules);
+		}
+		this.rules.put(rules.getBeanClass(), rules);
+	}
 
-    /**
-     * Set the list of rules retrievable by this source, where each item in the
-     * list is a <code>Rules</code> object which maintains validation rules
-     * for a bean class.
-     * 
-     * @param rules
-     *            The list of rules.
-     */
-    public void setRules(List rules) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Configuring rules in source...");
-        }
-        this.rules.clear();
-        for (Iterator i = rules.iterator(); i.hasNext();) {
-            addRules((Rules)i.next());
-        }
-    }
+	/**
+	 * Set the list of rules retrievable by this source, where each item in the
+	 * list is a <code>Rules</code> object which maintains validation rules
+	 * for a bean class.
+	 * 
+	 * @param rules
+	 *            The list of rules.
+	 */
+	public void setRules(List rules) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Configuring rules in source...");
+		}
+		this.rules.clear();
+		for (Iterator i = rules.iterator(); i.hasNext();) {
+			addRules((Rules)i.next());
+		}
+	}
 
-    public Rules getRules(Class bean) {
-        return (Rules)rules.get(bean);
-    }
+	public Rules getRules(Class bean) {
+		return (Rules)rules.get(bean);
+	}
 
-    public PropertyConstraint getRules(Class bean, String propertyName) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Retrieving rules for bean '" + bean + "', property '"
-                    + propertyName + "'");
-        }
-        Rules rules = (Rules)this.rules.get(bean);
-        if (rules != null) {
-            return rules.getRules(propertyName);
-        }
-        else {
-            return null;
-        }
-    }
+	public PropertyConstraint getRules(Class bean, String propertyName) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving rules for bean '" + bean + "', property '" + propertyName + "'");
+		}
+		Rules rules = (Rules)this.rules.get(bean);
+		if (rules != null) {
+			return rules.getRules(propertyName);
+		}
+		else {
+			return null;
+		}
+	}
 
-    public String toString() {
-        return new ToStringCreator(this).append("rules", rules).toString();
-    }
+	public String toString() {
+		return new ToStringCreator(this).append("rules", rules).toString();
+	}
 
 }

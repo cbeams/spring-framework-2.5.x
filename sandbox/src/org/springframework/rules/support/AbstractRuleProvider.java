@@ -23,8 +23,7 @@ import org.springframework.util.closure.Constraint;
 /**
  * @author Keith Donald
  */
-public abstract class AbstractRuleProvider extends DefaultRulesSource implements
-		RulesProvider {
+public abstract class AbstractRuleProvider extends DefaultRulesSource implements RulesProvider {
 
 	private Rules rules = Rules.createRules(this.getClass());
 
