@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.46 2004-06-09 17:46:27 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.47 2004-06-14 10:54:58 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -183,7 +183,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing StatementCallback", null, ex);
+			throw getExceptionTranslator().translate("executing StatementCallback", getSql(action), ex);
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
@@ -195,12 +195,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
-		execute(new StatementCallback() {
+		class ExecuteStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
 				return null;
 			}
-		});
+			public String getSql() {
+				return sql;
+			}
+		}
+		execute(new ExecuteStatementCallback());
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
@@ -214,7 +218,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
-		return execute(new StatementCallback() {
+		class QueryStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
@@ -229,7 +233,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 					JdbcUtils.closeResultSet(rs);
 				}
 			}
-		});
+			public String getSql() {
+				return sql;
+			}
+		}
+		return execute(new QueryStatementCallback());
 	}
 
 	public List query(String sql, RowCallbackHandler rch) throws DataAccessException {
@@ -258,7 +266,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
-		Integer result = (Integer) execute(new StatementCallback() {
+		class UpdateStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
 				if (logger.isDebugEnabled()) {
@@ -266,8 +274,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 				return new Integer(rows);
 			}
-		});
-		return result.intValue();
+			public String getSql() {
+				return sql;
+			}
+		}
+		return ((Integer) execute(new UpdateStatementCallback())).intValue();
 	}
 
 
