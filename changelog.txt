@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.140 2004-05-04 09:22:44 jhoeller Exp $
+$Id: changelog.txt,v 1.141 2004-05-04 17:30:12 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
@@ -80,9 +80,11 @@ Package org.springframework.web
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * refined ViewResolver's "resolveViewName" to expect null return value if not found, to allow for ViewResolver chaining
 * DispatcherServlet detects ViewResolvers by type to allow for ViewResolver chaining (respecting order values)
+* added "detectAllViewResolvers" property to DispatcherServlet, allowing to enforce a single ViewResolver
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
 * AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
 * AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations
+* added "getNrOfPages" method to AbstractWizardFormController, for determining whether last page has been reached
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
 * factored out common Struts Action delegation code from DelegationActionProxy to DelegatingActionUtils
 * added DelegatingRequestProcessor and DelegatingTilesRequestProcessor as alternatives to DelegatingActionProxy
