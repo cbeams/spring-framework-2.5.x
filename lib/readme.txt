@@ -50,11 +50,11 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's FreeMarker support
 
 * hibernate/ehcache.jar
-- EHCache 0.7 (http://ehcache.sourceforge.net)
+- EHCache 0.9 (http://ehcache.sourceforge.net)
 - required for running Petclinic (by Hibernate)
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.5 (http://www.hibernate.org)
+- Hibernate 2.1.6 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
