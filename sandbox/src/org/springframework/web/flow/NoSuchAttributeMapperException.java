@@ -6,21 +6,21 @@ package org.springframework.web.flow;
 /**
  * @author Keith Donald
  */
-public class NoSuchActionBeanException extends FlowNavigationException {
-	private ActionState state;
+public class NoSuchAttributeMapperException extends FlowNavigationException {
+	private SubFlowState state;
 
 	/**
 	 * @param flow
 	 * @param state
 	 * @param cause
 	 */
-	public NoSuchActionBeanException(Flow flow, ActionState state, Throwable cause) {
+	public NoSuchAttributeMapperException(Flow flow, SubFlowState state, Throwable cause) {
 		super(flow, cause);
 		this.state = state;
 	}
 
 	public String getMessage() {
-		return "No action bean was found with id '" + state.getActionBeanName() + "' for action state '" + state.getId()
+		return "No attribute mapper was found with id '" + state.getAttributesMapperId() + "' for sub flow state '" + state.getId()
 				+ "' of flow '" + getFlow().getId() + "' -- programmer error?";
 	}
 

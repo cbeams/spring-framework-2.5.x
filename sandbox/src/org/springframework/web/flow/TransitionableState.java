@@ -18,8 +18,8 @@ package org.springframework.web.flow;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public abstract class TransitionableState extends AbstractState {
-	private Set transitions = new HashSet();
+	private Set transitions = new LinkedHashSet();
 
 	public TransitionableState(String id) {
 		super(id);

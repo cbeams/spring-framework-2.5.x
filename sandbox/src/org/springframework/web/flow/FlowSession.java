@@ -36,6 +36,10 @@ import org.springframework.util.ToStringCreator;
 public class FlowSession implements MutableAttributesAccessor, Serializable {
 	private static final Log logger = LogFactory.getLog(FlowSession.class);
 
+	public static final String CURRENT_STATE_ID_ATTRIBUTE_NAME = "currentStateId";
+
+	public static final String FLOW_SESSION_ID_ATTRIBUTE_NAME = "flowSessionId";
+
 	private String flowId;
 
 	private String currentStateId;
@@ -68,8 +72,18 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	public String getCurrentStateId() {
 		return currentStateId;
 	}
-
-	public void setCurrentStateId(String stateId) {
+	
+	protected void setCurrentStateId(String stateId) {
+		Assert.notNull(stateId, "The currentStateId is required");
+		if (this.currentStateId != null) {
+			if (this.currentStateId.equals(stateId)) {
+				throw new IllegalArgumentException("The current state is already set to '" + this.currentStateId
+						+ "' - this should not happen!");
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Setting current state of this '" + getFlowId() + "' flow session to '" + stateId + "'");
+		}
 		this.currentStateId = stateId;
 	}
 
@@ -163,13 +177,13 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			setAttribute((String)e.getKey(), e.getValue());
 		}
 	}
-    
-    public void removeAttribute(String attributeName) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
-        }
-        this.attributes.remove(attributeName);
-    }
+
+	public void removeAttribute(String attributeName) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
+		}
+		this.attributes.remove(attributeName);
+	}
 
 	public String toString() {
 		return new ToStringCreator(this).append("flowId", flowId).append("currentStateId", currentStateId).append(

@@ -15,6 +15,11 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+
 import org.springframework.util.DefaultObjectStyler;
 
 /**
@@ -41,8 +46,20 @@ public class NoSuchEventInStateException extends FlowNavigationException {
 	}
 
 	public String getMessage() {
+		Collection t = state.getTransitions();
+		Collection events;
+		if (!t.isEmpty()) {
+			events = new LinkedHashSet(t.size());
+			Iterator it = t.iterator();
+			while (it.hasNext()) {
+				events.add(((Transition)it.next()).getId());
+			}
+		}
+		else {
+			events = Collections.EMPTY_SET;
+		}
 		return "No such transition for event '" + eventId + "' in state '" + state.getId() + "' in flow '"
-				+ getFlow().getId() + "' -- valid transitions are " + DefaultObjectStyler.call(state.getTransitions())
+				+ getFlow().getId() + "' -- valid events are " + DefaultObjectStyler.call(events)
 				+ " -- programmer error?";
 	}
 }

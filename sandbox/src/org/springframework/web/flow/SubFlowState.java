@@ -15,12 +15,13 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -29,9 +30,9 @@ import org.springframework.util.StringUtils;
  */
 public class SubFlowState extends TransitionableState {
 
-	protected String subFlowId;
+	private String subFlowId;
 
-	protected String attributesMapperId;
+	private String attributesMapperId;
 
 	public SubFlowState(String subFlowId, Transition transition) {
 		this(subFlowId, subFlowId, null, new Transition[] { transition });
@@ -61,15 +62,24 @@ public class SubFlowState extends TransitionableState {
 		addAll(transitions);
 	}
 
-	public boolean isSubFlowState() {
-		return false;
+	public String getAttributesMapperId() {
+		return attributesMapperId;
 	}
 
-	protected SubFlowAttributesMapper getAttributesMapper(FlowDao flowDao) {
+	public boolean isSubFlowState() {
+		return true;
+	}
+
+	protected SubFlowAttributesMapper getAttributesMapper(Flow flow) {
 		if (!StringUtils.hasText(attributesMapperId)) {
 			return null;
 		}
-		return flowDao.getSubFlowAttributesMapper(attributesMapperId);
+		try {
+			return flow.getFlowDao().getSubFlowAttributesMapper(attributesMapperId);
+		}
+		catch (NoSuchBeanDefinitionException e) {
+			throw new NoSuchAttributeMapperException(flow, this, e);
+		}
 	}
 
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
@@ -81,21 +91,20 @@ public class SubFlowState extends TransitionableState {
 		Assert.notNull(subFlow, "The subflow is required");
 		if (logger.isInfoEnabled()) {
 			if (!subFlow.getId().equals(this.subFlowId)) {
-				logger.info("The subflow definition exported in the context under ID '" + this.subFlowId
-						+ "' has ID '" + subFlow.getId() + "' -- these ID values are NOT equal; is this OK?");
+				logger.info("The subflow definition exported in the context under ID '" + this.subFlowId + "' has ID '"
+						+ subFlow.getId() + "' -- these ID values are NOT equal; is this OK?");
 			}
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + flow.getId() + "'");
 		}
 		Map subFlowAttributes;
-		if (getAttributesMapper(flow.getFlowDao()) != null) {
+		if (getAttributesMapper(flow) != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			subFlowAttributes = getAttributesMapper(flow.getFlowDao()).createSpawnedSubFlowAttributesMap(
-					sessionExecutionStack);
+			subFlowAttributes = getAttributesMapper(flow).createSpawnedSubFlowAttributesMap(sessionExecutionStack);
 		}
 		else {
 			if (logger.isInfoEnabled()) {
@@ -103,8 +112,10 @@ public class SubFlowState extends TransitionableState {
 						+ "' - note: as a result, no attributes in the parent flow '" + flow.getId()
 						+ "' scope will be passed to the spawned subflow '" + subFlow.getId() + "'");
 			}
-			subFlowAttributes = Collections.EMPTY_MAP;
+			subFlowAttributes = new HashMap(1);
 		}
+		subFlowAttributes.put(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME, sessionExecutionStack
+				.getRequiredAttribute(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME));
 		return subFlow.start(sessionExecutionStack, request, response, subFlowAttributes);
 	}
 

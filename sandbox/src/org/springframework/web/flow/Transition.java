@@ -59,12 +59,9 @@ public class Transition implements Serializable {
 					+ "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
 		}
 		try {
-			sessionExecutionStack.setAttribute(EVENT_ID_ATTRIBUTE, getId());
+			sessionExecutionStack.setLastEventId(getId());
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecutionStack, request,
 					response);
-			if (sessionExecutionStack.isActive()) {
-				sessionExecutionStack.removeAttribute(EVENT_ID_ATTRIBUTE);
-			}
 			return descriptor;
 		}
 		catch (NoSuchFlowStateException e) {

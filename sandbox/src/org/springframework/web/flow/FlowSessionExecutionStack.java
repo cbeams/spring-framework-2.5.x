@@ -16,13 +16,17 @@
 package org.springframework.web.flow;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -30,12 +34,16 @@ import org.springframework.util.ToStringCreator;
  * 
  * @author Keith Donald
  */
-public class FlowSessionExecutionStack implements MutableAttributesAccessor, Serializable {
+public class FlowSessionExecutionStack implements MutableAttributesAccessor, Serializable, FlowSessionExecutionInfo {
 	private static final Log logger = LogFactory.getLog(FlowSessionExecutionStack.class);
 
 	private FlowSession NO_SESSION = new FlowSession(null, null);
 
 	private Stack executingFlowSessions = new Stack();
+
+	private String lastEventId;
+
+	private long lastEventTimestamp;
 
 	public boolean isActive() {
 		return !isEmpty();
@@ -47,6 +55,21 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	public String getActiveFlowId() {
 		return getActiveFlowSession().getFlowId();
+	}
+
+	public String[] getFlowIdStack() {
+		if (isEmpty()) {
+			return new String[0];
+		}
+		else {
+			Iterator it = executingFlowSessions.iterator();
+			List stack = new ArrayList(executingFlowSessions.size());
+			while (it.hasNext()) {
+				FlowSession session = (FlowSession)it.next();
+				stack.add(session.getFlowId());
+			}
+			return (String[])stack.toArray(new String[0]);
+		}
 	}
 
 	public String getQualifiedActiveFlowId() {
@@ -78,10 +101,6 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	public String getCurrentStateId() {
 		return getActiveFlowSession().getCurrentStateId();
-	}
-
-	public void setCurrentState(String id) {
-		getActiveFlowSession().setCurrentStateId(id);
 	}
 
 	public Object getAttribute(String attributeName) {
@@ -128,6 +147,30 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return getActiveFlowSession().attributeValues();
 	}
 
+	/**
+	 * @return
+	 */
+	public String getLastEventId() {
+		return lastEventId;
+	}
+
+	public long getLastEventTimestamp() {
+		return lastEventTimestamp;
+	}
+
+	public void setLastEventId(String eventId) {
+		Assert.notNull(eventId, "The eventId is required");
+		this.lastEventId = eventId;
+		this.lastEventTimestamp = new Date().getTime();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Set last event id to '" + eventId + "' and updated timestamp to " + this.lastEventTimestamp);
+		}
+	}
+
+	protected void setCurrentStateId(String id) {
+		getActiveFlowSession().setCurrentStateId(id);
+	}
+
 	public void setAttribute(String attributeName, Object attributeValue) {
 		getActiveFlowSession().setAttribute(attributeName, attributeValue);
 	}
@@ -135,11 +178,11 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	public void setAttributes(Map attributes) {
 		getActiveFlowSession().setAttributes(attributes);
 	}
-    
-    public void removeAttribute(String attributeName) {
-        getActiveFlowSession().removeAttribute(attributeName);
-    }
-    
+
+	public void removeAttribute(String attributeName) {
+		getActiveFlowSession().removeAttribute(attributeName);
+	}
+
 	public FlowSession getActiveFlowSession() {
 		if (executingFlowSessions.isEmpty()) {
 			throw new IllegalStateException("No flow session is executing in this execution stack");
@@ -147,7 +190,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return (FlowSession)executingFlowSessions.peek();
 	}
 
-	public void push(FlowSession subFlowSession) {
+	protected void push(FlowSession subFlowSession) {
 		executingFlowSessions.push(subFlowSession);
 		if (logger.isDebugEnabled()) {
 			logger.debug("After push of new Flow Session '" + subFlowSession.getFlowId()
@@ -156,7 +199,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		}
 	}
 
-	public FlowSession pop() {
+	protected FlowSession pop() {
 		FlowSession s = (FlowSession)executingFlowSessions.pop();
 		if (logger.isDebugEnabled()) {
 			logger.debug("After pop of ended Flow Session '" + s.getFlowId() + "' - excutingFlowSessionsCount="
@@ -171,6 +214,5 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 						getCurrentStateId()).append("rootFlow", isRootFlow()).append("executingFlowSessions",
 						executingFlowSessions).toString();
 	}
-
 
 }

@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow.struts;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowEventProcessor;
+import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionExecutionStack;
 import org.springframework.web.flow.NoSuchFlowSessionException;
 import org.springframework.web.flow.ViewDescriptor;
@@ -46,11 +48,7 @@ public class FlowAction extends TemplateAction {
 
 	private static final String ACTION_PATH_NAME_ATTRIBUTE = "actionFormBeanName";
 
-	public static final String CURRENT_STATE_ID_ATTRIBUTE_NAME = "currentStateId";
-
-	public static final String FLOW_SESSION_ID_ATTRIBUTE_NAME = "flowId";
-
-	public static String FLOW_SESSION_ID_PARAMETER = "_flowId";
+	public static String FLOW_SESSION_ID_PARAMETER = "_flowSessionId";
 
 	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
 
@@ -104,7 +102,9 @@ public class FlowAction extends TemplateAction {
 			executionStack = createFlowSessionExecutionStack();
 			flowSessionId = generateUniqueFlowSessionId(executionStack);
 			saveFlowSession(executionStack, flowSessionId, request);
-			viewDescriptor = getEventProcessor(mapping).start(executionStack, request, response, null);
+			Map inputAttributes = new HashMap(1);
+			inputAttributes.put(getFlowSessionIdAttributeName(), flowSessionId);
+			viewDescriptor = getEventProcessor(mapping).start(executionStack, request, response, inputAttributes);
 		}
 		else {
 			// Client is participating in an existing flow session, retrieve it
@@ -153,7 +153,8 @@ public class FlowAction extends TemplateAction {
 				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
 				String actionFormBeanName = actionPathName + "Form";
 				if (logger.isDebugEnabled()) {
-					logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '" + actionPathName + " in request scope.");
+					logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '" + actionPathName
+							+ " in request scope.");
 					logger.debug("Setting action form attribute '" + actionFormBeanName + " to form '" + form
 							+ "' in request scope.");
 				}
@@ -233,12 +234,14 @@ public class FlowAction extends TemplateAction {
 		request.getSession().removeAttribute(flowSessionId);
 	}
 
-	protected String getFlowSessionIdAttributeName() {
-		return FLOW_SESSION_ID_ATTRIBUTE_NAME;
+	// made final as these attribute keys are needed elsewhere, so they cant change for now
+	
+	protected final String getFlowSessionIdAttributeName() {
+		return FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME;
 	}
 
-	protected String getCurrentStateIdAttributeName() {
-		return CURRENT_STATE_ID_ATTRIBUTE_NAME;
+	protected final String getCurrentStateIdAttributeName() {
+		return FlowSession.CURRENT_STATE_ID_ATTRIBUTE_NAME;
 	}
 
 }
