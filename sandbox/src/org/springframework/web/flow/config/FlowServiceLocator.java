@@ -16,7 +16,6 @@
 package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
@@ -33,25 +32,6 @@ import org.springframework.web.flow.ServiceLookupException;
  * @author Erwin Vervaet
  */
 public interface FlowServiceLocator extends FlowLocator {
-
-	/**
-	 * Lookup a flow build by specified type of flow builder.
-	 * @param flowDefinitionId the flow id
-	 * @param requiredFlowBuilderImplementationClass The required builder type
-	 * @return the flow
-	 * @throws ServiceLookupException When the flow cannot be found
-	 */
-	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-			throws ServiceLookupException;
-
-	/**
-	 * Lookup a flow of specified implementation class.
-	 * @param flowDefinitionImplementationClass The required implementation
-	 *        class.
-	 * @return The flow
-	 * @throws ServiceLookupException When the flow cannot be found
-	 */
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException;
 
 	/**
 	 * Lookup an action with specified id.
