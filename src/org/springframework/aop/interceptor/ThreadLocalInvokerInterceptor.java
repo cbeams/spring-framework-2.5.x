@@ -15,24 +15,23 @@ import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Alternative to an object pool.
- * This invoker uses a threading model in which
- * every thread has its own copy of the target. There's
- * no contention for targets. Target object creation is kept to
- * a minimum on the running server.
- * Application code is written as to a normal pool; callers
- * can't assume they will be dealing with the same instance
- * in invocations in different threads. However, state can be
- * relied on during the operations of a single thread.
- * <br>
- * Cleanup is performed in the destroy() method from DisposableBean.
- * We can't get at the ThreadLocals, but we can
- * use a layer of indirection to clear the references they hold.
- * <br>
- * <b>This pooling model should be considered alpha. It has not yet been 
+ * Alternative to an object pool. This invoker uses a threading model in which
+ * every thread has its own copy of the target. There's no contention for targets.
+ * Target object creation is kept to a minimum on the running server.
+ *
+ * <p>Application code is written as to a normal pool; callers can't assume they
+ * will be dealing with the same instance in invocations in different threads.
+ * However, state can be relied on during the operations of a single thread.
+ *
+ * <p>Cleanup is performed in the destroy() method from DisposableBean.
+ * We can't get at the ThreadLocals there, but we can use a layer of indirection
+ * to clear the references they hold.
+ *
+ * <p><b>This pooling model should be considered alpha. It has not yet been
  * tested in production.</b>
+ *
  * @author Rod Johnson
- * @version $Id: ThreadLocalInvokerInterceptor.java,v 1.1 2003-11-24 20:43:43 johnsonr Exp $
+ * @version $Id: ThreadLocalInvokerInterceptor.java,v 1.2 2003-11-24 21:48:06 jhoeller Exp $
  */
 public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor implements ThreadLocalInvokerStats, DisposableBean {
 	
@@ -52,7 +51,8 @@ public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor i
 		}
 		public Object target;
 	}
-	
+
+
 	/**
 	 * Set of managed holders, enabling us to keep track
 	 * of the targets we've created.
@@ -111,31 +111,20 @@ public class ThreadLocalInvokerInterceptor extends PrototypeInvokerInterceptor i
 		this.holderSet.clear();
 	}
 
-	
-	/**
-	 * @see org.springframework.aop.interceptor.ApartmentStats#getInvocations()
-	 */
 	public int getInvocations() {
 		return invocations;
 	}
 
-	/**
-	 * @see org.springframework.aop.interceptor.ApartmentStats#getHits()
-	 */
 	public int getHits() {
 		return hits;
 	}
 
-	/**
-	 * @see org.springframework.aop.interceptor.ApartmentStats#getObjects()
-	 */
 	public int getObjects() {
 		return holderSet.size();
 	}
-	
-	
+
 	/**
-	 * @return an introduction advisor mixin that allows the AOP proxy to be 
+	 * Return an introduction advisor mixin that allows the AOP proxy to be
 	 * case to ThreadLocalInvokerStats.
 	 */
 	public InterceptionIntroductionAdvisor getStatsMixin() {

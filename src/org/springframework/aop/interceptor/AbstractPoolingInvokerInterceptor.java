@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.framework.MethodInvocationImpl;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.SimpleIntroductionAdvice;
@@ -31,7 +32,7 @@ import org.springframework.beans.factory.DisposableBean;
  * a destroy() method to close down their pool.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingInvokerInterceptor.java,v 1.3 2003-11-24 11:29:16 johnsonr Exp $
+ * @version $Id: AbstractPoolingInvokerInterceptor.java,v 1.4 2003-11-24 21:48:06 jhoeller Exp $
  */
 public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvokerInterceptor implements PoolingConfig, DisposableBean {
 	
@@ -41,19 +42,19 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 	private int invocations;
 
 	/**
-	 * Return the size of the pool
+	 * Set the maximum size of the pool.
+	 * @param maxSize the size for the pool
+	 */
+	public void setMaxSize(int maxSize) {
+		this.maxSize = maxSize;
+	}
+
+	/**
+	 * Return the maximum size of the pool.
 	 * @return the size of the pool
 	 */
 	public int getMaxSize() {
 		return this.maxSize;
-	}
-
-	/**
-	 * Set the size of the pool
-	 * @param poolSize the size for the pool
-	 */
-	public void setMaxSize(int maxSize) {
-		this.maxSize = maxSize;
 	}
 
 	/**
