@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jndi.AbstractJndiLocator;
+import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -67,7 +67,11 @@ public abstract class DataSourceUtils {
 	 * @return the DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the data source cannot be located
+	 * @deprecated in favor of managing a DataSource via dependency injection,
+	 * i.e. using a JndiObjectFactoryBean for a JNDI DataSource and pass a
+	 * bean reference to a setDataSource(DataSource) method or the like
 	 * @see #getDataSourceFromJndi(String, boolean)
+	 * @see org.springframework.jndi.JndiObjectFactoryBean
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName)
 	    throws CannotGetJdbcConnectionException {
@@ -83,22 +87,26 @@ public abstract class DataSourceUtils {
 	 * @return the DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the data source cannot be located
+	 * @deprecated in favor of managing a DataSource via dependency injection,
+	 * i.e. using a JndiObjectFactoryBean for a JNDI DataSource and pass a
+	 * bean reference to a setDataSource(DataSource) method or the like
+	 * @see org.springframework.jndi.JndiObjectFactoryBean
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef)
 	    throws CannotGetJdbcConnectionException {
 		if (jndiName == null || "".equals(jndiName)) {
 			throw new IllegalArgumentException("jndiName must not be empty");
 		}
-		if (resourceRef && !jndiName.startsWith(AbstractJndiLocator.CONTAINER_PREFIX)) {
-			jndiName = AbstractJndiLocator.CONTAINER_PREFIX + jndiName;
+		if (resourceRef && !jndiName.startsWith(JndiLocatorSupport.CONTAINER_PREFIX)) {
+			jndiName = JndiLocatorSupport.CONTAINER_PREFIX + jndiName;
 		}
 		try {
 			// Perform JNDI lookup to obtain resource manager connection factory
 			return (DataSource) new JndiTemplate().lookup(jndiName);
 		}
 		catch (NamingException ex) {
-			throw new CannotGetJdbcConnectionException("Naming exception looking up JNDI data source [" +
-																								 jndiName + "]", ex);
+			throw new CannotGetJdbcConnectionException(
+					"Naming exception looking up JNDI data source [" + jndiName + "]", ex);
 		}
 	}
 
@@ -205,7 +213,7 @@ public abstract class DataSourceUtils {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
-										 definition.getIsolationLevel());
+						definition.getIsolationLevel());
 			}
 			previousIsolationLevel = new Integer(con.getTransactionIsolation());
 			con.setTransactionIsolation(definition.getIsolationLevel());
@@ -226,8 +234,7 @@ public abstract class DataSourceUtils {
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (previousIsolationLevel != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Resetting isolation level of connection [" + con + "] to " +
-											 previousIsolationLevel);
+					logger.debug("Resetting isolation level of connection [" + con + "] to " + previousIsolationLevel);
 				}
 				con.setTransactionIsolation(previousIsolationLevel.intValue());
 			}
