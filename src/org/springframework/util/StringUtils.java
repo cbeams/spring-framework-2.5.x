@@ -40,10 +40,16 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.11 2004-03-19 16:45:29 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.12 2004-05-08 20:28:59 pawlakjp Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
+
+	// Static strings for cleanPath
+	private static String CHANGE_PATH = "/";		// folder sep.
+	private static String WIN_CHANGE_PATH = "\\";	// Windows folder sep.
+	private static String TOP_PATH = "..";			// Top folder
+	private static String CURRENT_PATH = ".";		// Current folder
 
 	/**
 	 * Count the occurrences of the substring in string s.
@@ -360,4 +366,49 @@ public abstract class StringUtils {
 		return buf.toString();
 	}
 
+	/**
+	 * Normalizes the path by suppressing sequences like "path/.." and inner 
+	 * simple dots folders.
+	 * The result is convenient for path comparizon. For other uses, notice that 
+	 * Windows separators ("\") are replaced by simple dashes.  
+	 * @param path The original path
+	 * @return The normalized path
+	 */
+	public static String cleanPath(String path) {
+
+		String p = replace(path, WIN_CHANGE_PATH, CHANGE_PATH);
+		String[] pArray = delimitedListToStringArray(p, CHANGE_PATH);
+		List pList = new LinkedList();
+		
+		int tops = 0;
+		for ( int i = pArray.length - 1; i >= 0; i--) {
+			if (CURRENT_PATH.equals(pArray[i])) {
+				// Do nothing
+			} else if (TOP_PATH.equals(pArray[i])) {
+				tops++;
+			} else {
+				if (tops > 0) {	
+					tops--;	
+				} else { 
+					pList.add(0, pArray[i]); 
+				}
+			}
+		}
+		return collectionToDelimitedString(pList, CHANGE_PATH);
+	}
+	
+	/**
+	 * Compares two paths after normalization of them.
+	 * @param path1 First path for comparizon
+	 * @param path2 Second path for comparizon
+	 * @return True if the two paths are equivalent after normalization 
+	 */
+	public static boolean pathEquals(String path1, String path2) {
+		// String cleanPath1 = cleanPath(path1);
+		// String cleanPath2 = cleanPath(path2);
+		// return cleanPath1.equals(cleanPath2);
+		return cleanPath(path1).equals(cleanPath(path2));
+	}
+	
+	
 }

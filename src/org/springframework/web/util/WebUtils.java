@@ -27,6 +27,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Miscellaneous utilities for web applications.
  * Used by various framework classes.
@@ -83,10 +85,10 @@ public abstract class WebUtils {
 		if (root == null) {
 			throw new IllegalStateException("Cannot set web app root system property when WAR file is not expanded");
 		}
-		if (oldValue != null && !oldValue.equals(root)) {
+		if (oldValue != null && !StringUtils.pathEquals(oldValue, root)) {
 			throw new IllegalStateException("Web app root system property already set to different value: '" +
 																			key + "' = [" + oldValue +
-																			"] - Choose unique webAppRootKey values in your web.xml files!");
+																			"] instead of [" + root + "]- Choose unique webAppRootKey values in your web.xml files!");
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: " + key + " = " + root);
