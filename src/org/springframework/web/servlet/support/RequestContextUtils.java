@@ -94,7 +94,8 @@ public abstract class RequestContextUtils {
 	 * @throws IllegalStateException if no LocaleResolver has been found
 	 */
 	public static LocaleResolver getLocaleResolver(HttpServletRequest request) throws IllegalStateException {
-		LocaleResolver localeResolver = (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
+		LocaleResolver localeResolver =
+				(LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
 		if (localeResolver == null) {
 			throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
 		}
@@ -107,6 +108,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current locale
 	 * @throws IllegalStateException if no LocaleResolver has been found
+	 * @see #getLocaleResolver
 	 */
 	public static Locale getLocale(HttpServletRequest request) throws IllegalStateException {
 		return getLocaleResolver(request).resolveLocale(request);
@@ -120,7 +122,8 @@ public abstract class RequestContextUtils {
 	 * @throws IllegalStateException if no ThemeResolver has been found
 	 */
 	public static ThemeResolver getThemeResolver(HttpServletRequest request) throws IllegalStateException {
-		ThemeResolver themeResolver = (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
+		ThemeResolver themeResolver =
+				(ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 		if (themeResolver == null) {
 			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
 		}
@@ -133,6 +136,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current theme
 	 * @throws IllegalStateException if no ThemeResolver has been found
+	 * @see #getThemeResolver
 	 */
 	public static Theme getTheme(HttpServletRequest request) throws IllegalStateException {
 		WebApplicationContext context = getWebApplicationContext(request);
