@@ -14,21 +14,21 @@ public abstract class AbstractUrlBasedView extends AbstractView {
 	 * Set the URL of the resource that this view wraps.
 	 * The URL must be appropriate for the concrete View implementation.
 	 */
-	public final void setUrl(String url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 
 	/**
 	 * Return the URL of the resource that this view wraps.
 	 */
-	public final String getUrl() {
+	public String getUrl() {
 		return url;
 	}
 
 	/**
 	 * Overridden lifecycle method to check that 'url' property is set.
 	 */
-	protected void initApplicationContext() throws IllegalArgumentException {
+	protected void initApplicationContext() {
 		if (this.url == null) {
 			throw new IllegalArgumentException("url is required");
 		}
