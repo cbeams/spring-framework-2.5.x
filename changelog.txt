@@ -9,8 +9,10 @@ Changes in version 1.0 M1 (xx.8.2003)
 * introduced "destroy-method" attribute for XML bean definitions
 * SingleConnectionDataSource implements DisposableBean
 * LocalSessionFactoryBean implements DisposableBean
-* DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
 * added getValues and toCode methods to Constants utility class
+* DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
+* dissolved ReadOnlyResultSet to make JdbcTemplate return the underlying ResultSet
+* fixed Statement and ResultSet handling to work for all kinds of JDBC drivers 
 * support for returning Types.ARRAY from stored procedure
 * added HibernateTemplate.deleteAll for batch deletes
 * support for overlapping method name patterns in transaction attribute source definitions
