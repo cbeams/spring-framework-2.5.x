@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.11 2004-02-04 17:36:32 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.12 2004-02-16 07:56:25 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -822,6 +822,18 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals(2, tb.getArray().length);
 		assertEquals("a", tb.getArray()[0].getName());
 		assertEquals("b", tb.getArray()[1].getName());
+	}
+
+	public void testArrayToStringConversion() throws PropertyVetoException {
+		TestBean tb = new TestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("-" + text + "-");
+			}
+		});
+		bw.setPropertyValue("name", new String[] {"a", "b"});
+		assertEquals("-a,b-", tb.getName());
 	}
 
 

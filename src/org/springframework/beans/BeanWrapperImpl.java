@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.24 2004-02-04 17:36:32 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.25 2004-02-16 07:56:06 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -682,14 +682,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 			if (pe != null || !requiredType.isAssignableFrom(newValue.getClass())) {
 
 				if (newValue instanceof String[]) {
-					// convert String array to String
-					newValue = StringUtils.arrayToCommaDelimitedString((String[])newValue);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Converting String array to comma-delimited String [" + newValue + "]");
 					}
+					newValue = StringUtils.arrayToCommaDelimitedString((String[]) newValue);
 				}
 
-				else if (newValue instanceof String) {
+				if (newValue instanceof String) {
 					if (pe == null) {
 						// no custom editor -> check BeanWrapper's default editors
 						pe = (PropertyEditor) defaultEditors.get(requiredType);
