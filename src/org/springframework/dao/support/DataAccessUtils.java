@@ -59,7 +59,7 @@ public abstract class DataAccessUtils {
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
 		Object result = uniqueResult(results);
 		if (result == null) {
-			return new IncorrectResultSizeDataAccessException(1, 0);
+			throw new IncorrectResultSizeDataAccessException(1, 0);
 		}
 		return result;
 	}
