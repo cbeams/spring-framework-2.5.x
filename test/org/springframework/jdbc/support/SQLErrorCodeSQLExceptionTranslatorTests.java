@@ -86,7 +86,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		runTests(new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES));
 	}
 	
-	public void testCustomTranslation() {
+	public void testCustomTranslateMethodTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
 		final DataAccessException customDex = new DataAccessException("") {};
@@ -115,7 +115,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		
 		customErrorCodes.setBadSqlGrammarCodes(new String[] { "1", "2" });
 		customErrorCodes.setDataIntegrityViolationCodes(new String[] { "3", "4" });
-		customTranslation.setErrorCodes(new String[] { "1"});
+		customTranslation.setErrorCodes(new String[] { "1" });
 		customTranslation.setExceptionClass("org.springframework.jdbc.support.CustomErrorCodeException");
 		List l = new LinkedList();
 		l.add(customTranslation);
@@ -130,6 +130,9 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		// Shouldn't custom translate this
 		DataIntegrityViolationException diex = (DataIntegrityViolationException) sext.translate(TASK, SQL, INTEG_VIOLATION_EX);
 		assertEquals(INTEG_VIOLATION_EX, diex.getCause());
+		// Shouldn't custom translate this - class not found
+		customTranslation.setExceptionClass("org.springframework.jdbc.support.NoSuchException");
+		assertEquals(BadSqlGrammarException.class, sext.translate(TASK, SQL, BAD_SQL_EX).getClass());
 	}
 
 }
