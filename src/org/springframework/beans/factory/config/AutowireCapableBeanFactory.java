@@ -33,10 +33,17 @@ import org.springframework.beans.factory.BeanFactory;
  * the lifecycle of. This is particularly useful for WebWork Actions or
  * Tapestry Page objects, for example.
  *
+ * <p>Note that this interface is not implemented by ApplicationContext
+ * facades, as it is hardly ever used by application code. It is available
+ * on the internal BeanFactory of a context, though, accessible through
+ * ConfigurableApplicationContext's <code>getBeanFactory</code> method.
+ *
  * @author Juergen Hoeller
  * @since 04.12.2003
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
+ * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
+ * @see org.springframework.context.ConfigurableApplicationContext#getBeanFactory
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
@@ -103,24 +110,24 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * fully self-contained bean, reusing its property values, or just
 	 * property values meant to be used for existing bean instances.
 	 * @param existingBean the existing bean instance
-	 * @param name the name of the bean definition in the bean factory
+	 * @param beanName the name of the bean definition in the bean factory
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if there is no bean with the given name
 	 * @throws BeansException if applying the property values failed
 	 */
-	void applyBeanPropertyValues(Object existingBean, String name) throws BeansException;
+	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
 	/**
 	 * Apply BeanPostProcessors to the given existing bean instance,
 	 * invoking their postProcessBeforeInitialization methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
-	 * @param name the name of the bean
+	 * @param beanName the name of the bean
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessBeforeInitialization
 	 */
-	Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String name)
+	Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException;
 
 
@@ -129,12 +136,12 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * invoking their postProcessAfterInitialization methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
-	 * @param name the name of the bean
+	 * @param beanName the name of the bean
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if any post-processing failed
 	 * @see BeanPostProcessor#postProcessAfterInitialization
 	 */
-	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String name)
+	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
 
 }

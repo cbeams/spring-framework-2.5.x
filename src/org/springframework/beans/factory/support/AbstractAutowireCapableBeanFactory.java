@@ -170,40 +170,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		populateBean(existingBean.getClass().getName(), bd, createBeanWrapper(existingBean));
 	}
 
-	public void applyBeanPropertyValues(Object existingBean, String name) throws BeansException {
-		RootBeanDefinition bd = getMergedBeanDefinition(name, true);
-		applyPropertyValues(name, bd, createBeanWrapper(existingBean), bd.getPropertyValues());
+	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
+		RootBeanDefinition bd = getMergedBeanDefinition(beanName, true);
+		applyPropertyValues(beanName, bd, createBeanWrapper(existingBean), bd.getPropertyValues());
 	}
 
-	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String name) throws BeansException {
+	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + name + "'");
+			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + beanName + "'");
 		}
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			result = beanProcessor.postProcessBeforeInitialization(result, name);
+			result = beanProcessor.postProcessBeforeInitialization(result, beanName);
 			if (result == null) {
-				throw new BeanCreationException(
+				throw new BeanCreationException(beanName,
 						"postProcessBeforeInitialization method of BeanPostProcessor [" + beanProcessor +
-						"] returned null for bean [" + result + "] with name [" + name + "]");
+						"] returned null for bean [" + result + "] with name [" + beanName + "]");
 			}
 		}
 		return result;
 	}
 
-	public Object applyBeanPostProcessorsAfterInitialization(Object bean, String name) throws BeansException {
+	public Object applyBeanPostProcessorsAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + name + "'");
+			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + beanName + "'");
 		}
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			result = beanProcessor.postProcessAfterInitialization(result, name);
+			result = beanProcessor.postProcessAfterInitialization(result, beanName);
 			if (result == null) {
-				throw new BeanCreationException(
-				    "postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
-				    "] returned null for bean [" + result + "] with name [" + name + "]");
+				throw new BeanCreationException(beanName,
+						"postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
+				    "] returned null for bean [" + result + "] with name [" + beanName + "]");
 			}
 		}
 		return result;
