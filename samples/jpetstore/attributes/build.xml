@@ -40,7 +40,7 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${spring.root}/lib/aop-alliance">
+		<fileset dir="${spring.root}/lib/aopalliance">
 			<include name="aopalliance.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/axis">
@@ -138,7 +138,7 @@
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${spring.root}/lib/aop-alliance">
+			<fileset dir="${spring.root}/lib/aopalliance">
 				<include name="aopalliance.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/axis">

@@ -24,7 +24,7 @@
 		to any bean in child factories.
 	-->
 	<bean id="autoproxy" 
-		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">	
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 	</bean>
 
 	<bean id="transactionAttributeSource"

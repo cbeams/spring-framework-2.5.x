@@ -10,7 +10,7 @@
 					<include name="saaj.jar"/>
 					<include name="wsdl4j.jar"/>
 				</fileset>
-				<fileset dir="../../../lib/aop-alliance">
+				<fileset dir="../../../lib/aopalliance">
 					<include name="aopalliance.jar"/>
 				</fileset>
 				<fileset dir="../../../lib/caucho">

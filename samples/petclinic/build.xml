@@ -46,7 +46,7 @@
 		<fileset dir="${db.dir}/mysql">
 			<include name="mysql*.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/aop-alliance">
+		<fileset dir="${spring.root}/lib/aopalliance">
 			<include name="aopalliance.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/cglib">
@@ -131,7 +131,7 @@
 			<fileset dir="${db.dir}/mysql">
 				<include name="mysql*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/aop-alliance">
+			<fileset dir="${spring.root}/lib/aopalliance">
 				<include name="aopalliance.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">

@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.44 2004-03-21 23:02:25 jhoeller Exp $
+    $Id: build.xml,v 1.45 2004-03-23 14:22:32 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -327,7 +327,7 @@
 			<zipfileset dir="." prefix="${release.path}">
 				<include name="lib/ant/**"/>
 				<include name="lib/axis/**"/>
-				<include name="lib/aop-alliance/**"/>
+				<include name="lib/aopalliance/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
 				<include name="lib/cos/**"/>

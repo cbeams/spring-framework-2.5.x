@@ -23,7 +23,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/regexp/jakarta-oro-2.0.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/aop-alliance/aopalliance.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>

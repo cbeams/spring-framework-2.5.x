@@ -50,7 +50,7 @@
 			<fileset dir="${spring.home}/dist">
       			<include name="spring*.jar"/>
     		</fileset>
-    		<fileset dir="${springlib.dir}/aop-alliance">
+    		<fileset dir="${springlib.dir}/aopalliance">
       			<include name="*.jar"/>
     		</fileset>
     		<fileset dir="${springlib.dir}/cglib">
