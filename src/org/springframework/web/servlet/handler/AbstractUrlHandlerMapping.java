@@ -109,7 +109,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or null
 	 */
-	protected Object getHandlerInternal(HttpServletRequest request) throws BeansException {
+	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		logger.debug("Looking up handler for [" + lookupPath + "]");
 		return lookupHandler(lookupPath);
