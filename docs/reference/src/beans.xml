@@ -1484,7 +1484,7 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
           returned. A <literal>BeansException</literal> will be thrown when
           either the bean could not be found (in which case it'll be a
           <literal>NoSuchBeanDefinitionException</literal>), or an exception
-          occured while instantiated and preparing the bean</para>
+          occured while instantiating and preparing the bean</para>
         </listitem>
 
         <listitem>
