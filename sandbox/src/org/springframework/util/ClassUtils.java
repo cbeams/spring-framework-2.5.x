@@ -48,6 +48,16 @@ public class ClassUtils {
     }
 
     /**
+     * Returns the uncaptilized short string name of a java class.
+     * 
+     * @param clazz The class
+     * @return The short name rendered as a property.
+     */
+    public static String getShortNameAsProperty(Class clazz) {
+        return StringUtils.uncapitalize(getShortName(clazz));
+    }
+
+    /**
      * Gets the class name without the qualified package name.
      * 
      * @param className

@@ -34,6 +34,10 @@ public class UnaryNot implements UnaryPredicate {
     public UnaryNot(UnaryPredicate predicate) {
         this.predicate = predicate;
     }
+    
+    public UnaryPredicate getPredicate() {
+        return predicate;
+    }
 
     /**
      * Negates the boolean result returned by testing the wrapped predicate.

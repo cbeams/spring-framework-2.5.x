@@ -9,11 +9,11 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public abstract class AbstractBeanPropertyConstraint
-    implements BeanPropertyConstraint {
+public abstract class AbstractBeanPropertyExpression
+    implements BeanPropertyExpression {
     private String propertyName;
 
-    public AbstractBeanPropertyConstraint(String propertyName) {
+    public AbstractBeanPropertyExpression(String propertyName) {
         setPropertyName(propertyName);
     }
 

@@ -9,6 +9,6 @@ import org.springframework.rules.UnaryPredicate;
 /**
  * @author Keith Donald
  */
-public interface BeanPropertyConstraint extends UnaryPredicate {
+public interface BeanPropertyExpression extends UnaryPredicate {
     public String getPropertyName();
 }

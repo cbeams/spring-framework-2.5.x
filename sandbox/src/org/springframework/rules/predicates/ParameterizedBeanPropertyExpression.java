@@ -24,8 +24,9 @@ import org.springframework.rules.BinaryPredicate;
  * 
  * @author Keith Donald
  */
-public class ParameterizedBeanPropertyExpression implements BeanPropertyConstraint {
-    private BeanPropertyConstraint parameterizedExpression;
+public class ParameterizedBeanPropertyExpression
+    implements BeanPropertyExpression {
+    private BeanPropertyValueConstraint parameterizedExpression;
 
     /**
      * Creates a BeanPropertyExpressionTester.
@@ -48,12 +49,26 @@ public class ParameterizedBeanPropertyExpression implements BeanPropertyConstrai
     }
 
     /**
-     * @see org.springframework.rules.predicates.BeanPropertyConstraint#getPropertyName()
+     * @see org.springframework.rules.predicates.BeanPropertyExpression#getPropertyName()
      */
     public String getPropertyName() {
         return parameterizedExpression.getPropertyName();
     }
-    
+
+    public BinaryPredicate getPredicate() {
+        return getParameterizedBinaryPredicate().getPredicate();
+    }
+
+    public Object getParameter() {
+        return getParameterizedBinaryPredicate().getParameter();
+    }
+
+    public ParameterizedBinaryPredicate getParameterizedBinaryPredicate() {
+        return (ParameterizedBinaryPredicate)this
+            .parameterizedExpression
+            .getPredicate();
+    }
+
     /**
      * Tests the value of the configured propertyName for this bean against the
      * configured parameter value using the configured binary predicate.

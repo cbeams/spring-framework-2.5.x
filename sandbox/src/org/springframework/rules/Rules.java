@@ -17,17 +17,20 @@ package org.springframework.rules;
 
 import java.util.Iterator;
 
-import org.springframework.rules.predicates.BeanPropertyConstraint;
+import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.util.Assert;
 import org.springframework.util.Cache;
+import org.springframework.util.visitor.ReflectiveVisitorSupport;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 /**
  * A factory for creating rules.
  * 
  * @author Keith Donald
  */
-public class Rules implements UnaryPredicate {
+public class Rules implements UnaryPredicate, Validator {
     private Class beanClass;
     private Cache propertyRules = new Cache() {
         public Object create(Object key) {
@@ -50,7 +53,7 @@ public class Rules implements UnaryPredicate {
         return new Rules(beanClass);
     }
 
-    public Rules add(BeanPropertyConstraint expression) {
+    public Rules add(BeanPropertyExpression expression) {
         UnaryAnd and =
             (UnaryAnd)propertyRules.get(expression.getPropertyName());
         and.add(expression);
@@ -60,14 +63,35 @@ public class Rules implements UnaryPredicate {
     /**
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
-    public boolean test(Object argument) {
+    public boolean test(Object bean) {
         for (Iterator i = propertyRules.values(); i.hasNext();) {
             UnaryPredicate predicate = (UnaryPredicate)i.next();
-            if (!predicate.test(argument)) {
+            if (!predicate.test(bean)) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * @see org.springframework.validation.Validator#supports(java.lang.Class)
+     */
+    public boolean supports(Class clazz) {
+        return clazz.equals(this.beanClass);
+    }
+
+    /**
+     * @see org.springframework.validation.Validator#validate(java.lang.Object,
+     *      org.springframework.validation.Errors)
+     */
+    public void validate(final Object bean, final Errors errors) {
+        Algorithms.forEach(propertyRules.entries(), new UnaryProcedure() {
+            public void run(Object predicate) {
+                BeanPropertyExpression rule = (BeanPropertyExpression)predicate;
+                ValidationResults results = new ValidationResults(bean, errors);
+                results.collectResults(rule);
+            }
+        });
     }
 
 }

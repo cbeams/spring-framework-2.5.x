@@ -42,6 +42,14 @@ public class ParameterizedBinaryPredicate implements UnaryPredicate {
         this.predicate = predicate;
         this.parameter = parameter;
     }
+    
+    public Object getParameter() {
+        return parameter;
+    }
+    
+    public BinaryPredicate getPredicate() {
+        return predicate;
+    }
 
     /**
      * Tests the wrapped binary predicate with the variable argument value,

@@ -23,7 +23,7 @@ import java.util.Iterator;
  * functor objects such as predicates.
  * 
  * @author Keith Donald
- * @version $Id: Algorithms.java,v 1.1 2004-04-08 21:40:14 kdonald Exp $
+ * @version $Id: Algorithms.java,v 1.2 2004-04-11 19:58:00 kdonald Exp $
  */
 public abstract class Algorithms {
     
@@ -52,4 +52,15 @@ public abstract class Algorithms {
         }
         return null;
     }
+    
+    public static void forEach(Collection collection, UnaryProcedure callback) {
+        forEach(collection.iterator(), callback);
+    }
+
+    public static void forEach(Iterator it, UnaryProcedure callback) {
+        while (it.hasNext()) {
+            callback.run(it.next());
+        }
+    }
+    
 }

@@ -25,8 +25,7 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertiesExpression
-    extends AbstractBeanPropertyConstraint {
+public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
     private String otherPropertyName;
     private BinaryPredicate beanPropertyExpression;
 
@@ -50,6 +49,14 @@ public class BeanPropertiesExpression
         Assert.notNull(beanPropertyExpression);
         this.otherPropertyName = otherPropertyName;
         this.beanPropertyExpression = beanPropertyExpression;
+    }
+
+    public String getOtherPropertyName() {
+        return otherPropertyName;
+    }
+
+    public BinaryPredicate getPredicate() {
+        return beanPropertyExpression;
     }
 
     /**
