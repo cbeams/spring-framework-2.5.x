@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -185,30 +185,33 @@ public class CustomEditorTests extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(Boolean.class, null, new CustomBooleanEditor(true));
 
-		try {
-			bw.setPropertyValue("bool2", "true");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "true");
 		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
 
-		try {
-			bw.setPropertyValue("bool2", "false");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "false");
 		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
 
-		try {
-			bw.setPropertyValue("bool2", "");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "on");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "off");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "yes");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "no");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "1");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "0");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "");
 		assertTrue("Correct bool2 value", bw.getPropertyValue("bool2") == null);
 		assertTrue("Correct bool2 value", tb.getBool2() == null);
 	}

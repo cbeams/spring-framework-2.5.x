@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.propertyeditors;
 
@@ -49,11 +49,16 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	public static final String VALUE_YES = "yes";
 	public static final String VALUE_NO = "no";
 
+	public static final String VALUE_1 = "1";
+	public static final String VALUE_0 = "0";
+
+
 	private final String trueString;
 
 	private final String falseString;
 
 	private final boolean allowEmpty;
+
 
 	/**
 	 * Create a new CustomBooleanEditor instance, with "true"/"on"/"yes"
@@ -103,12 +108,14 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		else if (this.falseString != null && text.equalsIgnoreCase(this.falseString)) {
 			setValue(Boolean.FALSE);
 		}
-		else if (this.trueString == null && text.equalsIgnoreCase(VALUE_TRUE) ||
-				text.equalsIgnoreCase(VALUE_ON) || text.equalsIgnoreCase(VALUE_YES)) {
+		else if (this.trueString == null &&
+				(text.equalsIgnoreCase(VALUE_TRUE) || text.equalsIgnoreCase(VALUE_ON) ||
+				text.equalsIgnoreCase(VALUE_YES) || text.equals(VALUE_1))) {
 			setValue(Boolean.TRUE);
 		}
-		else if (this.falseString == null && text.equalsIgnoreCase(VALUE_FALSE) ||
-				text.equalsIgnoreCase(VALUE_OFF) || text.equalsIgnoreCase(VALUE_NO)) {
+		else if (this.falseString == null &&
+				(text.equalsIgnoreCase(VALUE_FALSE) || text.equalsIgnoreCase(VALUE_OFF) ||
+				text.equalsIgnoreCase(VALUE_NO) || text.equals(VALUE_0))) {
 			setValue(Boolean.FALSE);
 		}
 		else {
