@@ -28,12 +28,6 @@ import org.springframework.util.Assert;
  */
 public class EndState extends AbstractState {
 
-	public static final String DEFAULT_BACK_STATE_ID = "back";
-
-	public static final String DEFAULT_FINISH_STATE_ID = "finish";
-
-	public static final String DEFAULT_CANCEL_STATE_ID = "cancel";
-
 	private String viewName;
 
 	public EndState(String id) {

@@ -284,6 +284,21 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public static final String SELECT = "select";
 
 	/**
+	 * Comment for <code>DEFAULT_BACK_STATE_ID</code>
+	 */
+	public static final String DEFAULT_BACK_STATE_ID = "back";
+
+	/**
+	 * Comment for <code>DEFAULT_FINISH_STATE_ID</code>
+	 */
+	public static final String DEFAULT_FINISH_STATE_ID = "finish";
+
+	/**
+	 * Comment for <code>DEFAULT_CANCEL_STATE_ID</code>
+	 */
+	public static final String DEFAULT_CANCEL_STATE_ID = "cancel";
+
+	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
@@ -1794,7 +1809,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public String getDefaultCancelEndStateId() {
-		return EndState.DEFAULT_CANCEL_STATE_ID;
+		return DEFAULT_CANCEL_STATE_ID;
 	}
 
 	/**
@@ -1808,7 +1823,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public String getDefaultBackEndStateId() {
-		return EndState.DEFAULT_BACK_STATE_ID;
+		return DEFAULT_BACK_STATE_ID;
 	}
 
 	/**
@@ -1859,7 +1874,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public String getDefaultFinishEndStateId() {
-		return EndState.DEFAULT_FINISH_STATE_ID;
+		return DEFAULT_FINISH_STATE_ID;
 	}
 
 	/**
