@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
+ * @version $Id: SchedulerFactoryBean.java,v 1.4 2004-02-21 22:30:10 dkopylenko Exp $
  */
 public class SchedulerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
