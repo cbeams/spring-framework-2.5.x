@@ -51,6 +51,8 @@ public class BindStatus {
 
 	private final RequestContext requestContext;
 
+	private final String path;
+
 	private final boolean htmlEscape;
 
 	private final String expression;
@@ -70,7 +72,7 @@ public class BindStatus {
 	 * Create a new BindStatus instance, representing a field or object status.
 	 * @param requestContext the current RequestContext
 	 * @param path the bean and property path for which values and errors
-	 * will be resolved (e.g. "person.age")
+	 * will be resolved (e.g. "customer.address.street")
 	 * @param htmlEscape whether to HTML-escape error messages and string values
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
@@ -78,6 +80,7 @@ public class BindStatus {
 			throws IllegalStateException {
 
 		this.requestContext = requestContext;
+		this.path = path;
 		this.htmlEscape = htmlEscape;
 
 		// determine name of the object and property
@@ -155,6 +158,15 @@ public class BindStatus {
 		return messages;
 	}
 
+
+	/**
+	 * Return the bean and property path for which values and errors
+	 * will be resolved (e.g. "customer.address.street").
+	 */
+	public String getPath() {
+		return path;
+	}
+
 	/**
 	 * Return a bind expression that can be used in HTML forms as input name
 	 * for the respective field, or null if not field-specific.
@@ -163,7 +175,7 @@ public class BindStatus {
 	 * "customer.address.street", if bound to a "customer" bean.
 	 */
 	public String getExpression() {
-		return this.expression;
+		return expression;
 	}
 
 	/**
@@ -230,6 +242,7 @@ public class BindStatus {
 		return StringUtils.arrayToDelimitedString(this.errorMessages, delimiter);
 	}
 
+
 	/**
 	 * Return the Errors instance that this bind status is currently bound to.
 	 * @return the current Errors instance, or null if none
@@ -246,6 +259,7 @@ public class BindStatus {
 	public PropertyEditor getEditor() {
 		return editor;
 	}
+
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("BindStatus: ");
