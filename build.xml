@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.20 2003-12-15 10:37:04 johnsonr Exp $
+    $Id: build.xml,v 1.21 2003-12-19 12:32:02 jhoeller Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -236,10 +236,9 @@
 				<include name="dist/*.tld"/>
 				<include name="docs/**"/>
 				<exclude name="docs/reference/**"/>
-				<include name="src/**"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/aop-alliance/**"/>
-				<include name="lib/cglib/cglib-asm.jar"/>
+				<include name="lib/cglib/**"/>
 				<include name="lib/dom4j/**"/>
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
@@ -263,6 +262,7 @@
 				<include name="samples/tiles-example/**"/>
 				<include name="samples/webapp-minimal/**"/>
 				<include name="samples/webapp-typical/**"/>
+				<include name="src/**"/>
 				<include name="*.txt"/>
 			</zipfileset>
 		</zip>

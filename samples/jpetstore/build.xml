@@ -83,9 +83,6 @@
 			<fileset dir="${spring.root}/lib/aop-alliance">
 				<include name="aopalliance.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/cglib">
-				<include name="cglib-asm.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
 			</fileset>

@@ -46,7 +46,8 @@
 			<include name="aopalliance.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/cglib">
-			<include name="cglib-asm.jar"/>
+			<include name="asm.jar"/>
+			<include name="cglib*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hsqldb">
 			<include name="hsqldb.jar"/>
@@ -58,9 +59,7 @@
 			<include name="odmg.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-beanutils.jar"/>
 			<include name="commons-collections.jar"/>
-			<include name="commons-lang.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet.jar"/>
@@ -129,7 +128,8 @@
 				<include name="aopalliance.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">
-				<include name="cglib-asm.jar"/>
+				<include name="asm.jar"/>
+				<include name="cglib*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
