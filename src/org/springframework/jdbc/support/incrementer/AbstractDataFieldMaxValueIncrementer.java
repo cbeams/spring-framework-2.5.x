@@ -20,7 +20,7 @@ import org.springframework.dao.DataAccessException;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Ken Krebs
- * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.2 2004-01-02 22:01:31 jhoeller Exp $
  *
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
@@ -30,7 +30,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/** The name of the sequence/table containing the sequence */
 	private String incrementerName;
 
-	/** The name of the column to use for this sequence */
+	/** The name of the column for this sequence */
 	private String columnName;
 
 	/** The number of keys buffered in a cache */
@@ -39,21 +39,17 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/** Flag if dirty definition */
 	private boolean dirty = true;
 
-	/** Get the state of the dirty flag */
-	public boolean isDirty() {
-		return this.dirty;
-	}
 
 	/**
-	 * Default constructor
-	 **/
+	 * Create a new incrementer.
+	 */
 	public AbstractDataFieldMaxValueIncrementer() {
 	}
 
 	/**
-	 * Constructor
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
+	 * Create a new incrementer.
+	 * @param ds the datasource
+	 * @param incrementerName the name of the sequence/table
 	 **/
 	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName) {
 		this.dataSource = ds;
@@ -61,10 +57,10 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Constructor
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
+	 * Create a new incrementer.
+	 * @param ds the data source
+	 * @param incrementerName the name of the sequence/table
+	 * @param columnName the name of the column in the sequence table
 	 **/
 	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
 		this.dataSource = ds;
@@ -73,9 +69,9 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Constructor
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
+	 * Create a new incrementer.
+	 * @param ds the data source
+	 * @param incrementerName the name of the sequence/table
 	 * @param cacheSize the number of buffered keys
 	 **/
 	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, int cacheSize) {
@@ -85,10 +81,10 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Constructor
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
+	 * Create a new incrementer.
+	 * @param ds the data source
+	 * @param incrementerName the name of the sequence/table
+	 * @param columnName the name of the column in the sequence table
 	 * @param cacheSize the number of buffered keys
 	 **/
 	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, int cacheSize) {
@@ -98,14 +94,9 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 		this.cacheSize = cacheSize;
 	}
 
-	/** Set the state of the dirty flag	 */
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
 
 	/**
-	 * Set the data source.
-	 * @param dataSource The data source to set
+	 * Set the data soruce.
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -113,16 +104,14 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Get the data source.
-	 * @return ds The data source to return
+	 * Return the data source.
 	 */
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
 
 	/**
-	 * Set the incrementerName.
-	 * @param incrementerName The incrementerName to set
+	 * Set the name of the sequence/table.
 	 */
 	public void setIncrementerName(String incrementerName) {
 		this.incrementerName = incrementerName;
@@ -130,16 +119,14 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Get the incrementerName.
-	 * @return incrementerName The incrementerName to return
+	 * Return the name of the sequence/table.
 	 */
 	public String getIncrementerName() {
 		return this.incrementerName;
 	}
 
 	/**
-	 * Set the columnName.
-	 * @param columnName The columnName to set
+	 * Set the name of the column in the sequence table.
 	 */
 	public void setColumnName(String columnName) {
 		this.columnName = columnName;
@@ -147,16 +134,14 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Get the columnName.
-	 * @return columnName The columnName to return
+	 * Return the name of the column in the sequence table.
 	 */
 	public String getColumnName() {
 		return this.columnName;
 	}
 
 	/**
-	 * Set the cacheSize.
-	 * @param cacheSize The number of buffered keys
+	 * Set the number of buffered keys.
 	 */
 	public void setCacheSize(int cacheSize) {
 		this.cacheSize = cacheSize;
@@ -164,60 +149,59 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Get the cacheSize.
-	 * @return cacheSize The cacheSize to return
+	 * Return the number of buffered keys.
 	 */
 	public int getCacheSize() {
 		return this.cacheSize;
 	}
 
-	/**
-	 * Template method
-	 * @see org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer#nextIntValue
-	 */
-	public final int nextIntValue() throws DataAccessException {
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
+	}
+
+	public boolean isDirty() {
+		return this.dirty;
+	}
+
+	public void afterPropertiesSet() throws DataAccessException {
+		if (this.dataSource == null) {
+			throw new IllegalArgumentException("DataSource property must be set on " + getClass().getName());
+		}
+	}
+
+
+	public int nextIntValue() throws DataAccessException {
 		return incrementIntValue();
 	}
 
-	/**
-	 * Template method
-	 * @see org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer#nextLongValue
-	 */
-	public final long nextLongValue() throws DataAccessException {
+	public long nextLongValue() throws DataAccessException {
 		return incrementLongValue();
 	}
 
-	/**
-	 * Template method
-	 * @see org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer#nextDoubleValue
-	 */
-	public final double nextDoubleValue() throws DataAccessException {
+	public double nextDoubleValue() throws DataAccessException {
 		return incrementDoubleValue();
 	}
 
-	/**
-	 * Template method
-	 * @see org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer#nextStringValue()
-	 */
-	public final String nextStringValue() throws DataAccessException {
+	public String nextStringValue() throws DataAccessException {
 		return incrementStringValue();
 	}
 
-	/**
-	 * Template method
-	 * @see org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer#nextValue(java.lang.Class)
-	 */
-	public final Object nextValue(Class keyClass) throws DataAccessException {
-		if (int.class.getName().equals(keyClass.getName()) || Integer.class.getName().equals(keyClass.getName()))
+	public Object nextValue(Class keyClass) throws DataAccessException {
+		if (int.class.getName().equals(keyClass.getName()) || Integer.class.getName().equals(keyClass.getName())) {
 			return new Integer(incrementIntValue());
-		else if (long.class.getName().equals(keyClass.getName()) || Long.class.getName().equals(keyClass.getName()))
+		}
+		else if (long.class.getName().equals(keyClass.getName()) || Long.class.getName().equals(keyClass.getName())) {
 			return new Long(incrementLongValue());
-		else if (double.class.getName().equals(keyClass.getName()) || Double.class.getName().equals(keyClass.getName()))
+		}
+		else if (double.class.getName().equals(keyClass.getName()) || Double.class.getName().equals(keyClass.getName())) {
 			return new Double(incrementDoubleValue());
-		else if (String.class.getName().equals(keyClass.getName()))
+		}
+		else if (String.class.getName().equals(keyClass.getName())) {
 			return incrementStringValue();
-		else
-			throw new IllegalArgumentException("Invalid key class");
+		}
+		else {
+			throw new IllegalArgumentException("Invalid key class: " + keyClass.getName());
+		}
 	}
 
 	/**
@@ -244,11 +228,4 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	 */
 	protected abstract String incrementStringValue() throws DataAccessException;
 
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws DataAccessException {
-		if (this.dataSource == null)
-			throw new IllegalArgumentException("DataSource property must be set on " + getClass().getName());
-	}
 }

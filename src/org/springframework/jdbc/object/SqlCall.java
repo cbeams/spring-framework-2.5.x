@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SqlCall.java,v 1.4 2003-11-21 22:45:30 jhoeller Exp $
+ * @version $Id: SqlCall.java,v 1.5 2004-01-02 22:01:31 jhoeller Exp $
  */
 public abstract class SqlCall extends RdbmsOperation {
 
@@ -46,8 +46,6 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * Updated after each parameter is added.
 	 */
 	private String callString;
-
-
 
 	/**
 	 * Set the flag used to indicate that this call is for a function
@@ -78,7 +76,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with this parameters.
 	 * @param inParams parameters. May be null.
 	 */
-	protected final CallableStatementCreator newCallableStatementCreator(Map inParams) {
+	protected CallableStatementCreator newCallableStatementCreator(Map inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
 	}
 
@@ -87,7 +85,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * with the parameters returned from this ParameterMapper.
 	 * @param inParamMapper parametermapper. May not be null.
 	 */
-	protected final CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
+	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);
 	}
 
@@ -97,15 +95,14 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @see RdbmsOperation#compileInternal()
 	 */
 	protected final void compileInternal() {
-
 		List parameters = getDeclaredParameters();
 		int firstParameter = 0;
 		if (isFunction()) {
-			callString = "{? = call " + getSql() + "(";
+			this.callString = "{? = call " + getSql() + "(";
 			firstParameter = 1;
 		}
 		else {
-			callString = "{call " + getSql() + "(";
+			this.callString = "{call " + getSql() + "(";
 		}
 		for (int i = firstParameter; i < parameters.size(); i++) {
 			SqlParameter p = (SqlParameter) parameters.get(i);
@@ -113,12 +110,13 @@ public abstract class SqlCall extends RdbmsOperation {
 				firstParameter++;
 			}
 			else {
-				if (i > firstParameter)
-					callString += ", ";
-				callString += "?";
+				if (i > firstParameter) {
+					this.callString += ", ";
+				}
+				this.callString += "?";
 			}
 		}
-		callString += ")}";
+		this.callString += ")}";
 
 		logger.info("Compiled stored procedure. Call string is [" + getCallString() + "]");
 

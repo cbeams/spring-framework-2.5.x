@@ -18,17 +18,17 @@ import org.springframework.jdbc.support.JdbcUtils;
  * parameters.
  *
  * @author Rod Johnson
- * @version $Id: SqlOperation.java,v 1.7 2003-12-30 00:49:18 jhoeller Exp $
+ * @version $Id: SqlOperation.java,v 1.8 2004-01-02 22:01:31 jhoeller Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
+
+	private boolean updatableResults;
 
 	/**
 	 * Object enabling us to create PreparedStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
 	private PreparedStatementCreatorFactory preparedStatementFactory;
-
-	private boolean updatableResults;
 
 	/**
 	 * Set whether to create PreparedStatementCreators that return prepared
@@ -51,7 +51,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with this parameters.
 	 * @param params parameters. May be null.
 	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	protected PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
 	}
 
@@ -61,21 +61,22 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * @see RdbmsOperation#compileInternal()
 	 */
 	protected final void compileInternal() {
-
-		// Validate parameter count
+		// validate parameter count
 		int bindVarCount = 0;
 		try {
 			bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', '\'');
 		}
 		catch (IllegalArgumentException e) {
-			// Transform jdbc-agnostic error to data-access error
+			// transform JDBC-agnostic error to data access error
 			throw new InvalidDataAccessApiUsageException(e.getMessage());
 		}
 		if (bindVarCount != getDeclaredParameters().size())
 			throw new InvalidDataAccessApiUsageException("SQL '" + getSql() + "' requires " + bindVarCount +
-			                                             " bind variables, but " + getDeclaredParameters().size() + " variables were declared for this object");
+			                                             " bind variables, but " + getDeclaredParameters().size() +
+																									 " variables were declared for this object");
 
-		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters(), updatableResults);
+		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters(),
+																																				this.updatableResults);
 		onCompileInternal();
 	}
 

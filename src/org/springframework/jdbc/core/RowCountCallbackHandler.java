@@ -10,16 +10,17 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
- * Implementation of RowCallbackHandler.
- * Convenient superclass for callback handlers.
- * We can either use this on its own (for example, in a test case, to ensure
+ * Implementation of RowCallbackHandler. Convenient superclass for callback handlers.
+ * An instance can only be used once.
+ *
+ * <p>We can either use this on its own (for example, in a test case, to ensure
  * that our result sets have valid dimensions), or use it as a superclass
  * for callback handlers that actually do something, and will benefit
  * from the dimension information it provides.
- * Can only be used once
- * @author  Rod Johnson
+ *
+ * @author Rod Johnson
  * @since May 3, 2001
- * @version $Id: RowCountCallbackHandler.java,v 1.1.1.1 2003-08-14 16:20:29 trisberg Exp $
+ * @version $Id: RowCountCallbackHandler.java,v 1.2 2004-01-02 22:00:54 jhoeller Exp $
  */
 public class RowCountCallbackHandler implements RowCallbackHandler {
 
@@ -29,8 +30,9 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	/** Columns we've seen so far */
 	private int columnCount;
 
-	/** Indexed from 0. Type (as in java.sql.Types) for the columns
-	 * as returned by ResultSetMetaData object
+	/**
+	 * Indexed from 0. Type (as in java.sql.Types) for the columns
+	 * as returned by ResultSetMetaData object.
 	 */
 	private int[] columnTypes;
 	
@@ -38,24 +40,23 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 
 	/**
 	 * Implementation of ResultSetCallbackHandler.
-	 * Work out column size if this is the first row,
-	 * otherwise just count rows.
+	 * Work out column size if this is the first row,* otherwise just count rows.
 	 * <p>Subclasses can perform custom extraction or processing
 	 * by overriding the processRow(ResultSet, int) method.
 	 */
 	public final void processRow(ResultSet rs) throws SQLException {
-		if (rowCount == 0) {
+		if (this.rowCount == 0) {
 			ResultSetMetaData rsmd = rs.getMetaData();
-			columnCount = rsmd.getColumnCount();
-			columnTypes = new int[columnCount];
-			columnNames = new String[columnCount];
-			for (int i = 0; i < columnCount; i++) {
-				columnTypes[i] = rsmd.getColumnType(i + 1);
-				columnNames[i] = rsmd.getColumnName(i + 1);
+			this.columnCount = rsmd.getColumnCount();
+			this.columnTypes = new int[this.columnCount];
+			this.columnNames = new String[this.columnCount];
+			for (int i = 0; i < this.columnCount; i++) {
+				this.columnTypes[i] = rsmd.getColumnType(i + 1);
+				this.columnNames[i] = rsmd.getColumnName(i + 1);
 			}
-			// Could also get column names
+			// could also get column names
 		}
-		processRow(rs, rowCount++);
+		processRow(rs, this.rowCount++);
 	}
 
 	/** 
@@ -96,7 +97,6 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	public final int getRowCount() {
 		return rowCount;
 	}
-
 
 	/** 
 	 * Return the number of columns in this result set.

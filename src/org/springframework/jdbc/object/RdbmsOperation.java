@@ -8,7 +8,6 @@ package org.springframework.jdbc.object;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -41,7 +40,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.6 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: RdbmsOperation.java,v 1.7 2004-01-02 22:01:31 jhoeller Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -49,15 +48,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/** Lower-level class used to execute SQL */
+	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+
 	/** List of SqlParameter objects */
 	private List declaredParameters = new LinkedList();
 
 	/** SQL statement */
 	private String sql;
-	
-	/** Lower-level class used to execute SQL */
-	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
-
 	
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -70,7 +68,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Set the JDBC DataSource to obtain connections from.
 	 */
-	public final void setDataSource(DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate.setDataSource(dataSource);
 	}
 
@@ -81,14 +79,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * apply to multiple RdbmsOperation objects.
 	 * @param jdbcTemplate
 	 */
-	public final void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	/**
 	 * Return the JdbcTemplate object used by this object.
 	 */
-	protected final JdbcTemplate getJdbcTemplate() {
+	protected JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
 
@@ -102,8 +100,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
 	 */
 	public void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
-		if (compiled)
+		if (this.compiled) {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
+		}
 		if (types != null) {
 			for (int i = 0; i < types.length; i++) {
 				declareParameter(new SqlParameter(types[i]));
@@ -119,14 +118,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * and hence cannot be configured further
 	 */
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {
-		if (compiled)
+		if (this.compiled) {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
-		declaredParameters.add(param);
+		}
+		this.declaredParameters.add(param);
 	}
 
 	/**
 	 * Return a list of the declared SqlParameter objects.
-	 * @return a list of the declared SqlParameter objects
 	 */
 	protected List getDeclaredParameters() {
 		return declaredParameters;
@@ -136,7 +135,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the SQL executed by this operation.
 	 * @param sql the SQL executed by this operation
 	 */
-	public final void setSql(String sql) {
+	public void setSql(String sql) {
 		this.sql = sql;
 	}
 
@@ -162,7 +161,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * The exact meaning of compilation will vary between subclasses.
 	 * @return whether this operation is compiled, and ready to use.
 	 */
-	public final boolean isCompiled() {
+	public boolean isCompiled() {
 		return compiled;
 	}
 
@@ -174,10 +173,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	public final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
-			if (this.sql == null)
+			if (getSql() == null) {
 				throw new InvalidDataAccessApiUsageException("Sql must be set in class " + getClass().getName());
-			// Invoke subclass compile
-			
+			}
+
 			try {
 				this.jdbcTemplate.afterPropertiesSet();
 			}
@@ -207,69 +206,42 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @param parameters parameters supplied. May be null.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
-	protected final void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
-		if (!compiled) {
-			logger.info("SQL operation not compiled before execution -- invoking compile");
+	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
+		if (!this.compiled) {
+			logger.info("SQL operation not compiled before execution - invoking compile");
 			compile();
-			//throw new InvalidDataAccessApiUsageException("SQL operation must be compiled before execution");
 		}
 
 		int declaredInParameters = 0;
-		if (parameters != null) {
-			for (int i = 0; i < parameters.length; i++) {
-				if (!(parameters[i] instanceof SqlOutParameter))
-					declaredInParameters++;
-			}
-			if (declaredParameters == null)
-				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
-			if (parameters.length < declaredInParameters)
-				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " + declaredInParameters + " in parameters were declared in class " + getClass().getName());
-			if (parameters.length > declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " + declaredParameters.size() + " parameters were declared in class " + getClass().getName());
-		}
-		else {
-			// No parameters were supplied
-			if (!declaredParameters.isEmpty())
-				throw new InvalidDataAccessApiUsageException(declaredParameters.size() + " parameters must be supplied");
-		}
-	}
-
-	/**
-	 * Validate the parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every execute() method.
-	 * @param parameters parameters supplied. May be null.
-	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
-	 */
-	protected final void validateParameters(Map parameters) throws InvalidDataAccessApiUsageException {
-		if (!compiled) {
-			logger.info("SQL operation not compiled before execution -- invoking compile");
-			compile();
-			//throw new InvalidDataAccessApiUsageException("SQL operation must be compiled before execution");
-		}
-
-		int declaredInParameters = 0;
-		if (declaredParameters != null) {
-			Iterator iter = declaredParameters.iterator();
+		if (this.declaredParameters != null) {
+			Iterator iter = this.declaredParameters.iterator();
 			while (iter.hasNext()) {
 				Object p = iter.next();
-				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet))
+				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
 					declaredInParameters++;
+				}
 			}
 		}
 
 		if (parameters != null) {
-
-			if (declaredParameters == null)
+			if (this.declaredParameters == null) {
 				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
-			if (parameters.size() < declaredInParameters)
-				throw new InvalidDataAccessApiUsageException(parameters.size() + " parameters were supplied, but " + declaredInParameters + " in parameters were declared in class " + getClass().getName());
-			if (parameters.size() > declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException(parameters.size() + " parameters were supplied, but " + declaredParameters.size() + " parameters were declared in class " + getClass().getName());
+			}
+			if (parameters.length < declaredInParameters) {
+				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
+																										 declaredInParameters + " in parameters were declared in class " +
+																										 getClass().getName());
+			}
+			if (parameters.length > this.declaredParameters.size()) {
+				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
+																										 this.declaredParameters.size() + " parameters were declared in class " +
+																										 getClass().getName());
+			}
 		}
 		else {
-			// No parameters were supplied
-			if (!declaredParameters.isEmpty())
-				throw new InvalidDataAccessApiUsageException(declaredParameters.size() + " parameters must be supplied");
+			// no parameters were supplied
+			if (!this.declaredParameters.isEmpty())
+				throw new InvalidDataAccessApiUsageException(this.declaredParameters.size() + " parameters must be supplied");
 		}
 	}
 

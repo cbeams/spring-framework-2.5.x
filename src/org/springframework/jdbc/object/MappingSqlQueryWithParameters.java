@@ -61,7 +61,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Implementation of protected abstract method. This invokes the subclass's
 	 * implementation of the mapRow() method.
 	 */
-	protected final ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context) {
+	protected ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context) {
 		return new ResultReaderImpl(rowsExpected, parameters, context);
 	}
 
