@@ -92,18 +92,22 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		return value;
 	}
 
-	public Object getRequiredAttribute(String key) throws IllegalStateException {
-		Object value = getAttribute(key);
-		if (value == null) {
-			throw new IllegalStateException("Required attribute '" + key + "' is not present in flow scope for flow '"
-					+ getFlowId() + "'; attributes currently in scope are = " + DefaultObjectStyler.call(attributes));
-
-		}
+	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
+		Object value = getAttribute(attributeName);
+		assertValueNotNull(attributeName, value);
 		return value;
 	}
 
-	public Object getRequiredAttribute(String key, Class clazz) throws IllegalStateException {
-		Object value = getRequiredAttribute(key);
+	private void assertValueNotNull(String attributeName, Object value) throws IllegalStateException {
+		if (value == null) {
+			throw new IllegalStateException("Required attribute '" + attributeName
+					+ "' is not present in flow scope for flow '" + getFlowId()
+					+ "'; attributes currently in scope are = " + DefaultObjectStyler.call(attributes));
+		}
+	}
+
+	public Object getRequiredAttribute(String attributeName, Class clazz) throws IllegalStateException {
+		Object value = getRequiredAttribute(attributeName);
 		if (clazz != null) {
 			Assert.isInstanceOf(clazz, value);
 		}
@@ -112,6 +116,24 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	public boolean containsAttribute(String attributeName) {
 		return attributes.containsKey(attributeName);
+	}
+
+	public boolean containsAttribute(String attributeName, Class requiredType) {
+		try {
+			getRequiredAttribute(attributeName, requiredType);
+			return true;
+		}
+		catch (IllegalStateException e) {
+			return false;
+		}
+	}
+
+	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
+		getRequiredAttribute(attributeName, requiredType);
+	}
+
+	public void assertAttributePresent(String attributeName) throws IllegalStateException {
+		getRequiredAttribute(attributeName);
 	}
 
 	public Collection attributeNames() {

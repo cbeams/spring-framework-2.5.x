@@ -32,63 +32,70 @@ public class ActionState extends TransitionableState {
 
 	private Set actionBeanNames;
 
-	private boolean updateAction;
-
 	public ActionState(String id, Transition transition) {
 		super(id, transition);
-		setBeanName(buildActionBeanName(id));
+		setActionBeanName(buildActionBeanName(id));
 	}
 
 	public ActionState(String id, Transition[] transitions) {
 		super(id, transitions);
-		setBeanName(buildActionBeanName(id));
+		setActionBeanName(buildActionBeanName(id));
 	}
 
-	public ActionState(String id, String beanName, Transition transition) {
+	public ActionState(String id, String actionBeanName, Transition transition) {
 		super(id, transition);
-		setBeanName(beanName);
+		setActionBeanName(actionBeanName);
 	}
 
-	public ActionState(String id, String beanName, Transition[] transitions) {
+	public ActionState(String id, String actionBeanName, Transition[] transitions) {
 		super(id, transitions);
-		setBeanName(beanName);
+		setActionBeanName(actionBeanName);
 	}
 
 	public boolean isActionState() {
 		return true;
 	}
 
-	public void setBeanName(String beanName) {
-		Assert.hasText(beanName, "The action bean name is required");
+	public void setActionBeanName(String actionBeanName) {
+		Assert.hasText(actionBeanName, "The action bean name is required");
 		this.actionBeanNames = new HashSet(1);
-		this.actionBeanNames.add(beanName);
+		this.actionBeanNames.add(actionBeanName);
+	}
+
+	public void setActionBeanNames(String[] beanNames) {
+		this.actionBeanNames = new HashSet(Arrays.asList(beanNames));
 	}
 
 	protected String buildActionBeanName(String stateId) {
 		// do nothing, subclasses may override
 		return stateId;
 	}
+	
+	protected Set getActionBeanNames() {
+		return actionBeanNames;
+	}
 
-	public void setBeanNames(String[] beanNames) {
-		this.actionBeanNames = new HashSet(Arrays.asList(beanNames));
+	protected String getActionBeanName() {
+		Assert.notEmpty(this.actionBeanNames, "The action beans collection is empty");
+		return (String)this.actionBeanNames.iterator().next();
 	}
 
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response) {
-		Iterator it = actionBeanNames.iterator();
+		Iterator it = this.actionBeanNames.iterator();
 		while (it.hasNext()) {
-			String beanName = (String)it.next();
-			ActionBean bean = (ActionBean)flow.getFlowDao().getActionBean(beanName);
+			String actionBeanName = (String)it.next();
+			ActionBean actionBean = (ActionBean)flow.getFlowDao().getActionBean(actionBeanName);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing action bean with name '" + beanName + "'");
+				logger.debug("Executing action bean with name '" + actionBeanName + "'");
 			}
-			ActionBeanEvent event = bean.execute(request, response, sessionExecutionStack);
+			ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
 			}
 			else {
 				if (event != null && logger.isWarnEnabled()) {
-					logger.warn("Event '" + event + "' returned by action bean " + bean
+					logger.warn("Event '" + event + "' returned by action bean " + actionBean
 							+ "' does not map to a valid state transition for action state '" + getId() + "' in flow '"
 							+ flow.getId() + "'");
 				}
@@ -108,13 +115,5 @@ public class ActionState extends TransitionableState {
 			return null;
 		}
 		return getTransition(event.getId(), flow);
-	}
-
-	public boolean isUpdateAction() {
-		return updateAction;
-	}
-
-	public void setUpdateAction(boolean updateAction) {
-		this.updateAction = updateAction;
 	}
 }

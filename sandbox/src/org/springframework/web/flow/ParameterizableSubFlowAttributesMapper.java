@@ -246,6 +246,18 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 			return map.containsKey(attributeName);
 		}
 
+		public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void assertAttributePresent(String attributeName) throws IllegalStateException {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean containsAttribute(String attributeName, Class requiredType) {
+			throw new UnsupportedOperationException();
+		}
+
 		public Object getAttribute(String attributeName, Class requiredType) {
 			throw new UnsupportedOperationException();
 		}
@@ -279,5 +291,4 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 		}
 
 	}
-
 }

@@ -307,7 +307,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @return
 	 */
-	protected FlowDao getFlowDao() {
+	public FlowDao getFlowDao() {
 		assertFlowDaoSet();
 		return this.flowDao;
 	}

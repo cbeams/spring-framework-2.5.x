@@ -32,7 +32,13 @@ public interface AttributesAccessor {
 
 	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException;
 
+	public void assertAttributePresent(String attributeName) throws IllegalStateException;
+
+	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException;
+
 	public boolean containsAttribute(String attributeName);
+
+	public boolean containsAttribute(String attributeName, Class requiredType);
 
 	public Collection attributeNames();
 

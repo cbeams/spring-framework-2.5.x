@@ -104,6 +104,18 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return getActiveFlowSession().containsAttribute(attributeName);
 	}
 
+	public boolean containsAttribute(String attributeName, Class requiredType) {
+		return getActiveFlowSession().containsAttribute(attributeName, requiredType);
+	}
+
+	public void assertAttributePresent(String attributeName) {
+		getActiveFlowSession().assertAttributePresent(attributeName);
+	}
+
+	public void assertAttributePresent(String attributeName, Class requiredType) {
+		getActiveFlowSession().assertAttributePresent(attributeName, requiredType);
+	}
+
 	public Collection attributeNames() {
 		return getActiveFlowSession().attributeNames();
 	}
