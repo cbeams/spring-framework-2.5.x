@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
  * 
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: MethodMatcher.java,v 1.3 2003-11-21 22:45:09 jhoeller Exp $
+ * @version $Id: MethodMatcher.java,v 1.4 2004-02-11 17:18:13 jhoeller Exp $
  */
 public interface MethodMatcher {
 	
@@ -49,10 +49,10 @@ public interface MethodMatcher {
 	 * even if the 2-arg matches method returns true?
 	 * Can be invoked when an AOP proxy is created, and need not be invoked
 	 * again before each method invocation,
+	 * <p>Note: Could be pulled up into a Matcher super-interface to apply to
+	 * fields also.
 	 * @return whether or not a runtime matche via the 3-arg matches() method is
 	 * required if static matching passed.
-	 * <br>Note: could be pulled up into a Matcher superinterface to apply to
-	 * fields also
 	 */
 	boolean isRuntime();
 	
@@ -86,7 +86,7 @@ public interface MethodMatcher {
 		}
 
 		public boolean matches(Method m, Class targetClass, Object[] args) {
-			// Should never be invoked as isRuntime returns false
+			// should never be invoked as isRuntime returns false
 			throw new UnsupportedOperationException();
 		}
 	};

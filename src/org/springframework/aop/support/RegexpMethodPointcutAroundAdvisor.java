@@ -6,18 +6,18 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.Pointcut;
 
 /**
- * Convenient class for regexp method pointcuts that hold an Interceptor, making them
- * an Advisor
+ * Convenient class for regexp method pointcuts that hold an Interceptor,
+ * making them an Advisor.
  * @author Dmitriy Kopylenko
- * @version $Id: RegexpMethodPointcutAroundAdvisor.java,v 1.2 2003-11-28 15:01:33 dkopylenko Exp $
+ * @version $Id: RegexpMethodPointcutAroundAdvisor.java,v 1.3 2004-02-11 17:18:17 jhoeller Exp $
  */
-public class RegexpMethodPointcutAroundAdvisor extends RegexpMethodPointcut implements InterceptionAroundAdvisor {
-
-	private boolean isPerInstance;
+public class RegexpMethodPointcutAroundAdvisor extends RegexpMethodPointcut
+    implements InterceptionAroundAdvisor {
 
 	private Interceptor interceptor;
 
@@ -32,29 +32,16 @@ public class RegexpMethodPointcutAroundAdvisor extends RegexpMethodPointcut impl
 		this.interceptor = interceptor;
 	}
 	
-	public void setIsPerInstance(boolean isPerInstance) {
-		this.isPerInstance = isPerInstance;
-	}
-
-	/**
-	 * @see org.springframework.aop.InterceptionAroundAdvisor#getInterceptor()
-	 */
 	public Interceptor getInterceptor() {
 		return this.interceptor;
 	}
 
-	/**
-	 * @see org.springframework.aop.PointcutAdvisor#getPointcut()
-	 */
-	public Pointcut getPointcut() {
-		return this;
+	public boolean isPerInstance() {
+		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
 	}
 
-	/**
-	 * @see org.springframework.aop.Advisor#isPerInstance()
-	 */
-	public boolean isPerInstance() {
-		return this.isPerInstance;
+	public Pointcut getPointcut() {
+		return this;
 	}
 
 }

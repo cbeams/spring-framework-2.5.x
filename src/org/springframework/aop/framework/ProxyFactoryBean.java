@@ -63,7 +63,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.19 2004-02-04 17:42:50 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.20 2004-02-11 17:18:16 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -115,7 +115,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	}
 
 	/**
-	 * Set the list of Interceptor/MethodPointcut bean names. This must
+	 * Set the list of Interceptor/Advisor bean names. This must
 	 * always be set to use this factory bean in a bean factory.
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
@@ -166,13 +166,12 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 				}
 				else {
 					addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
-					                                  name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
+					                 name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				}
 			}
 			else {
 				// Add a named interceptor
 				Object advice = this.beanFactory.getBean(this.interceptorNames[i]);
-				//logger.debug("Adding pointcut or interceptor [" + pointcutOrInterceptor + "] from bean name '" + this.interceptorNames[i] + "'");
 				addAdvisor(advice, this.interceptorNames[i]);
 			}
 		}
@@ -272,15 +271,16 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 			logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
 			setTargetSource((TargetSource) advisor);
 			// Save target name
-			targetName = name;
+			this.targetName = name;
 		}
 	}
 	
 	private void refreshTarget() {
-		logger.debug("Refreshing target with name '" + targetName + "'");
-		if (targetName == null)
+		logger.debug("Refreshing target with name '" + this.targetName + "'");
+		if (this.targetName == null) {
 			throw new AopConfigException("Target name cannot be null when refreshing!");
-		Object target = beanFactory.getBean(targetName);
+		}
+		Object target = this.beanFactory.getBean(this.targetName);
 		setTarget(target);
 	}
 

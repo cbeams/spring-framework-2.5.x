@@ -14,6 +14,7 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
+
 import org.springframework.aop.ClassFilter;
 
 /**
@@ -33,13 +34,13 @@ import org.springframework.aop.ClassFilter;
  *
  * @author Rod Johnson
  * @since July 22, 2003
- * @version $Id: RegexpMethodPointcut.java,v 1.4 2004-01-13 22:33:49 johnsonr Exp $
+ * @version $Id: RegexpMethodPointcut.java,v 1.5 2004-02-11 17:18:17 jhoeller Exp $
  */
 public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter { 
 	
-	private Log logger = LogFactory.getLog(getClass());
+	private final Log logger = LogFactory.getLog(getClass());
 	
-	/** Regular expression to match */
+	/** Regular expressions to match */
 	private String[] patterns = new String[0];
 	
 	/** ORO's compiled form of this pattern */
@@ -49,17 +50,9 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	private PatternMatcher matcher;
 
 	/**
-	 * @return the regular expressions for method matching
-	 */
-	public String[] getPatterns() {
-		return patterns;
-	}
-	
-	/**
 	 * Convenience method when we have only a single pattern.
 	 * Use either this method or setPatterns(), not both.
-	 * @param pattern
-	 * @throws MalformedPatternException
+	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) throws MalformedPatternException {
 		setPatterns(new String[] { pattern });
@@ -85,6 +78,13 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	}
 
 	/**
+	 * Return the regular expressions for method matching.
+	 */
+	public String[] getPatterns() {
+		return patterns;
+	}
+
+	/**
 	 * Try to match the regular expression against the fully qualified name
 	 * of the method's declaring class, plus the name of the method.
 	 * Note that the declaring class is that class that originally declared
@@ -97,10 +97,13 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 		String patt = m.getDeclaringClass().getName() + "." + m.getName();
 		for (int i = 0; i < this.compiledPatterns.length; i++) {
 			boolean matched = this.matcher.matches(patt, this.compiledPatterns[i]);
-			if (logger.isDebugEnabled())
-				logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPatterns[i].getPattern() + "; matched=" + matched);
-			if (matched)
+			if (logger.isDebugEnabled()) {
+				logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPatterns[i].getPattern() +
+				             "; matched=" + matched);
+			}
+			if (matched) {
 				return true;
+			}
 		}
 		return false;
 	}

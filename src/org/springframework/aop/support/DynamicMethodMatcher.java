@@ -7,11 +7,11 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.springframework.aop.*;
+import org.springframework.aop.MethodMatcher;
 
 /**
- * Convenient abstract superclas for static method matchers, which don't care
- * about arguments at runtime. 
+ * Convenient abstract superclass for dynamic method matchers,
+ * which do care about arguments at runtime.
  */
 public abstract class DynamicMethodMatcher implements MethodMatcher {
 
