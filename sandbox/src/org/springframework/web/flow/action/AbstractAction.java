@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
  * Base action implementation that provides a number of helper methods generally
  * useful to any controller/command action. These include:
  * <ul>
- * <li>Creating common <code>ActionResult</code> objects
+ * <li>Creating common events
  * <li>Accessing request parameters
  * <li>Accessing and exporting form objects
  * <li>Inserting action pre and post execution logic (may also be done with an
@@ -49,7 +49,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * The form object is then aliased under this name by the default populate
-	 * and bind actions
+	 * and bind actions.
 	 */
 	public static final String LOCAL_FORM_OBJECT_NAME = "localFormObject";
 
@@ -59,18 +59,22 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 */
 	public static final String LOCAL_FORM_OBJECT_ERRORS_NAME = "localFormObjectErrors";
 
-	public static final String ERRORS_SUFFIX = "Errors";
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public void afterPropertiesSet() {
 		initAction();
 	}
 
+	/**
+	 * Returns the default error event ("error").
+	 */
 	protected String error() {
 		return FlowConstants.ERROR;
 	}
 
+	/**
+	 * Returns the default success event ("success").
+	 */
 	protected String success() {
 		return FlowConstants.SUCCESS;
 	}
@@ -80,7 +84,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * custom initialization.
 	 */
 	protected void initAction() {
-
 	}
 
 	/**
@@ -114,8 +117,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Get a boolean request parameter with a <code>defaultValue</code>
-	 * fallback value.
+	 * Get a boolean request parameter with a specified fallback value.
 	 * @param request The http request
 	 * @param parameterName The parameter name
 	 * @param defaultValue the fallback value
@@ -201,7 +203,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Get a attribute out of the http session, throwing an exception if not
+	 * Get an attribute out of the http session, throwing an exception if not
 	 * found.
 	 * @param request The http request with a session accessor
 	 * @param name The attribute name
@@ -213,7 +215,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Get a attribute out of the http session, returning null if not found.
+	 * Get an attribute out of the http session, returning null if not found.
 	 * @param request The http request with a session accessor
 	 * @param name The attribute name
 	 * @return The attribute value
@@ -224,7 +226,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Gets the form object from the model, using the local (to flow) name of
-	 * {@link #LOCAL_FORM_OBJECT_NAME}
+	 * {@link #LOCAL_FORM_OBJECT_NAME}.
 	 * 
 	 * @param model the flow model
 	 * @param formObjectClass the class of the form object, which will be
@@ -239,7 +241,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Gets the form object from the model, using the local (to flow) name of
-	 * {@link #LOCAL_FORM_OBJECT_NAME}
+	 * {@link #LOCAL_FORM_OBJECT_NAME}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the form object is not found in the
@@ -251,7 +253,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Gets the form object <code>Errors</code> tracker from the model, using
-	 * the local (to flow) name of {@link #LOCAL_FORM_OBJECT_NAME}
+	 * the local (to flow) name of {@link #LOCAL_FORM_OBJECT_NAME}.
 	 * 
 	 * @param model the flow model
 	 * @throws IllegalStateException if the Errors instance is not found in the
@@ -262,7 +264,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the specified name
+	 * Gets the form object from the model, using the specified name.
 	 * @param model the flow model
 	 * @param formObjectName the name of the form in the model
 	 * @param formObjectClass the class of the form object, which will be
@@ -274,7 +276,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Gets the form object from the model, using the specified name
+	 * Gets the form object from the model, using the specified name.
 	 * @param model the flow model
 	 * @param formObjectName the name of the form in the model
 	 * @return the form object
@@ -285,13 +287,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Gets the form object <code>Errors</code> tracker from the model, using
-	 * the specified name
+	 * the specified name.
 	 * @param model The flow model
-	 * @param formObjectName The name of the form object
+	 * @param formObjectErrorsName The name of the form object errors
 	 * @return The form object errors instance
 	 */
-	protected Errors getRequiredFormErrors(FlowModel model, String formObjectName) {
-		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
+	protected Errors getRequiredFormErrors(FlowModel model, String formObjectErrorsName) {
+		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
 	}
 
 	/**
