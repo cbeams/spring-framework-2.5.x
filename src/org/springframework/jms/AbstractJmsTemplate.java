@@ -17,6 +17,7 @@
 package org.springframework.jms;
 
 import java.lang.reflect.Constructor;
+import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -43,10 +44,12 @@ import org.springframework.util.ClassUtils;
  * 
  * Default setting for isEnabledDynamicDestinations is false.
  * 
+ * Default setting for isSessionTransacted is false.
+ * 
  * Default setting for isPubSubDomain is false.  Point-to-Point (Queues)
  * is the default domain.
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  * 
  */
 public abstract class AbstractJmsTemplate implements JmsTemplate, InitializingBean {
@@ -64,7 +67,7 @@ public abstract class AbstractJmsTemplate implements JmsTemplate, InitializingBe
     /**
      * Default transaction mode for a JMS Session. 
      */
-	private boolean sessionTransacted = true;
+	private boolean sessionTransacted = false;
 	
     /**
      * Default ack mode for a JMS Session.
@@ -229,26 +232,10 @@ public abstract class AbstractJmsTemplate implements JmsTemplate, InitializingBe
 		dynamicDestinationEnabled = b;
 	}
 
-	/**
-	 * Configure the JmsTemplate with knowledge of the JMS Domain used.
-	 * For the JMS 1.0.2 based senders this tells the JMS 1.0.2 which
-	 * class hierarchy to use in the implementation of the various
-	 * send and execute methods.  For the JMS 1.1 based senders it
-	 * tells what type of destination to create if dynamic destinations
-	 * are enabled.
-	 * @return true if the Publish/Subscribe domain (Topics) are used.
-	 * otherwise the Point-to-Point domain (Queues) are used.
-	 */
 	public boolean isPubSubDomain() {
 		return isPubSubDomain;
 	}
 
-	/**
-	 * Set the type of domain the sender is configured for.  See 
-	 * {@link #isPubSubDomain() isPubSubDomain} for more information.
-	 * @param b true for Publish/Subscribe domain (Topics) false for
-	 * Point-to-Point domain (Queues)
-	 */
 	public void setPubSubDomain(boolean b) {
 		isPubSubDomain = b;
 	}
@@ -376,5 +363,9 @@ public abstract class AbstractJmsTemplate implements JmsTemplate, InitializingBe
     public void setJmsConverter(JmsConverter converter) {
         jmsConverter = converter;
     }
+	
+	public void setJndiEnvironment(Properties jndiEnvironment) {
+		getJmsAdmin().setJndiEnvironment(jndiEnvironment);	
+	}
 
 }
