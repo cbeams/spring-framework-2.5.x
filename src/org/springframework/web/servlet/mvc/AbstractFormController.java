@@ -308,7 +308,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final BindException getErrorsForNewForm(HttpServletRequest request) throws Exception {
 		Object command = formBackingObject(request);
 		if (command == null) {
-			throw new ServletException("Form object returned by formBackingObject() may not be null");
+			throw new ServletException("Form object returned by formBackingObject() must not be null");
 		}
 		if (!checkCommand(command)) {
 			throw new ServletException("Form object returned by formBackingObject() must match commandClass");
@@ -340,12 +340,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		}
 		HttpSession session = request.getSession(false);
 		if (session == null) {
-			throw new ServletException("Must have session when trying to bind");
+			throw new ServletException("Must have session when trying to bind (in session-form mode)");
 		}
 		String formAttrName = getFormSessionAttributeName(request);
 		Object sessionFormObject = session.getAttribute(formAttrName);
 		if (sessionFormObject == null) {
-			throw new ServletException("Form object not found in session");
+			throw new ServletException("Form object not found in session (in session-form mode)");
 		}
 		session.removeAttribute(formAttrName);
 		return sessionFormObject;
