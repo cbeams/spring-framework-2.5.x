@@ -10,7 +10,14 @@ package org.springframework.beans.factory;
  * once all their properties have been set by a BeanFactory:
  * for example, to perform initialization, or merely to check
  * that all mandatory properties have been set.
+ * 
+ * <strong>Note, </strong>If the bean also implements BeanFactoryAware, this
+ * method will be invoked before BeanFactoryAware's <code>setBeanFactory</code>. 
+ * 
  * @author Rod Johnson
+ * @version $Revision: 1.2 $
+ * 
+ * @see org.springframework.beans.factory.BeanFactoryAware; 
  */
 public interface InitializingBean {
 	
