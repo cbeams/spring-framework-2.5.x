@@ -11,7 +11,7 @@ import org.springframework.beans.PropertyValues;
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.8 2003-11-09 21:38:37 jhoeller Exp $
+* @version $Id: RootBeanDefinition.java,v 1.9 2003-11-11 08:18:25 jhoeller Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -36,13 +36,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private ConstructorArgumentValues constructorArgumentValues;
 
-	private String initMethodName;
+	private String[] dependsOn;
 
-	private String destroyMethodName;
-	
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
 	private int autowire = AUTOWIRE_NO;
+
+	private String initMethodName;
+
+	private String destroyMethodName;
 
 
 	/**
@@ -103,10 +105,11 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.constructorArgumentValues = other.constructorArgumentValues;
 		setSingleton(other.isSingleton());
 		setLazyInit(other.isLazyInit());
-		setInitMethodName(other.getInitMethodName());
-		setDestroyMethodName(other.getDestroyMethodName());
+		setDependsOn(other.getDependsOn());
 		setDependencyCheck(other.getDependencyCheck());
 		setAutowire(other.getAutowire());
+		setInitMethodName(other.getInitMethodName());
+		setDestroyMethodName(other.getDestroyMethodName());
 	}
 
 
@@ -132,33 +135,21 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is null
-	 * in which case there is no initializer method.
+	 * Set the names of the beans that this bean depends on being initialized.
+	 * The bean factory will guarantee that these beans get initialized before.
+	 * <p>Note that dependencies are normally expressed through bean properties or
+	 * constructor arguments. This property should just be necessary for other kinds
+	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
-	public void setInitMethodName(String initMethodName) {
-		this.initMethodName = initMethodName;
+	public void setDependsOn(String[] dependsOn) {
+		this.dependsOn = dependsOn;
 	}
 
 	/**
-	 * Return the name of the initializer method.
+	 * Return the bean names that this bean depends on.
 	 */
-	public String getInitMethodName() {
-		return this.initMethodName;
-	}
-
-	/**
-	 * Set the name of the destroy method. The default is null
-	 * in which case there is no initializer method.
-	 */
-	public void setDestroyMethodName(String destroyMethodName) {
-		this.destroyMethodName = destroyMethodName;
-	}
-
-	/**
-	 * Return the name of the destroy method.
-	 */
-	public String getDestroyMethodName() {
-		return this.destroyMethodName;
+	public String[] getDependsOn() {
+		return dependsOn;
 	}
 
 	/**
@@ -200,6 +191,36 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public int getAutowire() {
 		return this.autowire;
+	}
+
+	/**
+	 * Set the name of the initializer method. The default is null
+	 * in which case there is no initializer method.
+	 */
+	public void setInitMethodName(String initMethodName) {
+		this.initMethodName = initMethodName;
+	}
+
+	/**
+	 * Return the name of the initializer method.
+	 */
+	public String getInitMethodName() {
+		return this.initMethodName;
+	}
+
+	/**
+	 * Set the name of the destroy method. The default is null
+	 * in which case there is no destroy method.
+	 */
+	public void setDestroyMethodName(String destroyMethodName) {
+		this.destroyMethodName = destroyMethodName;
+	}
+
+	/**
+	 * Return the name of the destroy method.
+	 */
+	public String getDestroyMethodName() {
+		return this.destroyMethodName;
 	}
 
 

@@ -59,12 +59,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * <p>This class handles resolution of runtime bean references,
  * FactoryBean dereferencing, and management of collection properties.
- * It also allows for management of a bean factory hierarchy, 
+ * It also allows for management of a bean factory hierarchy,
  * implementing the HierarchicalBeanFactory interface.
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.16 2003-11-10 18:06:48 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.17 2003-11-11 08:18:24 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -324,6 +324,13 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
 		logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
 
+		if (mergedBeanDefinition.getDependsOn() != null) {
+			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
+				// guarantee initialization of beans that the current one depends on
+				getBean(mergedBeanDefinition.getDependsOn()[i]);
+			}
+		}
+
 		BeanWrapper instanceWrapper = null;
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
 				mergedBeanDefinition.hasConstructorArgumentValues()) {
@@ -349,7 +356,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			autowireByType(beanName, mergedBeanDefinition, instanceWrapper);
 		}
-				
+
 		// We can apply dependency checks regardless of autowiring
 		dependencyCheck(beanName, mergedBeanDefinition, instanceWrapper);
 
@@ -642,14 +649,14 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
-		
+
 		for (int i = 0; i < pvals.length; i++) {
 			String argName = "property '" + pvals[i].getName() + "'";
 			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(beanName, argName, pvals[i].getValue()));
 			// Update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
-		
+
 		// Set our (possibly massaged) deepCopy
 		try {
 			bw.setPropertyValues(deepCopy);
@@ -679,7 +686,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			return resolveReference(beanName, argName, ref);
-		}	
+		}
 		else if (value instanceof ManagedList) {
 			// Convert from managed list. This is a special container that
 			// may contain runtime bean references.
@@ -698,7 +705,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			return value;
 		}
 	}
-	
+
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
@@ -748,7 +755,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		return ml;
 	}
-	
+
 	/**
 	 * Give a bean a chance to react now all its properties are set,
 	 * and a chance to know about its owning bean factory (this object).
@@ -773,7 +780,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				throw new FatalBeanException("afterPropertiesSet() on bean with name '" + name + "' threw an exception", ex);
 			}
 		}
-		
+
 		if (rbd.getInitMethodName() != null) {
 			logger.debug("Calling custom init method '" + rbd.getInitMethodName() + "' on bean with name '" + name + "'");
 			bw.invoke(rbd.getInitMethodName(), null);
@@ -802,8 +809,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(beanName);
 			if (bd instanceof RootBeanDefinition) {
-				// Remember to take a deep copy
-				return new RootBeanDefinition((RootBeanDefinition) bd);
+				return (RootBeanDefinition) bd;
 			}
 			else if (bd instanceof ChildBeanDefinition) {
 				ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
@@ -817,7 +823,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 					rbd.addPropertyValue(cbd.getPropertyValues().getPropertyValues()[i]);
 				}
 				return rbd;
-			}			
+			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (this.parentBeanFactory instanceof AbstractBeanFactory) {
@@ -827,9 +833,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				throw ex;
 			}
 		}
-		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName + "' is neither a RootBeanDefinition or ChildBeanDefinition");
+		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName +
+																 "' is neither a RootBeanDefinition or ChildBeanDefinition");
 	}
-	
+
 	/**
 	 * Register property value for a specific bean, overriding an existing value.
 	 * If no previous value exists, a new one will be added.
@@ -889,7 +896,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				}
 			}
 		}
-		
+
 		this.singletonCache.clear();
 	}
 

@@ -23,13 +23,13 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.LifecycleBean;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.14 2003-11-10 18:06:48 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.15 2003-11-11 08:17:45 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -713,6 +713,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		}
 	}
 
+	public void testDependsOn() {
+		InputStream is = getClass().getResourceAsStream("initializers.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		xbf.preInstantiateSingletons();
+	}
+
 
 	public static class BadInitializer {
 
@@ -781,6 +787,36 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 				throw new IllegalStateException("Already customDestroyed");
 			}
 			this.customDestroyed = true;
+		}
+	}
+
+
+	public static class PreparingBean1 {
+
+		public static boolean prepared = false;
+
+		public PreparingBean1() {
+			prepared = true;
+		}
+	}
+
+
+	public static class PreparingBean2 {
+
+		public static boolean prepared = false;
+
+		public PreparingBean2() {
+			prepared = true;
+		}
+	}
+
+
+	public static class DependingBean {
+
+		public DependingBean() {
+			if (!(PreparingBean1.prepared && PreparingBean2.prepared)) {
+				throw new IllegalStateException("Need prepared PreparedBeans!");
+			}
 		}
 	}
 

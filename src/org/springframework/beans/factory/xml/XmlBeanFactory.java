@@ -65,7 +65,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.17 2003-11-10 18:05:49 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.18 2003-11-11 08:18:25 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -80,6 +80,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String NAME_ATTRIBUTE = "name";
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
 	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
+	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
+	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 	private static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
 	private static final String INDEX_ATTRIBUTE = "index";
 	private static final String PROPERTY_ELEMENT = "property";
@@ -88,8 +91,6 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String MAP_ELEMENT = "map";
 	private static final String KEY_ATTRIBUTE = "key";
 	private static final String ENTRY_ELEMENT = "entry";
-	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
-	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 	private static final String BEAN_REF_ATTRIBUTE = "bean";
 	private static final String LOCAL_REF_ATTRIBUTE = "local";
 	private static final String EXTERNAL_REF_ATTRIBUTE = "external";
@@ -344,13 +345,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				ConstructorArgumentValues cargs = getConstructorArgSubElements(ele);
 				RootBeanDefinition rbd = new RootBeanDefinition(Class.forName(className, true, cl), cargs, pvs);
 
-				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-				if (!initMethodName.equals("")) {
-					rbd.setInitMethodName(initMethodName);
-				}
-				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-				if (!destroyMethodName.equals("")) {
-					rbd.setDestroyMethodName(destroyMethodName);
+				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
+					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
+					rbd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
 				}
 
 				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
@@ -362,6 +359,15 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				if (DEFAULT_VALUE.equals(autowire))
 					autowire = defaultAutowire;
 				rbd.setAutowire(getAutowire(autowire));
+
+				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
+				if (!initMethodName.equals("")) {
+					rbd.setInitMethodName(initMethodName);
+				}
+				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+				if (!destroyMethodName.equals("")) {
+					rbd.setDestroyMethodName(destroyMethodName);
+				}
 
 				bd = rbd;
 			}
