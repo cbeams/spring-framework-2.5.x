@@ -1822,7 +1822,7 @@ assertEquals("Added two advisors",
       (for example, mixins): they simply need to be defined as prototype,
       rather than singleton, bean definitions. For example, the
       <literal>LockMixin</literal> introduction interceptor from the Spring
-      test suite, shown above. could be used in conjunction with an
+      test suite, shown above, could be used in conjunction with an
       attribute-driven pointcut to target a mixin, as shown here. We use the
       generic <literal>DefaultPointcutAdvisor</literal>, configured using
       JavaBean properties:</para>
