@@ -19,12 +19,25 @@ package org.springframework.beans.factory.support;
 import java.util.HashMap;
 
 /**
- * Tag subclass used to hold managed values, which may
- * include runtime bean references
+ * Tag subclass used to hold managed Map values, which may
+ * include runtime bean references.
+ *
+ * <p>Just used on JDK < 1.4, as java.util.LinkedHashMap -
+ * which preserves key order - is preferred when it is available. 
+ *
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: ManagedMap.java,v 1.2 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: ManagedMap.java,v 1.3 2004-06-02 17:10:48 jhoeller Exp $
+ * @see ManagedLinkedMap
+ * @see java.util.LinkedHashMap
  */
 public class ManagedMap extends HashMap {
- 
+
+	public ManagedMap() {
+	}
+
+	public ManagedMap(int initialCapacity) {
+		super(initialCapacity);
+	}
+
 }

@@ -42,10 +42,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.ManagedLinkedMap;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -487,39 +489,47 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected List getList(Element collectionEle, String beanName) {
 		NodeList nl = collectionEle.getChildNodes();
-		ManagedList l = new ManagedList();
+		ManagedList list = new ManagedList(nl.getLength());
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				l.add(parsePropertySubelement(ele, beanName));
+				list.add(parsePropertySubelement(ele, beanName));
 			}
 		}
-		return l;
+		return list;
 	}
 
 	protected Set getSet(Element collectionEle, String beanName) {
 		NodeList nl = collectionEle.getChildNodes();
-		ManagedSet s = new ManagedSet();
+		ManagedSet set = new ManagedSet(nl.getLength());
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				s.add(parsePropertySubelement(ele, beanName));
+				set.add(parsePropertySubelement(ele, beanName));
 			}
 		}
-		return s;
+		return set;
 	}
 
 	protected Map getMap(Element mapEle, String beanName) {
-		ManagedMap m = new ManagedMap();
-		List l = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
-		for (int i = 0; i < l.size(); i++) {
-			Element entryEle = (Element) l.get(i);
+		List list = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
+		Map map = null;
+		// A LinkedHashMap will preserve insertion order, but is not available pre-1.4.
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			map = ManagedLinkedMapCreator.createManagedLinkedMap(list.size());
+			// ManagedLinkedMap = a tag subclass of java.util.LinkedHashMap
+		}
+		else {
+			map = new ManagedMap(list.size());  // a tag subclass of java.util.HashMap
+		}
+		for (int i = 0; i < list.size(); i++) {
+			Element entryEle = (Element) list.get(i);
 			String key = entryEle.getAttribute(KEY_ATTRIBUTE);
 			// TODO hack: make more robust
 			NodeList subEles = entryEle.getElementsByTagName("*");
-			m.put(key, parsePropertySubelement((Element) subEles.item(0), beanName));
+			map.put(key, parsePropertySubelement((Element) subEles.item(0), beanName));
 		}
-		return m;
+		return map;
 	}
 
 	/**
@@ -603,6 +613,18 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		// else leave default value
 		return autowire;
+	}
+
+
+	/**
+	 * Actual creation of a ManagedLinkedMap.
+	 * In separate inner class to avoid runtime dependency on JDK 1.4.
+	 */
+	private static abstract class ManagedLinkedMapCreator {
+
+		private static Map createManagedLinkedMap(int capacity) {
+			return new ManagedLinkedMap(capacity);
+		}
 	}
 
 }

@@ -19,12 +19,19 @@ package org.springframework.beans.factory.support;
 import java.util.ArrayList;
 
 /**
- * Tag subclass used to hold managed elements, which may
+ * Tag subclass used to hold managed List elements, which may
  * include runtime bean references.
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: ManagedList.java,v 1.3 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: ManagedList.java,v 1.4 2004-06-02 17:10:48 jhoeller Exp $
  */
 public class ManagedList extends ArrayList {
- 
+
+	public ManagedList() {
+	}
+
+	public ManagedList(int initialCapacity) {
+		super(initialCapacity);
+	}
+
 }

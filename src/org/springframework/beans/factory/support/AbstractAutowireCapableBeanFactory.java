@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +54,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.core.JdkVersion;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation.
@@ -74,6 +76,9 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
+
+	private static final String MANAGED_LINKED_MAP_CLASS_NAME =
+	    "org.springframework.beans.factory.support.ManagedLinkedMap";
 
 	static {
 		// Eagerly load the DisposableBean class to avoid weird classloader
@@ -331,10 +336,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				for (int j = 0; j < argTypes.length; j++) {
 					ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
 					if (valueHolder != null) {
-						// synchronize if custom editors are registered
-						// necessary because PropertyEditors are not thread-safe
+						// Synchronize if custom editors are registered.
+						// Necessary because PropertyEditors are not thread-safe.
 						if (!getCustomEditors().isEmpty()) {
-							synchronized (this) {
+							synchronized (getCustomEditors()) {
 								args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
 							}
 						}
@@ -669,18 +674,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else if (value instanceof ManagedList) {
 			// Convert from managed list. This is a special container that may
 			// contain runtime bean references. May need to resolve references.
-			return resolveManagedList(beanName, mergedBeanDefinition, argName, (ManagedList) value);
+			return resolveManagedList(beanName, mergedBeanDefinition, argName, (List) value);
 		}
 		else if (value instanceof ManagedSet) {
 			// Convert from managed set. This is a special container that may
 			// contain runtime bean references. May need to resolve references.
-			return resolveManagedSet(beanName, mergedBeanDefinition, argName, (ManagedSet) value);
+			return resolveManagedSet(beanName, mergedBeanDefinition, argName, (Set) value);
 		}
-		else if (value instanceof ManagedMap) {
+		else if (value instanceof ManagedMap ||
+		    (value != null && MANAGED_LINKED_MAP_CLASS_NAME.equals(value.getClass().getName()))) {
 			// Convert from managed map. This is a special container that may
 			// contain runtime bean references. May need to resolve references.
-			ManagedMap mm = (ManagedMap) value;
-			return resolveManagedMap(beanName, mergedBeanDefinition, argName, mm);
+			return resolveManagedMap(beanName, mergedBeanDefinition, argName, (Map) value);
 		}
 		else {
 			// no need to resolve value
@@ -725,10 +730,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	protected List resolveManagedList(String beanName, RootBeanDefinition mergedBeanDefinition,
-																		String argName, ManagedList ml) throws BeansException {
-		List resolved = new ArrayList();
+																		String argName, List ml) throws BeansException {
+		List resolved = new ArrayList(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
-			resolved.add(resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[" + i + "]", ml.get(i)));
+			resolved.add(
+			    resolveValueIfNecessary(beanName, mergedBeanDefinition,
+			                            argName + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
+			                            ml.get(i)));
 		}
 		return resolved;
 	}
@@ -737,10 +745,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	protected Set resolveManagedSet(String beanName, RootBeanDefinition mergedBeanDefinition,
-																	String argName, ManagedSet ms) throws BeansException {
-		Set resolved = new HashSet();
+																	String argName, Set ms) throws BeansException {
+		Set resolved = new HashSet(ms.size());
+		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
-			resolved.add(resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[(set-element)]", it.next()));
+			resolved.add(
+			    resolveValueIfNecessary(beanName, mergedBeanDefinition,
+			                            argName + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
+			                            it.next()));
+			i++;
 		}
 		return resolved;
 	}
@@ -749,12 +762,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
 	protected Map resolveManagedMap(String beanName, RootBeanDefinition mergedBeanDefinition,
-																	String argName, ManagedMap mm) throws BeansException {
-		Map resolved = new HashMap();
+																	String argName, Map mm) throws BeansException {
+		Map resolved = null;
+		// A LinkedHashMap will preserve insertion order, but is not available pre-1.4.
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			resolved = LinkedHashMapCreator.createLinkedHashMap(mm.size());
+		}
+		else {
+			resolved = new HashMap(mm.size());
+		}
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
-			resolved.put(key, resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[" + key + "]", mm.get(key)));
+			resolved.put(
+			    key,
+			    resolveValueIfNecessary(beanName, mergedBeanDefinition,
+			                            argName + BeanWrapper.PROPERTY_KEY_PREFIX + key + BeanWrapper.PROPERTY_KEY_SUFFIX,
+			                            mm.get(key)));
 		}
 		return resolved;
 	}
@@ -938,5 +962,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #destroyBean
 	 */
 	protected abstract String[] getDependingBeanNames(String beanName) throws BeansException;
+
+
+	/**
+	 * Actual creation of a java.util.LinkedHashMap.
+	 * In separate inner class to avoid runtime dependency on JDK 1.4.
+	 */
+	private static abstract class LinkedHashMapCreator {
+
+		private static Map createLinkedHashMap(int capacity) {
+			return new LinkedHashMap(capacity);
+		}
+	}
 
 }

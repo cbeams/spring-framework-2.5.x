@@ -16,20 +16,27 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 /**
- * Tag subclass used to hold managed Set elements, which may
+ * Tag subclass used to hold managed Map values, which may
  * include runtime bean references.
+ *
+ * <p>Just used on JDK >= 1.4, as java.util.LinkedHashMap -
+ * which preserves key order - is not available for earlier JDKs.
+ *
  * @author Juergen Hoeller
- * @since 21.01.2004
+ * @since 02.06.2004
+ * @version $Id: ManagedLinkedMap.java,v 1.1 2004-06-02 17:10:48 jhoeller Exp $
+ * @see ManagedMap
+ * @see java.util.LinkedHashMap
  */
-public class ManagedSet extends HashSet {
+public class ManagedLinkedMap extends LinkedHashMap {
 
-	public ManagedSet() {
+	public ManagedLinkedMap() {
 	}
 
-	public ManagedSet(int initialCapacity) {
+	public ManagedLinkedMap(int initialCapacity) {
 		super(initialCapacity);
 	}
 
