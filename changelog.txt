@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC1 (27.3.2005)
+Changes in version 1.2 RC1 (28.3.2005)
 --------------------------------------
 
 Overall
@@ -82,8 +82,8 @@ Package org.springframework.orm
 * SessionFactoryUtils sets Hibernate Session's flush mode to NEVER for a read-only transaction even with JTA
 
 Package org.springframework.samples
-* migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
-* added new JPetStore version based on Spring's JDK 1.5+ Transactional annotation (in "samples/jpetstore/annotation")
+* migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate 3.0 RC1
+* added new JPetStore version based on Spring's JDK 1.5+ "Transactional" annotation (in "samples/jpetstore/annotation")
 
 Package org.springframework.scheduling
 * fixed Quartz SchedulerFactoryBean to properly pass on given scheduler name, supporting multiple Scheduler instances
