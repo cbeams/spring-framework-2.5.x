@@ -195,9 +195,9 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 		// Copy appropriate properties across.
 		view.setExporterParameters(getExporterParameters());
 
-		// can skip most initialization since all relevant
+		// Can skip most initialization since all relevant
 		// URL processing has been done - just need to convert
-		// parameters on the sub view.
+		// parameters on the sub view..
     view.convertExporterParameters();
 
 		response.setContentType(view.getContentType());
