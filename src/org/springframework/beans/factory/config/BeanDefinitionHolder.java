@@ -1,6 +1,6 @@
 package org.springframework.beans.factory.config;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+
 
 /**
  * Holder for a BeanDefinition with name and aliases.
@@ -58,6 +58,10 @@ public class BeanDefinitionHolder {
 
 	public String[] getAliases() {
 		return aliases;
+	}
+
+	public String toString() {
+		return "Bean definition with name '" + this.beanName + "': " + this.beanDefinition;
 	}
 
 }
