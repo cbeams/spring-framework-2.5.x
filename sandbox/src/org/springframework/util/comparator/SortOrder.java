@@ -34,6 +34,17 @@ public class SortOrder implements Serializable {
         this.ascending = ascending;
     }
 
+    public boolean equals(Object o) {
+        if (!(o instanceof SortOrder)) { return false; }
+        SortOrder order = (SortOrder)o;
+        return ascending == order.ascending;
+    }
+
+    public int hashCode() {
+        int hash = "SortOrder".hashCode();
+        return ascending ? -1 * hash : hash;
+    }
+
     public String toString() {
         return (ascending ? "ascending" : "descending");
     }

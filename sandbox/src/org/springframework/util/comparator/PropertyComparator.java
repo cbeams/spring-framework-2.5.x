@@ -20,6 +20,7 @@ import java.util.Comparator;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -33,7 +34,7 @@ public class PropertyComparator implements Comparator, Serializable {
     private Comparator comparator;
 
     //@TODO favor PropertyAccessStrategy interface
-    private BeanWrapper beanWrapper;
+    private transient BeanWrapper beanWrapper;
 
     /**
      * Constructs a BeanPropertyComparator without a property set. Until
@@ -107,6 +108,17 @@ public class PropertyComparator implements Comparator, Serializable {
      */
     public Comparator getComparator() {
         return comparator;
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof PropertyComparator)) { return false; }
+        PropertyComparator c = (PropertyComparator)o;
+        return ObjectUtils.nullSafeEquals(property, c.property) && comparator.equals(c.comparator);
+    }
+
+    public int hashCode() {
+        int hash = (property != null ? property.hashCode() : -1);
+        return hash += comparator.hashCode();
     }
 
     /**

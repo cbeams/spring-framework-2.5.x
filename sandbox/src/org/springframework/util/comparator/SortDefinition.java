@@ -71,6 +71,16 @@ public class SortDefinition implements Comparator, Serializable {
         this.order = order;
     }
 
+    public boolean equals(Object o) {
+        if (!(o instanceof SortDefinition)) { return false; }
+        SortDefinition def = (SortDefinition)o;
+        return comparator.equals(def.comparator) && order.equals(def.order);
+    }
+
+    public int hashCode() {
+        return comparator.hashCode() + order.hashCode();
+    }
+
     public int compare(Object o1, Object o2) {
         int result = comparator.compare(o1, o2);
         if (result != 0) {
