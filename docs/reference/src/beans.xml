@@ -1468,7 +1468,7 @@ public class BlackListNotifier implement ApplicationListener {
 	</sect1>
 	
 		<sect1 id="beans-customeditors">
-			<title>Registerin additional custom editors</title>
+			<title>Registering additional custom editors</title>
 			<para>
 				When in need of a custom editor in your BeanFactory 
 				or ApplicationContext (e.g. you have some
