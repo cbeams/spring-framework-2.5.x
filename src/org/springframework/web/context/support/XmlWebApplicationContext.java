@@ -13,10 +13,9 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * WebApplicationContext implementation that takes configuration from an XML document.

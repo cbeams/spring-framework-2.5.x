@@ -7,10 +7,9 @@ package org.springframework.web.context;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.ui.context.ThemeSource;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.ui.context.ThemeSource;
 
 /** 
  * Interface to provide configuration for a web application. This is read-only while
@@ -26,7 +25,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since January 19, 2001
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface WebApplicationContext extends ApplicationContext, ThemeSource {
 

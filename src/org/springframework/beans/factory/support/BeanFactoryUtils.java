@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * hierarchy a bean factory may participate in.
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtils.java,v 1.4 2003-11-13 11:31:01 jhoeller Exp $
+ * @version $Id: BeanFactoryUtils.java,v 1.5 2003-11-13 15:21:53 colins Exp $
  */
 public abstract class BeanFactoryUtils {
 	

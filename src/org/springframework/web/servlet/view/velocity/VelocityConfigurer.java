@@ -8,7 +8,6 @@ package org.springframework.web.servlet.view.velocity;
 import org.springframework.ui.velocity.VelocityEngineFactory;
 import org.springframework.ui.velocity.VelocityInitializationException;
 import org.springframework.web.util.WebUtils;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * JavaBean to configure Velocity for web usage, via the "configLocation" and/or
@@ -38,7 +37,7 @@ import org.springframework.context.ApplicationContextException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityConfigurer.java,v 1.6 2003-11-09 21:33:47 jhoeller Exp $
+ * @version $Id: VelocityConfigurer.java,v 1.7 2003-11-13 15:21:52 colins Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setAppRootMarker

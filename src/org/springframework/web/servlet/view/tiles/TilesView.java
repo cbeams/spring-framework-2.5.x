@@ -12,9 +12,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.ComponentDefinition;
 import org.apache.struts.tiles.Controller;
 import org.apache.struts.tiles.DefinitionsFactory;
-import org.apache.struts.tiles.DefinitionsFactoryException;
 import org.apache.struts.tiles.TilesUtilImpl;
-
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.servlet.view.InternalResourceView;
 

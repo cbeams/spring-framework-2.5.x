@@ -12,9 +12,8 @@ import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
-import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.easymock.MockControl;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.JtaTransactionTestSuite;

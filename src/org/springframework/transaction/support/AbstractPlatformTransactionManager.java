@@ -2,8 +2,6 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
