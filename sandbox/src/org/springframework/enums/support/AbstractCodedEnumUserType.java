@@ -96,9 +96,9 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
             throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
                     + value.getClass() + "]");
         }
-        CodedEnum enum = (CodedEnum)value;
-        if (enum != null) {
-            Object code = enum.getCode();
+        CodedEnum codedEnum = (CodedEnum)value;
+        if (codedEnum != null) {
+            Object code = codedEnum.getCode();
             Assert.notNull(code, "Enum codes cannot be null!");
             // for some reason some characters don't map well, convert to string
             // instead...
