@@ -19,6 +19,6 @@ package org.springframework.aop.framework;
 
 public class LockedException extends RuntimeException {
 
-	LockedException() {
+	public LockedException() {
 	}
 }
