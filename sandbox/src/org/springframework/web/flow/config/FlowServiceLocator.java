@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow.config;
 
-import org.springframework.web.flow.ActionBean;
+import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 
@@ -36,14 +36,14 @@ public interface FlowServiceLocator {
 	 * @return
 	 * @throws NoSuchActionBeanException
 	 */
-	public ActionBean getActionBean(String actionBeanId) throws FlowServiceLookupException;
+	public Action getActionBean(String actionBeanId) throws FlowServiceLookupException;
 
 	/**
 	 * @param actionBeanImplementationClass
 	 * @return
 	 * @throws FlowServiceLookupException
 	 */
-	public ActionBean getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException;
+	public Action getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException;
 
 	/**
 	 * @param flowDefinitionId

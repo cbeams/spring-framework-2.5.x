@@ -25,7 +25,7 @@ import org.springframework.enums.ShortCodedEnum;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.ActionBeanEvent;
+import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
 /**
@@ -71,7 +71,7 @@ public class PopulateFormAction extends BindAndValidateAction {
 		}
 	}
 
-	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);

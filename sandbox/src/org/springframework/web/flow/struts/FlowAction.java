@@ -33,7 +33,7 @@ import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionStartResult;
 import org.springframework.web.flow.NoSuchFlowSessionException;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.action.AbstractActionBean;
+import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 
@@ -198,7 +198,7 @@ public class FlowAction extends TemplateAction {
 			}
 			else {
 				// execute the signaled event within the current state
-				viewDescriptor = getEventProcessor(sessionExecution.getActiveFlowId()).execute(eventId,
+				viewDescriptor = getEventProcessor(sessionExecution.getActiveFlowId()).signal(eventId,
 						currentStateIdParam, sessionExecution, request, response);
 			}
 		}
@@ -237,7 +237,7 @@ public class FlowAction extends TemplateAction {
 				if (form instanceof BindingActionForm) {
 					BindingActionForm bindingForm = (BindingActionForm)form;
 					bindingForm.setErrors((Errors)sessionExecution.getAttribute(
-							AbstractActionBean.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
+							AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
 					bindingForm.setHttpServletRequest(request);
 					bindingForm.setModel(sessionExecution);
 				}

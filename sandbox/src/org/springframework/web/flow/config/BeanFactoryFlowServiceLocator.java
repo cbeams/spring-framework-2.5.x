@@ -8,7 +8,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.web.flow.ActionBean;
+import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 
@@ -32,23 +32,23 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (ListableBeanFactory)getBeanFactory();
 	}
 
-	public ActionBean getActionBean(String actionBeanId) throws FlowServiceLookupException {
+	public Action getActionBean(String actionBeanId) throws FlowServiceLookupException {
 		try {
-			return (ActionBean)getBeanFactory().getBean(actionBeanId, ActionBean.class);
+			return (Action)getBeanFactory().getBean(actionBeanId, Action.class);
 		}
 		catch (BeansException e) {
 			throw new NoSuchActionBeanException(actionBeanId, e);
 		}
 	}
 
-	public ActionBean getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException {
-		if (!ActionBean.class.isAssignableFrom(actionBeanImplementationClass)) {
+	public Action getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException {
+		if (!Action.class.isAssignableFrom(actionBeanImplementationClass)) {
 			throw new IllegalArgumentException("Your action bean implementation '" + actionBeanImplementationClass
-					+ "' must implement the '" + ActionBean.class.getName() + "' interface");
+					+ "' must implement the '" + Action.class.getName() + "' interface");
 
 		}
 		try {
-			return (ActionBean)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionBeanImplementationClass);
+			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionBeanImplementationClass);
 		}
 		catch (BeansException e) {
 			throw new NoSuchActionBeanException(actionBeanImplementationClass, e);

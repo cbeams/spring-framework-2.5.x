@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.flow.ActionBeanEvent;
+import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.support.FlowUtils;
@@ -32,7 +32,7 @@ import org.springframework.web.flow.support.FlowUtils;
 /**
  * @author Keith Donald
  */
-public class MultiActionBean extends AbstractActionBean {
+public class MultiActionBean extends AbstractAction {
 
 	/**
 	 * @author Keith Donald
@@ -55,14 +55,14 @@ public class MultiActionBean extends AbstractActionBean {
 		}
 	}
 
-	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException {
 		FlowExecutionInfo sessionExecution = FlowUtils.getFlowSessionExecutionInfo(model);
 		String eventId = sessionExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {
 			Method handlerMethod = getHandlerMethod(handlerMethodName);
-			return (ActionBeanEvent)handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
+			return (ActionResult)handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
 		}
 		catch (NoSuchMethodException e) {
 			throw new RuntimeException("Exception occured dispatching action by reflection on event '" + eventId + "'",

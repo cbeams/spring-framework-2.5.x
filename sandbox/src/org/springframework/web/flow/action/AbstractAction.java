@@ -25,8 +25,8 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.flow.ActionBean;
-import org.springframework.web.flow.ActionBeanEvent;
+import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * @author Keith Donald
  */
-public abstract class AbstractActionBean implements ActionBean, InitializingBean {
+public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Default name used for a form object in flow scope.
@@ -60,33 +60,33 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 *  
+	 * 
 	 */
 	public void afterPropertiesSet() {
 		initAction();
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	protected void initAction() {
 
 	}
 
-	protected ActionBeanEvent success() {
-		return new ActionBeanEvent(this, AbstractFlowBuilder.SUCCESS);
+	protected ActionResult success() {
+		return new ActionResult(AbstractFlowBuilder.SUCCESS);
 	}
 
-	protected ActionBeanEvent error() {
-		return new ActionBeanEvent(this, FlowConstants.ERROR);
+	protected ActionResult error() {
+		return new ActionResult(FlowConstants.ERROR);
 	}
 
-	protected ActionBeanEvent add() {
-		return new ActionBeanEvent(this, FlowConstants.ADD);
+	protected ActionResult add() {
+		return new ActionResult(FlowConstants.ADD);
 	}
 
-	protected ActionBeanEvent search() {
-		return new ActionBeanEvent(this, FlowConstants.SEARCH);
+	protected ActionResult search() {
+		return new ActionResult(FlowConstants.SEARCH);
 	}
 
 	/**
@@ -282,15 +282,15 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	/*
-	 *  
+	 * 
 	 */
-	public final ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+	public final ActionResult execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action bean '" + getClass().getName() + "' beginning execution");
 		}
 		try {
-			ActionBeanEvent event = onPreExecute(request, response, model);
+			ActionResult event = onPreExecute(request, response, model);
 			if (event == null) {
 				event = doExecuteAction(request, response, model);
 				if (logger.isDebugEnabled()) {
@@ -326,7 +326,7 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	 * @throws RuntimeException
 	 * @throws ServletRequestBindingException
 	 */
-	protected ActionBeanEvent onPreExecute(HttpServletRequest request, HttpServletResponse response,
+	protected ActionResult onPreExecute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException {
 		return null;
 	}
@@ -339,7 +339,7 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	 * @throws RuntimeException
 	 * @throws ServletRequestBindingException
 	 */
-	protected abstract ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected abstract ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException;
 
 	/**

@@ -28,8 +28,8 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.ActionBean;
-import org.springframework.web.flow.ActionBeanEvent;
+import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
@@ -40,7 +40,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class BindAndValidateAction extends AbstractActionBean implements InitializingBean {
+public class BindAndValidateAction extends AbstractAction implements InitializingBean {
 
 	private String formObjectName = DEFAULT_FORM_OBJECT_NAME;
 
@@ -56,13 +56,6 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 
 	private MessageCodesResolver messageCodesResolver;
 
-	private static final ActionBean ACTION_BEAN_NULL_OBJECT = new ActionBean() {
-		public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
-				MutableAttributesAccessor model) {
-			return null;
-		}
-	};
-
 	/**
 	 * Constant <code>ActionBeanEvent</code> marker that indicates to the base
 	 * BindAndValidate action that it should attempt to return a default
@@ -70,7 +63,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 * returned is calculated based on whether any errors were generated during
 	 * the bind and validate process.
 	 */
-	protected static final ActionBeanEvent USE_DEFAULT_EVENT = new ActionBeanEvent(ACTION_BEAN_NULL_OBJECT, null);
+	protected static final ActionResult USE_DEFAULT_EVENT = ActionResult.NULL_RESULT;
 
 	/**
 	 * Set the name of the formObject in the model. The formObject object will
@@ -206,11 +199,11 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	/*
 	 *  
 	 */
-	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws ObjectRetrievalFailureException, IllegalStateException {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
-		ActionBeanEvent event = bindAndValidate(request, model, binder);
+		ActionResult event = bindAndValidate(request, model, binder);
 		exportErrors(binder.getErrors(), model);
 		if (event != null && event != USE_DEFAULT_EVENT) {
 			return event;
@@ -227,7 +220,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 * @param errors
 	 * @return
 	 */
-	protected ActionBeanEvent getDefaultResultEvent(HttpServletRequest request, MutableAttributesAccessor model,
+	protected ActionResult getDefaultResultEvent(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
@@ -319,7 +312,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 *         validation
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ActionBeanEvent bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
+	protected final ActionResult bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
 			ServletRequestDataBinder binder) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
@@ -459,7 +452,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
-	protected ActionBeanEvent onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
+	protected ActionResult onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(request, model, formObject, errors);
@@ -477,7 +470,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 * @param errors
 	 * @return
 	 */
-	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected ActionResult onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return onBindAndValidateSuccess(request, model, formObject);
 	}
@@ -492,7 +485,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 	 * @param formObject
 	 * @return
 	 */
-	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected ActionResult onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject) {
 		return null;
 	}
