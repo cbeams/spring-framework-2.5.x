@@ -3,14 +3,30 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.5 (6.3.2005)
------------------------------------
+Changes in version 1.1.5 (28.2.2005)
+------------------------------------
+
+Documentation
+* Moved Tapestry integration content to a separate chapter ("Integrating with other web frameworks")
+
+Package org.springframework.aop
+* adapted AdvisedSupport to keep the order of proxy interfaces, to create JDK proxy with specified order of interfaces
 
 Package org.springframework.context
 * AbstractApplicationContext uses new DelegatingMessageSource as placeholder, to avoid StaticMessageSource side effects
 
-Documentation
-* Moved Tapestry integration content to a separate chapter (Integrating with other web frameworks)
+Package org.springframework.orm
+* fixed AbstractLobType for Hibernate, cleaning up in afterCompletion if necessary (for HibernateTransactionManager)
+
+Package org.springframework.util
+* fixed DefaultPropertiesPersister to correctly handle empty property values when reading with specific encoding
+
+Package org.springframework.validation
+* added overloaded "reject" and "rejectValue" methods without default message to Errors interface and BindException
+
+Package org.springframework.web
+* added "searchAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving stringified attribute values
+
 
 Changes in version 1.1.4 (31.1.2005)
 ------------------------------------
