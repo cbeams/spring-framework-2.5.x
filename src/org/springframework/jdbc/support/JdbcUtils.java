@@ -34,14 +34,30 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
- * Generic utility methods for working with JDBC.
- * @author Isabelle Muszynski
+ * Generic utility methods for working with JDBC. Mainly for internal use
+ * within the framework, but also useful for custom JDBC access code.
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
 public class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
+
+	/**
+	 * Close the given JDBC Connection and ignore any thrown exception.
+	 * This is useful for typical finally blocks in manual JDBC code.
+	 * @param con the JDBC Connection to close
+	 */
+	public static void closeConnection(Connection con) {
+		if (con != null) {
+			try {
+				con.close();
+			}
+			catch (SQLException ex) {
+				logger.warn("Could not close JDBC Connection", ex);
+			}
+		}
+	}
 
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
