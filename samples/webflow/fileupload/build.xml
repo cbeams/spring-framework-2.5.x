@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="phonebook" default="usage" basedir=".">
+<project name="fileupload" default="usage" basedir=".">
 	<property id="build properties" file="build.properties" />
 	<property id="project properties" file="project.properties" />
 	<property file="${toplevel.build.properties}" />
