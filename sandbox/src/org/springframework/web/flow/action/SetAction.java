@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.TypeConverterRegistry;
-import org.springframework.binding.TypeConverters;
+import org.springframework.binding.convert.ConverterLocator;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.MutableFlowModel;
 
@@ -41,7 +41,7 @@ public class SetAction extends AbstractAction {
 
 	private AttributeMapper requestParameterMapper;
 
-	private TypeConverterRegistry typeConverterRegistry;
+	private ConverterLocator converterLocator;
 
 	/**
 	 * Creates a set action with an initially empty mappings list.
@@ -90,6 +90,14 @@ public class SetAction extends AbstractAction {
 	}
 
 	/**
+	 * Set the type converter registry
+	 * @param registry the registry
+	 */
+	public void setConverterLocator(ConverterLocator registry) {
+		this.converterLocator = registry;
+	}
+
+	/**
 	 * Set the encoded string mapping.
 	 * @param mapping the mapping
 	 */
@@ -109,13 +117,18 @@ public class SetAction extends AbstractAction {
 			if (encodedMapping.length == 2) {
 				classEditor.setAsText(encodedMapping[1]);
 				Class clazz = (Class)classEditor.getValue();
-				maps[i] = new Mapping(encodedMapping[0], getTypeConverterRegistry().getTypeConverter(clazz));
+				maps[i] = new Mapping(encodedMapping[0], getConverterLocator().getConverter(String.class, clazz));
 			}
 			else {
 				maps[i] = new Mapping(encodedMapping[0]);
 			}
 		}
 		setMappings(maps);
+	}
+
+	protected ConverterLocator getConverterLocator() {
+		Assert.notNull(this.converterLocator, "The converterLocator property was request but is not set");
+		return this.converterLocator;
 	}
 
 	/**
@@ -150,8 +163,8 @@ public class SetAction extends AbstractAction {
 			if (encodedMapping.length == 2) {
 				classEditor.setAsText(encodedMapping[1]);
 				Class clazz = (Class)classEditor.getValue();
-				maps[i] = new Mapping(sourceAttributeName, encodedMapping[0], getTypeConverterRegistry()
-						.getTypeConverter(clazz));
+				maps[i] = new Mapping(sourceAttributeName, encodedMapping[0], getConverterLocator().getConverter(
+						String.class, clazz));
 			}
 			else {
 				maps[i] = new Mapping(sourceAttributeName, encodedMapping[0]);
@@ -159,26 +172,6 @@ public class SetAction extends AbstractAction {
 			i++;
 		}
 		setMappings(maps);
-	}
-
-	/**
-	 * Set the type converter registry
-	 * @param registry the registry
-	 */
-	public void setTypeConverterRegistry(TypeConverterRegistry registry) {
-		this.typeConverterRegistry = registry;
-	}
-
-	/**
-	 * @return the type converter registry
-	 */
-	protected TypeConverterRegistry getTypeConverterRegistry() {
-		if (this.typeConverterRegistry != null) {
-			return this.typeConverterRegistry;
-		}
-		else {
-			return TypeConverters.instance();
-		}
 	}
 
 	/**
