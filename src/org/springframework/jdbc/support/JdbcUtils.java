@@ -13,18 +13,16 @@ import java.sql.Types;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.FileCopyUtils;
-
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.4 2004-01-29 23:22:49 jhoeller Exp $
+ * @version $Id: JdbcUtils.java,v 1.5 2004-02-22 21:50:29 jhoeller Exp $
  */
 public class JdbcUtils {
 
-	private static final Log logger = LogFactory.getLog(FileCopyUtils.class);
+	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
@@ -59,22 +57,17 @@ public class JdbcUtils {
 	}
 
 	/**
-	 * Count the occurrences of the character <code>placeholder</code> in an SQL string <code>str</code>.
-	 * <p>
-	 * The character <code>placeholder</code> is not counted if it appears within a literal as determined
-	 * by the <code>delim</code> that is passed in.
-	 * <p>
-	 * Examples : if the delimiter is the single quote, and the character to count the 
-	 * occurrences of is the question mark, then
-	 * <p>
-	 * <code>The big ? 'bad wolf?'</code> gives a count of one
-	 * <code>The big ?? bad wolf</code> gives a count of two
-	 * <code>The big  'ba''ad?' ? wolf</code> gives a count of one
-	 * <p>
-	 * The grammar of the string passed in should obey the rules
-	 * of the JDBC spec which is close to no rules at all.  One placeholder
-	 * per parameter and it should be valid SQL for the target database.
-	 * <p>
+	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
+	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
+	 * appears within a literal as determined by the <code>delim</code> that is passed in.
+	 * <p>Examples: If the delimiter is the single quote, and the character to count the
+	 * occurrences of is the question mark, then:
+	 * <p><code>The big ? 'bad wolf?'</code> gives a count of one.<br>
+	 * <code>The big ?? bad wolf</code> gives a count of two.<br>
+	 * <code>The big  'ba''ad?' ? wolf</code> gives a count of one.
+	 * <p>The grammar of the string passed in should obey the rules of the JDBC spec
+	 * which is close to no rules at all: one placeholder per parameter, and it should
+	 * be valid SQL for the target database.
 	 * @param str string to search in. Returns 0 if this is null
 	 * @param placeholder the character to search for and count.
 	 * @param delim the delimiter for character literals.
@@ -82,7 +75,6 @@ public class JdbcUtils {
 	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
 		int count = 0;
 		boolean insideLiteral = false;
-		
 		for (int i = 0; str != null && i < str.length(); i++) {
 			if (str.charAt(i) == placeholder) {
 				if (!insideLiteral)
@@ -94,31 +86,23 @@ public class JdbcUtils {
 				}
 			}
 		}
-
 		return count;
 	}
 
 	/**
-	 * Check that a SQL type is numeric
+	 * Check that a SQL type is numeric.
 	 * @param sqlType the SQL type to be checked
-	 * @return <code>true</code> if the type is numeric,
-	 * <code>false</code> otherwise
+	 * @return if the type is numeric
 	 */
 	public static boolean isNumeric(int sqlType) {
-		return Types.BIT == sqlType
-			|| Types.BIGINT == sqlType
-			|| Types.DECIMAL == sqlType
-			|| Types.DOUBLE == sqlType
-			|| Types.FLOAT == sqlType
-			|| Types.INTEGER == sqlType
-			|| Types.NUMERIC == sqlType
-			|| Types.REAL == sqlType
-			|| Types.SMALLINT == sqlType
-			|| Types.TINYINT == sqlType;
+		return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
+				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
+				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
+				Types.TINYINT == sqlType;
 	}
 
 	/**
-	 * Translate a SQL type into one of a few values.
+	 * Translate a SQL type into one of a few values:
 	 * All integer types are translated to Integer.
 	 * All real types are translated to Double.
 	 * All string types are translated to String.
@@ -128,18 +112,17 @@ public class JdbcUtils {
 	 */
 	public static int translateType(int sqlType) {
 		int retType = sqlType;
-		if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType || Types.INTEGER == sqlType)
+		if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType ||
+				Types.INTEGER == sqlType) {
 			retType = Types.INTEGER;
-		else if (Types.CHAR == sqlType || Types.VARCHAR == sqlType)
+		}
+		else if (Types.CHAR == sqlType || Types.VARCHAR == sqlType) {
 			retType = Types.VARCHAR;
-		else if (
-			Types.DECIMAL == sqlType
-				|| Types.DOUBLE == sqlType
-				|| Types.FLOAT == sqlType
-				|| Types.NUMERIC == sqlType
-				|| Types.REAL == sqlType)
+		}
+		else if (Types.DECIMAL == sqlType || Types.DOUBLE == sqlType || Types.FLOAT == sqlType ||
+				Types.NUMERIC == sqlType || Types.REAL == sqlType) {
 			retType = Types.NUMERIC;
-
+		}
 		return retType;
 	}
 
