@@ -15,7 +15,7 @@ import org.springframework.beans.BeanUtils;
 
 /**
  * Miscellaneous utilities for web applications.
- * Also used by various framework classes.
+ * Used by various framework classes.
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
@@ -60,18 +60,20 @@ public abstract class WebUtils {
 	 * @see #WEB_APP_ROOT_KEY_PARAM
 	 * @see #DEFAULT_WEB_APP_ROOT_KEY
 	 * @see WebAppRootListener
+	 * @see Log4jWebConfigurer
 	 */
 	public static void setWebAppRootSystemProperty(ServletContext servletContext) throws IllegalStateException {
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
-		if (oldValue != null) {
-			throw new IllegalStateException("WARNING: Web app root system property already set: " + key + " = " +
-																			oldValue + " - Choose unique webAppRootKey values in your web.xml files!");
-		}
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException("Cannot set web app root system property when WAR file is not expanded");
+		}
+		if (oldValue != null && !oldValue.equals(root)) {
+			throw new IllegalStateException("Web app root system property already set to different value: '" +
+																			key + "' = [" + oldValue +
+																			"] - Choose unique webAppRootKey values in your web.xml files!");
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: " + key + " = " + root);
