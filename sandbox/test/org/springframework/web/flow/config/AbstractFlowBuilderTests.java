@@ -171,7 +171,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	}
 
-	private class TestDetailFlowBuilderLookupById extends AbstractFlowBuilder {
+	public class TestDetailFlowBuilderLookupById extends AbstractFlowBuilder {
 		protected String flowId() {
 			return PERSON_DETAILS;
 		}

@@ -95,6 +95,7 @@ public class HttpServletFlowExecutionManager {
 	 * @param flow the default flow for which executions will be managed
 	 */
 	public HttpServletFlowExecutionManager(FlowLocator flowLocator, Flow flow) {
+        this.flowLocator = flowLocator;
 		this.flow = flow;
 	}
 
@@ -162,7 +163,6 @@ public class HttpServletFlowExecutionManager {
 		return flowLocator;
 	}
 
-	
 	/**
 	 * Set the flow locator to use for lookup of flows specified using the
 	 * "_flowId" request parameter.
@@ -394,7 +394,7 @@ public class HttpServletFlowExecutionManager {
 	 * Remove given flow execution from the HTTP session associated with given
 	 * request.
 	 */
-	public void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
+	protected void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removing flow execution '" + flowExecution.getId() + "' from HTTP session");
 		}
