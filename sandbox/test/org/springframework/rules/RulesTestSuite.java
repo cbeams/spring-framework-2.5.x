@@ -232,9 +232,4 @@ public class RulesTestSuite extends TestCase {
         assertFalse(r.test(new TestBean()));
     }
 
-    public void testCompoundRules() {
-        Rules r = Rules.createRules(TestBean.class);
-
-    }
-
 }
