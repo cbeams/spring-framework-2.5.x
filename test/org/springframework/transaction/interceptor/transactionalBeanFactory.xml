@@ -97,6 +97,25 @@
 		</property>
 	</bean>
 	
+	
+	<bean name="cglibNoInterfaces"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		
+		<property name="transactionManager"><ref local="mockMan"/></property>
+		
+		<property name="target">
+			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">
+				<property name="dependency"><ref local="targetDependency"/></property>
+			</bean>	
+		</property>
+		
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	
 	<!--
 		The HotSwappableTargetSource is a Type 3 component.
 	-->

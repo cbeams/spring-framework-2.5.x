@@ -73,6 +73,21 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
 		executeGetsAreNotTransactional(testBean);
 	}
+	
+	public void testCglibTransactionProxyImplementsNoInterfaces() throws NoSuchMethodException {
+		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
+		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(ini));
+		String newName = "Gordon";
+		
+		// Install facade
+		final TransactionStatus ts = new DefaultTransactionStatus(null, true, false, false, false, null);
+		CountingTxManager ptm = new CountingTxManager();
+		PlatformTransactionManagerFacade.delegate = ptm;
+		
+		ini.setName(newName);
+		assertEquals(newName, ini.getName());
+		assertEquals(2, ptm.commits);		
+	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory3() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory3");
