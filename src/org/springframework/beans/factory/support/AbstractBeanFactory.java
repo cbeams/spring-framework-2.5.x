@@ -61,18 +61,18 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.54 2004-05-27 08:53:31 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.55 2004-05-27 16:54:17 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
+ * @see #destroyBean
  */
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, HierarchicalBeanFactory {
 
 	/**
-	 * Used to dereference a FactoryBean and distinguish it from
-	 * beans <i>created</i> by the factory. For example,
-	 * if the bean named <code>myEjb</code> is a factory, getting
-	 * <code>&myEjb</code> will return the factory, not the instance
-	 * returned by the factory.
+	 * Used to dereference a FactoryBean and distinguish it from beans
+	 * <i>created</i> by the factory. For example, if the bean named
+	 * <code>myEjb</code> is a factory, getting <code>&myEjb</code> will
+	 * return the factory, not the instance returned by the factory.
 	 */
 	public static final String FACTORY_BEAN_PREFIX = "&";
 
@@ -453,33 +453,32 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 			throw new BeanIsNotAFactoryException(beanName, beanInstance);
 		}
 
-		// Now we have the bean instance, which may be a normal bean
-		// or a FactoryBean. If it's a FactoryBean, we use it to
-		// create a bean instance, unless the caller actually wants
-		// a reference to the factory.
+		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
+		// If it's a FactoryBean, we use it to create a bean instance, unless the
+		// caller actually wants a reference to the factory.
 		if (beanInstance instanceof FactoryBean) {
 			if (!isFactoryDereference(name)) {
 				// return bean instance from factory
 				FactoryBean factory = (FactoryBean) beanInstance;
-				logger.debug("Bean with name '" + beanName + "' is a factory bean");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean with name '" + beanName + "' is a factory bean");
+				}
 				try {
 					beanInstance = factory.getObject();
 				}
-				catch (BeansException ex) {
-					throw ex;
-				}
 				catch (Exception ex) {
-					throw new BeanCreationException("FactoryBean threw exception on object creation", ex);
+					throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 				}
 				if (beanInstance == null) {
 					throw new FactoryBeanCircularReferenceException(
-					    "Factory bean '" + beanName + "' returned null object - " +
-					    "possible cause: not fully initialized due to circular bean reference");
+					    beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference");
 				}
 			}
 			else {
 				// the user wants the factory itself
-				logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
+				}
 			}
 		}
 

@@ -33,6 +33,14 @@ public class BeanCreationException extends FatalBeanException {
 		super(msg, ex);
 	}
 
+	public BeanCreationException(String beanName, String msg) {
+		this(beanName, msg, (Throwable) null);
+	}
+
+	public BeanCreationException(String beanName, String msg, Throwable ex) {
+		super("Error creating bean with name '" + beanName + "': " + msg, ex);
+	}
+
 	public BeanCreationException(String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);
 	}

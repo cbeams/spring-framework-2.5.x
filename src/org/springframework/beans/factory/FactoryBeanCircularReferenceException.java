@@ -29,10 +29,10 @@ package org.springframework.beans.factory;
  * @author Juergen Hoeller
  * @since 30.10.2003
  */
-public class FactoryBeanCircularReferenceException extends BeanDefinitionStoreException {
+public class FactoryBeanCircularReferenceException extends BeanCreationException {
 
-	public FactoryBeanCircularReferenceException(String msg) {
-		super(msg);
+	public FactoryBeanCircularReferenceException(String beanName, String msg) {
+		super(beanName, msg);
 	}
 
 }
