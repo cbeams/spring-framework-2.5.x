@@ -12,26 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-package org.springframework.functor.predicates;
-
-import org.springframework.functor.BinaryPredicate;
-import org.springframework.functor.UnaryPredicate;
+ */ 
+package org.springframework.functor;
 
 /**
  * @author Keith Donald
  */
-public class BindSecond implements UnaryPredicate {
-    private BinaryPredicate predicate;
-    private Object constant;
-    
-    public BindSecond(BinaryPredicate predicate, Object constant) {
+public class UnaryFunctionEvaluator implements UnaryPredicate {
+    private UnaryPredicate predicate;
+    private UnaryFunction function;
+
+    public UnaryFunctionEvaluator(UnaryPredicate predicate,
+            UnaryFunction function) {
         this.predicate = predicate;
-        this.constant = constant;
+        this.function = function;
     }
-    
+
     public boolean evaluate(Object value) {
-        return predicate.evaluate(value, this.constant);
+        return this.predicate.evaluate(function.execute(value));
     }
 
 }
