@@ -19,9 +19,29 @@ public class JdoTransactionObject {
 
 	private boolean newPersistenceManagerHolder;
 
-	public JdoTransactionObject(PersistenceManagerHolder persistenceManagerHolder, boolean newPersistenceManagerHolder) {
+	/**
+	 * Create JdoTransactionObject for new PersistenceManagerHolder.
+	 */
+	public JdoTransactionObject() {
+	}
+
+	/**
+	 * Create JdoTransactionObject for existing PersistenceManagerHolder.
+	 */
+	protected JdoTransactionObject(PersistenceManagerHolder persistenceManagerHolder) {
 		this.persistenceManagerHolder = persistenceManagerHolder;
-		this.newPersistenceManagerHolder = newPersistenceManagerHolder;
+		this.newPersistenceManagerHolder = false;
+	}
+
+	/**
+	 * Set new PersistenceManagerHolder.
+	 */
+	protected void setPersistenceManagerHolder(PersistenceManagerHolder persistenceManagerHolder) {
+		if (this.persistenceManagerHolder != null) {
+			throw new IllegalStateException("Already initialized with an existing PersistenceManagerHolder");
+		}
+		this.persistenceManagerHolder = persistenceManagerHolder;
+		this.newPersistenceManagerHolder = true;
 	}
 
 	public PersistenceManagerHolder getPersistenceManagerHolder() {
@@ -30,6 +50,11 @@ public class JdoTransactionObject {
 
 	public boolean isNewPersistenceManagerHolder() {
 		return newPersistenceManagerHolder;
+	}
+
+	public boolean hasTransaction() {
+		return (persistenceManagerHolder != null && persistenceManagerHolder.getPersistenceManager() != null &&
+		    persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
 	}
 
 }

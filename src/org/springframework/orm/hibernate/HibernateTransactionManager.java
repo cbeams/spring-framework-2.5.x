@@ -75,7 +75,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Note: This class, like all of Spring's Hibernate support, requires
  * Hibernate 2.0 (initially developed with RC1).
- * 
+ *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see SessionFactoryUtils#getSession
@@ -201,27 +201,30 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 			logger.debug("Found thread-bound session for Hibernate transaction");
 			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
-			return new HibernateTransactionObject(sessionHolder, false);
+			return new HibernateTransactionObject(sessionHolder);
 		}
 		else {
-			logger.debug("Opening new session for Hibernate transaction");
-			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor,
-																											 this.jdbcExceptionTranslator);
-			return new HibernateTransactionObject(new SessionHolder(session), true);
+			return new HibernateTransactionObject();
 		}
 	}
 
 	protected boolean isExistingTransaction(Object transaction) throws TransactionException {
-		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		return (txObject.getSessionHolder().getTransaction() != null);
+		return ((HibernateTransactionObject) transaction).hasTransaction();
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		Session session = txObject.getSessionHolder().getSession();
-		logger.debug("Beginning Hibernate transaction");
+		if (txObject.getSessionHolder() == null) {
+			logger.debug("Opening new session for Hibernate transaction");
+			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor,
+																											 this.jdbcExceptionTranslator);
+			txObject.setSessionHolder(new SessionHolder(session));
+		}
 
+		logger.debug("Beginning Hibernate transaction");
 		try {
+			Session session = txObject.getSessionHolder().getSession();
+
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
@@ -275,8 +278,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		return txObject.getSessionHolder().isRollbackOnly();
+		return ((HibernateTransactionObject) transaction).getSessionHolder().isRollbackOnly();
 	}
 
 	protected void doCommit(TransactionStatus status) throws TransactionException {
@@ -370,7 +372,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			logger.debug("Not closing pre-bound Hibernate session after transaction");
 		}
 	}
-	
+
 	/**
 	 * Convert the given HibernateException to an appropriate exception from
 	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.

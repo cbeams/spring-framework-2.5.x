@@ -91,20 +91,15 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-					HibernateTemplate ht = new HibernateTemplate(sf);
-					return ht.find("some query string");
-				}
-			});
-			assertTrue("Correct result list", result == list);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				return ht.find("some query string");
+			}
+		});
+		assertTrue("Correct result list", result == list);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
@@ -203,25 +198,20 @@ public class HibernateTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
-		try {
-			tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-					HibernateTemplate ht = new HibernateTemplate(sf);
-					ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
-					ht.execute(new HibernateCallback() {
-						public Object doInHibernate(Session session) {
-							return null;
-						}
-					});
-					status.setRollbackOnly();
-					return null;
-				}
-			});
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+				ht.execute(new HibernateCallback() {
+					public Object doInHibernate(Session session) {
+						return null;
+					}
+				});
+				status.setRollbackOnly();
+				return null;
+			}
+		});
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
@@ -261,27 +251,22 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					return tt.execute(new TransactionCallback() {
-						public Object doInTransaction(TransactionStatus status) {
-							HibernateTemplate ht = new HibernateTemplate(sf);
-							ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
-							return ht.executeFind(new HibernateCallback() {
-								public Object doInHibernate(Session session) {
-									return l;
-								}
-							});
-						}
-					});
-				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				return tt.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+						return ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(Session session) {
+								return l;
+							}
+						});
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -371,27 +356,22 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 
-		try {
-			tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					return tt.execute(new TransactionCallback() {
-						public Object doInTransaction(TransactionStatus status) {
-							HibernateTemplate ht = new HibernateTemplate(sf);
-							ht.execute(new HibernateCallback() {
-								public Object doInHibernate(Session session) {
-									return l;
-								}
-							});
-							status.setRollbackOnly();
-							return null;
-						}
-					});
-				}
-			});
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				return tt.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						HibernateTemplate ht = new HibernateTemplate(sf);
+						ht.execute(new HibernateCallback() {
+							public Object doInHibernate(Session session) {
+								return l;
+							}
+						});
+						status.setRollbackOnly();
+						return null;
+					}
+				});
+			}
+		});
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -424,54 +404,49 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				try {
+					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+					HibernateTemplate ht = new HibernateTemplate(sf);
+					List htl = ht.executeFind(new HibernateCallback() {
+						public Object doInHibernate(Session sess) {
+							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+							assertEquals(session, sess);
+							return l;
+						}
+					});
+					ht = new HibernateTemplate(sf);
+					htl = ht.executeFind(new HibernateCallback() {
+						public Object doInHibernate(Session sess) {
+							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+							assertEquals(session, sess);
+							return l;
+						}
+					});
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					sessionControl.verify();
+					sessionControl.reset();
 					try {
-						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
-						assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
-						HibernateTemplate ht = new HibernateTemplate(sf);
-						List htl = ht.executeFind(new HibernateCallback() {
-							public Object doInHibernate(Session sess) {
-								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-								assertEquals(session, sess);
-								return l;
-							}
-						});
-						ht = new HibernateTemplate(sf);
-						htl = ht.executeFind(new HibernateCallback() {
-							public Object doInHibernate(Session sess) {
-								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-								assertEquals(session, sess);
-								return l;
-							}
-						});
-						assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-						sessionControl.verify();
-						sessionControl.reset();
-						try {
-							session.flush();
-							sessionControl.setVoidCallable(1);
-							session.close();
-							sessionControl.setReturnValue(null, 1);
-						}
-						catch (HibernateException e) {
-						}
-						sessionControl.replay();
-						return htl;
+						session.flush();
+						sessionControl.setVoidCallable(1);
+						session.close();
+						sessionControl.setReturnValue(null, 1);
 					}
-					catch (Error err) {
-						err.printStackTrace();
-						throw err;
+					catch (HibernateException e) {
 					}
+					sessionControl.replay();
+					return htl;
 				}
-			});
-			assertTrue("Correct result list", result == l);
-			assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException: " + ex.getMessage());
-		}
+				catch (Error err) {
+					err.printStackTrace();
+					throw err;
+				}
+			}
+		});
+		assertTrue("Correct result list", result == l);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		utControl.verify();
@@ -504,43 +479,77 @@ public class HibernateTransactionManagerTests extends TestCase {
 		l.add("test");
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				try {
+					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+					HibernateTemplate ht = new HibernateTemplate(sf);
+					List htl = ht.executeFind(new HibernateCallback() {
+						public Object doInHibernate(Session session) {
+							return l;
+						}
+					});
+					status.setRollbackOnly();
+					sessionControl.verify();
+					sessionControl.reset();
 					try {
-						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
-						HibernateTemplate ht = new HibernateTemplate(sf);
-						List htl = ht.executeFind(new HibernateCallback() {
-							public Object doInHibernate(Session session) {
-								return l;
-							}
-						});
-						status.setRollbackOnly();
-						sessionControl.verify();
-						sessionControl.reset();
-						try {
-							session.close();
-						}
-						catch (HibernateException ex) {
-						}
-						sessionControl.setReturnValue(null, 1);
-						sessionControl.replay();
-						return htl;
+						session.close();
 					}
-					catch (Error err) {
-						err.printStackTrace();
-						throw err;
+					catch (HibernateException ex) {
 					}
+					sessionControl.setReturnValue(null, 1);
+					sessionControl.replay();
+					return htl;
 				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException: " + ex.getMessage());
-		}
+				catch (Error err) {
+					err.printStackTrace();
+					throw err;
+				}
+			}
+		});
+		assertTrue("Correct result list", result == l);
 
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		utControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testTransactionWithPropagationSupports() throws HibernateException, SQLException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Is not new transaction", !status.isNewTransaction());
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+				ht.execute(new HibernateCallback() {
+					public Object doInHibernate(Session session) {
+						return null;
+					}
+				});
+				return null;
+			}
+		});
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -588,24 +597,19 @@ public class HibernateTransactionManagerTests extends TestCase {
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-					HibernateTemplate ht = new HibernateTemplate(sf);
-					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
-							return l;
-						}
-					});
-				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				return ht.executeFind(new HibernateCallback() {
+					public Object doInHibernate(Session session) throws HibernateException {
+						return l;
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
 
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 		TransactionSynchronizationManager.unbindResource(sf);
@@ -656,23 +660,18 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-					HibernateTemplate ht = new HibernateTemplate(sf);
-					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
-							return l;
-						}
-					});
-				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				return ht.executeFind(new HibernateCallback() {
+					public Object doInHibernate(Session session) throws HibernateException {
+						return l;
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -722,23 +721,18 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-					HibernateTemplate ht = new HibernateTemplate(sf);
-					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
-							return l;
-						}
-					});
-				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				return ht.executeFind(new HibernateCallback() {
+					public Object doInHibernate(Session session) throws HibernateException {
+						return l;
+					}
+				});
+			}
+		});
+		assertTrue("Correct result list", result == l);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());

@@ -122,25 +122,20 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		Connection con = (Connection) conControl.getMock();
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
 		conControl.replay();
 		dsControl.replay();
 
-		PlatformTransactionManager tm = new DataSourceTransactionManager(ds) {
-			protected boolean isExistingTransaction(Object transaction) {
-				return true;
-			}
-		};
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
+		TransactionSynchronizationManager.bindResource(ds, new ConnectionHolder(con));
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-					assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is existing transaction", !status.isNewTransaction());
 					throw ex;
@@ -150,10 +145,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		}
 		catch (RuntimeException ex2) {
 			// expected
-			assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-			assertTrue("Correct exception thrown", ex2.equals(ex));
+			ex2.printStackTrace();
+			assertEquals("Correct exception thrown", ex, ex2);
 		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(ds);
+		}
+
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -477,6 +476,27 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testTransactionCommitWithPropagationSupports() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+				assertTrue("Is not new transaction", !status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		dsControl.verify();
 	}
 

@@ -89,14 +89,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-			// existing transaction -> use it
 			ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
 			return new DataSourceTransactionObject(holder);
 		}
 		else {
-			// no existing transaction -> create new holder
-			ConnectionHolder holder = new ConnectionHolder(DataSourceUtils.getConnection(this.dataSource));
-			return new DataSourceTransactionObject(holder);
+			return new DataSourceTransactionObject();
 		}
 	}
 
@@ -110,6 +107,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		if (txObject.getConnectionHolder() == null) {
+			logger.debug("Opening new connection for JDBC transaction");
+			Connection con = DataSourceUtils.getConnection(this.dataSource);
+			txObject.setConnectionHolder(new ConnectionHolder(con));
+		}
+
 		Connection con = txObject.getConnectionHolder().getConnection();
 		logger.debug("Switching JDBC connection [" + con + "] to manual commit");
 		try {

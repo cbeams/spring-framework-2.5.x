@@ -27,10 +27,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JtaTransactionTestSuite extends TestCase {
 
-	public JtaTransactionTestSuite(String msg) {
-		super(msg);
-	}
-
 	public static TransactionTemplate getTransactionTemplateForJta(final String utName, final UserTransaction ut) {
 		JndiTemplate jndiTemplate = new JndiTemplate() {
 			protected Context createInitialContext() throws NamingException {
@@ -129,6 +125,26 @@ public class JtaTransactionTestSuite extends TestCase {
 						fail("Shouldn't have been triggered");
 					}
 				});
+				status.setRollbackOnly();
+			}
+		});
+
+		utControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithPropagationSupports() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				status.setRollbackOnly();
 			}
 		});

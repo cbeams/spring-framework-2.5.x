@@ -23,17 +23,41 @@ public class HibernateTransactionObject {
 
 	private Integer previousIsolationLevel;
 
-	protected HibernateTransactionObject(SessionHolder sessionHolder, boolean newSessionHolder) {
+	/**
+	 * Create HibernateTransactionObject for new SessionHolder.
+	 */
+	protected HibernateTransactionObject() {
+	}
+
+	/**
+	 * Create HibernateTransactionObject for existing SessionHolder.
+	 */
+	protected HibernateTransactionObject(SessionHolder sessionHolder) {
 		this.sessionHolder = sessionHolder;
-		this.newSessionHolder = newSessionHolder;
+		this.newSessionHolder = false;
+	}
+
+	/**
+	 * Set new SessionHolder.
+	 */
+	protected void setSessionHolder(SessionHolder sessionHolder) {
+		if (this.sessionHolder != null) {
+			throw new IllegalStateException("Already initialized with an existing SessionHolder");
+		}
+		this.sessionHolder = sessionHolder;
+		this.newSessionHolder = true;
+	}
+
+	public SessionHolder getSessionHolder() {
+		return sessionHolder;
 	}
 
 	public boolean isNewSessionHolder() {
 		return newSessionHolder;
 	}
 
-	public SessionHolder getSessionHolder() {
-		return sessionHolder;
+	public boolean hasTransaction() {
+		return (sessionHolder != null && sessionHolder.getTransaction() != null);
 	}
 
 	protected void setPreviousIsolationLevel(Integer previousIsolationLevel) {

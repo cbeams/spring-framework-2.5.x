@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -130,18 +129,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		if (TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {
 			logger.debug("Found thread-bound persistence manager for JDO transaction");
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(this.persistenceManagerFactory);
-			return new JdoTransactionObject(pmHolder, false);
+			return new JdoTransactionObject(pmHolder);
 		}
 		else {
-			logger.debug("Using new persistence manager for JDO transaction");
-			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
-			return new JdoTransactionObject(new PersistenceManagerHolder(pm), true);
+			return new JdoTransactionObject();
 		}
 	}
 
 	protected boolean isExistingTransaction(Object transaction) throws TransactionException {
-		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-		return txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().isActive();
+		return ((JdoTransactionObject) transaction).hasTransaction();
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
@@ -154,9 +150,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		if (definition.isReadOnly()) {
 			logger.warn("JdoTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
-		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-		logger.debug("Beginning JDO transaction");
 
+		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
+		if (txObject.getPersistenceManagerHolder() == null) {
+			logger.debug("Opening new persistence manager for JDO transaction");
+			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
+			txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(pm));
+		}
+
+		logger.debug("Beginning JDO transaction");
 		try {
 			PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 			pm.currentTransaction().begin();
@@ -179,8 +181,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-		return txObject.getPersistenceManagerHolder().isRollbackOnly();
+		return ((JdoTransactionObject) transaction).getPersistenceManagerHolder().isRollbackOnly();
 	}
 
 	protected void doCommit(TransactionStatus status) throws TransactionException {

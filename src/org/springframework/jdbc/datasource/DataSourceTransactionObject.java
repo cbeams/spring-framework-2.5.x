@@ -14,11 +14,27 @@ package org.springframework.jdbc.datasource;
  */
 public class DataSourceTransactionObject {
 
-	private final ConnectionHolder connectionHolder;
+	private ConnectionHolder connectionHolder;
 
 	private Integer previousIsolationLevel;
 
+	/**
+	 * Create DataSourceTransactionObject for new ConnectionHolder.
+	 */
+	public DataSourceTransactionObject() {
+	}
+
+	/**
+	 * Create DataSourceTransactionObject for existing ConnectionHolder.
+	 */
 	protected DataSourceTransactionObject(ConnectionHolder connectionHolder) {
+		this.connectionHolder = connectionHolder;
+	}
+
+	/**
+	 * Set new ConnectionHolder.
+	 */
+	protected void setConnectionHolder(ConnectionHolder connectionHolder) {
 		this.connectionHolder = connectionHolder;
 	}
 
