@@ -236,6 +236,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public static final String FINISH = "finish";
 
 	/**
+	 * The <code>RESUME</code> action state/event identifier.
+	 */
+	public static final String RESUME = "resume";
+
+	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
@@ -1316,6 +1321,17 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String getErrorEventId() {
 		return ERROR;
+	}
+
+	public Transition onResume(String resumeStateIdPrefix) {
+		return onEvent(getResumeEventId(), resumeStateIdPrefix);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getResumeEventId() {
+		return RESUME;
 	}
 
 	/**
