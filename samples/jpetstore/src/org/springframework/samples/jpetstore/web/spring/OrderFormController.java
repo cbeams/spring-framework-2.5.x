@@ -35,7 +35,7 @@ public class OrderFormController extends AbstractWizardFormController {
 		this.petStore = petStore;
 	}
 
-	protected Object formBackingObject(HttpServletRequest request) throws Exception {
+	protected Object formBackingObject(HttpServletRequest request) throws ModelAndViewDefiningException {
 		UserSession userSession = (UserSession) request.getSession().getAttribute("userSession");
 		Cart cart = (Cart) request.getSession().getAttribute("sessionCart");
 		if (cart != null) {
@@ -46,24 +46,20 @@ public class OrderFormController extends AbstractWizardFormController {
 			return orderForm;
 		}
 		else {
-			ModelAndView modelAndView = new ModelAndView("Error", "message", "An order could not be created because a cart could not be found.");
+			ModelAndView modelAndView = new ModelAndView("Error");
+			modelAndView.addObject("message", "An order could not be created because a cart could not be found.");
 			throw new ModelAndViewDefiningException(modelAndView);
 		}
 	}
 
-	protected boolean isFormSubmission(HttpServletRequest request) {
-		return super.isFormSubmission(request) || request.getParameter(PARAM_FINISH) != null;
-	}
-
-	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page)
-			throws Exception {
+	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page) {
 		if (page == 0 && request.getParameter("shippingAddressRequired") == null) {
 			OrderForm orderForm = (OrderForm) command;
 			orderForm.setShippingAddressRequired(false);
 		}
 	}
 
-	protected Map referenceData(HttpServletRequest request, int page) throws Exception {
+	protected Map referenceData(HttpServletRequest request, int page) {
 		if (page == 0) {
 			List creditCardTypes = new ArrayList();
 			creditCardTypes.add("Visa");
@@ -101,8 +97,8 @@ public class OrderFormController extends AbstractWizardFormController {
 		errors.setNestedPath("");
 	}
 
-	protected ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
-																			 Object command, BindException errors) throws Exception {
+	protected ModelAndView processFinish(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 		OrderForm orderForm = (OrderForm) command;
 		this.petStore.insertOrder(orderForm.getOrder());
 		request.getSession().removeAttribute("sessionCart");
@@ -110,11 +106,6 @@ public class OrderFormController extends AbstractWizardFormController {
 		model.put("order", orderForm.getOrder());
 		model.put("message", "Thank you, your order has been submitted.");
 		return new ModelAndView("ViewOrder", model);
-	}
-
-	protected ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
-																			 Object command, BindException errors) throws Exception {
-		throw new UnsupportedOperationException();
 	}
 
 }
