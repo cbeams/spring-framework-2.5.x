@@ -18,25 +18,29 @@ package org.springframework.context.support;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Standalone XML application context, taking the context definition
  * files from the class path. Mainly useful for test harnesses,
  * but also for application contexts embedded within JARs.
  *
- * <p>Note: Generally treats (file) paths as class path resources, when using
+ * <p>Treats resource paths as class path resources, when using
  * ApplicationContext.getResource. Only supports full classpath resource
  * names that include the package path, like "mypackage/myresource.dat".
+ *
+ * <p>Note: In case of multiple config locations, later bean definitions will
+ * override ones defined in earlier loaded files. This can be leveraged to
+ * deliberately override certain bean definitions via an extra XML file.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @version $Id: ClassPathXmlApplicationContext.java,v 1.10 2004-03-18 02:46:06 trisberg Exp $
+ * @version $Id: ClassPathXmlApplicationContext.java,v 1.11 2004-03-18 14:53:36 jhoeller Exp $
  */
-public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationContext {
+public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
+
+	private String[] configLocations;
 
 	/**
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
@@ -44,7 +48,8 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * @param configLocation file path
 	 */
 	public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
-		super(configLocation);
+		this.configLocations = new String[] {configLocation};
+		refresh();
 	}
 
 	/**
@@ -53,7 +58,8 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * @param configLocations array of file paths
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
-		super(configLocations);
+		this.configLocations = configLocations;
+		refresh();
 	}
 
 	/**
@@ -63,18 +69,14 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * @param parent the parent context
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent)
-	    throws BeansException {
-		super(configLocations, parent);
+			throws BeansException {
+		super(parent);
+		this.configLocations = configLocations;
+		refresh();
 	}
 
-	/**
-	 * This implementation treats paths as class path resources.
-	 * Only supports full class path names including package specification,
-	 * like "/mypackage/myresource.dat". A root slash gets prepended to
-	 * the path if not already contained.
-	 */
-	protected Resource getResourceByPath(String path) {
-		return new ClassPathResource(path);
+	protected String[] getConfigLocations() {
+		return this.configLocations;
 	}
 
 }

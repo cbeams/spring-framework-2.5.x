@@ -31,7 +31,7 @@ import org.springframework.context.ApplicationContextException;
  * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -47,7 +47,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	
 	/**
 	 * Create a new AbstractXmlApplicationContext with the given parent context.
-	 * @param parent parent context
+	 * @param parent the parent context
 	 */
 	public AbstractXmlApplicationContext(ApplicationContext parent) {
 		super(parent);
@@ -99,15 +99,27 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	/**
-	 * Load the bean definitions with the given DefaultXmlBeanDefinitionReader.
+	 * Load the bean definitions with the given XmlBeanDefinitionReader.
 	 * <p>The lifecycle of the bean factory is handled by refreshBeanFactory;
-	 * therefore an implemention of this template method is just supposed
-	 * to load and/or register bean definitions.
+	 * therefore this method is just supposed to load and/or register bean definitions.
 	 * @throws BeansException in case of bean registration errors
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 */
-	protected abstract void loadBeanDefinitions(XmlBeanDefinitionReader reader)
-	    throws BeansException, IOException;
-	
+	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		String[] configLocations = getConfigLocations();
+		if (configLocations != null) {
+			for (int i = 0; i < configLocations.length; i++) {
+				reader.loadBeanDefinitions(getResource(configLocations[i]));
+			}
+		}
+	}
+
+	/**
+	 * Return an array of resource locations, referring to the XML bean
+	 * definition files that this context should be built with.
+	 * @return an array of resource locations, or null if none
+	 */
+	protected abstract String[] getConfigLocations();
+
 }

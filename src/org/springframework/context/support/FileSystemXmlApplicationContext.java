@@ -16,16 +16,19 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Standalone XML application context, taking the context definition files
  * from the file system or from URLs. Mainly useful for test harnesses,
  * but also for standalone environments.
+ *
+ * <p>Treats resource paths as file system resources, when using
+ * ApplicationContext.getResource. Resource paths are considered relative
+ * to the current VM working directory, even if they start with a slash.
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
@@ -33,6 +36,8 @@ import org.springframework.context.ApplicationContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #getResource
+ * @see #getResourceByPath
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 
@@ -71,12 +76,23 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 		refresh();
 	}
 
-	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
-		if (this.configLocations != null) {
-			for (int i = 0; i < this.configLocations.length; i++) {
-				reader.loadBeanDefinitions(getResource(this.configLocations[i]));
-			}
+	protected String[] getConfigLocations() {
+		return this.configLocations;
+	}
+
+	/**
+	 * Resolve resource paths as file system paths.
+	 * <p>Note: Even if a given path starts with a slash, it will get
+	 * interpreted as relative to the current VM working directory.
+	 * This is consisted with the semantics in a Servlet container.
+	 * @param path path to the resource
+	 * @return Resource handle
+	 */
+	protected Resource getResourceByPath(String path) {
+		if (path != null && path.startsWith("/")) {
+			path = path.substring(1);
 		}
+		return new FileSystemResource(path);
 	}
 
 }

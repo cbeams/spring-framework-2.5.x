@@ -16,13 +16,10 @@
 
 package org.springframework.web.context.support;
 
-import java.io.IOException;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.ui.context.Theme;
@@ -48,6 +45,10 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * the web application root. Absolute paths, e.g. for files outside the web app root,
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
+ * <p>In addition to the special beans detected by AbstractApplicationContext,
+ * this class detects a ThemeSource bean in the context, with the name
+ * "themeSource".
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setNamespace
@@ -55,6 +56,7 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
  * @see org.springframework.context.support.AbstractApplicationContext#getResource
+ * @see org.springframework.ui.context.ThemeSource
  */
 public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 		implements ConfigurableWebApplicationContext {
@@ -125,16 +127,6 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-	}
-
-	/**
-	 * Initialize the config locations for the current namespace.
-	 * This can be overridden in subclasses for custom config lookup.
-	 */
-	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
-		for (int i = 0; i < this.configLocations.length; i++) {
-			reader.loadBeanDefinitions(getResource(this.configLocations[i]));
-		}
 	}
 
 	/**
