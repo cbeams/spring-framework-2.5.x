@@ -10,7 +10,7 @@ import org.springframework.aop.TargetSource;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: MockTargetSource.java,v 1.1 2003-11-30 18:02:39 johnsonr Exp $
+ * @version $Id: MockTargetSource.java,v 1.2 2003-11-30 18:10:40 johnsonr Exp $
  */
 public class MockTargetSource implements TargetSource {
 	
@@ -60,6 +60,13 @@ public class MockTargetSource implements TargetSource {
 	public void verify() {
 		if (gets != releases)
 			throw new RuntimeException("Expectation failed: " + gets + " gets and " + releases + " releases");
+	}
+
+	/**
+	 * @see org.springframework.aop.TargetSource#isStatic()
+	 */
+	public boolean isStatic() {
+		return false;
 	}
 
 }

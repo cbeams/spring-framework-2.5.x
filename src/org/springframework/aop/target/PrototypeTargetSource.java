@@ -20,7 +20,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * to do an explicit getBean() method to get the prototype
  * instance.
  * @author Rod Johnson
- * @version $Id: PrototypeTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: PrototypeTargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
  */
 public class PrototypeTargetSource implements TargetSource, BeanFactoryAware {
 	
@@ -85,6 +85,13 @@ public class PrototypeTargetSource implements TargetSource, BeanFactoryAware {
 	
 	public Class getTargetClass() {
 		return this.targetClass;
+	}
+
+	/**
+	 * @see org.springframework.aop.TargetSource#isStatic()
+	 */
+	public final boolean isStatic() {
+		return false;
 	}
 
 }

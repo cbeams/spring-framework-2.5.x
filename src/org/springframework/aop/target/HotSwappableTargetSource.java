@@ -17,7 +17,7 @@ import org.springframework.aop.framework.AopConfigException;
  * It does not invoke proceed() on the MethodInvocation.
  *
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
  */
 public class HotSwappableTargetSource implements TargetSource {
 
@@ -83,6 +83,13 @@ public class HotSwappableTargetSource implements TargetSource {
 			return false;
 		HotSwappableTargetSource otherII = (HotSwappableTargetSource) other;
 		return otherII.target == this.target || otherII.target.equals(this.target);
+	}
+
+	/**
+	 * @see org.springframework.aop.TargetSource#isStatic()
+	 */
+	public boolean isStatic() {
+		return false;
 	}
 
 }

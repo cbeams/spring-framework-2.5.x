@@ -20,7 +20,7 @@ import org.springframework.aop.TargetSource;
  * but at the price of a little code duplication making it implement invoke()
  * itself simplifies stack traces and produces a slight performance improvement.
  * @author Rod Johnson
- * @version $Id: SingletonTargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: SingletonTargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
  */
 public final class SingletonTargetSource implements TargetSource {
 
@@ -62,6 +62,13 @@ public final class SingletonTargetSource implements TargetSource {
 			return false;
 		SingletonTargetSource otherII = (SingletonTargetSource) other;
 		return otherII.target == this.target || otherII.target.equals(this.target);
+	}
+
+	/**
+	 * @see org.springframework.aop.TargetSource#isStatic()
+	 */
+	public boolean isStatic() {
+		return true;
 	}
 
 }

@@ -8,13 +8,13 @@ package org.springframework.aop;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: TargetSource.java,v 1.1 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: TargetSource.java,v 1.2 2003-11-30 18:10:53 johnsonr Exp $
  */
 public interface TargetSource {
 	
 	Class getTargetClass();
 	
-	//boolean isDynamic();
+	boolean isStatic();
 	
 	Object getTarget() throws Exception;
 	
