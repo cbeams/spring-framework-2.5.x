@@ -11,11 +11,12 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.jndi.support.SimpleNamingContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -29,7 +30,12 @@ public class JtaTransactionTestSuite extends TestCase {
 
 	public static TransactionTemplate getTransactionTemplateForJta(final String utName, final UserTransaction ut) {
 		JndiTemplate jndiTemplate = new JndiTemplate() {
+			private boolean invoked = false;
 			protected Context createInitialContext() throws NamingException {
+				if (invoked) {
+					throw new IllegalStateException("Should only invoke createInitialContext once");
+				}
+				invoked = true;
 				Context mockContext = new SimpleNamingContext();
 				mockContext.bind(utName, ut);
 				return mockContext;
@@ -38,6 +44,7 @@ public class JtaTransactionTestSuite extends TestCase {
 		JtaTransactionManager tm = new JtaTransactionManager();
 		tm.setJndiTemplate(jndiTemplate);
 		tm.setUserTransactionName(utName);
+		tm.afterPropertiesSet();
 		return new TransactionTemplate(tm);
 	}
 
@@ -179,7 +186,7 @@ public class JtaTransactionTestSuite extends TestCase {
 	public void testJtaTransactionManagerWithoutJtaSupport() throws Exception {
 		JtaTransactionManager tm = new JtaTransactionManager();
 		try {
-			tm.getTransaction(null);
+			tm.afterPropertiesSet();
 			fail("Should have thrown CannotCreateTransactionException");
 		}
 		catch (CannotCreateTransactionException ex) {
@@ -524,6 +531,35 @@ public class JtaTransactionTestSuite extends TestCase {
 		}
 
 		utControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithNotCacheUserTransaction() {
+		JndiTemplate jndiTemplate = new JndiTemplate() {
+			protected Context createInitialContext() throws NamingException {
+				MockControl utControl = MockControl.createControl(UserTransaction.class);
+				UserTransaction ut = (UserTransaction) utControl.getMock();
+				try {
+					ut.getStatus();
+					utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+					ut.begin();
+					utControl.setVoidCallable(1);
+				}
+				catch (Exception ex) {
+				}
+				utControl.replay();
+				Context mockContext = new SimpleNamingContext();
+				mockContext.bind("ut", ut);
+				return mockContext;
+			}
+		};
+		JtaTransactionManager tm = new JtaTransactionManager();
+		tm.setJndiTemplate(jndiTemplate);
+		tm.setUserTransactionName("ut");
+		tm.setCacheUserTransaction(false);
+		tm.afterPropertiesSet();
+		TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition());
+		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition());
+		assertTrue(status1.getTransaction() != status2.getTransaction());
 	}
 
 }

@@ -20,6 +20,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
@@ -50,13 +51,17 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  */
-public class JtaTransactionManager extends AbstractPlatformTransactionManager {
+public class JtaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
 
 	private JndiTemplate jndiTemplate = new JndiTemplate();
 
-	private String userTransactionName;
+	private String userTransactionName = DEFAULT_USER_TRANSACTION_NAME;
+
+	private boolean cacheUserTransaction = true;
+
+	private UserTransaction cachedUserTransaction;
 
 	/**
 	 * Create a new JtaTransactionManager instance,
@@ -91,14 +96,51 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager {
 		this.userTransactionName = userTransactionName;
 	}
 
-	protected Object doGetTransaction() {
+	/**
+	 * Set whether the JTA UserTransaction object should be cached, i.e.
+	 * looked up from JNDI on afterPropertiesSet. Else, each getTransaction
+	 * call will perform a fresh JNDI lookup. Default is true.
+	 * <p>As JNDI lookups are expensive even in local JNDI environments,
+	 * it is highly advisable to leave this activated. Only turn this off if
+	 * your application server does not allow for caching the UserTransaction.
+	 */
+	public void setCacheUserTransaction(boolean cacheUserTransaction) {
+		this.cacheUserTransaction = cacheUserTransaction;
+	}
+
+	/**
+	 * Eagerly fetch the UserTransaction if cacheUserTransaction is true.
+	 * @see #setCacheUserTransaction
+	 * @see #lookupUserTransaction
+	 */
+	public void afterPropertiesSet() throws CannotCreateTransactionException {
+		if (this.cacheUserTransaction) {
+			this.cachedUserTransaction = lookupUserTransaction();
+		}
+	}
+
+	/**
+	 * Look up the JTA UserTransaction from JNDI via the configured name.
+	 * Can be overridden in subclasses to provide a different UserTransaction object.
+	 * <p>Called either on afterPropertiesSet or on doGetTransaction,
+	 * depending on the cacheUserTransaction setting.
+	 * @return the UserTransaction object
+	 * @throws CannotCreateTransactionException if the JNDI lookup failed
+	 * @see #setJndiTemplate
+	 * @see #setUserTransactionName
+	 * @see #setCacheUserTransaction
+	 */
+	protected UserTransaction lookupUserTransaction() throws CannotCreateTransactionException {
 		try {
-			return (UserTransaction) this.jndiTemplate.lookup(
-				this.userTransactionName != null ? this.userTransactionName : DEFAULT_USER_TRANSACTION_NAME);
+			return (UserTransaction) this.jndiTemplate.lookup(this.userTransactionName);
 		}
 		catch (NamingException ex) {
 			throw new CannotCreateTransactionException("JTA is not available", ex);
 		}
+	}
+
+	protected Object doGetTransaction() {
+		return (this.cachedUserTransaction != null ? this.cachedUserTransaction : lookupUserTransaction());
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
