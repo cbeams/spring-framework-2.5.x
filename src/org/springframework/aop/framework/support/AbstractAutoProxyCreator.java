@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,6 +63,8 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	private boolean applyCommonInterceptorsFirst = true;
 
 	private boolean proxyInterfacesOnly = true;
+	
+	private AttributeRegistry attributeRegistry;
 
 	public final void setOrder(int order) {
 	  this.order = order;
@@ -77,6 +80,14 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 */
 	public void setInterceptors(Object[] interceptors) {
 		this.interceptors = interceptors;
+	}
+	
+	public void setAttributeRegistry(AttributeRegistry attributeRegistry) {
+		this.attributeRegistry = attributeRegistry;
+	}
+	
+	protected AttributeRegistry getAttributeRegistry() {
+		return this.attributeRegistry;
 	}
 
 	/**
@@ -121,6 +132,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 										" common interceptors and " + specificInterceptors.length + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
+			proxyFactory.setAttributeRegistry(this.attributeRegistry);
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
 				Object interceptor = it.next();
 				if (interceptor instanceof MethodPointcut) {
