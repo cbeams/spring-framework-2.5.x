@@ -20,18 +20,20 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Singleton factory to conceal automatic choice of Java 1.4 or 1.3
- * ControlFlow implementation class. We want to use the more efficient
- * Java 1.4 StackTraceElement if we can, and we don't want to impose
- * a runtime dependency on 1.4.
+ * Static factory to conceal automatic choice of Java 1.4 or 1.3 ControlFlow
+ * implementation class.
+ *
+ * <p>We want to use the more efficient Java 1.4 StackTraceElement if we can,
+ * and we don't want to impose a runtime dependency on 1.4.
+ *
  * @author Rod Johnson
  */
 public abstract class ControlFlowFactory {
 	
 	public static ControlFlow createControlFlow() {
 		return JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14 ?
-					(ControlFlow) new Jdk14ControlFlow() :
-					(ControlFlow) new Jdk13ControlFlow();
+				(ControlFlow) new Jdk14ControlFlow() :
+				(ControlFlow) new Jdk13ControlFlow();
 	}
 
 
@@ -42,21 +44,20 @@ public abstract class ControlFlowFactory {
 	 * However, they are useful in some cases.
 	 * <p>This implementation uses the StackTraceElement class introduced in Java 1.4.
 	 * @author Rod Johnson
-	 * @version $Id: ControlFlowFactory.java,v 1.3 2004-08-16 12:29:07 trisberg Exp $
 	 */
-	static class Jdk14ControlFlow implements ControlFlow {
+	private static class Jdk14ControlFlow implements ControlFlow {
 
 		private StackTraceElement[] stack;
 
 		public Jdk14ControlFlow() {
-			stack = new Throwable().getStackTrace();
+			this.stack = new Throwable().getStackTrace();
 		}
 
 		public boolean under(Class clazz) {
 			String className = clazz.getName();
 			for (int i = 0; i < stack.length; i++) {
 				//System.out.println(stack[i]);
-				if (stack[i].getClassName().equals(className)) {
+				if (this.stack[i].getClassName().equals(className)) {
 					return true;
 				}
 			}
@@ -64,15 +65,13 @@ public abstract class ControlFlowFactory {
 		}
 
 		/**
-		 * Matches whole method name
-		 * @param clazz
-		 * @param methodName
-		 * @return
+		 * Matches whole method name.
 		 */
 		public boolean under(Class clazz, String methodName) {
 			String className = clazz.getName();
-			for (int i = 0; i < stack.length; i++) {
-				if (stack[i].getClassName().equals(className) && stack[i].getMethodName().equals(methodName)) {
+			for (int i = 0; i < this.stack.length; i++) {
+				if (this.stack[i].getClassName().equals(className) &&
+						this.stack[i].getMethodName().equals(methodName)) {
 					return true;
 				}
 			}
@@ -82,23 +81,21 @@ public abstract class ControlFlowFactory {
 		/**
 		 * Leave it up to the caller to decide what matches.
 		 * Caller must understand stack trace format, so there's less abstraction.
-		 * @param token
-		 * @return
 		 */
 		public boolean underToken(String token) {
 			StringWriter sw = new StringWriter();
 			new Throwable().printStackTrace(new PrintWriter(sw));
-			//System.err.println(sw);
 			String stackTrace = sw.toString();
 			return stackTrace.indexOf(token) != -1;
 		}
 
 		public String toString() {
 			StringBuffer sb = new StringBuffer("Jdk14ControlFlow: ");
-			for (int i = 0; i < stack.length; i++) {
-				if (i > 0)
+			for (int i = 0; i < this.stack.length; i++) {
+				if (i > 0) {
 					sb.append("\n\t@");
-				sb.append(stack[i]);
+				}
+				sb.append(this.stack[i]);
 			}
 			return sb.toString();
 		}
@@ -112,41 +109,34 @@ public abstract class ControlFlowFactory {
 	 * JDK 1.3 than other pointcuts, as they require analysis of the stack trace
 	 * (through constructing a new throwable). However, they are useful in some cases.
 	 * @author Rod Johnson
-	 * @version $Id: ControlFlowFactory.java,v 1.3 2004-08-16 12:29:07 trisberg Exp $
 	 */
-	static class Jdk13ControlFlow implements ControlFlow {
+	private static class Jdk13ControlFlow implements ControlFlow {
 
 		private String stackTrace;
-
 
 		public Jdk13ControlFlow() {
 			StringWriter sw = new StringWriter();
 			new Throwable().printStackTrace(new PrintWriter(sw));
-			stackTrace = sw.toString();
+			this.stackTrace = sw.toString();
 		}
 
 		public boolean under(Class clazz) {
-			return stackTrace.indexOf(clazz.getName()) != -1;
+			return this.stackTrace.indexOf(clazz.getName()) != -1;
 		}
 
 		/**
-		 * Matches whole method name
-		 * @param clazz
-		 * @param methodName
-		 * @return
+		 * Matches whole method name.
 		 */
 		public boolean under(Class clazz, String methodName) {
-			return stackTrace.indexOf(clazz.getName() + "." + methodName + "(") != -1;
+			return this.stackTrace.indexOf(clazz.getName() + "." + methodName + "(") != -1;
 		}
 
 		/**
 		 * Leave it up to the caller to decide what matches.
 		 * Caller must understand stack trace format, so there's less abstraction.
-		 * @param token
-		 * @return
 		 */
 		public boolean underToken(String token) {
-			return stackTrace.indexOf(token) != -1;
+			return this.stackTrace.indexOf(token) != -1;
 		}
 	}
 
