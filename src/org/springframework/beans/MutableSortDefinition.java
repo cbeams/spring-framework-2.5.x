@@ -4,10 +4,13 @@ package org.springframework.beans;
  * Mutable implementation of SortDefinition.
  * Supports toggling the ascending value on setting the same property again.
  * @author Juergen Hoeller
+ * @author Jean-Pierre Pawlak
  * @since 26.05.2003
  * @see #setToggleAscendingOnProperty
  */
 public class MutableSortDefinition implements SortDefinition {
+
+	public static final String NO_CHANGE = "nochange";
 
 	private String property = "";
 
@@ -34,8 +37,14 @@ public class MutableSortDefinition implements SortDefinition {
 	 * Sets the sort property.
 	 * If the property was the same as the current, the sort is reversed if
 	 * toggleAscendingOnProperty is activated, else simply ignored.
+	 * <br>If the property equals <code>NO_CHANGE</code>, nothing is done.
+	 * In web applications, this allows having a form element managing the property. 
 	 */
 	public void setProperty(String property) {
+		// If NO_CHANGE does nothing
+		if (NO_CHANGE.equals(property)) {
+			return;
+		}
 		if (property == null || "".equals(property)) {
 			this.property = "";
 		}
