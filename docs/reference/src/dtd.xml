@@ -47,24 +47,18 @@
 	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 
-	$Id: dtd.xml,v 1.5 2004-06-28 19:50:00 colins Exp $
+	$Id: dtd.xml,v 1.6 2004-09-30 21:10:45 jhoeller Exp $
 --&gt;
 
-
-&lt;!--
-	Element containing informative text describing the purpose of the enclosing
-	element. Always optional.
-	Used primarily for user documentation of XML bean definition documents.
---&gt;
-&lt;!ELEMENT description (#PCDATA)&gt;
 
 &lt;!--
 	The document root.
 	At least one bean definition is required.
 --&gt;
 &lt;!ELEMENT beans (
-        description?,
-        bean+
+	description?,
+	import*,
+	bean+
 )&gt;
 
 &lt;!--
@@ -76,20 +70,40 @@
 &lt;!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no"&gt;
 
 &lt;!--
+	Element containing informative text describing the purpose of the enclosing
+	element. Always optional.
+	Used primarily for user documentation of XML bean definition documents.
+--&gt;
+&lt;!ELEMENT description (#PCDATA)&gt;
+
+&lt;!--
+	Specifies an XML bean definition resource to import.
+--&gt;
+&lt;!ELEMENT import EMPTY&gt;
+
+&lt;!--
+	The relative resource location of the XML bean definition file to import,
+	for example "myImport.xml" or "includes/myImport.xml" or "../myImport.xml".
+--&gt;
+&lt;!ATTLIST import resource CDATA #IMPLIED&gt;
+
+&lt;!--
 	Defines a single named bean.
 --&gt;
 &lt;!ELEMENT bean (
-        description?,
-        (constructor-arg | property)*,
-        (lookup-method)*,
-        (replaced-method)*
+	description?,
+	(constructor-arg | property)*,
+	(lookup-method)*,
+	(replaced-method)*
 )&gt;
 
 &lt;!--
 	Beans can be identified by an id, to enable reference checking.
+
 	There are constraints on a valid XML id: if you want to reference your bean
 	in Java code using a name that's illegal as an XML id, use the optional
-	"name" attribute. If neither given, the bean class name is used as id.
+	"name" attribute. If neither is given, the bean class name is used as id
+	(with an appended counter like "#2" if there is already a bean with that name).
 --&gt;
 &lt;!ATTLIST bean id ID #IMPLIED&gt;
 
@@ -100,28 +114,36 @@
 &lt;!ATTLIST bean name CDATA #IMPLIED&gt;
 
 &lt;!--
-  Optionally specify a parent bean definition.
-
-  Will use the bean class of the parent if none specified, but can
-  also override it. In the latter case, the child bean class must be
-  compatible with the parent, i.e. accept the parent's property values
-  and constructor argument values, if any.
-
-  A child bean definition will inherit constructor argument values,
-  property values and method overrides from the parent, with the option
-  to add new values. If init method, destroy method and/or static factory
-  method are specified, they will override the corresponding parent settings.
-
-  The remaining settings will &lt;i&gt;always&lt;/i&gt; be taken from the child definition:
-  depends on, autowire mode, dependency check, singleton, lazy init.
---&gt;
-&lt;!ATTLIST bean parent CDATA #IMPLIED&gt;
-
-&lt;!--
 	Each bean definition must specify the fully qualified name of the class,
 	except if it pure serves as parent for child bean definitions.
 --&gt;
 &lt;!ATTLIST bean class CDATA #IMPLIED&gt;
+
+&lt;!--
+	Optionally specify a parent bean definition.
+
+	Will use the bean class of the parent if none specified, but can
+	also override it. In the latter case, the child bean class must be
+	compatible with the parent, i.e. accept the parent's property values
+	and constructor argument values, if any.
+
+	A child bean definition will inherit constructor argument values,
+	property values and method overrides from the parent, with the option
+	to add new values. If init method, destroy method, factory bean and/or factory
+	method are specified, they will override the corresponding parent settings.
+
+	The remaining settings will &lt;i&gt;always&lt;/i&gt; be taken from the child definition:
+	depends on, autowire mode, dependency check, singleton, lazy init.
+--&gt;
+&lt;!ATTLIST bean parent CDATA #IMPLIED&gt;
+
+&lt;!--
+	Is this bean "abstract", i.e. not meant to be instantiated itself but
+	rather just serving as parent for concrete child bean definitions.
+	Default is false. Specify true to tell the bean factory to not try to
+	instantiate that particular bean in any case.
+--&gt;
+&lt;!ATTLIST bean abstract (true | false) "false"&gt;
 
 &lt;!--
 	Is this bean a "singleton" (one shared instance, which will
@@ -217,44 +239,70 @@
 &lt;!ATTLIST bean destroy-method CDATA #IMPLIED&gt;
 
 &lt;!--
-	Optional attribute specifying the name of a static factory method to use
-	to create this object. Use constructor-arg elements to specify arguments
-	to the factory method, if it takes arguments. Autowiring does not
-	apply to factory methods.
-	The factory method will be on the class specified by the "class" attribute
-	on this bean definition. Often this will be the same class as that of the
-	constructed object - for example, when the factory method is used as an
-	alternative to a constructor. However, it may be on a different class. In 
-	that case, the created object will *not* be of the class specified in
-	the "class" attribute. This is analogous to FactoryBean behaviour.
-	
-	The factory method can have any number of arguments. Autowiring is not supported.
-	Use indexed constructor-arg elements in conjunction with the factory-method
-	attribute.
-	
+	Optional attribute specifying the name of a factory method to use to
+	create this object. Use constructor-arg elements to specify arguments
+	to the factory method, if it takes arguments. Autowiring does not apply
+	to factory methods.
+
+	If the "class" attribute is present, the factory method will be a static
+	method on the class specified by the "class" attribute on this bean
+	definition. Often this will be the same class as that of the constructed
+	object - for example, when the factory method is used as an alternative
+	to a constructor. However, it may be on a different class. In that case,
+	the created object will *not* be of the class specified in the "class"
+	attribute. This is analogous to FactoryBean behavior.
+
+	If the "factory-bean" attribute is present, the "class" attribute is not
+	used, and the factory method will be an instance method on the object
+	returned from a getBean call with the specified bean name. The factory
+	bean may be defined as a singleton or a prototype.
+
+	The factory method can have any number of arguments. Autowiring is not
+	supported. Use indexed constructor-arg elements in conjunction with the
+	factory-method attribute.
+
 	Setter Injection can be used in conjunction with a factory method.
-	Method Injection cannot, as the factory method returns an instance, which
-	will be used when the container creates the bean.
+	Method Injection cannot, as the factory method returns an instance,
+	which will be used when the container creates the bean.
 --&gt;
 &lt;!ATTLIST bean factory-method CDATA #IMPLIED&gt;
 
 &lt;!--
+	Alternative to class attribute for factory-method usage.
+	If this is specified, no class attribute should be used.
+	This should be set to the name of a bean in the current or
+	ancestor factories that contains the relevant factory method.
+	This allows the factory itself to be configured using Dependency
+	Injection, and an instance (rather than static) method to be used.
+--&gt;
+&lt;!ATTLIST bean factory-bean CDATA #IMPLIED&gt;
+
+&lt;!--
 	Bean definitions can specify zero or more constructor arguments.
-	They correspond to either a specific index of the constructor argument list
-	or are supposed to be matched generically by type.
 	This is an alternative to "autowire constructor".
+	Arguments correspond to either a specific index of the constructor argument
+	list or are supposed to be matched generically by type.
+	Note: A single generic argument value will just be used once, rather than
+	potentially matched multiple times (as of Spring 1.1).
 	constructor-arg elements are also used in conjunction with the factory-method
-	element to construct beans using static factory methods.
+	element to construct beans using static or instance factory methods.
 --&gt;
 &lt;!ELEMENT constructor-arg (
-        description?,
-        (bean | ref | idref | list | set | map | props | value | null)
+	description?,
+	(bean | ref | idref | list | set | map | props | value | null)
 )&gt;
 
 &lt;!--
 	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
+
+	NOTE: it is highly recommended to use the index attribute, in Spring up
+	to and including 1.1. The constructor matcher is extremely greedy in
+	matching args without an index, to the point of duplicating supplied args
+	to fill in unspecified constructor args, if they are compatible (i.e. one
+	single String arg will match a constructor with two String args, etc.).
+	The matcher should be less agressive in a future version.
 --&gt;
 &lt;!ATTLIST constructor-arg index CDATA #IMPLIED&gt;
 
@@ -273,8 +321,8 @@
 	beans in the same or related factories, lists, maps and properties.
 --&gt;
 &lt;!ELEMENT property (
-        description?,
-        (bean | ref | idref | list | set | map | props | value | null)
+	description?,
+	(bean | ref | idref | list | set | map | props | value | null)
 )&gt;
 
 &lt;!--
@@ -298,11 +346,10 @@
 --&gt;
 &lt;!ATTLIST lookup-method name CDATA #IMPLIED&gt;
 
-
 &lt;!--
 	Similar to the lookup method mechanism, the replaced-method element is used to control
 	IoC container method overriding: Method Injection. This mechanism allows the overriding
-	of a method with arbitrary code. 
+	of a method with arbitrary code.
 --&gt;
 &lt;!ELEMENT replaced-method (
 	(arg-type)*
@@ -311,7 +358,7 @@
 &lt;!--
 	Name of the method whose implementation should be replaced by the IoC container.
 	If this method is not overloaded, there's no need to use arg-type subelements.
-	If this method is overloaded, arg-type subelements must be used for all 
+	If this method is overloaded, arg-type subelements must be used for all
 	override definitions for the method.
 --&gt;
 &lt;!ATTLIST replaced-method name CDATA #IMPLIED&gt;
@@ -331,18 +378,17 @@
 &lt;!ELEMENT arg-type (#PCDATA)&gt;
 
 &lt;!--
-	Specification of the type of an overloaded method argument as a String. 
-	For convenenince, this may be a substring of the FQN. E.g. all the
+	Specification of the type of an overloaded method argument as a String.
+	For convenience, this may be a substring of the FQN. E.g. all the
 	following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
-	
+
 	As the number of arguments will be checked also, this convenience can often
-	be used to save typing
+	be used to save typing.
 --&gt;
 &lt;!ATTLIST arg-type match CDATA #IMPLIED&gt;
-
 
 &lt;!--
 	Name of the bean in the current or ancestor factories that the lookup method
@@ -351,7 +397,6 @@
 	is useful for single-threaded objects.
 --&gt;
 &lt;!ATTLIST lookup-method bean CDATA #IMPLIED&gt;
-
 
 &lt;!--
 	Defines a reference to another bean in this factory or an external
@@ -399,7 +444,7 @@
 	is automatically performed by the BeanFactory.
 --&gt;
 &lt;!ELEMENT list (
-        (bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | list | set | map | props | value | null)*
 )&gt;
 
 &lt;!--
@@ -408,7 +453,7 @@
 	although references will be strongly typed.
 --&gt;
 &lt;!ELEMENT set (
-        (bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | list | set | map | props | value | null)*
 )&gt;
 
 &lt;!--
@@ -416,7 +461,7 @@
 	Maps may be empty.
 --&gt;
 &lt;!ELEMENT map (
-        (entry)*
+	(entry)*
 )&gt;
 
 &lt;!--
@@ -424,7 +469,7 @@
 	The name of the property is given by the "key" attribute.
 --&gt;
 &lt;!ELEMENT entry (
-        (bean | ref | idref | list | set | map | props | value | null)
+	(bean | ref | idref | list | set | map | props | value | null)
 )&gt;
 
 &lt;!--
@@ -437,7 +482,7 @@
 	Props may be empty.
 --&gt;
 &lt;!ELEMENT props (
-        (prop)*
+	(prop)*
 )&gt;
 
 &lt;!--
@@ -445,9 +490,7 @@
 	Note that whitespace is trimmed off to avoid unwanted whitespace
 	caused by typical XML formatting.
 --&gt;
-&lt;!ELEMENT prop
-        (#PCDATA)
-&gt;
+&lt;!ELEMENT prop (#PCDATA)&gt;
 
 &lt;!--
 	Each property element must specify its key.
@@ -474,5 +517,6 @@
 	null value unless a special PropertyEditor does so.
 --&gt;
 &lt;!ELEMENT null (#PCDATA)&gt;
+
 </programlisting></para>
 </appendix>
