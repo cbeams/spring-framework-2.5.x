@@ -18,6 +18,7 @@ package org.springframework.rules.values;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.reporting.ValidationResults;
 import org.springframework.util.Assert;
+import org.springframework.util.ToStringBuilder;
 
 /**
  * @author Keith Donald
@@ -62,5 +63,9 @@ public class ValidationEvent {
 
     public ValidationResults getResults() {
         return results;
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).appendProperties().toString();
     }
 }
