@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1 RC2 (August 2004)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1 (August 2004)
+-----------------------------------------------
 http://www.springframework.org
 
 
@@ -94,7 +94,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~220 KB)
+* "spring-context" (~225 KB)
 - Contents: application context, validation framework, UI support, mail, JNDI, JMS, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1235 KB)
+* "spring" (~1240 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
