@@ -29,9 +29,9 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.InternalEvent;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.StubRequestContext;
 import org.springframework.web.flow.SubFlowState;
@@ -48,16 +48,16 @@ import org.springframework.web.flow.ViewState;
 public class XmlFlowBuilderTests extends TestCase {
 
 	private Flow flow;
+
 	private StubRequestContext context;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		builder.setFlowServiceLocator(new TestFlowServiceLocator());
 		flow = new FlowFactoryBean(builder).getFlow();
-		
-		context=new StubRequestContext();
+		context = new StubRequestContext();
 	}
-	
+
 	private Event createEvent(String id) {
 		return new InternalEvent(this, id);
 	}

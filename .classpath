@@ -73,7 +73,6 @@
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
-	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
@@ -91,7 +90,6 @@
 	<classpathentry kind="lib" path="lib/fop/fop.jar"/>
 	<classpathentry kind="lib" path="lib/activemq/activemq-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/jmx/jmxtools.jar"/>
 	<classpathentry kind="lib" path="lib/jamon/JAMon.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/struts/struts.jar"/>
@@ -109,5 +107,6 @@
 	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/rowset.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

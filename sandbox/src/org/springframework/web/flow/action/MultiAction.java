@@ -31,29 +31,37 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- *    public Event ${executeMethodName}(RequestContext context)
+ * 
+ *     public Event ${executeMethodName}(RequestContext context)
+ *  
  * </pre>
  * 
  * By default, the ${executeMethodName} will be the name of the <b>current state</b>
  * of the flow, so the follow state definition
  * 
  * <pre>
- *     &lt;action-state id=&quot;search&quot;&gt;
- *         &lt;action bean=&quot;my.search.action&quot;/&gt;
- *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
- *     &lt;/action-state&gt;
+ * 
+ *      &lt;action-state id=&quot;search&quot;&gt;
+ *          &lt;action bean=&quot;my.search.action&quot;/&gt;
+ *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *      &lt;/action-state&gt;
+ *  
  * </pre>
  * 
  * ... will execute the method:
  * 
  * <pre>
- *     public Event search(RequestContext context)
+ * 
+ *      public Event search(RequestContext context)
+ *  
  * </pre>
  * 
  * <p>
  * A typical use of the MultiAction is to combine all CRUD operations for a
- * certain domain object into a single controller. This action also allows you
- * to reduce the number of action beans you have to define and configure.
+ * certain domain object into a single controller. Another typical use is to
+ * centralize form setup and submit logic into one place. This action also
+ * allows you to reduce the number of action beans you have to define and
+ * configure.
  * <p>
  * <b>Exposed configuration properties:</b> <br>
  * <table border="1">
@@ -90,8 +98,7 @@ public class MultiAction extends AbstractAction {
 	/**
 	 * The action execute method name resolver strategy.
 	 */
-	private ActionExecuteMethodNameResolver executeMethodNameResolver =
-		new CurrentStateActionExecuteMethodNameResolver();
+	private ActionExecuteMethodNameResolver executeMethodNameResolver = new CurrentStateActionExecuteMethodNameResolver();
 
 	/**
 	 * The resolved action execute method cache.
