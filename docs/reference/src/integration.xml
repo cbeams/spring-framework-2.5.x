@@ -49,16 +49,19 @@
 			<title>Dependencies</title> 
 
             <para>
+
                 There is one dependency that your web application will need to
      			satisfy before working with Velocity, namely that
-     			velocity-1.x.x.jar needs to be available. Typically this is
-     			included in the WEB-INF/lib folder where it is guaranteed to
-     			be found by a J2EE server and added to the classpath for your
-     			application. It is of course assumed that you already have the
-     			spring-full.jar (or equivalent) in your WEB-INF/lib folder
-     			too! The latest stable velocity jar is supplied with the
-     			Spring framework and can be copied from the /lib/velocity
-     			directory.
+     			<literal>velocity-1.x.x.jar</literal> needs to be
+     			available. Typically this is included in the
+     			<literal>WEB-INF/lib</literal> folder where it is guaranteed
+     			to be found by a J2EE server and added to the classpath for
+     			your application. It is of course assumed that you already
+     			have the spring.jar in your <literal>WEB-INF/lib</literal>
+     			folder too! The latest stable velocity jar is supplied with
+     			the Spring framework and can be copied from the
+     			<literal>/lib/velocity</literal> directory.
+
             </para>
 			
 		</sect2>
@@ -66,13 +69,15 @@
 		<sect2 id="integration-velocity-configuration-dispatcher">
 
 			<title>Dispatcher Servlet Context</title>
-			<para>				
+			<para>	
+			
                 The configuration file for your Spring dispatcher servlet
-			    (usually WEB-INF/[servletname]-servlet.xml) should already
-			    contain a bean definition for the view resolver. We'll also
-			    add a bean here to configure the Velocity environment. I've
-			    chosen to call my dispatcher 'frontcontroller' so my config
-			    file names reflect this.  
+			    (usually <literal>WEB-INF/[servletname]-servlet.xml</literal>)
+			    should already contain a bean definition for the view
+			    resolver. We'll also add a bean here to configure the Velocity
+			    environment. I've chosen to call my dispatcher
+			    'frontcontroller' so my config file names reflect this.
+  
             </para>
 
 			<para>
@@ -85,33 +90,33 @@
 <!-- View resolver. Required by web framework.                  -->
 <!-- ===========================================================-->
 <!--
-	View resolvers can be configured with ResourceBundles or XML files.  If you need
-	different view resolving based on Locale, you have to use the resource bundle resolver, 
-	otherwise it makes no difference.  I simply prefer to keep the Spring configs and 
-	contexts in XML.  See Spring documentation for more info.
+  View resolvers can be configured with ResourceBundles or XML files.  If you need
+  different view resolving based on Locale, you have to use the resource bundle resolver, 
+  otherwise it makes no difference.  I simply prefer to keep the Spring configs and 
+  contexts in XML.  See Spring documentation for more info.
 -->
 <bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
-	<property name="cache"><value>true</value></property>
-	<property name="location"><value>/WEB-INF/frontcontroller-views.xml</value></property>
+  <property name="cache"><value>true</value></property>
+  <property name="location"><value>/WEB-INF/frontcontroller-views.xml</value></property>
 </bean>
 
 <!-- ===========================================================-->
 <!-- Velocity configurer.                                       -->
 <!-- ===========================================================-->
 <!--
-	The next bean sets up the Velocity environment for us based on a properties file, the 
-	location of which is supplied here and set on the bean in the normal way.  My example shows
-	that the bean will expect to find our velocity.properties file in the root of the 
-	WEB-INF folder.  In fact, since this is the default location, it's not necessary for me
-	to supply it here.  Another possibility would be to specify all of the velocity
-	properties here in a property set called "velocityProperties" and dispense with the
-	actual velocity.properties file altogether.
+  The next bean sets up the Velocity environment for us based on a properties file, the 
+  location of which is supplied here and set on the bean in the normal way.  My example shows
+  that the bean will expect to find our velocity.properties file in the root of the 
+  WEB-INF folder.  In fact, since this is the default location, it's not necessary for me
+  to supply it here.  Another possibility would be to specify all of the velocity
+  properties here in a property set called "velocityProperties" and dispense with the
+  actual velocity.properties file altogether.
 -->
 <bean 
-	id="velocityConfig" 
-	class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
-	singleton="true">
-	<property name="configLocation"><value>/WEB-INF/velocity.properties</value></property>          
+  id="velocityConfig" 
+  class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
+  singleton="true">
+  <property name="configLocation"><value>/WEB-INF/velocity.properties</value></property>          
 </bean>
 				]]></programlisting>
 		</sect2>
@@ -130,6 +135,7 @@
 			</para>
 
 			<para>
+
 				The main property values concern the location of the Velocity
 			    templates themselves. Velocity templates can be loaded from
 			    the classpath or the file system and there are pros and cons
@@ -139,23 +145,28 @@
 			    source tree for them). A further downside of classpath storage
 			    is that during development, changing anything in the source
 			    tree often causes a refresh of the resource in the
-			    WEB-INF/classes tree and this in turn may cause your
-			    development server to restart the application (hot-deploying
-			    of code). This can be irritating. Once most of the development
-			    is complete though, you could store the templates in a jar
-			    file which would make them available to the application if
-			    this were placed in WEB-INF/lib.  
+			    <literal>WEB-INF/classes</literal> tree and this in turn may
+			    cause your development server to restart the application
+			    (hot-deploying of code). This can be irritating. Once most of
+			    the development is complete though, you could store the
+			    templates in a jar file which would make them available to the
+			    application if this were placed in
+			    <literal>WEB-INF/lib</literal>
+
             </para>
 
-			<para> This example stores velocity templates on the file system
-                somewhere under WEB-INF so that they are not directly
-                available to the client browsers, but don't cause an
-                application restart in development every time you change
+			<para> 
+
+                This example stores velocity templates on the file system
+                somewhere under <literal>WEB-INF</literal> so that they are
+                not directly available to the client browsers, but don't cause
+                an application restart in development every time you change
                 one. The downside is that the target server may not be able to
                 resolve the path to these files correctly, particularly if the
                 target server doesn't explode WAR modules on the file
                 system. The file method works fine for Tomcat 4.1.x/5.x,
                 WebSphere 4.x and WebSphere 5.x. Your mileage may vary.
+
             </para>
 
 			<programlisting><![CDATA[
@@ -194,16 +205,18 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			]]></programlisting>		
 		        
 			<para>
+
 				The file resource loader configuration above uses a marker to
 			    denote the root of the web application on the file system
-			    ${webapp.root}. This marker will be translated into the actual
-			    OS-specific path by the Spring code prior to supplying the
-			    properties to Velocity. This is what makes the file resource
-			    loader non-portable in some servers. The actual name of the
-			    marker itself can be changed if you consider it important by
-			    defining a different "appRootMarker" for
-			    VelocityConfigurer. See the Spring documentation for details
-			    on how to do this.  
+			    <literal>${webapp.root}</literal>. This marker will be
+			    translated into the actual OS-specific path by the Spring code
+			    prior to supplying the properties to Velocity. This is what
+			    makes the file resource loader non-portable in some
+			    servers. The actual name of the marker itself can be changed
+			    if you consider it important by defining a different
+			    "appRootMarker" for VelocityConfigurer. See the Spring
+			    documentation for details on how to do this.
+
             </para>
 
             <para>
@@ -217,12 +230,12 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 
 			<programlisting><![CDATA[
 <property name="velocityProperties">
-   	<props>
-   		<prop key="resource.loader">file</prop>
-   		<prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
-   		<prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
-   		<prop key="file.resource.loader.cache">false</prop>
-   	</props>
+  <props>
+    <prop key="resource.loader">file</prop>
+    <prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
+    <prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
+   	<prop key="file.resource.loader.cache">false</prop>
+  </props>
 </property>
 			]]></programlisting>		
 
@@ -253,9 +266,10 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			    noted earlier, this example uses an XML file to define view
 			    beans, but a properties file (ResourceBundle) can also be
 			    used. The name of the view definition file was defined earlier
-			    in our ViewResolver bean - part of the
-			    WEB-INF/frontcontroller-servlet.xml file.  
-            </para>
+			    in the ViewResolver bean - part of the
+			    <literal>WEB-INF/frontcontroller-servlet.xml</literal> file.
+
+		    </para>
 
 			<programlisting><![CDATA[
 <!--
@@ -264,7 +278,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   will normally be overridden in child definitions.
 -->
 <bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView">
-	<property name="templateName"><value>mainTemplate.vm</value></property>        
+  <property name="templateName"><value>mainTemplate.vm</value></property>        
 </bean>
 
 <!--
@@ -272,23 +286,23 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   from the parent is used.
 -->
 <bean id="welcomeView" parent="parentVelocityView">
-	<property name="attributes">
-		<props>
-			<prop key="title">My Velocity Home Page</prop>
-		</props>
-	</property>     
+  <property name="attributes">
+    <props>
+      <prop key="title">My Velocity Home Page</prop>
+    </props>
+  </property>     
 </bean>  
 
 <!--
   - Another view - this one defines a different velocity template.
 -->
 <bean id="secondaryView" parent="parentVelocityView">
-	<property name="templateName"><value>secondaryTemplate.vm</value></property>  
-	<property name="attributes">
-			<props>
-				<prop key="title">My Velocity Secondary Page</prop>
-			</props>
-	</property>    
+  <property name="templateName"><value>secondaryTemplate.vm</value></property>  
+  <property name="attributes">
+    <props>
+      <prop key="title">My Velocity Secondary Page</prop>
+    </props>
+  </property>    
 </bean>   
 			]]></programlisting>
 		</sect2>
@@ -297,24 +311,26 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 			<title>Create templates and test</title>
 
 			<para>
+
 				Finally, you simply need to create the actual velocity
 				templates. We have defined views that reference two templates,
 				mainTemplate.vm and secondaryTemplate.vm Both of these files
-				will live in WEB-INF/velocity/ as noted in the
-				velocity.properties file above. If you chose a classpath
+				will live in <literal>WEB-INF/velocity/</literal> as noted in
+				the velocity.properties file above. If you chose a classpath
 				loader in velocity.properties, these files would live in the
-				default package (WEB-INF/classes), or in a jar file under
-				WEB-INF/lib.  Here's what our 'secondaryView' might look like
-				(simplified HTML) 
+				default package (<literal>WEB-INF/classes</literal>), or in a
+				jar file under <literal>WEB-INF/lib</literal>.  Here's what
+				our 'secondaryView' might look like (simplified HTML)
+
             </para>
 
 			<programlisting><![CDATA[
 ## $title is set in the view definition file for this view.
 <html>
-	<head><title>$title</title></head>
-	<body>
-		<h1>This is $title!!</h1>
-	</body>
+  <head><title>$title</title></head>
+  <body>
+    <h1>This is $title!!</h1>
+  </body>
 </html>
 			]]></programlisting>
 
@@ -326,19 +342,138 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
 
 		</sect2>
 		
-    		<sect2 id="integration-velocity-summary">
-				<title>Summary</title> 
+		<sect2 id="integration-velocity-forms">
 
-                <para>
-                    To summarize, this is the tree structure of files
-				    discussed in the example above. Only a partial tree is
-				    shown, some required directories are not highlighted
-				    here. Incorrect file locations are probably the major
-				    reason for velocity views not working, with incorrect
-				    properties in the view definitions a close second.
-                </para>
+		    <title>Form Handling</title>
 
-				<programlisting><![CDATA[
+			<para>
+			
+			    Spring provides a tag library for use in JSP's that contains
+			    (amongst other things) a
+			    <literal><![CDATA[<spring:bind>]]></literal> tag.  This tag
+			    primarily enables forms to display the results of failed
+			    validations from a <literal>Validator</literal> in the web or
+			    business tier.  This behaviour can be simulated with a
+			    Velocity macro and some additional Spring functionality.
+
+			</para>
+
+			<para>
+			
+			    The error messages that are actually produced from the
+			    validation of a form submission can be read from a properties
+			    file to make them easily maintainable or internationalised.
+			    Spring handles this elegantly in its own way and you should
+			    refer to the MVC tutorial or relevant parts of the javadocs
+			    for details on how this works.  In order to gain access to the
+			    messages, the <literal>RequestContext</literal> object needs
+			    to be exposed to your Velocity templates in the
+			    <literal>VelocityContext</literal>.  Amend your template
+			    definition in views.properties or views.xml file to give a
+			    name to this attribute (giving it a name is what causes it to
+			    be exposed)
+
+			</para>
+
+			<programlisting><![CDATA[
+<bean id="welcomeView" parent="parentVelocityView">
+  <property name="requestContextAttribute"><value>rc</value></property>  
+  <property name="attributes">
+    <props>
+      <prop key="title">My Velocity Home Page</prop>
+    </props>
+  </property>     
+</bean>
+			]]></programlisting>
+
+			<para>
+
+			    The example above is based on our earlier example and sets the
+			    RequestContext attribute name to be rc.  All Velocity views
+			    that inherit from this parent view will now have an additional
+			    object available to them via the reference
+			    <literal>$rc</literal>
+
+			</para>
+
+			<para>
+
+			    Next, a velocity macro needs to be defined.  It makes sense to
+			    create this macro in a global macro file since it will be
+			    reusable across many Velocity templates (html forms).  Refer
+			    to the Velocity documentation for more information on creating
+			    macros.  
+
+			</para>
+
+			<para>
+
+			    The code below should go into the file VM_global_library.vm in
+			    the root directory of your Velocity template location..
+
+			</para>
+
+			<programlisting><![CDATA[
+#*
+ * showerror
+ *
+ * display an error for the field name supplied if one exists
+ * in the supplied errors object.
+ *
+ * param $errors the object obtained from RequestContext.getErrors( "formBeanName" )
+ * param $field the field name you want to display errors for (if any)
+ *
+ *#
+#macro( showerror $errors $field )
+  #if( $errors )
+    #if( $errors.getFieldErrors( $field ))
+      #foreach($err in $errors.getFieldErrors( $field ))
+        <span class="fieldErrorText">$rc.getMessage($err)</span><br />
+      #end
+    #end
+  #end
+#end
+            ]]></programlisting>
+
+			<para>
+
+			    Finally, in your html forms, you can use code similar to the
+			    following to display bound error messages for each input
+			    field.
+
+			</para>
+
+			<programlisting><![CDATA[
+## set the following variable once somewhere at the top of
+## the velocity template
+#set ($errors=$rc.getErrors("commandBean"))
+<html>
+...
+<form ...>
+  <input name="query" value="$!commandBean.query"><br>
+  #showerror($errors "query")
+</form>
+...
+</html>
+            ]]></programlisting>
+
+		</sect2>		
+		
+   		<sect2 id="integration-velocity-summary">
+			<title>Summary</title> 
+
+            <para>
+
+                To summarize, this is the tree structure of files discussed in
+			    the example above. Only a partial tree is shown, some required
+			    directories are not highlighted here. Incorrect file locations
+			    are probably the major reason for velocity views not working,
+			    with incorrect properties in the view definitions a close
+			    second.
+
+            </para>
+
+			<programlisting><![CDATA[
 ProjectRoot
 	|
 	+- WebContent
@@ -352,6 +487,7 @@ ProjectRoot
 			  |
 			  +- velocity
 			  |    |
+			  |    +- VM_global_library.vm
 			  |    +- mainTemplate.vm
 			  |    +- secondaryTemplate.vm
 			  |
