@@ -23,8 +23,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A transition takes a flow from one state to another when executed.
- * A transition is associated with exactly one source
+ * A transition takes a flow from one state to another when executed. A
+ * transition is associated with exactly one source
  * <code>TransitionableState</code> managed by exactly one <code>Flow</code>
  * definition.
  * 
@@ -120,8 +120,9 @@ public class Transition {
 	 * @throws IllegalStateException if the source state has not been set
 	 */
 	public TransitionableState getSourceState() throws IllegalStateException {
-		Assert.state(sourceState != null,
-			"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
+		Assert
+				.state(sourceState != null,
+						"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
 		return sourceState;
 	}
 
@@ -178,32 +179,35 @@ public class Transition {
 	}
 
 	/**
-	 * Execute this transition.
+	 * Execute this state transition.
 	 * @param context the flow execution request context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the transition execution
-	 * @throws CannotExecuteStateTransitionException when this transition
-	 *         cannot be executed
+	 * @throws CannotExecuteStateTransitionException when this transition cannot
+	 *         be executed
 	 */
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
+		State state = null;
 		try {
-			ViewDescriptor viewDescriptor = getTargetState().enter(context);
-			if (logger.isDebugEnabled()) {
-				if (context.isFlowExecutionActive()) {
-					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-							+ context.getCurrentState().getId() + "' in flow '"
-							+ context.getActiveFlow().getId() + "'");
-				}
-				else {
-					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
-							+ context.getRootFlow().getId() + "' execution has ended");
-				}
-			}
-			return viewDescriptor;
+			state = getTargetState();
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
+		// enter the target state (note: any exceptions are propagated)
+		ViewDescriptor viewDescriptor = state.enter(context);
+		if (logger.isDebugEnabled()) {
+			if (context.isFlowExecutionActive()) {
+				logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
+						+ context.getCurrentState().getId() + "' in flow '" + context.getActiveFlow().getId() + "'");
+			}
+			else {
+				logger.debug("Transition '" + this + "' executed; as a result, the flow '"
+						+ context.getRootFlow().getId() + "' execution has ended");
+			}
+		}
+		return viewDescriptor;
+
 	}
 
 	/**
@@ -220,12 +224,12 @@ public class Transition {
 	};
 
 	/**
-	 * Simple, default transition criteria that matches on an eventId and nothing
-	 * else. Specifically, if the last event that occured has id ${eventId},
-	 * this criteria will return true.
+	 * Simple, default transition criteria that matches on an eventId and
+	 * nothing else. Specifically, if the last event that occured has id
+	 * ${eventId}, this criteria will return true.
 	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
-		
+
 		private String eventId;
 
 		public EventIdTransitionCriteria(String eventId) {
