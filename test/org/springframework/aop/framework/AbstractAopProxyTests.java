@@ -42,7 +42,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.17 2004-01-21 20:21:34 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.18 2004-01-25 22:29:03 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -622,7 +622,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		t.getName();
 		assertEquals(3, di.getCount());
 		assertEquals(1, di2.getCount());
-		config.removeInterceptor(di);
+		// will remove di
+		config.removeAdvisor(0);
 		t.getAge();
 		// Unchanged
 		assertEquals(3, di.getCount());
