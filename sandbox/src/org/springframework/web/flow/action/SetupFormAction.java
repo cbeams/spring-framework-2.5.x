@@ -32,7 +32,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class FormSetupAction extends BindAndValidateAction {
+public class SetupFormAction extends BindAndValidateAction {
 
 	private static final String NOT_MAPPED_PLACEHOLDER_VALUE = "!NOT MAPPED!";
 
@@ -84,7 +84,7 @@ public class FormSetupAction extends BindAndValidateAction {
 		exportErrors(binder.getErrors(), model);
 		exportViewPlaceholders(request, model);
 		try {
-			setReferenceData(request, model);
+			setupReferenceData(request, model);
 		}
 		catch (ServletRequestBindingException e) {
 			throw new ReferenceDataSetupException(e);
@@ -119,12 +119,12 @@ public class FormSetupAction extends BindAndValidateAction {
 	}
 
 	/**
-	 * Template method to be implemented by subclasses to set any reference data
-	 * needed to support this form.
+	 * Template method to be implemented by subclasses to setup any reference
+	 * data needed to support this form.
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
-	protected void setReferenceData(HttpServletRequest request, MutableAttributesAccessor model)
+	protected void setupReferenceData(HttpServletRequest request, MutableAttributesAccessor model)
 			throws ReferenceDataSetupException, ServletRequestBindingException {
 
 	}
