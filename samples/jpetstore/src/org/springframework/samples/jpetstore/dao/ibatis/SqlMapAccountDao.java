@@ -7,6 +7,22 @@ import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
 import org.springframework.samples.jpetstore.dao.AccountDao;
 import org.springframework.samples.jpetstore.domain.Account;
 
+/**
+ * In this and other DAOs in this package, a DataSource property
+ * is inherited from the SqlMapDaoSupport convenience superclass
+ * supplied by Spring. DAOs don't need to extend such
+ * superclasses, but it saves coding in many cases. There are
+ * analogous superclasses for JDBC (JdbcDaoSupport), Hibernate
+ * (HibernateDaoSupport), JDO (JdoDaoSupport) etc.
+ * <p>
+ * This and other DAOs are configured using Dependency Injection.
+ * This means, for example, that Spring can source the DataSource
+ * from a local class, such as the Commons DBCP BasicDataSource,
+ * or from JNDI, concealing the JNDI lookup from application code.
+ * 
+ * @author Juergen Hoeller
+ * @version $Id: SqlMapAccountDao.java,v 1.3 2004-06-25 06:49:20 johnsonr Exp $
+ */
 public class SqlMapAccountDao extends SqlMapDaoSupport implements AccountDao {
 
   public Account getAccount(String username) throws DataAccessException {
