@@ -170,8 +170,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	/**
 	 * Process the model map by merging it with the FreeMarker template.
-	 * Output is directed to the response.
-	 * This method can be overridden if custom behavior is needed.
+	 * Output is directed to the servlet response.
+	 * <p>This method can be overridden if custom behavior is needed.
 	 */
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -183,8 +183,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
-	 * This method can be overridden to add custom helpers to the model.
+	 * <p>Called by <code>renderMergedTemplateModel</code>. The default implementation
+	 * is empty. This method can be overridden to add custom helpers to the model.
 	 * @param model The model that will be passed to the template at merge time
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding information to the context
@@ -192,6 +192,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
 	}
+
 	/**
 	 * Render the FreeMarker view to the given response, using the given model
 	 * map which contains the complete template model to use.
@@ -253,7 +254,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	/**
 	 * Process the FreeMarker template to the servlet response.
-	 * Can be overridden to customize the behavior.
+	 * <p>Can be overridden to customize the behavior.
 	 * @param template the template to process
 	 * @param model the model for the template
 	 * @param response servlet response (use this to get the OutputStream or Writer)

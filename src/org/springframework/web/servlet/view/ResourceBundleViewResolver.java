@@ -41,8 +41,8 @@ import org.springframework.web.servlet.View;
  * typically defined in a properties file, located in the class path.
  * The default bundle basename is "views".
  *
- * <p>This ViewResolver supports localized view definitions,
- * using the default support of java.util.PropertyResourceBundle.
+ * <p>This ViewResolver supports localized view definitions, using the
+ * default support of <code>java.util.PropertyResourceBundle</code>.
  *
  * <p>Note: This ViewResolver implements the Ordered interface to allow for
  * flexible participation in ViewResolver chaining. For example, some special
@@ -60,13 +60,14 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	/** Default if no other basename is supplied */
 	public final static String DEFAULT_BASENAME = "views";
 
+
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private String[] basenames = new String[] {DEFAULT_BASENAME};
 
 	private String defaultParentView;
 
-	/** Locale -> BeanFactory */
+	/* Locale -> BeanFactory */
 	private final Map cachedFactories = new HashMap();
 
 
@@ -143,8 +144,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
 		for (int i = 0; i < this.basenames.length; i++) {
-			ResourceBundle bundle = ResourceBundle.getBundle(this.basenames[i], locale,
-																											 Thread.currentThread().getContextClassLoader());
+			ResourceBundle bundle = ResourceBundle.getBundle(
+					this.basenames[i], locale, Thread.currentThread().getContextClassLoader());
 			reader.registerBeanDefinitions(bundle);
 		}
 		factory.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));

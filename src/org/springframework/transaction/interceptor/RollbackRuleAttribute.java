@@ -30,7 +30,8 @@ import org.springframework.aop.framework.AopConfigException;
  */
 public class RollbackRuleAttribute implements Serializable{
 	
-	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS = new RollbackRuleAttribute("java.lang.RuntimeException");
+	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS =
+			new RollbackRuleAttribute(RuntimeException.class);
 	
 	/**
 	 * Could hold exception, resolving classname but would always require FQN.
@@ -40,15 +41,15 @@ public class RollbackRuleAttribute implements Serializable{
 	private final String exceptionName;
 	
 	/**
-	 * Preferred way to construct a RollbackRule, matching
-	 * the exception class and subclasses. The exception class must be
-	 * Throwable or a subclass of Throwable.
+	 * Preferred way to construct a RollbackRule, matching the exception class and
+	 * subclasses. The exception class must be Throwable or a subclass of Throwable.
 	 * @param clazz throwable class
 	 */
 	public RollbackRuleAttribute(Class clazz) {
-		if (!Throwable.class.isAssignableFrom(clazz))
-			throw new AopConfigException("Cannot construct rollback rule from " + clazz + "; " +
-					"it's not a Throwable");
+		if (!Throwable.class.isAssignableFrom(clazz)) {
+			throw new AopConfigException("Cannot construct rollback rule from [" + clazz.getName() +
+					"]; it's not a Throwable");
+		}
 		this.exceptionName = clazz.getName();
 	}
 
@@ -57,7 +58,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * This can be a substring, with no wildcard support at present.
 	 * A value of "ServletException" would match ServletException and
 	 * subclasses, for example.
-	 * <p><b>NB: </b>Consider carefully how specific the pattern is, and whether
+	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * "Exception" will match nearly anything, and will probably hide other rules.
 	 * "java.lang.Exception" would be correct if "Exception" was meant to define
@@ -98,12 +99,13 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 	
 	public String toString() {
-		return "RollbackRule with pattern '" + this.exceptionName + "'";
+		return "RollbackRule with pattern [" + this.exceptionName + "]";
 	}
 	
 	public boolean equals(Object o) {
-		if ( !(o instanceof RollbackRuleAttribute) )
+		if (!(o instanceof RollbackRuleAttribute)) {
 			return false;
+		}
 
 		RollbackRuleAttribute rhs = (RollbackRuleAttribute) o;
 		
@@ -112,7 +114,7 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 	
 	public int hashCode() {
-		return exceptionName.hashCode();
+		return this.exceptionName.hashCode();
 	}
 	
 }

@@ -17,15 +17,15 @@
 package org.springframework.transaction.interceptor;
 
 /**
- * Tag class. Its class means it has the opposite behaviour to the
- * RollbackRule superclass.
+ * Tag subclass of RollbackRule. Its class name means that it has the
+ * opposite behavior to the RollbackRule superclass.
  * @author Rod Johnson
  * @since 09-Apr-2003
  */
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	
 	/**
-	 * Constrct a new NoRollbackRule for the given throwable class.
+	 * Construct a new NoRollbackRule for the given throwable class.
 	 * @param clazz throwable class
 	 */
 	public NoRollbackRuleAttribute(Class clazz) {
@@ -47,6 +47,5 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 		return "No" + super.toString();
 	}
 	
-
-	// rely on superclass equals() and hashCode methods
+	// rely on superclass equals and hashCode methods
 }
