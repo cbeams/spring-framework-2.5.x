@@ -67,7 +67,8 @@ import org.springframework.util.Assert;
  *
  * <p>Supports synchronization with both Spring-managed JTA transactions
  * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
- * or EJB CMT). See the getSession version with all parameters for details.
+ * or EJB CMT). See the <code>getSession</code> version with all parameters
+ * for details.
  *
  * <p>Used internally by HibernateTemplate, HibernateInterceptor, and
  * HibernateTransactionManager. Can also be used directly in application code,
@@ -162,13 +163,14 @@ public abstract class SessionFactoryUtils {
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
 	 * otherwise, if allowCreate is true.
-	 * <p>This is the getSession method used by typical data access code, in
-	 * combination with closeSessionIfNecessary called when done with the Session.
-	 * Note that HibernateTemplate allows to write data access code without caring
-	 * about such resource handling.
+	 * <p>This is the <code>getSession</code> method used by typical data access code,
+	 * in combination with <code>closeSessionIfNecessary</code> called when done with
+	 * the Session. Note that HibernateTemplate allows to write data access code
+	 * without caring about such resource handling.
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
 	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
-	 * or EJB CMT). See the getSession version with all parameters for details.
+	 * or EJB CMT). See the <code>getSession</code> version with all parameters
+	 * for details.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param allowCreate if a new Session should be created if no thread-bound found
 	 * @return the Hibernate Session
@@ -334,8 +336,7 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new DataAccessResourceFailureException(
-			    "Could not open Hibernate session", ex.getSQLException());
+			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
 			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
@@ -462,6 +463,76 @@ public abstract class SessionFactoryUtils {
 
 
 	/**
+	 * Get a new Hibernate Session from the given SessionFactory.
+	 * Will return a new Session even if there already is a pre-bound
+	 * Session for the given SessionFactory.
+	 * <p>Within a transaction, this method will create a new Session
+	 * that shares the transaction's JDBC Connection. More specifically,
+	 * it will use the same JDBC Connection as the pre-bound Hibernate Session.
+	 * @param sessionFactory Hibernate SessionFactory to create the session with
+	 * @return the new Session
+	 */
+	public static Session getNewSession(SessionFactory sessionFactory) {
+		return getNewSession(sessionFactory, null);
+	}
+
+	/**
+	 * Get a new Hibernate Session from the given SessionFactory.
+	 * Will return a new Session even if there already is a pre-bound
+	 * Session for the given SessionFactory.
+	 * <p>Within a transaction, this method will create a new Session
+	 * that shares the transaction's JDBC Connection. More specifically,
+	 * it will use the same JDBC Connection as the pre-bound Hibernate Session.
+	 * @param sessionFactory Hibernate SessionFactory to create the session with
+	 * @param entityInterceptor Hibernate entity interceptor, or null if none
+	 * @return the new Session
+	 */
+	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {
+		Assert.notNull(sessionFactory, "No SessionFactory specified");
+
+		try {
+			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			if (sessionHolder != null && !sessionHolder.isEmpty()) {
+				if (entityInterceptor != null) {
+					return sessionFactory.openSession(sessionHolder.getAnySession().connection(), entityInterceptor);
+				}
+				else {
+					return sessionFactory.openSession(sessionHolder.getAnySession().connection());
+				}
+			}
+			else {
+				if (entityInterceptor != null) {
+					return sessionFactory.openSession(entityInterceptor);
+				}
+				else {
+					return sessionFactory.openSession();
+				}
+			}
+		}
+		catch (JDBCException ex) {
+			// SQLException underneath
+			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
+		}
+		catch (HibernateException ex) {
+			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
+		}
+	}
+
+
+	/**
+	 * Return whether the given Hibernate Session is transactional, that is,
+	 * bound to the current thread by Spring's transaction facilities.
+	 * @param session the Hibernate Session to check
+	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * @return whether the Session is transactional
+	 */
+	public static boolean isSessionTransactional(Session session, SessionFactory sessionFactory) {
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		return (sessionHolder != null && sessionHolder.containsSession(session));
+	}
+
+	/**
 	 * Apply the current transaction timeout, if any, to the given
 	 * Hibernate Query object.
 	 * @param query the Hibernate Query object
@@ -545,7 +616,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Return if deferred close is active for the current thread
 	 * and the given SessionFactory.
-	 * @param sessionFactory Hibernate SessionFactory
+	 * @param sessionFactory the Hibernate SessionFactory to check
 	 */
 	public static boolean isDeferredCloseActive(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
@@ -595,7 +666,6 @@ public abstract class SessionFactoryUtils {
 		Set sessions = (Set) holderMap.remove(sessionFactory);
 		for (Iterator it = sessions.iterator(); it.hasNext();) {
 			doClose((Session) it.next());
-
 		}
 
 		if (holderMap.isEmpty()) {
@@ -614,14 +684,10 @@ public abstract class SessionFactoryUtils {
 			return;
 		}
 
-		SessionHolder sessionHolder =
-		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.containsSession(session)) {
-			// It's a transactional Session: Don't close it.
-			return;
+		// Only close non-transactional Sessions.
+		if (!isSessionTransactional(session, sessionFactory)) {
+			closeSessionOrRegisterDeferredClose(session, sessionFactory);
 		}
-
-		closeSessionOrRegisterDeferredClose(session, sessionFactory);
 	}
 
 	/**
