@@ -47,7 +47,14 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 	private List listeners;
 
 	/**
-	 * 
+	 * Supports injection of listeners
+	 * @param listeners
+	 */
+	public void setListeners(List listeners) {
+		this.listeners = listeners;
+	}
+
+	/**
 	 * @return the listeners registered in the current Spring IoC context.
 	 */
 	public List getListeners() {
@@ -64,12 +71,15 @@ public class MulticastFlowLifecycleListener implements FlowLifecycleListener, Be
 			throw new IllegalStateException("Cannot use MulticastFlowLifecycleListener except in a ListableBeanFactory");
 		}
 		ListableBeanFactory lbf = (ListableBeanFactory)beanFactory;
-		Map m = lbf.getBeansOfType(FlowLifecycleListener.class, false, true);
-		listeners = new ArrayList(m.values());
-		// This class implements FlowLifecycleListener, so we must remove it to
-		// avoid
-		// a stack overflow
-		listeners.remove(this);
+		if (listeners == null) {
+			Map m = lbf.getBeansOfType(FlowLifecycleListener.class, false, true);
+			listeners = new ArrayList(m.values());
+			// This class implements FlowLifecycleListener, so we must remove it
+			// to
+			// avoid
+			// a stack overflow
+			listeners.remove(this);
+		}
 	}
 
 	/*
