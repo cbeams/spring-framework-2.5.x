@@ -1,4 +1,4 @@
-package org.springframework.util;
+package org.springframework.beans.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.MutableSortDefinition;
 import org.springframework.beans.TestBean;
 
 /**

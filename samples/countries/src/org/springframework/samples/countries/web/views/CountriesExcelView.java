@@ -16,12 +16,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.SortDefinition;
-import org.springframework.util.RefreshablePagedListHolder;
-import org.springframework.web.servlet.view.document.AbstractExcelView;
-
-import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.beans.support.RefreshablePagedListHolder;
+import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.web.servlet.view.document.AbstractExcelView;
 
 /**
  * This view demonstrates how to send an Excel file with the Spring Framework

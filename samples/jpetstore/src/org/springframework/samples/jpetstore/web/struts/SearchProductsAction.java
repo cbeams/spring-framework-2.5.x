@@ -7,7 +7,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-import org.springframework.util.PagedListHolder;
+import org.springframework.beans.support.PagedListHolder;
 
 public class SearchProductsAction extends BaseAction {
 

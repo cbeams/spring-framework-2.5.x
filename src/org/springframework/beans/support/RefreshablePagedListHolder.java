@@ -1,4 +1,4 @@
-package org.springframework.util;
+package org.springframework.beans.support;
 
 import java.util.Locale;
 
@@ -51,9 +51,9 @@ import org.springframework.beans.BeanUtils;
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 24.05.2003
- * @see PagedListSourceProvider
+ * @see org.springframework.beans.support.PagedListSourceProvider
  * @see org.springframework.beans.propertyeditors.LocaleEditor
- * @version $Id: RefreshablePagedListHolder.java,v 1.1.1.1 2003-08-14 16:20:46 trisberg Exp $
+ * @version $Id: RefreshablePagedListHolder.java,v 1.1 2004-01-06 22:14:57 jhoeller Exp $
  */
 public class RefreshablePagedListHolder extends PagedListHolder {
 
@@ -88,7 +88,7 @@ public class RefreshablePagedListHolder extends PagedListHolder {
 	 * Set the callback class for reloading the List when necessary.
 	 * If the list is definitely not modifiable, i.e. not locale aware
 	 * and no filtering, use PagedListHolder.
-	 * @see PagedListHolder
+	 * @see org.springframework.beans.support.PagedListHolder
 	 */
 	public void setSourceProvider(PagedListSourceProvider sourceProvider) {
 		this.sourceProvider = sourceProvider;

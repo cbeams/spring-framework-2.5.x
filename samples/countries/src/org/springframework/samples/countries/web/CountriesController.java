@@ -7,10 +7,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.support.PagedListSourceProvider;
+import org.springframework.beans.support.RefreshablePagedListHolder;
 import org.springframework.samples.countries.appli.ICountry;
 import org.springframework.samples.countries.dao.IDaoCountry;
-import org.springframework.util.PagedListSourceProvider;
-import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.BindUtils;
 import org.springframework.web.servlet.ModelAndView;

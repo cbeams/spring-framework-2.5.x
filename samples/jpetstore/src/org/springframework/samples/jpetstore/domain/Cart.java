@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.util.PagedListHolder;
+import org.springframework.beans.support.PagedListHolder;
 
 public class Cart implements Serializable {
 

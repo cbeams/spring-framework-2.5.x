@@ -3,9 +3,9 @@ package org.springframework.samples.jpetstore.web.spring;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Account;
 import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
-import org.springframework.util.PagedListHolder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 

@@ -1,13 +1,9 @@
-package org.springframework.util;
+package org.springframework.beans.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.springframework.beans.MutableSortDefinition;
-import org.springframework.beans.PropertyComparator;
-import org.springframework.beans.SortDefinition;
 
 /**
  * PagedListHolder is a simple state holder for handling lists of objects,
@@ -35,8 +31,8 @@ import org.springframework.beans.SortDefinition;
  * @author Juergen Hoeller
  * @since 19.05.2003
  * @see #getPageList
- * @see RefreshablePagedListHolder
- * @see org.springframework.beans.MutableSortDefinition
+ * @see org.springframework.beans.support.RefreshablePagedListHolder
+ * @see org.springframework.beans.support.MutableSortDefinition
  */
 public class PagedListHolder implements Serializable {
 
@@ -102,7 +98,7 @@ public class PagedListHolder implements Serializable {
 	/**
 	 * Set the sort definition for this holder.
 	 * Typically an instance of MutableSortDefinition.
-	 * @see org.springframework.beans.MutableSortDefinition
+	 * @see org.springframework.beans.support.MutableSortDefinition
 	 */
 	public void setSort(SortDefinition sort) {
 		this.sort = sort;

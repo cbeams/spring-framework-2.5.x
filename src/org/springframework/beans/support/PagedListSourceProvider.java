@@ -1,4 +1,4 @@
-package org.springframework.util;
+package org.springframework.beans.support;
 
 import java.util.List;
 import java.util.Locale;
@@ -8,7 +8,7 @@ import java.util.Locale;
  * Used by RefreshablePagedListHolder.
  * @author Jean-Pierre PAWLAK
  * @author Juergen Hoeller
- * @see RefreshablePagedListHolder#setSourceProvider
+ * @see org.springframework.beans.support.RefreshablePagedListHolder#setSourceProvider
  */
 public interface PagedListSourceProvider {
 
@@ -22,8 +22,8 @@ public interface PagedListSourceProvider {
 	 * @param filter object representing filter settings,
 	 * or null if no filter options are used
 	 * @return the loaded List
-	 * @see RefreshablePagedListHolder#setLocale
-	 * @see RefreshablePagedListHolder#setFilter
+	 * @see org.springframework.beans.support.RefreshablePagedListHolder#setLocale
+	 * @see org.springframework.beans.support.RefreshablePagedListHolder#setFilter
 	 */
 	public List loadList(Locale locale, Object filter);
 

@@ -1,7 +1,7 @@
 package org.springframework.samples.jpetstore.web.spring;
 
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Account;
-import org.springframework.util.PagedListHolder;
 
 /**
  * @author Juergen Hoeller

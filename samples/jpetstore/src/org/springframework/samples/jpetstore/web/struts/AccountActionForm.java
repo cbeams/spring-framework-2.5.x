@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts.action.ActionMapping;
 
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Account;
-import org.springframework.util.PagedListHolder;
 
 public class AccountActionForm extends BaseActionForm {
 

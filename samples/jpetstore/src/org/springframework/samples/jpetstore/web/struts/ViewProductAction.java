@@ -7,8 +7,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Product;
-import org.springframework.util.PagedListHolder;
 
 public class ViewProductAction extends BaseAction {
 

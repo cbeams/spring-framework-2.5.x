@@ -6,9 +6,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.samples.jpetstore.domain.Account;
-import org.springframework.util.PagedListHolder;
+import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;

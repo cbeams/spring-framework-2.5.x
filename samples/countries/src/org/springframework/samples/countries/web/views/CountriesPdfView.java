@@ -26,11 +26,11 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.SortDefinition;
+import org.springframework.beans.support.RefreshablePagedListHolder;
+import org.springframework.beans.support.SortDefinition;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
 
 /**
