@@ -154,26 +154,28 @@ public abstract class AopUtils {
 	
 	/**
 	 * Is the given method declared on one of these interfaces?
-	 * @param m method to check
+	 * @param method method to check
 	 * @param interfaces array of interfaces we want to check
 	 * @return whether the method is declared on one of these interfaces
 	 */
-	public static boolean methodIsOnOneOfTheseInterfaces(Method m, Class[] interfaces) {
-		if (interfaces == null)
+	public static boolean methodIsOnOneOfTheseInterfaces(Method method, Class[] interfaces) {
+		if (interfaces == null) {
 			return false;
-			
+		}
+
 		for (int i = 0; i < interfaces.length; i++) {
-			if (!interfaces[i].isInterface())
+			if (!interfaces[i].isInterface()) {
 				throw new IllegalArgumentException(interfaces[i].getName() + " is not an interface");
-			// TODO check that the method with this name actually comes from the interface?
+			}
+			// TODO: Check that the method with this name actually comes from the interface?
 			try {
-				interfaces[i].getDeclaredMethod(m.getName(), m.getParameterTypes());
+				interfaces[i].getDeclaredMethod(method.getName(), method.getParameterTypes());
 				return true;
 			}
 			catch (NoSuchMethodException ex) {
-				// Didn't find it...keep going
+				// Didn't find it... keep going.
 			}
-		}	// for
+		}
 		return false;
 	}
 

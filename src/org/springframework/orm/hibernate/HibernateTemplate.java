@@ -821,6 +821,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	public Query createQuery(Session session, String queryString) throws HibernateException {
@@ -842,6 +843,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#getNamedQuery
 	 */
 	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
@@ -863,6 +865,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Criteria could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#createCriteria
 	 */
 	public Criteria createCriteria(Session session, Class entityClass) throws HibernateException {

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -34,12 +35,14 @@ import org.springframework.util.StringUtils;
  * to override to add Method Injection  support, for example by overriding methods.
  * 
  * @author Rod Johnson
+ * @since 1.1
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
-	protected final Log log = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+	public Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// don't override the class with CGLIB if no overrides
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
@@ -56,12 +59,14 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use a no-arg constructor.
 	 */
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-									Constructor ctor, Object[] args) {
+	public Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Constructor ctor, Object[] args) {
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(ctor, args);
 		}
@@ -76,36 +81,39 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use the given constructor and parameters.
 	 */
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-														Constructor ctor, Object[] args) {
+	protected Object instantiateWithMethodInjection(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Constructor ctor, Object[] args) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	
-	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-														Method factoryMethod, Object[] args) {
+	public Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Method factoryMethod, Object[] args) {
+
 		Object target = null;
 		if (beanDefinition.getFactoryBeanName() != null) {
 			target = owner.getBean(beanDefinition.getFactoryBeanName());
 		}
 		
 		try {
-			// A static method if the target is null
+			// It's a static method if the target is null.
 			return factoryMethod.invoke(target, args);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionStoreException("Illegal arguments to factory method " + factoryMethod + "; " +
-													"args=" + StringUtils.arrayToCommaDelimitedString(args));
+					"args=" + StringUtils.arrayToCommaDelimitedString(args));
 		}
 		catch (IllegalAccessException ex) {
-			throw new BeanDefinitionStoreException("Cannot access factory method " + factoryMethod + "; is it public?");
+			throw new BeanDefinitionStoreException(
+					"Cannot access factory method " + factoryMethod + "; is it public?");
 		}
 		catch (InvocationTargetException ex) {
-			String mesg = "Factory method " + factoryMethod + " threw exception";
+			String msg = "Factory method " + factoryMethod + " threw exception";
 			// We want to log this one, as it may be a config error:
-			// the method may match, but may have been given incorrect arguments	
-			log.warn(mesg, ex.getTargetException());
-			throw new BeanDefinitionStoreException(mesg, ex.getTargetException());			
+			// the method may match, but may have been given incorrect arguments.
+			logger.warn(msg, ex.getTargetException());
+			throw new BeanDefinitionStoreException(msg, ex.getTargetException());
 		}
 	}
 	

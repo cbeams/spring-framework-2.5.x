@@ -68,9 +68,9 @@ public abstract class DelegatingActionUtils {
 		}
 		// if no context found, throw an exception
 		if (wac == null) {
-			throw new IllegalStateException("Could not find ContextLoaderPlugIn's WebApplicationContext as " +
-																			"ServletContext attribute [" + attrName +
-																			"] - did you register [" + ContextLoaderPlugIn.class.getName() + "]?");
+			throw new IllegalStateException(
+					"Could not find ContextLoaderPlugIn's WebApplicationContext as ServletContext attribute [" +
+					attrName + "] - did you register [" + ContextLoaderPlugIn.class.getName() + "]?");
 		}
 		return wac;
 	}
@@ -89,7 +89,7 @@ public abstract class DelegatingActionUtils {
 		String beanName = prefix + path;
 		if (logger.isDebugEnabled()) {
 			logger.debug("DelegatingActionProxy with mapping path '" + path + "' and module prefix '" +
-			             prefix + "' delegating to Spring bean with name [" + beanName + "]");
+					prefix + "' delegating to Spring bean with name [" + beanName + "]");
 		}
 		return beanName;
 	}

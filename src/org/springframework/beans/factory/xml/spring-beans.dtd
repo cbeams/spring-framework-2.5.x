@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.38 2004-09-18 13:18:47 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.39 2004-09-23 09:47:17 jhoeller Exp $
 -->
 
 
@@ -241,7 +241,7 @@
 	object - for example, when the factory method is used as an alternative
 	to a constructor. However, it may be on a different class. In that case,
 	the created object will *not* be of the class specified in the "class"
-	attribute. This is analogous to FactoryBean behaviour.
+	attribute. This is analogous to FactoryBean behavior.
 
 	If the "factory-bean" attribute is present, the "class" attribute is not
 	used, and the factory method will be an instance method on the object

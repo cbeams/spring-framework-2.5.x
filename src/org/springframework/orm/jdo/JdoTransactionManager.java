@@ -216,9 +216,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
 		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
-			logger.debug("Found thread-bound persistence manager for JDO transaction");
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
 					TransactionSynchronizationManager.getResource(getPersistenceManagerFactory());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found thread-bound persistence manager [" +
+						pmHolder.getPersistenceManager() + "] for JDO transaction");
+			}
 			txObject.setPersistenceManagerHolder(pmHolder, false);
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = (ConnectionHolder)
@@ -241,8 +244,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 		if (txObject.getPersistenceManagerHolder() == null) {
-			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(),
-			                                                                             true, false);
+			PersistenceManager pm =
+					PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true, false);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Opened new persistence manager [" + pm + "] for JDO transaction");
 			}
@@ -278,16 +281,16 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect ["
-												 + getJdoDialect() + "] does not support JDBC connection retrieval");
+						logger.debug("Not exposing JDO transaction [" + pm + "] as JDBC transaction because JdoDialect [" +
+								getJdoDialect() + "] does not support JDBC connection retrieval");
 					}
 				}
 			}
 
 			// bind the persistence manager holder to the thread
 			if (txObject.isNewPersistenceManagerHolder()) {
-				TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(),
-																											 txObject.getPersistenceManagerHolder());
+				TransactionSynchronizationManager.bindResource(
+						getPersistenceManagerFactory(), txObject.getPersistenceManagerHolder());
 			}
 		}
 
@@ -304,8 +307,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	protected Object doSuspend(Object transaction) {
 		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
 		txObject.setPersistenceManagerHolder(null, false);
-		PersistenceManagerHolder persistenceManagerHolder =
-		    (PersistenceManagerHolder) TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
+		PersistenceManagerHolder persistenceManagerHolder = (PersistenceManagerHolder)
+				TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
@@ -315,8 +318,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
-		TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(),
-																									 resourcesHolder.getPersistenceManagerHolder());
+		TransactionSynchronizationManager.bindResource(
+				getPersistenceManagerFactory(), resourcesHolder.getPersistenceManagerHolder());
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
@@ -326,7 +329,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing JDO transaction on persistence manager [" +
-									 txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
+					txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
 		}
 		try {
 			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
@@ -341,7 +344,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back JDO transaction on persistence manager [" +
-									 txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
+					txObject.getPersistenceManagerHolder().getPersistenceManager() + "]");
 		}
 		try {
 			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().rollback();
@@ -371,7 +374,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 			try {
 				getJdoDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),
-				                                      txObject.getPersistenceManagerHolder().getPersistenceManager());
+						txObject.getPersistenceManagerHolder().getPersistenceManager());
 			}
 			catch (Exception ex) {
 				// just log it, to keep a transaction-related exception

@@ -341,8 +341,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-			logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
-					"] for Hibernate transaction");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
+						"] for Hibernate transaction");
+			}
 			txObject.setSessionHolder(sessionHolder, false);
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = (ConnectionHolder)
@@ -455,7 +457,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing Hibernate transaction on session [" +
-									 txObject.getSessionHolder().getSession() + "]");
+					txObject.getSessionHolder().getSession() + "]");
 		}
 		try {
 			txObject.getSessionHolder().getTransaction().commit();
