@@ -14,9 +14,13 @@ import java.util.Set;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.BeforeAdvice;
+import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
+import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -31,7 +35,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.12 2003-12-02 09:36:46 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.13 2003-12-05 13:05:54 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -210,6 +214,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		addAdvisor(pos, new DefaultInterceptionAroundAdvisor(interceptor));
 	}
+	
+	public void addBeforeAdvice(final MethodBeforeAdvice ba) {
+		addAdvisor(new BeforeAdvisor() {
+			public BeforeAdvice getBeforeAdvice() {
+				return ba;
+			}
+			public Pointcut getPointcut() {
+				return Pointcut.TRUE;
+			}
+			public boolean isPerInstance() {
+				throw new UnsupportedOperationException();
+			}
+		});
+	}
 
 	// TODO what about removing a ProxyInterceptor?
 	public final boolean removeInterceptor(Interceptor interceptor) {
@@ -279,11 +297,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return classes;
 	}
 
-	public void addAdvisor(int pos, InterceptionAroundAdvisor advice) throws AopConfigException {
-		addAdviceInternal(pos, advice);
-	}
 
-	private void addAdviceInternal(int pos, Advisor advice) {
+	private void addAdvisorInternal(int pos, Advisor advice) {
 		this.advisors.add(pos, advice);
 		updateAdvisorsArray();
 		adviceChanged();
@@ -305,18 +320,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		for (int i = 0; i < advice.getInterfaces().length; i++) {
 			 addInterface(advice.getInterfaces()[i]);
 		 }
-		addAdviceInternal(pos, advice);
+		addAdvisorInternal(pos, advice);
 	}
 
-	public void addAdvisor(int pos, Advisor advice) {
-		if (advice instanceof InterceptionAroundAdvisor) {
-			addAdvisor(pos, (InterceptionAroundAdvisor) advice);
-		}
-		else if (advice instanceof InterceptionIntroductionAdvisor) {
-			addAdvisor(pos, (InterceptionIntroductionAdvisor) advice);
+	public void addAdvisor(int pos, Advisor advisor) {
+		if (advisor instanceof InterceptionIntroductionAdvisor) {
+			addAdvisor(pos, (InterceptionIntroductionAdvisor) advisor);
 		}
 		else {
-			throw new AopConfigException("Unknown advice type '" + advice.getClass().getName() + "'");
+			addAdvisorInternal(pos, advisor);
 		}
 	}
 	

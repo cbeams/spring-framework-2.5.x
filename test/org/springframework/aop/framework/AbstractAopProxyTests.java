@@ -14,12 +14,16 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.BeforeAdvice;
+import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -29,7 +33,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.6 2003-12-03 11:30:37 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.7 2003-12-05 13:05:54 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1039,6 +1043,102 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		proxyA.absquatulate();
 		assertEquals(1, i1.getCount());
 		assertFalse(proxyA.equals(proxyB));
+	}
+	
+	public void testBeforeAdvisorIsInvoked() {
+		CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		BeforeAdvisor matchesNoArgs = new StaticMethodMatcherPointcutBeforeAdvisor(cba) {
+			public boolean matches(Method m, Class targetClass) {
+				return m.getParameterTypes().length == 0;
+			}
+		};
+		TestBean target = new TestBean();
+		target.setAge(80);
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(new NopInterceptor());
+		pf.addAdvisor(matchesNoArgs);
+		assertEquals("Advisor was added", matchesNoArgs, pf.getAdvisors()[1]);
+		ITestBean proxied = (ITestBean) createProxy(pf);
+		assertEquals(0, cba.getCalls());
+		assertEquals(0, cba.getCalls("getAge"));
+		assertEquals(target.getAge(), proxied.getAge());
+		assertEquals(1, cba.getCalls());
+		assertEquals(1, cba.getCalls("getAge"));
+		assertEquals(0, cba.getCalls("setAge"));
+		// Won't be advised
+		proxied.setAge(26);
+		assertEquals(1, cba.getCalls());
+		assertEquals(26, proxied.getAge());
+	}
+	
+	public void testBeforeAdviceThrowsException() {
+		final RuntimeException rex = new RuntimeException();
+		CountingBeforeAdvice ba = new CountingBeforeAdvice() {
+			public void before(Method m, Object[] args, Object target) throws Throwable {
+				super.before(m, args, target);
+				if (m.getName().startsWith("set"))
+					throw rex;
+			}
+		};
+		
+		TestBean target = new TestBean();
+		target.setAge(80);
+		NopInterceptor nop1 = new NopInterceptor();
+		NopInterceptor nop2 = new NopInterceptor();
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(nop1);
+		pf.addBeforeAdvice(ba);
+		pf.addInterceptor(nop2);
+		ITestBean proxied = (ITestBean) createProxy(pf);
+		// Won't throw an exception
+		assertEquals(target.getAge(), proxied.getAge());
+		assertEquals(1, ba.getCalls());
+		assertEquals(1, ba.getCalls("getAge"));
+		assertEquals(1, nop1.getCount());
+		assertEquals(1, nop2.getCount());
+		// Will fail, after invoking Nop1
+		try {
+			proxied.setAge(26);
+			fail("before advice should have ended chain");
+		}
+		catch (RuntimeException ex) {
+			assertEquals(rex, ex);
+		}
+		assertEquals(2, ba.getCalls());
+		assertEquals(2, nop1.getCount());
+		// Nop2 didn't get invoked when the exception was thrown
+		assertEquals(1, nop2.getCount());
+		// Shouldn't have changed value in joinpoint
+		assertEquals(target.getAge(), proxied.getAge());
+	}
+	
+
+	protected static class MethodCounter {
+		/** Method name --> count, does not understand overloading */
+		private HashMap map = new HashMap();
+		private int allCount;
+		
+		protected void count(Method m) {
+			Integer I = (Integer) map.get(m.getName());
+			I = (I != null) ? new Integer(I.intValue() + 1) : new Integer(1);
+			map.put(m.getName(), I);
+			++allCount;
+		}
+		
+		public int getCalls(String methodName) {
+			Integer I = (Integer) map.get(methodName);
+			return (I != null) ? I.intValue() : 0;
+		}
+		
+		public int getCalls() {
+			return allCount;
+		}
+	}
+	
+	protected static class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
+		public void before(Method m, Object[] args, Object target) throws Throwable {
+			count(m);
+		}
 	}
 	
 
