@@ -43,7 +43,9 @@ import org.springframework.util.ToStringBuilder;
  */
 public class CompoundComparator implements Comparator, Serializable {
     private List comparators;
+
     private BitSet sortOrder;
+
     private boolean locked;
 
     /**
@@ -55,9 +57,17 @@ public class CompoundComparator implements Comparator, Serializable {
         this(new ArrayList(), new BitSet());
     }
 
+    /**
+     * Construct a CompoundComparator from the Comparators in the Array. All
+     * Comparators will default to the forward sort order.
+     * 
+     * @param list
+     *            the list of comparators
+     */
     public CompoundComparator(Comparator[] comparators) {
         this(Arrays.asList(comparators));
     }
+
     /**
      * Construct a CompoundComparator from the Comparators in the List. All
      * Comparators will default to the forward sort order.
@@ -72,7 +82,7 @@ public class CompoundComparator implements Comparator, Serializable {
     /**
      * Construct a CompoundComparator from the Comparators in the given List.
      * The sort order of each column will be drawn from the given BitSet. If a
-     * bit at a comparator index is <i>false </i>, the forward sort order is
+     * bit at a comparator index is <i>false</i>, the forward sort order is
      * used; else a reverse sort order is used.
      * 
      * @param list
@@ -144,7 +154,8 @@ public class CompoundComparator implements Comparator, Serializable {
         comparators.set(index, comparator);
         if (reverse == true) {
             sortOrder.set(index);
-        } else {
+        }
+        else {
             sortOrder.clear(index);
         }
     }
@@ -184,7 +195,8 @@ public class CompoundComparator implements Comparator, Serializable {
 
     public int compare(Object o1, Object o2) {
         if (locked == false) {
-            Assert.isTrue(comparators.size() > 0, "No comparators have yet been added to invoke!");
+            Assert.isTrue(comparators.size() > 0,
+                    "No comparators have yet been added to invoke!");
             locked = true;
         }
         // iterate over all comparators in the chain
@@ -197,7 +209,8 @@ public class CompoundComparator implements Comparator, Serializable {
                 if (sortOrder.get(i) == true) {
                     if (Integer.MIN_VALUE == result) {
                         result = Integer.MAX_VALUE;
-                    } else {
+                    }
+                    else {
                         result *= -1;
                     }
                 }
@@ -215,9 +228,7 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+        if (this == o) { return true; }
         if (o instanceof NullSafeComparator) {
             CompoundComparator c = (CompoundComparator)o;
             return sortOrder.equals(c.sortOrder)
