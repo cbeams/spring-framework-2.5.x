@@ -8,56 +8,38 @@ package org.springframework.jdbc.support.incrementer;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface that defines contract of incrementing
- * any data store field's maximum value. Works much like
- * sequence number generator. Typical implementations could use
- * RDBMS SQL and/or Stored Procedures to do the job.
- * <br><br><b>History:</b>
- * <li>17/04/2003 : donated to Spring by Dmitriy Kopylenko
- * <li>19/04/2003 : modified by Isabelle Muszynski, added nextDoubleValue
- * <li>09/05/2003 : modified by JPP, added nextLongValue
+ * Interface that defines contract of incrementing any data store field's
+ * maximum value. Works much like a sequence number generator.
+ *
+ * <p>Typical implementations can use RDBMS SQL, native RDBMS sequences,
+ * and/or Stored Procedures to do the job.
+ *
  * @author Dmitriy Kopylenko
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
- * @version $Id: DataFieldMaxValueIncrementer.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: DataFieldMaxValueIncrementer.java,v 1.2 2004-02-27 08:28:37 jhoeller Exp $
  */
 public interface DataFieldMaxValueIncrementer {
 
 	/**
-	 * Increments data store field's max value as int
+	 * Increments data store field's max value as int.
 	 * @return int next data store value such as <b>max + 1</b>
 	 * @throws org.springframework.dao.DataAccessException
 	 */
 	int nextIntValue() throws DataAccessException;
 
 	/**
-	 * Increments data store field's max value as long
+	 * Increments data store field's max value as long.
 	 * @return int next data store value such as <b>max + 1</b>
 	 * @throws org.springframework.dao.DataAccessException
 	 */
 	long nextLongValue() throws DataAccessException;
 
 	/**
-	 * Increments data store field's max value as double
-	 * @return next data store value such as <b>max + 1</b>
-	 * @throws org.springframework.dao.DataAccessException
-	 */
-	double nextDoubleValue() throws DataAccessException;
-
-	/**
-	 * Increments data store field's max value as String
+	 * Increments data store field's max value as String.
 	 * @return next data store value such as <b>max + 1</b>
 	 * @throws org.springframework.dao.DataAccessException
 	 */
 	String nextStringValue() throws DataAccessException;
 
-	/**
-	 * Generic method to retrieve the next value.
-	 * Legal values for keyClass are int.class, double.class, String.class,
-	 * Integer.class and Double.class
-	 * @throws java.lang.IllegalArgumentException if keyClass is not one of
-	 * the expected types
-	 * @throws org.springframework.dao.DataAccessException
-	 **/
-	Object nextValue(Class keyClass) throws DataAccessException;
 }

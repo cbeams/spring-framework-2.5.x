@@ -7,16 +7,14 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Class to increment maximum value of a given HSQL table with the equivalent
- * of an auto-increment column. Note: if you use this class, your HSQL key
+ * of an auto-increment column. Note: If you use this class, your HSQL key
  * column should <i>NOT</i> be auto-increment, as the sequence table does the job.
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
@@ -37,211 +35,128 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.2 2004-02-02 11:36:54 jhoeller Exp $
+ * @version $Id: HsqlMaxValueIncrementer.java,v 1.3 2004-02-27 08:28:37 jhoeller Exp $
  */
-
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** The name of the column for this sequence */
+	private String columnName;
+
+	/** The Sql string for updating the sequence value */
+	private String insertSql;
+
+	/** The Sql string for retrieving the new sequence value */
+	private String valueSql;
+
+	/** The Sql string for removing old sequence values */
+	private String deleteSql;
+
+	/** The number of keys buffered in a cache */
+	private int cacheSize = 1;
 
 	private long[] valueCache = null;
 
-	private NextMaxValueProvider nextMaxValueProvider;
+	/** The next id to serve from the value cache */
+	private int nextValueIndex = -1;
+
 
 	/**
 	 * Default constructor.
 	 **/
 	public HsqlMaxValueIncrementer() {
-		this.nextMaxValueProvider = new NextMaxValueProvider();
 	}
 
 	/**
-	 * Alternative constructor.
-	 * @param ds the datasource to use
+	 * Convenience constructor.
+	 * @param ds the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 * @param columnName the name of the column in the sequence table to use
 	 **/
 	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
-		super(ds, incrementerName, columnName);
-		this.nextMaxValueProvider = new NextMaxValueProvider();
+		setDataSource(ds);
+		setIncrementerName(incrementerName);
+		this.columnName = columnName;
+		afterPropertiesSet();
 	}
 
 	/**
-	 * Alternative constructor.
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 * @param cacheSize the number of buffered keys
-	 **/
-	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, int cacheSize) {
-		super(ds, incrementerName, columnName, cacheSize);
-		this.nextMaxValueProvider = new NextMaxValueProvider();
-	}
-
-	/**
-	 * Alternative constructor.
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 * @param prefixWithZero in case of a String return value, should the string be prefixed with zeroes
-	 * @param padding the length to which the string return value should be padded with zeroes
-	 **/
-	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, boolean prefixWithZero, int padding) {
-		super(ds, incrementerName, columnName);
-		this.nextMaxValueProvider = new NextMaxValueProvider();
-		this.nextMaxValueProvider.setPrefixWithZero(prefixWithZero, padding);
-	}
-
-	/**
-	 * Alternative constructor.
-	 * @param ds the datasource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 * @param prefixWithZero in case of a String return value, should the string be prefixed with zeroes
-	 * @param padding the length to which the string return value should be padded with zeroes
-	 * @param cacheSize the number of buffered keys
-	 **/
-	public HsqlMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, boolean prefixWithZero, int padding, int cacheSize) {
-		super(ds, incrementerName, columnName, cacheSize);
-		this.nextMaxValueProvider = new NextMaxValueProvider();
-		this.nextMaxValueProvider.setPrefixWithZero(prefixWithZero, padding);
-	}
-
-	/**
-	 * Set whether to prefix with zero.
+	 * Set the name of the column in the sequence table.
 	 */
-	public void setPrefixWithZero(boolean prefixWithZero, int length) {
-		this.nextMaxValueProvider.setPrefixWithZero(prefixWithZero, length);
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
 	}
 
 	/**
-	 * @see org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer#incrementIntValue()
+	 * Return the name of the column in the sequence table.
 	 */
-	protected int incrementIntValue() {
-		return nextMaxValueProvider.getNextIntValue();
+	public String getColumnName() {
+		return this.columnName;
 	}
 
 	/**
-	 * @see org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer#incrementLongValue()
+	 * Set the number of buffered keys.
 	 */
-	protected long incrementLongValue() {
-		return nextMaxValueProvider.getNextLongValue();
+	public void setCacheSize(int cacheSize) {
+		this.cacheSize = cacheSize;
 	}
 
 	/**
-	 * @see org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer#incrementDoubleValue()
+	 * Return the number of buffered keys.
 	 */
-	protected double incrementDoubleValue() {
-		return nextMaxValueProvider.getNextDoubleValue();
+	public int getCacheSize() {
+		return this.cacheSize;
 	}
 
-	/**
-	 * @see org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer#incrementStringValue()
-	 */
-	protected String incrementStringValue() {
-		return nextMaxValueProvider.getNextStringValue();
-	}
-
-
-	// Private class that does the actual
-	// job of getting the sequence.nextVal value
-	private class NextMaxValueProvider extends AbstractNextMaxValueProvider {
-
-		/** The Sql string for updating the sequence value */
-		private String insertSql;
-
-		/** The Sql string for retrieving the new sequence value */
-		private String valueSql;
-
-		/** The Sql string for removing old sequence values */
-		private String deleteSql;
-
-		/** The next id to serve */
-		private int nextValueIx = -1;
-
-		synchronized protected long getNextKey(int type) throws DataAccessException {
-			if (isDirty()) {
-				initPrepare();
-			}
-			if (nextValueIx < 0 || nextValueIx >= getCacheSize()) {
-				/*
-				* Need to use straight JDBC code because we need to make sure that the insert and select
-				* are performed on the same connection (otherwise we can't be sure that last_insert_id()
-				* returned the correct value)
-				*/
-				Connection con = null;
-				Statement stmt = null;
-				ResultSet rs = null;
-				try {
-					con = DataSourceUtils.getConnection(getDataSource());
-					stmt = con.createStatement();
-					DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-					valueCache = new long[getCacheSize()];
-					nextValueIx = 0;
-					for (int i = 0; i < getCacheSize(); i++) {
-						stmt.executeUpdate(insertSql);
-						rs = stmt.executeQuery(valueSql);
-						if (rs.next()) {
-							valueCache[i] = rs.getLong(1);
-						}
-						else {
-							throw new DataAccessResourceFailureException("last_insert_id() failed after executing an update");
-						}
-					}
-					long maxValue = valueCache[(valueCache.length - 1)];
-					stmt.executeUpdate(deleteSql + maxValue);
-				}
-				catch (SQLException ex) {
-					throw new DataAccessResourceFailureException("Could not obtain last_insert_id", ex);
-				}
-				finally {
-					if (null != rs) {
-						try {
-							rs.close();
-						}
-						catch (SQLException e) {
-						}
-					}
-					if (null != stmt) {
-						try {
-							stmt.close();
-						}
-						catch (SQLException e) {
-						}
-						DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
-					}
-				}
-			}
-			if (logger.isInfoEnabled())
-				logger.info("Next sequence value is : " + valueCache[nextValueIx]);
-			return valueCache[nextValueIx++];
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+		if (this.columnName == null) {
+			throw new IllegalArgumentException("columnName is required");
 		}
+		this.insertSql = "insert into " + getIncrementerName() + " values(null)";
+		this.valueSql = "select max(identity()) from " + getIncrementerName();
+		this.deleteSql = "delete from " + getIncrementerName() + " where " + this.columnName + " < ";
+	}
 
-		private void initPrepare() {
-			if (getIncrementerName() == null) {
-				throw new IllegalArgumentException("incrementerName property must be set on " + getClass().getDeclaringClass().getName());
+
+	protected synchronized long getNextKey() throws DataAccessException {
+		if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
+			/*
+			* Need to use straight JDBC code because we need to make sure that the insert and select
+			* are performed on the same connection (otherwise we can't be sure that last_insert_id()
+			* returned the correct value)
+			*/
+			Connection con = DataSourceUtils.getConnection(getDataSource());
+			Statement stmt = null;
+			try {
+				stmt = con.createStatement();
+				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+				this.valueCache = new long[getCacheSize()];
+				this.nextValueIndex = 0;
+				for (int i = 0; i < getCacheSize(); i++) {
+					stmt.executeUpdate(this.insertSql);
+					ResultSet rs = stmt.executeQuery(this.valueSql);
+					try {
+						if (!rs.next()) {
+							throw new DataAccessResourceFailureException("identity() failed after executing an update");
+						}
+						this.valueCache[i] = rs.getLong(1);
+					}
+					finally {
+						JdbcUtils.closeResultSet(rs);
+					}
+				}
+				long maxValue = this.valueCache[(this.valueCache.length - 1)];
+				stmt.executeUpdate(this.deleteSql + maxValue);
 			}
-			if (getColumnName() == null) {
-				throw new IllegalArgumentException("columnName property must be set on " + getClass().getDeclaringClass().getName());
+			catch (SQLException ex) {
+				throw new DataAccessResourceFailureException("Could not obtain identity()", ex);
 			}
-			StringBuffer buf = new StringBuffer();
-			buf.append("insert into ");
-			buf.append(getIncrementerName());
-			buf.append(" values(null)");
-			insertSql = buf.toString();
-			if (logger.isInfoEnabled())
-				logger.info("insertSql = " + insertSql);
-			valueSql = "select max(identity()) from " + getIncrementerName();
-			nextValueIx = -1;
-			buf = new StringBuffer();
-			buf.append("delete from ");
-			buf.append(getIncrementerName());
-			buf.append(" where ");
-			buf.append(getColumnName());
-			buf.append(" < ");
-			deleteSql = buf.toString();
-			setDirty(false);
+			finally {
+				JdbcUtils.closeStatement(stmt);
+				DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			}
 		}
+		return this.valueCache[this.nextValueIndex++];
 	}
 
 }

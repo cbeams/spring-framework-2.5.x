@@ -6,22 +6,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Implementation of {@link org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer}
- * Uses <b>Template Method</b> design pattern
- * Subclasses should provide implementations of protected abstract methods.
- *
- * <p><b>History:</b>
- * <li>17/04/2003 : donated to Spring by Dmitriy Kopylenko
- * <li>19/04/2003 : modified by Isabelle Muszynski, added nextDoubleValue
- * <li>09/05/2003 : modified by JPP, added nextLongValue
- * <li>17/06/2003 : modified by Ken Krebs, added common functionality for subclasses
- *
+ * Implementation of DataFieldMaxValueIncrementer that delegates
+ * to a single getNextKey template method that returns a long.
+ * Uses longs for String values, padding with zeroes if required.
  * @author Dmitriy Kopylenko
- * @author Isabelle Muszynski
+ * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
- * @author Ken Krebs
- * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.2 2004-01-02 22:01:31 jhoeller Exp $
- *
+ * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.3 2004-02-27 08:28:37 jhoeller Exp $
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 
@@ -30,81 +21,19 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/** The name of the sequence/table containing the sequence */
 	private String incrementerName;
 
-	/** The name of the column for this sequence */
-	private String columnName;
-
-	/** The number of keys buffered in a cache */
-	private int cacheSize = 1;
-
-	/** Flag if dirty definition */
-	private boolean dirty = true;
+	/** The length to which a string result should be pre-pended with zeroes */
+	protected int paddingLength = 0;
 
 
 	/**
-	 * Create a new incrementer.
-	 */
-	public AbstractDataFieldMaxValueIncrementer() {
-	}
-
-	/**
-	 * Create a new incrementer.
-	 * @param ds the datasource
-	 * @param incrementerName the name of the sequence/table
-	 **/
-	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName) {
-		this.dataSource = ds;
-		this.incrementerName = incrementerName;
-	}
-
-	/**
-	 * Create a new incrementer.
-	 * @param ds the data source
-	 * @param incrementerName the name of the sequence/table
-	 * @param columnName the name of the column in the sequence table
-	 **/
-	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, String columnName) {
-		this.dataSource = ds;
-		this.incrementerName = incrementerName;
-		this.columnName = columnName;
-	}
-
-	/**
-	 * Create a new incrementer.
-	 * @param ds the data source
-	 * @param incrementerName the name of the sequence/table
-	 * @param cacheSize the number of buffered keys
-	 **/
-	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, int cacheSize) {
-		this.dataSource = ds;
-		this.incrementerName = incrementerName;
-		this.cacheSize = cacheSize;
-	}
-
-	/**
-	 * Create a new incrementer.
-	 * @param ds the data source
-	 * @param incrementerName the name of the sequence/table
-	 * @param columnName the name of the column in the sequence table
-	 * @param cacheSize the number of buffered keys
-	 **/
-	public AbstractDataFieldMaxValueIncrementer(DataSource ds, String incrementerName, String columnName, int cacheSize) {
-		this.dataSource = ds;
-		this.incrementerName = incrementerName;
-		this.columnName = columnName;
-		this.cacheSize = cacheSize;
-	}
-
-
-	/**
-	 * Set the data soruce.
+	 * Set the data source to retrieve the value from.
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
-		this.dirty = true;
 	}
 
 	/**
-	 * Return the data source.
+	 * Return the data source to retrieve the value from.
 	 */
 	public DataSource getDataSource() {
 		return this.dataSource;
@@ -115,7 +44,6 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	 */
 	public void setIncrementerName(String incrementerName) {
 		this.incrementerName = incrementerName;
-		this.dirty = true;
 	}
 
 	/**
@@ -126,106 +54,57 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Set the name of the column in the sequence table.
+	 * Set the padding length, i.e. the length to which a string result
+	 * should be pre-pended with zeroes.
 	 */
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-		this.dirty = true;
+	public void setPaddingLength(int paddingLength) {
+		this.paddingLength = paddingLength;
 	}
 
 	/**
-	 * Return the name of the column in the sequence table.
+	 * Return the padding length for String values.
 	 */
-	public String getColumnName() {
-		return this.columnName;
+	public int getPaddingLength() {
+		return paddingLength;
 	}
 
-	/**
-	 * Set the number of buffered keys.
-	 */
-	public void setCacheSize(int cacheSize) {
-		this.cacheSize = cacheSize;
-		this.dirty = true;
-	}
-
-	/**
-	 * Return the number of buffered keys.
-	 */
-	public int getCacheSize() {
-		return this.cacheSize;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
-
-	public boolean isDirty() {
-		return this.dirty;
-	}
-
-	public void afterPropertiesSet() throws DataAccessException {
+	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
-			throw new IllegalArgumentException("DataSource property must be set on " + getClass().getName());
+			throw new IllegalArgumentException("dataSource is required");
+		}
+		if (this.incrementerName == null) {
+			throw new IllegalArgumentException("incrementerName is required");
 		}
 	}
 
 
 	public int nextIntValue() throws DataAccessException {
-		return incrementIntValue();
+		return (int) getNextKey();
 	}
 
 	public long nextLongValue() throws DataAccessException {
-		return incrementLongValue();
-	}
-
-	public double nextDoubleValue() throws DataAccessException {
-		return incrementDoubleValue();
+		return getNextKey();
 	}
 
 	public String nextStringValue() throws DataAccessException {
-		return incrementStringValue();
-	}
-
-	public Object nextValue(Class keyClass) throws DataAccessException {
-		if (int.class.getName().equals(keyClass.getName()) || Integer.class.getName().equals(keyClass.getName())) {
-			return new Integer(incrementIntValue());
+		String s = Long.toString(getNextKey());
+		int len = s.length();
+		if (len < this.paddingLength) {
+			StringBuffer buf = new StringBuffer(this.paddingLength);
+			for (int i = 0; i < this.paddingLength - len; i++) {
+				buf.append('0');
+			}
+			buf.append(s);
+			s = buf.toString();
 		}
-		else if (long.class.getName().equals(keyClass.getName()) || Long.class.getName().equals(keyClass.getName())) {
-			return new Long(incrementLongValue());
-		}
-		else if (double.class.getName().equals(keyClass.getName()) || Double.class.getName().equals(keyClass.getName())) {
-			return new Double(incrementDoubleValue());
-		}
-		else if (String.class.getName().equals(keyClass.getName())) {
-			return incrementStringValue();
-		}
-		else {
-			throw new IllegalArgumentException("Invalid key class: " + keyClass.getName());
-		}
+		return s;
 	}
 
 	/**
-	 * Template method implementation to be provided by concrete subclasses
-	 * @see #nextIntValue
+	 * Determine the next key to use, as a long.
+	 * @return the key to use as a long. It will eventually be converted later
+	 * in another format by the public concrete methods of this class.
 	 */
-	protected abstract int incrementIntValue() throws DataAccessException;
-
-	/**
-	 * Template method implementation to be provided by concrete subclasses
-	 * @see #nextLongValue
-	 */
-	protected abstract long incrementLongValue() throws DataAccessException;
-
-	/**
-	 * Template method implementation to be provided by concrete subclasses
-	 * @see #nextDoubleValue
-	 */
-	protected abstract double incrementDoubleValue() throws DataAccessException;
-
-	/**
-	 * Template method implementation to be provided by concrete subclasses
-	 * @see #nextStringValue
-	 */
-	protected abstract String incrementStringValue() throws DataAccessException;
+	protected abstract long getNextKey();
 
 }
