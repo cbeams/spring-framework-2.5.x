@@ -7,12 +7,16 @@ Changes in version 1.1.1 (27.9.2004)
 ------------------------------------
 
 Package org.springframework.aop
-* Fixed bug in DelegatingIntroductionAdvisor that caused UndeclaredThrowableException to wrap unchecked exceptions thrown by introduction delegates
+* DelegatingIntroductionAdvisor lets unchecked exceptions thrown by introduction delegates through without wrapping them
 
 Package org.springframework.beans
+* MutablePropertyValues's "addPropertyValues" methods return MutablePropertyValues, for invocation chains in 1 statement
+* AbstractAutowireCapableBeanFactory is able to create non-public classes and invoke non-public init and destroy methods
+* AbstractAutowireCapableBeanFactory regards bean references for correct destruction order (not requiring "depends-on")
+* AbstractAutowireCapableBeanFactory regards bean references and "depends-on" for destruction order of inner beans too
+* removed "getDependentBeanNames" hook and implementation from AbstractAutowireCapable/DefaultListableBeanFactory
 * fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
 * added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
-* MutablePropertyValues addPropertyValues() methods now return MutablePropertyValues, to allow adding multiple property values in one statement
 
 Package org.springframework.context
 * factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
@@ -47,6 +51,7 @@ Package org.springframework.orm
 * added "checkWriteOperations" flag to HibernateTemplate, to be able to suppress read-only check on save/update/delete
 * added null check to BlobByteArrayType's "deepCopy" implementation
 * added "deepCopy" implementation to BlobSerializableType, serializing and deserializing the given value
+* added "applyQueryTimeout" method to JdoDialect, called by JdoTemplate for each created JDO query object
 
 Package org.springframework.web
 * fixed "createRelative" implementation in ServletContextResource to correctly handle relative subdirectories
