@@ -121,7 +121,7 @@ public class FlowAction extends TemplateAction {
 	/**
 	 * The main entry point for this action. Looks for a flow execution ID in
 	 * the request. If none exists, it creates one. If one exists, it looks in
-	 * the user's session find the current FlowExecution. The request should
+	 * the user's session to find the current FlowExecution. The request should
 	 * also contain the current state ID and event ID. These String values can
 	 * be passed to the FlowExecution to execute the action. Execution will
 	 * typically result in a state transition.

@@ -75,7 +75,7 @@ import java.util.Random;
  * of the System time.  Thanks to Ashutosh Narhari for the suggestion
  * of using the static method to prime the basic random generator.
  *
- * Using the secure random option, this class compies with the statistical
+ * Using the secure random option, this class complies with the statistical
  * random number generator tests specified in FIPS 140-2, Security
  * Requirements for Cryptographic Modules, secition 4.9.1.
  *
