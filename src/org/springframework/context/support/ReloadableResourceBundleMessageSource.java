@@ -496,38 +496,38 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		/** Cache to hold already generated MessageFormats per message code */
 		private final Map cachedMessageFormats = new HashMap();
 
-		protected PropertiesHolder(Properties properties, long fileTimestamp) {
+		public PropertiesHolder(Properties properties, long fileTimestamp) {
 			this.properties = properties;
 			this.fileTimestamp = fileTimestamp;
 		}
 
-		protected PropertiesHolder() {
+		public PropertiesHolder() {
 		}
 
-		protected Properties getProperties() {
+		public Properties getProperties() {
 			return properties;
 		}
 
-		protected long getFileTimestamp() {
+		public long getFileTimestamp() {
 			return fileTimestamp;
 		}
 
-		protected void setRefreshTimestamp(long refreshTimestamp) {
+		public void setRefreshTimestamp(long refreshTimestamp) {
 			this.refreshTimestamp = refreshTimestamp;
 		}
 
-		protected long getRefreshTimestamp() {
+		public long getRefreshTimestamp() {
 			return refreshTimestamp;
 		}
 
-		protected String getProperty(String code) {
+		public String getProperty(String code) {
 			if (this.properties == null) {
 				return null;
 			}
 			return this.properties.getProperty(code);
 		}
 
-		protected MessageFormat getMessageFormat(String code, Locale locale) {
+		public MessageFormat getMessageFormat(String code, Locale locale) {
 			if (this.properties == null) {
 				return null;
 			}
