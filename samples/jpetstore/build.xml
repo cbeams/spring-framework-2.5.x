@@ -35,7 +35,7 @@
 			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/struts">
-			<include name="struts-1.1.jar"/>
+			<include name="struts.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
@@ -133,7 +133,7 @@
 				<include name="jdom.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
-				<include name="struts-*.jar"/>
+				<include name="struts.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>

@@ -186,7 +186,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore and Image Database
 
 * jakarta-commons/commons-validator.jar
-- Commons Validator 1.0.2 (http://jakarta.apache.org/commons/validator)
+- Commons Validator 1.1.3 (http://jakarta.apache.org/commons/validator)
 - required for running JPetStore's Struts web tier
 
 * jakarta-taglibs/standard.jar
@@ -256,8 +256,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
-* struts/struts-1.1.jar
-- Apache Struts 1.1 (http://jakarta.apache.org/struts)
+* struts/struts.jar
+- Apache Struts 1.2.4 (http://jakarta.apache.org/struts)
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
