@@ -326,7 +326,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * supporting Ant-style location patterns.
 	 * <p>Can be overridden in subclasses, for extended resolution strategies,
 	 * for example in a web environment.
-	 * <p><b>Do not call this when needing to resolve a location pattern.
+	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
 	 * Call the context's <code>getResources</code> method instead, which
 	 * will delegate to the ResourcePatternResolver.
 	 * @see #getResources
