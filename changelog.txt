@@ -8,14 +8,14 @@ Changes in version 1.1 RC1 (28.7.2004)
 
 Package org.springframework.aop
 * deprecated addInterceptor, addThrowsAdvice and other methods taking Advice subtype on Advised: use addAdvice etc
-* added opaque property to ProxyConfig, to not allowe proxies to be cast to Advised, securing configuration
+* added "opaque" property to ProxyConfig as an option to prevent proxies being cast to Advised, securing configuration
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
 * AOP proxies are now Serializable if all Advisors and the TargetSource are Serializable
 * most framework pointcuts, advice and advisors are now Serializable
 * added invocableClone() method to ReflectiveMethodInvocation to allow proceed to be called more than once
 * added SETTERS and GETTERS constants to org.springframework.aop.support.Pointcuts
 * improved NameMatchMethodPointcut for programmatic use
-* deprected RegexpMethodPointcut to allow for other regexp syntaxes besides Perl5: use Perl5RegexpMethodPointcut
+* deprecated RegexpMethodPointcut to allow for other regexp syntaxes besides Perl5: use Perl5RegexpMethodPointcut
 
 Package org.springframework.beans
 * BeanUtils' "instantiateClass" methods try to set the constructors accessible if given non-accessible constructors
