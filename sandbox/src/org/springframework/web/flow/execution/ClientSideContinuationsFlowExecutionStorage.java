@@ -27,6 +27,19 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * {@link #save(Event, String, FlowExecution) save} method. The load method
  * just decodes the incoming id and restores the <code>FlowExecution</code>
  * object.
+ * <p>
+ * <b>Warning:</b> storing state (a flow execution continuation) on the client
+ * entails a certain security risk. This implementation does not provide a
+ * secure way of storing state on the client, so a mallicious client could
+ * reverse engineer a continuation and get access to possible sensitive data stored
+ * in the flow execution. If you need more security and still want to store
+ * continuations on the client, subclass this class and override the methods
+ * {@link #encode(FlowExecution)} and {@link #decode(String)}, implementing
+ * them with a secure encoding/decoding algorithm, e.g. based on public/private
+ * key encryption.
+ * <p>
+ * This class depends on the <a href="http://jakarta.apache.org/commons/codec/">
+ * Jakarta Commons Codec</a> library to do BASE64 encoding.
  * 
  * @author Erwin Vervaet
  */
@@ -50,6 +63,10 @@ public class ClientSideContinuationsFlowExecutionStorage implements FlowExecutio
 	/**
 	 * Decode given data string, received from the client, and return the
 	 * corresponding flow execution object.
+	 * <p>
+	 * Subclasses can override this to change the decoding algorithm. This
+	 * class just does a BASE64 decoding and then deserializes the flow
+	 * execution.
 	 */
 	protected FlowExecution decode(String data) {
 		return new FlowExecutionContinuation(Base64.decodeBase64(data.getBytes())).getFlowExecution();
@@ -58,6 +75,9 @@ public class ClientSideContinuationsFlowExecutionStorage implements FlowExecutio
 	/**
 	 * Encode given flow execution object into a data string that can be
 	 * stored on the client.
+	 * <p>
+	 * Subclasses can override this to change the encoding algorithm. This
+	 * class just does a BASE64 encoding of the serialized flow execution.
 	 */
 	protected String encode(FlowExecution flowExecution) {
 		byte[] data = new FlowExecutionContinuation(flowExecution).getData();

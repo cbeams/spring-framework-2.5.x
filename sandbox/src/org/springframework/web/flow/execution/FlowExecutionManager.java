@@ -202,7 +202,7 @@ public class FlowExecutionManager {
 	/**
 	 * The main entry point into managed flow executions.
 	 * @param event the incoming event
-	 * @param executionListener a listener interested in flow execution
+	 * @param flowExecutionListener a listener interested in flow execution
 	 *        lifecycle events that happen <i>while handling this event</i>
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
