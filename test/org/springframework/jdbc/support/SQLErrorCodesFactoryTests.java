@@ -299,15 +299,20 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		WildcardSQLErrorCodesFactory factory = new WildcardSQLErrorCodesFactory();
 		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/", factory);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2 UDB for Xxxxx", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2", factory);
+		
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB3", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2", factory);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB3/", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2/", factory);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3", factory);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2", factory);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB3/", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-3", factory);
 		assertIsEmpty(sec);
 
 		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB1", factory);
