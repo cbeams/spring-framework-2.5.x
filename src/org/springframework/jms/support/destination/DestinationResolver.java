@@ -17,8 +17,8 @@
 package org.springframework.jms.support.destination;
 
 import javax.jms.Destination;
-
-import org.springframework.jms.JmsException;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
 /**
  * Strategy interface for managing JMS destinations.
@@ -38,14 +38,13 @@ public interface DestinationResolver {
 	/**
 	 * Resolve the given destination name, either as located resource
 	 * or as dynamic destination.
+	 * @param session the current JMS Session
 	 * @param destinationName the name of the destination
 	 * @param isPubSubDomain whether the domain is pub-sub, else P2P
-	 * @param factory the factory for dynamic destinations, if any
-	 * (for example, the JmsTemplate itself)
 	 * @return the JMS destination (either a topic or a queue)
-	 * @throws JmsException if resolution failed
+	 * @throws javax.jms.JMSException if resolution failed
 	 */
-	Destination resolveDestinationName(String destinationName, boolean isPubSubDomain,
-	                                   DynamicDestinationFactory factory) throws JmsException;
+	Destination resolveDestinationName(Session session, String destinationName, boolean isPubSubDomain)
+			throws JMSException;
 
 }

@@ -16,28 +16,22 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
+import org.springframework.jms.JmsException;
 
 /**
- * Simple implementation of the DestinationResolver interface,
- * resolving destination names as dynamic destinations.
+ * Thrown by DestinationResolver when it cannot resolve a destination name.
  * @author Juergen Hoeller
- * @since 20.07.2004
- * @see javax.jms.Session#createQueue
- * @see javax.jms.Session#createTopic
+ * @since 25.07.2004
+ * @see DestinationResolver
  */
-public class DynamicDestinationResolver implements DestinationResolver {
+public class DestinationResolutionException extends JmsException {
 
-	public Destination resolveDestinationName(Session session, String destinationName, boolean isPubSubDomain)
-			throws JMSException {
-		if (isPubSubDomain) {
-			return session.createTopic(destinationName);
-		}
-		else {
-			return session.createQueue(destinationName);
-		}
+	public DestinationResolutionException(String msg) {
+		super(msg);
+	}
+
+	public DestinationResolutionException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }
