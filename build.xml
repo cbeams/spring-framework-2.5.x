@@ -1070,6 +1070,7 @@
 			<doctitle><![CDATA[<h1>Spring Framework Sandbox</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
 			<packageset dir="${sandbox.src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
