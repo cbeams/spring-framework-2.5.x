@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.24 2003-11-22 15:05:21 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.25 2003-11-25 13:01:33 johnsonr Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -436,7 +436,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @return a new instance of the bean
 	 */
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
-		logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
+		}
 
 		if (mergedBeanDefinition.getDependsOn() != null) {
 			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
@@ -910,7 +912,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @return the bean instance to use, either the original or a wrapped one
 	 */
 	private Object applyBeanPostProcessors(Object bean, String name) throws BeansException {
-		logger.debug("Invoking BeanPostProcessors on bean with name '" + name + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking BeanPostProcessors on bean with name '" + name + "'");
+		}
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
