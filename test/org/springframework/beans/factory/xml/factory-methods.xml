@@ -4,16 +4,15 @@
 <beans>
 
 	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
-		factory-method="defaultInstance">
+			factory-method="defaultInstance">
 		<!-- No constructor-arg elements -->
-		
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
 
 	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"/> 
 
 	<bean id="testBeanOnly" class="org.springframework.beans.factory.xml.FactoryMethods"
-		factory-method="newInstance">
+			factory-method="newInstance">
 		<constructor-arg><ref local="juergen"/></constructor-arg>
 	</bean>
 
@@ -24,40 +23,37 @@
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
 	</bean>
 	
-	<bean id="defaultPrototype" 
-		class="org.springframework.beans.factory.xml.FactoryMethods"
-		singleton="false"
-		factory-method="defaultInstance">
+	<bean id="fullWithAutowire" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance" autowire="constructor">
+		<constructor-arg index="0" ref="juergen"/>
+		<constructor-arg index="1" value="27"/>
+	</bean>
+
+	<bean id="stringToBeAutowired" class="java.lang.String">
+		<constructor-arg value="gotchaAutowired"/>
+	</bean>
+
+	<bean id="defaultPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
+			singleton="false" factory-method="defaultInstance">
 		<!-- No constructor-arg elements -->
-		
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
 
-	<bean id="testBeanOnlyPrototype" 
-		class="org.springframework.beans.factory.xml.FactoryMethods"
-		factory-method="newInstance"
-		singleton="false"
-	>
+	<bean id="testBeanOnlyPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance" singleton="false">
 		<constructor-arg><ref local="juergen"/></constructor-arg>
-		
 		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
 	</bean>
 
-	<bean id="fullPrototype" 
-			class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance"
-			singleton="false"
-		>
-		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
-		<constructor-arg index="1"><value>27</value></constructor-arg>
-		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+	<bean id="fullPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance" singleton="false">
+		<constructor-arg type="int"><value>27</value></constructor-arg>
+		<constructor-arg><value>gotcha</value></constructor-arg>
+		<constructor-arg><ref local="juergen"/></constructor-arg>
 	</bean>
 	
-	<bean id="noMatchPrototype" 
-			class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance"
-			singleton="false"
-		>
+	<bean id="noMatchPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance" singleton="false">
 		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
@@ -79,7 +75,7 @@
 	<bean id="externalFactoryMethodWithArgs" class="org.springframework.beans.factory.xml.TestBeanCreator"
 			factory-method="createTestBean">
 		<constructor-arg index="0"><value>Rod</value></constructor-arg>
-		<constructor-arg index="1"><value>33</value></constructor-arg>
+		<constructor-arg><value type="java.lang.Integer">33</value></constructor-arg>
 	</bean>
 	
 	

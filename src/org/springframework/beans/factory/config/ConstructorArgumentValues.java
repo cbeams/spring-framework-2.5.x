@@ -16,12 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
 
 /**
  * Holder for constructor argument values for a bean.
@@ -136,7 +138,8 @@ public class ConstructorArgumentValues {
 					return valueHolder;
 				}
 			}
-			else if (requiredType.isInstance(value) || (requiredType.isArray() && List.class.isInstance(value))) {
+			else if (BeanUtils.isAssignable(requiredType, value) ||
+					(requiredType.isArray() && Collection.class.isInstance(value))) {
 				return valueHolder;
 			}
 		}

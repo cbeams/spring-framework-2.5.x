@@ -80,7 +80,7 @@ public abstract class AutowireUtils {
 			if (args[i] != null) {
 				Class superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
-					if (argTypes[i].isAssignableFrom(superClass)) {
+					if (BeanUtils.isAssignable(argTypes[i], superClass)) {
 						result++;
 						superClass = superClass.getSuperclass();
 					}

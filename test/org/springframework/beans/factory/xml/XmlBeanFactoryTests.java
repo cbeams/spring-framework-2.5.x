@@ -1040,6 +1040,18 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame(fm, fm2);
 	}
 
+	public void testFactoryMethodsWithAutowire() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		FactoryMethods fm = (FactoryMethods) xbf.getBean("fullWithAutowire");
+		assertEquals(27, fm.getNum());
+		assertEquals("gotchaAutowired", fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+	}
+
 	public void testFactoryMethodsPrototypeOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
