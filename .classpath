@@ -82,5 +82,6 @@
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/itext/pdfbox-0.6.5.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

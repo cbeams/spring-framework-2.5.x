@@ -59,7 +59,21 @@ public class SqlMapTestSuite extends TestCase {
 			// expected
 		}
 	}
-
+	
+	public void testSqlMapClientFactoryBeanWithoutConfig() {
+		SqlMapClientFactoryBean factory = new SqlMapClientFactoryBean();
+		// explicitly set to null, don't know why ;-)
+		factory.setConfigLocation(null);
+		try {
+			factory.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// expected
+		} catch (IOException e) {
+			fail("Should have thrown IllegalArgumentException");
+		}
+	}
+	
 	public void testSqlMapTemplate() throws SQLException {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();

@@ -19,6 +19,7 @@ package org.springframework.remoting;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.StubNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,6 +28,8 @@ import javax.xml.rpc.Stub;
 
 import junit.framework.TestCase;
 
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
@@ -34,6 +37,7 @@ import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import org.springframework.remoting.rmi.RmiClientInterceptor;
 import org.springframework.remoting.rmi.RmiProxyFactoryBean;
 import org.springframework.remoting.rmi.RmiServiceExporter;
+import org.springframework.remoting.support.RemoteInvocation;
 
 /**
  * @author Juergen Hoeller
@@ -197,6 +201,35 @@ public class RemotingTestSuite extends TestCase {
 		catch(IllegalArgumentException illegalArg){
 			//expected
 		}
+	}
+	
+	public void testRemoteInvocation() throws NoSuchMethodException {
+		// let's see if the remote invocation object works:
+		
+		RemoteBean rb = new RemoteBean();
+		
+		MethodInvocation mi = new ReflectiveMethodInvocation(
+				rb, rb, rb.getClass().getDeclaredMethod("setName", new Class[] {String.class}), new Object[] { "bla" }, RemoteBean.class, new ArrayList());
+		
+		RemoteInvocation inv = new RemoteInvocation(mi);
+		
+		assertEquals("setName", inv.getMethodName());
+		assertEquals("bla", inv.getArguments()[0]);
+		assertEquals(String.class, inv.getParameterTypes()[0]);		
+		
+		// this is a bit BS, but we need to test it
+		inv = new RemoteInvocation();
+		inv.setArguments(new Object[] { "bla" });
+		assertEquals("bla", inv.getArguments()[0]);
+		inv.setMethodName("setName");
+		assertEquals("setName", inv.getMethodName());
+		inv.setParameterTypes(new Class[] {String.class});
+		assertEquals(String.class, inv.getParameterTypes()[0]);
+		
+		inv = new RemoteInvocation("setName", new Class[] {String.class}, new Object[] {"bla"});
+		assertEquals("bla", inv.getArguments()[0]);
+		assertEquals("setName", inv.getMethodName());
+		assertEquals(String.class, inv.getParameterTypes()[0]);
 	}
 
 
