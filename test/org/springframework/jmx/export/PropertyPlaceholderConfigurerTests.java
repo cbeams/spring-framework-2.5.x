@@ -39,8 +39,8 @@ public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 
 	public void testPropertiesCorrectInJmx() throws Exception {
 		ObjectName oname = new ObjectName("bean:name=proxyTestBean1");
-		Object name = server.getAttribute(oname, "name");
-		Integer age = (Integer) server.getAttribute(oname, "age");
+		Object name = server.getAttribute(oname, "Name");
+		Integer age = (Integer) server.getAttribute(oname, "Age");
 
 		assertEquals("Name is incorrect in JMX", "Rob Harrop", name);
 		assertEquals("Age is incorrect in JMX", 100, age.intValue());

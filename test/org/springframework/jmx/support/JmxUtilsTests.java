@@ -16,12 +16,15 @@
 
 package org.springframework.jmx.support;
 
+import java.beans.PropertyDescriptor;
+
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
@@ -69,6 +72,30 @@ public class JmxUtilsTests extends TestCase {
 				JmxUtils.isMBean(abc.getClass()));
 	}
 
+	public void testGetAttributeNameWithStrictCasing() {
+		PropertyDescriptor pd = BeanUtils.getPropertyDescriptors(AttributeTest.class)[1];
+		String attributeName = JmxUtils.getAttributeName(pd, true);
+		assertEquals("Incorrect casing on attribute name", "Name", attributeName);
+	}
+
+	public void testGetAttributeNameWithoutStrictCasing() {
+		PropertyDescriptor pd = BeanUtils.getPropertyDescriptors(AttributeTest.class)[1];
+		String attributeName = JmxUtils.getAttributeName(pd, false);
+		assertEquals("Incorrect casing on attribute name", "name", attributeName);
+	}
+
+	public static class AttributeTest {
+
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
 
 	public static class StandardMBeanImpl extends StandardMBean implements IJmxTestBean {
 
@@ -118,10 +145,12 @@ public class JmxUtilsTests extends TestCase {
 
 
 	public static class Bar extends Foo {
+
 	}
 
 
 	public static class Abc extends Bar {
+
 	}
 
 }

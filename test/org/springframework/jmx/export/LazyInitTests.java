@@ -40,7 +40,7 @@ public class LazyInitTests extends TestCase {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean2");
-			String name = (String) server.getAttribute(oname, "name");
+			String name = (String) server.getAttribute(oname, "Name");
 
 			assertEquals("Invalid name returned", "foo", name);
 		}
