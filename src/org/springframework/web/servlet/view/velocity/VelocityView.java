@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -59,7 +58,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.11 2003-11-13 11:31:03 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.12 2003-11-21 15:21:29 jhoeller Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -140,8 +139,9 @@ public class VelocityView extends AbstractView {
  	*/
 	protected void initApplicationContext() throws ApplicationContextException {
 		if (this.templateName == null) {
-			throw new ApplicationContextException("Must set templateName property on VelocityView");
+			throw new IllegalArgumentException("Must set 'templateName' property in class [" + getClass().getName() + "]");
 		}
+
 		try {
 			VelocityConfiguration vconfig = (VelocityConfiguration)
 					BeanFactoryUtils.beanOfTypeIncludingAncestors(getWebApplicationContext(),
@@ -190,16 +190,12 @@ public class VelocityView extends AbstractView {
 	 * Render the view given the model to output.
 	 * @param model combined output Map, with dynamic values
 	 * taking precedence over static attributes
-	 * @param request HttpServetRequest
-	 * @param response HttpServletResponse
+	 * @param request current HTTP request
+	 * @param response current HTTP response
 	 * @throws ServletException if there is any other error
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 		throws ServletException {
-
-		if (this.velocityTemplate == null) {
-			throw new ServletException("VelocityView with name '" + getName() + "' is not configured: templateName must have been set");
-		}
 
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
@@ -269,8 +265,7 @@ public class VelocityView extends AbstractView {
 	
 	/**
 	 * If necessary, transform the model name into a legal Velocity model name.
-	 * Velocity can't cope with .s in a variable name, so we change them to
-	 * _s. 
+	 * Velocity can't cope with ".s" in a variable name, so we change them to "_s".
 	 * @param modelName
 	 */
 	protected String transformModelNameIfNecessary(String modelName) {
@@ -280,7 +275,7 @@ public class VelocityView extends AbstractView {
 	/**
 	 * Expose helpers unique to each rendering operation. 
 	 * This is necessary so that different rendering operations can't overwrite each other's formats etc.
-	 * This method can be overridden if desired to add request information to the Velocity context.
+	 * <p>This method can be overridden if desired to add request information to the Velocity context.
 	 * Be sure to call this implementation if you require the date formatter or currency formatter to
 	 * be made available.
 	 * @param vContext Velocity context that will be passed to the Velocity template at merge time
@@ -291,8 +286,7 @@ public class VelocityView extends AbstractView {
 		Locale locale = RequestContextUtils.getLocale(request);
 
 		if (this.exposeDateFormatter) {
-			// Javadocs indicate that this cast will work in most locales
-			SimpleDateFormat df = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 			vContext.put(DATE_FORMAT_KEY, df);
 			logger.debug("Adding date helper to context");
 		}
@@ -302,7 +296,7 @@ public class VelocityView extends AbstractView {
 			vContext.put(CURRENCY_FORMAT_KEY, nf);
 			logger.debug("Adding currency helper to context");
 		}
-	}	// exposeHelpers
+	}
 	
 	/**
 	 * Based on code from the VelocityServlet.

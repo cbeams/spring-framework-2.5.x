@@ -32,7 +32,7 @@ import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.6 2003-11-13 11:51:27 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.7 2003-11-21 15:22:52 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -70,7 +70,7 @@ public class VelocityViewTests extends TestCase {
 			vv.setApplicationContext(wac);
 			fail();
 		}
-		catch (ApplicationContextException ex) {
+		catch (IllegalArgumentException ex) {
 			// Check there's a helpful error message
 			assertTrue(ex.getMessage().indexOf("templateName") != -1);
 		}
