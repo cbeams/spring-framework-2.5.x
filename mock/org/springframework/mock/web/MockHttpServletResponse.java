@@ -88,14 +88,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 
 	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
-
-	public MockHttpServletResponse() {
-	}
-
-
-	//---------------------------------------------------------------------
 	// ServletResponse interface
 	//---------------------------------------------------------------------
 
@@ -121,10 +113,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public byte[] getContentAsByteArray() {
+		flushBuffer();
 		return this.content.toByteArray();
 	}
 
 	public String getContentAsString() throws UnsupportedEncodingException {
+		flushBuffer();
 		return (this.characterEncoding != null) ?
 				this.content.toString(this.characterEncoding) : this.content.toString();
 	}
@@ -154,8 +148,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void flushBuffer() {
-		if (this.committed) {
-			throw new IllegalStateException("Cannot flush buffer - response is already committed");
+		if (this.writer != null) {
+			this.writer.flush();
 		}
 		if (this.outputStream != null) {
 			try {
@@ -164,9 +158,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			catch (IOException ex) {
 				throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
 			}
-		}
-		if (this.writer != null) {
-			this.writer.flush();
 		}
 		this.committed = true;
 	}
