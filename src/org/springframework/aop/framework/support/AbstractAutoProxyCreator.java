@@ -40,7 +40,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.9 2003-10-25 21:07:17 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.10 2003-10-27 16:09:09 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -118,7 +118,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 */
 	public Object postProcessBean(Object bean, String name, RootBeanDefinition definition) throws BeansException {
 		
-		// Check for special case. We don't want to try to autoproxy a part of the autoproxying
+		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
 		if (MethodPointcut.class.isAssignableFrom(bean.getClass()) ||
 				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
@@ -156,7 +156,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 					proxyFactory.addInterceptor((Interceptor) interceptor);
 				}
 			}
-			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
+			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name, definition));
 			if (this.proxyInterfacesOnly) {
 				// Must allow for introductions; can't just set interfaces to
 				// the target's interfaces only
@@ -181,10 +181,12 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * Subclasses can override this if they want to use a custom invoker,
 	 * such as a pooling interceptor.
 	 * @param bean bean to intercept
+	 * @param beanName name of the bean
+	 * @param definition bean definition for the bean
 	 * @return an invoker interceptor wrapping this bean.
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
-	protected Interceptor createInvokerInterceptor(Object bean, String beanName) {
+	protected Interceptor createInvokerInterceptor(Object bean, String beanName, RootBeanDefinition definition) {
 		return new InvokerInterceptor(bean);
 	}
 
