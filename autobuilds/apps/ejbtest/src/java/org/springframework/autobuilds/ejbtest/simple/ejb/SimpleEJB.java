@@ -34,7 +34,7 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
  * <p>Note for XDoclet users. XDoclet is not smart enough to see that this class's
  * superclass implements SessionBean. If you are using XDoclet (not the case here,
  * this class would also have to directly implement SessionBean or XDoclet will
- * complain! Additionally, XDoclet is not smart enough to see the superclass
+ * complain! Additionally, XDoclet is not smart enough to see that the superclass
  * implements ejbCreate, so it will create its own empty ejbCreate method in the
  * final EJB class it generates. This will override the one from the superclass,
  * which means the superclass one will never get called, and the bean factory will
@@ -48,8 +48,7 @@ public class SimpleEJB extends AbstractStatelessSessionBean
 		implements SimpleService {
 
 	// --- statics
-	public static final String SESSION_FACTORY_ID = "hibSsessionFactory";
-	public static final String POJO_SERVICE_ID = "delegatingSimpleService";
+	public static final String POJO_SERVICE_ID = "delegatingSimpleService2";
 
 	protected static final Log logger = LogFactory
 			.getLog(SimpleEJB.class);

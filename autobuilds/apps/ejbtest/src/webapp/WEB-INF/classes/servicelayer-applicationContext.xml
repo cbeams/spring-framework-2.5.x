@@ -69,49 +69,73 @@
       </list>
     </property>
   </bean>
+  
+  <!-- Transaction Interceptor set up to do PROPAGATION_REQUIRED on all methods -->
+  <bean id="matchAllWithPropReq" class="org.springframework.transaction.interceptor.MatchAlwaysTransactionAttributeSource">
+    <property name="transactionAttribute"><value>PROPAGATION_REQUIRED</value></property>
+  </bean>
+  <bean id="matchAllTxInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+    <property name="transactionManager"><ref bean="transactionManager"/></property>
+    <property name="transactionAttributeSource"><ref bean="matchAllWithPropReq"/></property>
+  </bean>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
   
-  <!-- pojo SimpleService bean, and tx wrapped proxy which is actually used by clients -->
-	<bean id="delegatingSimpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
-    <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
-	</bean>
-  <bean id="delegatingSimpleService" 
-        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    <property name="transactionManager"><ref bean="transactionManager"/></property>
-    <property name="target"><ref bean="delegatingSimpleServiceTarget"/></property>
-    <property name="transactionAttributes">
-      <props>
-        <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
-      </props>
-    </property>
+  <!-- a parent bean definition which is a 'template' or base definition for transaction
+       proxies. It is set as lazy-init, since it is never supposed to be instantiated
+       itself. Children can override the transaction attributes -->
+	<bean id="baseTxProxy" lazy-init="true"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref bean="transactionManager"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
     <property name="postInterceptors">
       <list>
         <ref local="hibInterceptor"/>
       </list>
     </property>
-  </bean>
+	</bean>
   
+  <!-- pojo SimpleService bean, wrapped in a tx proxy -->
+  <bean id="delegatingSimpleService" parent="baseTxProxy">
+    <property name="target">
+    	<bean class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
+        <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
+    	</bean>
+    </property>
+  </bean>
+
+
   <!-- pojo SimpleService bean, and tx wrapped proxy which is actually used by clients -->
 	<bean id="mapperUsingSimpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.MapperUsingSimpleService">
     <property name="mapper"><ref bean="root-mapper"/></property>
 	</bean>
-  <bean id="mapperUsingSimpleService" 
-        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-    <property name="transactionManager"><ref bean="transactionManager"/></property>
+  <bean id="mapperUsingSimpleService" parent="baseTxProxy">
     <property name="target"><ref bean="mapperUsingSimpleServiceTarget"/></property>
-    <property name="transactionAttributes">
-      <props>
-        <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
-      </props>
-    </property>
-    <property name="postInterceptors">
+  </bean>
+
+	<bean id="delegatingSimpleService2" class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
+    <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
+	</bean>
+
+  <!-- One BeanNameAutoProxyCreator handles all beans where we want all methods to use PROPAGATION_REQUIRED -->
+  <bean id="autoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+    <property name="interceptorNames">
       <list>
-        <ref local="hibInterceptor"/>
+        <idref local="matchAllTxInterceptor"/>
+        <idref bean="hibInterceptor"/>
       </list>
     </property>
-    
-  </bean>
+    <property name="beanNames">
+      <list>
+   	    <idref local="delegatingSimpleService2"/>
+      </list>
+    </property>
+  </bean> 
+
 
 	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">

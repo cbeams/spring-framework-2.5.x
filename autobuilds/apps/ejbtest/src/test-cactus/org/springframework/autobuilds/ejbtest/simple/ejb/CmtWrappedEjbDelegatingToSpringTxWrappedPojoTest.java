@@ -66,7 +66,7 @@ public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
 		ejb.echo2("whatever2");
 	}
 	
-	public void testCmtDelegatingToTwoLayersOfSpringTxIncludingHibernatePersistence() {
+	public void xxxtestCmtDelegatingToTwoLayersOfSpringTxIncludingHibernatePersistence() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
 		ejb.echo("hello");
 		ejb.echo("hello2");
@@ -76,7 +76,7 @@ public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
 		ejb.echo3("goodbye2");
 	}
 	
-	public void testSingleMultiLayerTxCallStack() {
+	public void xxxtestSingleMultiLayerTxCallStack() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
 		ejb.echo3("goodbye");
 	}

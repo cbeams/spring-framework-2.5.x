@@ -21,7 +21,12 @@ import org.springframework.autobuilds.ejbtest.dbutil.mapper.Mapper;
 import org.springframework.autobuilds.ejbtest.domain.User1;
 
 /**
- * A POJO implementation of SimpleService
+ * A POJO implementation of SimpleService. This is wrapped transactionally for some
+ * tests. This would be the case when using Spring transactions only, or CMT+Spring
+ * transactions. On the other hand, if using CMT alone (with no Spring transactions)
+ * this would not be wrapped at all.
+ * 
+ * @author colin sampaleanu
  */
 public class MapperUsingSimpleService implements SimpleService {
 	
@@ -64,5 +69,4 @@ public class MapperUsingSimpleService implements SimpleService {
 		
 		return "(MapperUsingSimpleService:echo3: hello " + input + ")";
 	}
-	
 }

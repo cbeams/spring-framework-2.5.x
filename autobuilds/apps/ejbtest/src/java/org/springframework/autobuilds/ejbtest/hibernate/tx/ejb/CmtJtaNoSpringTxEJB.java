@@ -37,15 +37,19 @@ import org.springframework.orm.hibernate.HibernateCallback;
 import org.springframework.orm.hibernate.HibernateTemplate;
 
 /**
- * <p>EJB used to test proper session binding and unbinding in 
+ * <p>EJB used just to test proper Hibernate Session binding and unbinding in 
  * a CMT (Container Managed Transaction) environment with JTA, but no Spring
- * TransactionManager involved.</p>
+ * TransactionManager involved. The methods here are not an example of what your
+ * own EJB methods should do; they are just meant to test that Spring internals
+ * are working ok. However the config of this bean _is_ a general example of how
+ * you would set up an EJB to work with CMT without Spring transaction environment</p>
  * 
- * <p>In this environment, as long as the Hibernate Configuration is set up with a 
- * TransactionManagerLookup so Hibernate (and Spring) can find the JTA
- * TransactionManager, Spring is still able to bind the Hibernate Session to the 
- * current transaction, and ensure that all Hibernate work in a transaction happens
- * within the same session (when using HibernateTemplate/SessionFactoryUtils.</p>
+ * <p>In a CMT without Spring transactions environment, as long as the Hibernate
+ * Configuration is set up with a TransactionManagerLookup so Hibernate (and Spring)
+ * can find the JTA TransactionManager, Spring is still able to bind the Hibernate
+ * Session to the current transaction, and ensure that all Hibernate work in a
+ * transaction happens within the same session (when using
+ * HibernateTemplate/SessionFactoryUtils.</p>
  * 
  * <p>This is not an example of how you would ideally write an EJB in a Spring 
  * environment. Ideally the EJB just obtains a POJO service object (wrapped with
