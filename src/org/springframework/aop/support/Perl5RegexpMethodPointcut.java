@@ -27,8 +27,6 @@ import org.apache.oro.text.regex.Perl5Matcher;
  * <li>pattern: Perl5 regular expression for the fully-qualified method names to match
  * <li>patterns: alternative property taking a String array of patterns. The result will
  * be the union of these patterns. 
- * <li>interceptor: AOP Alliance interceptor to invoke if the pointcut matches
- * Matching is based purely on method name.
  *
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
@@ -38,8 +36,8 @@ import org.apache.oro.text.regex.Perl5Matcher;
  * Does not require J2SE 1.4, although it runs under 1.4.
  *
  * @author Rod Johnson
- * @since July 22, 2003
- * @version $Id: Perl5RegexpMethodPointcut.java,v 1.1 2004-07-25 11:58:10 johnsonr Exp $
+ * @since 1.1
+ * @version $Id: Perl5RegexpMethodPointcut.java,v 1.2 2004-07-28 18:34:34 dkopylenko Exp $
  * @see org.springframework.aop.support.AbstractRegexpMethodPointcut
  */
 public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut { 

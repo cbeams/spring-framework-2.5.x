@@ -32,9 +32,7 @@ import org.springframework.aop.ClassFilter;
  * The exact regexp syntax will depend on the subclass (e.g. Perl5 regular expressions)
  * <li>patterns: alternative property taking a String array of patterns. The result will
  * be the union of these patterns. 
- * <li>interceptor: AOP Alliance interceptor to invoke if the pointcut matches
- * Matching is based purely on method name.
- *
+ * 
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
@@ -45,8 +43,8 @@ import org.springframework.aop.ClassFilter;
  * be invoked again on the client side on deserialization.
  * 
  * @author Rod Johnson
- * @since July 22, 2003
- * @version $Id: AbstractRegexpMethodPointcut.java,v 1.1 2004-07-25 11:58:10 johnsonr Exp $
+ * @since 1.1
+ * @version $Id: AbstractRegexpMethodPointcut.java,v 1.2 2004-07-28 18:34:34 dkopylenko Exp $
  */
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter, Serializable { 
 	
