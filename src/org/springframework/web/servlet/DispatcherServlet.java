@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter;
+import org.springframework.web.servlet.mvc.throwaway.ValidatableThrowawayControllerHandlerAdapter;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
@@ -80,7 +82,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.18 2003-12-06 15:49:30 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.19 2003-12-09 08:47:37 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -174,7 +176,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>Loads HandlerMapping and HandlerAdapter objects, and configures a
 	 * ViewResolver and a LocaleResolver.
 	 */
-	protected void initFrameworkServlet() throws ServletException {
+	protected void initFrameworkServlet() throws ServletException, BeansException {
 		initMultipartResolver();
 		initLocaleResolver();
 		initThemeResolver();
@@ -189,7 +191,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, no multipart handling is provided.
 	 */
-	private void initMultipartResolver() throws ServletException {
+	private void initMultipartResolver() throws BeansException {
 		try {
 			this.multipartResolver = (MultipartResolver) getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
 			logger.info("Loaded multipart resolver [" + this.multipartResolver + "]");
@@ -200,11 +202,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.info("Unable to locate multipart resolver with name ["	+ MULTIPART_RESOLVER_BEAN_NAME +
 			            "]: no multipart handling provided");
 		}
-		catch (BeansException ex) {
-			// we tried and failed to load the MultipartResolver specified by a bean
-			throw new ServletException("Fatal error loading multipart resolver with name '" +
-			                           MULTIPART_RESOLVER_BEAN_NAME	+ "'",	ex);
-		}
 	}
 
 	/**
@@ -212,7 +209,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to AcceptHeaderLocaleResolver.
 	 */
-	private void initLocaleResolver() {
+	private void initLocaleResolver() throws BeansException {
 		try {
 			this.localeResolver = (LocaleResolver) getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
 			logger.info("Loaded locale resolver [" + this.localeResolver + "]");
@@ -230,7 +227,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to a AcceptHeaderLocaleResolver.
 	 */
-	private void initThemeResolver() {
+	private void initThemeResolver() throws BeansException {
 		try {
 			this.themeResolver = (ThemeResolver) getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
 			logger.info("Loaded theme resolver [" + this.themeResolver + "]");
@@ -248,7 +245,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no HandlerMapping beans are defined in the BeanFactory
 	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
-	private void initHandlerMappings() {
+	private void initHandlerMappings() throws BeansException {
 		// find all HandlerMappings in the ApplicationContext
 		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
 		this.handlerMappings = new ArrayList(matchingBeans.values());
@@ -271,16 +268,17 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no HandlerAdapter beans are defined in the BeanFactory
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
-	private void initHandlerAdapters() {
+	private void initHandlerAdapters() throws BeansException {
 		// find all HandlerAdapters in the ApplicationContext
 		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerAdapter.class, true, false);
 		this.handlerAdapters = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
 		if (this.handlerAdapters.isEmpty()) {
-			SimpleControllerHandlerAdapter ha = new SimpleControllerHandlerAdapter();
-			this.handlerAdapters.add(ha);
-			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
+			this.handlerAdapters.add(new SimpleControllerHandlerAdapter());
+			this.handlerAdapters.add(new ThrowawayControllerHandlerAdapter());
+			this.handlerAdapters.add(new ValidatableThrowawayControllerHandlerAdapter());
+			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using defaults");
 		}
 		else {
 			// we keep HandlerAdapters in sorted order
@@ -293,7 +291,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initHandlerExceptionResolvers() {
+	private void initHandlerExceptionResolvers() throws BeansException {
 		// find all HandlerExceptionResolvers in the ApplicationContext
 		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
 		this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
@@ -306,7 +304,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolver() {
+	private void initViewResolver() throws BeansException {
 		try {
 			this.viewResolver = (ViewResolver) getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
 			logger.info("Loaded view resolver [" + viewResolver + "]");
@@ -413,29 +411,18 @@ public class DispatcherServlet extends FrameworkServlet {
 				logger.debug("Null ModelAndView returned to DispatcherServlet with name '" +
 										 getServletName() + "': assuming HandlerAdapter completed request handling");
 			}
+
+			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
 		catch (Exception ex) {
-			throw triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			if (mappedHandler != null) {
+				triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			}
 		}
 		finally {
-			Exception ex = null;
-			if (mappedHandler != null) {
-				ex = triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
-			}
-			try {
-				// clean up any resources used by a multipart request
-				if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
-					this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
-				}
-			}
-			catch (RuntimeException ex2) {
-				if (ex != null) {
-					logger.error("Exception overridden by MultipartResolver.cleanMultipart exception", ex);
-				}
-				throw ex2;
-			}
-			if (ex != null) {
-				throw ex;
+			// clean up any resources used by a multipart request
+			if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
+				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 		}
 	}
@@ -458,7 +445,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.debug("Last-Modified value for [" + WebUtils.getRequestUri(request) + "] is [" + lastModified + "]");
 			return lastModified;
 		}
-		catch (ServletException ex) {
+		catch (Exception ex) {
 			// ignore -> will reappear on doService
 			logger.debug("Exception thrown in getLastModified", ex);
 			return -1;
@@ -470,7 +457,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Try all handler mappings in order.
 	 * @return the handler, or null if no handler could be found
 	 */
-	private HandlerExecutionChain getHandler(HttpServletRequest request) throws ServletException {
+	private HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Iterator itr = this.handlerMappings.iterator();
 		while (itr.hasNext()) {
 			HandlerMapping hm = (HandlerMapping) itr.next();
@@ -530,13 +517,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param mappedHandler the mapped HandlerExecutionChain
 	 * @param interceptorIndex index of last interceptor that successfully completed
 	 * @param ex Exception thrown on handler execution, or null if none
-	 * @return the most current Exception thrown, either the passed-in one or one
-	 * thrown by a HandlerInterceptor.afterCompletion invocation
 	 * @see HandlerInterceptor#afterCompletion
 	 */
-	private Exception triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+	private void triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
 																					 HttpServletRequest request, HttpServletResponse response,
-																					 Exception ex) {
+																					 Exception ex) throws Exception {
 		// apply afterCompletion methods of registered interceptors
 		Exception currEx = ex;
 		if (mappedHandler.getInterceptors() != null) {
@@ -553,7 +538,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 			}
 		}
-		return currEx;
+		if (currEx != null) {
+			throw currEx;
+		}
 	}
 
 }
