@@ -8,6 +8,10 @@ import org.springframework.web.flow.Flow;
 /**
  * Builder interface used to build flows.
  * 
+ * <p>Flow builders are <i>executed</i> by the FlowFactoryBean.
+ * 
+ * @see org.springframework.web.flow.config.FlowFactoryBean
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
