@@ -51,9 +51,11 @@ import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -85,6 +87,15 @@ import org.springframework.util.Assert;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public abstract class SessionFactoryUtils {
+
+	/**
+	 * Order value for TransactionSynchronization objects that clean up Hibernate
+	 * Sessions. Return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100
+	 * to execute Session cleanup before JDBC Connection cleanup, if any.
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	public static final int SESSION_SYNCHRONIZATION_ORDER =
+			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
@@ -734,7 +745,7 @@ public abstract class SessionFactoryUtils {
 	 * i.e. when participating in a JtaTransactionManager transaction.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class SpringSessionSynchronization implements TransactionSynchronization {
+	private static class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
 
 		private final SessionHolder sessionHolder;
 
@@ -778,6 +789,10 @@ public abstract class SessionFactoryUtils {
 					throw new DataAccessResourceFailureException("Could not check JTA transaction", ex);
 				}
 			}
+		}
+
+		public int getOrder() {
+			return SESSION_SYNCHRONIZATION_ORDER;
 		}
 
 		public void suspend() {
@@ -870,14 +885,18 @@ public abstract class SessionFactoryUtils {
 		}
 
 		public void afterCompletion(int status) {
-			if (!this.hibernateTransactionCompletion) {
-				// No Hibernate TransactionManagerLookup: close the Session after completion.
+			if (!this.hibernateTransactionCompletion || !this.newSession) {
+				// No Hibernate TransactionManagerLookup: apply afterTransactionCompletion callback.
+				// Always perform explicit afterTransactionCompletion callback for pre-bound Session,
+				// even with Hibernate TransactionManagerLookup (which only applies to new Sessions).
 				Session session = this.sessionHolder.getSession();
 				// Provide correct transaction status for releasing the Session's cache locks,
 				// if possible. Else, closing will release all cache locks assuming a rollback.
 				if (session instanceof SessionImplementor) {
 					((SessionImplementor) session).afterTransactionCompletion(status == STATUS_COMMITTED);
 				}
+				// Close the Hibernate Session here if necessary
+				// (closed in beforeCompletion in case of TransactionManagerLookup).
 				if (this.newSession) {
 					closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}

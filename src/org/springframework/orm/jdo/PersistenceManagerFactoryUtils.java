@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -56,7 +57,17 @@ import org.springframework.util.Assert;
  */
 public abstract class PersistenceManagerFactoryUtils {
 
+	/**
+	 * Order value for TransactionSynchronization objects that clean up JDO
+	 * PersistenceManagers. Return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100
+	 * to execute PersistenceManager cleanup before JDBC Connection cleanup, if any.
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	public static final int PERSISTENCE_MANAGER_SYNCHRONIZATION_ORDER =
+			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+
 	private static final Log logger = LogFactory.getLog(PersistenceManagerFactoryUtils.class);
+
 
 	/**
 	 * Create an appropriate SQLExceptionTranslator for the given PersistenceManagerFactory.
@@ -243,6 +254,10 @@ public abstract class PersistenceManagerFactoryUtils {
 		private PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
 			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
+		}
+
+		public int getOrder() {
+			return PERSISTENCE_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
 		public void suspend() {

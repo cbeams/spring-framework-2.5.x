@@ -12,17 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.support;
 
 /**
  * Interface for transaction synchronization callbacks.
  * Supported by AbstractPlatformTransactionManager.
+ *
+ * <p>TransactionSynchronization implementations can implement the Ordered interface
+ * to influence their execution order. A synchronization that does not implement the
+ * Ordered interface is appended to the end of the synchronization chain.
+ *
+ * <p>System synchronizations performed by Spring itself use specific order values,
+ * allowing for fine-grained interaction with their execution order (if necessary).
+ *
  * @author Juergen Hoeller
  * @since 02.06.2003
  * @see TransactionSynchronizationManager
  * @see AbstractPlatformTransactionManager
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+ * @see org.springframework.orm.hibernate.SessionFactoryUtils#SESSION_SYNCHRONIZATION_ORDER
  */
 public interface TransactionSynchronization {
 

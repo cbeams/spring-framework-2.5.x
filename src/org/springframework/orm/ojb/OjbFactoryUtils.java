@@ -24,6 +24,7 @@ import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -42,7 +43,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public abstract class OjbFactoryUtils {
 
+	/**
+	 * Order value for TransactionSynchronization objects that clean up OJB
+	 * PersistenceBrokers. Return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100
+	 * to execute PersistenceBroker cleanup before JDBC Connection cleanup, if any.
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	public static final int PERSISTENCE_BROKER_SYNCHRONIZATION_ORDER =
+			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+
 	private static final Log logger = LogFactory.getLog(OjbFactoryUtils.class);
+
 
 	/**
 	 * Get an OJB PersistenceBroker for the given PBKey. Is aware of a
@@ -143,6 +154,10 @@ public abstract class OjbFactoryUtils {
 		private PersistenceBrokerSynchronization(PersistenceBrokerHolder pbHolder, PBKey pbKey) {
 			this.persistenceBrokerHolder = pbHolder;
 			this.pbKey = pbKey;
+		}
+
+		public int getOrder() {
+			return PERSISTENCE_BROKER_SYNCHRONIZATION_ORDER;
 		}
 
 		public void suspend() {

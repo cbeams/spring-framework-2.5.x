@@ -12,18 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.support;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.core.OrderComparator;
 
 /**
  * Internal class that manages resources and transaction synchronizations per thread.
@@ -75,6 +78,8 @@ public abstract class TransactionSynchronizationManager {
 	private static ThreadLocal resources = new ThreadLocal();
 
 	private static final ThreadLocal synchronizations = new ThreadLocal();
+
+	private static final Comparator synchronizationComparator = new OrderComparator();
 
 
 	//-------------------------------------------------------------------------
@@ -197,20 +202,25 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
 		logger.debug("Initializing transaction synchronization");
-		synchronizations.set(new ArrayList());
+		synchronizations.set(new LinkedList());
 	}
 
 	/**
 	 * Register a new transaction synchronization for the current thread.
 	 * Typically called by resource management code.
+	 * <p>Note that synchronizations can implemented the Ordered interface.
+	 * They will be executed in an order according to their order value (if any).
 	 * @throws IllegalStateException if synchronization is not active
+	 * @see org.springframework.core.Ordered
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
 	    throws IllegalStateException {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		((List) synchronizations.get()).add(synchronization);
+		List synchs = (List) synchronizations.get();
+		synchs.add(synchronization);
+		Collections.sort(synchs, synchronizationComparator);
 	}
 
 	/**
@@ -224,7 +234,8 @@ public abstract class TransactionSynchronizationManager {
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		return Collections.unmodifiableList(new ArrayList((List) synchronizations.get()));
+		List synchs = (List) synchronizations.get();
+		return Collections.unmodifiableList(new LinkedList(synchs));
 	}
 
 	/**
