@@ -48,7 +48,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * 
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.7 2004-05-23 20:50:29 jhoeller Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.8 2004-05-27 14:46:26 jhoeller Exp $
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -127,10 +127,13 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		
 		// now try error code
 		String errorCode;
-		if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation())
+		if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
 			errorCode = sqlex.getSQLState();
-		else
+		}
+		else {
 			errorCode = Integer.toString(sqlex.getErrorCode());
+		}
+
 		if (this.sqlErrorCodes != null && errorCode != null) {
 			if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
@@ -156,7 +159,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 
 		// we couldn't identify it more precisely - let's hand it over to the SQLState fallback translator
 		logger.warn("Unable to translate SQLException with errorCode '" + sqlex.getErrorCode() +
-						"', will now try the fallback translator");
+		            "', will now try the fallback translator");
 		return this.fallback.translate(task, sql, sqlex);
 	}
 

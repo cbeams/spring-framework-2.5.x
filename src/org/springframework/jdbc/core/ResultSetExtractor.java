@@ -33,17 +33,17 @@ import org.springframework.dao.DataAccessException;
  * in particular a RowMapperResultReader in combination with a RowMapper.
  *
  * <p>Note: In contrast to a RowCallbackHandler, a ResultSetExtractor object
- * is typically stateless and thus reusable, as long as it doesn't keep
- * result state within the object.
+ * is typically stateless and thus reusable, as long as it doesn't access
+ * stateful resources (like output streams when streaming LOB contents)
+ * or keep result state within the object.
  *
  * @author Rod Johnson
  * @since April 24, 2003
- * @version $Id: ResultSetExtractor.java,v 1.5 2004-05-26 10:11:21 jhoeller Exp $
+ * @version $Id: ResultSetExtractor.java,v 1.6 2004-05-27 14:46:26 jhoeller Exp $
  * @see JdbcTemplate
  * @see RowCallbackHandler
- * @see ResultReader
  * @see RowMapperResultReader
- * @see RowMapper
+ * @see org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor
  */
 public interface ResultSetExtractor {
 	
@@ -52,7 +52,8 @@ public interface ResultSetExtractor {
 	 * all rows in the ResultSet.
 	 * @param rs ResultSet to extract data from. Implementations should
 	 * not close this: it will be closed by the JdbcTemplate.
-	 * @return an arbitrary result object
+	 * @return an arbitrary result object, or null if none
+	 * (the extractor will typically be stateful in the latter case).
 	 * @throws SQLException if a SQLException is encountered getting column
 	 * values or navigating (that is, there's no need to catch SQLException)
 	 * @throws DataAccessException in case of custom exceptions

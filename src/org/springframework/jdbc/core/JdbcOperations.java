@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.9 2004-04-26 23:08:14 jhoeller Exp $
+ * @version $Id: JdbcOperations.java,v 1.10 2004-05-27 14:46:26 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -454,6 +454,7 @@ public interface JdbcOperations {
 	 * Execute a SQL call using a CallableStatementCreator to provide SQL and any
 	 * required parameters.
 	 * @param csc object that provides SQL and any necessary parameters
+	 * @param declaredParameters list of declared SqlParameter objects
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */

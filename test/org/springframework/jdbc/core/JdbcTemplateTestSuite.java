@@ -38,9 +38,9 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.UncategorizedDataAccessException;
+import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.25 2004-05-21 19:25:40 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.26 2004-05-27 14:47:34 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 
@@ -301,10 +301,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		ctrlStatement = MockControl.createControl(PreparedStatement.class);
 		mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
@@ -326,10 +324,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		ctrlStatement.replay();
 		replay();
 
-		SingleConnectionDataSource scf =
-			new SingleConnectionDataSource(
-				mockDataSource.getConnection(),
-				false);
+		SingleConnectionDataSource scf = new SingleConnectionDataSource(mockDataSource.getConnection(), false);
 		JdbcTemplate template2 = new JdbcTemplate(scf);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 		template2.query(sql, rcch);
@@ -348,10 +343,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.getWarnings();
@@ -388,10 +381,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.getWarnings();
@@ -425,8 +416,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	 * Test update with static SQL.
 	 */
 	public void testSqlUpdate() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
@@ -456,8 +446,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 
 	public void testSqlUpdateEncountersSqlException() throws Exception {
 		SQLException sex = new SQLException("bad update");
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
@@ -484,8 +473,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 
 	public void testSqlUpdateWithThreadConnection() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
@@ -514,14 +502,11 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 
 	public void testBatchUpdate() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 
-		MockControl ctrlPreparedStatement =
-				MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-				(PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 		mockPreparedStatement.getConnection();
 		ctrlPreparedStatement.setReturnValue(mockConnection);
 		mockPreparedStatement.setInt(1, ids[0]);
@@ -578,14 +563,11 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 
 	public void testBatchUpdateWithNoBatchSupport() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 
-		MockControl ctrlPreparedStatement =
-				MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-				(PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 		mockPreparedStatement.getConnection();
 		ctrlPreparedStatement.setReturnValue(mockConnection);
 		mockPreparedStatement.setInt(1, ids[0]);
@@ -601,28 +583,14 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		//mockDatabaseMetaData.getDatabaseProductName();
-		//ctrlDatabaseMetaData.setReturnValue("MySQL");
-		//mockDatabaseMetaData.getDriverVersion();
-		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(false);
-
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
 
 		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
 		replay();
 
-		BatchPreparedStatementSetter setter =
-			new BatchPreparedStatementSetter() {
-			public void setValues(PreparedStatement ps, int i)
-				throws SQLException {
+		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
 			public int getBatchSize() {
@@ -636,22 +604,15 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
 		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
 	}
 
-	/**
-	 * Test case where a batch update fails.
-	 */
 	public void testBatchUpdateFails() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		SQLException sex = new SQLException();
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 		mockPreparedStatement.getConnection();
 		ctrlPreparedStatement.setReturnValue(mockConnection);
 		mockPreparedStatement.setInt(1, ids[0]);
@@ -669,26 +630,27 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		//mockDatabaseMetaData.getDatabaseProductName();
-		//ctrlDatabaseMetaData.setReturnValue("MySQL");
-		//mockDatabaseMetaData.getDriverVersion();
-		//ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(true);
 
+		ctrlConnection.reset();
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+		mockConnection.close();
+		ctrlConnection.setVoidCallable(2);
 
 		ctrlPreparedStatement.replay();
 		ctrlDatabaseMetaData.replay();
 		replay();
 
-		BatchPreparedStatementSetter setter =
-			new BatchPreparedStatementSetter() {
-			public void setValues(PreparedStatement ps, int i)
-				throws SQLException {
+		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
 			public int getBatchSize() {
@@ -718,15 +680,13 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockDataSource = (DataSource) ctrlDataSource.getMock();
 		mockDataSource.getConnection();
 		// Expect two calls (one call after caching data product name): make get Metadata fail also
-		ctrlDataSource.setThrowable(sex, 1);
-		ctrlDataSource.replay();
+		ctrlDataSource.setThrowable(sex, 2);
+		replay();
 
 		try {
 			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
 			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template2.query(
-				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
-				rcch);
+			template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 			fail("Shouldn't have executed query without a connection");
 		} 
 		catch (CannotGetJdbcConnectionException ex) {
@@ -738,14 +698,13 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 
 	/**
-	 * Verify that afterPropertiesSet invokes exceception translator
-	 * @throws SQLException
+	 * Verify that afterPropertiesSet invokes exception translator.
 	 */
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized() throws SQLException {
 		SQLException sex = new SQLException("foo", "07xxx");
 
-		ctrlConnection = MockControl.createControl(Connection.class);
-		mockConnection = (Connection) ctrlConnection.getMock();
+		ctrlDataSource = MockControl.createControl(DataSource.class);
+		mockDataSource = (DataSource) ctrlDataSource.getMock();
 		//mockConnection.getMetaData();
 		//ctrlConnection.setReturnValue(null, 1);
 		//mockConnection.close();
@@ -761,16 +720,14 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		//ctrlDataSource.setReturnValue(mockConnection, 1);
 		// One call for operation
 		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex, 1);
+		ctrlDataSource.setThrowable(sex, 2);
 		ctrlDataSource.replay();
 
 		try {
 			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
 			template2.afterPropertiesSet();
 			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template2.query(
-				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
-				rcch);
+			template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 			fail("Shouldn't have executed query without a connection");
 		} 
 		catch (CannotGetJdbcConnectionException ex) {
@@ -791,10 +748,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 	
 	/**
-	 * If beanProperty is true, initialize via exception translator bean property
-	 * if false, use afterPropertiesSet()
-	 * @param beanProperty
-	 * @throws SQLException
+	 * If beanProperty is true, initialize via exception translator bean property;
+	 * if false, use afterPropertiesSet().
 	 */
 	private void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty) throws SQLException {
 		SQLException sex = new SQLException("foo", "07xxx");
@@ -816,19 +771,19 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		//ctrlDataSource.setReturnValue(mockConnection, 1);
 		// One call for operation
 		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex, 1);
+		ctrlDataSource.setThrowable(sex, 2);
 		ctrlDataSource.replay();
 
 		try {
 			JdbcTemplate template2 = new JdbcTemplate();
 			template2.setDataSource(mockDataSource);
 			if (beanProperty) {
-				// This will get a connection
+				// This will get a connection.
 				template2.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(mockDataSource));
 			}
 			else {
 				// This will cause creation of default SQL translator.
-				// Note that only call should be effective
+				// Note that only call should be effective.
 				template2.afterPropertiesSet();
 				template2.afterPropertiesSet();
 			}
@@ -1028,9 +983,9 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		replay();
 
 		// Too long: truncation
-		JdbcTemplate t = new JdbcTemplate(mockDataSource);
-		t.setIgnoreWarnings(true);
-		t.query(sql, new RowCallbackHandler() {
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		template.setIgnoreWarnings(true);
+		template.query(sql, new RowCallbackHandler() {
 			public void processRow(java.sql.ResultSet rs)
 				throws java.sql.SQLException {
 				rs.getByte(1);
@@ -1045,8 +1000,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	 * Test that we see an SQLException translated using Error Code
 	 */
 	public void testSQLErrorCodeTranslation() throws Exception {
-		final SQLException sex =
-			new SQLException("I have a known problem", "99999", 1054);
+		final SQLException sex = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -1056,43 +1010,44 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+
 		mockConnection.createStatement();
 		ctrlConnection.setReturnValue(mockStatement);
-		//mockConnection.getMetaData();
-		//ctrlConnection.setReturnValue(mockDatabaseMetaData);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData);
 
 		ctrlResultSet.replay();
 		ctrlStatement.replay();
+		ctrlDatabaseMetaData.replay();
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(java.sql.ResultSet rs)
-					throws SQLException {
+				public void processRow(java.sql.ResultSet rs) throws SQLException {
 					throw sex;
 				}
 			});
 			fail("Should have thrown exception");
 		}
 		catch (BadSqlGrammarException ex) {
-			assertTrue(
-				"Wanted same exception back, not " + ex,
-				sex == ex.getCause());
+			assertTrue("Wanted same exception back, not " + ex, sex == ex.getCause());
 		}
 		catch (Exception ex) {
-			fail(
-				"Should have thrown BadSqlGrammarException exception, not "
-					+ ex);
+			fail("Should have thrown BadSqlGrammarException exception, not " + ex);
 		}
 
 		ctrlResultSet.verify();
@@ -1106,8 +1061,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	 */
 	public void testUseCustomSQLErrorCodeTranslator() throws Exception {
 		// Bad SQL state
-		final SQLException sex =
-			new SQLException("I have a known problem", "07000", 1054);
+		final SQLException sex = new SQLException("I have a known problem", "07000", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -1117,10 +1071,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.close();
@@ -1769,8 +1721,7 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 			this.sql = sql;
 		}
 
-		public PreparedStatement createPreparedStatement(Connection conn)
-			throws SQLException {
+		public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
 			return ps;

@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
@@ -36,7 +37,7 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.10 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: StoredProcedure.java,v 1.11 2004-05-27 14:46:26 jhoeller Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -50,7 +51,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Create a new object wrapper for a stored procedure.
 	 * @param ds DataSource to use throughout the lifetime
 	 * of this object to obtain connections
-	 * @param name name of the stored procedure in the database.
+	 * @param name name of the stored procedure in the database
 	 */
 	protected StoredProcedure(DataSource ds, String name) {
 		setDataSource(ds);
@@ -60,7 +61,7 @@ public abstract class StoredProcedure extends SqlCall {
 	/**
 	 * Create a new object wrapper for a stored procedure.
 	 * @param jdbcTemplate JdbcTemplate which wraps DataSource
-	 * @param name name of the stored procedure in the database.
+	 * @param name name of the stored procedure in the database
 	 */
 	protected StoredProcedure(JdbcTemplate jdbcTemplate, String name) {
 		setJdbcTemplate(jdbcTemplate);
@@ -68,18 +69,17 @@ public abstract class StoredProcedure extends SqlCall {
 	}
 
 	/**
-	 * Overridden method. Add a parameter.
-	 * <b>NB: Calls to addParameter must be made in the same
-	 * order as they appear in the database's stored procedure parameter
-	 * list.</b> Names are purely used to help mapping
-	 * @param p Parameter object (as defined in the Parameter
-	 * inner class)
+	 * Declare a parameter. Overridden method.
+	 * <b>Note: Calls to declareParameter must be made in the same order as
+	 * they appear in the database's stored procedure parameter list.</b>
+	 * Names are purely used to help mapping.
+	 * @param param parameter object
 	 */
-	public void declareParameter(SqlParameter p) throws InvalidDataAccessApiUsageException {
-		if (p.getName() == null) {
+	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {
+		if (param.getName() == null) {
 			throw new InvalidDataAccessApiUsageException("Parameters to stored procedures must have names as well as types");
 		}
-		super.declareParameter(p);
+		super.declareParameter(param);
 	}
 
 	/**
@@ -96,11 +96,12 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map execute(final Map inParams) throws InvalidDataAccessApiUsageException {
+	public Map execute(final Map inParams) throws DataAccessException {
 		validateParameters(inParams.values().toArray());
-		logger.debug("Executing call: " + getCallString());
-		Map retValues = getJdbcTemplate().call(newCallableStatementCreator(inParams), this.getDeclaredParameters());
-		return retValues;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing call [" + getCallString() + "]");
+		}
+		return getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
 	}
 
 	/**
@@ -119,10 +120,11 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map execute(final ParameterMapper inParamMapper) throws InvalidDataAccessApiUsageException {
-		logger.debug("Executing call using ParameterMapper: " + getCallString());
-		Map retValues = getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), this.getDeclaredParameters());
-		return retValues;
+	public Map execute(final ParameterMapper inParamMapper) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing call [" + getCallString() + "] using ParameterMapper");
+		}
+		return getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), getDeclaredParameters());
 	}
 
 }

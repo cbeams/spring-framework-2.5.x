@@ -51,7 +51,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.8 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: RdbmsOperation.java,v 1.9 2004-05-27 14:46:26 jhoeller Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -62,12 +62,12 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/** Lower-level class used to execute SQL */
 	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
+	/** SQL statement */
+	private String sql;
+
 	/** List of SqlParameter objects */
 	private List declaredParameters = new LinkedList();
 
-	/** SQL statement */
-	private String sql;
-	
 	/**
 	 * Has this operation been compiled? Compilation means at
 	 * least checking that a DataSource and sql have been provided,
@@ -99,6 +99,22 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
+	}
+
+	/**
+	 * Set the SQL executed by this operation.
+	 */
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
+	/**
+	 * Subclasses can override this to supply dynamic SQL if they wish,
+	 * but SQL is normally set by calling the setSql() method
+	 * or in a subclass constructor.
+	 */
+	public String getSql() {
+		return sql;
 	}
 
 	/**
@@ -143,28 +159,12 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Set the SQL executed by this operation.
-	 * @param sql the SQL executed by this operation
-	 */
-	public void setSql(String sql) {
-		this.sql = sql;
-	}
-
-	/**
-	 * Subclasses can override this to supply dynamic SQL if they wish,
-	 * but SQL is normally set by calling the setSql() method
-	 * or in a subclass constructor.
-	 */
-	public String getSql() {
-		return sql;
-	}
-
-	/**
 	 * Ensures compilation if used in a bean factory.
 	 */
 	public void afterPropertiesSet() {
 		compile();
 	}
+
 
 	/**
 	 * Is this operation "compiled"? Compilation, as in JDO,
@@ -185,7 +185,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	public final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getSql() == null) {
-				throw new InvalidDataAccessApiUsageException("Sql must be set in class " + getClass().getName());
+				throw new InvalidDataAccessApiUsageException("sql must be set in class " + getClass().getName());
 			}
 
 			try {
@@ -227,8 +227,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 		if (this.declaredParameters != null) {
 			Iterator iter = this.declaredParameters.iterator();
 			while (iter.hasNext()) {
-				Object p = iter.next();
-				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
+				Object param = iter.next();
+				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
 					declaredInParameters++;
 				}
 			}
@@ -240,19 +240,20 @@ public abstract class RdbmsOperation implements InitializingBean {
 			}
 			if (parameters.length < declaredInParameters) {
 				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
-																										 declaredInParameters + " in parameters were declared in class " +
-																										 getClass().getName());
+																										 declaredInParameters + " in parameters were declared in class [" +
+																										 getClass().getName() + "]");
 			}
 			if (parameters.length > this.declaredParameters.size()) {
 				throw new InvalidDataAccessApiUsageException(parameters.length + " parameters were supplied, but " +
-																										 this.declaredParameters.size() + " parameters were declared in class " +
-																										 getClass().getName());
+																										 this.declaredParameters.size() + " parameters were declared " +
+				                                             "in class [" + getClass().getName() + "]");
 			}
 		}
 		else {
 			// no parameters were supplied
-			if (!this.declaredParameters.isEmpty())
+			if (!this.declaredParameters.isEmpty()) {
 				throw new InvalidDataAccessApiUsageException(this.declaredParameters.size() + " parameters must be supplied");
+			}
 		}
 	}
 

@@ -30,14 +30,15 @@ import java.sql.SQLException;
  * thread-safe and needs to be instantiated for each statement execution or for
  * each transaction. Each LobCreator needs to be closed after completion.
  *
- * <p>According to the JDBC spec, one should be able to use setBytes/setBinaryStream
- * for any BLOB contents, analogously for CLOBs: Therefore, implementations should
- * use those direct setters if possible, for the sake of efficiency.
+ * <p>For convenient working with a PreparedStatement and a LobCreator, consider
+ * JdbcTemplate with a AbstractLobCreatingPreparedStatementCallback implementation.
+ * See the latter's javadoc for details.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
  * @see #close
  * @see LobHandler#getLobCreator
+ * @see org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback
  * @see DefaultLobHandler.DefaultLobCreator
  * @see OracleLobHandler.OracleLobCreator
  * @see java.sql.PreparedStatement#setBlob

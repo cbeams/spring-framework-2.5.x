@@ -30,7 +30,7 @@ import org.easymock.MockControl;
 
 /**
  * @author <a href="mailto:tcook@interprisesoftware.com">Trevor D. Cook</a>
- * @version $Id: AbstractJdbcTests.java,v 1.1 2004-05-21 19:25:40 jhoeller Exp $
+ * @version $Id: AbstractJdbcTests.java,v 1.2 2004-05-27 14:47:34 jhoeller Exp $
  */
 public abstract class AbstractJdbcTests extends TestCase {
 
@@ -63,6 +63,12 @@ public abstract class AbstractJdbcTests extends TestCase {
 		ctrlDataSource.setDefaultReturnValue(mockConnection);
 	}
 
+	protected void replay() {
+		this.shouldVerify = true;
+		ctrlDataSource.replay();
+		ctrlConnection.replay();
+	}
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 
@@ -75,12 +81,6 @@ public abstract class AbstractJdbcTests extends TestCase {
 
 	protected boolean shouldVerify() {
 		return this.shouldVerify;
-	}
-
-	protected void replay() {
-		this.shouldVerify = true;
-		ctrlDataSource.replay();
-		ctrlConnection.replay();
 	}
 
 }
