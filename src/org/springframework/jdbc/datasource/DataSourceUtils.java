@@ -16,9 +16,13 @@ import java.sql.Statement;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.jndi.AbstractJndiLocator;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.util.ThreadObjectManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
  
 /**
  * Helper class that provides static methods to obtain connections from
@@ -33,7 +37,7 @@ import org.springframework.util.ThreadObjectManager;
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.3 2003-11-02 12:55:13 johnsonr Exp $
+ * @version $Id: DataSourceUtils.java,v 1.4 2003-11-05 20:30:19 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -41,22 +45,7 @@ import org.springframework.util.ThreadObjectManager;
  */
 public abstract class DataSourceUtils {
 
-	/**
-	 * Per-thread mappings: DataSource -> ConnectionHolder
-	 */
-	private static final ThreadObjectManager threadObjectManager = new ThreadObjectManager();
-
-	/**
-	 * Return the thread object manager for data sources, keeping a
-	 * DataSource/ConnectionHolder map per thread for JDBC transactions.
-	 * <p>Note: This is an SPI method, not intended to be used by applications.
-	 * @return the thread object manager
-	 * @see ConnectionHolder
-	 * @see #getConnection
-	 */
-	public static ThreadObjectManager getThreadObjectManager() {
-		return threadObjectManager;
-	}
+	private static final Log logger = LogFactory.getLog(DataSourceUtils.class);
 
 	/**
 	 * Return if the given Connection is bound to the current thread,
@@ -66,7 +55,7 @@ public abstract class DataSourceUtils {
 	 * @return if the Connection is bound for the DataSource
 	 */
 	public static boolean isConnectionBoundToThread(Connection con, DataSource ds) {
-		ConnectionHolder holder = (ConnectionHolder) getThreadObjectManager().getThreadObject(ds);
+		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		return (holder != null && con == holder.getConnection());
 	}
 
@@ -118,19 +107,28 @@ public abstract class DataSourceUtils {
 	 * @param ds DataSource to get connection from
 	 * @throws org.springframework.jdbc.datasource.CannotGetJdbcConnectionException if we fail to get a connection from the given DataSource
 	 * @return a JDBC connection from this DataSource
-	 * @see #getThreadObjectManager
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
 	public static Connection getConnection(DataSource ds) throws CannotGetJdbcConnectionException {
-		ConnectionHolder holder = (ConnectionHolder) getThreadObjectManager().getThreadObject(ds);
+		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		if (holder != null) {
 			return holder.getConnection();
-		} else {
+		}
+		else {
 			try {
-				return ds.getConnection();
+				Connection con = ds.getConnection();
+				if (TransactionSynchronizationManager.isSynchronizationActive()) {
+					logger.debug("Registering transaction synchronization for JDBC connection");
+					// use same Connection for further JDBC actions within the transaction
+					// thread object will get removed by synchronization at transaction completion
+					TransactionSynchronizationManager.bindResource(ds, new ConnectionHolder(con));
+					TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(con, ds));
+				}
+				return con;
 			}
 			catch (SQLException ex) {
-				throw new CannotGetJdbcConnectionException("DataSource " + ds, ex);
+				throw new CannotGetJdbcConnectionException(ex);
 			}
 		}
 	}
@@ -142,7 +140,7 @@ public abstract class DataSourceUtils {
 	 * @param ds DataSource that the connection came from
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource ds) throws SQLException {
-		ConnectionHolder holder = (ConnectionHolder) getThreadObjectManager().getThreadObject(ds);
+		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		if (holder != null && holder.getDeadline() != null) {
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
 		}
@@ -168,7 +166,7 @@ public abstract class DataSourceUtils {
 				con.close();
 			}
 			catch (SQLException ex) {
-				throw new CannotCloseJdbcConnectionException("Failed to close connection", ex);
+				throw new CannotCloseJdbcConnectionException(ex);
 			}
 		}
 	}
@@ -211,6 +209,34 @@ public abstract class DataSourceUtils {
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}
+		}
+	}
+
+
+	/**
+	 * Callback for resource cleanup at the end of a non-native-JDBC transaction
+	 * (e.g. when participating in a JTA transaction).
+	 */
+	private static class ConnectionSynchronization implements TransactionSynchronization {
+
+		private Connection connection;
+
+		private DataSource dataSource;
+
+		public ConnectionSynchronization(Connection connection, DataSource dataSource) {
+			this.connection = connection;
+			this.dataSource = dataSource;
+		}
+
+		public void beforeCommit() {
+		}
+
+		public void beforeCompletion() throws CannotCloseJdbcConnectionException {
+			TransactionSynchronizationManager.unbindResource(this.dataSource);
+			closeConnectionIfNecessary(this.connection, this.dataSource);
+		}
+
+		public void afterCompletion(int status) {
 		}
 	}
 

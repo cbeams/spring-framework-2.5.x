@@ -8,10 +8,12 @@ import javax.jdo.PersistenceManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.util.ThreadObjectManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Helper class featuring methods for JDO PersistenceManager handling,
@@ -32,36 +34,6 @@ public abstract class PersistenceManagerFactoryUtils {
 	private static final Log logger = LogFactory.getLog(PersistenceManagerFactoryUtils.class);
 
 	/**
-	 * Per-thread mappings: PersistenceManagerFactory -> PersistenceManagerHolder
-	 */
-	private static final ThreadObjectManager threadObjectManager = new ThreadObjectManager();
-
-	/**
-	 * Return the thread object manager for JDO PersistenceManagers keeping a
-	 * PersistenceManagerFactory/PersistenceManagerHolder map per thread for
-	 * JDO transactions.
-	 * <p>Note: This is an SPI method, not intended to be used by applications.
-	 * @return the thread object manager
-	 * @see #getPersistenceManager
-	 * @see JdoTransactionManager
-	 */
-	public static ThreadObjectManager getThreadObjectManager() {
-		return threadObjectManager;
-	}
-
-	/**
-	 * Return if the given PersistenceManager is bound to the current thread,
-	 * for the given PersistenceManagerFactory.
-	 * @param pm PersistenceManager that should be checked
-	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
-	 * @return if the PersistenceManager is bound for the PersistenceManagerFactory
-	 */
-	public static boolean isPersistenceManagerBoundToThread(PersistenceManager pm, PersistenceManagerFactory pmf) {
-		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) threadObjectManager.getThreadObject(pmf);
-		return (pmHolder != null && pm == pmHolder.getPersistenceManager());
-	}
-
-	/**
 	 * Get a JDO PersistenceManager via the given factory.
 	 * Is aware of a respective PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager.
@@ -74,19 +46,27 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException {
-		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) threadObjectManager.getThreadObject(pmf);
+		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null) {
 			return pmHolder.getPersistenceManager();
 		}
 		if (!allowCreate) {
-			throw new IllegalStateException("Not allowed to create new PersistenceManager");
+			throw new IllegalStateException("Not allowed to create new persistence manager");
 		}
-		logger.debug("Opening JDO PersistenceManager");
+		logger.debug("Opening JDO persistence manager");
 		try {
-			return pmf.getPersistenceManager();
+			PersistenceManager pm = pmf.getPersistenceManager();
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				logger.debug("Registering transaction synchronization for JDO persistence manager");
+				// use same PersistenceManager for further JDO actions within the transaction
+				// thread object will get removed by synchronization at transaction completion
+				TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
+				TransactionSynchronizationManager.registerSynchronization(new PersistenceManagerSynchronization(pm, pmf));
+			}
+			return pm;
 		}
 		catch (JDOException ex) {
-			throw new DataAccessResourceFailureException("Cannot get JDO PersistenceManager", ex);
+			throw new DataAccessResourceFailureException("Cannot get JDO persistence manager", ex);
 		}
 	}
 
@@ -103,8 +83,10 @@ public abstract class PersistenceManagerFactoryUtils {
 		if (ex instanceof JDOUserException || ex instanceof JDOFatalUserException) {
 			return new JdoUsageException(ex);
 		}
-		// fallback
-		return new JdoSystemException(ex);
+		else {
+			// fallback
+			return new JdoSystemException(ex);
+		}
 	}
 
 	/**
@@ -116,15 +98,43 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static void closePersistenceManagerIfNecessary(PersistenceManager pm, PersistenceManagerFactory pmf)
 	    throws CleanupFailureDataAccessException {
-		if (pm == null || isPersistenceManagerBoundToThread(pm, pmf)) {
+		if (pm == null || TransactionSynchronizationManager.hasResource(pmf)) {
 			return;
 		}
-		logger.debug("Closing JDO PersistenceManager");
+		logger.debug("Closing JDO persistence manager");
 		try {
 			pm.close();
 		}
 		catch (JDOException ex) {
-			throw new CleanupFailureDataAccessException("Cannot close JDO PersistenceManager", ex);
+			throw new CleanupFailureDataAccessException("Cannot close JDO persistence manager", ex);
+		}
+	}
+
+
+	/**
+	 * Callback for resource cleanup at the end of a non-JDO transaction
+	 * (e.g. when participating in a JTA transaction).
+	 */
+	private static class PersistenceManagerSynchronization implements TransactionSynchronization {
+
+		private PersistenceManager persistenceManager;
+
+		private PersistenceManagerFactory persistenceManagerFactory;
+
+		public PersistenceManagerSynchronization(PersistenceManager pm, PersistenceManagerFactory pmf) {
+			this.persistenceManager = pm;
+			this.persistenceManagerFactory = pmf;
+		}
+
+		public void beforeCommit() {
+		}
+
+		public void beforeCompletion() throws CleanupFailureDataAccessException {
+			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
+			closePersistenceManagerIfNecessary(this.persistenceManager, this.persistenceManagerFactory);
+		}
+
+		public void afterCompletion(int status) {
 		}
 	}
 
