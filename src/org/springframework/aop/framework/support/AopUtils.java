@@ -15,7 +15,7 @@ import org.springframework.aop.Pointcut;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.7 2003-11-29 21:52:46 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.8 2003-12-03 13:57:06 johnsonr Exp $
  */
 public class AopUtils {
 	
@@ -25,6 +25,10 @@ public class AopUtils {
 	
 	public static boolean isJdkDynamicProxy(Object o) {
 		return Proxy.isProxyClass(o.getClass());
+	}
+	
+	public static boolean isAopProxy(Object o) {
+		return isJdkDynamicProxy(o) || isCglibProxy(o);
 	}
 
 	/**
