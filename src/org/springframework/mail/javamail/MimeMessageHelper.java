@@ -396,6 +396,16 @@ public class MimeMessageHelper {
 	}
 
 
+	/**
+	 * Set the given text directly as content in non-multipart mode
+	 * respectively as default body part in multipart mode.
+	 * Always applies the default content type "text/plain".
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
+	 * @param text the text for the message
+	 * @throws MessagingException in case of errors
+	 * @see #addInline
+	 */
 	public void setText(String text) throws MessagingException {
 		setText(text, false);
 	}
@@ -403,11 +413,16 @@ public class MimeMessageHelper {
 	/**
 	 * Set the given text directly as content in non-multipart mode
 	 * respectively as default body part in multipart mode.
-	 * @param text text to set
+	 * The "html" flag determines the content type to apply.
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
+	 * @param text the text for the message
 	 * @param html whether to apply content type "text/html" for an
 	 * HTML mail, using default content type ("text/plain") else
+	 * @throws MessagingException in case of errors
+	 * @see #addInline
 	 */
-	public void setText(final String text, boolean html) throws MessagingException {
+	public void setText(String text, boolean html) throws MessagingException {
 		MimePart partToUse = null;
 		if (this.mimeMultipart != null) {
 			partToUse = getMainPart();
@@ -434,7 +449,8 @@ public class MimeMessageHelper {
 		return bodyPart;
 	}
 
-	private void setTextToMimePart(MimePart mimePart, final String text, boolean html) throws MessagingException {
+	private void setTextToMimePart(MimePart mimePart, String text, boolean html)
+	    throws MessagingException {
 		if (html) {
 			if (getEncoding() != null) {
 				mimePart.setContent(text, CONTENT_TYPE_HTML + CONTENT_TYPE_CHARSET_SUFFIX + getEncoding());
@@ -460,19 +476,22 @@ public class MimeMessageHelper {
 	 * <p>Note that the InputStream returned by the DataSource implementation
 	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
 	 * getInputStream() multiple times.
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param dataSource the <code>javax.activation.DataSource</code> to take
 	 * the content from, determining the InputStream and the content type
 	 * @throws MessagingException in case of errors
+	 * @see #setText
 	 * @see #addAttachment(String, File)
 	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
 	 */
 	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
-		// Using setHeader here to stay compatible with JavaMail 1.2,
+		// We're using setHeader here to stay compatible with JavaMail 1.2,
 		// rather than JavaMail 1.3's setContentID.
 		mimeBodyPart.setHeader(HEADER_CONTENT_ID, "<" + contentId + ">");
 		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
@@ -485,11 +504,14 @@ public class MimeMessageHelper {
 	 * <p>The content type will be determined by the name of the given
 	 * content file. Do not use this for temporary files with arbitrary
 	 * filenames (possibly ending in ".tmp" or the like)!
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param file the File resource to take the content from
-	 * @throws MessagingException
+	 * @throws MessagingException in case of errors
+	 * @see #setText
 	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 */
@@ -503,10 +525,14 @@ public class MimeMessageHelper {
 	 * <p>The content type will be determined by the name of the given
 	 * content file. Do not use this for temporary files with arbitrary
 	 * filenames (possibly ending in ".tmp" or the like)!
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param resource the resource to take the content from
+	 * @throws MessagingException in case of errors
+	 * @see #setText
 	 * @see #addAttachment(String, File)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 */
@@ -521,11 +547,15 @@ public class MimeMessageHelper {
 	 * <p>Note that you can determine the content type for any given filename
 	 * via the Activation Framework's FileTypeMap utility:<br>
 	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
+	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
+	 * readers might not be able to resolve inline references correctly.
 	 * @param contentId the content ID to use. Will end up as "Content-ID" header
 	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
 	 * Can be referenced in HTML source via src="cid:myId" expressions.
 	 * @param inputStreamSource the resource to take the content from
 	 * @param contentType the content type to use for the element
+	 * @throws MessagingException in case of errors
+	 * @see #setText
 	 * @see #addAttachment(String, File)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
@@ -567,7 +597,7 @@ public class MimeMessageHelper {
 	 * @param attachmentFilename the name of the attachment as it will
 	 * appear in the mail
 	 * @param file the File resource to take the content from
-	 * @throws MessagingException
+	 * @throws MessagingException in case of errors
 	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 */
@@ -584,6 +614,7 @@ public class MimeMessageHelper {
 	 * @param attachmentFilename the name of the attachment as it will
 	 * appear in the mail
 	 * @param inputStreamSource the resource to take the content from
+	 * @throws MessagingException in case of errors
 	 * @see #addAttachment(String, java.io.File)
 	 * @see #addAttachment(String, javax.activation.DataSource)
 	 */

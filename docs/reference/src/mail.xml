@@ -304,15 +304,15 @@ MimeMessage message = sender.createMimeMesage();
 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 message.setTo("test@host.com");
 
-// let's include the infamous windows Sample file (this time copied to c:/)
-FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
-helper.addInline("identifier1234", res);
-
 // use the true flag to indicate the text included is HTML
 helper.setText(
   "<html><body><img src='cid:identifier1234'></body></html>"
   true);
-  
+
+// let's include the infamous windows Sample file (this time copied to c:/)
+FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
+helper.addInline("identifier1234", res);
+
 // if you would need to include the file as an attachment, use
 // addAttachment() methods on the MimeMessageHelper
 
