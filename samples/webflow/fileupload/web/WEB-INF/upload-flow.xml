@@ -6,10 +6,10 @@
 <web-flow id="Upload" start-state="selectFile.view">
 
 	<view-state id="selectFile.view" view="selectFile.view">
-		<transition on="submit" to="processUpload"/>
+		<transition on="submit" to="bindAndValidate"/>
 	</view-state>
 
-	<action-state id="processUpload">
+	<action-state id="bindAndValidate">
 		<action bean="Upload.process"/>
 		<transition on="success" to="confirmation.view"/>
 		<transition on="error" to="selectFile.view"/>
