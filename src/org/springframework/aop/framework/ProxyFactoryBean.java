@@ -62,7 +62,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.17 2003-12-11 14:53:13 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.18 2004-01-25 19:44:26 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -196,7 +196,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 				// Might have just refreshed target source
 				if (refreshedAdvisor instanceof Advisor) {
 					// What about aspect interfaces!? we're only updating
-					replaceAdvice(advisors[i], (Advisor) refreshedAdvisor);
+					replaceAdvisor(advisors[i], (Advisor) refreshedAdvisor);
 				}
 				else {
 					setTargetSource((TargetSource) refreshedAdvisor);

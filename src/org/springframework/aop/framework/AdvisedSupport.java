@@ -29,15 +29,17 @@ import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
 
 /**
- * Superclass for AOP Proxy configuration objects.
- * Subclasses are normally factories from which AOP proxy instances
- * are obtained directly.
+ * Superclass for AOP Proxy configuration managers.
+ * These are not themselves AOP proxies, but
+ * subclasses of this class are normally factories from which 
+ * AOP proxy instances are obtained directly.
  *
  * <p>This class frees subclasses of the housekeeping of Interceptors
- * and Advisors, but doesn't actually implement AOP proxies.
+ * and Advisors, but doesn't actually implement proxy creation
+ * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.22 2004-01-21 20:21:35 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.23 2004-01-25 19:44:25 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -215,33 +217,82 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) {
 		addAdvisor(new DefaultThrowsAdvisor(throwsAdvice));
 	}
-
-
-	public final boolean removeInterceptor(Interceptor interceptor) {
-		boolean removed = false;
-		for (int i = 0; i < this.advisors.size() && !removed; i++) {
+	
+	/**
+	 * Return the index (from 0) of the given AOP Alliance interceptor,
+	 * or -1 if no such interceptor is an advice for this proxy.
+	 * The return value of this method can be used to index into
+	 * the Advisors array.
+	 * @param interceptor AOP Alliance interceptor to search for
+	 * @return index from 0 of this interceptor, or -1 if there's
+	 * no such advice.
+	 */
+	public int indexOf(Interceptor interceptor) {
+		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advice = (Advisor) this.advisors.get(i);
 			if (advice instanceof InterceptionAroundAdvisor && ((InterceptionAroundAdvisor) advice).getInterceptor() == interceptor) {
-				this.advisors.remove(i);
-				removed = true;
+				return i;
 			}
 			else if (advice instanceof InterceptionIntroductionAdvisor && ((InterceptionIntroductionAdvisor) advice).getIntroductionInterceptor() == interceptor) {
-				this.advisors.remove(i);
-				InterceptionIntroductionAdvisor ia = (InterceptionIntroductionAdvisor) advice;
-				// We need to remove interfaces
-				for (int j = 0; j < ia.getInterfaces().length; j++) {
-					removeInterface(ia.getInterfaces()[j]);
-				}
-				removed = true;
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * Return the index (from 0) of the given advisor,
+	 * or -1 if no such advisor applies to this proxy.
+	 * The return value of this method can be used to index into
+	 * the Advisors array.
+	 * @param advisor advisor to search for
+	 * @return index from 0 of this advisor, or -1 if there's
+	 * no such advisor.
+	 */
+	public int indexOf(Advisor advisor) {
+		return this.advisors.indexOf(advisor);
+	}
+
+	public final boolean removeAdvisor(Advisor advisor) {
+		int index = indexOf(advisor);
+		if (index == -1) {
+			return false;
+		}
+		else {
+			removeAdvisor(index);
+			return true;
+		}
+	}
+	
+	public void removeAdvisor(int index) throws AopConfigException {
+		if (index < 0 || index > advisors.size() - 1)
+			throw new AopConfigException("Advisor index " + index + " is out of bounds: " +					"Only have " + advisors.size() + " advisors");
+		Advisor advisor = (Advisor) advisors.get(index);
+		if (advisor instanceof IntroductionAdvisor) {
+			IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
+			// We need to remove interfaces
+			for (int j = 0; j < ia.getInterfaces().length; j++) {
+				removeInterface(ia.getInterfaces()[j]);
 			}
 		}
 		
-		if (removed) {
-			updateAdvisorsArray();
-			adviceChanged();
-		}
+		this.advisors.remove(index);
+		updateAdvisorsArray();
+		adviceChanged();
+	}
 
-		return removed;
+	/**
+	 * Convenience method to remove an interceptor
+	 */
+	public final boolean removeInterceptor(Interceptor interceptor) {
+		int index = indexOf(interceptor);
+		if (index == -1) {
+			return false;
+		}
+		else {
+			removeAdvisor(index);
+			return true;
+		}
 	}
 
 	/**
@@ -328,24 +379,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * TODO comments WHAT IF IT'S AN INTRODUCTION
-	 * Replace the given pointcut
-	 * @param a pointcut to replace
-	 * @param b pointcut to replace it with
-	 * @return whether it was replaced. If the pointcut wasn't found in the
-	 * list of pointcuts, this method returns false and does nothing.
+	 * Replace the given advisor.
+	 * <b>NB:</b>If the advisor is an IntroductionAdvisor
+	 * and the replacement is not or implements different interfaces,
+	 * the proxy will need to be re-obtained or the old interfaces
+	 * won't be supported and the new interface won't be implemented.
+	 * @param a advisor to replace
+	 * @param b advisor to replace it with
+	 * @return whether it was replaced. If the advisor wasn't found in the
+	 * list of advisors, this method returns false and does nothing.
 	 */
-	public final boolean replaceAdvice(Advisor a, Advisor b) {
-		if (!this.advisors.contains(a))
+	public final boolean replaceAdvisor(Advisor a, Advisor b) {
+		int index = indexOf(a);
+		if (index == -1 || b == null)
 			return false;
-		this.advisors.set(this.advisors.indexOf(a), b);
-		updateAdvisorsArray();
-		adviceChanged();
+		removeAdvisor(index);
+		addAdvisor(index, b);
 		return true;
 	}
 
 	/**
-	 * Is this interceptor included in any pointcut?
+	 * Is this interceptor included in any advisor?
 	 * @param mi interceptor to check inclusion of
 	 * @return whether this interceptor instance could be run in an invocation
 	 */

@@ -8,7 +8,10 @@ package org.springframework.aop.framework;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.Interceptor;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.DefaultBeforeAdvisor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -21,7 +24,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.10 2004-01-21 20:21:34 johnsonr Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.11 2004-01-25 19:44:15 johnsonr Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -39,8 +42,125 @@ public class ProxyFactoryTests extends TestCase {
 			// Use the constructor taking Object
 			new ProxyFactory((Object) null);
 			fail("Should't allow proxy with null target");
-		} catch (AopConfigException ex) {
+		} 
+		catch (AopConfigException ex) {
 		}
+	}
+	
+	public void testIndexOfMethods() {
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		NopInterceptor nop = new NopInterceptor();
+		Advisor advisor = new DefaultBeforeAdvisor(new CountingBeforeAdvice());
+		Advised advised = (Advised) pf.getProxy();
+		// Can use advised and ProxyFactory interchangeably
+		advised.addInterceptor(nop);
+		pf.addAdvisor(advisor);
+		assertEquals(-1, pf.indexOf((Interceptor) null));
+		assertEquals(-1, pf.indexOf(new NopInterceptor()));
+		assertEquals(0, pf.indexOf(nop));
+		assertEquals(-1, advised.indexOf((Advisor) null));
+		assertEquals(1, pf.indexOf(advisor));
+		assertEquals(-1, advised.indexOf(new DefaultInterceptionAroundAdvisor(null)));
+	}
+	
+	public void testRemoveAdvisorByReference() {
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		NopInterceptor nop = new NopInterceptor();
+		CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		Advisor advisor = new DefaultBeforeAdvisor(cba);
+		pf.addInterceptor(nop);
+		pf.addAdvisor(advisor);
+		ITestBean proxied = (ITestBean) pf.getProxy();
+		proxied.setAge(5);
+		assertEquals(1, cba.getCalls());
+		assertEquals(1, nop.getCount());
+		assertFalse(pf.removeAdvisor(null));
+		assertTrue(pf.removeAdvisor(advisor));
+		assertEquals(5, proxied.getAge());
+		assertEquals(1, cba.getCalls());
+		assertEquals(2, nop.getCount());
+		assertFalse(pf.removeAdvisor(new DefaultBeforeAdvisor(null)));
+	}
+	
+	
+	public void testRemoveAdvisorByIndex() {
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		NopInterceptor nop = new NopInterceptor();
+		CountingBeforeAdvice cba = new CountingBeforeAdvice();
+		Advisor advisor = new DefaultBeforeAdvisor(cba);
+		pf.addInterceptor(nop);
+		pf.addAdvisor(advisor);
+		NopInterceptor nop2 = new NopInterceptor();
+		pf.addInterceptor(nop2);
+		ITestBean proxied = (ITestBean) pf.getProxy();
+		proxied.setAge(5);
+		assertEquals(1, cba.getCalls());
+		assertEquals(1, nop.getCount());
+		assertEquals(1, nop2.getCount());
+		// Removes counting before advisor
+		pf.removeAdvisor(1);
+		assertEquals(5, proxied.getAge());
+		assertEquals(1, cba.getCalls());
+		assertEquals(2, nop.getCount());
+		assertEquals(2, nop2.getCount());
+		// Removes Nop1
+		pf.removeAdvisor(0);
+		assertEquals(5, proxied.getAge());
+		assertEquals(1, cba.getCalls());
+		assertEquals(2, nop.getCount());
+		assertEquals(3, nop2.getCount());
+		
+		// Check out of bounds
+		try {
+			pf.removeAdvisor(-1);
+		}
+		catch (AopConfigException ex) {
+			// Ok
+		}
+		
+		try {
+			pf.removeAdvisor(2);
+		}
+		catch (AopConfigException ex) {
+			// Ok
+		}
+		
+		assertEquals(5, proxied.getAge());
+		assertEquals(4, nop2.getCount());
+	}
+	
+	
+	public void testReplaceAdvisor() {
+		TestBean target = new TestBean();
+		ProxyFactory pf = new ProxyFactory(target);
+		NopInterceptor nop = new NopInterceptor();
+		CountingBeforeAdvice cba1 = new CountingBeforeAdvice();
+		CountingBeforeAdvice cba2 = new CountingBeforeAdvice();
+		Advisor advisor1 = new DefaultBeforeAdvisor(cba1);
+		Advisor advisor2 = new DefaultBeforeAdvisor(cba2);
+		pf.addAdvisor(advisor1);
+		pf.addInterceptor(nop);
+		ITestBean proxied = (ITestBean) pf.getProxy();
+		// Use the type cast feature
+		// Replace etc methods on advised should be same as on ProxyFactory
+		Advised advised = (Advised) proxied;
+		proxied.setAge(5);
+		assertEquals(1, cba1.getCalls());
+		assertEquals(0, cba2.getCalls());
+		assertEquals(1, nop.getCount());
+		assertFalse(advised.replaceAdvisor(null, null));
+		assertFalse(advised.replaceAdvisor(null, advisor2));
+		assertFalse(advised.replaceAdvisor(advisor1, null));
+		assertTrue(advised.replaceAdvisor(advisor1, advisor2));
+		assertEquals(advisor2, pf.getAdvisors()[0]);
+		assertEquals(5, proxied.getAge());
+		assertEquals(1, cba1.getCalls());
+		assertEquals(2, nop.getCount());
+		assertEquals(1, cba2.getCalls());
+		assertFalse(pf.replaceAdvisor(new DefaultBeforeAdvisor(null), advisor1));
 	}
 
 	public static class Concrete {
