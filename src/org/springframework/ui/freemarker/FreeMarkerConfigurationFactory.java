@@ -16,6 +16,7 @@
 
 package org.springframework.ui.freemarker;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -38,14 +39,17 @@ import org.springframework.core.io.ResourceLoader;
  *
  * <p>The optional "configLocation" property sets the location of a FreeMarker
  * properties file, within the current application. FreeMarker properties can be
- * overridden via "freemarkerSettings".  All of these properties will be set by
- * calling FreeMarker's Configuration.setSetting() method and are subject to
- * constraints set by FreeMarker
+ * overridden via "freemarkerSettings". All of these properties will be set by
+ * calling FreeMarker's <code>Configuration.setSettings()</code> method and are
+ * subject to constraints set by FreeMarker.
  *
- * <p>The "freemarkerVariables" property can be used to specify a Map of shared
- * variables that will be applied to the Configuration via the setSharedVariable()
- * method.  Like setSettings(), these entries are subject to FreeMarker constraints
- * and may throw a FreemarkerInitializationException.
+ * <p>The "freemarkerVariables" property can be used to specify a Map of
+ * shared variables that will be applied to the Configuration via the
+ * <code>setAllSharedVariables()</code> method. Like <code>setSettings()</code>,
+ * these entries are subject to FreeMarker constraints.
+ *
+ * <p>The simplest way to use this class is to specify a "templateLoaderPath";
+ * FreeMarker does not need any further configuration then.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
@@ -72,6 +76,8 @@ public class FreeMarkerConfigurationFactory {
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+	private boolean preferFileSystemAccess = true;
+
 
 	/**
 	 * Set the location of the FreeMarker config file.
@@ -85,20 +91,20 @@ public class FreeMarkerConfigurationFactory {
 
 	/**
 	 * Set properties that contain well-known FreeMarker keys which will be
-	 * passed to FreeMarker's Configuration.setSettings method.
+	 * passed to FreeMarker's <code>Configuration.setSettings</code> method.
 	 * @see freemarker.template.Configuration#setSettings
 	 */
 	public void setFreemarkerSettings(Properties settings) {
-		freemarkerSettings = settings;
+		this.freemarkerSettings = settings;
 	}
 
 	/**
-	 * Set a Map that contains well-known FreeMarker objects which will be
-	 * passed to FreeMarker's Configuration.setAllSharedVariables method.
+	 * Set a Map that contains well-known FreeMarker objects which will be passed
+	 * to FreeMarker's <code>Configuration.setAllSharedVariables()</code> method.
 	 * @see freemarker.template.Configuration#setAllSharedVariables
 	 */
 	public void setFreemarkerVariables(Map variables) {
-		freemarkerVariables = variables;
+		this.freemarkerVariables = variables;
 	}
 
 	/**
@@ -107,8 +113,11 @@ public class FreeMarkerConfigurationFactory {
 	 * pseudo URLs are supported, as understood by ResourceEditor. Allows for
 	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default FreeMarker template loader.
-	 * If the specified resource cannot be resolved to a java.io.File, the
-	 * generic SpringTemplateLoader will be used, without modification detection.
+	 * If the specified resource cannot be resolved to a java.io.File, a generic
+	 * SpringTemplateLoader will be used, without modification detection.
+	 * <p>To enforce the use of SpringTemplateLoader, i.e. to not resolve a path
+	 * as file system resource in any case, turn off the "preferFileSystemAccess"
+	 * flag. See the latter's javadoc for details.
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see freemarker.template.Configuration#setDirectoryForTemplateLoading
@@ -128,6 +137,22 @@ public class FreeMarkerConfigurationFactory {
 		this.resourceLoader = resourceLoader;
 	}
 
+	/**
+	 * Set whether to prefer file system access for template loading.
+	 * File system access enables hot detection of template changes.
+	 * <p>If this is enabled, FreeMarkerConfigurationFactory will try to resolve
+	 * the specified "templateLoaderPath" as file system resource (which will work
+	 * for expanded class path resources and ServletContext resources too).
+	 * <p>Default is true. Turn this off to always load via SpringTemplateLoader
+	 * (i.e. as stream, without hot detection of template changes), which might
+	 * be necessary if some of your templates reside in an expanded classes
+	 * directory while others reside in jar files.
+	 * @see #setTemplateLoaderPath
+	 */
+	public void setPreferFileSystemAccess(boolean preferFileSystemAccess) {
+		this.preferFileSystemAccess = preferFileSystemAccess;
+	}
+
 
 	/**
 	 * Prepare the FreeMarker Configuration and return it.
@@ -139,9 +164,11 @@ public class FreeMarkerConfigurationFactory {
 		Configuration config = newConfiguration();
 		Properties props = new Properties();
 
-		// load config file if set
+		// Load config file if set.
 		if (this.configLocation != null) {
-			logger.info("Loading FreeMarker config from [" + this.configLocation + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading FreeMarker config from [" + this.configLocation + "]");
+			}
 			InputStream is = this.configLocation.getInputStream();
 			try {
 				props.load(is);
@@ -151,13 +178,13 @@ public class FreeMarkerConfigurationFactory {
 			}
 		}
 
-		// merge local properties if set
+		// Merge local properties if set.
 		if (this.freemarkerSettings != null) {
 			props.putAll(this.freemarkerSettings);
 		}
 
 		// FreeMarker will only accept known keys in its setSettings and
-		// setAllSharedVariables methods
+		// setAllSharedVariables methods.
 		if (!props.isEmpty()) {
 			config.setSettings(props);
 		}
@@ -166,21 +193,38 @@ public class FreeMarkerConfigurationFactory {
 		}
 
 		if (this.templateLoaderPath != null) {
-			Resource path = this.resourceLoader.getResource(this.templateLoaderPath);
-			try {
-				config.setDirectoryForTemplateLoading(path.getFile());
+			if (this.preferFileSystemAccess) {
+				// Try to load via the file system, fall back to SpringTemplateLoader
+				// (for hot detection of template changes, if possible).
+				try {
+					Resource path = this.resourceLoader.getResource(this.templateLoaderPath);
+					File file = path.getFile();  // will fail if not resolvable in the file system
+					if (logger.isDebugEnabled()) {
+						logger.debug("Template loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
+					}
+					config.setDirectoryForTemplateLoading(file);
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cannot resolve template loader path [" + this.templateLoaderPath +
+								"] to java.io.File: using SpringTemplateLoader", ex);
+					}
+					else if (logger.isInfoEnabled()) {
+						logger.info("Cannot resolve template loader path [" + this.templateLoaderPath +
+								"] to java.io.File: using SpringTemplateLoader");
+					}
+					config.setTemplateLoader(
+							new SpringTemplateLoader(this.resourceLoader, this.templateLoaderPath));
+				}
 			}
-			catch (IOException ex) {
+			else {
+				// Always load via SpringTemplateLoader
+				// (without hot detection of template changes).
 				if (logger.isDebugEnabled()) {
-					logger.debug("Cannot resolve template loader path [" + this.templateLoaderPath +
-											 "] to File: using SpringTemplateLoader", ex);
+					logger.debug("File system access not preferred: using SpringTemplateLoader");
 				}
-				else if (logger.isInfoEnabled()) {
-					logger.info("Cannot resolve template loader path [" + this.templateLoaderPath +
-											"] to File: using SpringTemplateLoader");
-				}
-				config.setTemplateLoader(new SpringTemplateLoader(this.resourceLoader,
-																													this.templateLoaderPath));
+				config.setTemplateLoader(
+						new SpringTemplateLoader(this.resourceLoader, this.templateLoaderPath));
 			}
 		}
 
