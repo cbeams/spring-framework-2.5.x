@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.24 2004-08-23 01:00:13 davison Exp $-->
+<!--$Id: views.xml,v 1.25 2004-11-09 09:58:38 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -678,7 +678,7 @@ recommend sticking to 'spring' --&gt;
 ...
     Name:
     #springFormInput("command.name" "")&lt;br&gt;
-    #showErrors("&lt;br&gt;" "")&lt;br&gt;</programlisting></para>
+    #springShowErrors("&lt;br&gt;" "")&lt;br&gt;</programlisting></para>
 
           <para>The formInput macro takes the path parameter (command.name)
           and an additional attributes parameter which is empty in the example
