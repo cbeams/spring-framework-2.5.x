@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
@@ -20,7 +21,15 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
  */
-public interface ConfigurableBeanFactory extends BeanFactory {
+public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
+
+	/**
+	 * Set the parent of this bean factory.
+	 * <p>Note that the parent shouldn't be changed: It should only be set outside
+	 * a constructor if it isn't available when an object of this class is created.
+	 * @param parentBeanFactory the parent bean factory
+	 */
+	void setParentBeanFactory(BeanFactory parentBeanFactory);
 
 	/**
 	 * Register the given custom property editor for all properties

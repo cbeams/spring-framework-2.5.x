@@ -67,7 +67,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.35 2003-12-18 18:56:49 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.36 2003-12-21 16:20:46 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -294,6 +294,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurableBeanFactory interface
 	//---------------------------------------------------------------------
+
+	public void setParentBeanFactory(BeanFactory parentBeanFactory) {
+		this.parentBeanFactory = parentBeanFactory;
+	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		this.customEditors.put(requiredType, propertyEditor);
