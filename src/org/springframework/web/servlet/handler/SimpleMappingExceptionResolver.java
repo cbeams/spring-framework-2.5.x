@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,7 +54,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	private String defaultErrorView;
 
-	private List mappedHandlers;
+	private Set mappedHandlers;
 
 	private Integer defaultStatusCode;
 
@@ -104,7 +104,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Set the list of handlers that this exception resolver should map.
+	 * Specify the set of handlers that this exception resolver should map.
 	 * The exception mappings and the default error view will only apply
 	 * to the specified handlers.
 	 * <p>If no handlers set, both the exception mappings and the default error
@@ -112,7 +112,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * error view will be used as fallback for all exceptions; any further
 	 * HandlerExceptionResolvers in the chain will be ignored in this case.
 	 */
-	public void setMappedHandlers(List mappedHandlers) {
+	public void setMappedHandlers(Set mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
 	}
 
