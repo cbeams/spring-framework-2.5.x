@@ -1,12 +1,41 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.132 2004-04-25 16:48:41 trisberg Exp $
+$Id: changelog.txt,v 1.133 2004-04-28 07:43:26 jhoeller Exp $
 
-Changes in version 1.0.2 (?)
+
+Changes in version 1.0.2 (16.5.2003)
 ------------------------------------
 
+Package org.springframework.beans
+* fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
+* added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
+* reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
+* deprecated PropertiesFactoryBean's "charset" property in favor of the newly added "fileEncoding" property
+
+Package org.springframework.context
+* added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
+* fixed AbstractMessageSource's parent checks to correctly respect the child's "useCodeAsDefaultMessage" setting
+
 Package org.springframework.jdbc
-* fixed a npe in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have datasource set
+* fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
+* added "query(sql, args, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
+* added "query(sql, args, argTypes, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
+* added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
+* added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
+* added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
+
+Package org.springframework.samples
+* reworked DefaultImageDatabase's "streamImage" implementation to leverage AbstractLobStreamingResultSetExtractor
+* reworked DefaultImageDatabase's "storeImage" implementation to leverage AbstractLobCreatingPreparedStatementCallback
+
+Package org.springframework.ui
+* added "velocityPropertiesMap" property to VelocityEngineFactory, to allow for passing non-String values to Velocity
+
+Package org.springframework.web
+* refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
+* deprecated BaseCommandController's "onBind(request, command)" method in favor of "onBind(request, command, errors)"
+* deprecated SimpleFormController's "onSubmit(command)" method in favor of "onSubmit(command, errors)"
+* reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
 
 
 Changes in version 1.0.1 (22.4.2003)
