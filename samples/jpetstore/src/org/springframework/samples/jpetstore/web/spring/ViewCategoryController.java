@@ -28,25 +28,29 @@ public class ViewCategoryController implements Controller {
 		Map model = new HashMap();
 		String categoryId = request.getParameter("categoryId");
 		if (categoryId != null) {
+			Category category = this.petStore.getCategory(categoryId);
 			PagedListHolder productList = new PagedListHolder(this.petStore.getProductListByCategory(categoryId));
 			productList.setPageSize(4);
-			Category category = this.petStore.getCategory(categoryId);
-			request.getSession().setAttribute("ViewProductAction_productList", productList);
 			request.getSession().setAttribute("ViewProductAction_category", category);
-			model.put("productList", productList);
+			request.getSession().setAttribute("ViewProductAction_productList", productList);
 			model.put("category", category);
+			model.put("productList", productList);
 		}
 		else {
-			PagedListHolder productList = (PagedListHolder) request.getSession().getAttribute("ViewProductAction_productList");
 			Category category = (Category) request.getSession().getAttribute("ViewProductAction_category");
+			PagedListHolder productList = (PagedListHolder) request.getSession().getAttribute("ViewProductAction_productList");
+			if (category == null || productList == null) {
+				throw new IllegalStateException("Cannot find pre-loaded category and product list");
+			}
 			String page = request.getParameter("page");
 			if ("next".equals(page)) {
 				productList.nextPage();
-			} else if ("previous".equals(page)) {
+			}
+			else if ("previous".equals(page)) {
 				productList.previousPage();
 			}
-			model.put("productList", productList);
 			model.put("category", category);
+			model.put("productList", productList);
 		}
 		return new ModelAndView("Category", model);
 	}
