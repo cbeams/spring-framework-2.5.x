@@ -15,9 +15,11 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * Convenient superclass for JNDI-based Service Locators. Subclasses are
  * JavaBeans, exposing a jndiName property. This may or may not include
- * the "java:comp/env/" prefix expected by J2EE applications. If it doesn't,
- * the container prefix will be prepended if the "inContainer" property is
- * true (the default) and no other scheme like "java:" is given.
+ * the "java:comp/env/" prefix expected by J2EE applications when accessing
+ * a locally mapped (ENC - Environmental Naming Context) resource. If it
+ * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"
+ * property is true (the default is <storng>false</strong>) and no other scheme
+ * like "java:" is given.
  *
  * <p>Subclasses must implement the located() method to cache the results
  * of the JNDI lookup. They don't need to worry about error handling.</p>
@@ -32,8 +34,8 @@ import org.springframework.beans.factory.InitializingBean;
  * this class (i.e. lazy load it instead).<p> 
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.5 2004-02-16 02:04:18 colins Exp $
- * @see #setInContainer
+ * @version $Id: AbstractJndiLocator.java,v 1.6 2004-02-18 19:39:02 colins Exp $
+ * @see #setResourceRef
  */
 public abstract class AbstractJndiLocator implements InitializingBean {
 
@@ -46,7 +48,7 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 
 	private String jndiName;
 
-	private boolean inContainer = true;
+	private boolean resourceRef = false;
 
 	/**
 	 * Create a new JNDI locator. The jndiName property must be set,
@@ -84,9 +86,9 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 
 	/**
 	 * Set the JNDI name. If it doesn't begin "java:comp/env/"
-	 * we add this prefix if we're running in a container.
+	 * we add this prefix if resourceRef is set to True.
 	 * @param jndiName JNDI name of bean to look up
-	 * @see #setInContainer
+	 * @see #setResourceRef
 	 */
 	public final void setJndiName(String jndiName) {
 		this.jndiName = jndiName;
@@ -102,18 +104,18 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	/**
 	 * Set if the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
-	 * contain it. Default is true.
+	 * contain it. Default is false.
 	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
 	 */
-	public void setInContainer(boolean inContainer) {
-		this.inContainer = inContainer;
+	public void setResourceRef(boolean resourceRef) {
+		this.resourceRef = resourceRef;
 	}
 
 	/**
 	 * Return if the lookup occurs in a J2EE container.
 	 */
-	public final boolean isInContainer() {
-		return inContainer;
+	public final boolean isResourceRef() {
+		return resourceRef;
 	}
 
 	public final void afterPropertiesSet() throws NamingException, IllegalArgumentException {
@@ -121,7 +123,7 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 			throw new IllegalArgumentException("Property 'jndiName' must be set on " + getClass().getName());
 		}
 		// prepend container prefix if not already specified and no other scheme given
-		if (this.inContainer && !this.jndiName.startsWith(CONTAINER_PREFIX) && this.jndiName.indexOf(':') == -1) {
+		if (this.resourceRef && !this.jndiName.startsWith(CONTAINER_PREFIX) && this.jndiName.indexOf(':') == -1) {
 			this.jndiName = CONTAINER_PREFIX + this.jndiName;
 		}
 		Object o = lookup(this.jndiName);

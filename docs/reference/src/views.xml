@@ -1106,7 +1106,7 @@ public class PDFPage extends AbstractPdfView {
    <!-- the DataSource -->
    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
      <property name="jndiName"><value>java:DefaultDS</value></property>
-     <property name="inContainer"><value>false</value></property>
+     <property name="resourceRef"><value>false</value></property>
    </bean>
  
    <!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean -->
@@ -1276,7 +1276,7 @@ public class PDFPage extends AbstractPdfView {
  file: xportal.application:
  
  <?xml version="1.0" encoding="UTF-8"?>
- <!--$Id: views.xml,v 1.5 2004-02-16 23:39:42 davison Exp $-->
+ <!--$Id: views.xml,v 1.6 2004-02-18 19:39:03 colins Exp $-->
  <!DOCTYPE application PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">

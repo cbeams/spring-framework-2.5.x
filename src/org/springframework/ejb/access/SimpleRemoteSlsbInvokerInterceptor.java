@@ -35,17 +35,17 @@ import org.springframework.remoting.RemoteAccessException;
  * the lazy-init attribute.</p>
  * 
  * @author Rod Johnson
- * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.5 2004-02-16 02:03:56 colins Exp $
+ * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.6 2004-02-18 19:39:02 colins Exp $
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
 	
 	/**
 	 * Constructor for use as JavaBean.
-	 * Sets "inContainer" to false by default.
-	 * @see #setInContainer
+	 * Sets "resourceRef" to false by default.
+	 * @see #setResourceRef
 	 */
 	public SimpleRemoteSlsbInvokerInterceptor() {
-		setInContainer(false);
+		setResourceRef(false);
 	}
 	
 	/**
@@ -53,9 +53,9 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * @see org.springframework.jndi.AbstractJndiLocator#setJndiName
 	 * @see org.springframework.jndi.AbstractJndiLocator#setInContainer
 	 */
-	public SimpleRemoteSlsbInvokerInterceptor(String jndiName, boolean inContainer) throws AspectException {
+	public SimpleRemoteSlsbInvokerInterceptor(String jndiName, boolean resourceRef) throws AspectException {
 		setJndiName(jndiName);
-		setInContainer(inContainer);
+		setResourceRef(resourceRef);
 		try {
 			afterPropertiesSet();
 		}

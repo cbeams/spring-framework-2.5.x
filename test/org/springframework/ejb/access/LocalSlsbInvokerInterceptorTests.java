@@ -56,9 +56,9 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 	
 		LocalSlsbInvokerInterceptor si = new LocalSlsbInvokerInterceptor();
 		si.setJndiName("foobar");
+		// default resourceRef=false should cause this to fail, as java:/comp/env will not
+		// automatically be added
 		si.setJndiTemplate(jt);
-		// Stop java:comp/env addition
-		si.setInContainer(false);
 		try {
 			si.afterPropertiesSet();
 			fail("Should have failed with naming exception");
@@ -153,6 +153,7 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 			}
 		});
 		si.setJndiName(jndiName);
+		si.setResourceRef(true);
 		si.afterPropertiesSet();
 		
 		return si;

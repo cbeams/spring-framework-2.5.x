@@ -48,9 +48,9 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 
 		SimpleRemoteSlsbInvokerInterceptor si = new SimpleRemoteSlsbInvokerInterceptor();
 		si.setJndiName("foobar");
+		// default resourceRef=false should cause this to fail, as java:/comp/env will not
+		// automatically be added
 		si.setJndiTemplate(jt);
-		// Stop java:comp/env addition
-		si.setInContainer(false);
 		try {
 			si.afterPropertiesSet();
 			fail("Should have failed with naming exception");
@@ -227,7 +227,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 				return mockCtx;
 			}
 		});
-		si.setInContainer(true);
+		si.setResourceRef(true);
 		si.setJndiName(jndiName);
 		si.afterPropertiesSet();
 		return si;

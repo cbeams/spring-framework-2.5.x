@@ -22,59 +22,62 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		}
 	}
 	
-	public void testLookupWithFullNameAndInContainerTrue() throws Exception {
+	public void testLookupWithFullNameAndResourceRefTrue() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:comp/env/foo", o));
 		jof.setJndiName("java:comp/env/foo");
+		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
 
-	public void testLookupWithFullNameAndInContainerFalse() throws Exception {
+	public void testLookupWithFullNameAndResourceRefFalse() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:comp/env/foo", o));
 		jof.setJndiName("java:comp/env/foo");
-		jof.setInContainer(false);
+		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
 
-	public void testLookupWithSchemeNameAndInContainerTrue() throws Exception {
+	public void testLookupWithSchemeNameAndResourceRefTrue() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:foo", o));
 		jof.setJndiName("java:foo");
+		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
 
-	public void testLookupWithSchemeNameAndInContainerFalse() throws Exception {
+	public void testLookupWithSchemeNameAndResourceRefFalse() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:foo", o));
 		jof.setJndiName("java:foo");
-		jof.setInContainer(false);
+		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
 
-	public void testLookupWithShortNameAndInContainerTrue() throws Exception {
+	public void testLookupWithShortNameAndResourceRefTrue() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:comp/env/foo", o));
 		jof.setJndiName("foo");
+		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
 
-	public void testLookupWithShortNameAndInContainerFalse() throws Exception {
+	public void testLookupWithShortNameAndResourceRefFalse() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:comp/env/foo", o));
 		jof.setJndiName("foo");
-		jof.setInContainer(false);
+		jof.setResourceRef(false);
 		try {
 			jof.afterPropertiesSet();
 			fail("Should have thrown NamingException");
@@ -84,14 +87,13 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testLookupWithArbitraryNameAndInContainerFalse() throws Exception {
+	public void testLookupWithArbitraryNameAndResourceRefFalse() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		Object o = new Object();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", o));
 		jof.setJndiName("foo");
-		jof.setInContainer(false);
+		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
 	}
-
 }

@@ -1,10 +1,20 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.91 2004-02-17 17:26:21 jhoeller Exp $
+$Id: changelog.txt,v 1.92 2004-02-18 19:39:02 colins Exp $
 
 
 Changes in version 1.0 (01.03.2003)
 -----------------------------------
+
+Small, but non backwards compatible JNDI configuration change!
+ 'inContainer' property of AbstractJndiLocator and derived subclasses such as 
+  JndiObjectFactoryBean and the EJB invokers has become 'resourceRef', and the default
+  value is now false, not true. If your old JNDI locations had a scheme (i.e. started
+  with 'java:' or any 'xxxx:' value) you do not have to do anything. If your old JNDI
+  location had no scheme specified, Spring will no longer by default prepend
+  'java:comp/env' to it. To get the old behaviour, just add the resourceRef property
+  with a true value. Alternately just add the 'java:comp/env' prefix yourself to the
+  JNDI location path.
 
 Package org.springframework.beans
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
@@ -17,6 +27,9 @@ Package org.springframework.context
 * renamed DefaultBeanFactoryLocator to ContextSingletonBeanFactoryLocator
 * renamed LocatorFactory to DefaultLocatorFactory
 * fixed "useCodeAsDefaultMessage" fallback for multiple codes in a MessageSourceResolvable
+
+Package org.springframework.jndi
+* renamed the inContainer property to resourceRef, and changed the default value from true to false.
 
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean

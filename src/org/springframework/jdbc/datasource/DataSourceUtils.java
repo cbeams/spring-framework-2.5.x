@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.6 2004-01-26 18:03:42 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.7 2004-02-18 19:39:02 colins Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -65,16 +65,16 @@ public abstract class DataSourceUtils {
 	 * Look up the specified DataSource in JNDI, explicitly specifying
 	 * if the lookup occurs in a J2EE container.
 	 * @param jndiName jndiName of the DataSource
-	 * @param inContainer if the lookup occurs in a J2EE container, i.e. if the prefix
+	 * @param resourceRef if the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already contain it.
 	 * @return the DataSource
 	 * @throws CannotGetJdbcConnectionException if the data source cannot be located
 	 */
-	public static DataSource getDataSourceFromJndi(String jndiName, boolean inContainer) throws CannotGetJdbcConnectionException {
+	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef) throws CannotGetJdbcConnectionException {
 		if (jndiName == null || "".equals(jndiName)) {
 			throw new IllegalArgumentException("jndiName must not be empty");
 		}
-		if (inContainer && !jndiName.startsWith(AbstractJndiLocator.CONTAINER_PREFIX)) {
+		if (resourceRef && !jndiName.startsWith(AbstractJndiLocator.CONTAINER_PREFIX)) {
 			jndiName = AbstractJndiLocator.CONTAINER_PREFIX + jndiName;
 		}
 		try {
