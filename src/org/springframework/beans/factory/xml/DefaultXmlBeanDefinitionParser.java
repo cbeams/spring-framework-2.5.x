@@ -510,15 +510,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	protected Properties getProps(Element propsEle, String beanName) {
-		Properties p = new Properties();
+		Properties props = new Properties();
 		NodeList nl = propsEle.getElementsByTagName(PROP_ELEMENT);
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element propEle = (Element) nl.item(i);
 			String key = propEle.getAttribute(KEY_ATTRIBUTE);
-			String value = getTextValue(propEle, beanName);
-			p.setProperty(key, value);
+			// trim the text value to avoid unwanted whitespace
+			// caused by typical XML formatting
+			String value = getTextValue(propEle, beanName).trim();
+			props.setProperty(key, value);
 		}
-		return p;
+		return props;
 	}
 
 	/**

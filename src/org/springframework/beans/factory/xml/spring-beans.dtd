@@ -32,7 +32,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.24 2004-02-24 17:43:02 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.25 2004-03-16 16:42:49 jhoeller Exp $
 -->
 
 <!--
@@ -322,8 +322,9 @@
 >
 
 <!--
-	Each property element must specify the key. The value
-	is the element content.
+	Each property element must specify the key. The value is the
+	element content: Note that whitespace is trimmed off to avoid
+	unwanted whitespace caused by typical XML formatting.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
 
