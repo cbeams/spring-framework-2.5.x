@@ -346,7 +346,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 
 	/**
 	 * Checks to see if a <code>Method</code> has the <code>ManagedAttribute</code> attribute.
-	 * @param method the <code>Method</code> to check.
+	 * @param method the method to check
 	 */
 	private boolean hasManagedAttribute(Method method) {
 		ManagedAttribute ma = this.attributeSource.getManagedAttribute(method);
@@ -363,13 +363,14 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	}
 
 	/**
-	 * Used for auto detection of beans. Checks to see if the bean's class has a
+	 * Used for autodetection of beans. Checks to see if the bean's class has a
 	 * <code>ManagedResource</code> attribute. If so it will add it list of included beans.
 	 * @param beanName the name of the bean in the bean factory
-	 * @param beanClass the Class of the managed resource
+	 * @param beanClass the class of the bean
 	 */
 	public boolean includeBean(String beanName, Class beanClass) {
-		return (this.attributeSource.getManagedResource(beanClass) != null);
+		ManagedResource mr = this.attributeSource.getManagedResource(beanClass);
+		return (mr != null);
 	}
 
 }

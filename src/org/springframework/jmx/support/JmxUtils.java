@@ -46,17 +46,17 @@ public class JmxUtils {
 	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
 	 * <code>MBeanServer</code> can be found, or if more than one is found.
 	 * @return the <code>MBeanServer</code> if found
-	 * @throws org.springframework.jmx.MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found
+	 * @throws org.springframework.jmx.MBeanServerNotFoundException
+	 * if no <code>MBeanServer</code> is found, or more than one is found
 	 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(null);
 		// Check to see if an MBeanServer is registered.
 		if (servers == null || servers.size() == 0) {
-			throw new org.springframework.jmx.MBeanServerNotFoundException("Unable to locate an MBeanServer instance");
+			throw new MBeanServerNotFoundException("Unable to locate an MBeanServer instance");
 		}
 		if (servers.size() > 1) {
 			logger.warn("Found more than one MBeanServer instance. Returning first from list.");
-			throw new MBeanServerNotFoundException("" + servers);
 		}
 		MBeanServer server = (MBeanServer) servers.get(0);
 		if (logger.isDebugEnabled()) {

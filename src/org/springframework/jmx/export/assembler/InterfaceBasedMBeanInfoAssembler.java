@@ -33,7 +33,6 @@ import org.springframework.util.StringUtils;
  * interfaces defined by <code>managedInterfaces</code>.
  *
  * @author Rob Harrop
- * @author Marcus Brito
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setManagedInterfaces

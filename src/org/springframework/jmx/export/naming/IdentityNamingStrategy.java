@@ -19,6 +19,7 @@ package org.springframework.jmx.export.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -44,7 +45,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 		sb.append(ClassUtils.getShortName(managedResource.getClass()));
 		sb.append(",hashCode=");
 		sb.append(ObjectUtils.getIdentityHexString(managedResource));
-		return org.springframework.jmx.support.ObjectNameManager.getInstance(sb.toString());
+		return ObjectNameManager.getInstance(sb.toString());
 	}
 
 }

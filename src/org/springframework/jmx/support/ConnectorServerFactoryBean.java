@@ -48,7 +48,6 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @author Marcus Brito
  * @since 1.2
  * @see	FactoryBean
  * @see JMXConnectorServer
