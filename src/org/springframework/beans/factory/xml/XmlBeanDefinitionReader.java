@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.xml;
 
@@ -59,7 +59,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean validating = true;
 
-	private EntityResolver entityResolver;
+	private EntityResolver entityResolver = new BeansDtdResolver();
 
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
@@ -125,7 +125,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			factory.setValidating(this.validating);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new BeansErrorHandler());
-			docBuilder.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
+			if (this.entityResolver != null) {
+				docBuilder.setEntityResolver(this.entityResolver);
+			}
 			is = resource.getInputStream();
 			Document doc = docBuilder.parse(is);
 			return registerBeanDefinitions(doc, resource);
