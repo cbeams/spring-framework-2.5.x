@@ -22,15 +22,24 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A interface that provides access to data model of a executing flow session.
+ * An interface that provides access to the data model of a executing flow
+ * session. All attributes in the flow model are in "flow scope"; that is, they
+ * exist for the life of a flow session and will be cleaned up when the flow
+ * session ends. All attributes in the flow model are automatically exported for
+ * convenient access by the views.
  * <p>
- * This is a simple interface for accessing model attributes. It helps prevent
- * accidental misuse and manipulation of more enabling interfaces like Map, for
- * example, through better encapsulation. It also adds a number of helpful
+ * This is a simple interface for accessing flow model attributes, typically
+ * from within controller (action) code. This interface helps prevent accidental
+ * misuse and manipulation of more enabling interfaces like <code>Map</code>,
+ * for example, through better encapsulation. It also adds a number of helpful
  * methods related to data model access.
  * <p>
- * Note: the attributes stored in the flow model (flow execution scope) are
- * accessed using this common interface.
+ * Note: The flow model should not be used as a general purpose cache, but
+ * rather as a stateful context for data needed locally from within the
+ * individual states of a flow. For example, it would be inappropriate to stuff
+ * large collections of objects (like those returned to support a search results
+ * view) into the flow model. Instead, put such result collections in the
+ * request. 2nd level caches are much better cache solutions.
  * <p>
  * Implementers of this interface (e.g <code>FlowExecutionStack</code>,
  * <code>FlowSession</code>) may also support <b>transaction tokens </b> and
