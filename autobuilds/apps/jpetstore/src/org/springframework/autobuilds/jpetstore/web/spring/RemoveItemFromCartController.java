@@ -15,7 +15,7 @@ import org.springframework.web.util.WebUtils;
 public class RemoveItemFromCartController implements Controller {
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request, "sessionCart", Cart.class);
+		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request.getSession(), "sessionCart", Cart.class);
 		cart.removeItemById(request.getParameter("workingItemId"));
 		return new ModelAndView("Cart", "cart", cart);
 	}

@@ -23,7 +23,7 @@ public class AddItemToCartController implements Controller {
 	}
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request, "sessionCart", Cart.class);
+		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request.getSession(), "sessionCart", Cart.class);
 		String workingItemId = request.getParameter("workingItemId");
 		if (cart.containsItemId(workingItemId)) {
 			cart.incrementQuantityByItemId(workingItemId);

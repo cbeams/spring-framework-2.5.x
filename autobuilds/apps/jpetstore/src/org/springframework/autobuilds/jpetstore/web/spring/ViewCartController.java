@@ -21,7 +21,7 @@ public class ViewCartController implements Controller {
 	}
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request, "sessionCart", Cart.class);
+		Cart cart = (Cart) WebUtils.getOrCreateSessionAttribute(request.getSession(), "sessionCart", Cart.class);
 		UserSession userSession = (UserSession) WebUtils.getSessionAttribute(request, "userSession");
 		String page = request.getParameter("page");
 		if (userSession != null) {
