@@ -95,7 +95,6 @@
 	<classpathentry kind="lib" path="lib/itext/itext-1.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common-2.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
-	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1-dev.jar"/>
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.RC3-snapshot.jar"/>
@@ -103,5 +102,6 @@
 	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.jar"/>
+	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
