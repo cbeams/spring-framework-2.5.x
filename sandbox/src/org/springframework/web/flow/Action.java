@@ -67,6 +67,9 @@ public interface Action {
 	 * view) into the flow model. Instead, put such result collections in the
 	 * request, and ensure you execute this action again each time you wish to
 	 * view those results. 2nd level caches are much better cache solutions.
+	 * <p>
+	 * Note: The flow model is typically managed in the HTTP session, so
+	 * attributes set in it should generally be serializable.
 	 * 
 	 * @param request The current http request, enabling access to request
 	 *        parameters and/or attributes if neccessary
