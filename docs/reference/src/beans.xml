@@ -593,7 +593,7 @@ public class ExampleBean {
 					Is exactly the same as:
 					
 					<programlisting><![CDATA[
-<bean id="exampleInitBean class="examples.AnotherExampleBean"/>
+<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
 
 public class AnotherExampleBean implements InitializingBean {
 	public void afterPropertiesSet() {
@@ -645,7 +645,7 @@ public class ExampleBean {
 					Is exactly the same as:
 					
 					<programlisting><![CDATA[
-<bean id="exampleInitBean class="examples.AnotherExampleBean"/>
+<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
 
 public class AnotherExampleBean implements DisposableBean {
 	public void destroy() {
@@ -1297,7 +1297,7 @@ cfg.postProcessBeanFactory(factory);
 		<sect2 id="context-functionality-events">
 			<title>Propagating events</title>
 			<para>
-				Event handling in the ApplicationContext is provided through the <literal>ApplicationEvent</literal>
+				Eventhandling in the ApplicationContext is provided through the <literal>ApplicationEvent</literal>
 				class and <literal>ApplicationListener</literal> interface. When implementing the 
 				<literal>ApplicationListener</literal> in one of your beans, everytime an <literal>ApplicationEvent</literal>
 				gets published to the ApplicationContext, your bean will be notified, based on the

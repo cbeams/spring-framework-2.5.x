@@ -652,6 +652,10 @@ protected ModelAndView handleRequestInternal(
 			    JDOM (and Dom4J) easier API's to handle than the W3C API.
 
 <programlisting><![CDATA[
+package xslt;
+
+// imports omitted for brevity
+
 public class HomePage extends AbstractXsltView {
 
   protected Node createDomNode( 
@@ -743,8 +747,7 @@ home.root=words
 			    called <literal>home.xslt</literal> and it lives in the war
 			    file under <literal>WEB-INF/xsl</literal>.
 
-<programlisting><![CDATA[
-<?xml version="1.0"?>
+<programlisting><![CDATA[<?xml version="1.0"?>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="text/html" omit-xml-declaration="yes"/>
@@ -763,8 +766,7 @@ home.root=words
     </html>	
   </xsl:template>
 	
-</xsl:stylesheet>
-]]></programlisting>
+</xsl:stylesheet>]]></programlisting>
 
 			</para>
 
@@ -829,35 +831,196 @@ ProjectRoot
     <sect1 id="view-document">
 		<title>Document views (PDF/Excel)</title>
 
+		
+		<sect2 id="view-document-intro">
+		<title>Introduction</title> 
+
 		<para>
 
-			intro
+			Returning an HTML page isn't always the best way for the user to
+			view the model output, and Spring makes it simple to generate a
+			PDF document or an Excel spreadsheet dynamically from the model
+			data.  The document is the view and will be streamed from the
+			server with the corrdct content type to (hopefully) enable the
+			client PC to run the spreadsheet or PDF viewer application in
+			response.
 
 		</para>
-		
-		<sect2 id="view-document-config">
 
-			<title>Configuration</title> 
+		<para>
 
-            <para>
+		    In order to use Excel views, you need to add the 'poi' library to
+		    your classpath, and for PDF generation, the iText.jar.  Both are
+		    included in the main Spring distribution.
 
-			    config
+		</para>
 
-			</para>
-			
 		</sect2>
 
+		<sect2 id="view-document-config">
 
-		<sect2 id="view-document-summary">
-
-			<title>Summary</title> 
+			<title>Configuration and setup</title> 
 
             <para>
 
-			    summarize files / libs involved
-			
+			    Document based views are handled in an almost identical
+			    fashion to XSLT views, and the following sections build upon
+			    the previous one by demonstrating how the same controller used
+			    in the XSLT example is invoked to render the same model as
+			    both a PDF document and an Excel spreadsheet (which can also
+			    be viewed or manipulated in Open Office).
+
 			</para>
 
+			<sect3 id="view-document-configviews">
+			<title>Document view definitions</title>
+			<para>
+			
+			    Firstly, let's amend the views.properties file (or xml
+			    equivalent) and add a simple view definition for both document
+			    types.  The entire file now looks like this with the XSLT view
+			    shown from earlier..
+
+<programlisting><![CDATA[home.class=xslt.HomePage
+home.stylesheetLocation=/WEB-INF/xsl/home.xslt
+home.root=words
+
+xl.class=excel.HomePage
+
+pdf.class=pdf.HomePage]]></programlisting>
+
+                <emphasis>If you want to start with a template spreadsheet to
+			    add your model data to, specify the location as the 'url'
+			    property in the view definition</emphasis>
+
+			</para>
+			</sect3>
+
+			<sect3 id="view-document-configcontroller">
+			<title>Controller code</title>
+			<para>
+
+			    The controller code we'll use remains exactly the same from
+			    the XSLT example earlier other than to change the name of the
+			    view to use.  Of course, you could be clever and have this
+			    selected based on a URL parameter or some other logic - proof
+			    that Spring really is very good at decoupling the views from
+			    the controllers!
+
+			</para>
+			</sect3>
+
+			<sect3 id="view-document-configsubclasses">
+			<title>Subclassing for Excel views</title>
+			<para>
+
+			    Exactly as we did for the XSLT example, we'll subclass
+			    suitable abstract classes in order to implement custom
+			    behaviour in generating our output documents.  For Excel, this
+			    involves writing a subclass of
+			    <literal>org.springframework.web.servlet.view.document.AbstractExcelView</literal>
+			    and implementing the <literal>buildExcelDocument</literal>
+
+			</para>
+
+			<para>
+			
+			    Here's the complete listing for our Excel view which displays
+			    the word list from the model map in consecutive rows of the
+			    first column of a new spreadsheet..
+
+<programlisting><![CDATA[package excel;
+
+// imports omitted for brevity
+
+public class HomePage extends AbstractExcelView {
+
+  protected void buildExcelDocument(
+    Map model,
+    HSSFWorkbook wb,
+    HttpServletRequest req,
+    HttpServletResponse resp)
+    throws Exception {
+    
+    HSSFSheet sheet;
+    HSSFRow sheetRow;
+    HSSFCell cell;
+
+    // Go to the first sheet
+    // getSheetAt: only if wb is created from an existing document
+    //sheet = wb.getSheetAt( 0 );
+    sheet = wb.createSheet("Spring");
+    sheet.setDefaultColumnWidth((short)12);
+		
+    // write a text at A1
+    cell = getCell( sheet, 0, 0 );
+    setText(cell,"Spring-Excel test");
+		
+    List words = (List ) model.get("wordList");
+    for (int i=0; i < words.size(); i++) {
+      cell = getCell( sheet, 2+i, 0 );
+      setText(cell, (String) words.get(i));
+	
+    }
+  }
+}]]></programlisting>
+
+            </para>
+
+			<para>
+
+			    If you now amend the controller such that it returns
+			    <literal>xl</literal> as the name of the view (<literal>return
+			    new ModelAndView("xl", map);</literal>) and run your
+			    application again, you should find that the Excel spreadsheet
+			    is created and downloaded automagically when you request the
+			    same page as before.
+
+			</para>
+		    </sect3>
+
+			<sect3 id="view-document-configsubclasspdf">
+			<title>Subclassing for PDF views</title>
+			<para>
+			
+			    The PDF version of the word list is even simpler.  This time,
+			    the class extends
+			    <literal>org.springframework.web.servlet.view.document.AbstractPdfView</literal>
+			    and implements the <literal>buildPdfDocument()</literal>
+			    method as follows..
+
+<programlisting><![CDATA[package pdf;
+
+// imports omitted for brevity
+
+public class PDFPage extends AbstractPdfView {
+
+  protected void buildPdfDocument(
+    Map model,
+    Document doc,
+    PdfWriter writer,
+    HttpServletRequest req,
+    HttpServletResponse resp)
+    throws Exception {
+        
+    List words = (List) model.get("wordList");
+        
+    for (int i=0; i<words.size(); i++)
+      doc.add( new Paragraph((String) words.get(i)));
+        	
+  }
+}]]></programlisting>
+
+                Once again, amend the controller to return the
+                <literal>pdf</literal> view with a <literal>return new
+                ModelAndView("pdf", map);</literal> and reload the URL in your
+                application.  This time a PDF document should appear listing
+                each of the words in the model map.
+
+			</para>
+			</sect3>
+
+			
 		</sect2>
 
 
@@ -1112,7 +1275,7 @@ ProjectRoot
  file: xportal.application:
  
  <?xml version="1.0" encoding="UTF-8"?>
- <!--$Id: views.xml,v 1.3 2004-02-04 00:54:22 davison Exp $-->
+ <!--$Id: views.xml,v 1.4 2004-02-05 23:49:52 davison Exp $-->
  <!DOCTYPE application PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
