@@ -26,8 +26,8 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${lib.dir}">
-			<include name="*.jar"/>
+		<fileset dir="${spring.root}/lib/hibernate">
+			<include name="hibernate2.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
@@ -85,6 +85,12 @@
 			<classpath refid="master-classpath"/>
 		</javac>
 
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
 		<mkdir dir="${weblib.dir}"/>
 
 		<jar jarfile="${weblib.dir}/petclinic.jar" compress="true" basedir="${build.dir}"/>
@@ -94,7 +100,21 @@
 				<include name="hsqldb.jar"/>
 				<include name="mysql*.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/aop-alliance">
+				<include name="aopalliance.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/cglib">
+				<include name="cglib-asm.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/hibernate">
+				<include name="dom4j.jar"/>
+				<include name="hibernate2.jar"/>
+				<include name="odmg.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-beanutils.jar"/>
+				<include name="commons-collections.jar"/>
+				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jstl">
@@ -139,7 +159,7 @@
 			<include name="*"/>
 			<include name="docs/**"/>
 			<include name="html/**"/>
-			<include name="WEB-INF/applicationContext.xml"/>
+			<include name="WEB-INF/applicationContext*.xml"/>
 			<include name="WEB-INF/petclinic-servlet.xml"/>
 			<include name="WEB-INF/spring.tld"/>
 			<include name="WEB-INF/classes/*.properties"/>
@@ -199,10 +219,17 @@
 			<classpath path="${spring.root}/lib/junit/junit.jar"/>
 		</javac>
 
+		<copy todir="${testbuild.dir}" preservelastmodified="true">
+			<fileset dir="${testsrc.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
 		<junit printsummary="true" fork="yes">
 			<formatter type="xml"/>
 			<test name="petclinic.OwnerTest" todir="${testreports.dir}"/>
 			<test name="petclinic.jdbc.JdbcClinicTest" todir="${testreports.dir}"/>
+			<test name="petclinic.hibernate.HibernateClinicTest" todir="${testreports.dir}"/>
 			<classpath path="${build.dir}"/>
 			<classpath path="${testbuild.dir}"/>
 			<classpath path="${testsrc.dir}"/>

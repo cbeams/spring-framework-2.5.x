@@ -29,6 +29,21 @@
 	</context-param>
 
 	<!--
+	  - Location of the XML file that defines the root application context
+	  - Applied by ContextLoaderListener.
+		-
+		- Can be set to "/WEB-INF/applicationContext-hibernate.xml" for the Hibernate
+		- implementation, or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
+	  -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
+		<!--
+		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
+		-->
+	</context-param>
+
+	<!--
 	  - Configures Log4J for this web app.
 	  - As this context specifies a context-param "log4jConfigLocation", its file path
 	  - is used to load the Log4J configuration, including periodic refresh checks.

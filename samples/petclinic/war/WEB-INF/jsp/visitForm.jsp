@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 
 <P>
-<H2><c:if test="${command.id == 0}">New </c:if>Visit:</H2>
+<H2><c:if test="${command.new}">New </c:if>Visit:</H2>
 <spring:bind path="command">
   <FONT color="red">
     <B><c:out value="${status.errorMessage}"/></B><BR>
@@ -14,7 +14,7 @@
   <TR>
     <TD><c:out value="${command.pet.name}"/></TD>
     <TD><fmt:formatDate value="${command.pet.birthDate}" pattern="yyyy-MM-dd"/></TD>
-    <TD><c:out value="${types[command.pet.typeId].name}"/></TD>
+    <TD><c:out value="${command.pet.type.name}"/></TD>
     <TD><c:out value="${command.pet.owner.firstName}"/> <c:out value="${command.pet.owner.lastName}"/></TD>
   </TR>
 </TABLE>
@@ -46,10 +46,12 @@
 <TABLE border="true">
   <TH>Date</TH><TH>Description</TH>
   <c:forEach var="visit" items="${command.pet.visits}">
+		<c:if test="${!visit.new}">
     <TR>
       <TD><fmt:formatDate value="${visit.date}" pattern="yyyy-MM-dd"/></TD>
       <TD><c:out value="${visit.description}"/></TD>
     </TR>
+		</c:if>
   </c:forEach>
 </TABLE>
 <P>

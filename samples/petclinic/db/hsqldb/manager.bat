@@ -1,2 +1,2 @@
-java -cp hsqldb.jar org.hsqldb.util.DatabaseManager
+java -classpath ..\..\lib\hsqldb.jar org.hsqldb.util.DatabaseManager
 

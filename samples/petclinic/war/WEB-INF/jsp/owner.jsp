@@ -40,7 +40,7 @@
           <TR>
             <TD><c:out value="${pet.name}"/></TD>
             <TD><fmt:formatDate value="${pet.birthDate}" pattern="yyyy-MM-dd"/></TD>
-            <TD><c:out value="${model.types[pet.typeId].name}"/></TD>
+            <TD><c:out value="${pet.type.name}"/></TD>
           </TR>
       </TABLE>
     </TD></TR>

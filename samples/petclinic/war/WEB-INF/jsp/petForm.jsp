@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 
 <P>
-<H2><c:if test="${command.id == 0}">New </c:if>Pet</H2>
+<H2><c:if test="${command.new}">New </c:if>Pet</H2>
 <spring:bind path="command">
   <FONT color="red">
     <B><c:out value="${status.errorMessage}"/></B>
@@ -35,23 +35,22 @@
     </FONT>
     <BR>
     <SELECT name="typeId">
-      <c:forEach var="typeEntry" items="${types}">
-        <c:if test="${command.typeId == typeEntry.key}">
-          <OPTION selected="<c:out value="${command.typeId}"/>" value="<c:out value="${typeEntry.key}"/>"><c:out value="${typeEntry.value.name}"/></OPTION>
+      <c:forEach var="type" items="${types}">
+        <c:if test="${command.typeId == type.id}">
+          <OPTION selected="<c:out value="${command.typeId}"/>" value="<c:out value="${type.id}"/>"><c:out value="${type.name}"/></OPTION>
         </c:if>
-        <c:if test="${command.typeId != typeEntry.key}">
-          <OPTION value="<c:out value="${typeEntry.key}"/>"><c:out value="${typeEntry.value.name}"/></OPTION>
+        <c:if test="${command.typeId != type.id}">
+          <OPTION value="<c:out value="${type.id}"/>"><c:out value="${type.name}"/></OPTION>
         </c:if>
       </c:forEach>
     </SELECT>
   </spring:bind>
   <P>
-  <INPUT type="hidden" name="ownerId" value="<c:out value="${command.owner.id}"/>"/>
-  <c:if test="${command.id == 0}">
-    <INPUT type = "submit" value="Add Pet"  />
+  <c:if test="${command.new}">
+    <INPUT type = "submit" value="Add Pet"/>
   </c:if>
-  <c:if test="${command.id != 0}">
-    <INPUT type = "submit" value="Update Pet"  />
+  <c:if test="${!command.new}">
+    <INPUT type = "submit" value="Update Pet"/>
   </c:if>
 </FORM>
 <P>

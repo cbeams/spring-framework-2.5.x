@@ -1,5 +1,6 @@
 -- Spring Petclinic demo --
 @author Ken Krebs
+@author Juergen Hoeller
 
 This directory contains the web app source.
 For deployment, it needs to be built with Apache Ant.
