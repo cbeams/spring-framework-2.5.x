@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -133,7 +134,7 @@ final class OptimizedJdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			// We can skip creating a MethodInvocation: just invoke the target directly
 			// Note that the final invoker must be an InvokerInterceptor so we know it does
 			// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
-			retVal = AopProxyUtils.invokeJoinpointUsingReflection(target, method, args);
+			retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
 		}
 		else {
 			// We need to create a method invocation...
