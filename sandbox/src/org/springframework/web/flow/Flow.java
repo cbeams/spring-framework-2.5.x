@@ -1068,7 +1068,7 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 * @return
 	 */
 	public ActionState createLoadState(String stateIdPrefix, Transition transition) {
-		return createGetState(stateIdPrefix, new Transition[] { transition });
+		return createLoadState(stateIdPrefix, new Transition[] { transition });
 	}
 
 	/**
@@ -1310,7 +1310,7 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 * @return
 	 */
 	public ActionState createSaveState(String stateIdPrefix, String saveActionBeanName, Transition[] transitions) {
-		return createActionState(add(stateIdPrefix), saveActionBeanName, transitions);
+		return createActionState(save(stateIdPrefix), saveActionBeanName, transitions);
 	}
 
 	/**
