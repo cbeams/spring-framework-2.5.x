@@ -40,7 +40,7 @@ public class DefaultToStringStyler implements ToStringStyler {
      */
     private void styleIdentityHashCode(StringBuffer buffer, Object object) {
         buffer.append('@');
-        buffer.append(ObjectUtils.getIdentity(object));
+        buffer.append(ObjectUtils.getIdentityHexString(object));
     }
 
     public void styleEnd(StringBuffer buffer, Object o) {

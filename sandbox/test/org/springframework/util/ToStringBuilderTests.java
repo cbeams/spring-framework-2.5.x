@@ -28,7 +28,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(stringy.toString());
         assertEquals(
             "[ToStringBuilderTests.1@"
-                + ObjectUtils.getIdentity(stringy)
+                + ObjectUtils.getIdentityHexString(stringy)
                 + " familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
             stringy.toString());
     }
@@ -47,7 +47,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[@"
-                + ObjectUtils.getIdentity(array)
+                + ObjectUtils.getIdentityHexString(array)
                 + " array<ToStringBuilderTests.SomeObject>[A, B, C]]",
             str);
     }
@@ -58,7 +58,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[@"
-                + ObjectUtils.getIdentity(integers)
+                + ObjectUtils.getIdentityHexString(integers)
                 + " array<Object>[0, 1, 2, 3, 4]]",
             str);
     }
@@ -73,7 +73,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
-                + ObjectUtils.getIdentity(this)
+                + ObjectUtils.getIdentityHexString(this)
                 + " myLetters = list[A, B, C]]",
             str);
     }
@@ -88,7 +88,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
-                + ObjectUtils.getIdentity(this)
+                + ObjectUtils.getIdentityHexString(this)
                 + " myLetters = set[A, B, C]]",
             str);
     }
@@ -101,7 +101,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
-                + ObjectUtils.getIdentity(this)
+                + ObjectUtils.getIdentityHexString(this)
                 + " myClass = ToStringBuilderTests]",
             str);
     }
@@ -116,7 +116,7 @@ public class ToStringBuilderTests extends TestCase {
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
-                + ObjectUtils.getIdentity(this)
+                + ObjectUtils.getIdentityHexString(this)
                 + " myMethod = testMethod@ToStringBuilderTests]",
             str);
     }
