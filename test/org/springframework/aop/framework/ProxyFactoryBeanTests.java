@@ -103,7 +103,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("non-advisor") != -1);
+			assertTrue(aex.getMessage().indexOf("interceptorNames") != -1);
 		}
 	}
 	
@@ -592,7 +592,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertFalse("Not serializable because an interceptor isn't serializable", SerializationTestUtils.isSerializable(p));
 	}
 
-	/*
 	public void testPrototypeAdvisor() {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()));
 
@@ -651,8 +650,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			fail("did not expect LockedException");
 		}
 	}
-	*/
-
+	
 
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
