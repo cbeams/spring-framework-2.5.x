@@ -32,8 +32,9 @@ import org.apache.log4j.xml.DOMConfigurator;
  * configuration from a "log4j.properties" file in the root of the class path.
  *
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
- * in the web package. In a J2EE web application, Log4J is usually set up via
- * Log4jConfigListener or Log4jConfigServlet.
+ * in the web package, reading in its configuration from context-params in web.xml.
+ * In a J2EE web application, Log4J is usually set up via Log4jConfigListener or
+ * Log4jConfigServlet, delegating to Log4jWebConfigurer underneath.
  *
  * @author Juergen Hoeller
  * @since 13.03.2003
@@ -59,7 +60,7 @@ public abstract class Log4jConfigurer {
 
 
 	/**
-	 * Initialize Log4J from the given location, with no config file refreshing.
+	 * Initialize Log4J from the given file location, with no config file refreshing.
 	 * Assumes an XML file in case of a ".xml" file extension, and a properties
 	 * file else.
 	 * @param location the location of the config file
