@@ -104,6 +104,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * in constructors of UserType implementations.
 	 * @see #setLobHandler
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
+	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
 	 * @see net.sf.hibernate.type.Type
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
@@ -245,6 +246,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Will be exposed at config time for Type implementations.
 	 * @see #getConfigTimeLobHandler
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
+	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
 	 * @see net.sf.hibernate.type.Type
 	 */
 	public void setLobHandler(LobHandler lobHandler) {
