@@ -139,7 +139,7 @@ public class BeanPropertyAccessStrategy implements
         return beanWrapper.getWrappedClass();
     }
 
-    protected int getNestedPropertySeparatorIndex(String propertyPath,
+    protected static int getNestedPropertySeparatorIndex(String propertyPath,
             boolean last) {
         boolean inKey = false;
         int i = (last ? propertyPath.length() - 1 : 0);

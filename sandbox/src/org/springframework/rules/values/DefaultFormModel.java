@@ -99,7 +99,7 @@ public class DefaultFormModel extends AbstractFormModel implements
         }
         ValueModel formValueModel = new PropertyAdapter(
                 getPropertyAccessStrategy().getPropertyAccessStrategyForPath(
-                        formPropertyPath), formPropertyPath);
+                        formPropertyPath), getFinalPath(formPropertyPath));
         if (bufferChanges) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating form value buffer for property '"
@@ -115,6 +115,11 @@ public class DefaultFormModel extends AbstractFormModel implements
             }
         }
         return add(formPropertyPath, formValueModel);
+    }
+
+    private String getFinalPath(String formPropertyPath) {
+        return formPropertyPath.substring(BeanPropertyAccessStrategy
+                .getNestedPropertySeparatorIndex(formPropertyPath, true) + 1);
     }
 
     public ValueModel add(String formPropertyPath, ValueModel formValueModel) {
