@@ -31,8 +31,8 @@ import java.sql.SQLException;
  *
  * @author Thomas Risberg
  * @since 1.1
- * @see java.sql.CallableStatement#getObject
  * @see java.sql.Types
+ * @see java.sql.CallableStatement#getObject
  * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
  */
 public interface SqlReturnType {
@@ -52,11 +52,12 @@ public interface SqlReturnType {
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
-	 * @throws SQLException if a SQLException is encountered setting
-	 * parameter values (that is, there's no need to catch SQLException)
+	 * @throws SQLException if a SQLException is encountered setting parameter values
+	 * (that is, there's no need to catch SQLException)
 	 * @see java.sql.Types
-	 * @see java.sql.PreparedStatement#setObject
+	 * @see java.sql.CallableStatement#getObject
 	 */
-	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, String typeName) throws SQLException;
+	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, String typeName)
+			throws SQLException;
 
 }

@@ -21,12 +21,13 @@ import java.sql.SQLException;
 
 /**
  * Interface to be implemented for setting values for more complex database specific
- * types not supported by the standard setObject method. Implementations perform the
- * actual work of setting the actual values. They must implement the callback method
- * <code>setTypeValue</code> which can throw SQLExceptions that will be caught and
- * translated by the calling code. This callback method has access to the underlying
- * Connection via the given statement object, if that should be needed to create any
- * database-specific objects.
+ * types not supported by the standard setObject method.
+ *
+ * <p>Implementations perform the actual work of setting the actual values. They must
+ * implement the callback method <code>setTypeValue</code> which can throw SQLExceptions
+ * that will be caught and translated by the calling code. This callback method has
+ * access to the underlying Connection via the given PreparedStatement object, if that
+ * should be needed to create any database-specific objects.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -54,8 +55,8 @@ public interface SqlTypeValue {
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
-	 * @throws SQLException if a SQLException is encountered setting
-	 * parameter values (that is, there's no need to catch SQLException)
+	 * @throws SQLException if a SQLException is encountered setting parameter values
+	 * (that is, there's no need to catch SQLException)
 	 * @see java.sql.Types
 	 * @see java.sql.PreparedStatement#setObject
 	 */
