@@ -34,14 +34,13 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- * 
- *      public Event ${executeMethodName}(RequestContext context) throws Exception
- *  
+ *     public Event ${executeMethodName}(RequestContext context) throws Exception
  * </pre>
  * 
- * By default, the ${executeMethodName} will be the name of a <i>named action</i>,
- * or the name of the <i>current state</i> of the flow if the action is
- * unnamed. So the follow state definition
+ * By default, the ${executeMethodName} will be the name of the "executeMethodName"
+ * property associated with the action in the current state, or the name of the
+ * current state of the flow if there is no such property defined.
+ * So the following state definition
  * 
  * <pre>
  *     &lt;action-state id=&quot;search&quot;&gt;
@@ -49,17 +48,22 @@ import org.springframework.web.flow.RequestContext;
  *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *     &lt;/action-state&gt;
  * </pre>
+ * 
  * ... will execute the method:
+ * 
  * <pre>
  *     public Event search(RequestContext context) throws Exception
-* </pre>
+ * </pre>
  * 
- * Alternatively you could have used a named action to execute the above method:
+ * Alternatively you could have explictly specified the method name using a
+ * property:
  * 
  * <pre>
  *     &lt;action-state id=&quot;searchState&quot;&gt;
- *          &lt;action name=&quot;search&quot; bean=&quot;my.search.action&quot;/&gt;
- *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *         &lt;action bean=&quot;my.search.action&quot;&gt;
+ *             &lt;property name="executeMethodName" value="search"/&gt;
+ *         &lt;/action&gt;
+ *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *     &lt;/action-state&gt;
  * </pre>
  * 
@@ -211,8 +215,8 @@ public class MultiAction extends AbstractAction {
 	 * Action execution method name resolver that uses the following algorithm
 	 * to calculate a method name:
 	 * <ol>
-	 * <li>If the currently executing action is a <i>named action</i>, use the
-	 * name of the action as a method name.</li>
+	 * <li>If the currently executing action has a "executeMethodName" property
+	 * defined, use the value as method name.</li>
 	 * <li>Else, use the name of the current state of the flow execution as a
 	 * method name.</li>
 	 * </ol>
@@ -225,7 +229,7 @@ public class MultiAction extends AbstractAction {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
 			ActionStateAction actionStateAction = ((ActionState)context.getCurrentState()).getAction(action);
 			if (StringUtils.hasText(actionStateAction.getExecuteMethodName())) {
-				// use action name as method name
+				// use specified execute method name
 				return actionStateAction.getExecuteMethodName();
 			}
 			else {

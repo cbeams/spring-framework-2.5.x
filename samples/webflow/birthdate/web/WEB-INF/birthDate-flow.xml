@@ -35,9 +35,11 @@
 		method of the SimpleFormController.
 	-->
 	<action-state id="bindAndValidateForm">
-		<action name="bindAndValidate" bean="birthDateFormAction"/>
-		<transition on="bindAndValidate.success" to="calculateAge"/>
-		<transition on="bindAndValidate.error" to="formView"/>
+		<action bean="birthDateFormAction">
+			<property name="executeMethodName">bindAndValidate</property>
+		</action>
+		<transition on="success" to="calculateAge"/>
+		<transition on="error" to="formView"/>
 	</action-state>
 	
 	<!--

@@ -51,8 +51,13 @@ public class ActionStateAction {
 	public static final String DESCRIPTION_PROPERTY = "description";
 
 	/**
-	 * Property storing ther name of the method that should be handle action
-	 * execution.
+	 * Property storing the name of the method that should handle action
+	 * execution when using a multi-action. A multi-action is an action
+	 * that groups several action execute methods together on a single
+	 * class. The methods follow the following signature:
+	 * <pre>
+	 * public Event ${executeMethodName}(RequestContext context)
+	 * </pre>
 	 */
 	public static final String EXECUTE_METHOD_NAME_PROPERTY = "executeMethodName";
 
@@ -186,7 +191,7 @@ public class ActionStateAction {
 
 	/**
 	 * Sets the name of the handler method on the target action instance to
-	 * invoke when this action is executed.
+	 * invoke when this action is executed. Only used by multi-actions.
 	 * @param executeMethodName the method name, with the signature
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 */
@@ -227,7 +232,8 @@ public class ActionStateAction {
 
 	/**
 	 * Returns the name of the handler method to invoke on the target action
-	 * instance to handle action execution for this state.
+	 * instance to handle action execution for this state. Only used by
+	 * multi-actions.
 	 * @return the execute method name
 	 */
 	public String getExecuteMethodName() {
