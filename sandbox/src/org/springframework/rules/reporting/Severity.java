@@ -17,7 +17,7 @@ package org.springframework.rules.reporting;
 
 import javax.swing.Icon;
 
-import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.core.enums.support.ShortCodedLabeledEnum;
 
 public class Severity extends ShortCodedLabeledEnum {
 

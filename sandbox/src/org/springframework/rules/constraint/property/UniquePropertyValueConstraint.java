@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.springframework.binding.MutablePropertyAccessStrategy;
 import org.springframework.binding.support.BeanPropertyAccessStrategy;
-import org.springframework.util.closure.support.AbstractConstraint;
+import org.springframework.rules.constraint.AbstractConstraint;
 
 public class UniquePropertyValueConstraint extends AbstractConstraint implements PropertyConstraint {
 	private String propertyName;

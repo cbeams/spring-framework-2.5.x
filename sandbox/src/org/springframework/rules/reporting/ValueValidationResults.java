@@ -1,6 +1,6 @@
 package org.springframework.rules.reporting;
 
-import org.springframework.util.closure.Constraint;
+import org.springframework.core.closure.Constraint;
 
 /**
  * @author Keith Donald

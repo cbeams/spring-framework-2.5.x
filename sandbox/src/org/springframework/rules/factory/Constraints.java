@@ -18,6 +18,9 @@ package org.springframework.rules.factory;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.springframework.core.closure.Closure;
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AlgorithmsAccessor;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
@@ -48,9 +51,6 @@ import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.rules.constraint.property.UniquePropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.closure.Closure;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
  * A factory for easing the construction and composition of constraints.

@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
-import org.springframework.util.closure.support.Block;
 
 /**
  * Request context implementation used internally by the web flow system.

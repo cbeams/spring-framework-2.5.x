@@ -19,8 +19,8 @@ import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A transition takes a flow from one state to another when executed. A

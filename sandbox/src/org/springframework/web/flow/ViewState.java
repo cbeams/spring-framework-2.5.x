@@ -15,8 +15,8 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.StringUtils;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A view state is a state in which a physical view resource should be rendered

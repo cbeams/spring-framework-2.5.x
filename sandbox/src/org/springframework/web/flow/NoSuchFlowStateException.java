@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.util.Styler;
+import org.springframework.core.Styler;
 
 /**
  * Thrown when a state could not be found in a flow on lookup by

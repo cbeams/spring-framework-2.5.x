@@ -18,8 +18,8 @@ package org.springframework.rules.reporting;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Constraint;
 
 /**
  * @author Keith Donald
@@ -62,8 +62,4 @@ public class PropertyResults implements ValidationResults {
         return severity;
     }
     
-    public String toString() {
-        return new ToStringCreator(this).appendProperties().toString();
-    }
-
 }

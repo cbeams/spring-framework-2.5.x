@@ -22,12 +22,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ToStringCreator;
 import org.springframework.rules.Rules;
 import org.springframework.rules.RulesSource;
 import org.springframework.rules.constraint.ConstraintsAccessor;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.util.StringUtils;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A default rules source implementation which is simply a in-memory registry

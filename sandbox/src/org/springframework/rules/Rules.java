@@ -23,6 +23,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.CompoundConstraint;
 import org.springframework.rules.constraint.ConstraintsAccessor;
@@ -31,8 +33,6 @@ import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

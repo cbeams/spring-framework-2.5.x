@@ -17,8 +17,8 @@ package org.springframework.web.flow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A base super class for state definitions. Each state is associated with

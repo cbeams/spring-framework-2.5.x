@@ -4,7 +4,7 @@
  */
 package org.springframework.rules.constraint.property;
 
-import org.springframework.util.closure.Constraint;
+import org.springframework.core.closure.Constraint;
 
 /**
  * A predicate that constrains a bean property in some way.

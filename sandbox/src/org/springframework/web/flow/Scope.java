@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.core.Styler;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
 
 /**
  * Holder for data placed in a specific scope, for example "request scope" or

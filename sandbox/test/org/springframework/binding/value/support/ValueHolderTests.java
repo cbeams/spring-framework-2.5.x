@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/test/org/springframework/binding/value/support/ValueHolderTests.java,v 1.1 2004-10-28 22:17:50 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-10-28 22:17:50 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/test/org/springframework/binding/value/support/ValueHolderTests.java,v 1.2 2005-04-04 17:32:58 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2005-04-04 17:32:58 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -13,7 +13,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.binding.value.ValueModel;
-import org.springframework.util.closure.Closure;
+import org.springframework.core.closure.Closure;
 
 /**
  * 

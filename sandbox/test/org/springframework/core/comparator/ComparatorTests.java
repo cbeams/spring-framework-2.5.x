@@ -1,10 +1,10 @@
-package org.springframework.util.comparator;
+package org.springframework.core.comparator;
 
 import java.util.Comparator;
 
-import org.springframework.beans.PropertyComparator;
-
 import junit.framework.TestCase;
+
+import org.springframework.beans.PropertyComparator;
 
 public class ComparatorTests extends TestCase {
 
@@ -131,10 +131,8 @@ public class ComparatorTests extends TestCase {
 	}
 
 	public void testStaticFactoryMethods() {
-		CompoundComparator c = new CompoundComparator(SortDefinition
-				.createSortDefinitionList(new Comparator[]{
-					new PropertyComparator("lastName"),
-					new PropertyComparator("firstName")}));
+		CompoundComparator c = new CompoundComparator(SortDefinition.createSortDefinitionList(new Comparator[] {
+				new PropertyComparator("lastName"), new PropertyComparator("firstName") }));
 		Dog dog1 = new Dog();
 		dog1.setFirstName("macy");
 		dog1.setLastName("grayspots");
@@ -146,7 +144,6 @@ public class ComparatorTests extends TestCase {
 		assertTrue(c.compare(dog1, dog2) > 0);
 	}
 
-
 	private static class Dog implements Comparable {
 
 		private String nickName;
@@ -156,7 +153,7 @@ public class ComparatorTests extends TestCase {
 		private String lastName;
 
 		public int compareTo(Object o) {
-			return nickName.compareTo(((Dog) o).nickName);
+			return nickName.compareTo(((Dog)o).nickName);
 		}
 
 		public String getNickName() {

@@ -15,8 +15,8 @@
  */
 package org.springframework.rules.closure;
 
+import org.springframework.core.closure.support.AbstractClosure;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.support.AbstractClosure;
 
 /**
  * Conveneince support class for binary closures. Overrides call(argument) to

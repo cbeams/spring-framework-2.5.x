@@ -9,12 +9,12 @@ import java.util.Locale;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.constraint.CompoundConstraint;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.rules.reporting.BeanValidationResults;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
-import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

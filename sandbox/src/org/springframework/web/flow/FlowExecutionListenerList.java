@@ -17,9 +17,9 @@ package org.springframework.web.flow;
 
 import java.util.Iterator;
 
+import org.springframework.core.EventListenerListHelper;
+import org.springframework.core.closure.ProcessTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.EventListenerListHelper;
-import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * A strongly typed listener list class for FlowExecutionListeners.

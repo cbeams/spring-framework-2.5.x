@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.support.Mapping;
-import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.core.enums.support.ShortCodedLabeledEnum;
 
 /**
  * @author Keith Donald

@@ -19,12 +19,12 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.CompoundConstraint;
 import org.springframework.rules.constraint.Not;
 import org.springframework.rules.constraint.Or;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

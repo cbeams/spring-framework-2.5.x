@@ -17,9 +17,9 @@ package org.springframework.rules.constraint.property;
 
 import java.util.Iterator;
 
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AbstractConstraint;
 import org.springframework.rules.constraint.CompoundConstraint;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AbstractConstraint;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.

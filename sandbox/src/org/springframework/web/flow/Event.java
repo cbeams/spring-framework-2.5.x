@@ -19,7 +19,7 @@ import java.util.EventObject;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
-import org.springframework.util.ToStringCreator;
+import org.springframework.core.ToStringCreator;
 
 /**
  * Signals the occurence of an <i>event</i> that is relevant to the web flow

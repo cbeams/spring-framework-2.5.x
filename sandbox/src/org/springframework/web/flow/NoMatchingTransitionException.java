@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.util.Styler;
+import org.springframework.core.Styler;
 
 /**
  * Throw when no transition can be matched given the occurence of an event in

@@ -14,12 +14,12 @@
  * the License.
  */
 
-package org.springframework.util.enums;
+package org.springframework.core.enums;
 
 import junit.framework.TestCase;
 
-import org.springframework.util.enums.support.ShortCodedLabeledEnum;
-import org.springframework.util.enums.support.StaticLabeledEnumResolver;
+import org.springframework.core.enums.support.ShortCodedLabeledEnum;
+import org.springframework.core.enums.support.StaticLabeledEnumResolver;
 
 /**
  * @author Rod Johnson
@@ -37,7 +37,8 @@ public class LabeledEnumTests extends TestCase {
 		try {
 			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)1));
 			fail("Should have failed");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
 	}

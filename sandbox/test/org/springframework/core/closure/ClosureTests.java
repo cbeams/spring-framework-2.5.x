@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.util.closure;
+package org.springframework.core.closure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 
 import org.springframework.binding.value.ValueModel;
 import org.springframework.binding.value.support.ValueHolder;
-import org.springframework.util.closure.support.Block;
-import org.springframework.util.closure.support.IteratorProcessTemplate;
+import org.springframework.core.closure.support.Block;
+import org.springframework.core.closure.support.IteratorProcessTemplate;
 
 /**
  * @author Keith Donald

@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a

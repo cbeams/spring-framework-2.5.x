@@ -17,9 +17,9 @@ package org.springframework.web.flow;
 
 import java.util.Properties;
 
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.util.ToStringCreator;
 
 /**
  * A parameter object that allows for storing arbitrary properties about a

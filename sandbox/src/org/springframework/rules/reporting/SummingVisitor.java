@@ -17,15 +17,15 @@ package org.springframework.rules.reporting;
 
 import java.util.Iterator;
 
+import org.springframework.core.ReflectiveVisitorSupport;
+import org.springframework.core.Visitor;
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.Or;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectiveVisitorSupport;
-import org.springframework.util.Visitor;
-import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

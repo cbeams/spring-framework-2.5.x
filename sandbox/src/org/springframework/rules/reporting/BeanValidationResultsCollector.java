@@ -15,14 +15,14 @@
  */
 package org.springframework.rules.reporting;
 
+import org.springframework.core.Visitor;
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.Block;
 import org.springframework.rules.Rules;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
-import org.springframework.util.Visitor;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.Block;
 
 /**
  * @author Keith Donald

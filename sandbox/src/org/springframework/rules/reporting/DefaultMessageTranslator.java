@@ -26,6 +26,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.ReflectiveVisitorSupport;
+import org.springframework.core.Styler;
+import org.springframework.core.Visitor;
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
 import org.springframework.rules.constraint.Not;
@@ -40,10 +44,6 @@ import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectiveVisitorSupport;
-import org.springframework.util.Styler;
-import org.springframework.util.Visitor;
-import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

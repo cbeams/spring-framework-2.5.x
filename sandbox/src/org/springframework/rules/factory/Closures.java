@@ -15,12 +15,12 @@
  */
 package org.springframework.rules.factory;
 
+import org.springframework.core.closure.Closure;
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AlgorithmsAccessor;
+import org.springframework.core.closure.support.ClosureChain;
+import org.springframework.core.closure.support.ConstrainedBlock;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.Closure;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AlgorithmsAccessor;
-import org.springframework.util.closure.support.ClosureChain;
-import org.springframework.util.closure.support.ConstrainedBlock;
 
 /**
  * A factory for easing the construction and composition of closure (blocks of

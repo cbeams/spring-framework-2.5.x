@@ -15,10 +15,10 @@
  */
 package org.springframework.rules.factory;
 
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AlgorithmsAccessor;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
  * Helper class for creating and composing constraints for a single domain object property.

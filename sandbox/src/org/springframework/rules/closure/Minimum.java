@@ -15,7 +15,7 @@
  */
 package org.springframework.rules.closure;
 
-import org.springframework.util.comparator.NullSafeComparator;
+import org.springframework.core.comparator.NullSafeComparator;
 
 /**
  * Returns the maximum of two <code>Comparable</code> objects.
