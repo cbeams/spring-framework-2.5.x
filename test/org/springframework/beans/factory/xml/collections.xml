@@ -9,7 +9,7 @@
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
 		<!-- Could use id and href -->
-			<ref bean="david"/>
+			<ref local="david"/>
 		</property>
 	</bean>
 	
@@ -23,8 +23,8 @@
 		<property name="age"><value>32</value></property>
 		<property name="friends">
 			<list>
-				<ref bean="jenny"/>
-				<ref bean="david"/>			
+				<ref local="jenny"/>
+				<ref local="david"/>
 			</list>
 		</property>
 	</bean>
@@ -37,7 +37,7 @@
 		<property name="age"><value>26</value></property>
 		<property name="friends">
 			<list>
-				<ref bean="david"/>			
+				<ref local="david"/>
 			</list>
 		</property>
 	</bean>
@@ -45,9 +45,9 @@
 	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">	
 		<property name="jumble">
 			<list>
-				<ref bean="david"/>	
+				<ref local="david"/>
 				<value>literal</value>
-				<ref bean="jenny" />
+				<ref local="jenny" />
 			</list>
 		</property>
 	</bean>
@@ -88,7 +88,7 @@
 		<property name="map">
 			<map>
 				<entry key="foo"><value>bar</value></entry>
-				<entry key="jenny"><ref bean="jenny"/></entry>
+				<entry key="jenny"><ref local="jenny"/></entry>
 			</map>
 		</property>
 	</bean>
@@ -97,11 +97,11 @@
 		<property name="map">
 			<map>
 				<entry key="foo"><value>bar</value></entry>
-				<entry key="jenny"><ref bean="jenny"/></entry>
+				<entry key="jenny"><ref local="jenny"/></entry>
 				<entry key="list">
 					<list>
 						<value>zero</value>
-						<ref bean="jenny" />
+						<ref local="jenny" />
 					</list>
 				</entry>
 			</map>
@@ -129,7 +129,7 @@
 		<property name="objectArray">
 			<list>
 				<value>one</value>
-				<ref bean="jenny"/>
+				<ref local="jenny"/>
 			</list>
 		</property>
 	</bean>

@@ -14,7 +14,7 @@
 	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade"/>
 
 	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="transactionManager"><ref local="mockMan"/></property>
 		<property name="transactionAttributeSource">
 			<value>org.springframework.beans.ITestBean.setAge=PROPAGATION_REQUIRED</value>
 		</property>
@@ -34,8 +34,8 @@
 	
 
 	<bean id="proxyFactory2" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref bean="mockMan"/></property>
-		<property name="target"><ref bean="target"/></property>
+		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="target"><ref local="target"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="setAge">PROPAGATION_REQUIRED</prop>
@@ -44,8 +44,8 @@
 	</bean>
 
 	<bean id="proxyFactory3" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref bean="mockMan"/></property>
-		<property name="target"><ref bean="target"/></property>
+		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="target"><ref local="target"/></property>
 		<property name="proxyInterfacesOnly"><value>false</value></property>
 		<property name="transactionAttributes">
 			<props>
@@ -53,16 +53,16 @@
 			</props>
 		</property>
 		<property name="methodPointcut">
-			<ref bean="txnInvocationCounterPointcut"/>
+			<ref local="txnInvocationCounterPointcut"/>
 		</property>
 		<property name="preInterceptors">
 			<list>
-				<ref bean="preInvocationCounterInterceptor"/>
+				<ref local="preInvocationCounterInterceptor"/>
 			</list>
 		</property>
 		<property name="postInterceptors">
 			<list>
-				<ref bean="postInvocationCounterInterceptor"/>
+				<ref local="postInvocationCounterInterceptor"/>
 			</list>
 		</property>
 	</bean>

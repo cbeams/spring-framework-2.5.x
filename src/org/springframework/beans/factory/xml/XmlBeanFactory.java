@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.9 2003-10-16 18:56:41 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.10 2003-10-21 16:03:10 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -102,6 +102,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 
 	private static final String BEAN_REF_ATTRIBUTE = "bean";
+
+	private static final String LOCAL_REF_ATTRIBUTE = "local";
 
 	private static final String EXTERNAL_REF_ATTRIBUTE = "external";
 
@@ -428,13 +430,17 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	private Object parsePropertySubelement(Element ele) {
 		if (ele.getTagName().equals(REF_ELEMENT)) {
-			// a reference to another bean in this factory?
+			// a generic reference to any name of any bean
 			String beanName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			if ("".equals(beanName)) {
-				// a reference to an external bean (in a parent factory)?
-				beanName = ele.getAttribute(EXTERNAL_REF_ATTRIBUTE);
+				// a reference to the id of another bean in the same XML file
+				beanName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if ("".equals(beanName)) {
-					throw new FatalBeanException("Either 'bean' or 'external' is required for a reference");
+					// a reference to a bean in a different XML file
+					beanName = ele.getAttribute(EXTERNAL_REF_ATTRIBUTE);
+					if ("".equals(beanName)) {
+						throw new FatalBeanException("Either 'bean' or 'local' or 'external' is required for a reference");
+					}
 				}
 			}
 			return new RuntimeBeanReference(beanName);

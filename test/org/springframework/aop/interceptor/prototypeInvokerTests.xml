@@ -19,7 +19,7 @@
 		default
 	-->
 	<bean id="invokerInterceptor" class="org.springframework.aop.framework.InvokerInterceptor">	
-		<property name="target"><ref bean="test"/></property>
+		<property name="target"><ref local="test"/></property>
 	</bean>
 	
 	<bean id="prototypeInvokerInterceptor" class="org.springframework.aop.interceptor.PrototypeInvokerInterceptor">	
