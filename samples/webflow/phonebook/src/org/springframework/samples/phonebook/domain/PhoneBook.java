@@ -24,27 +24,61 @@ public class PhoneBook {
 	private List persons = new ArrayList();
 
 	public PhoneBook() {
-		//setup some test data
-		Person jkerry = new Person("John", "Kerry", "jkerry", "11111");
-		Person jedwar = new Person("John", "Edwards", "jedwar", "22222");
-		Person bclint = new Person("Bill", "Clinton", "bclint", "33333");
-		jkerry.addColleague(jedwar);
-		jkerry.addColleague(bclint);
-		jedwar.addColleague(jkerry);
-		jedwar.addColleague(bclint);
-		bclint.addColleague(jkerry);
-		bclint.addColleague(jedwar);
+		// setup some test data
+		Person kd = new Person("Keith", "Donald", "kdonald", "11111");
+		Person ev = new Person("Erwin", "Vervaet", "klr8", "22222");
+		Person cs = new Person("Colin", "Sampaleanu", "sampa", "33333");
+		Person jh = new Person("Juergen", "Hoeller", "jhoeller", "44444");
+		Person rj = new Person("Rod", "Johnson", "rod", "55555");
+		Person tr = new Person("Thomas", "Risberg", "trisberg", "66666");
+		Person aa = new Person("Alef", "Andersen", "alef", "77777");
+		Person mp = new Person("Mark", "Pollack", "mark", "888888");
+		
+		kd.addColleague(ev);
+		kd.addColleague(cs);
+		kd.addColleague(jh);
+		kd.addColleague(rj);
+		kd.addColleague(tr);
+		kd.addColleague(aa);
+		kd.addColleague(mp);
+		
+		ev.addColleague(kd);
+		ev.addColleague(cs);
+		ev.addColleague(jh);
+		ev.addColleague(rj);
+		
+		cs.addColleague(kd);
+		cs.addColleague(ev);
+		cs.addColleague(jh);
+		cs.addColleague(rj);
+		cs.addColleague(aa);
+		cs.addColleague(mp);
 
-		Person gwbush = new Person("George Walker", "Bush", "gwbush", "44444");
-		Person dchain = new Person("Dick", "Chainey", "dchain", "55555");
-		gwbush.addColleague(dchain);
-		dchain.addColleague(gwbush);
+		rj.addColleague(cs);
+		rj.addColleague(kd);
+		rj.addColleague(ev);
+		rj.addColleague(jh);
+		rj.addColleague(tr);
+		rj.addColleague(aa);
+		rj.addColleague(mp);
 
-		persons.add(jkerry);
-		persons.add(jedwar);
-		persons.add(bclint);
-		persons.add(gwbush);
-		persons.add(dchain);
+		jh.addColleague(cs);
+		jh.addColleague(kd);
+		jh.addColleague(ev);
+		jh.addColleague(jh);
+		jh.addColleague(tr);
+		jh.addColleague(aa);
+
+		Person sa = new Person("Shaun", "Alexander", "rolltide", "44444");
+		Person dj = new Person("Darell", "Jackson", "gatorcountry", "55555");
+		sa.addColleague(dj);
+		dj.addColleague(sa);
+
+		persons.add(kd);
+		persons.add(ev);
+		persons.add(cs);
+		persons.add(sa);
+		persons.add(dj);
 	}
 
 	public List query(PhoneBookQuery query) {
