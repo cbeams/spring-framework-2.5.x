@@ -83,6 +83,7 @@ public abstract class StringUtils {
 	 * @param str the String to check, may be null
 	 * @return <code>true</code> if the String is not null, length > 0,
 	 * and not whitespace only
+	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
 		int strLen;
@@ -95,6 +96,34 @@ public abstract class StringUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Trim whitespace from the front of the given String.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimFrontWhitespace(String str) {
+		StringBuffer buf = new StringBuffer(str);
+		while (Character.isWhitespace(buf.charAt(0))) {
+			buf.deleteCharAt(0);
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Trim whitespace from the rear of the given String.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimRearWhitespace(String str) {
+		StringBuffer buf = new StringBuffer(str);
+		while (Character.isWhitespace(buf.charAt(buf.length() - 1))) {
+			buf.deleteCharAt(buf.length() - 1);
+		}
+		return buf.toString();
 	}
 
 
@@ -133,7 +162,7 @@ public abstract class StringUtils {
 
 		StringBuffer sbuf = new StringBuffer();
 		// output StringBuffer we'll build up
-		int pos = 0; // Our position in the old string
+		int pos = 0; // our position in the old string
 		int index = inString.indexOf(oldPattern);
 		// the index of an occurrence we've found, or -1
 		int patLen = oldPattern.length();

@@ -29,41 +29,34 @@ import java.util.Properties;
 
 /**
  * Default implementation of the PropertiesPersister interface.
- * Provides java.util.Properties' native parsing.
+ * Follows <code>java.util.Properties</code> native parsing.
  *
- * <p>Allows for reading from any Reader and writing to any Writer,
- * for example to specify a charset for a properties file. This is a
- * capability that standard java.util.Properties unfortunately lacks:
- * You can only load files using the ISO-8859-1 charset there.
+ * <p>Allows for reading from any Reader and writing to any Writer, for example
+ * to specify a charset for a properties file. This is a capability that standard
+ * <code>java.util.Properties</code> unfortunately lacks: You can only load files
+ * using the ISO-8859-1 charset there.
  *
- * <p>Due to the fact that java.util.Properties' own load and store
- * methods are implemented in a completely unextensible fashion,
- * the persistence code had to be copied and pasted into this class,
- * allowing to specify any Reader or Writer.
+ * <p>Loading from and storing to a stream delegates to <code>Properties.load</code>
+ * and <code>Properties.store</code>, respectively, to be fully compatible with
+ * the Unicode conversion as implemented by the JDK Properties class.
  *
- * <p>All persistence code in this class is subject to the license
- * of the original java.util.Properties file. The unextensible code
- * there should be permission enough to copy and paste it here.
+ * <p>The persistence code that works with Reader/Writer follows the JDK's parsing
+ * strategy but does not implement Unicode conversion, because the Reader/Writer
+ * should already apply proper decoding/encoding of characters. If you use prefer
+ * to escape unicode characters in your properties files, do <i>not</i> specify
+ * an encoding for a Reader/Writer (like ReloadableResourceBundleMessageSource's
+ * "defaultEncoding" and "fileEncodings" properties).
  *
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see java.util.Properties
+ * @see java.util.Properties#load
+ * @see java.util.Properties#store
+ * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setPropertiesPersister
+ * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setDefaultEncoding
+ * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setFileEncodings
  */
 public class DefaultPropertiesPersister implements PropertiesPersister {
-
-	public static final String keyValueSeparators = "=: \t\r\n\f";
-
-	public static final String strictKeyValueSeparators = "=:";
-
-	public static final String specialSaveChars = "=: \t\r\n\f#!";
-
-	public static final String whiteSpaceChars = " \t\r\n\f";
-
-	/** A table of hex digits */
-	protected static final char[] hexDigit = {
-		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-	};
-
 
 	public void load(Properties props, InputStream is) throws IOException {
 		props.load(is);
@@ -72,160 +65,65 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	public void load(Properties props, Reader reader) throws IOException {
 		BufferedReader in = new BufferedReader(reader);
 		while (true) {
-			// Get next line
 			String line = in.readLine();
-			if (line == null)
+			if (line == null) {
 				return;
-
+			}
+			line = StringUtils.trimFrontWhitespace(line);
 			if (line.length() > 0) {
-
-				// Find start of key
-				int len = line.length();
-				int keyStart;
-				for (keyStart = 0; keyStart < len; keyStart++)
-					if (whiteSpaceChars.indexOf(line.charAt(keyStart)) == -1)
-						break;
-
-				// Blank lines are ignored
-				if (keyStart == len)
-					continue;
-
-				// Continue lines that end in slashes if they are not comments
-				char firstChar = line.charAt(keyStart);
-				if ((firstChar != '#') && (firstChar != '!')) {
-					while (continueLine(line)) {
+				char firstChar = line.charAt(0);
+				if (firstChar != '#' && firstChar != '!') {
+					while (endsWithContinuationMarker(line)) {
 						String nextLine = in.readLine();
-						if (nextLine == null)
-							nextLine = "";
-						String loppedLine = line.substring(0, len - 1);
-						// Advance beyond whitespace on new line
-						int startIndex;
-						for (startIndex = 0; startIndex < nextLine.length(); startIndex++)
-							if (whiteSpaceChars.indexOf(nextLine.charAt(startIndex)) == -1)
-								break;
-						nextLine = nextLine.substring(startIndex, nextLine.length());
-						line = new String(loppedLine + nextLine);
-						len = line.length();
+						line = line.substring(0, line.length() - 1);
+						if (nextLine != null) {
+							line += StringUtils.trimFrontWhitespace(nextLine);
+						}
 					}
-
-					// Find separation between key and value
-					int separatorIndex;
-					for (separatorIndex = keyStart; separatorIndex < len; separatorIndex++) {
-						char currentChar = line.charAt(separatorIndex);
-						if (currentChar == '\\')
-							separatorIndex++;
-						else if (keyValueSeparators.indexOf(currentChar) != -1)
-							break;
+					int separatorIndex = line.indexOf("=");
+					if (separatorIndex == -1) {
+						separatorIndex = line.indexOf(":");
 					}
-
-					// Skip over whitespace after key if any
-					int valueIndex;
-					for (valueIndex = separatorIndex; valueIndex < len; valueIndex++)
-						if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-							break;
-
-					// Skip over one non whitespace key value separators if any
-					if (valueIndex < len)
-						if (strictKeyValueSeparators.indexOf(line.charAt(valueIndex)) != -1)
-							valueIndex++;
-
-					// Skip over white space after other separators if any
-					while (valueIndex < len) {
-						if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-							break;
-						valueIndex++;
-					}
-					String key = line.substring(keyStart, separatorIndex);
-					String value = (separatorIndex < len) ? line.substring(valueIndex, len) : "";
-
-					// Convert then store key and value
-					key = loadConvert(key);
-					value = loadConvert(value);
-					props.put(key, value);
+					String key = (separatorIndex != -1 ? line.substring(0, separatorIndex) : line);
+					String value = (separatorIndex != -1) ? line.substring(separatorIndex + 1) : "";
+					key = StringUtils.trimRearWhitespace(key);
+					value = StringUtils.trimFrontWhitespace(value);
+					props.put(unescape(key), unescape(value));
 				}
 			}
 		}
 	}
 
-	/**
-	 * Return true if the given line is a line that must be appended
-	 * to the next line.
-	 */
-	protected boolean continueLine(String line) {
-		int slashCount = 0;
+	protected boolean endsWithContinuationMarker(String line) {
+		boolean evenSlashCount = true;
 		int index = line.length() - 1;
-		while ((index >= 0) && (line.charAt(index--) == '\\'))
-			slashCount++;
-		return (slashCount % 2 == 1);
+		while (index >= 0 && line.charAt(index) == '\\') {
+			evenSlashCount = !evenSlashCount;
+			index--;
+		}
+		return !evenSlashCount;
 	}
 
-	/**
-	 * Convert encoded &#92;uxxxx to unicode chars and changes special
-	 * saved chars to their original forms.
-	 */
-	protected String loadConvert(String theString) {
-		char aChar;
-		int len = theString.length();
-		StringBuffer outBuffer = new StringBuffer(len);
-
-		for (int x = 0; x < len;) {
-			aChar = theString.charAt(x++);
-			if (aChar == '\\') {
-				aChar = theString.charAt(x++);
-				if (aChar == 'u') {
-					// Read the xxxx
-					int value = 0;
-					for (int i = 0; i < 4; i++) {
-						aChar = theString.charAt(x++);
-						switch (aChar) {
-							case '0':
-							case '1':
-							case '2':
-							case '3':
-							case '4':
-							case '5':
-							case '6':
-							case '7':
-							case '8':
-							case '9':
-								value = (value << 4) + aChar - '0';
-								break;
-							case 'a':
-							case 'b':
-							case 'c':
-							case 'd':
-							case 'e':
-							case 'f':
-								value = (value << 4) + 10 + aChar - 'a';
-								break;
-							case 'A':
-							case 'B':
-							case 'C':
-							case 'D':
-							case 'E':
-							case 'F':
-								value = (value << 4) + 10 + aChar - 'A';
-								break;
-							default:
-								throw new IllegalArgumentException(
-								    "Malformed \\uxxxx encoding.");
-						}
-					}
-					outBuffer.append((char) value);
+	protected String unescape(String str) {
+		StringBuffer outBuffer = new StringBuffer(str.length());
+		for (int index = 0; index < str.length();) {
+			char c = str.charAt(index++);
+			if (c == '\\') {
+				c = str.charAt(index++);
+				if (c == 't') {
+					c = '\t';
 				}
-				else {
-					if (aChar == 't')
-						aChar = '\t';
-					else if (aChar == 'r')
-						aChar = '\r';
-					else if (aChar == 'n')
-						aChar = '\n';
-					else if (aChar == 'f') aChar = '\f';
-					outBuffer.append(aChar);
+				else if (c == 'r') {
+					c = '\r';
+				}
+				else if (c == 'n') {
+					c = '\n';
+				}
+				else if (c == 'f') {
+					c = '\f';
 				}
 			}
-			else
-				outBuffer.append(aChar);
+			outBuffer.append(c);
 		}
 		return outBuffer.toString();
 	}
@@ -236,95 +134,57 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 	public void store(Properties props, Writer writer, String header) throws IOException {
-		BufferedWriter out;
-		out = new BufferedWriter(writer);
-		if (header != null)
-			writeln(out, "#" + header);
-		writeln(out, "#" + new Date().toString());
-		for (Enumeration e = props.keys(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String val = (String) props.get(key);
-			key = saveConvert(key, true);
-
-			/* No need to escape embedded and trailing spaces for value, hence
-			* pass false to flag.
-			*/
-			val = saveConvert(val, false);
-			writeln(out, key + "=" + val);
+		BufferedWriter out = new BufferedWriter(writer);
+		if (header != null) {
+			out.write("#" + header);
+			out.newLine();
+		}
+		out.write("#" + new Date());
+		out.newLine();
+		for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
+			String key = (String) keys.nextElement();
+			String val = props.getProperty(key);
+			out.write(escape(key, true) + "=" + escape(val, false));
+			out.newLine();
 		}
 		out.flush();
 	}
 
-	/**
-	 * Write the given string to the given writer, following it up with a new line.
-	 */
-	protected void writeln(BufferedWriter bw, String s) throws IOException {
-		bw.write(s);
-		bw.newLine();
-	}
-
-	/**
-	 * Convert unicodes to encoded &#92;uxxxx and writes out any of the
-	 * characters in specialSaveChars with a preceding slash
-	 */
-	protected String saveConvert(String theString, boolean escapeSpace) {
-		int len = theString.length();
+	protected String escape(String str, boolean isKey) {
+		int len = str.length();
 		StringBuffer outBuffer = new StringBuffer(len * 2);
-
-		for (int x = 0; x < len; x++) {
-			char aChar = theString.charAt(x);
-			switch (aChar) {
+		for (int index = 0; index < len; index++) {
+			char c = str.charAt(index);
+			switch (c) {
 				case ' ':
-					if (x == 0 || escapeSpace)
+					if (index == 0 || isKey) {
 						outBuffer.append('\\');
-
+					}
 					outBuffer.append(' ');
 					break;
 				case '\\':
-					outBuffer.append('\\');
-					outBuffer.append('\\');
+					outBuffer.append("\\\\");
 					break;
 				case '\t':
-					outBuffer.append('\\');
-					outBuffer.append('t');
+					outBuffer.append("\\t");
 					break;
 				case '\n':
-					outBuffer.append('\\');
-					outBuffer.append('n');
+					outBuffer.append("\\n");
 					break;
 				case '\r':
-					outBuffer.append('\\');
-					outBuffer.append('r');
+					outBuffer.append("\\r");
 					break;
 				case '\f':
-					outBuffer.append('\\');
-					outBuffer.append('f');
+					outBuffer.append("\\f");
 					break;
 				default:
-					if ((aChar < 0x0020) || (aChar > 0x007e)) {
+					if ("=: \t\r\n\f#!".indexOf(c) != -1) {
 						outBuffer.append('\\');
-						outBuffer.append('u');
-						outBuffer.append(toHex((aChar >> 12) & 0xF));
-						outBuffer.append(toHex((aChar >> 8) & 0xF));
-						outBuffer.append(toHex((aChar >> 4) & 0xF));
-						outBuffer.append(toHex(aChar & 0xF));
 					}
-					else {
-						if (specialSaveChars.indexOf(aChar) != -1)
-							outBuffer.append('\\');
-						outBuffer.append(aChar);
-					}
+					outBuffer.append(c);
 			}
 		}
 		return outBuffer.toString();
-	}
-
-	/**
-	 * Convert a nibble to a hex character.
-	 * @param	nibble the nibble to convert
-	 */
-	protected char toHex(int nibble) {
-		return hexDigit[(nibble & 0xF)];
 	}
 
 }

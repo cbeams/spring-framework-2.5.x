@@ -129,20 +129,23 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 	public void testResourceBundleMessageSourceStandalone() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
 	public void testReloadableResourceBundleMessageSourceStandalone() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
 	public void testReloadableResourceBundleMessageSourceWithDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("ISO-8859-1");
-		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
 	public void testReloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
@@ -185,7 +188,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		Properties fileCharsets = new Properties();
 		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
 		ms.setFileEncodings(fileCharsets);
-		assertEquals("message1",  ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("message2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
 }
