@@ -17,21 +17,31 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
- * Bean definition for beans whose class is defined by their ancestry.
+ * Bean definition for beans who inherit settings from their parent.
  *
- * <p>PropertyValues defined by the parent will also be "inherited", although
- * it's possible to override them by redefining them in the property values
- * associated with the child.
+ * <p>Will use the bean class of the parent if none specified, but can
+ * also override it. In the latter case, the child bean class must be
+ * compatible with the parent, i.e. accept the parent's property values
+ * and constructor argument values, if any.
+ *
+ * <p>A child bean definition will inherit constructor argument values,
+ * property values and method overrides from the parent, with the option
+ * to add new values. If init method, destroy method and/or static factory
+ * method are specified, they will override the corresponding parent settings.
+ *
+ * <p>The remaining settings will <i>always</i> be taken from the child definition:
+ * depends on, autowire mode, dependency check, singleton, lazy init.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
-	private String parentName;
+	private final String parentName;
 
 	/**
 	 * Create a new ChildBeanDefinition for the given parent.
@@ -39,16 +49,63 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the additional property values of the child
 	 */
 	public ChildBeanDefinition(String parentName, MutablePropertyValues pvs) {
-		super(pvs);
 		this.parentName = parentName;
+		setPropertyValues(pvs);
 	}
 
 	/**
-	 * Return the name of the parent bean definition in the bean factory.
+	 * Create a new ChildBeanDefinition for the given parent.
+	 * @param parentName the name of the parent bean
+	 * @param cargs the constructor argument values to apply
+	 * @param pvs the additional property values of the child
+	 */
+	public ChildBeanDefinition(String parentName, ConstructorArgumentValues cargs,
+	                           MutablePropertyValues pvs) {
+		this.parentName = parentName;
+		setConstructorArgumentValues(cargs);
+		setPropertyValues(pvs);
+	}
+
+	/**
+	 * Create a new ChildBeanDefinition for the given parent,
+	 * providing constructor arguments and property values.
+	 * @param parentName the name of the parent bean
+	 * @param beanClass the class of the bean to instantiate
+	 * @param cargs the constructor argument values to apply
+	 * @param pvs the property values to apply
+	 */
+	public ChildBeanDefinition(String parentName, Class beanClass,
+	                           ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		this.parentName = parentName;
+		setBeanClass(beanClass);
+		setConstructorArgumentValues(cargs);;
+		setPropertyValues(pvs);
+	}
+
+	/**
+	 * Create a new ChildBeanDefinition for the given parent,
+	 * providing constructor arguments and property values.
+	 * Takes a bean class name to avoid eager loading of the bean class.
+	 * @param parentName the name of the parent bean
+	 * @param beanClassName the name of the class to instantiate
+	 * @param cargs the constructor argument values to apply
+	 * @param pvs the property values to apply
+	 */
+	public ChildBeanDefinition(String parentName, String beanClassName,
+	                           ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		this.parentName = parentName;
+		setBeanClassName(beanClassName);
+		setConstructorArgumentValues(cargs);;
+		setPropertyValues(pvs);
+	}
+
+	/**
+	 * Return the name of the parent definition of this bean definition.
 	 */
 	public String getParentName() {
 		return parentName;
 	}
+
 
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();

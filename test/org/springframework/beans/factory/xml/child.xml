@@ -3,31 +3,34 @@
 
 <beans>
 
-	<bean id="inheritsFromParentFactory" 
-		parent="inheritedTestBean">
+	<bean id="inheritsFromParentFactory" parent="inheritedTestBean">
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 	
-	<bean id="protoypeInheritsFromParentFactorySingleton" 
-		parent="inheritedTestBean"
-		singleton="false">
+	<bean id="inheritsWithDifferentClass" class="org.springframework.beans.DerivedTestBean"
+		parent="inheritedTestBean" init-method="initialize">
+		<property name="name"><value>override</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+		parent="inheritedTestBeanWithoutClass" init-method="initialize">
+		<property name="name"><value>override</value></property>
+		<!-- age should inherit value of 1 from parent -->
+	</bean>
+
+	<bean id="protoypeInheritsFromParentFactorySingleton" parent="inheritedTestBean" singleton="false">
 		<property name="name"><value>prototypeOverridesInheritedSingleton</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 	
-	<bean id="prototypeInheritsFromParentFactoryPrototype" 
-		parent="inheritedTestBeanPrototype"
-		singleton="false"
-	>
+	<bean id="prototypeInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" singleton="false">
 		<property name="name"><value>prototype-override</value></property>
 		<!-- age should inherit value of 2 from parent -->
 	</bean>
 	
-	<bean id="singletonInheritsFromParentFactoryPrototype" 
-		parent="inheritedTestBeanPrototype"
-		singleton="true"
-	>
+	<bean id="singletonInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" singleton="true">
 		<property name="name"><value>prototype-override</value></property>
 		<!-- age should inherit value of 2 from parent -->
 	</bean>
@@ -37,10 +40,6 @@
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
 
-	<bean id="bogusParent"
-		parent="bogus"
-		singleton="false"
-	>
-	</bean>
+	<bean id="bogusParent" parent="bogus" singleton="false"/>
 
 </beans>

@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.57 2004-06-15 09:29:40 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.58 2004-06-24 14:33:17 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -536,17 +536,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 				}
 			}
 
-			// deep copy
+			// deep copy with overridden values
 			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
-
-			// override properties
-			rbd.getPropertyValues().addPropertyValues(cbd.getPropertyValues());
-
-			// override settings
-			rbd.setSingleton(cbd.isSingleton());
-			rbd.setLazyInit(cbd.isLazyInit());
-			rbd.setResourceDescription(cbd.getResourceDescription());
-			
+			rbd.overrideFrom(cbd);
 			return rbd;
 		}
 		else {

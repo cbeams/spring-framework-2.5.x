@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.9 2004-06-13 15:28:05 johnsonr Exp $
+ *	$Id: TestBean.java,v 1.10 2004-06-24 14:33:18 jhoeller Exp $
  */
 
 /*
@@ -69,9 +69,6 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	private IndexedTestBean nestedIndexedBean;
 
-	public String getTouchy() {
-		return touchy;
-	}
 
 	public TestBean() {
 	}
@@ -80,6 +77,7 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		this.name = name;
 		this.age = age;
 	}
+
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
@@ -97,38 +95,32 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		return postProcessed;
 	}
 
+	public String getTouchy() {
+		return touchy;
+	}
+
 	public void setTouchy(String touchy) throws Exception {
-		if (touchy.indexOf('.') != -1)
+		if (touchy.indexOf('.') != -1) {
 			throw new Exception("Can't contain a .");
-		if (touchy.indexOf(',') != -1)
+		}
+		if (touchy.indexOf(',') != -1) {
 			throw new NumberFormatException("Number format exception: contains a ,");
+		}
 		this.touchy = touchy;
 	}
 
-	/** Getter for property age.
-	 * @return Value of property age.
-	 */
 	public int getAge() {
 		return age;
 	}
 
-	/** Setter for property age.
-	 * @param age New value of property age.
-	 */
 	public void setAge(int age) {
 		this.age = age;
 	}
 
-	/** Getter for property name.
-	 * @return Value of property name.
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/** Setter for property name.
-	 * @param name New value of property name.
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -156,6 +148,7 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	public void setMyFloat(Float myFloat) {
 		this.myFloat = myFloat;
 	}
+
 
 	public boolean equals(Object other) {
 		if (this == other)
@@ -190,6 +183,7 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		return s;
 	}
 
+
 	/**
 	 * @see ITestBean#exceptional(Throwable)
 	 */
@@ -211,6 +205,7 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	public void absquatulate() {
 		//System.out.println("IOther.absquatulate");
 	}
+	
 
 	/**
 	 * @return Collection

@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.22 2004-05-31 17:15:13 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.23 2004-06-24 14:33:17 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -172,7 +172,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				String beanName = (String) it.next();
 				if (containsBeanDefinition(beanName)) {
 					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-					if (bd.isSingleton() && !bd.isLazyInit()) {
+					if (bd.hasBeanClass() && bd.isSingleton() && !bd.isLazyInit()) {
 						if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
 							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 							if (factory.isSingleton()) {

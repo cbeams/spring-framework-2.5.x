@@ -29,6 +29,8 @@ public class DerivedTestBean extends TestBean implements Serializable, BeanNameA
 
 	private String beanName;
 
+	private boolean initialized;
+
 	private boolean destroyed;
 
 	public void setBeanName(String beanName) {
@@ -37,6 +39,14 @@ public class DerivedTestBean extends TestBean implements Serializable, BeanNameA
 
 	public String getBeanName() {
 		return beanName;
+	}
+
+	public void initialize() {
+		this.initialized = true;
+	}
+
+	public boolean wasInitialized() {
+		return initialized;
 	}
 
 	public void destroy() {

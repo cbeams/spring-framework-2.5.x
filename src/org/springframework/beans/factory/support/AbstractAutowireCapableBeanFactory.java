@@ -75,7 +75,7 @@ import org.springframework.core.JdkVersion;
  * @author Juergen Hoeller
  * @since 13.02.2004
  * @see #findMatchingBeans
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.24 2004-06-24 08:45:59 jhoeller Exp $
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.25 2004-06-24 14:33:17 jhoeller Exp $
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
@@ -235,7 +235,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// instantiate bean
 			errorMessage = "Instantiation of bean failed";
 
-			if (mergedBeanDefinition.getStaticFactoryMethod() != null)  {
+			if (mergedBeanDefinition.getStaticFactoryMethodName() != null)  {
 				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition);
 			}
 			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
@@ -315,7 +315,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (int i = 0; i < mergedBeanDefinition.getBeanClass().getMethods().length; i++) {
 			Method factoryMethod = mergedBeanDefinition.getBeanClass().getMethods()[i];
 			if (Modifier.isStatic(factoryMethod.getModifiers()) &&
-					factoryMethod.getName().equals(mergedBeanDefinition.getStaticFactoryMethod()) &&
+					factoryMethod.getName().equals(mergedBeanDefinition.getStaticFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length == cargs.getNrOfArguments()) {
 
 				Class[] argTypes = factoryMethod.getParameterTypes();
@@ -342,7 +342,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}	// for each method
 
 		// If we get here, we didn't match any method
-		throw new BeanDefinitionStoreException("Cannot find matching factory method " + mergedBeanDefinition.getStaticFactoryMethod());
+		throw new BeanDefinitionStoreException("Cannot find matching factory method " + mergedBeanDefinition.getStaticFactoryMethodName());
 	}
 
 

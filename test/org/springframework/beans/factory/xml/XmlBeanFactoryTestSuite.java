@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.48 2004-06-23 21:17:45 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.49 2004-06-24 14:33:18 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -143,12 +143,34 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("inheritsFromParentFactory");
-		// Name property value is overriden
+		// Name property value is overridden
 		assertTrue(inherits.getName().equals("override"));
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
 		TestBean inherits2 = (TestBean) child.getBean("inheritsFromParentFactory");
 		assertTrue(inherits2 == inherits);
+	}
+
+	public void testInheritanceWithDifferentClass() throws Exception {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		DerivedTestBean inherits = (DerivedTestBean) child.getBean("inheritsWithDifferentClass");
+		// Name property value is overridden
+		assertTrue(inherits.getName().equals("override"));
+		// Age property is inherited from bean in parent factory
+		assertTrue(inherits.getAge() == 1);
+		assertTrue(inherits.wasInitialized());
+	}
+
+	public void testInheritanceWithClass() throws Exception {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		DerivedTestBean inherits = (DerivedTestBean) child.getBean("inheritsWithClass");
+		// Name property value is overridden
+		assertTrue(inherits.getName().equals("override"));
+		// Age property is inherited from bean in parent factory
+		assertTrue(inherits.getAge() == 1);
+		assertTrue(inherits.wasInitialized());
 	}
 
 	public void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {

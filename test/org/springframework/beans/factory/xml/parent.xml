@@ -8,10 +8,12 @@
 		<property name="age"><value>1</value></property>
 	</bean>
 	
-	<bean id="inheritedTestBeanPrototype" 
-		class="org.springframework.beans.TestBean"
-		singleton="false"
-	>
+	<bean id="inheritedTestBeanWithoutClass">
+		<property name="name"><value>parent</value></property>
+		<property name="age"><value>1</value></property>
+	</bean>
+
+	<bean id="inheritedTestBeanPrototype" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>2</value></property>
 	</bean>

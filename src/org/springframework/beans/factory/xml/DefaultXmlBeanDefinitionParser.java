@@ -25,6 +25,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -45,12 +52,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
@@ -251,63 +252,66 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 				parent = ele.getAttribute(PARENT_ATTRIBUTE);
 			}
-			if (className == null && parent == null) {
-				throw new BeanDefinitionStoreException(this.resource, beanName, "Either 'class' or 'parent' is required");
+
+			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
+			ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
+
+			Class beanClass = null;
+			if (className != null && this.beanClassLoader != null) {
+				beanClass = Class.forName(className, true, this.beanClassLoader);
 			}
 
 			AbstractBeanDefinition bd = null;
-			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
-			
-			if (className != null) {
-				ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
-				RootBeanDefinition rbd = null;
-
-				if (this.beanClassLoader != null) {
-					Class clazz = Class.forName(className, true, this.beanClassLoader);
-					rbd = new RootBeanDefinition(clazz, cargs, pvs);
+			if (parent == null) {
+				if (beanClass != null) {
+					bd = new RootBeanDefinition(beanClass, cargs, pvs);
 				}
 				else {
-					rbd = new RootBeanDefinition(className, cargs, pvs);
+					bd = new RootBeanDefinition(className, cargs, pvs);
 				}
-
-				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
-					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
-					rbd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
-				}
-				
-				if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
-					rbd.setStaticFactoryMethod(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
-				}
-
-				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-				if (DEFAULT_VALUE.equals(dependencyCheck)) {
-					dependencyCheck = this.defaultDependencyCheck;
-				}
-				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
-
-				String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
-				if (DEFAULT_VALUE.equals(autowire)) {
-					autowire = this.defaultAutowire;
-				}
-				rbd.setAutowireMode(getAutowireMode(autowire));
-
-				String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
-				if (!initMethodName.equals("")) {
-					rbd.setInitMethodName(initMethodName);
-				}
-				String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-				if (!destroyMethodName.equals("")) {
-					rbd.setDestroyMethodName(destroyMethodName);
-				}
-
-				bd = rbd;
 			}
 			else {
-				bd = new ChildBeanDefinition(parent, pvs);
+				if (beanClass != null) {
+					bd = new ChildBeanDefinition(parent, beanClass, cargs, pvs);
+				}
+				else {
+					bd = new ChildBeanDefinition(parent, className, cargs, pvs);
+				}
 			}
-			
+
+			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
+				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
+				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
+			}
+
+			if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
+				bd.setStaticFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+			}
+
+			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(dependencyCheck)) {
+				dependencyCheck = this.defaultDependencyCheck;
+			}
+			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
+
+			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
+			if (DEFAULT_VALUE.equals(autowire)) {
+				autowire = this.defaultAutowire;
+			}
+			bd.setAutowireMode(getAutowireMode(autowire));
+
+			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
+			if (!initMethodName.equals("")) {
+				bd.setInitMethodName(initMethodName);
+			}
+			String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+			if (!destroyMethodName.equals("")) {
+				bd.setDestroyMethodName(destroyMethodName);
+			}
 
 			getLookupOverrideSubElements(bd.getMethodOverrides(), beanName, ele);
+
+			bd.setResourceDescription(this.resource.getDescription());
 
 			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
@@ -319,8 +323,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				lazyInit = this.defaultLazyInit;
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
-
-			bd.setResourceDescription(this.resource.getDescription());
 
 			return bd;
 		}
