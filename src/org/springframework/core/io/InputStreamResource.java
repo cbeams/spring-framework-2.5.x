@@ -42,7 +42,7 @@ public class InputStreamResource extends AbstractResource {
 	 * @param inputStream the InputStream to use
 	 */
 	public InputStreamResource(InputStream inputStream) {
-		this(inputStream, "resource for InputStream");
+		this(inputStream, "resource loaded through InputStream");
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class InputStreamResource extends AbstractResource {
 	 */
 	public InputStreamResource(InputStream inputStream, String description) {
 		if (inputStream == null) {
-			throw new IllegalArgumentException("inputStream must not be null");
+			throw new IllegalArgumentException("InputStream must not be null");
 		}
 		this.inputStream = inputStream;
 		this.description = description;

@@ -185,7 +185,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			return registerBeanDefinitions(props, prefix, resource.getDescription());
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("IOException parsing properties from " + resource, ex);
+			throw new BeanDefinitionStoreException("Could not parse properties from " + resource, ex);
 		}
 	}
 
@@ -240,7 +240,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public int registerBeanDefinitions(Map map, String prefix) throws BeansException {
-		return registerBeanDefinitions(map, prefix, "(no description)");
+		return registerBeanDefinitions(map, prefix, "Map " + map);
 	}
 
 	/**
