@@ -79,27 +79,6 @@
 
     	</sect2>
     	
-    	<sect2 id="aop-introduction-defn">
-    		<title>AOP concepts</title>
-    		
-    		<para>
-    			Define pointcuts, advice, aspect, introduction, etc.
-    		</para>
-
-    	</sect2>
-    	
-    	<sect2 id="aop-introduction-spring-defn">
-    		<title>Spring terminology</title>
-    		
-    		<para>
-    			Classes for pointcuts, Advisor etc.
-    		</para>
-    		
-    		<para>
-    			Note AOP Alliance ocmpliance
-    		</para>
-
-    	</sect2>
     	
     	<sect2 id="metadata-handlers">
     		<title>Using attributes to minimize MVC web tier configuration</title>
