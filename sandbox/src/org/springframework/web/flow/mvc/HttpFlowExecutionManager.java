@@ -77,6 +77,13 @@ public class HttpFlowExecutionManager {
 		this.flowServiceLocator = flowServiceLocator;
 	}
 
+	public HttpFlowExecutionManager(String flowId, FlowServiceLocator flowServiceLocator) {
+		if (StringUtils.hasText(flowId)) {
+			this.flow = flowServiceLocator.getFlow(flowId);
+		}
+		this.flowServiceLocator = flowServiceLocator;
+	}
+
 	public HttpFlowExecutionManager(Flow flow, FlowServiceLocator flowServiceLocator, Collection flowExecutionListeners) {
 		this.flow = flow;
 		this.flowServiceLocator = flowServiceLocator;

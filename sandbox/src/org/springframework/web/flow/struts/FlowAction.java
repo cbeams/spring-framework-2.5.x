@@ -26,7 +26,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
-import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
@@ -80,8 +79,7 @@ public class FlowAction extends TemplateAction {
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowServiceLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		Flow flow = locator.getFlow(getFlowId(mapping));
-		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(flow, locator);
+		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
 		ModelAndView modelAndView = executionManager.handleRequest(request, response);
 		// this is not very clean (pulling attribute from hard coded name)
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
