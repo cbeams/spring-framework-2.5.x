@@ -11,9 +11,10 @@ import org.springframework.beans.PropertyComparator;
 import org.springframework.beans.MutableSortDefinition;
 
 /**
- *  Simple JavaBean business object representing a pet.
+ * Simple JavaBean business object representing a pet.
  *
- *  @author  Ken Krebs
+ * @author  Ken Krebs
+ * @author Juergen Hoeller
  */
 public class Pet extends NamedEntity {
 

@@ -13,6 +13,7 @@ import org.springframework.beans.PropertyComparator;
  * Simple JavaBean domain object representing a veterinarian.
  *
  * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public class Vet extends Person {
 

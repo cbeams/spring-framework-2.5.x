@@ -1,8 +1,3 @@
-/*
- * Owner.java
- *
- */
-
 package org.springframework.samples.petclinic;
 
 import java.util.Collections;
@@ -18,6 +13,7 @@ import org.springframework.beans.MutableSortDefinition;
  * Simple JavaBean domain object representing an owner.
  *
  * @author Ken Krebs
+ * @author Juergen Hoeller
  */
 public class Owner extends Person {
 
