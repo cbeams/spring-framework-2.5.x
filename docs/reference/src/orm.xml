@@ -173,7 +173,7 @@
 
     &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
         &lt;property name="jndiName"&gt;
-            &lt;value&gt;jdbc/myds&lt;/value&gt;
+            &lt;value&gt;java:comp/env/jdbc/myds&lt;/value&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
 
@@ -617,13 +617,13 @@
 
     &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
         &lt;property name="jndiName"&gt;
-            &lt;value&gt;jdbc/myds1&lt;/value&gt;
+            &lt;value&gt;java:comp/env/jdbc/myds1&lt;/value&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
 
     &lt;bean id="myDataSource2" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
         &lt;property name="jndiName"&gt;
-            &lt;value&gt;jdbc/myds2&lt;/value&gt;
+            &lt;value&gt;java:comp/env/jdbc/myds2&lt;/value&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
 
