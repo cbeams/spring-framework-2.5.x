@@ -1,95 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry output="target/classes" kind="src" path="src"/>
-	<classpathentry output="target/test-classes" kind="src" path="test"/>
-	<classpathentry output="target/load-classes" kind="src" path="load"/>
-	<classpathentry kind="src" path="samples/countries/src"/>
-	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
-	<classpathentry kind="src" path="samples/jpetstore/src"/>
-	<classpathentry kind="src" path="samples/tiles-example/src"/>
-	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
-	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src"/>
-	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test"/>
-	<classpathentry kind="src" path="benchmark/cmt/src"/>
-	<classpathentry kind="src" path="benchmark/cmt/test"/>
-	<classpathentry kind="src" path="samples/imagedb/src"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/ejb.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/jta.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/servlet.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-digester.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-lang.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/mail.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-fileupload.jar"/>
-	<classpathentry kind="lib" path="lib/cos/cos.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
-	<classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/ant/ant.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
-	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
-	<classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
-	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
-	<classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
-	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap.jar"/>
-	<classpathentry kind="lib" path="lib/ibatis/ibatis-common.jar"/>
-	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
-	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
-	<classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
-	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
-	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
-	<classpathentry kind="lib" path="lib/itext/itext-1.02b.jar"/>
-	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
-	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate/odmg.jar"/>
-	<classpathentry kind="lib" path="lib/hsqldb/hsqldb.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-discovery.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-1.4.jar"/>
-	<classpathentry output="target/mock-classes" kind="src" path="mock"/>
-	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
-	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
-	<classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
-	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
-	<classpathentry kind="lib" path="lib/itext/pdfbox-0.6.5.jar"/>
-	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
-	<classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-6.jar"/>
-	<classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/oro/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
-	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
-	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
-	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.0.jar"/>
-	<classpathentry kind="output" path="target/other-classes"/>
+    <classpathentry kind="src" output="target/classes" path="src"/>
+    <classpathentry kind="src" output="target/test-classes" path="test"/>
+    <classpathentry kind="src" output="target/load-classes" path="load"/>
+    <classpathentry kind="src" output="target/mock-classes" path="mock"/>
+    <classpathentry kind="src" path="samples/countries/src"/>
+    <classpathentry kind="src" output="samples/petclinic/.classes" path="samples/petclinic/src"/>
+    <classpathentry kind="src" path="samples/jpetstore/src"/>
+    <classpathentry kind="src" path="samples/tiles-example/src"/>
+    <classpathentry kind="src" path="samples/imagedb/src"/>
+    <classpathentry kind="src" output="target/autobuilds/classes" path="autobuilds/src"/>
+    <classpathentry kind="src" output="target/sandbox/classes" path="sandbox/src"/>
+    <classpathentry kind="src" output="target/sandbox/test-classes" path="sandbox/test"/>
+    <classpathentry kind="src" path="benchmark/cmt/src"/>
+    <classpathentry kind="src" path="benchmark/cmt/test"/>
+    <classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/ejb.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/jta.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/servlet.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-digester.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-lang.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-logging.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/mail.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-fileupload.jar"/>
+    <classpathentry kind="lib" path="lib/cos/cos.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
+    <classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
+    <classpathentry kind="lib" path="lib/ant/ant.jar"/>
+    <classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
+    <classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
+    <classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
+    <classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
+    <classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
+    <classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
+    <classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.0.jar"/>
+    <classpathentry kind="lib" path="lib/axis/axis.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
+    <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
+    <classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap.jar"/>
+    <classpathentry kind="lib" path="lib/ibatis/ibatis-common.jar"/>
+    <classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
+    <classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
+    <classpathentry kind="lib" path="lib/quartz/quartz.jar"/>
+    <classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
+    <classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
+    <classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
+    <classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
+    <classpathentry kind="lib" path="lib/itext/itext-1.02b.jar"/>
+    <classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
+    <classpathentry kind="lib" path="lib/axis/saaj.jar"/>
+    <classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
+    <classpathentry kind="lib" path="lib/hibernate/odmg.jar"/>
+    <classpathentry kind="lib" path="lib/hsqldb/hsqldb.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-discovery.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-validator.jar"/>
+    <classpathentry kind="lib" path="lib/velocity/velocity-1.4.jar"/>
+    <classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
+    <classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
+    <classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
+    <classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
+    <classpathentry kind="lib" path="lib/cglib/cglib-full-2.0.2.jar"/>
+    <classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
+    <classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
+    <classpathentry kind="lib" path="lib/itext/pdfbox-0.6.5.jar"/>
+    <classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
+    <classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-6.jar"/>
+    <classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>
+    <classpathentry kind="lib" path="lib/oro/jakarta-oro-2.0.8.jar"/>
+    <classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
+    <classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
+    <classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.1.jar"/>
+    <classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
+    <classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
+    <classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
+    <classpathentry kind="lib" path="lib/ehcache/ehcache-1.0.jar"/>
+    <classpathentry kind="lib" path="lib/fop/fop.jar"/>
+    <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
