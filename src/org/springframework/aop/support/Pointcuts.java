@@ -13,12 +13,12 @@ import org.springframework.aop.Pointcut;
 /**
  * Static methods useful for manipulating pointcuts.
  * @author Rod Johnson
- * @version $Id: Pointcuts.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: Pointcuts.java,v 1.3 2004-01-12 18:45:18 johnsonr Exp $
  */
 public abstract class Pointcuts {
 	
 	public static Pointcut union(Pointcut a, Pointcut b) {
-		return new ComposablePointcut(a.getClassFilter(), a.getMethodMatcher()).union(b);
+		return new UnionPointcut(a, b);
 	}
 	
 	public static Pointcut intersection(Pointcut a, Pointcut b) {

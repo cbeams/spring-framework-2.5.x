@@ -13,7 +13,7 @@ import org.springframework.aop.Pointcut;
  * Convenient class for building up pointcuts.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: ComposablePointcut.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: ComposablePointcut.java,v 1.3 2004-01-12 18:45:18 johnsonr Exp $
  */
 public class ComposablePointcut implements Pointcut {
 	
@@ -51,11 +51,6 @@ public class ComposablePointcut implements Pointcut {
 		return this;
 	}
 	
-	public ComposablePointcut union(Pointcut other) {
-		this.classFilter = ClassFilters.union(this.classFilter, other.getClassFilter());
-		this.methodMatcher = MethodMatchers.union(this.methodMatcher, other.getMethodMatcher());
-		return this;
-	}
 	
 	public ComposablePointcut intersection(Pointcut other) {
 		// TODO vertical composition issue
