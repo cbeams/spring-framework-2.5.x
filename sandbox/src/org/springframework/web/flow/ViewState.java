@@ -145,7 +145,7 @@ public class ViewState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning view name '" + viewName + "' to render");
 			}
-			return new ModelAndView(viewName, flowExecution.getAttributes());
+			return new ModelAndView(viewName, flowExecution.getModel());
 		}
 	}
 

@@ -171,20 +171,6 @@ public class HttpFlowExecutionManager {
 			// event execution resulted in the entire flow ending, cleanup
 			removeFromHttpSession(flowExecution, request);
 		}
-		else {
-			// we're still in the flow, inject flow state into model
-			if (modelAndView != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("[Placing information about the new current flow state in the model]");
-					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
-					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + flowExecution.getCurrentStateId());
-				}
-				modelAndView.addObject(getFlowExecutionIdAttributeName(), flowExecution.getId());
-				modelAndView.addObject(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
-				// also make the flow execution itself available in the model
-				modelAndView.addObject(getFlowExecutionAttributeName(), flowExecution);
-			}
-		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + modelAndView);
 		}
