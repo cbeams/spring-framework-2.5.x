@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.2 2003-12-20 01:47:33 davison Exp $
+ * @version $Id: readme.txt,v 1.3 2004-01-01 13:44:35 davison Exp $
  */
 
 
@@ -84,10 +84,10 @@ server type that autobuilds supports.  Currently configs are available for:
     tomcat-4.1.x (tomcat4)
     tomcat-5.0.x (tomcat5)
     resin-2.1.x (resin2)
+    resin-3.x (resin3)
     jetty-4.2.x (jetty4)
 
-Scripts for jboss3, resin3 and (hopefully) wls8 will be available very
-shortly.
+Scripts for jboss3 and (hopefully) wls8 will be available very shortly.
 
 It may not always be possible to deploy all sample apps on all servers of
 course.  If the app were to use EJB's for example, it would obviously have to
@@ -133,7 +133,7 @@ command line:
     builds if you want to be able to fire the application up in a browser and
     look at it after tests have run.  This option will keep alive the
     application server and the HSQL server (if used) until you manually stop
-    the build process by typing 'Q' at the prompt in the command window which
+    the build process with a 'Ctrl-C' at the prompt in the command window which
     will then shutdown the server(s).  Access the application at the URL
     http://localhost:13084/appname
 
@@ -212,9 +212,10 @@ dependencies..
 1)  it must have a build.xml file in its root directory.
 
 2)  the build.xml must have a 'dist' target which builds the deployment
-    units and places them in a directory called 'dist' in the app root.
+    units and places them in a directory called 'dist' found in the root.
 
-3)  the 'dist' build process uses spring.jar from the /dist directory
+3)  the 'dist' build process uses spring.jar from the spring-root/dist 
+    directory
 
 4)  if the sample app uses an HSQL db, the following three files must
     be present in the db/hsqldb directory from the app root:
@@ -269,8 +270,8 @@ or if you'd like to see something moved up this list.
 
 Items near the top are likely to be imminent.
 
- - jboss3 / resin3 / wls8 server builds added
- - httpunit tests for countries / jpetstore / tiles-example completed
+ - jboss3 / wls8 server builds added
+ - httpunit tests for countries / tiles-example completed
  - make anonymous cvs work
  - http downloads implemented
  - skip tests if class not available
