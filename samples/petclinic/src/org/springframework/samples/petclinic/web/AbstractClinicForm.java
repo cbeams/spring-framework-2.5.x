@@ -8,10 +8,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.samples.petclinic.Clinic;
-
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.samples.petclinic.Clinic;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
@@ -39,7 +39,9 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 			throw new ApplicationContextException("Must set clinic bean property on " + getClass());
 	}
 
-	/**	Method sets up a custom property editor for the application's Date format */
+	/**
+	 * Set up a custom property editor for the application's date format.
+	 */
 	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		dateFormat.setLenient(false);
@@ -47,13 +49,13 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 	}
 
 	/**
-	 * 	Method disallows duplicate form submission.
-	 *  Typically used to prevent duplicate insertion of <code>Entity</code>s
-	 *  into the datastore. Shows a new form with an error message.
+	 * Method disallows duplicate form submission.
+	 * Typically used to prevent duplicate insertion of <code>Entity</code>s
+	 * into the datastore. Shows a new form with an error message.
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		ServletRequestDataBinder errors = createBinder(request, formBackingObject(request));
+		BindException errors = new BindException(formBackingObject(request), getBeanName());
 		errors.reject("duplicateFormSubmission", null, "Duplicate form submission");
 		return showForm(request, response, errors);
 	}
