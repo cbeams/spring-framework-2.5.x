@@ -5,18 +5,26 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.Types;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
- * @version $Id: JdbcUtils.java,v 1.3 2004-01-13 18:01:59 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: JdbcUtils.java,v 1.4 2004-01-29 23:22:49 jhoeller Exp $
  */
 public class JdbcUtils {
+
+	private static final Log logger = LogFactory.getLog(FileCopyUtils.class);
 
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
@@ -28,7 +36,8 @@ public class JdbcUtils {
 			try {
 				stmt.close();
 			}
-			catch (SQLException ignore) {
+			catch (SQLException ex) {
+				logger.warn("Could not close JDBC Statement", ex);
 			}
 		}
 	}
@@ -43,7 +52,8 @@ public class JdbcUtils {
 			try {
 				rs.close();
 			}
-			catch (SQLException ignore) {
+			catch (SQLException ex) {
+				logger.warn("Could not close JDBC ResultSet", ex);
 			}
 		}
 	}

@@ -13,12 +13,18 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Utility methods for file and stream copying.
+ * Mainly for use within the framework.
  * @author Juergen Hoeller
  * @since 06.10.2003
  */
 public abstract class FileCopyUtils {
+
+	private static final Log logger = LogFactory.getLog(FileCopyUtils.class);
 
 	public static final int BLOCK_SIZE = 1024;
 
@@ -42,12 +48,14 @@ public abstract class FileCopyUtils {
 			try {
 				in.close();
 			}
-			catch (IOException ignore) {
+			catch (IOException ex) {
+				logger.warn("Could not close Reader", ex);
 			}
 			try {
 				out.close();
 			}
-			catch (IOException ignore) {
+			catch (IOException ex) {
+				logger.warn("Could not close Writer", ex);
 			}
 		}
 	}
@@ -72,12 +80,14 @@ public abstract class FileCopyUtils {
 			try {
 				in.close();
 			}
-			catch (IOException ignore) {
+			catch (IOException ex) {
+				logger.warn("Could not close InputStream", ex);
 			}
 			try {
 				out.close();
 			}
-			catch (IOException ignore) {
+			catch (IOException ex) {
+				logger.warn("Could not close OutputStream", ex);
 			}
 		}
 	}

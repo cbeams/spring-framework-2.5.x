@@ -38,7 +38,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.6 2004-01-21 23:13:18 jhoeller Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.7 2004-01-29 23:27:53 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -123,11 +123,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
 		}
 		finally {
-			try {
-				if (is != null)
+			if (is != null) {
+				try {
 					is.close();
-			}
-			catch (IOException ignore) {
+				}
+				catch (IOException ex) {
+					logger.warn("Could not close InputStream", ex);
+				}
 			}
 		}
 	}
