@@ -33,7 +33,7 @@ import org.springframework.validation.Validator;
  * @author Juergen Hoeller
  * @since 23.05.2003
  */
-public class BindUtilsTestSuite extends TestCase {
+public class BindUtilsTests extends TestCase {
 
 	public void testBind() throws ServletException {
 		ServletContext sc = new MockServletContext();
