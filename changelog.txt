@@ -10,6 +10,7 @@ Package org.springframework.aop
 * added "setClassFilter" method to StaticMethodMatcherPointcut, to allow for overriding the default ClassFilter.TRUE
 * factored out AbstractBeanFactoryBasedTargetSource superclass from AbstractPrototypeBasedTargetSource
 * added LazyInitTargetSource, lazily accessing a singleton from a BeanFactory (lazily initializing on first call)
+* fixed AbstractAdvisorAutoProxyCreator to match pointcuts against interface methods if appropriate (e.g. for regexp)
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to allow custom PropertyEditor (setValue) to kick in before applying String[]-to-CSV conversion
@@ -47,6 +48,7 @@ Package org.springframework.jdbc
 * added database product name "Adaptive Server Enterprise" to Sybase definition in default sql-error-codes.xml file
 * changed CustomSQLErrorCodesTranslation's "exceptionClass" property from type String to Class (compatible in XML)
 * added "lazyInit" flag to JdbcAccessor, allowing to enforce lazy initialization of the SQLExceptionTranslator
+* reworked WebSphereNativeJdbcExtractor to detect a WebSphere version 4 DataSource even when running on WebSphere 5
 * added overloaded "queryForList"/"queryForObject"/"queryForLong"/"queryForInt" methods with arg types to JdbcTemplate
 * optimized JdbcTemplate's "queryForList" result set parsing to not access result set meta data for empty results
 * added overloaded SqlReturnResultSet constructor, taking a ResultSetExtractor as argument
@@ -116,6 +118,7 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added "exposeRequestAttributes" method to WebUtils, exposing a given java.util.Map as request attributes
+* changed WebUtils' "getParametersStartingWith" method to use a TreeMap, automatically sorting parameters by name
 * Log4jConfigListener/Servlet supports "file:" URL as "log4jConfigLocation" (as alternative to ServletContext resource)
 * Log4jConfigListener/Servlet and WebAppRootListener remove the web app root system property on shutdown
 * ContextLoader can optionally load a (shared) parent application context to the root web application context
