@@ -58,12 +58,12 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		assertTrue("roderick.age was inherited", roderick.getAge() == rod.getAge());
 	}
 	
-	public void testGetNull() {
+	public void testGetBeanWithNullArg() {
 		try {
 			getBeanFactory().getBean(null);
 			fail("Can't get null bean");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (IllegalArgumentException ex) {
 			// OK
 		}
 	}
@@ -127,7 +127,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			assertTrue("Exception has correct bean name", ex.getBeanName().equals("rod"));
 			assertTrue("Exception requiredType must be BeanFactory.class", ex.getRequiredType().equals(BeanFactory.class));
 			assertTrue("Exception actualType as TestBean.class", TestBean.class.isAssignableFrom(ex.getActualType()));
-			assertTrue("Actual instance is correct", ex.getActualInstance() == getBeanFactory().getBean("rod"));
+			assertTrue("Actual type is correct", ex.getActualType() == getBeanFactory().getBean("rod").getClass());
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();

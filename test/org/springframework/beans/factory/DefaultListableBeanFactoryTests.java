@@ -82,9 +82,11 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+		assertEquals(TestBean.class, lbf.getType("x1"));
 		lbf.preInstantiateSingletons();
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		lbf.getBean("x1");
+		assertEquals(TestBean.class, lbf.getType("x1"));
 		assertTrue("prototype was instantiated", DummyFactory.wasPrototypeCreated());
 	}
 
@@ -365,6 +367,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		Object singletonObject = new TestBean();
 		lbf.registerSingleton("singletonObject", singletonObject);
 		assertTrue(lbf.isSingleton("singletonObject"));
+		assertEquals(TestBean.class, lbf.getType("singletonObject"));
 		TestBean test = (TestBean) lbf.getBean("test");
 		assertEquals(singletonObject, lbf.getBean("singletonObject"));
 		assertEquals(singletonObject, test.getSpouse());
@@ -387,6 +390,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerSingleton("singletonObject", singletonObject);
 		assertTrue(lbf.containsBean("singletonObject"));
 		assertTrue(lbf.isSingleton("singletonObject"));
+		assertEquals(TestBean.class, lbf.getType("singletonObject"));
 		assertEquals(0, lbf.getAliases("singletonObject").length);
 		DependenciesBean test = (DependenciesBean) lbf.getBean("test");
 		assertEquals(singletonObject, lbf.getBean("singletonObject"));

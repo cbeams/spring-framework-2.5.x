@@ -174,6 +174,10 @@ public class BeanFactoryBootstrapTests extends TestCase {
 			return true;
 		}
 
+		public Class getType(String name) {
+			return null;
+		}
+
 		public String[] getAliases(String name) {
 			throw new UnsupportedOperationException("getAliases");
 		}
