@@ -13,7 +13,7 @@
 				<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
 				<INPUT type="hidden" name="_eventId" value="back">
 		</FORM>
-		<TABLE>
+		<TABLE width="100%">
 			<TR>
 				<TD>Person Details</TD>
 			</TR>

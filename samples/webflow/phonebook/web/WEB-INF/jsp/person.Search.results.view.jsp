@@ -14,7 +14,7 @@
 		</FORM>
 		<DIV align="left">
 			<P>
-				<TABLE>
+				<TABLE width="100%">
 					<TR>
 						<TD>
 							<DIV align="left">Search Results</DIV>
@@ -23,34 +23,36 @@
 					<TR>
 						<TD><HR></TD>
 					</TR>
-					<TR><TD>
-					<TABLE BORDER="1">
 					<TR>
-						<TD><B>First Name</B></TD>
-						<TD><B>Last Name</B></TD>
-						<TD><B>User Id</B></TD>
-						<TD><B>Phone</B></TD>
+						<TD>
+							<TABLE BORDER="1">
+								<TR>
+									<TD><B>First Name</B></TD>
+									<TD><B>Last Name</B></TD>
+									<TD><B>User Id</B></TD>
+									<TD><B>Phone</B></TD>
+								</TR>
+							<%
+								List results=(List)request.getAttribute("persons");
+								for (int i=0; i<results.size(); i++) {
+									Person person=(Person)results.get(i);
+							%>
+								<TR>
+									<TD><%=person.getFirstName() %></TD>
+									<TD><%=person.getLastName() %></TD>
+									<TD>
+										<A href="search.htm?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=person.getId() %>">
+											<%=person.getUserId() %>
+										</A>
+									</TD>
+									<TD><%=person.getPhone() %></TD>
+								</TR>
+							<%
+								}
+							%>
+							</TABLE>
+						</TD>
 					</TR>
-					<%
-						List results=(List)request.getAttribute("persons");
-						for (int i=0; i<results.size(); i++) {
-							Person person=(Person)results.get(i);
-					%>
-						<TR>
-							<TD><%=person.getFirstName() %></TD>
-							<TD><%=person.getLastName() %></TD>
-							<TD>
-								<A href="search.htm?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=person.getId() %>">
-									<%=person.getUserId() %>
-								</A>
-							</TD>
-							<TD><%=person.getPhone() %></TD>
-						</TR>
-					<%
-						}
-					%>
-					</TD></TR>
-					</TABLE>
 					<TR>
 						<TD><HR></TD>
 					</TR>
