@@ -73,11 +73,8 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 	 */
 	private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
 
-	/**
-	 * Stores the <tt>Class</tt> of the <tt>MBeanInvoker</tt> implementation
-	 * that will be used when invoking operations on beans.
-	 */
-	private Class invokerClass = ReflectiveMBeanInvoker.class;
+	
+	private MBeanInvoker invoker = new ReflectiveMBeanInvoker();
 
 	/**
 	 * The strategy to use for creating ObjectNames for an object
@@ -115,13 +112,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 			beans = new HashMap();
 		}
 
-		// check to see if the supplied invoker class is valid
-		if (!(MBeanInvoker.class.isAssignableFrom(invokerClass))) {
-			throw new IllegalArgumentException(
-					"The Class supplied for the invokerClass property "
-							+ "must implement the MBeanInvoker intferace");
-		}
-
 		// if no server was provided
 		// then try to load one.
 		// This is useful in environment such as
@@ -140,8 +130,8 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 		this.assembler = assembler;
 	}
 
-	public void setInvokerClass(Class invokerClass) {
-		this.invokerClass = invokerClass;
+	public void setInvoker(MBeanInvoker invoker) {
+		this.invoker = invoker;
 	}
 
 	public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
@@ -189,7 +179,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 
 					server.registerMBean(bean, objectName);
 				} else {
-					ModelMBean mbean = getModelMBean();
+					ModelMBean mbean = getModelMBean(objectName);
 					mbean.setManagedResource(bean, "ObjectReference");
 					mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
 
@@ -250,13 +240,12 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 	 * 
 	 * @return
 	 */
-	private ModelMBean getModelMBean() throws MBeanException {
+	private ModelMBean getModelMBean(ObjectName objectName) throws MBeanException {
 		if (useRequiredModelMBean) {
 			return new RequiredModelMBean();
 		} else {
 			try {
-				return new ModelMBeanImpl((MBeanInvoker) invokerClass
-						.newInstance());
+				return new ModelMBeanImpl(invoker, objectName);
 			} catch (Exception ex) {
 				throw new MBeanException(ex,
 						"Unable to create ModelMBeanImpl class - check supplied invokerClass is valid");
