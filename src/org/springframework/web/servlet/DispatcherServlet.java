@@ -59,17 +59,24 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * <li>It can use any HandlerMapping implementation - whether standard, or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Additional HandlerMapping objects can be added through defining beans in the
- * servlet's application context that implement the HandlerMapping interface in this
- * package. HandlerMappings can be given any bean name (they are tested by type).
+ * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be define as beans
+ * in the servlet's application context that implement the HandlerMapping interface.
+ * HandlerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any HandlerAdapter. Default is SimpleControllerHandlerAdapter;
- * additional HandlerAdapter objects can be added through the application context.
+ * <li>It can use any HandlerAdapter; this allows to use any handler interface.
+ * Default is SimpleControllerHandlerAdapter, for Spring's Controller interface.
+ * Additional HandlerAdapter objects can be added through the application context.
  * Like HandlerMappings, HandlerAdapters can be given any bean name (tested by type).
  *
- * <li>Its view resolution strategy can be specified via a ViewResolver implementation.
- * Standard implementations support mapping URLs to bean names, and explicit mappings.
- * The ViewResolver bean name is "viewResolver"; default is InternalResourceViewResolver.
+ * <li>Its exception resolution strategy can be specified via a HandlerExceptionResolver,
+ * for example mapping certain exceptions to error pages. Default is none.
+ * Additional HandlerExceptionResolvers can be added through the application context.
+ * HandlerExceptionResolver can be given any bean name (tested by type).
+ *
+ * <li>Its view resolution strategy can be specified via a ViewResolver implementation,
+ * resolving symbolic view names into View objects. Default is InternalResourceViewResolver.
+ * Additional ViewResolver objects can be added through the application context.
+ * ViewResolvers can be given any bean name (tested by type).
  *
  * <li>Its strategy for resolving multipart requests is determined by a MultipartResolver
  * implementation. Implementations for Jakarta Commons FileUpload and Jason Hunter's COS
@@ -84,13 +91,12 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * The ThemeResolver bean name is "themeResolver"; default is FixedThemeResolver.
  * </ul>
  *
- * <p>A web application can use any number of dispatcher servlets.
- * Each servlet will operate in its own namespace. Only the root application context,
- * and any config objects set for the application as a whole, will be shared.
+ * <p>A web application can use any number of dispatcher servlets. Each servlet will
+ * operate in its own namespace. Only the root application context will be shared.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.31 2004-05-04 09:00:12 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.32 2004-05-04 17:28:53 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -116,6 +122,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
 	 */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
+
+	/**
+	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
+	 * Only used when "detectAllViewResolvers" is turned off.
+	 * @see #setDetectAllViewResolvers
+	 */
+	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
 	/**
 	 * Request attribute to hold current web application context.
@@ -147,6 +160,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
 
+	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
+	private boolean detectAllViewResolvers = true;
+
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
 
@@ -165,8 +181,24 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of HandlerExceptionResolvers used by this servlet */
 	private List handlerExceptionResolvers;
 
-	/** ViewResolver used by this servlet */
+	/** List of ViewResolvers used by this servlet */
 	private List viewResolvers;
+
+
+	/**
+	 * Set whether to detect all ViewResolver beans in this servlet's context.
+	 * Else, just a single bean with name "viewResolver" will be expected.
+	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * single ViewResolver, despite multiple ViewResolver beans being defined
+	 * in the context.
+	 * <p>You'll rarely have to touch this setting; it is mainly provided
+	 * for full backward compatibility with earlier Spring behavior that
+	 * some applications might rely on. <b>This setting will be removed
+	 * for Spring 1.1.</b>
+	 */
+	public void setDetectAllViewResolvers(boolean detectAllViewResolvers) {
+		this.detectAllViewResolvers = detectAllViewResolvers;
+	}
 
 
 	/**
@@ -193,12 +225,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initMultipartResolver() throws BeansException {
 		try {
 			this.multipartResolver = (MultipartResolver) getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
-			logger.info("Loaded multipart resolver [" + this.multipartResolver + "]");
+			logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// default is no multipart resolver
 			this.multipartResolver = null;
-			logger.info("Unable to locate multipart resolver with name ["	+ MULTIPART_RESOLVER_BEAN_NAME +
+			logger.info("Unable to locate MultipartResolver with name ["	+ MULTIPART_RESOLVER_BEAN_NAME +
 			            "]: no multipart handling provided");
 		}
 	}
@@ -211,12 +243,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initLocaleResolver() throws BeansException {
 		try {
 			this.localeResolver = (LocaleResolver) getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
-			logger.info("Loaded locale resolver [" + this.localeResolver + "]");
+			logger.info("Using LocaleResolver [" + this.localeResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// we need to use the default
 			this.localeResolver = new AcceptHeaderLocaleResolver();
-			logger.info("Unable to locate locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
+			logger.info("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 			            "': using default [" + this.localeResolver + "]");
 		}
 	}
@@ -229,12 +261,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initThemeResolver() throws BeansException {
 		try {
 			this.themeResolver = (ThemeResolver) getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
-			logger.info("Loaded theme resolver [" + this.themeResolver + "]");
+			logger.info("Using ThemeResolver [" + this.themeResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// we need to use the default
 			this.themeResolver = new FixedThemeResolver();
-			logger.info("Unable to locate theme resolver with name '" + THEME_RESOLVER_BEAN_NAME +
+			logger.info("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
 			            "': using default [" + this.themeResolver + "]");
 		}
 	}
@@ -276,7 +308,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.handlerAdapters.isEmpty()) {
 			this.handlerAdapters.add(new SimpleControllerHandlerAdapter());
 			this.handlerAdapters.add(new ThrowawayControllerHandlerAdapter());
-			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using defaults");
+			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
 		}
 		else {
 			// we keep HandlerAdapters in sorted order
@@ -303,20 +335,31 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
 	private void initViewResolvers() throws BeansException {
-		// find all ViewResolvers in the ApplicationContext
-		Map matchingBeans = getWebApplicationContext().getBeansOfType(ViewResolver.class, true, false);
-		this.viewResolvers = new ArrayList(matchingBeans.values());
+		this.viewResolvers = new ArrayList();
+		if (this.detectAllViewResolvers) {
+			// find all ViewResolvers in the ApplicationContext
+			Map matchingBeans = getWebApplicationContext().getBeansOfType(ViewResolver.class, true, false);
+			this.viewResolvers.addAll(matchingBeans.values());
+			// we keep ViewResolvers in sorted order
+			Collections.sort(this.viewResolvers, new OrderComparator());
+		}
+		else {
+			try {
+				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
+				this.viewResolvers.add(vr);
+				logger.info("Using view resolver [" + vr + "]");
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore, we'll add a default ViewResolver later
+			}
+		}
 		// Ensure we have at least one ViewResolver, by registering
 		// a default ViewResolver if no other resolvers are found.
 		if (this.viewResolvers.isEmpty()) {
 			InternalResourceViewResolver vr = new InternalResourceViewResolver();
 			vr.setApplicationContext(getWebApplicationContext());
 			this.viewResolvers.add(vr);
-			logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using defaults");
-		}
-		else {
-			// we keep ViewResolvers in sorted order
-			Collections.sort(this.viewResolvers, new OrderComparator());
+			logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using default");
 		}
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import javax.servlet.ServletException;
@@ -359,6 +360,25 @@ public class DispatcherServletTestSuite extends TestCase {
 		}
 		catch (ServletException ex) {
 			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testNotDetectAllViewResolvers() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.setDetectAllViewResolvers(false);
+		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/unknown.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexDispatcherServlet.doGet(request, response);
+			fail("Should have thrown ServletException");
+		}
+		catch (ServletException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("failed0") != -1);
 		}
 	}
 

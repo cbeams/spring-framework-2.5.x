@@ -83,7 +83,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("order", new Integer(0)));
 		pvs.addPropertyValue(new PropertyValue("basename", "org.springframework.web.servlet.complexviews"));
-		registerSingleton("viewResolver1", ResourceBundleViewResolver.class, pvs);
+		registerSingleton("viewResolver", ResourceBundleViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("suffix", ".jsp"));
