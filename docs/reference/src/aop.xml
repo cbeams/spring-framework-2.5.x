@@ -1718,7 +1718,7 @@ assertEquals("Added two advisors",
     </sect2>
 
     <sect2 id="aop-autoproxy-metadata">
-      <title>Using metadata-driven autoproxying</title>
+      <title>Using metadata-driven auto-proxying</title>
 
       <para>A particularly important type of autoproxying is driven by
       metadata. This produces a similar programming model to .NET
@@ -1746,7 +1746,7 @@ assertEquals("Added two advisors",
       following code, in <literal>/WEB-INF/declarativeServices.xml</literal>.
       Note that this is generic, and can be used outside the jPetStore:</para>
 
-      <para><programlisting>&lt;bean id="autoproxy" 
+      <para><programlisting>&lt;bean id="autoProxyCreator" 
     class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
 &lt;/bean&gt;
 
@@ -1770,10 +1770,10 @@ assertEquals("Added two advisors",
 /&gt;</programlisting></para>
 
       <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> bean
-      definition--called "advisor" in this case, but the name is not
-      significant--will pick up all eligible pointcuts in the current
-      application context. In this case, the "transactionAdvisor" bean
-      definition, of type
+      definition--called "autoProxyCreator" in this case, but the name is
+      not significant (it could even be omitted)--will pick up all eligible
+			pointcuts in the current application context. In this case, the
+			"transactionAdvisor" bean definition, of type
       <literal>TransactionAttributeSourceAdvisor</literal>, will apply to
       classes or methods carrying a transaction attribute. The
       TransactionAttributeSourceAdvisor depends on a TransactionInterceptor,

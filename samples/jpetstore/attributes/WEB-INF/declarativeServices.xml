@@ -20,10 +20,10 @@
 	</description>
 
 	<!--
-		This bean is a postprocessor that will automatically apply relevant advisors
+		This bean is a post-processor that will automatically apply relevant advisors
 		to any bean in child factories.
 	-->
-	<bean id="autoproxy" 
+	<bean id="autoProxyCreator"
 		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 	</bean>
 
