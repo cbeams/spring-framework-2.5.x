@@ -1,8 +1,12 @@
 package org.springframework.load;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+
 
 
 /**
@@ -12,7 +16,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
  */
 public class BeanFactoryTestSuite extends AbstractTestSuite implements InitializingBean {
 	
-	private String[] testNames;
+	/** List of String bean name */
+	private List testNames;
 	
 	private BeanFactory beanFactory;
 	
@@ -34,9 +39,19 @@ public class BeanFactoryTestSuite extends AbstractTestSuite implements Initializ
 	public void init(ListableBeanFactory lbf) {
 		System.out.println("init");
 		this.beanFactory = lbf;
-		this.testNames = lbf.getBeanDefinitionNames(Test.class);
-		if (testNames.length == 0)
+		String[] allTestNames = lbf.getBeanDefinitionNames(Test.class);
+		this.testNames = new LinkedList();
+		if (allTestNames.length == 0)
 			throw new RuntimeException("No test beans defined");
+		for (int i = 0; i < allTestNames.length; i++) {
+			// TODO hack need abstract bean functionality
+			if (!allTestNames[i].startsWith("_")) {
+				this.testNames.add(allTestNames[i]);
+			}
+			else {
+				System.out.println("Bean '" + allTestNames[i] + "' is not a running test");
+			}
+		}
 			
 //		try {
 //			Object fixture = lbf.getBean("fixture");
@@ -56,16 +71,19 @@ public class BeanFactoryTestSuite extends AbstractTestSuite implements Initializ
 		Test[] tests = new Test[getThreads()];
 		int index = 0;
 		for (int i = 0; i < getThreads(); ) {
-			Test test = (Test) this.beanFactory.getBean(testNames[index]);
+			String name = (String) testNames.get(index);
+			Test test = (Test) this.beanFactory.getBean(name);
 			for (int j = 0; j < test.getInstances() && i < getThreads(); j++) {
-				tests[i] = (Test) this.beanFactory.getBean(testNames[index]);
+				tests[i] = (Test) this.beanFactory.getBean(name);
 				//System.out.println("New test " + tests[j].getClass());
 				++i;
 			}
 			
 			++index;
-			if (index == testNames.length)
+			if (index == testNames.size()) {
+				// Wrap
 				index = 0;
+			}
 		}
 		return tests;
 	}
