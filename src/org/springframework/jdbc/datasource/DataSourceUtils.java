@@ -16,10 +16,6 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,19 +38,22 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * JNDI and close connections if necessary. Has support for thread-bound
  * connections, e.g. for use with DataSourceTransactionManager.
  *
- * <p>Note: The getDataSourceFromJndi methods are targetted at applications
- * that do not use a BeanFactory resp. an ApplicationContext. With the latter,
- * it is preferable to preconfigure your beans or even JdbcTemplate instances
- * in the factory: JndiObjectFactoryBean can be used to fetch a DataSource
- * from JNDI and give the DataSource bean reference to other beans. Switching
- * to another DataSource is just a matter of configuration then: You can even
- * replace the definition of the FactoryBean with a non-JNDI DataSource!
+ * <p>Note: The <code>getDataSourceFromJndi</code> methods are targetted at
+ * applications that do not use a Spring BeanFactory. With the latter, it is
+ * preferable to preconfigure your beans or even JdbcTemplate instances in the
+ * factory: JndiObjectFactoryBean can be used to fetch a DataSource from JNDI
+ * and pass the DataSource bean reference to other beans. Switching to another
+ * DataSource is just a matter of configuration then: For example, you can
+ * replace the definition of the JndiObjectFactoryBean with a local DataSource
+ * (like a Commons DBCP BasicDataSource).
  *
- * @version $Id: DataSourceUtils.java,v 1.14 2004-07-22 09:45:27 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see DataSourceTransactionManager
+ * @version $Id: DataSourceUtils.java,v 1.15 2004-08-04 08:57:56 jhoeller Exp $
+ * @see #getDataSourceFromJndi
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see #getConnection
+ * @see DataSourceTransactionManager
  */
 public abstract class DataSourceUtils {
 
@@ -197,7 +196,8 @@ public abstract class DataSourceUtils {
 			}
 			catch (Exception ex) {
 				// SQLException or UnsupportedOperationException
-				logger.warn("Could not set JDBC connection read-only", ex);
+				// -> ignore, it's just a hint anyway
+				logger.debug("Could not set JDBC connection read-only", ex);
 			}
 		}
 
