@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.13 2004-07-01 20:56:16 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.14 2004-07-10 06:39:38 johnsonr Exp $
  */
 
 /*
@@ -225,6 +225,10 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 	 * @see IOther#absquatulate()
 	 */
 	public void absquatulate() {
+	}
+	
+	public int haveBirthday() {
+		return age++;
 	}
 
 

@@ -20,6 +20,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -29,12 +30,14 @@ import org.aopalliance.intercept.MethodInvocation;
  * <p>Invokes target using reflection. Subclasses can override the
  * invokeJoinpoint() method to change this behaviour, so this is a
  * useful base class for MethodInvocation implementations.
- *
+ * <p>
+ * It's possible to clone an invocation, to invoke proceed() repeatedly
+ * (once per clone), using the invocableClone() method.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.5 2004-04-21 17:49:36 jhoeller Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.6 2004-07-10 06:39:38 johnsonr Exp $
  * @see #invokeJoinpoint
  */
-public class ReflectiveMethodInvocation implements MethodInvocation {
+public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 
 	protected Method method;
 	
@@ -156,6 +159,26 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	public final Object getThis() {
 		return this.target;
 	}
+	
+	/**
+	 * Create a clone of this object. If cloning is done before proceed() is invoked on this
+	 * object, proceed() can be invoked once per clone to invoke the joinpoint (and the rest
+	 * of the advice chain) more than once.
+	 * <br>This method returns a shallow copy. This is what we want in this case: we
+	 * want to use the same interceptor-chain and other object references, but we want an
+	 * independent value for the current interceptor index. 
+	 * @see java.lang.Object#clone()
+	 * @return an invocable clone of this invocation. proceed() can be called once per clone.
+	 */
+	public MethodInvocation invocableClone() {
+		try {
+			return (MethodInvocation) clone();
+		}
+		catch (CloneNotSupportedException ex) {
+			throw new AspectException("Should be able to clone object of " + getClass(), ex);
+		}
+	}
+	
 	
 	public String toString() {
 		// Don't do toString on target, it may be proxied.

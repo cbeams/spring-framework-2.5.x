@@ -17,6 +17,12 @@
 
 package org.springframework.beans;
 
+/**
+ * Interface used for test beans.
+ * 
+ * @author Rod Johnson
+ * @version $Id: ITestBean.java,v 1.5 2004-07-10 06:39:38 johnsonr Exp $
+ */
 public interface ITestBean {
 	
 	int getAge();
@@ -43,5 +49,12 @@ public interface ITestBean {
 	INestedTestBean getLawyer();
 
 	IndexedTestBean getNestedIndexedBean();
+	
+	/**
+	 * Increment the age by one
+	 * @return the previous age
+	 *
+	 */
+	int haveBirthday();
 
 }

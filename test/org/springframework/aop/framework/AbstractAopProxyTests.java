@@ -25,10 +25,10 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
@@ -48,7 +48,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.31 2004-06-24 14:23:06 jhoeller Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.32 2004-07-10 06:39:38 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1038,6 +1038,44 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		it.setAge(11);
 		assertEquals(it.getAge(), 11);
 		assertEquals(di.getCount(), 2);
+	}
+	
+	/**
+	 * There are times when we want to call proceed()
+	 * twice. We can do this if we clone the invocation.
+	 * @throws Throwable
+	 */
+	public void testCloneInvocationToProceedThreeTimes() throws Throwable {
+		TestBean tb = new TestBean();
+		ProxyFactory pc = new ProxyFactory(tb);
+		pc.addInterface(ITestBean.class);
+		
+		MethodInterceptor twoBirthdayInterceptor = new MethodInterceptor() {
+			public Object invoke(MethodInvocation mi) throws Throwable {
+				// Clone the invocation to proceed three times
+				// "The Moor's Last Sigh": this technology can cause premature aging
+				MethodInvocation clone1 = ((ReflectiveMethodInvocation) mi).invocableClone();
+				MethodInvocation clone2 = ((ReflectiveMethodInvocation) mi).invocableClone();
+				clone1.proceed();
+				clone2.proceed();
+				return mi.proceed();
+			}
+		};
+		StaticMethodMatcherPointcutAdvisor advisor = new StaticMethodMatcherPointcutAdvisor(twoBirthdayInterceptor) {
+			public boolean matches(Method m, Class targetClass) {
+				return "haveBirthday".equals(m.getName());
+			}
+		};
+		pc.addAdvisor(advisor);
+		ITestBean it = (ITestBean) createProxy(pc);
+		
+		final int age = 20;
+		it.setAge(age);
+		assertEquals(age, it.getAge());
+		// Should return the age before the third, AOP-induced birthday
+		assertEquals(age + 2, it.haveBirthday());
+		// Return the final age produced by 3 birthdays
+		assertEquals(age + 3, it.getAge());
 	}
 	
 	public static interface IOverloads {
