@@ -24,6 +24,7 @@ import java.util.List;
 
 import net.sf.hibernate.Criteria;
 import net.sf.hibernate.FlushMode;
+import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.LockMode;
 import net.sf.hibernate.Query;
@@ -311,6 +312,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				return null;
 			}
 		});
+	}
+
+	public void initialize(Object proxy) throws DataAccessException {
+		try {
+			Hibernate.initialize(proxy);
+		}
+		catch (HibernateException ex) {
+			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
 	}
 
 
@@ -785,6 +795,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				return queryObject.iterate();
 			}
 		});
+	}
+
+	public void closeIterator(Iterator it) throws DataAccessException {
+		try {
+			Hibernate.close(it);
+		}
+		catch (HibernateException ex) {
+			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
 	}
 
 	public int delete(final String queryString) throws DataAccessException {

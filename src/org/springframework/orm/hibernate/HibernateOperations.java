@@ -183,6 +183,15 @@ public interface HibernateOperations {
 	 */
 	void evict(Object entity) throws DataAccessException;
 
+	/**
+	 * Force initialization of a Hibernate proxy or persistent collection.
+	 * @param proxy a proxy for a persistent object or a persistent collection
+	 * @throws DataAccessException if we can't initialize the proxy, for example
+	 * because it is not associated with an active Session
+	 * @see net.sf.hibernate.Hibernate#initialize
+	 */
+	void initialize(Object proxy) throws DataAccessException;
+
 
 	//-------------------------------------------------------------------------
 	// Convenience methods for storing individual objects
@@ -670,6 +679,15 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	Iterator iterate(String queryString, Object[] values, Type[] types) throws DataAccessException;
+
+	/**
+	 * Close an Iterator created by <i>iterate</i> operations immediately,
+	 * instead of waiting until the session is closed or disconnected.
+	 * @param it the Iterator to close
+	 * @throws DataAccessException if the Iterator could not be closed
+	 * @see net.sf.hibernate.Hibernate#close
+	 */
+	void closeIterator(Iterator it) throws DataAccessException;
 
 	/**
 	 * Delete all objects returned by the query. Return the number of objects deleted.
