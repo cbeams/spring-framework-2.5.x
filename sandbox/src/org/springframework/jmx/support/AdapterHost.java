@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jmx.support.adapter;
+package org.springframework.jmx.support;
 
 /**
  * Interface for classes that host non-standard JMX adapters such as the HTTP adapter

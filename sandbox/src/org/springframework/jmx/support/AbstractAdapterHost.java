@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jmx.support.adapter;
+package org.springframework.jmx.support;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.jmx.support.adapter;
+package org.springframework.jmx.support;
 
-import com.sun.jdmk.comm.HtmlAdaptorServer;
+//import com.sun.jdmk.comm.HtmlAdaptorServer;
 
 /**
  * Implementation of <code>AdapterHost</code> for the <code>HtmlAdaptorServer</code>
@@ -35,7 +35,7 @@ public class HtmlAdapterHost extends AbstractAdapterHost {
 	/**
 	 * The <code>HtmlAdaptorServer</code> instance.
 	 */
-	private HtmlAdaptorServer adapter;
+	private Object adapter;
 
 
 	/**
@@ -49,7 +49,7 @@ public class HtmlAdapterHost extends AbstractAdapterHost {
 	 * Creates the adapter instance.
 	 */
 	protected void initAdapterHost() {
-		this.adapter = new HtmlAdaptorServer(this.port);
+		//this.adapter = new HtmlAdaptorServer(this.port);
 	}
 
 	/**
@@ -63,14 +63,14 @@ public class HtmlAdapterHost extends AbstractAdapterHost {
 	 * Start the HtmlAdaptorServer.
 	 */
 	public void start() {
-		this.adapter.start();
+		//this.adapter.start();
 	}
 
 	/**
 	 * Stop the HtmlAdaptorServer.
 	 */
 	public void stop() {
-		this.adapter.stop();
+		//this.adapter.stop();
 	}
 
 }

@@ -23,7 +23,6 @@ import java.net.URLConnection;
 import javax.management.MalformedObjectNameException;
 
 import org.springframework.jmx.AbstractJmxTests;
-import org.springframework.jmx.support.adapter.HtmlAdapterHost;
 
 /**
  * @author Rob Harrop
