@@ -1,10 +1,8 @@
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -19,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @see #setUseExpiresHeader
  * @see #setUseCacheControlHeader
  */
-public class WebContentGenerator extends ApplicationObjectSupport {
+public class WebContentGenerator extends WebApplicationObjectSupport {
 	
 	/** Use HTTP 1.0 expires header? */
 	private boolean useExpiresHeader = true;
@@ -98,10 +96,38 @@ public class WebContentGenerator extends ApplicationObjectSupport {
 	}
 
 	/**
-	 * Convenience method for subclasses that returns the current ServletContext.
+	 * Apply the given cache seconds and generate respective HTTP headers,
+	 * i.e. allow caching for the given number of seconds in case of a positive
+	 * value, prevent caching if given a 0 value, do nothing else.
+	 * Does not tell the browser to revalidate the resource.
+	 * @param response current HTTP response
+	 * @param seconds positive number of seconds into the future that the
+	 * response should be cacheable for, 0 to prevent caching,
+	 * @see #cacheForSeconds(HttpServletResponse, int, boolean)
 	 */
-	protected final ServletContext getServletContext() {
-		return ((WebApplicationContext) getApplicationContext()).getServletContext();
+	protected final void applyCacheSeconds(HttpServletResponse response, int seconds) {
+		applyCacheSeconds(response, seconds, false);
+	}
+
+	/**
+	 * Apply the given cache seconds and generate respective HTTP headers,
+	 * i.e. allow caching for the given number of seconds in case of a positive
+	 * value, prevent caching if given a 0 value, do nothing else.
+	 * Does not tell the browser to revalidate the resource.
+	 * @param response current HTTP response
+	 * @param seconds number of seconds into the future that the response
+	 * should be cacheable for
+	 * @param mustRevalidate whether the client should revalidate the resource
+	 * (typically only necessary for controllers with last-modified support)
+	 */
+	protected final void applyCacheSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
+		if (seconds > 0) {
+			cacheForSeconds(response, seconds, mustRevalidate);
+		}
+		else if (seconds == 0) {
+			preventCaching(response);
+		}
+		// Leave caching to the client otherwise
 	}
 
 }

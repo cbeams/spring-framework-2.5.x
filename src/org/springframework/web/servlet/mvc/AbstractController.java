@@ -157,16 +157,9 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		}
 		
 		// Do declarative cache control
-		if (this.cacheSeconds == 0) {
-			preventCaching(response);
-		}
-		else if (this.cacheSeconds > 0) {
-			// Revalidate only if we understand last modification
-			boolean revalidate = this instanceof LastModified;
-			cacheForSeconds(response, this.cacheSeconds, revalidate);
-		}
-		// Leave caching to the client otherwise
-		
+		// Revalidate if the controller supports last-modified
+		applyCacheSeconds(response, this.cacheSeconds, this instanceof LastModified);
+
 		// If everything's OK, let subclass do its business
 		return handleRequestInternal(request, response);
 	}
