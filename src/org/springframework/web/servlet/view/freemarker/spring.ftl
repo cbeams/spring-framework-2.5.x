@@ -126,7 +126,7 @@
 	<select name="${spring.status.expression}" ${attributes}>
 		<#list options?keys as value>
 		<option value="${value}" 
-		<#if spring.status.value?default("") == value>selected="true"</#if>>${options[value]}</option>
+		<#if spring.status.value?default("") == value>selected="selected"</#if>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>
@@ -147,7 +147,7 @@
 	<select multiple="multiple" name="${spring.status.expression}" ${attributes}>
 		<#list options?keys as value>
 		<#assign isSelected = contains(spring.status.value?default([""]), value)>
-		<option value="${value}" <#if isSelected>selected="true"</#if>>${options[value]}</option>
+		<option value="${value}" <#if isSelected>selected="selected"</#if>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>

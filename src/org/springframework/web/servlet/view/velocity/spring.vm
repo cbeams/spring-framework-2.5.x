@@ -135,7 +135,7 @@
 		#foreach($option in $options.keySet())
 			<option value="${option}"
 			#if($status.value && $status.value == $option)
-				selected="true"
+				selected="selected"
 			#end>
 			${options.get($option)}</option>
 		#end
@@ -160,7 +160,7 @@
 			<option value="${option}"
 			#foreach($item in $status.value)
 				#if($item == $option)
-					selected="true"
+					selected="selected"
 				#end
 			#end
 			>${options.get($option)}</option>
