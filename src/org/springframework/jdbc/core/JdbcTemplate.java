@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,7 +28,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +37,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataAccessException;
@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.50 2004-06-28 17:02:14 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.51 2004-07-08 04:52:47 trisberg Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -915,11 +915,58 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (rs.next()) {
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
 			}
-			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-				throw new TypeMismatchDataAccessException("Result object (db-type=\"" + rsmd.getColumnTypeName(1) +
-																									"\" value=\"" + result + "\") is of type [" +
-																									rsmd.getColumnClassName(1) + "] and not of required type [" +
-																									this.requiredType.getName() + "]");
+			if (result != null && this.requiredType != null
+					&& !this.requiredType.isInstance(result)) {
+				if (String.class == requiredType) {
+					result = result.toString();
+				} 
+				else if (Number.class.isAssignableFrom(requiredType) && Number.class.isInstance(result)) {
+					try {
+						if (Byte.class.isAssignableFrom(requiredType)) {
+							result = new Byte(((Number)result).byteValue());
+						}
+						else if (Short.class.isAssignableFrom(requiredType)) {
+							result = new Short(((Number)result).shortValue());
+						}
+						else if (Integer.class.isAssignableFrom(requiredType)) {
+							result = new Integer(((Number)result).intValue());
+						}
+						else if (Long.class.isAssignableFrom(requiredType)) {
+							result = new Long(((Number)result).longValue());
+						}
+						else if (Float.class.isAssignableFrom(requiredType)) {
+							result = new Float(((Number)result).floatValue());
+						}
+						else if (Double.class.isAssignableFrom(requiredType)) {
+							result = new Double(((Number)result).doubleValue());
+						}
+						else if (BigDecimal.class.isAssignableFrom(requiredType)) {
+							result = new BigDecimal(((Number)result).doubleValue());
+						}
+						else if (BigInteger.class.isAssignableFrom(requiredType)) {
+							result = new BigInteger(((Number)result).toString());
+						}
+						else {
+							throw new NumberFormatException();
+						}
+					}
+					catch (NumberFormatException ne) {
+						throw new TypeMismatchDataAccessException(
+								"Result object (db-type=\"" + rsmd.getColumnTypeName(1)
+										+ "\" value=\"" + result + "\") is of type ["
+										+ rsmd.getColumnClassName(1)
+										+ "] and could not be converted to required type ["
+										+ this.requiredType.getName() + "]");
+					}
+				}
+				else {
+					throw new TypeMismatchDataAccessException(
+							"Result object (db-type=\"" + rsmd.getColumnTypeName(1)
+									+ "\" value=\"" + result + "\") is of type ["
+									+ rsmd.getColumnClassName(1)
+									+ "] and not of required type ["
+									+ this.requiredType.getName() + "]");
+				}
 			}
 			return result;
 		}
