@@ -19,9 +19,11 @@ package org.springframework.validation;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 /**
- * Encapsulates an object error, i.e. a global reason for rejection.
+ * Class that encapsulates an object error, i.e. a global reason for
+ * rejecting an object.
  *
- * <p>Normally, an ObjectError has a single code for message resolution.
+ * <p>Normally, an ObjectError has a single code for message resolution,
+ * in contrast to a FieldError.
  *
  * @author Juergen Hoeller
  * @since 10.03.2003
