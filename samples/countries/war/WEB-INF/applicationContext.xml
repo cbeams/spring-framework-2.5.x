@@ -52,7 +52,7 @@
 
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/countries</value></property>
+		<property name="jndiName"><value>java:comp/env/jdbc/countries</value></property>
 	</bean>
 
 	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryMem"/>
@@ -70,7 +70,7 @@
 
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/countries</value></property>
+		<property name="jndiName"><value>java:comp/env/jdbc/countries</value></property>
 	</bean>
 
 	<bean id="daoCountry" class="org.springframework.samples.countries.dao.DaoCountryJdbc">

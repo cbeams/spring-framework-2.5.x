@@ -18,14 +18,14 @@
 	<!-- Refers to the main database, containing product and account data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/jpetstore</value></property>
+		<property name="jndiName"><value>java:comp/env/jdbc/jpetstore</value></property>
 	</bean>
 
 	<!-- Additional JNDI DataSource for J2EE environments -->
 	<!-- Refers to the order database, containing order data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
 	<bean id="orderDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/jpetstore-order</value></property>
+		<property name="jndiName"><value>java:comp/env/jdbc/jpetstore-order</value></property>
 	</bean>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
@@ -35,7 +35,7 @@
 
 	<!-- SqlMap setup for iBATIS Database Layer -->
 	<bean id="sqlMap" class="org.springframework.orm.ibatis.SqlMapFactoryBean">
-		<property name="configLocation"><value>classpath:/sql-map-config.xml</value></property>
+		<property name="configLocation"><value>WEB-INF/sql-map-config.xml</value></property>
 	</bean>
 
 

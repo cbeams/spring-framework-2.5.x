@@ -10,8 +10,8 @@
 	<description>Spring JPetStore sample application</description>
 
 	<!--
-	  - Location of the XML file that defines the root application context
-	  - Applied by ContextLoaderListener.
+	  - Location of the XML file that defines the root application context.
+	  - Applied by ContextLoaderServlet.
 		-
 		- Can include "/WEB-INF/dataAccessContext-local.xml" for a single-database
 		- context, or "/WEB-INF/dataAccessContext-jta.xml" for a two-database context.

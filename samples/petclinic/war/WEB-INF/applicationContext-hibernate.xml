@@ -33,7 +33,7 @@
 	<!-- JNDI DataSource for J2EE environments -->
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/petclinic</value></property>
+		<property name="jndiName"><value>java:comp/env/jdbc/petclinic</value></property>
 	</bean>
 	-->
 
