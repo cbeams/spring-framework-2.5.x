@@ -31,7 +31,7 @@
 	</action-state>
 	
 	<subflow-state id="person.Detail" flow="person.Detail" attribute-mapper="id.attributeMapper">
-		<transition on="finish" to="results.view"/>
+		<transition on="finish" to="criteria.view"/>
 		<transition on="error" to="error"/>
 	</subflow-state>
 	
