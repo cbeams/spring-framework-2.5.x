@@ -331,20 +331,42 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
+		if (this.configLocation != null) {
+			// load Hibernate configuration from given location
+			config.configure(this.configLocation.getURL());
+		}
+
+		if (this.hibernateProperties != null) {
+			// add given Hibernate properties
+			config.addProperties(this.hibernateProperties);
+		}
+
+		if (this.dataSource != null) {
+			// make given DataSource available for SessionFactory configuration
+			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
+			configTimeDataSourceHolder.set(this.dataSource);
+		}
+
+		if (this.jtaTransactionManager != null) {
+			// set Spring-provided JTA TransactionManager for Hibernate cache callbacks
+			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
+		}
+
 		if (this.lobHandler != null) {
 			// make given LobHandler available for SessionFactory configuration
 			// do early because because mapping resource might refer to custom types
 			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
+		if (this.entityInterceptor != null) {
+			// set given entity interceptor at SessionFactory level
+			config.setInterceptor(this.entityInterceptor);
+		}
+
 		if (this.namingStrategy != null) {
 			// pass given naming strategy to Hibernate Configuration
 			config.setNamingStrategy(this.namingStrategy);
-		}
-
-		if (this.configLocation != null) {
-			// load Hibernate configuration from given location
-			config.configure(this.configLocation.getURL());
 		}
 
 		if (this.mappingLocations != null) {
@@ -374,28 +396,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			}
 		}
 
-		if (this.hibernateProperties != null) {
-			// add given Hibernate properties
-			config.addProperties(this.hibernateProperties);
-		}
-
-		if (this.dataSource != null) {
-			// make given DataSource available for SessionFactory configuration
-			config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
-			configTimeDataSourceHolder.set(this.dataSource);
-		}
-
-		if (this.jtaTransactionManager != null) {
-			// set Spring-provided JTA TransactionManager for Hibernate cache callbacks
-			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
-			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
-		}
-
-		if (this.entityInterceptor != null) {
-			// set given entity interceptor at SessionFactory level
-			config.setInterceptor(this.entityInterceptor);
-		}
-
 		// perform custom post-processing in subclasses
 		postProcessConfiguration(config);
 
@@ -404,14 +404,14 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		this.configuration = config;
 		this.sessionFactory = newSessionFactory(config);
 
-		if (this.jtaTransactionManager != null) {
-			// reset TransactionManager holder
-			configTimeTransactionManagerHolder.set(null);
-		}
-
 		if (this.dataSource != null) {
 			// reset DataSource holder
 			configTimeDataSourceHolder.set(null);
+		}
+
+		if (this.jtaTransactionManager != null) {
+			// reset TransactionManager holder
+			configTimeTransactionManagerHolder.set(null);
 		}
 
 		if (this.lobHandler != null) {
