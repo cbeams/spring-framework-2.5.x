@@ -43,6 +43,19 @@ import org.springframework.mock.web.MockServletContext;
  */
 public class ServletContextSupportTests extends TestCase {
 
+	public void testServletContextFactoryBean() {
+		MockServletContext sc = new MockServletContext();
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		wac.registerSingleton("servletContext", ServletContextFactoryBean.class, pvs);
+		wac.refresh();
+
+		Object value = wac.getBean("servletContext");
+		assertEquals(sc, value);
+	}
+
 	public void testServletContextAttributeFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute("myAttr", "myValue");
