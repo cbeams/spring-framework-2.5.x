@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.util.ResponseTimeMonitor;
 import org.springframework.util.ResponseTimeMonitorImpl;
 import org.springframework.util.StopWatch;
@@ -25,9 +26,9 @@ import org.springframework.util.StopWatch;
  * 
  * @author  Rod Johnson
  * @since February 9, 2001
- * @version $Id: AbstractTest.java,v 1.5 2003-11-21 18:42:11 johnsonr Exp $
+ * @version $Id: AbstractTest.java,v 1.6 2003-12-05 17:50:55 johnsonr Exp $
  */
-public abstract class AbstractTest implements Test {
+public abstract class AbstractTest implements Test, BeanNameAware {
 
 	//---------------------------------------------------------------------
 	// Instance variables
@@ -98,6 +99,13 @@ public abstract class AbstractTest implements Test {
 		elapsedTimer.setKeepTaskList(false);
 	}
 	
+	
+	/**
+	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+	 */
+	public void setBeanName(String name) {
+		setName(name);
+	}
 	
 	//---------------------------------------------------------------------
 	// Implementation of Test
@@ -346,6 +354,10 @@ public abstract class AbstractTest implements Test {
 			}
 		}
 		return s;
+	}
+	
+	public String getGroup() {
+		return null;
 	}
 
 

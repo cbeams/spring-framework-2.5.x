@@ -11,6 +11,12 @@ package org.springframework.load;
 
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -194,6 +200,9 @@ public abstract class AbstractTestSuite implements ConfigurableTest, TestStatus 
 				}
 			}
 		}
+		
+		// Always do a final report
+		report();
 	} 	// runAllTests
 
 
@@ -213,7 +222,8 @@ public abstract class AbstractTestSuite implements ConfigurableTest, TestStatus 
 			for (int i = 0; i < tests.length; i++) {
 				String classname = tests[i].getClass().getName();
 				classname = classname.substring(classname.lastIndexOf(".") + 1);
-				tests[i].setName(classname + "-" + i);
+				if (tests[i].getName() == null)
+					tests[i].setName(classname + "-" + i);
 				tests[i].setTestSuite(this);
 				if (this.fixture != null) {
 					// If there's a fixture, all test threads must understand fixtures
@@ -327,9 +337,36 @@ public abstract class AbstractTestSuite implements ConfigurableTest, TestStatus 
 	 */
 	public void report(StringBuffer sb) {
 		sb.append("-----------------------------------\n");
-		Test[] allTests = getTests();
-		for (int i = 0; i < allTests.length; i++) {
-			sb.append(allTests[i]).append("\n");
+		Test[] theirTests = getTests();
+		// Take our own copy so we can sort it
+		Test[] myTests = new Test[theirTests.length];
+		System.arraycopy(theirTests, 0, myTests, 0, theirTests.length);
+		Arrays.sort(myTests, new TestPerformanceComparator());
+		for (int i = 0; i < myTests.length; i++) {
+			sb.append(myTests[i]).append("\n");
+		}
+		
+		// Now do by group, ignoring default group
+		
+		// Key is group name, key is a list
+		HashMap groupsToTests = new HashMap();
+		for (int i = 0; i < myTests.length; i++) {
+			if (myTests[i].getGroup() != null) {
+				List l = (List) groupsToTests.get(myTests[i].getGroup());
+				if (l == null) {
+					l = new LinkedList();
+					groupsToTests.put(myTests[i].getGroup(), l);
+				}
+				l.add(myTests[i]);
+			}
+		}
+		
+		for (Iterator itr = groupsToTests.keySet().iterator(); itr.hasNext(); ) {
+			String name = (String) itr.next();
+			List l = (List) groupsToTests.get(name);
+			if (l.size() > 1) {
+				sb.append(new Stats("Group [" + name + "]", (Test[]) l.toArray(new Test[l.size()])));
+			}
 		}
 		
 		sb.append(new Stats());
@@ -435,9 +472,13 @@ public abstract class AbstractTestSuite implements ConfigurableTest, TestStatus 
 		public final int errors;
 		public final long elapsedTime;
 		public final long workingTime;
+		public String description;
 		
 		public Stats() {
-			Test[] allTests = getTests();
+			this("All tests", getTests());
+		}
+		
+		public Stats(String description, Test[] allTests) {
 			int totalResponseTimeAvg = 0;
 			int totalHits = 0;
 			int errors = 0;
@@ -462,15 +503,36 @@ public abstract class AbstractTestSuite implements ConfigurableTest, TestStatus 
 			this.errors = errors;
 			this.elapsedTime = elapsedTime;
 			this.workingTime = workingTime;
+			this.description = description;
 		}
 		
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
-			sb.append("*********** Total hits=" + totalHits + "\n");
-			sb.append("*********** HPS=" + df.format(hitsPerSecond) + "\n");
-			sb.append("*********** Average response=" + avgResponseTime + "\n");
+			sb.append("[" + description + "]");
+			sb.append("Total hits=" + totalHits);
+			sb.append("; HPS=" + df.format(hitsPerSecond));
+			sb.append("; Average response=" + avgResponseTime + "\n");
 			return sb.toString();
 		}
 	}	// class Stats
+	
+	
+	/**
+	 * Sort in ascending order by hits per second
+	 */
+	private class TestPerformanceComparator implements Comparator {
+		/**
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Object o1, Object o2) {
+			if (! ((o1 instanceof Test) && (o2 instanceof Test)))
+				return 0;
+			Test t1 = (Test) o1;
+			Test t2 = (Test) o2;
+			int result = (int) (100.0 * (t2.getTestsPerSecondCount() - t1.getTestsPerSecondCount()));
+			//System.out.println("t1.hps=" + t1.getTestsPerSecondCount() + "t2.hps=" + t2.getTestsPerSecondCount() + "; result is " + result);
+			return result;
+		}
+	}
 
 } 	// class AbstractTestSuite

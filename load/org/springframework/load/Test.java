@@ -20,6 +20,7 @@ import org.springframework.util.ResponseTimeMonitor;
  */
 public interface Test extends Runnable, ConfigurableTest, TestStatus {
 	
+	
 	/**
 	 * Set the descriptive name of the test
 	 * @param name the human-readable name of the test, for display with test results
@@ -55,6 +56,13 @@ public interface Test extends Runnable, ConfigurableTest, TestStatus {
 	 * @param fixture the shared test fixture
 	 */
 	void setFixture(Object fixture) ;
+	
+	/**
+	 * Return the group the test belongs to. These can be
+	 * displayed together for reporting purposes.
+	 * @return
+	 */
+	String getGroup();
 
     
     void setLongReports(boolean flag);
