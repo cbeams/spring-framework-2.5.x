@@ -31,6 +31,16 @@ public class ScheduledTimerTask {
 
 	private boolean fixedRate = false;
 
+	public ScheduledTimerTask() {
+	}
+
+	public ScheduledTimerTask(TimerTask timerTask, long delay, long period, boolean fixedRate) {
+		this.timerTask = timerTask;
+		this.delay = delay;
+		this.period = period;
+		this.fixedRate = fixedRate;
+	}
+
 	/**
 	 * Set the TimerTask to schedule.
 	 */
