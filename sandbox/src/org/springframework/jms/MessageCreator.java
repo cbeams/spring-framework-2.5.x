@@ -6,6 +6,7 @@
  */
 package org.springframework.jms;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
@@ -15,8 +16,9 @@ import javax.jms.Session;
  * by the JmsSender.  
  *
  * <p>Implementations <i>do not</i> need to concern themselves with
- * JmsException that may be thrown from operations they attempt.
- * The JmsSender will catch and handle JmsExceptions appropriately.* 
+ * checked JMSException (from javax.jms) that may be thrown from 
+ * operations they attempt.  The JmsSender will catch and handle 
+ * these JMSExceptions appropriately.
  *
  * If extra parameters need to be set, such as the delivery mode, priority or time
  * to live, override any of the getters with your own implementation.
@@ -28,9 +30,10 @@ public interface MessageCreator {
 	 *
 	 * @param The JMS session
 	 * @return The message to be sent.
-	 * @throws The spring JmsException
+	 * @throws The JMS Checked Exception.  Do not catch it, it will be
+	 * handled correctly by the JmsSender.
 	 */
-	public abstract Message createMessage(Session session) throws JmsException;
+	public abstract Message createMessage(Session session) throws JMSException;
 
 
 }

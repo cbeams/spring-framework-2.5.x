@@ -127,6 +127,7 @@ public class JmsSender102 extends AbstractJmsSender {
 			//TODO put in pretty printer.
 			logger.info("Message created was [" + message + "]");
 
+			
 			queueSender.send(queue, message);
 			logger.info("Message sent OK");
 
