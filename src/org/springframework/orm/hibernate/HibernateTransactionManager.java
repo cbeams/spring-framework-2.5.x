@@ -239,10 +239,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					session.setFlushMode(FlushMode.NEVER);
 				}
 				try {
+					Connection con = session.connection();
 					if (debugEnabled) {
-						logger.debug("Setting JDBC connection [" + session.connection() + "] read-only");
+						logger.debug("Setting JDBC connection [" + con + "] read-only");
 					}
-					session.connection().setReadOnly(true);
+					con.setReadOnly(true);
 				}
 				catch (Exception ex) {
 					// SQLException or UnsupportedOperationException
@@ -257,11 +258,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				Connection con = session.connection();
 				if (debugEnabled) {
-					logger.debug("Changing isolation level of JDBC connection [" + session.connection() +
-											 "] to " + definition.getIsolationLevel());
+					logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
+					             definition.getIsolationLevel());
 				}
-				txObject.setPreviousIsolationLevel(new Integer(session.connection().getTransactionIsolation()));
+				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
 				session.connection().setTransactionIsolation(definition.getIsolationLevel());
 			}
 
