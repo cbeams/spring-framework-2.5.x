@@ -33,7 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the
- * whole processing of the request. Intended for the "Open Session in View" pattern,
+ * entire processing of the request. Intended for the "Open Session in View" pattern,
  * i.e. to allow for lazy loading in web views despite the original transactions
  * already being completed.
  *
@@ -65,6 +65,8 @@ import org.springframework.web.servlet.ModelAndView;
  * @see OpenSessionInViewFilter
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
+ * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
+ * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements HandlerInterceptor {
 
@@ -78,14 +80,14 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
-	 * Opens a new Hibernate Session according to the settings of this HibernateAccessor
+	 * Open a new Hibernate Session according to the settings of this HibernateAccessor
 	 * and binds in to the thread via TransactionSynchronizationManager.
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 													 Object handler) throws DataAccessException {
-		logger.debug("Opening Hibernate Session in OpenSessionInViewInterceptor");
+		logger.debug("Opening Hibernate session in OpenSessionInViewInterceptor");
 		Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
 																										 getJdbcExceptionTranslator());
 		if (getFlushMode() == FLUSH_NEVER) {
@@ -96,13 +98,13 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
-	 * Flushes the Hibernate Session before view rendering, if necessary.
+	 * Flush the Hibernate Session before view rendering, if necessary.
 	 * Set the flushMode of this HibernateAccessor to FLUSH_NEVER to avoid this extra flushing.
 	 * @see #setFlushMode
 	 */
 	public void postHandle(HttpServletRequest request, HttpServletResponse response,
 												 Object handler, ModelAndView modelAndView) throws DataAccessException {
-		logger.debug("Flushing Hibernate Session in OpenSessionInViewInterceptor");
+		logger.debug("Flushing Hibernate session in OpenSessionInViewInterceptor");
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 		try {
 			flushIfNecessary(sessionHolder.getSession(), false);
@@ -113,14 +115,14 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
-	 * Unbinds the Hibernate Session from the thread and closes it.
+	 * Unbind the Hibernate Session from the thread and closes it.
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
 															Object handler, Exception ex) throws DataAccessException {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		logger.debug("Closing Hibernate Session in OpenSessionInViewInterceptor");
+		logger.debug("Closing Hibernate session in OpenSessionInViewInterceptor");
 		SessionFactoryUtils.closeSessionIfNecessary(sessionHolder.getSession(), getSessionFactory());
 	}
 

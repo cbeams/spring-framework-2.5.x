@@ -29,6 +29,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  * ObjectDeletedException, and WrongClassException.
  * @author Juergen Hoeller
  * @since 13.10.2003
+ * @see SessionFactoryUtils#convertHibernateAccessException
  */
 public class HibernateObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 

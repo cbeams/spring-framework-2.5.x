@@ -100,7 +100,7 @@ public abstract class SessionFactoryUtils {
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 		if (!TransactionSynchronizationManager.hasResource(sessionFactory) && !allowCreate) {
-			throw new IllegalStateException("No Hibernate Session bound to thread, and configuration " +
+			throw new IllegalStateException("No Hibernate session bound to thread, and configuration " +
 																			"does not allow creation of new one here");
 		}
 		return getSession(sessionFactory, null, null, true);
@@ -113,7 +113,7 @@ public abstract class SessionFactoryUtils {
 	 * Session otherwise.
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
 	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
-	 * or EJB CMT). See the getSession version with all parameters for details.
+	 * or EJB CMT). See the full <code>getSession</code> version for details.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or null if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
@@ -179,8 +179,8 @@ public abstract class SessionFactoryUtils {
 			return sessionHolder.getSession();
 		}
 
+		logger.debug("Opening Hibernate session");
 		try {
-			logger.debug("Opening Hibernate session");
 			Session session = (entityInterceptor != null ?
 			    sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
 
@@ -271,7 +271,7 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
+		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
@@ -284,20 +284,24 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
+		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Note that it is advisable to handle JDBCException
-	 * specifically by using an SQLExceptionTranslator for the underlying SQLException.
+	 * org.springframework.dao hierarchy. Note that it is advisable to handle
+	 * JDBCException specifically by using an SQLExceptionTranslator for the
+	 * underlying SQLException.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateAccessor#convertHibernateAccessException
 	 * @see HibernateAccessor#convertJdbcAccessException
-	 * @see HibernateTemplate#execute
+	 * @see HibernateTransactionManager#convertHibernateAccessException
+	 * @see HibernateTransactionManager#convertJdbcAccessException
+	 * @see net.sf.hibernate.JDBCException#getSQLException
+	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
 	 */
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {

@@ -37,7 +37,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Servlet 2.3 Filter that binds a Hibernate Session to the thread for the whole
+ * Servlet 2.3 Filter that binds a Hibernate Session to the thread for the entire
  * processing of the request. Intended for the "Open Session in View" pattern,
  * i.e. to allow for lazy loading in web views despite the original transactions
  * already being completed.
@@ -57,7 +57,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>Looks up the SessionFactory in Spring's root web application context.
  * Supports a "sessionFactoryBeanName" filter init-param; the default bean name is
  * "sessionFactory". Looks up the SessionFactory on each request, to avoid
- * initialization order issues (if using ContextLoaderServlet, the root
+ * initialization order issues (when using ContextLoaderServlet, the root
  * application context will get initialized <i>after</i> this filter).
  *
  * <p><b>NOTE</b>: This filter will by default not flush the Hibernate session, as
@@ -68,8 +68,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
- * @see OpenSessionInViewInterceptor
  * @see #closeSession
+ * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
@@ -83,7 +83,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set the bean name of the SessionFactory to fetch from Spring's
-	 * root application context.
+	 * root application context. Default is "sessionFactory".
+	 * @see #DEFAULT_SESSION_FACTORY_BEAN_NAME
 	 */
 	public void setSessionFactoryBeanName(String sessionFactoryBeanName) {
 		this.sessionFactoryBeanName = sessionFactoryBeanName;
@@ -110,7 +111,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 																	FilterChain filterChain) throws ServletException, IOException {
 		SessionFactory sessionFactory = lookupSessionFactory();
-		logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
+		logger.debug("Opening Hibernate session in OpenSessionInViewFilter");
 		Session session = getSession(sessionFactory);
 		TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
 		try {
@@ -118,7 +119,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(sessionFactory);
-			logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+			logger.debug("Closing Hibernate session in OpenSessionInViewFilter");
 			closeSession(session, sessionFactory);
 		}
 	}
@@ -131,7 +132,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @see #getSessionFactoryBeanName
 	 */
 	protected SessionFactory lookupSessionFactory() {
-		logger.info("Using SessionFactory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
+		logger.info("Using session factory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (SessionFactory) wac.getBean(getSessionFactoryBeanName());
 	}

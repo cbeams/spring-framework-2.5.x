@@ -23,13 +23,12 @@ import net.sf.hibernate.JDBCException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
- * Hibernate-specific subclass of DataAccessException, for JDBC exceptions
- * that Hibernate rethrew. Used by SessionFactoryUtils and HibernateTemplate.
+ * Hibernate-specific subclass of UncategorizedDataAccessException,
+ * for JDBC exceptions that Hibernate rethrew.
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see SessionFactoryUtils#convertHibernateAccessException
  * @see HibernateTemplate#convertHibernateAccessException
- * @see org.springframework.dao.DataAccessException
  */
 public class HibernateJdbcException extends UncategorizedDataAccessException {
 

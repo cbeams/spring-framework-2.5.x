@@ -21,9 +21,11 @@ import net.sf.hibernate.QueryException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
- * Exception thrown on invalid HQL query syntax.
+ * Hibernate-specific subclass of InvalidDataAccessResourceUsageException,
+ * thrown on invalid HQL query syntax.
  * @author Juergen Hoeller
  * @since 13.10.2003
+ * @see SessionFactoryUtils#convertHibernateAccessException
  */
 public class HibernateQueryException extends InvalidDataAccessResourceUsageException {
 
