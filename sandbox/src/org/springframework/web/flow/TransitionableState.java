@@ -153,7 +153,7 @@ public abstract class TransitionableState extends State {
 	 * for given flow execution request context.
 	 * @param context a flow execution context
 	 */
-	public boolean hasTransitionFor(StateContext context) {
+	public boolean hasTransitionFor(RequestContext context) {
 		return getTransition(context) != null;
 	}
 
