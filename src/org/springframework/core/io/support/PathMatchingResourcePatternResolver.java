@@ -37,6 +37,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
@@ -158,6 +159,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
+		Assert.notNull(locationPattern, "locationPattern is required");
 		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
 			if (PathMatcher.isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
