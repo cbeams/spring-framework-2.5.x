@@ -6,6 +6,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aopalliance.intercept.AspectException;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
@@ -15,7 +16,7 @@ import org.springframework.aop.Pointcut;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.8 2003-12-03 13:57:06 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.9 2003-12-11 11:36:31 johnsonr Exp $
  */
 public class AopUtils {
 	
@@ -29,6 +30,24 @@ public class AopUtils {
 	
 	public static boolean isAopProxy(Object o) {
 		return isJdkDynamicProxy(o) || isCglibProxy(o);
+	}
+	
+	/**
+	 * Convenience method to convert a string array of interface names
+	 * to a class array.
+	 * @throws ClassNotFoundException if any of the classes can't be loaded
+	 * @throws AspectException if any of the classes is not an interface
+	 * @return an array of interface classes
+	 */
+	public static Class[] toInterfaceArray(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+		Class interfaces[] = new Class[interfaceNames.length];
+		for (int i = 0; i < interfaceNames.length; i++) {
+			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
+			// Check it's an interface
+			if (!interfaces[i].isInterface())
+				throw new AspectException("Can proxy only interfaces: " + interfaces[i] + " is a class");
+		}
+		return interfaces;
 	}
 
 	/**

@@ -44,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.16 2003-12-03 13:58:24 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.17 2003-12-11 11:36:46 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -143,15 +143,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * or if providing a custom invoker interceptor instead of a target.
 	 */
 	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
-		// TODO similar code in ProxyFactoryBean: may be able to refactor conversion from
-		// String[] to Class[]
-		this.interfaces = new Class[interfaceNames.length];
-		for (int i = 0; i < interfaceNames.length; i++) {
-			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
-			// Check it's an interface
-			if (!interfaces[i].isInterface())
-				throw new AspectException("Can proxy only interfaces: " + interfaces[i] + " is a class");
-		}
+		this.interfaces = AopUtils.toInterfaceArray(interfaceNames);
 	}
 	
 
