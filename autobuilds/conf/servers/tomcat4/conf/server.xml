@@ -1,7 +1,7 @@
 <!--
 	Tomcat server config for Spring autobuild testing
 	
-	$Id: server.xml,v 1.1 2003-12-19 01:44:36 davison Exp $
+	$Id: server.xml,v 1.2 2004-01-05 00:28:52 davison Exp $
  -->
 
 <Server port="13005" shutdown="SHUTDOWN" debug="0">
@@ -94,6 +94,22 @@
         
 
 
+		<Context
+			path="/jpetstore"
+			docBase="jpetstore"
+			debug="4"
+			reloadable="true">
+
+  			<Logger
+  				className="org.apache.catalina.logger.FileLogger"
+  				directory="../../reports"
+        		prefix="jpetstore_tomcat4_app_"
+  				suffix=".log"
+  				timestamp="true"/>
+  		
+  		</Context>
+  		
+  		
 		<Context 
 			path="/petclinic" 
 			docBase="petclinic" 
@@ -109,6 +125,7 @@
 
 			<!-- Define a database connection pool for HSQL -->
   			<!-- NOTE: make sure that a copy of hsqldb.jar is in the TOMCAT common/lib directory -->
+  			<!--
   			<Resource 
   				name="jdbc/petclinicHSQL" 
   				auth="Container" 
@@ -158,6 +175,7 @@
       				<value>true</value>
     			</parameter>
   			</ResourceParams>
+  			-->
 
 		</Context>
 
