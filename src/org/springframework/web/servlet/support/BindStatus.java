@@ -20,9 +20,6 @@ import java.beans.PropertyEditor;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
@@ -45,10 +42,9 @@ import org.springframework.web.util.HtmlUtils;
  * @author Darren Davison
  * @see RequestContext#getBindStatus
  * @see org.springframework.web.servlet.tags.BindTag
+ * @see org.springframework.web.servlet.view.AbstractTemplateView#setExposeSpringMacroHelpers
  */
 public class BindStatus {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final RequestContext requestContext;
 
@@ -119,12 +115,6 @@ public class BindStatus {
 					if (this.errors instanceof BindException) {
 						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
 					}
-					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Cannot not expose custom property editor because Errors instance [" +
-									this.errors + "] is not of type BindException");
-						}
-					}
 					if (htmlEscape && this.value instanceof String) {
 						this.value = HtmlUtils.htmlEscape((String) this.value);
 					}
@@ -141,9 +131,9 @@ public class BindStatus {
 		else {
 			// No Errors instance available as request attribute:
 			// Probably forwarded directly to a form view.
-			// Let's do the best we can: extract a plain value if appropriate.
+			// Let's do the best we can: extract a plain target if appropriate.
 
-			Object target = requestContext.getRequest().getAttribute(beanName);
+			Object target = requestContext.getModelObject(beanName);
 			if (target == null) {
 				throw new IllegalStateException("Neither Errors instance nor plain target object for bean name " +
 						beanName + " available as request attribute");

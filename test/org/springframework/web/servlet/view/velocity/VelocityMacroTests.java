@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.jsp.JspException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,9 +34,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.tags.BindTag;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.beans.TestBean;
 
 /**
  * @author Darren Davison
@@ -76,6 +80,10 @@ public class VelocityMacroTests extends TestCase {
 		VelocityView vv = new VelocityView() {
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				assertTrue(context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
+				RequestContext rc = (RequestContext) context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
+				BindStatus status = rc.getBindStatus("tb.name");
+				assertEquals("name", status.getExpression());
+				assertEquals("juergen", status.getValue());
 			}
 		};
 		vv.setUrl(templateName);
@@ -83,6 +91,7 @@ public class VelocityMacroTests extends TestCase {
 		vv.setExposeSpringMacroHelpers(true);
 
 		Map model = new HashMap();
+		model.put("tb", new TestBean("juergen", 99));
 		vv.render(model, request, expectedResponse);
 	}
 

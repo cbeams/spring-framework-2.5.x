@@ -376,7 +376,7 @@ public class RequestContext {
 		Errors errors = (Errors) this.errorsMap.get(name);
 		boolean put = false;
 		if (errors == null) {
-			errors = retrieveErrors(name);
+			errors = (Errors) getModelObject(BindException.ERROR_KEY_PREFIX + name);
 			if (errors == null) {
 				return null;
 			}
@@ -397,16 +397,17 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the Errors instance for the given bind object,
+	 * Retrieve the model object for the given model name,
 	 * either from the model or from the request attributes.
+	 * @param modelName the name of the model object
+	 * @return the model object
 	 */
-	private Errors retrieveErrors(String name) {
-		String key = BindException.ERROR_KEY_PREFIX + name;
+	protected Object getModelObject(String modelName) {
 		if (this.model != null) {
-			return (Errors) this.model.get(key);
+			return this.model.get(modelName);
 		}
 		else {
-			return (Errors) this.request.getAttribute(key);
+			return this.request.getAttribute(modelName);
 		}
 	}
 

@@ -28,6 +28,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * @author Juergen Hoeller
@@ -378,7 +379,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertEquals("juergen", status.getValue());
 	}
 
-	public void testBindTagButWithoutErrorsInstance() throws JspException {
+	public void testBindTagWithBeanButWithoutErrorsInstance() throws JspException {
 		PageContext pc = createPageContext();
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
