@@ -19,10 +19,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * An action that executes controller, mediator, and/or command-like behavior.
- * Actions typically delegate down to the service-layer to perform business
- * operations, and/or prep views with dynamic model data for rendering. They act
- * the bridge between the web-tier and the middle-tier.
+ * An action that executes controller, mediator (bridge), and/or command-like
+ * behavior. Actions typically delegate down to the service-layer to perform
+ * business operations, and/or prep views with dynamic model data for rendering.
+ * They act the bridge between the web-tier and the middle-tier.
+ * <p>
+ * Action implementations are typically instantiated and managed by Spring to
+ * take advantage of the container's configuration and dependency injection
+ * (wiring) capabilities. However, actions can also be directly instantiated for
+ * use im a standalone test environment and parameterized with mocks or stubs,
+ * as they are simple POJOs.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -31,16 +37,17 @@ public interface Action {
 
 	/**
 	 * Execute this action. Action execution will occur in the context of the
-	 * current request. Execution is typically triggered when an
+	 * current request. Execution is typically triggered in production when an
 	 * <code>ActionState</code> is entered in an ongoing
-	 * <code>FlowExecution</code>.
+	 * <code>FlowExecution</code> for a specific <code>Flow</code>
+	 * definition.
 	 * <p>
-	 * Note: The <code>MutableAttributesAccessor</code> model argument
-	 * provides access to the <b>data model </b> of the active flow session. All
-	 * attributes in the flow model are considered in "flow scope"; that is,
-	 * they exist for the life of the flow session and will be cleaned up when
-	 * the flow session ends. All attributes in the flow model are automatically
-	 * exported for convenient access by the views.
+	 * Note: The <code>MutableAttributesAccessor</code> model argument to this
+	 * method provides access to the <b>data model </b> of the active flow
+	 * session. All attributes in the flow model are considered in "flow scope";
+	 * that is, they exist for the life of the flow session and will be cleaned
+	 * up when the flow session ends. All attributes in the flow model are
+	 * automatically exported for convenient access by the views.
 	 * <p>
 	 * Note: The flow model should not be used as a general purpose cache; but
 	 * rather as a context for data needed locally by the flows this action
