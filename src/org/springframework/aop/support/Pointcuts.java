@@ -34,7 +34,9 @@ public abstract class Pointcuts {
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 		public static SetterPointcut INSTANCE = new SetterPointcut();
 		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("set");
+			return m.getName().startsWith("set") && 
+				m.getParameterTypes().length == 1 &&
+				m.getReturnType() == Void.TYPE;
 		}
 		private Object readResolve() {
 			return INSTANCE;
@@ -44,7 +46,8 @@ public abstract class Pointcuts {
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 		public static GetterPointcut INSTANCE = new GetterPointcut();
 		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("get");
+			return m.getName().startsWith("get") && 
+				m.getParameterTypes().length == 0;
 		}
 		private Object readResolve() {
 			return INSTANCE;
@@ -62,10 +65,24 @@ public abstract class Pointcuts {
 	public static final Pointcut GETTERS = GetterPointcut.INSTANCE; 
 	
 	
+	/**
+	 * Match all methods that <b>either</b> (or both) of the given pointcuts matches
+	 * @param a input pointcut
+	 * @param b input pointput
+	 * @return a distinct Pointcut that matches all methods that either of the
+	 * given pointcuts matches
+	 */
 	public static Pointcut union(Pointcut a, Pointcut b) {
 		return new UnionPointcut(a, b);
 	}
 	
+	/**
+	 * Match all methods that <b>both</b> the given pointcuts match
+	 * @param a input pointcut
+	 * @param b input pointput
+	 * @return a distinct Pointcut that matches all methods that both the
+	 * given pointcuts match
+	 */
 	public static Pointcut intersection(Pointcut a, Pointcut b) {
 		return new ComposablePointcut(a.getClassFilter(), a.getMethodMatcher()).intersection(b);
 	}
