@@ -39,9 +39,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	/** Marker for read-only transactions in description strings */
 	public static final String READ_ONLY_MARKER = "readOnly";
 
-	/** Constants instance for TransactionDefinition */
-	private static final Constants constants = new Constants(TransactionDefinition.class);
 
+	/** Constants instance for TransactionDefinition */
+	private final Constants constants = new Constants(TransactionDefinition.class);
 
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 

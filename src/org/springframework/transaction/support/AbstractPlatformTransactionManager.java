@@ -58,7 +58,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.25 2004-03-26 16:33:12 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.26 2004-05-23 20:24:31 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -84,11 +84,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
-	/** Constants instance for AbstractPlatformTransactionManager */
-	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	/** Constants instance for AbstractPlatformTransactionManager */
+	private final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
 
 	private int transactionSynchronization = SYNCHRONIZATION_ALWAYS;
 

@@ -55,7 +55,7 @@ import org.springframework.core.Constants;
 public class SimpleTriggerBean extends SimpleTrigger
     implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 
-	private static final Constants constants = new Constants(SimpleTrigger.class);
+	private final Constants constants = new Constants(SimpleTrigger.class);
 
 	private JobDetail jobDetail;
 

@@ -89,7 +89,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.11 2004-04-22 07:58:22 jhoeller Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.12 2004-05-23 20:24:30 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -114,7 +114,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	public static final int SYSTEM_PROPERTIES_MODE_OVERRIDE = 2;
 
 
-	private static final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
+	private final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
 
 	private String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 

@@ -80,10 +80,10 @@ public abstract class HibernateAccessor implements InitializingBean {
 	public static final int FLUSH_EAGER = 2;
 
 
-	/** Constants instance for HibernateAccessor */
-	private static final Constants constants = new Constants(HibernateAccessor.class);
-
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	/** Constants instance for HibernateAccessor */
+	private final Constants constants = new Constants(HibernateAccessor.class);
 
 	private SessionFactory sessionFactory;
 
