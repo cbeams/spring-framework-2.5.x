@@ -167,7 +167,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return getFlow();
 	}
 	
-	public void shutdown() {
+	public void dispose() {
 		setFlow(null);
 	}
 

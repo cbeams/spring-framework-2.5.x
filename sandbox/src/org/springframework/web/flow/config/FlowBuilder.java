@@ -78,5 +78,5 @@ public interface FlowBuilder {
 	 * construction process should start with another call to the
 	 * <code>init()</code> method.
 	 */
-	public void shutdown();
+	public void dispose();
 }

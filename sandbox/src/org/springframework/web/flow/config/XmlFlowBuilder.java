@@ -263,7 +263,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		parseStateDefinitions();
 	}
 	
-	public void shutdown() {
+	public void dispose() {
 		setFlow(null);
 		doc=null;
 	}
