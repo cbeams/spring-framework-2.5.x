@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +51,10 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 	private Properties jdoProperties;
 
+	private DataSource dataSource;
+
 	private PersistenceManagerFactory persistenceManagerFactory;
+
 
 	/**
 	 * Set the location of the JDO properties config file, for example
@@ -70,6 +74,17 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	public void setJdoProperties(Properties jdoProperties) {
 		this.jdoProperties = jdoProperties;
 	}
+
+	/**
+	 * Set the DataSource to be used by the PersistenceManagerFactory.
+	 * If set, this will override corresponding settings in JDO properties.
+	 * <p>Note: If this is set, the JDO settings should not define
+	 * a connection factory to avoid meaningless double configuration.
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
 
 	/**
 	 * Initialize the PersistenceManagerFactory for the given location.
@@ -102,6 +117,11 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		// build factory instance
 		this.persistenceManagerFactory = newPersistenceManagerFactory(props);
+
+		if (this.dataSource != null) {
+			// use given DataSource as JDO connection factory
+			this.persistenceManagerFactory.setConnectionFactory(this.dataSource);
+		}
 	}
 
 	/**
@@ -139,7 +159,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * Close the PersistenceManagerFactory on context shutdown.
 	 */
 	public void destroy() {
-		logger.info("Closing JDO PersistenceManagerFactory of LocalPersistenceManagerFactoryBean [" + this + "]");
+		logger.info("Closing JDO PersistenceManagerFactory");
 		this.persistenceManagerFactory.close();
 	}
 
