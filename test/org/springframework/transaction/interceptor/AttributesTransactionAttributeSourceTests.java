@@ -16,7 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -24,7 +26,10 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.metadata.Attributes;
+import org.springframework.metadata.commons.CommonsAttributes;
 import org.springframework.metadata.support.MapAttributes;
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * @author Rod Johnson
@@ -71,6 +76,34 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		TransactionAttribute actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
 		assertEquals(txAtt, actual);
 		assertSame(txAtt, atas.getTransactionAttribute(method, method.getDeclaringClass()));
+	}
+	
+	
+	public static class TestBeanWithOverloadedMethod extends TestBean {
+	    public int getAge(int i) {
+	        return i;
+	    }
+	}
+	
+	public void testOverloadedMethodsGetDistinctTransactionAttributes() throws Exception {
+		Method method1 = TestBeanWithOverloadedMethod.class.getMethod("getAge", (Class[]) null);
+		Method method2 = TestBeanWithOverloadedMethod.class.getMethod("getAge", new Class[] { int.class} );
+
+		TransactionAttribute txAtt1 = new DefaultTransactionAttribute();
+		TransactionAttribute txAtt2 = new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NEVER);;
+	
+		MapAttributes ma = new MapAttributes();
+		AttributesTransactionAttributeSource atas = new AttributesTransactionAttributeSource(ma);
+		ma.register(method1, new Object[] { new Object(), "", txAtt1, "er" });
+		ma.register(method2, new Object[] { txAtt2 });
+		
+		TransactionAttribute actual = atas.getTransactionAttribute(method1, TestBeanWithOverloadedMethod.class);
+		assertEquals(txAtt1, actual);
+		assertSame(txAtt1, atas.getTransactionAttribute(method1, method1.getDeclaringClass()));
+		
+		TransactionAttribute actual2 = atas.getTransactionAttribute(method2, TestBeanWithOverloadedMethod.class);
+		assertEquals(txAtt2, actual2);
+		assertSame(txAtt2, atas.getTransactionAttribute(method2, method2.getDeclaringClass()));
 	}
 	
 	/**
@@ -153,5 +186,35 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		TransactionAttribute actual = atas.getTransactionAttribute(method, null);
 		assertEquals(txAtt, actual);
 	}
+	
+	public void testSPR418UnboundedCacheSizeGrowth() throws Exception {
+        Attributes attributes = new CommonsAttributes();
+
+        AttributesTransactionAttributeSource attributeSource = new AttributesTransactionAttributeSource(
+                attributes);
+
+        //Method m = PrototypeBean.class.getMethod("doNothing", new Class[0]);
+        for (int i = 0; i < 100; i++) {
+            PrototypeBean bean = new PrototypeBean();
+            Method m = bean.getClass().getMethod("doNothing", new Class[0]); 
+            attributeSource.getTransactionAttribute(m, bean.getClass());
+            Map cache = (Map) getPrivateField(attributeSource,
+                    AbstractFallbackTransactionAttributeSource.class, "cache");
+            assertEquals("Cache size should not increase: i=" + i, 1, cache.size());
+        }
+    }
+
+    static class PrototypeBean {
+        public void doNothing() {
+        }
+    }
+
+    static private Object getPrivateField(Object obj, Class clazz,
+            String fieldName) throws NoSuchFieldException,
+            IllegalAccessException {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(obj);
+    }
 
 }

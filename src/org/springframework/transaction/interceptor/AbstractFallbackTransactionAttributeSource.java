@@ -22,12 +22,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.support.AopUtils;
-import org.springframework.metadata.Attributes;
 
 /**
  * Abstract implementation of TransactionAttributeSource that caches attributes
@@ -59,7 +58,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Cache of TransactionAttributes, keyed by Method and target class
 	 */
-	private HashMap cache = new HashMap();
+	private Map cache = new HashMap();
 
 
 	/**
@@ -100,7 +99,13 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	
 	private Object cacheKey(Method method, Class targetClass) {
 		// Class may be null, method can't
-		return targetClass + "" + System.identityHashCode(method);
+	    // Must not produce same key for overloaded methods
+	    // Must produce same key for different instances of the same method
+	    
+	    // TODO this works fine, but could consider making it faster in future:
+	    // Method.toString() is relatively (although not disastrously) slow
+		return targetClass + "" 
+				+ method;
 	}
 	
 	/**
