@@ -58,10 +58,26 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if expression is <code>false</code>
 	 */
 	public static void isTrue(boolean expression, String message) {
-		if (expression == false) {
+		if (!expression) {
 			throw new IllegalArgumentException(message);
 		}
 	}
+	
+	/**
+     * Assert a boolean expression, throwing <code>IllegalStateException</code>
+     * if the test result is <code>false</code>. Call isTrue if you wish to
+     * throw IllegalArgumentException on an assertion failure.
+	 * <pre>
+	 * Assert.state(id == null, "The id property must not already be initialized");</pre>
+	 * @param expression a boolean expression
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if expression is <code>false</code>
+	 */
+    public static void state(boolean expression, String message) {
+		if (!expression) {
+			throw new IllegalStateException(message);
+		}
+    }
 
 	/**
 	 * Assert that an object is not null.
@@ -131,7 +147,7 @@ public abstract class Assert {
 	 * or has no elements
 	 */
 	public static void notEmpty(Collection collection, String message) {
-		if (collection == null || !collection.isEmpty()) {
+		if (collection == null || collection.isEmpty()) {
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -147,7 +163,7 @@ public abstract class Assert {
 	 * or has no entries
 	 */
 	public static void notEmpty(Map map, String message) {
-		if (map == null || !map.isEmpty()) {
+		if (map == null || map.isEmpty()) {
 			throw new IllegalArgumentException(message);
 		}
 	}
