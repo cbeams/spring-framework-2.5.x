@@ -154,7 +154,8 @@ public class CallableStatementCreatorFactory {
 
 		public String toString() {
 			StringBuffer sbuf = new StringBuffer("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql={" + callString + "}: params={");
-			sbuf.append(inParameters.toString());
+			if (inParameters != null)
+				sbuf.append(inParameters.toString());
 			return sbuf.toString() + "}";
 		}
 	}
