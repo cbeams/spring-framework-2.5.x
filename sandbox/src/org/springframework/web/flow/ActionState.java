@@ -38,12 +38,12 @@ public class ActionState extends TransitionableState {
 
     public ActionState(String id, Transition transition) {
         super(id, transition);
-        setBeanName(appendBeanNameSuffix(id));
+        setBeanName(appendStandardActionBeanNameSuffix(id));
     }
 
     public ActionState(String id, Transition[] transitions) {
         super(id, transitions);
-        setBeanName(appendBeanNameSuffix(id));
+        setBeanName(appendStandardActionBeanNameSuffix(id));
     }
 
     public ActionState(String id, String beanName, Transition transition) {
@@ -66,7 +66,7 @@ public class ActionState extends TransitionableState {
         this.actionBeanNames.add(beanName);
     }
 
-    private String appendBeanNameSuffix(String stateId) {
+    private String appendStandardActionBeanNameSuffix(String stateId) {
         return stateId + ACTION_BEAN_NAME_SUFFIX;
     }
 

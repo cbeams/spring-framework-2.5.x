@@ -465,21 +465,29 @@ public class Flow implements FlowEventProcessor, Serializable {
     }
 
     public ViewState createViewState(String stateIdSuffix) {
-        return createViewState(stateIdSuffix, new Transition[] { onSubmitBindAndValidate(stateIdSuffix),
-                OnEvent.cancel(), OnEvent.back(getBackEndStateId()) });
+        return createViewState(stateIdSuffix, new Transition[] { onSubmitBindAndValidate(stateIdSuffix), onCancelEnd(),
+                onBackEnd() });
     }
 
-    public ViewState createViewState(String stateIdSuffix, String submitStateIdSuffix) {
-        return createViewState(stateIdSuffix, new Transition[] { onSubmitBindAndValidate(submitStateIdSuffix),
-                OnEvent.cancel(), OnEvent.back(getBackEndStateId()) });
+    public ViewState createViewState(String stateIdSuffix, String viewName) {
+        return createViewState(stateIdSuffix, viewName, new Transition[] { onSubmitBindAndValidate(stateIdSuffix),
+                onCancelEnd(), onBackEnd() });
     }
 
     public ViewState createViewState(String stateIdSuffix, Transition transition) {
-        return createViewState(stateIdSuffix, new Transition[] { transition });
+        return new ViewState(view(stateIdSuffix), transition);
+    }
+
+    public ViewState createViewState(String stateIdSuffix, String viewName, Transition transition) {
+        return new ViewState(view(stateIdSuffix), viewName, transition);
     }
 
     public ViewState createViewState(String stateIdSuffix, Transition[] transitions) {
-        return new ViewState(buildStateId(VIEW_PREFIX, stateIdSuffix), transitions);
+        return new ViewState(view(stateIdSuffix), transitions);
+    }
+
+    public ViewState createViewState(String stateIdSuffix, String viewName, Transition[] transitions) {
+        return new ViewState(view(stateIdSuffix), viewName, transitions);
     }
 
     public ActionState createBindAndValidateState(String stateIdSuffix) {
@@ -606,7 +614,7 @@ public class Flow implements FlowEventProcessor, Serializable {
     protected Transition onBackPopulate(String populateActionStateIdSuffix) {
         return OnEvent.Back.populate(populateActionStateIdSuffix);
     }
-    
+
     protected Transition onBackView(String viewActionStateIdSuffix) {
         return OnEvent.Back.view(viewActionStateIdSuffix);
     }
@@ -642,7 +650,7 @@ public class Flow implements FlowEventProcessor, Serializable {
     protected Transition onFinishEnd() {
         return OnEvent.Finish.end();
     }
-    
+
     protected Transition onFinishGet(String getActionStateIdSuffix) {
         return OnEvent.Finish.get(getActionStateIdSuffix);
     }
@@ -742,7 +750,7 @@ public class Flow implements FlowEventProcessor, Serializable {
     public static String populate(String populateFormActionStateIdSuffix) {
         return buildStateId(POPULATE_FORM_ACTION_PREFIX, populateFormActionStateIdSuffix + FORM_SUFFIX);
     }
-    
+
     public static String view(String viewActionStateIdSuffix) {
         return buildStateId(VIEW_PREFIX, viewActionStateIdSuffix);
     }
@@ -773,6 +781,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 
     public static String action(String actionBeanNamePrefix) {
         return actionBeanNamePrefix + ACTION_BEAN_NAME_SUFFIX;
+    }
+
+    public static Transition onEvent(String eventName, String newState) {
+        return new Transition(eventName, newState);
     }
 
     public String getDefaultFlowAttributesMapperId() {
