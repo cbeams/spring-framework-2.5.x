@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>The path may contain ${...} placeholders, to be resolved as
  * system properties: e.g. ${user.dir}.
  *
- * <p>Delegates to a ResourceLoader, by default DefaultResourceLoader.
+ * <p>Delegates to a ResourceLoader, by default a DefaultResourceLoader.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -66,12 +66,13 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) {
-		setValue(this.resourceLoader.getResource(resolvePath(text).trim()));
+		String locationToUse = resolvePath(text).trim();
+		setValue(this.resourceLoader.getResource(locationToUse));
 	}
 
 	/**
-	 * Resolve the given path, replacing placeholders with corresponding
-	 * system property values if necessary.
+	 * Resolve the given path, replacing ${...} placeholders with
+	 * corresponding system property values if necessary.
 	 * @param path the original file path
 	 * @return the resolved file path
 	 * @see #PLACEHOLDER_PREFIX
@@ -89,7 +90,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 				}
 				else {
 					logger.warn("Could not resolve placeholder '" + placeholder +
-					            "' in file path [" + path + "] as system property");
+					    "' in resource path [" + path + "] as system property");
 				}
 			}
 		}
