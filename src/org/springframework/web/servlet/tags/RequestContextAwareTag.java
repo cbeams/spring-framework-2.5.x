@@ -25,6 +25,7 @@ import javax.servlet.jsp.tagext.TryCatchFinally;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -47,7 +48,7 @@ import org.springframework.web.servlet.support.RequestContext;
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
 	/** PageContext attribute for page-level RequestContext instance */
-	protected static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
+	public static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
 			"org.springframework.web.servlet.tags.REQUEST_CONTEXT";
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -61,15 +62,11 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * @see #doStartTagInternal
 	 */
 	public final int doStartTag() throws JspException {
-		this.requestContext = (RequestContext) pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
+		this.requestContext = (RequestContext) this.pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 		try {
 			if (this.requestContext == null) {
-				if (!(this.pageContext.getRequest() instanceof HttpServletRequest)) {
-					throw new JspException("RequestContextAwareTag just supports HTTP requests");
-				}
-				this.requestContext =	new RequestContext(
-						(HttpServletRequest) this.pageContext.getRequest(), this.pageContext.getServletContext());
-				pageContext.setAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE, this.requestContext);
+				this.requestContext =	new JspAwareRequestContext(this.pageContext);
+				this.pageContext.setAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE, this.requestContext);
 			}
 			return doStartTagInternal();
 		}

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -45,12 +46,18 @@ import org.springframework.web.util.WebUtils;
  * that do not have access to the servlet request, like Velocity templates.
  *
  * <p>Can be instantiated manually, or automatically exposed to views as
- * model attribute via AbstractView's requestContextAttribute property.
+ * model attribute via AbstractView's "requestContextAttribute" property.
+ *
+ * <p>Will also work outside DispatcherServlet requests, accessing the root
+ * WebApplicationContext and using an appropriate fallback for the locale
+ * (the JSTL locale if available, or the HttpServletRequest locale else).
  *
  * @author Juergen Hoeller
  * @since 03.03.2003
+ * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
  * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
+ * @see #getFallbackLocale
  */
 public class RequestContext {
 
@@ -73,14 +80,18 @@ public class RequestContext {
 	 * @see javax.servlet.jsp.jstl.core.Config#FMT_LOCALE
 	 * @see javax.servlet.http.HttpServletRequest#getLocale
 	 */
-	protected final static String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
+	public final static String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
+
+	protected static final String REQUEST_SCOPE_SUFFIX = ".request";
+	protected static final String SESSION_SCOPE_SUFFIX = ".session";
+	protected static final String APPLICATION_SCOPE_SUFFIX = ".application";
 
 
-	private final HttpServletRequest request;
+	private HttpServletRequest request;
 
-	private final Map model;
+	private Map model;
 
-	private final WebApplicationContext webApplicationContext;
+	private WebApplicationContext webApplicationContext;
 
 	private Locale locale;
 
@@ -106,7 +117,7 @@ public class RequestContext {
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext)
 	 */
 	public RequestContext(HttpServletRequest request) {
-		this(request, null, null);
+		initContext(request, null, null);
 	}
 
 	/**
@@ -124,7 +135,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
 	public RequestContext(HttpServletRequest request, ServletContext servletContext) {
-		this(request, servletContext, null);
+		initContext(request, servletContext, null);
 	}
 
 	/**
@@ -136,11 +147,12 @@ public class RequestContext {
 	 * ServletContext to be able to fallback to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view
+	 * (can be null, using the request attributes for Errors retrieval)
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, Map model) {
-		this(request, null, model);
+		initContext(request, null, model);
 	}
 
 	/**
@@ -154,10 +166,35 @@ public class RequestContext {
 	 * @param servletContext the servlet context of the web application
 	 * (can be null; necessary for fallback to root WebApplicationContext)
 	 * @param model the model attributes for the current view
+	 * (can be null, using the request attributes for Errors retrieval)
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 */
 	public RequestContext(HttpServletRequest request, ServletContext servletContext, Map model) {
+		initContext(request, servletContext, model);
+	}
+
+	protected RequestContext() {
+	}
+
+
+	/**
+	 * Initialize this context with the given request,
+	 * using the given model attributes for Errors retrieval.
+	 * <p>Delegates to <code>getFallbackLocale</code> and <code>getFallbackTheme</code>
+	 * for determining the fallback locale and theme, respectively, if no LocaleResolver
+	 * and/or ThemeResolver can be found in the request.
+	 * @param request current HTTP request
+	 * @param servletContext the servlet context of the web application
+	 * (can be null; necessary for fallback to root WebApplicationContext)
+	 * @param model the model attributes for the current view
+	 * (can be null, using the request attributes for Errors retrieval)
+	 * @see #getFallbackLocale
+	 * @see #getFallbackTheme
+	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
+	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
+	 */
+	protected void initContext(HttpServletRequest request, ServletContext servletContext, Map model) {
 		this.request = request;
 		this.model = model;
 
@@ -171,13 +208,8 @@ public class RequestContext {
 			this.locale = RequestContextUtils.getLocale(request);
 		}
 		catch (IllegalStateException ex) {
-			// No LocaleResolver available -> try JSTL locale attribute.
-			this.locale = (Locale) request.getAttribute(JSTL_LOCALE_ATTRIBUTE);
-			if (this.locale == null) {
-				// Neither LocaleResolver nor JSTL locale available ->
-				// fall back to accept-header locale.
-				this.locale = request.getLocale();
-			}
+			// No LocaleResolver available -> try fallback.
+			this.locale = getFallbackLocale();
 		}
 
 		// Determine theme to use for this RequestContext.
@@ -185,8 +217,8 @@ public class RequestContext {
 			this.theme = RequestContextUtils.getTheme(request);
 		}
 		catch (IllegalStateException ex) {
-			// No ThemeResolver available -> fall back to default theme.
-			this.theme = this.webApplicationContext.getTheme(DEFAULT_THEME_NAME);
+			// No ThemeResolver available -> try fallback.
+			this.theme = getFallbackTheme();
 		}
 
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
@@ -197,31 +229,84 @@ public class RequestContext {
 	}
 
 	/**
+	 * Determine the fallback locale for this context.
+	 * <p>Default implementation checks for a JSTL locale attribute
+	 * in request, session or application scope; if not found,
+	 * returns the <code>HttpServletRequest.getLocale()</code>.
+	 * @return the fallback locale (never null)
+	 * @see javax.servlet.http.HttpServletRequest#getLocale
+	 */
+	protected Locale getFallbackLocale() {
+		Locale locale = (Locale) getRequest().getAttribute(JSTL_LOCALE_ATTRIBUTE);
+		if (locale == null) {
+			locale = (Locale) getRequest().getAttribute(JSTL_LOCALE_ATTRIBUTE + REQUEST_SCOPE_SUFFIX);
+			if (locale == null) {
+				HttpSession session = getRequest().getSession(false);
+				if (session != null) {
+					locale = (Locale) session.getAttribute(JSTL_LOCALE_ATTRIBUTE);
+					if (locale == null) {
+						locale = (Locale) session.getAttribute(JSTL_LOCALE_ATTRIBUTE + SESSION_SCOPE_SUFFIX);
+					}
+				}
+				if (locale == null) {
+					locale = (Locale) getServletContext().getAttribute(JSTL_LOCALE_ATTRIBUTE);
+					if (locale == null) {
+						locale = (Locale) getServletContext().getAttribute(JSTL_LOCALE_ATTRIBUTE + APPLICATION_SCOPE_SUFFIX);
+						if (locale == null) {
+							// Nor JSTL locale available -> fall back to accept-header locale.
+							locale = getRequest().getLocale();
+						}
+					}
+				}
+			}
+		}
+		return locale;
+	}
+
+	/**
+	 * Determine the fallback theme for this context.
+	 * <p>Default implementation returns the default theme (with name "theme").
+	 * @return the fallback theme (never null)
+	 */
+	protected Theme getFallbackTheme() {
+		return getWebApplicationContext().getTheme(DEFAULT_THEME_NAME);
+	}
+
+
+	/**
 	 * Return the underlying HttpServletRequest.
 	 * Only intended for cooperating classes in this package.
 	 */
-	protected HttpServletRequest getRequest() {
+	protected final HttpServletRequest getRequest() {
 		return request;
 	}
 
 	/**
 	 * Return the current WebApplicationContext.
 	 */
-	public WebApplicationContext getWebApplicationContext() {
+	public final WebApplicationContext getWebApplicationContext() {
 		return webApplicationContext;
+	}
+
+	/**
+	 * Return the underlying ServletContext.
+	 * Only intended for cooperating classes in this package.
+	 */
+	protected final ServletContext getServletContext() {
+		return this.webApplicationContext.getServletContext();
 	}
 
 	/**
 	 * Return the current locale.
 	 */
-	public Locale getLocale() {
+	public final Locale getLocale() {
 		return locale;
 	}
 
 	/**
 	 * Return the current theme.
 	 */
-	public Theme getTheme() {
+	public final Theme getTheme() {
 		return theme;
 	}
 
