@@ -1,4 +1,4 @@
--- Spring PetClinic demo --
+-- Spring Petclinic demo --
 @author Ken Krebs
 
 This directory contains the web app source.

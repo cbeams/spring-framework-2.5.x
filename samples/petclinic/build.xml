@@ -46,7 +46,7 @@
 	<target name="usage">
 
 		<echo message=""/>
-		<echo message="PetClinic build file"/>
+		<echo message="Petclinic build file"/>
 		<echo message="------------------------------------------------------"/>
 		<echo message=""/>
 		<echo message="Available targets are:"/>
