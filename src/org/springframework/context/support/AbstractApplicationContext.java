@@ -55,6 +55,9 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Partial implementation of ApplicationContext. Doesn't mandate the type
@@ -247,9 +250,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
 		// configure the bean factory with context-specific editors
-		beanFactory.registerCustomEditor(Resource.class, new ResourceEditor(this));
-		beanFactory.registerCustomEditor(URL.class, new URLEditor(new ResourceEditor(this)));
-		beanFactory.registerCustomEditor(InputStream.class, new InputStreamEditor(new ResourceEditor(this)));
+		beanFactory.registerCustomEditor(Resource.class,
+		    new ResourceEditor(this));
+		beanFactory.registerCustomEditor(URL.class,
+		    new URLEditor(new ResourceEditor(this)));
+		beanFactory.registerCustomEditor(InputStream.class,
+		    new InputStreamEditor(new ResourceEditor(this)));
+		beanFactory.registerCustomEditor(Resource[].class,
+		    new ResourceArrayPropertyEditor(getResourcePatternResolver()));
 
 		// configure the bean factory with context semantics
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -297,6 +305,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// last step: publish corresponding event
 		publishEvent(new ContextRefreshedEvent(this));
+	}
+
+	/**
+	 * Return the ResourcePatternResolver to use for resolving location patterns
+	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
+	 * supporting Ant-style location patterns.
+	 * <p>Can be overridden in subclasses, for extended resolution strategies.
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 */
+	protected ResourcePatternResolver getResourcePatternResolver() {
+		return new PathMatchingResourcePatternResolver(this);
 	}
 
 	/**

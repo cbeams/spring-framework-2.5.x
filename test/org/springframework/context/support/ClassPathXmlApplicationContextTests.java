@@ -19,6 +19,10 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -33,6 +37,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -71,6 +76,20 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				"/org/springframework/context/support/context*.xml");
 		Service service = (Service) ctx.getBean("service");
 		assertEquals(ctx, service.getMessageSource());
+	}
+
+	public void testResourceArrayPropertyEditor() throws IOException {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/context*.xml");
+		Service service = (Service) ctx.getBean("service");
+		assertEquals(3, service.getResources().length);
+		List resources = Arrays.asList(service.getResources());
+		assertTrue(resources.contains(
+		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextA.xml").getFile())));
+		assertTrue(resources.contains(
+		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextB.xml").getFile())));
+		assertTrue(resources.contains(
+		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextC.xml").getFile())));
 	}
 
 	public void testChildWithProxy() throws Exception {

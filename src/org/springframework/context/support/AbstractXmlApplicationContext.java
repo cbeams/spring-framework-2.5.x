@@ -25,15 +25,23 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Convenient abstract superclass for ApplicationContext implementations,
  * drawing configuration from XML documents containing bean definitions
  * understood by an XmlBeanDefinitionParser.
+ *
+ * <p>Subclasses just have to implement the <code>getConfigLocations</code>
+ * method. Furthermore, they might override the <code>getResourceByPath</code>
+ * hook to interpret relative paths in an environment-specific fashion, and/or
+ * <code>getResourcePatternResolver</code> for extended pattern resolution.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #getConfigLocations
+ * @see #getResourceByPath
+ * @see #getResourcePatternResolver
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -140,19 +148,12 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	/**
-	 * Return the ResourcePatternResolver to use for resolving location patterns
-	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
-	 * supporting Ant-style location patterns.
-	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
-	 */
-	protected ResourcePatternResolver getResourcePatternResolver() {
-		return new PathMatchingResourcePatternResolver(this);
-	}
-
-	/**
 	 * Return an array of resource locations, referring to the XML bean
 	 * definition files that this context should be built with.
+	 * <p>Can also include location patterns, which will get resolved
+	 * via a ResourcePatternResolver.
 	 * @return an array of resource locations, or null if none
+	 * @see #getResourcePatternResolver
 	 */
 	protected abstract String[] getConfigLocations();
 

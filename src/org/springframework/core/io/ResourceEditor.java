@@ -16,14 +16,10 @@
 
 package org.springframework.core.io;
 
-import java.beans.PropertyEditorSupport;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Editor for Resource descriptors, to convert String locations to Resource
- * properties automatically instead of using a String location property.
+ * Editor for Resource descriptors, to automatically convert String locations
+ * (e.g. "file:C:/myfile.txt" or "classpath:myfile.txt") to Resource properties
+ * instead of using a String location property.
  *
  * <p>The path may contain ${...} placeholders, to be resolved as
  * system properties: e.g. ${user.dir}.
@@ -39,18 +35,12 @@ import org.apache.commons.logging.LogFactory;
  * @see DefaultResourceLoader
  * @see System#getProperty(String)
  */
-public class ResourceEditor extends PropertyEditorSupport {
-
-	protected static final Log logger = LogFactory.getLog(ResourceEditor.class);
-
-	public static final String PLACEHOLDER_PREFIX = "${";
-
-	public static final String PLACEHOLDER_SUFFIX = "}";
+public class ResourceEditor extends AbstractPathResolvingPropertyEditor {
 
 	private final ResourceLoader resourceLoader;
 
 	/**
-	 * Create new ResourceEditor with DefaultResourceLoader.
+	 * Create a new ResourceEditor with a DefaultResourceLoader.
 	 * @see DefaultResourceLoader
 	 */
 	public ResourceEditor() {
@@ -58,7 +48,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Create new ResourceEditor with given ResourceLoader.
+	 * Create a new ResourceEditor with the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to use
 	 */
 	public ResourceEditor(ResourceLoader resourceLoader) {
@@ -68,39 +58,6 @@ public class ResourceEditor extends PropertyEditorSupport {
 	public void setAsText(String text) {
 		String locationToUse = resolvePath(text).trim();
 		setValue(this.resourceLoader.getResource(locationToUse));
-	}
-
-	/**
-	 * Resolve the given path, replacing ${...} placeholders with
-	 * corresponding system property values if necessary.
-	 * @param path the original file path
-	 * @return the resolved file path
-	 * @see #PLACEHOLDER_PREFIX
-	 * @see #PLACEHOLDER_SUFFIX
-	 */
-	protected String resolvePath(String path) {
-		StringBuffer buf = new StringBuffer(path);
-		int startIndex = buf.indexOf(PLACEHOLDER_PREFIX);
-		while (startIndex != -1) {
-			int endIndex = buf.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
-			if (endIndex != -1) {
-				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
-				String propVal = System.getProperty(placeholder);
-				if (propVal != null) {
-					buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
-					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, startIndex + propVal.length());
-				}
-				else {
-					logger.warn("Could not resolve placeholder '" + placeholder +
-					    "' in resource path [" + path + "] as system property");
-					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, endIndex + PLACEHOLDER_SUFFIX.length());
-				}
-			}
-			else {
-				startIndex = -1;
-			}
-		}
-		return buf.toString();
 	}
 
 }

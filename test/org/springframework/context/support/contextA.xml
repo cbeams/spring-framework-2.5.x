@@ -5,7 +5,9 @@
 
 	<bean class="org.springframework.context.support.FactoryBeanAndApplicationListener"/>
 
-	<bean name="service" class="org.springframework.context.support.Service"/>
+	<bean name="service" class="org.springframework.context.support.Service">
+		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
+  </bean>
 
 	<bean name="assemblerOne" class="org.springframework.context.support.Assembler">
 		<property name="service"><ref bean="service"/></property>

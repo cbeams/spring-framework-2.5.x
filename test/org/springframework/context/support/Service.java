@@ -18,13 +18,17 @@ package org.springframework.context.support;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public class Service implements MessageSourceAware {
 
 	private MessageSource messageSource;
+
+	private Resource[] resources;
 
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
@@ -32,6 +36,14 @@ public class Service implements MessageSourceAware {
 
 	public MessageSource getMessageSource() {
 		return messageSource;
+	}
+
+	public void setResources(Resource[] resources) {
+		this.resources = resources;
+	}
+
+	public Resource[] getResources() {
+		return resources;
 	}
 
 }
