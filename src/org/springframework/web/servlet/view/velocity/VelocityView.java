@@ -16,9 +16,14 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -83,12 +88,14 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class VelocityView extends AbstractTemplateView {
 
+	private Map toolAttributes;
+
 	private String velocityFormatterAttribute;
 
 	private String dateToolAttribute;
 
 	private String numberToolAttribute;
-	
+
 	private String encoding;
 
 	private boolean cacheTemplate = false;
@@ -99,9 +106,54 @@ public class VelocityView extends AbstractTemplateView {
 
 
 	/**
+	 * Set tool attributes to expose to the view, as attribute name / class name pairs.
+	 * An instance of the given class will be added to the Velocity context for each
+	 * rendering operation, under the given attribute name.
+	 * <p>For example, an instance of MathTool, which is part of the generic package
+	 * of Velocity Tools, can be bound under the attribute name "math", specifying the
+	 * fully qualified class name "org.apache.velocity.tools.generic.MathTool" as value.
+	 * <p>Note that VelocityView can only create simple generic tools or values, that is,
+	 * classes with a public default constructor and no further initialization needs.
+	 * This class does not do any further checks, to not introduce a required dependency
+	 * on a specific tools package.
+	 * <p>For tools that are part of the view package of Velocity Tools, a special
+	 * Velocity context and a special init callback are needed. Use VelocityToolboxView
+	 * in such a case, or override <code>createVelocityContext</code> and
+	 * <code>initTool</code> accordingly.
+	 * <p>For a simple VelocityFormatter instance or special locale-aware instances
+	 * of DateTool/NumberTool, which are part of the generic package of Velocity Tools,
+	 * specify the "velocityFormatterAttribute", "dateToolAttribute" or
+	 * "numberToolAttribute" properties, respectively.
+	 * @param toolAttributes attribute names as keys, and tool class names as values
+	 * @see org.apache.velocity.tools.generic.MathTool
+	 * @see VelocityToolboxView
+	 * @see #createVelocityContext
+	 * @see #initTool
+	 * @see #setVelocityFormatterAttribute
+	 * @see #setDateToolAttribute
+	 * @see #setNumberToolAttribute
+	 */
+	public void setToolAttributes(Properties toolAttributes) {
+		this.toolAttributes = new HashMap(toolAttributes.size());
+		for (Enumeration attributeNames = toolAttributes.propertyNames(); attributeNames.hasMoreElements();) {
+			String attributeName = (String) attributeNames.nextElement();
+			String className = toolAttributes.getProperty(attributeName);
+			Class toolClass = null;
+			try {
+				toolClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalArgumentException(
+						"Invalid definition for tool '" + attributeName + "' - tool class not found: " + ex.getMessage());
+			}
+			this.toolAttributes.put(attributeName, toolClass);
+		}
+	}
+
+	/**
 	 * Set the name of the VelocityFormatter helper object to expose in the
 	 * Velocity context of this view, or null if not needed.
-	 * VelocityFormatter is part of the standard Velocity distribution.
+	 * <p>VelocityFormatter is part of the standard Velocity distribution.
 	 * @see org.apache.velocity.app.tools.VelocityFormatter
 	 */
 	public void setVelocityFormatterAttribute(String velocityFormatterAttribute) {
@@ -110,8 +162,13 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the DateTool helper object to expose in the Velocity context
-	 * of this view, or null if not needed. DateTool is part of Velocity Tools 1.0.
+	 * of this view, or null if not needed. The exposed DateTool will be aware of
+	 * the current locale, as determined by Spring's LocaleResolver.
+	 * <p>DateTool is part of the generic package of Velocity Tools 1.0.
+	 * Spring uses a special locale-aware subclass of DateTool.
 	 * @see org.apache.velocity.tools.generic.DateTool
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.LocaleResolver
 	 */
 	public void setDateToolAttribute(String dateToolAttribute) {
 		this.dateToolAttribute = dateToolAttribute;
@@ -119,13 +176,18 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the NumberTool helper object to expose in the Velocity context
-	 * of this view, or null if not needed. NumberTool is part of Velocity Tools 1.1.
+	 * of this view, or null if not needed. The exposed NumberTool will be aware of
+	 * the current locale, as determined by Spring's LocaleResolver.
+	 * <p>NumberTool is part of the generic package of Velocity Tools 1.1.
+	 * Spring uses a special locale-aware subclass of NumberTool.
 	 * @see org.apache.velocity.tools.generic.NumberTool
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.LocaleResolver
 	 */
 	public void setNumberToolAttribute(String numberToolAttribute) {
 		this.numberToolAttribute = numberToolAttribute;
 	}
-	
+
 	/**
 	 * Set the encoding of the Velocity template file. Default is determined
 	 * by the VelocityEngine: "ISO-8859-1" if not specified otherwise.
@@ -276,14 +338,26 @@ public class VelocityView extends AbstractTemplateView {
 	 * Create a Velocity Context instance for the given model,
 	 * to be passed to the template for merging.
 	 * <p>Default implementation delegates to <code>createVelocityContext(model)</code>.
+	 * Can be overridden for a special context class, for example ChainedContext which
+	 * is part of the view package of Velocity Tools. ChainedContext is needed for
+	 * initialization of ViewTool instances.
+	 * <p>Have a look at VelocityToolboxView, which pre-implements such a ViewTool
+	 * check. This is not part of the standard VelocityView class to avoid a
+	 * required dependency on the view package of Velocity Tools.
 	 * @param model the model Map, containing the model attributes
 	 * to be exposed to the view
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return the Velocity Context
+	 * @throws Exception if there's a fatal error while creating the context
 	 * @see #createVelocityContext(Map)
+	 * @see org.apache.velocity.tools.view.context.ChainedContext
+	 * @see org.apache.velocity.tools.view.tools.ViewTool
+	 * @see #initTool
+	 * @see VelocityToolboxView
 	 */
-	protected Context createVelocityContext(Map model, HttpServletRequest request, HttpServletResponse response) {
+	protected Context createVelocityContext(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		return createVelocityContext(model);
 	}
 
@@ -295,9 +369,10 @@ public class VelocityView extends AbstractTemplateView {
 	 * @param model the model Map, containing the model attributes
 	 * to be exposed to the view
 	 * @return the Velocity Context
+	 * @throws Exception if there's a fatal error while creating the context
 	 * @see org.apache.velocity.VelocityContext
 	 */
-	protected Context createVelocityContext(Map model) {
+	protected Context createVelocityContext(Map model) throws Exception {
 		return new VelocityContext(model);
 	}
 
@@ -338,17 +413,38 @@ public class VelocityView extends AbstractTemplateView {
 	 * Override one of the <code>exposeHelpers</code> methods to add custom helpers.
 	 * @param velocityContext Velocity context that will be passed to the template
 	 * @param request current HTTP request
+	 * @throws Exception if there's a fatal error while we're adding model attributes
 	 * @see #setVelocityFormatterAttribute
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
 	 * @see #exposeHelpers(Map, HttpServletRequest)
 	 * @see #exposeHelpers(org.apache.velocity.context.Context, HttpServletRequest, HttpServletResponse)
 	 */
-	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) {
+	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) throws Exception {
+		// expose generic attributes
+		if (this.toolAttributes != null) {
+			for (Iterator it = this.toolAttributes.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String attributeName = (String) entry.getKey();
+				Class toolClass = (Class) entry.getValue();
+				try {
+					Object tool = toolClass.newInstance();
+					initTool(tool, velocityContext);
+					velocityContext.put(attributeName, tool);
+				}
+				catch (Exception ex) {
+					throw new ServletException(
+							"Could not instantiate Velocity tool '" + attributeName + "': " + ex.getMessage(), ex);
+				}
+			}
+		}
+
+		// expose VelocityFormatter attribute
 		if (this.velocityFormatterAttribute != null) {
 			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
 		}
 
+		// expose locale-aware DateTool/NumberTool attributes
 		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
 			Locale locale = RequestContextUtils.getLocale(request);
 			if (this.dateToolAttribute != null) {
@@ -359,6 +455,27 @@ public class VelocityView extends AbstractTemplateView {
 			}
 		}
 	}
+
+	/**
+	 * Initialize the given tool instance. The default implementation is empty.
+	 * <p>Can be overridden to check for special callback interfaces, for example
+	 * the ViewContext interface which is part of the view package of Velocity Tools.
+	 * In the particular case of ViewContext, you'll usually also need a special
+	 * Velocity context, like ChainedContext which is part of Velocity Tools too.
+	 * <p>Have a look at VelocityToolboxView, which pre-implements such a ViewTool
+	 * check. This is not part of the standard VelocityView class to avoid a
+	 * required dependency on the view package of Velocity Tools.
+	 * @param tool the tool instance to initialize
+	 * @param velocityContext the Velocity context
+	 * @throws Exception if initializion of the tool failed
+	 * @see org.apache.velocity.tools.view.tools.ViewTool
+	 * @see org.apache.velocity.tools.view.context.ChainedContext
+	 * @see #createVelocityContext
+	 * @see VelocityToolboxView
+	 */
+	protected void initTool(Object tool, Context velocityContext) throws Exception {
+	}
+
 
 	/**
 	 * Render the Velocity view to the given response, using the given Velocity
@@ -439,7 +556,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Subclass of DateTool from Velocity Tools, using a passed-in Locale
-	 * (usually the RequestContext Locale) instead of the default Locale.
+	 * (usually the RequestContext Locale) instead of the default Locale.N
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	private static class LocaleAwareDateTool extends DateTool {
