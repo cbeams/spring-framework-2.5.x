@@ -29,7 +29,9 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 * @param propertyName the offending property
 	 */
 	public NotWritablePropertyException(Class beanClass, String propertyName) {
-		super(beanClass, propertyName, "Property '" + propertyName + "' is not writable");
+		super(beanClass, propertyName,
+				"Bean property '" + propertyName + "' is not writable or has an invalid setter method: " +
+				"Does the parameter type of the setter match the return type of the getter?");
 	}
 
 	/**

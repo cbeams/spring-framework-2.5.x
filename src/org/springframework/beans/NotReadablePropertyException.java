@@ -30,7 +30,9 @@ public class NotReadablePropertyException extends InvalidPropertyException {
 	 * @param propertyName the offending property
 	 */
 	public NotReadablePropertyException(Class beanClass, String propertyName) {
-		super(beanClass, propertyName, "Property '" + propertyName + "' is not readable");
+		super(beanClass, propertyName,
+				"Bean property '" + propertyName + "' is not readable or has an invalid getter method: " +
+				"Does the return type of the getter match the parameter type of the setter?");
 	}
 
 }
