@@ -336,7 +336,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  Base class for all <code>Vet</code> Query Objects.
 	 */
-	protected static class VetsQuery extends MappingSqlQuery {
+	protected class VetsQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of VetsQuery
@@ -369,7 +369,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  All <code>Vet</code>s specialties Query Object.
 	 */
-	protected static class SpecialtiesQuery extends MappingSqlQuery {
+	protected class SpecialtiesQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of SpecialtiesQuery
@@ -392,7 +392,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  A particular <code>Vet</code>'s specialties Query Object.
 	 */
-	protected static class VetSpecialtiesQuery extends MappingSqlQuery {
+	protected class VetSpecialtiesQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of VetSpecialtiesQuery
@@ -413,7 +413,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  Abstract base class for all <code>Owner</code> Query Objects.
 	 */
-	protected static abstract class OwnersQuery extends MappingSqlQuery {
+	protected abstract class OwnersQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of OwnersQuery
@@ -440,7 +440,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Owner</code>s by last name Query Object.
 	 */
-	protected static class OwnersByNameQuery extends OwnersQuery {
+	protected class OwnersByNameQuery extends OwnersQuery {
 
 		/**
 		 *  Creates a new instance of OwnersByNameQuery
@@ -457,7 +457,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Owner</code> by id Query Object.
 	 */
-	protected static class OwnerQuery extends OwnersQuery {
+	protected class OwnerQuery extends OwnersQuery {
 
 		/**
 		 *  Creates a new instance of OwnerQuery
@@ -505,7 +505,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Owner</code> Update Object.
 	 */
-	protected static class OwnerUpdate extends SqlUpdate {
+	protected class OwnerUpdate extends SqlUpdate {
 
 		/**
 		 *  Creates a new instance of OwnerUpdate
@@ -543,7 +543,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  Abstract base class for all <code>Pet</code> Query Objects.
 	 */
-	protected static abstract class PetsQuery extends MappingSqlQuery {
+	protected abstract class PetsQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of PetsQuery
@@ -569,7 +569,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Pet</code>s by <code>Owner</code> Query Object.
 	 */
-	protected static class PetsByOwnerQuery extends PetsQuery {
+	protected class PetsByOwnerQuery extends PetsQuery {
 
 		/**
 		 *  Creates a new instance of PetsByOwnerQuery
@@ -586,7 +586,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Pet</code> by id Query Object.
 	 */
-	static class PetQuery extends PetsQuery {
+    protected class PetQuery extends PetsQuery {
 
 		/**
 		 *  Creates a new instance of PetQuery
@@ -640,7 +640,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Pet</code> Update Object.
 	 */
-	protected static class PetUpdate extends SqlUpdate {
+	protected class PetUpdate extends SqlUpdate {
 
 		/**
 		 *  Creates a new instance of PetUpdate
@@ -677,7 +677,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  All <code>Pet</code> types Query Object.
 	 */
-	protected static class PetTypesQuery extends MappingSqlQuery {
+	protected class PetTypesQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of PetTypesQuery
@@ -700,7 +700,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 *  <code>Visit</code>s by <code>Pet</code> Query Object.
 	 */
-	protected static class VisitsQuery extends MappingSqlQuery {
+	protected class VisitsQuery extends MappingSqlQuery {
 
 		/**
 		 *  Creates a new instance of VisitsQuery
