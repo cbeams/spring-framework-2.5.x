@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.8 2003-11-27 14:32:42 johnsonr Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.9 2003-12-12 18:48:03 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -116,13 +116,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
-			// apply isolation level
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
-				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
-				con.setTransactionIsolation(definition.getIsolationLevel());
-			}
-
 			// apply read-only
 			if (definition.isReadOnly()) {
 				try {
@@ -132,6 +125,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 					// SQLException or UnsupportedOperationException
 					logger.warn("Could not set JDBC connection read-only", ex);
 				}
+			}
+
+			// apply isolation level
+			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
+				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
+				con.setTransactionIsolation(definition.getIsolationLevel());
 			}
 
 			// Switch to manual commit if necessary. This is very expensive in some JDBC

@@ -226,13 +226,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		try {
 			Session session = txObject.getSessionHolder().getSession();
 
-			// apply isolation level
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
-				txObject.setPreviousIsolationLevel(new Integer(session.connection().getTransactionIsolation()));
-				session.connection().setTransactionIsolation(definition.getIsolationLevel());
-			}
-
 			// apply read-only
 			if (definition.isReadOnly()) {
 				if (txObject.isNewSessionHolder()) {
@@ -251,6 +244,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				// we need AUTO for a non-read-only transaction
 				txObject.setPreviousFlushMode(session.getFlushMode());
 				session.setFlushMode(FlushMode.AUTO);
+			}
+
+			// apply isolation level
+			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
+				txObject.setPreviousIsolationLevel(new Integer(session.connection().getTransactionIsolation()));
+				session.connection().setTransactionIsolation(definition.getIsolationLevel());
 			}
 
 			// add the Hibernate transaction to the session holder
