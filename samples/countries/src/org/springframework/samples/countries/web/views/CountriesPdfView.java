@@ -2,6 +2,7 @@ package org.springframework.samples.countries.web.views;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -12,11 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.SortDefinition;
+import org.springframework.samples.countries.appli.ICountry;
 import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
 
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.samples.countries.utils.Convert;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -62,11 +62,11 @@ public class CountriesPdfView extends AbstractPdfView {
 		throws DocumentException {
 
 		Paragraph              par;
-
+		
 		// We search the data to insert
 		RefreshablePagedListHolder pgHolder = ( RefreshablePagedListHolder ) model.get( "countries" );
 		Locale loc = pgHolder.getLocale();
-		Convert conv = new Convert(loc, loc);
+		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, loc);
 
 		// We prepare some data
 		SortDefinition  sort = pgHolder.getSort();
@@ -114,7 +114,7 @@ public class CountriesPdfView extends AbstractPdfView {
 		// We put the used criteria and extracting information	
 		cell = new PdfPCell(new Phrase(getMessage( "date.extraction", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(conv.fromDate(pgHolder.getRefreshDate()), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(df.format(pgHolder.getRefreshDate()), HEADING_DATA_FONT));
 		table.addCell(cell);
 
 		cell = new PdfPCell(new Phrase(getMessage( "nbRecords", loc), HEADING_FONT));
