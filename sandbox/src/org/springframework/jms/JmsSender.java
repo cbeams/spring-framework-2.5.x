@@ -14,6 +14,8 @@ package org.springframework.jms;
  */
 public interface JmsSender {
 	
+    
+    public void send(String destinationName, JmsSenderCallback callback) throws JmsException;
 
 	/**
 	 * Send a message to a supplied JMS destination.

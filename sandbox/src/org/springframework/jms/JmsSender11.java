@@ -77,4 +77,13 @@ public class JmsSender11 extends AbstractJmsSender
 
     }
 
+    /* (non-Javadoc)
+     * @see org.springframework.jms.JmsSender#send(java.lang.String, org.springframework.jms.JmsSenderCallback)
+     */
+    public void send(String destinationName, JmsSenderCallback callback) throws JmsException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
