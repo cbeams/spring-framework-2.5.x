@@ -47,15 +47,20 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * <tr>
  * <td>flow</td>
- * <td><i>null </i></td>
+ * <td><i>null</i></td>
  * <td>Set the top level fow started by this controller. This is optional.
  * </td>
  * </tr>
  * <tr>
  * <td>flowExecutionListener(s)</td>
- * <td><i>null </i></td>
+ * <td><i>null</i></td>
  * <td>Set the flow execution listener(s) that should be notified of flow
  * execution lifecycle events.</td>
+ * </tr>
+ * <tr>
+ * <td>flowExecutionManager</td>
+ * <td>{@link org.springframework.web.flow.support.HttpServletFlowExecutionManager default}</td>
+ * <td>Configures the flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 
@@ -75,7 +80,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	/**
 	 * A helper for managed HTTP servlet request-based flow executions.
 	 */
-	private HttpServletFlowExecutionManager manager;
+	private HttpServletFlowExecutionManager flowExecutionManager;
 
 	/**
 	 * The listeners of executing flows managed by this controller.
@@ -83,12 +88,28 @@ public class FlowController extends AbstractController implements InitializingBe
 	private FlowExecutionListener[] flowExecutionListeners;
 
 	/**
+	 * Returns the top level flow started by this controller, or
+	 * <code>null</code> if not set.
+	 */
+	protected Flow getFlow() {
+		return flow;
+	}
+	
+	/**
 	 * Set the top level fow started by this controller. This is optional.
 	 */
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
 
+	/**
+	 * Returns the flow execution listeners that should be notified of flow
+	 * execution lifecycle events.
+	 */
+	protected FlowExecutionListener[] getFlowExecutionListeners() {
+		return this.flowExecutionListeners;
+	}
+	
 	/**
 	 * Set the flow execution listener that should be notified of flow execution
 	 * lifecycle events.
@@ -106,53 +127,58 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
+	 * Returns the flow execution manager used by this controller. Defaults
+	 * to {@link HttpServletFlowExecutionManager}.
+	 */
+	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
+		return flowExecutionManager;
+	}
+
+	/**
 	 * Configures the flow execution manager implementation to use, allowing
 	 * parameterization of custom manager specializations.
 	 * @param manager the flow execution manager.
 	 */
 	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
-		this.manager = manager;
+		this.flowExecutionManager = manager;
 	}
 
 	public void afterPropertiesSet() throws Exception {
 		// web flows need a session!
 		setRequireSession(true);
-		if (this.manager == null) {
-			this.manager = createDefaultHttpFlowExecutionManager();
+		if (this.flowExecutionManager == null) {
+			this.flowExecutionManager = createFlowExecutionManager();
 		}
-	}
-
-	/**
-	 * Returns the top level flow started by this controller, or
-	 * <code>null</code> if not set.
-	 */
-	protected Flow getFlow() {
-		return flow;
-	}
-
-	/**
-	 * @return Returns the listener list
-	 */
-	protected FlowExecutionListener[] getFlowExecutionListeners() {
-		return this.flowExecutionListeners;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		// delegate to the flow execution manager to process the request
-		ViewDescriptor viewDescriptor = manager.handleRequest(request, response);
-		ModelAndView mv = new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
-		return mv;
+		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response);
+		// convert the view descriptor to a ModelAndView object
+		return createModelAndViewFromViewDescriptor(viewDescriptor);
 	}
 
 	// subclassing hooks
 
 	/**
-	 * Create a new HTTP flow execution manager. Subclasses can override this to
-	 * return a specialized manager.
+	 * Creates the default flow execution manager. Subclasses can override this to
+	 * return a specialized manager. Alternatively, they can pass in a custom
+	 * flow execution manager by setting the "flowExecutionManager" property.
 	 */
-	protected HttpServletFlowExecutionManager createDefaultHttpFlowExecutionManager() {
+	protected HttpServletFlowExecutionManager createFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
 		return new HttpServletFlowExecutionManager(flowLocator, getFlow(), getFlowExecutionListeners());
+	}
+	
+	/**
+	 * Create a ModelAndView object based on the information in given view
+	 * descriptor. Subclasses can override this to return a specialized ModelAndView
+	 * or to do custom processing on it.
+	 * @param viewDescriptor the view descriptor to convert
+	 * @return a new ModelAndView object
+	 */
+	protected ModelAndView createModelAndViewFromViewDescriptor(ViewDescriptor viewDescriptor) {
+		return new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 	}
 }

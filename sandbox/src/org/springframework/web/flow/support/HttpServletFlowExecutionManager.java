@@ -59,6 +59,11 @@ import org.springframework.web.util.WebUtils;
  * ("_currentStateId") and event id ("_eventId") parameter values will be
  * obtained from the request and will be signaled in the flow execution.</li>
  * </ol>
+ * <p>
+ * Note that this class does not implement a <i>flow execution manager interface</i>
+ * or something like that. The flow execution manager is very protocol specific
+ * and should only be used by controllers that need to manage flow executions
+ * for incoming HttpServletRequests.
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -109,25 +114,61 @@ public class HttpServletFlowExecutionManager {
 
 	/**
 	 * Returns the flow whose executions are managed by this manager.
+	 * Could be <code>null</code> if there is no preconfigured flow and
+	 * the id of the flow for which executions will be managed is sent
+	 * in a request parameter "_flowId".
 	 */
 	protected Flow getFlow() {
 		return flow;
 	}
+	
+	/**
+	 * Set the flow whose executions will be managed if there is no alternate
+	 * flow id specified in a "_flowId" request parameter.
+	 */
+	public void setFlow(Flow flow) {
+		this.flow = flow;
+	}
 
 	/**
-	 * Returns the array of flow execution listeners
+	 * Returns the array of flow execution listeners.
 	 * @return the flow execution listeners
 	 */
 	protected FlowExecutionListener[] getFlowExecutionListeners() {
 		return this.flowExecutionListeners;
 	}
+	
+	/**
+	 * Set the flow execution listener that will be notified of managed
+	 * flow executions.
+	 */
+	public void setFlowExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
+	}
+	
+	/**
+	 * Sets the flow execution listeners that will be notified of managed
+	 * flow executions.
+	 */
+	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
+		this.flowExecutionListeners = flowExecutionListeners;
+	}
 
 	/**
 	 * Returns the flow locator to use for lookup of flows specified using the
-	 * "_flowId" request parameter
+	 * "_flowId" request parameter.
 	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
+	}
+
+	
+	/**
+	 * Set the flow locator to use for lookup of flows specified using the
+	 * "_flowId" request parameter.
+	 */
+	public void setFlowLocator(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
 	}
 
 	// internal worker methods
@@ -225,7 +266,7 @@ public class HttpServletFlowExecutionManager {
 	}
 
 	/**
-	 * Create a flow event wrapping given request.
+	 * Create a flow event wrapping given request and response.
 	 */
 	protected Event createEvent(HttpServletRequest request, HttpServletResponse response) {
 		return new HttpServletRequestEvent(request, response, getEventIdParameterName(),

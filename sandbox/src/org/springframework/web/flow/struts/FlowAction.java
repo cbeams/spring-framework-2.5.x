@@ -61,16 +61,12 @@ import org.springframework.web.util.WebUtils;
  * FlowAction that fronts a single top-level flow:
  * 
  * <pre>
- * 
- *  
  *   &lt;action path=&quot;/userRegistration&quot;
  *   	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
  *   	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
  *   	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
  *   	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
  *   &lt;/action&gt;
- *   
- *  
  * </pre>
  * 
  * This example associates the logical request URL
@@ -94,22 +90,14 @@ import org.springframework.web.util.WebUtils;
  * form population:
  * 
  * <pre>
- * 
- *  
  *   &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
- *   
- *  
  * </pre>
  * 
  * <li>A <code>BindingPlugin</code> is needed, to plugin an Errors-aware
  * <code>jakarta-commons-beanutils</code> adapter:
  * 
  * <pre>
- * 
- *  
  *   &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
- *   
- *  
  * </pre>
  * 
  * </ol>
@@ -134,29 +122,40 @@ public class FlowAction extends TemplateAction {
 
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
-		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
+		flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 	}
 
+	/**
+	 * Returns the flow locator used to lookup flows by id. Defaults
+	 * to {@link BeanFactoryFlowServiceLocator}.
+	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
-	}
-
-	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-		HttpServletFlowExecutionManager flowExecutionManager = new HttpServletFlowExecutionManager(flowLocator,
-				flowLocator.getFlow(getFlowId(mapping)));
-		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
-		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
-		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
 	}
 
 	/**
 	 * Get the flow id from given action mapping, which should be of type
 	 * <code>FlowActionMapping</code>.
 	 */
-	private String getFlowId(ActionMapping mapping) {
+	protected String getFlowId(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
 		return ((FlowActionMapping)mapping).getFlowId();
+	}
+
+	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		HttpServletFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
+		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
+		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
+		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
+	}
+
+	/**
+	 * Creates the default flow execution manager. Subclasses can override this to
+	 * return a specialized manager.
+	 */
+	protected HttpServletFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
+		return new HttpServletFlowExecutionManager(flowLocator,	flowLocator.getFlow(getFlowId(mapping)));
 	}
 
 	/**
