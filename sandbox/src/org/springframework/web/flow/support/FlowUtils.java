@@ -17,7 +17,7 @@ public class FlowUtils {
 	 * @return The session info
 	 * @throws IllegalStateException should not happen
 	 */
-	public static FlowExecutionInfo getFlowSessionExecutionInfo(AttributesAccessor model)
+	public static FlowExecutionInfo getFlowExecutionInfo(AttributesAccessor model)
 			throws IllegalStateException {
 		return (FlowExecutionInfo)model.getRequiredAttribute(FlowExecutionInfo.ATTRIBUTE_NAME);
 	}

@@ -57,7 +57,7 @@ public class MultiActionBean extends AbstractAction {
 
 	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException, ServletRequestBindingException {
-		FlowExecutionInfo flowExecution = FlowUtils.getFlowSessionExecutionInfo(model);
+		FlowExecutionInfo flowExecution = FlowUtils.getFlowExecutionInfo(model);
 		String eventId = flowExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {
