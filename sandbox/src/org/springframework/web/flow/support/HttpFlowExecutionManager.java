@@ -39,7 +39,31 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Helper to manage flow execution and process requests coming into a flow
- * execution.
+ * execution. This class provides numerous methods that can be extended
+ * in subclasses to fine-tune the execution algorithm.
+ * 
+ * <p>
+ * The <code>handleRequest()</code> method implements the following
+ * algorithm:
+ * <ol>
+ * <li>Look for a flow execution id in the request (in a parameter named
+ * "_flowExecutionId").</li>
+ * <li>If a flow execution id is not found, a new flow execution will
+ * be created. The top-level flow for which the execution is created
+ * is determined by first looking for a flow id specified in the request
+ * using the "_flowId" request parameter. If this parameter is set,
+ * the specified flow will be used, after lookup using a flow locator.
+ * If no "_flowId" parameter is present, the default top-level flow
+ * configured for this manager is used.</li>
+ * <li>If a flow execution id is found, the corresponding flow execution
+ * is obtained from the HTTP session.</li>
+ * <li>If a new flow execution was created in the previous steps,
+ * it will be started.</li>
+ * <li>If an existing flow execution is continued, current state
+ * id ("_currentStateId") and event id ("_eventId") parameter values
+ * will be obtained from the request and will be signaled in the
+ * flow execution.</li>
+ * </ol>
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -55,17 +79,8 @@ public class HttpFlowExecutionManager {
 	private Collection flowExecutionListeners;
 
 	/**
-	 * Create a new flow execution manager. Since the flow is specified, the id
-	 * of the flow for which executions will be managed is expected in the
-	 * request.
-	 */
-	public HttpFlowExecutionManager() {
-		this.flow = null;
-	}
-
-	/**
 	 * Create a new flow execution manager.
-	 * @param flow the flow for which executions will be managed
+	 * @param flow the default flow for which executions will be managed
 	 */
 	public HttpFlowExecutionManager(Flow flow) {
 		this.flow = flow;
@@ -73,7 +88,7 @@ public class HttpFlowExecutionManager {
 
 	/**
 	 * Create a new flow execution manager.
-	 * @param flow the flow for which executions will be managed
+	 * @param flow the default flow for which executions will be managed
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
 	 */
@@ -82,20 +97,22 @@ public class HttpFlowExecutionManager {
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	public HttpFlowExecutionManager(FlowLocator flowLocator) {
-		this.flowLocator = flowLocator;
-	}
-
-	public HttpFlowExecutionManager(FlowLocator flowLocator, Collection flowExecutionListeners) {
-		this.flowLocator = flowLocator;
-		this.flowExecutionListeners = flowExecutionListeners;
-	}
-
+	/**
+	 * Create a new flow execution manager.
+	 * @param flow the default flow for which executions will be managed
+	 * @param flowLocator the flow locator to use for flow lookup of possible
+	 *        other flows specified using the "_flowId" request parameter
+	 */
 	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator) {
 		this.flow = flow;
 		this.flowLocator = flowLocator;
 	}
 
+	/**
+	 * Create a new flow execution manager.
+	 * @param flowId id of the default flow for which executions will be managed
+	 * @param flowLocator the flow locator to use for flow lookup
+	 */
 	public HttpFlowExecutionManager(String flowId, FlowLocator flowLocator) {
 		if (StringUtils.hasText(flowId)) {
 			this.flow = flowLocator.getFlow(flowId);
@@ -103,6 +120,14 @@ public class HttpFlowExecutionManager {
 		this.flowLocator = flowLocator;
 	}
 
+	/**
+	 * Create a new flow execution manager.
+	 * @param flow the default flow for which executions will be managed
+	 * @param flowLocator the flow locator to use for flow lookup of possible
+	 *        other flows specified using the "_flowId" request parameter
+	 * @param flowExecutionListeners the set of listeners that should be
+	 *        notified of lifecycle events in the managed flow execution
+	 */
 	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator, Collection flowExecutionListeners) {
 		this.flow = flow;
 		this.flowLocator = flowLocator;
@@ -110,64 +135,87 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * @return name of the flow id parameter in the request
+	 * Create a new flow execution manager. Since no default flow is specified,
+	 * the id of the flow for which executions will be managed is expected
+	 * in the request parameter "_flowId".
+	 * @param flowLocator the flow locator to use for flow lookup
+	 */
+	public HttpFlowExecutionManager(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
+	}
+
+	/**
+	 * Create a new flow execution manager. Since no default flow is specified,
+	 * the id of the flow for which executions will be managed is expected
+	 * in the request parameter "_flowId".
+	 * @param flowLocator the flow locator to use for flow lookup
+	 * @param flowExecutionListeners the set of listeners that should be
+	 *        notified of lifecycle events in the managed flow execution
+	 */
+	public HttpFlowExecutionManager(FlowLocator flowLocator, Collection flowExecutionListeners) {
+		this.flowLocator = flowLocator;
+		this.flowExecutionListeners = flowExecutionListeners;
+	}
+	
+	//subclassing hooks
+
+	/**
+	 * Returns the name of the flow id parameter in the request ("_flowId").
 	 */
 	protected String getFlowIdParameterName() {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
 	/**
-	 * @return name of the flow execution id parameter in the request
+	 * Returns the name of the flow execution id parameter in the request
+	 * ("_flowExecutionId").
 	 */
 	protected String getFlowExecutionIdParameterName() {
 		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
 
 	/**
-	 * @return name of the current state id parameter in the request
+	 * Returns the name of the current state id parameter in the request
+	 * ("_currentStateId").
 	 */
 	protected String getCurrentStateIdParameterName() {
 		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
 	/**
-	 * @return name of the event id parameter in the request
+	 * Returns the name of the event id parameter in the request ("_eventId").
 	 */
 	protected String getEventIdParameterName() {
 		return FlowConstants.EVENT_ID_PARAMETER;
 	}
 
 	/**
-	 * @return name of the event id attribute in the request
+	 * Returns the name of the event id attribute in the request
+	 * ("_mapped_eventId")
 	 */
 	protected String getEventIdRequestAttributeName() {
 		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
 
 	/**
-	 * @return marker value indicating that the event id parameter was not
-	 *         properly set in the request
+	 * Returns the marker value indicating that the event id parameter
+	 * was not properly set in the request ("@NOT_SET@")
 	 */
 	protected String getNotSetEventIdParameterMarker() {
 		return FlowConstants.NOT_SET_EVENT_ID;
 	}
 
 	/**
-	 * @return the default delimiter used to separate a request parameter name
-	 *         and value when both are embedded in the name of the request
-	 *         parameter (e.g. when using an HTML submit button)
+	 * Returns the default delimiter used to separate a request parameter name
+	 * and value when both are embedded in the name of the request parameter
+	 * (e.g. when using an HTML submit button)
 	 */
 	protected String getParameterValueDelimiter() {
 		return "_";
 	}
 
 	/**
-	 * The main entry point into managed HTTP-based flow executions. Looks for a
-	 * flow execution id in the request. If none exists, it creates one. If one
-	 * exists, it looks in the user's session to find the current FlowExecution.
-	 * The request should also contain the current state id and event id. These
-	 * String values will be passed to the FlowExecution to execute the action.
-	 * Execution will typically result in a state transition.
+	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
 	 * @return the model and view to render
@@ -203,8 +251,7 @@ public class HttpFlowExecutionManager {
 			if (!StringUtils.hasText(eventId)) {
 				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 				if (!StringUtils.hasText(eventId)) {
-					throw new IllegalArgumentException(
-							"The '"
+					throw new IllegalArgumentException("The '"
 									+ getEventIdParameterName()
 									+ "' request parameter (or '"
 									+ getEventIdRequestAttributeName()
@@ -220,6 +267,7 @@ public class HttpFlowExecutionManager {
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
+			
 			// execute the signaled event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
@@ -235,7 +283,7 @@ public class HttpFlowExecutionManager {
 
 	/**
 	 * Create a map of input attributes for new flow executions started by the
-	 * exeution manager.
+	 * execution manager.
 	 * <p>
 	 * Default implementation returns null. Subclasses can override if needed.
 	 * @param request current HTTP request
@@ -246,7 +294,10 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Obtain a flow to use from given request.
+	 * Obtain a flow to use from given request. If there is a flow id parameter
+	 * specified in the request, the flow with that id will be returend after
+	 * lookup using the flow locator. If no flow id parameter is present in
+	 * the request, the default top-level flow will be returned.
 	 */
 	protected Flow getFlow(HttpServletRequest request) {
 		String flowId = request.getParameter(getFlowIdParameterName());
@@ -255,8 +306,8 @@ public class HttpFlowExecutionManager {
 			return this.flow;
 		}
 		else {
-			Assert.notNull("The flow locator is required to lookup flows to execute by an id request parameter");
-			return flowLocator.getFlow(flowId);
+			Assert.notNull(this.flowLocator, "The flow locator is required to lookup flows to execute by a flow id request parameter");
+			return this.flowLocator.getFlow(flowId);
 		}
 	}
 
@@ -364,7 +415,7 @@ public class HttpFlowExecutionManager {
 	 * value.</li>
 	 * <li>Try to obtain the parameter value from the parameter name, where the
 	 * parameter name in the request is of the form
-	 * <tt>logicalName_value = xyz</tt> with "_" the being the specified
+	 * <tt>logicalName_value = xyz</tt> with "_" being the specified
 	 * delimiter. This deals with parameter values submitted using an HTML form
 	 * submit button.</li>
 	 * <li>If the value obtained in the previous step has a ".x" or ".y"

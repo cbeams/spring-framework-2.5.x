@@ -41,28 +41,34 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
+ * Globally unique identifier generator.
+ * 
+ * <p>
  * In the multitude of java GUID generators, I found none that guaranteed
  * randomness. GUIDs are guaranteed to be globally unique by using ethernet
  * MACs, IP addresses, time elements, and sequential numbers. GUIDs are not
  * expected to be random and most often are easy/possible to guess given a
  * sample from a given generator. SQL Server, for example generates GUID that
  * are unique but sequencial within a given instance.
+ * 
  * <p>
  * GUIDs can be used as security devices to hide things such as files within a
  * filesystem where listings are unavailable (e.g. files that are served up from
  * a Web server with indexing turned off). This may be desireable in cases where
- * standard authentication is not appropriate. In this scenario, the RandomGUIDs
+ * standard authentication is not appropriate. In this scenario, the RandomGuids
  * are used as directories. Another example is the use of GUIDs for primary keys
  * in a database where you want to ensure that the keys are secret. Random GUIDs
  * can then be used in a URL to prevent hackers (or users) from accessing
  * records by guessing or simply by incrementing sequential numbers.
+ * 
  * <p>
  * There are many other possiblities of using GUIDs in the realm of security and
  * encryption where the element of randomness is important. This class was
  * written for these purposes but can also be used as a general purpose GUID
  * generator as well.
+ * 
  * <p>
- * RandomGUID generates truly random GUIDs by using the system's IP address
+ * RandomGuid generates truly random GUIDs by using the system's IP address
  * (name/IP), system time in milliseconds (as an integer), and a very large
  * random number joined together in a single String that is passed through an
  * MD5 hash. The IP address and system time make the MD5 seed globally unique
@@ -71,8 +77,9 @@ import java.util.Random;
  * generated GUIDs. It is generally not possible to access the seed information
  * (IP, time, random number) from the resulting GUIDs as the MD5 hash algorithm
  * provides one way encryption.
+ * 
  * <p>
- * ----> Security of RandomGUID: <----- RandomGUID can be called one of two ways --
+ * <b>Security of RandomGuid</b>: RandomGuid can be called one of two ways --
  * with the basic java Random number generator or a cryptographically strong
  * random generator (SecureRandom). The choice is offered because the secure
  * random generator takes about 3.5 times longer to generate its random numbers
@@ -103,15 +110,15 @@ import java.util.Random;
  */
 public class RandomGuid extends Object {
 
-	public String valueBeforeMD5 = "";
+	private static Random random;
 
-	public String valueAfterMD5 = "";
+	private static SecureRandom secureRandom;
 
-	private static Random myRand;
+	private static String id;
 
-	private static SecureRandom mySecureRand;
+	private String valueBeforeMD5 = "";
 
-	private static String s_id;
+	private String valueAfterMD5 = "";
 
 	/*
 	 * Static block to take care of one time secureRandom seed. It takes a few
@@ -120,11 +127,11 @@ public class RandomGuid extends Object {
 	 * to reduce this time. This block will run only once per JVM instance.
 	 */
 	static {
-		mySecureRand = new SecureRandom();
-		long secureInitializer = mySecureRand.nextLong();
-		myRand = new Random(secureInitializer);
+		secureRandom = new SecureRandom();
+		long secureInitializer = secureRandom.nextLong();
+		random = new Random(secureInitializer);
 		try {
-			s_id = InetAddress.getLocalHost().toString();
+			id = InetAddress.getLocalHost().toString();
 		}
 		catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -137,7 +144,7 @@ public class RandomGuid extends Object {
 	 * constructor defaults to lower security, high performance.
 	 */
 	public RandomGuid() {
-		getRandomGUID(false);
+		getRandomGuid(false);
 	}
 
 	/**
@@ -147,13 +154,13 @@ public class RandomGuid extends Object {
 	 * strong random number.
 	 */
 	public RandomGuid(boolean secure) {
-		getRandomGUID(secure);
+		getRandomGuid(secure);
 	}
 
 	/**
 	 * Method to generate the random GUID
 	 */
-	private void getRandomGUID(boolean secure) {
+	private void getRandomGuid(boolean secure) {
 		MessageDigest md5 = null;
 		StringBuffer sbValueBeforeMD5 = new StringBuffer();
 
@@ -169,10 +176,10 @@ public class RandomGuid extends Object {
 			long rand = 0;
 
 			if (secure) {
-				rand = mySecureRand.nextLong();
+				rand = secureRandom.nextLong();
 			}
 			else {
-				rand = myRand.nextLong();
+				rand = random.nextLong();
 			}
 
 			// This StringBuffer can be a long as you need; the MD5
@@ -181,7 +188,7 @@ public class RandomGuid extends Object {
 			// You could even stream a file through the MD5 making
 			// the odds of guessing it at least as great as that
 			// of guessing the contents of the file!
-			sbValueBeforeMD5.append(s_id);
+			sbValueBeforeMD5.append(id);
 			sbValueBeforeMD5.append(":");
 			sbValueBeforeMD5.append(Long.toString(time));
 			sbValueBeforeMD5.append(":");
