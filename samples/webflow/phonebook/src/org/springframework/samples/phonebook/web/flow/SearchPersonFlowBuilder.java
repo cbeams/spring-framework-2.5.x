@@ -21,7 +21,7 @@ import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.action.SetAction;
+import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
@@ -76,7 +76,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setId) });
 
 		// set a user id in the model (selected from result list)
-		Action setAction = new SetAction(new Mapping(ID, getConversionExecutor(Long.class)));
+		Action setAction = new EventParameterMapperAction(new Mapping(ID, getConversionExecutor(Long.class)));
 		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id

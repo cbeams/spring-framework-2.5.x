@@ -21,7 +21,7 @@ import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.action.SetAction;
+import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
@@ -63,7 +63,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addViewState(new Transition[] { onBackFinish(), onSelect(setColleagueId) });
 
 		// set the selected colleague (chosen from the person's colleague list)
-		Action setAction = new SetAction(new Mapping("id", colleagueId, getConversionExecutor(Long.class)));
+		Action setAction = new EventParameterMapperAction(new Mapping("id", colleagueId, getConversionExecutor(Long.class)));
 		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
 
 		// spawn subflow to view selected colleague details

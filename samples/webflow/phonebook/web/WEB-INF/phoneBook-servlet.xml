@@ -55,11 +55,11 @@
 
 	<bean id="person.Search.executeQuery" class="org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction" autowire="byType"/>
 
-	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
+	<!-- The event parameter mapper action sets request parameters as attributes in the flow model.
 	     The exact mapping(s) policies are fully configurable; in this case, the
 	     "id" request parameter is mapped to the "id" attribute and converted
 	     to a java.lang.Long in the target flow model!  -->
-	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.SetAction">
+	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
 		<property name="mapping"><value>id,java.lang.Long</value></property>
 	</bean>
 
@@ -113,11 +113,11 @@
 	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
 	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
 
-	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
+	<!-- The event parameter mapper action sets request parameters as attributes in the flow model.
 	     The exact mapping(s) policies are fully configurable; in this case, the
 	     "id" request parameter is mapped to the "colleagueId" attribute and converted
 	     to a java.lang.Long in the target flow model!  -->
-	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.SetAction">
+	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
 		<property name="mapping">
 			<value>id->colleagueId,java.lang.Long</value>
 		</property>

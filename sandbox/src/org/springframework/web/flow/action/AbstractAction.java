@@ -30,9 +30,7 @@ import org.springframework.web.flow.InternalEvent;
  * Base action implementation that provides a number of helper methods generally
  * useful to any controller/command action. These include:
  * <ul>
- * <li>Creating common result outcome identifiers
- * <li>Accessing request parameters and session attributes
- * <li>Accessing and exposing form objects
+ * <li>Creating common action result events
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
@@ -57,14 +55,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	// creating common events
 
 	/**
-	 * Returns the default error event ("error").
+	 * Returns the default error event.
 	 */
 	protected Event error() {
 		return new InternalEvent(this, FlowConstants.ERROR);
 	}
 
 	/**
-	 * Returns the default success event ("success").
+	 * Returns the default success event.
 	 */
 	protected Event success() {
 		return new InternalEvent(this, FlowConstants.SUCCESS);
@@ -75,7 +73,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Typically called as part of return, for example:
 	 * 
 	 * <pre>
-	 *    protected Event doExecuteAction(FlowExecutionContext context) {
+	 *    protected Event doExecuteAction(RequestContext context) {
 	 *      // do some work
 	 *      if (some condition) {
 	 *        return result(&quot;success&quot;);
@@ -95,11 +93,26 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns a result event for this action with the specified identifier and
-	 * event parameters.
+	 * Returns a result event for this action with the specified identifier
+	 * and the specified set of parameters. Typically called as part of
+	 * return, for example:
+	 * 
+	 * <pre>
+	 *    protected Event doExecuteAction(RequestContext context) {
+	 *      // do some work
+	 *      if (some condition) {
+	 *        return result(&quot;success&quot;);
+	 *      } else {
+	 *        return result(&quot;error&quot;);
+	 *      }
+	 *    }
+	 * </pre>
+	 * 
+	 * Consider calling the error() or success() factory methods for returning
+	 * common results.
 	 * @param resultId the result event identifier
-	 * @param the event parameters
-	 * @return the parameterized action result event
+	 * @param parameters the event parameters
+	 * @return the action result event
 	 */
 	protected Event result(String resultId, Map parameters) {
 		return new InternalEvent(this, resultId, parameters);
@@ -111,13 +124,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
-		Event result = onPreExecute(context);
+		Event result = doPreExecute(context);
 		if (result == null) {
 			result = doExecuteAction(context);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Action '" + getClass().getName() + "' completed execution; event result is " + result);
+				logger.debug("Action '" + getClass().getName() + "' completed execution; result event is " + result);
 			}
-			onPostExecute(context);
+			doPostExecute(context);
 			if (logger.isInfoEnabled()) {
 				if (result == null) {
 					logger.info("Retured action event is [null]; that's ok so long as another action associated "
@@ -135,36 +148,34 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Pre-action-execution hook, subclasses may override. If this method
-	 * returns a non- <code>null</code> value, the
-	 * <code>doExecuteAction()</code> method will <b>not </b> be called and
-	 * the returned value will be used to select a transition to trigger in the
+	 * returns a non-<code>null</code> event, the
+	 * <code>doExecuteAction()</code> method will <b>not</b> be called and
+	 * the returned event will be used to select a transition to trigger in the
 	 * calling action state. If this method returns <code>null</code>,
 	 * <code>doExecuteAction()</code> will be called to obtain an action
-	 * result.
+	 * result event.
 	 * <p>
 	 * This implementation just returns <code>null</code>.
-	 * @param request The http request
-	 * @param response The http response
-	 * @param context The flow data context
-	 * @return The non- <code>null</code> action result, in which case the
-	 *         <code>doExecuteAction()</code> will not be called. Or
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @return the non-<code>null</code> action result, in which case the
+	 *         <code>doExecuteAction()</code> will not be called, or
 	 *         <code>null</code> if the <code>doExecuteAction()</code>
-	 *         method should be called to obtain the action result.
-	 * @throws Exception An <b>unrecoverable </b> exception occured, either
+	 *         method should be called to obtain the action result
+	 * @throws Exception an <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected Event onPreExecute(RequestContext context) throws Exception {
+	protected Event doPreExecute(RequestContext context) throws Exception {
 		return null;
 	}
 
 	/**
 	 * Template hook method subclasses should override to encapsulate their
 	 * specific action execution logic.
-	 * @param request The http request
-	 * @param response The http response
-	 * @param context The flow data context
-	 * @return The action result
-	 * @throws Exception An <b>unrecoverable </b> exception occured, either
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @return the action result event
+	 * @throws Exception an <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
 	 */
 	protected abstract Event doExecuteAction(RequestContext context) throws Exception;
@@ -173,12 +184,11 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Post-action execution hook, subclasses may override.
 	 * <p>
 	 * This implementation does nothing.
-	 * @param request The http request
-	 * @param response The http response
-	 * @param context The flow data context
-	 * @throws Exception An <b>unrecoverable </b> exception occured, either
+	 * @param context the action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
+	 * @throws Exception an <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected void onPostExecute(RequestContext context) throws Exception {
+	protected void doPostExecute(RequestContext context) throws Exception {
 	}
 }

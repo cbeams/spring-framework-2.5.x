@@ -22,37 +22,61 @@ import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 
 /**
- * Maps parameters in an event to attributes <i>set</i> into flow scope.
+ * Maps parameters in an event to attributes <i>set</i> in flow scope.
+ * This action always returns the
+ * {@link org.springframework.web.flow.action.AbstractAction#success() success}
+ * event.
+ * <p>
+ * <b>Exposed configuration properties:</b> <br>
+ * <table border="1">
+ * <tr>
+ * <td><b>Name </b></td>
+ * <td><b>Default </b></td>
+ * <td><b>Description </b></td>
+ * </tr>
+ * <tr>
+ * <td>mapping(s)</td>
+ * <td><i>null</i></td>
+ * <td>The mappings executed by this action.</td>
+ * </tr>
+ * <tr>
+ * <td>eventParameterMapper</td>
+ * <td><i>null</i></td>
+ * <td>The custom mapping strategy used by this action.</td>
+ * </tr>
+ * </table>
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
-public class SetAction extends AbstractAction {
+public class EventParameterMapperAction extends AbstractAction {
 
 	private AttributeMapper eventParameterMapper;
 
 	/**
-	 * Creates a set action with an initially empty mappings list.
+	 * Creates a new action with an initially empty mappings list.
 	 */
-	public SetAction() {
+	public EventParameterMapperAction() {
 	}
 
 	/**
-	 * Create a set action with the specified mapping.
+	 * Create a new action with the specified mapping.
 	 * @param mapping the mapping
 	 */
-	public SetAction(Mapping mapping) {
+	public EventParameterMapperAction(Mapping mapping) {
 		setMappings(new Mapping[] { mapping });
 	}
 
 	/**
-	 * Create a set action with the specified mappings.
+	 * Create a new action with the specified mappings.
 	 * @param mappings the mappings
 	 */
-	public SetAction(Mapping[] mappings) {
+	public EventParameterMapperAction(Mapping[] mappings) {
 		setMappings(mappings);
 	}
 
 	/**
-	 * Set the single mapping for this set action.
+	 * Set the single mapping for this action.
 	 * @param mapping the mapping
 	 */
 	public void setMapping(Mapping mapping) {
@@ -60,16 +84,16 @@ public class SetAction extends AbstractAction {
 	}
 
 	/**
-	 * Set the mappings for this set action.
+	 * Set the mappings for this action.
 	 * @param mappings the mappings
 	 */
 	public void setMappings(Mapping[] mappings) {
-		this.eventParameterMapper = new ParameterizableAttributeMapper(mappings);
+		setEventParameterMapper(new ParameterizableAttributeMapper(mappings));
 	}
 
 	/**
 	 * Set to completely customize the attribute mapper strategy.
-	 * @param mapper The strategy
+	 * @param mapper the mapping strategy
 	 */
 	public void setEventParameterMapper(AttributeMapper mapper) {
 		this.eventParameterMapper = mapper;
