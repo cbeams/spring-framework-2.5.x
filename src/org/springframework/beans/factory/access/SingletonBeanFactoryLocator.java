@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -262,7 +263,7 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  *   
  * @author Colin Sampaleanu
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
@@ -429,33 +430,34 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 								+ ". Returned cbject class is: " + bean.getClass());
 
 			final BeanFactory beanFactory = (BeanFactory) bean;
+
 			return new BeanFactoryReference() {
 				
-				BeanFactory _groupContext;
+				BeanFactory groupContextRef;
 				
 				// constructor
 				{
-					_groupContext = groupContext;
+					this.groupContextRef = groupContext;
 				}
 				
 				public BeanFactory getFactory() {
 					return beanFactory;
 				}
+
 				public void release() throws FatalBeanException {
 					synchronized (bfgInstancesByKey) {
-						BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj
-						.get(_groupContext);
+						BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj.get(this.groupContextRef);
 						if (bfg != null) {
 							bfg.refCount--;
 							if (bfg.refCount == 0) {
-								destroyDefinition(_groupContext, resourceName);
+								destroyDefinition(this.groupContextRef, resourceName);
 								bfgInstancesByKey.remove(resourceName);
-								bfgInstancesByObj.remove(_groupContext);
+								bfgInstancesByObj.remove(this.groupContextRef);
 							}
 						}
 						else {
-							logger.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition more times than it has actually been used. Resourcename="
-									+ resourceName);
+							logger.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition " +
+													"more times than it has actually been used. resourceName='" + resourceName + "'");
 						}
 					}
 				}
@@ -476,8 +478,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			try {
 				reader.loadBeanDefinitions(new UrlResource(resources[i]));
 			}
-			catch (MalformedURLException e) {
-				throw new BeanDefinitionStoreException("Bad URL when loading definition", e);
+			catch (MalformedURLException ex) {
+				throw new BeanDefinitionStoreException("Bad URL when loading definition", ex);
 			}
 		}
 		fac.preInstantiateSingletons();
@@ -519,7 +521,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 
 	// We track BeanFactory instances with this class
-	private class BeanFactoryGroup {
+	private static class BeanFactoryGroup {
 
 		private BeanFactory definition;
 
