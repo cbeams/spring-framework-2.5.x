@@ -19,6 +19,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         MBeanServer server = MBeanServerFactory.createMBeanServer();
         HtmlAdaptorServer adapter = new HtmlAdaptorServer(9000);
+       
         server.registerMBean(adapter, ObjectNameManager.getInstance("adapter:type=http"));
         adapter.start();
 

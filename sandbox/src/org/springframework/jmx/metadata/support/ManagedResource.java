@@ -26,6 +26,10 @@ package org.springframework.jmx.metadata.support;
 public class ManagedResource extends AbstractJmxAttribute {
 
 	private String objectName;
+    
+    private boolean log = false;
+    
+    private String logFile;
 	
     public ManagedResource() {
         description = "";
@@ -38,4 +42,17 @@ public class ManagedResource extends AbstractJmxAttribute {
 	public void setObjectName(String objectName) {
 	    this.objectName = objectName;
 	}
+    
+    public boolean isLog() {
+        return log;
+    }
+    public void setLog(boolean log) {
+        this.log = log;
+    }
+    public String getLogFile() {
+        return logFile;
+    }
+    public void setLogFile(String logFile) {
+        this.logFile = logFile;
+    }
 }

@@ -24,8 +24,13 @@ import org.springframework.jmx.util.JmxUtils;
 public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
         AbstractModelMBeanInfoAssembler {
 
+    private static final String VISIBILITY = "visibility";
+    private static final String SETTER = "setter";
+    private static final String GETTER = "getter";
+    private static final String OPERATION = "operation";
+    private static final String ROLE = "role";
     private static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
-    
+
     private static final String GET_CLASS = "getClass";
 
     protected ModelMBeanAttributeInfo[] getAttributeInfo(Object bean) {
@@ -42,17 +47,17 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
                 Method getter = props[x].getReadMethod();
 
                 // check for getClass()
-                if(getter != null && GET_CLASS.equals(getter.getName())) {
+                if (getter != null && GET_CLASS.equals(getter.getName())) {
                     continue;
                 }
-                
+
                 if (getter != null && !includeReadAttribute(getter)) {
                     getter = null;
                 }
 
                 Method setter = props[x].getWriteMethod();
 
-                if (setter !=null && !includeWriteAttribute(setter)) {
+                if (setter != null && !includeWriteAttribute(setter)) {
                     setter = null;
                 }
 
@@ -72,6 +77,8 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
                     if (setter != null) {
                         desc.setField("setMethod", setter.getName());
                     }
+                    
+                    populateAttributeDescriptor(desc, getter, setter);
 
                     inf.setDescriptor(desc);
 
@@ -105,23 +112,34 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
         for (int x = 0; x < methods.length; x++) {
             Method method = methods[x];
             ModelMBeanOperationInfo inf = null;
-
+            
             if ((JmxUtils.isGetter(method) && includeReadAttribute(method))
                     || (JmxUtils.isSetter(method) && includeWriteAttribute(method))) {
                 // attributes need to have their methods exposed as
-                // operations to the JMX server as well. We set low
-                // visibility to try and hide these operations
-                // from any adapters.
+                // operations to the JMX server as well.
                 inf = new ModelMBeanOperationInfo(
                         getOperationDescription(method), method);
 
+                
                 Descriptor desc = inf.getDescriptor();
-                desc.setField("visibility", ATTRIBUTE_OPERATION_VISIBILITY);
+                desc.setField(VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
+                
+                if(JmxUtils.isGetter(method)) {
+                    desc.setField(ROLE, GETTER);
+                } else {
+                    desc.setField(ROLE, SETTER);
+                }
+                
                 inf.setDescriptor(desc);
 
             } else if (includeOperation(method)) {
                 inf = new ModelMBeanOperationInfo(
                         getOperationDescription(method), method);
+                
+                Descriptor desc = inf.getDescriptor();
+                desc.setField(ROLE, OPERATION);
+                populateOperationDescriptor(desc, method);
+                inf.setDescriptor(desc);
             }
 
             if (inf != null) {
@@ -148,4 +166,9 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
 
     protected abstract String getAttributeDescription(
             PropertyDescriptor propertyDescriptor);
+
+    protected abstract void populateAttributeDescriptor(Descriptor descriptor,
+            Method getter, Method setter);
+    
+    protected abstract void populateOperationDescriptor(Descriptor descriptor, Method method);
 }

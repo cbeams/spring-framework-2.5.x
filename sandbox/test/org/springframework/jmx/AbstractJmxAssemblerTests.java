@@ -3,11 +3,13 @@
  */
 package org.springframework.jmx;
 
+import javax.management.Attribute;
 import javax.management.Descriptor;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
@@ -100,6 +102,15 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
         assertNotNull("The MBean description should not be null",
                 info.getDescription());
     }
+    
+    public void testSetAttribute() throws Exception {
+        ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
+        
+        server.setAttribute(objectName, new Attribute("name", "Rob Harrop"));
+        
+        JmxTestBean bean = (JmxTestBean) getContext().getBean("testBean");
+        assertEquals("Rob Harrop", bean.getName());
+    }
 
     public void testAttributeInfoHasDescriptors() throws Exception {
         ModelMBeanInfo info = getMBeanInfoFromAssembler();
@@ -124,12 +135,14 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
         assertEquals("get operation should have visibility of four",
                 (Integer) get.getDescriptor().getFieldValue("visibility"),
                 new Integer(4));
+        assertEquals("get operation should have role \"getter\"", "getter", get.getDescriptor().getFieldValue("role"));
 
         ModelMBeanOperationInfo set = info.getOperation("setName");
         assertNotNull("set operation should not be null", set);
         assertEquals("set operation should have visibility of four",
                 (Integer) set.getDescriptor().getFieldValue("visibility"),
                 new Integer(4));
+        assertEquals("set operation should have role \"setter\"", "setter", set.getDescriptor().getFieldValue("role"));
     }
 
     /**

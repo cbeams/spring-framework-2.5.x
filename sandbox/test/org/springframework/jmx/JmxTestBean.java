@@ -6,7 +6,10 @@ package org.springframework.jmx;
 /**
  * @@org.springframework.jmx.metadata.support.ManagedResource(description="My Managed
  *                                                                               Bean",
- *                                                                               objectName="spring:bean=test")
+ *                                                                               objectName="spring:bean=test", 
+ *                                                                               log=true, 
+ *                                                                               logFile="jmx.log",
+ *                                                                               currencyTimeLimit=15)
  * @author robh
  */
 public class JmxTestBean {
@@ -20,7 +23,7 @@ public class JmxTestBean {
     private boolean isSuperman;
 
     /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Age Attribute")
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Age Attribute", currencyTimeLimit=15)
      */
     public int getAge() {
         return age;
@@ -36,21 +39,23 @@ public class JmxTestBean {
     }
 
     /**
-     * @@org.springframework.jmx.metadata.support.ManagedOperation()
+     * @@org.springframework.jmx.metadata.support.ManagedOperation(currencyTimeLimit=30)
      */
     public long myOperation() {
         return 1L;
     }
 
     /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Name Attribute")
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Name Attribute", 
+     *                      currencyTimeLimit=20,
+     *                      defaultValue="bar")
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute()
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(defaultValue="foo")
      */
     public String getName() {
         return name;
@@ -63,11 +68,19 @@ public class JmxTestBean {
         return this.nickName;
     }
     
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+    
     /**
      * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Is Superman Attribute")
      */
-    public void setIsSuperman(boolean isSuperman) {
-        this.isSuperman = isSuperman;
+    public void setSuperman(boolean superman) {
+        this.isSuperman = superman;
+    }
+    
+    public boolean isSuperman() {
+        return isSuperman;
     }
 
     /**

@@ -18,6 +18,8 @@ package org.springframework.jmx.assemblers.reflection;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
+import javax.management.Descriptor;
+
 import org.springframework.jmx.assemblers.AbstractReflectionBasedModelMBeanInfoAssembler;
 
 /**
@@ -50,5 +52,21 @@ public class ReflectiveModelMBeanInfoAssembler extends
 
     protected String getAttributeDescription(PropertyDescriptor propertyDescriptor) {
         return propertyDescriptor.getDisplayName();
+    }
+    
+    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean) {
+       // no-op
+    }
+    
+    
+    protected void populateAttributeDescriptor(Descriptor descriptor,
+            Method getter, Method setter) {
+        // no-op
+    }
+    
+    
+    protected void populateOperationDescriptor(Descriptor descriptor,
+            Method method) {
+        // no-op
     }
 }

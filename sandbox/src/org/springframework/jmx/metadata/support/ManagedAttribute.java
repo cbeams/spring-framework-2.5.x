@@ -20,7 +20,19 @@ package org.springframework.jmx.metadata.support;
  */
 public class ManagedAttribute extends AbstractJmxAttribute {
 
+    public static final ManagedAttribute EMPTY = new ManagedAttribute();
+    
+    private Object defaultValue;
+    
     public ManagedAttribute() {
         description = "";
+    }
+    
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+    
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }

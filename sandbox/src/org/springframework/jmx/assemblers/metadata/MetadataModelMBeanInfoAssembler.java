@@ -18,6 +18,8 @@ package org.springframework.jmx.assemblers.metadata;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
+import javax.management.Descriptor;
+
 import org.springframework.jmx.assemblers.AbstractReflectionBasedModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.metadata.support.ManagedAttribute;
@@ -39,6 +41,14 @@ import org.springframework.metadata.commons.CommonsAttributes;
 public class MetadataModelMBeanInfoAssembler extends
         AbstractReflectionBasedModelMBeanInfoAssembler implements
         AutodetectCapableModelMBeanInfoAssembler {
+
+    private static final String LOG = "log";
+
+    private static final String LOG_FILE = "logFile";
+
+    private static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
+    
+    private static final String DEFAULT = "default";
 
     /**
      * Attributes implementation. Default is Commons Attributes
@@ -108,12 +118,10 @@ public class MetadataModelMBeanInfoAssembler extends
         Method readMethod = propertyDescriptor.getReadMethod();
         Method writeMethod = propertyDescriptor.getWriteMethod();
 
-        ManagedAttribute getter = (readMethod != null) ? MetadataReader.getManagedAttribute(
-                attributes, readMethod)
-                : null;
-        ManagedAttribute setter = (writeMethod != null) ? MetadataReader.getManagedAttribute(
-                attributes, writeMethod)
-                : null;
+        ManagedAttribute getter = (readMethod != null) ? MetadataReader
+                .getManagedAttribute(attributes, readMethod) : null;
+        ManagedAttribute setter = (writeMethod != null) ? MetadataReader
+                .getManagedAttribute(attributes, writeMethod) : null;
 
         StringBuffer sb = new StringBuffer();
 
@@ -134,13 +142,92 @@ public class MetadataModelMBeanInfoAssembler extends
      * found.
      */
     protected String getDescription(Object bean) {
-        ManagedResource mr = MetadataReader.getManagedResource(attributes,
-                bean.getClass());
+        ManagedResource mr = MetadataReader.getManagedResource(attributes, bean
+                .getClass());
 
         if (mr == null) {
             return "";
         } else {
             return mr.getDescription();
+        }
+    }
+
+    protected void populateMBeanDescriptor(Descriptor mbeanDescriptor,
+            Object bean) {
+        ManagedResource mr = MetadataReader.getManagedResource(attributes, bean
+                .getClass());
+
+        mbeanDescriptor.setField(LOG, mr.isLog() ? "true" : "false");
+
+        if (mr.getLogFile() != null) {
+            mbeanDescriptor.setField(LOG_FILE, mr.getLogFile());
+        }
+
+        mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mr
+                .getCurrencyTimeLimit()));
+    }
+
+    protected void populateAttributeDescriptor(Descriptor descriptor,
+            Method getter, Method setter) {
+
+        ManagedAttribute gma = (getter == null) ? ManagedAttribute.EMPTY : MetadataReader
+                .getManagedAttribute(attributes, getter);
+        
+        ManagedAttribute sma = (setter == null) ? ManagedAttribute.EMPTY : MetadataReader
+                .getManagedAttribute(attributes, setter);
+
+
+        int ctl = getCurrencyTimeLimit(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
+        descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(ctl));
+        
+        Object defaultValue = getDefaultValue(gma.getDefaultValue(), sma.getDefaultValue());
+        descriptor.setField(DEFAULT, defaultValue);
+            
+    }
+    
+    protected void populateOperationDescriptor(Descriptor descriptor,
+            Method method) {
+        ManagedOperation mo = MetadataReader.getManagedOperation(attributes, method);
+        
+        if(mo != null) {
+            descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mo.getCurrencyTimeLimit()));
+        }
+    }
+    
+    /**
+     * Determines which of two <code>int</code> values
+     * should be used for the <code>currencyTimeLimit</code> descriptor.
+     * In general only the getter or the setter will be have a non-zero
+     * value so we use that value. In the event that both values
+     * are non-zero we use the greater of the two.
+     * @param getter the <code>int</code> value associated with the getter for this attribute.
+     * @param setter the <code>int</code> value associated with the setter for this attribute.
+     */
+    private int getCurrencyTimeLimit(int getter, int setter) {
+        if(getter == 0 && setter != 0) {
+            return setter;
+        } else if(setter == 0 && getter != 0) {
+            return getter;
+        } else {
+            return (getter >= setter) ? getter : setter;
+        }
+    }
+    
+    /**
+     * Locates the default value descriptor based on values attached
+     * to both the getter and setter methods. If both have values
+     * supplied then the value attached to the getter is preferred.
+     * @param getter
+     * @param setter
+     * @return
+     */
+    private Object getDefaultValue(Object getter, Object setter) {
+        if(getter != null) {
+            return getter;
+        } else if (setter != null) {
+            return setter;
+        } else {
+            return null;
         }
     }
 

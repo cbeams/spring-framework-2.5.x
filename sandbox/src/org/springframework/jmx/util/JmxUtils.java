@@ -42,6 +42,8 @@ public class JmxUtils {
     private static final String GET = "get";
 
     private static final String SET = "set";
+    
+    private static final String IS = "is";
 
     /**
      * Determines whether the supplied method is actually the getter or setter
@@ -103,7 +105,7 @@ public class JmxUtils {
      * @return
      */
     private static boolean isGetterInternal(Method method) {
-        if (method.getName().startsWith(GET)) {
+        if (method.getName().startsWith(GET) || method.getName().startsWith(IS)) {
             return ((method.getReturnType() != void.class) && (method
                     .getParameterTypes().length == 0));
         } else {
@@ -143,7 +145,7 @@ public class JmxUtils {
         }
 
         // the fourth character should be uppercase
-        if (!Character.isUpperCase(name.charAt(3))) {
+        if (!Character.isUpperCase(name.charAt(getOffset(method.getName())))) {
             return false;
         }
 
@@ -201,8 +203,10 @@ public class JmxUtils {
                     + " is too short to be an attribute name");
         }
 
-        char[] attributeName = new char[length - 3];
-        method.getName().getChars(3, length, attributeName, 0);
+        int offset = getOffset(method.getName());
+        
+        char[] attributeName = new char[length - offset];
+        method.getName().getChars(offset, length, attributeName, 0);
         attributeName[0] = Character.toLowerCase(attributeName[0]);
         return new String(attributeName);
     }
@@ -288,6 +292,14 @@ public class JmxUtils {
         }
 
         return server;
+    }
+    
+    private static int getOffset(String methodName) {
+        if(methodName.startsWith(IS)) {
+            return 2;
+        } else {
+            return 3;
+        }
     }
 
 }

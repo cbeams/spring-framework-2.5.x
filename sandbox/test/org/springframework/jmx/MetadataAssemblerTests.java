@@ -3,6 +3,7 @@
  */
 package org.springframework.jmx;
 
+import javax.management.Descriptor;
 import javax.management.MBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
@@ -89,9 +90,41 @@ public class MetadataAssemblerTests extends AbstractJmxAssemblerTests {
      * @throws Exception
      */
     public void testWithOnlySetter() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
         
+        ModelMBeanAttributeInfo attr = info.getAttribute("superman");
+        
+        assertNotNull("Attribute should not be null", attr);
     }
 
+    public void testManagedResourceDescriptor() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        Descriptor desc = info.getMBeanDescriptor();
+        
+        assertEquals("Logging should be set to true", "true", desc.getFieldValue("log"));
+        assertEquals("Log file should be jmx.log", "jmx.log", desc.getFieldValue("logFile"));
+        assertEquals("Currency Time Limit should be 15", new Integer(15), desc.getFieldValue("currencyTimeLimit"));
+    }
+    
+    public void testAttributeDescriptor() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        Descriptor desc = info.getAttribute("name").getDescriptor();
+        
+        assertEquals("Default value should be foo", "foo", desc.getFieldValue("default"));
+        assertEquals("Currency Time Limit should be 20", new Integer(20), desc.getFieldValue("currencyTimeLimit"));
+    }
+    
+    public void testOperationDescriptor() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        Descriptor desc = info.getOperation("myOperation").getDescriptor();
+        
+        assertEquals("Currency Time Limit should be 30", new Integer(30), desc.getFieldValue("currencyTimeLimit"));
+        assertEquals("Role should be \"operation\"", "operation", desc.getFieldValue("role"));
+    }
+    
     protected String getObjectName() {
         return OBJECT_NAME;
     }

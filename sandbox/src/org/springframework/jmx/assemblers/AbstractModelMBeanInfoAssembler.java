@@ -15,12 +15,16 @@
  */ 
 package org.springframework.jmx.assemblers;
 
+import javax.management.Descriptor;
+import javax.management.MBeanException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanConstructorInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
+
+import org.springframework.context.ApplicationContextException;
 
 
 /**
@@ -31,9 +35,19 @@ public abstract class AbstractModelMBeanInfoAssembler implements
 
     public ModelMBeanInfo getMBeanInfo(Object bean) {
 
-        return new ModelMBeanInfoSupport(bean.getClass().getName(), getDescription(bean),
+        ModelMBeanInfo info = new ModelMBeanInfoSupport(bean.getClass().getName(), getDescription(bean),
                 getAttributeInfo(bean), getConstructorInfo(bean),
                 getOperationInfo(bean), getNotificationInfo(bean));
+        
+        try {
+            Descriptor desc = info.getMBeanDescriptor();
+            populateMBeanDescriptor(desc, bean);
+            info.setMBeanDescriptor(desc);
+        } catch(MBeanException ex) {
+            throw new ApplicationContextException("Unable to populate MBean Descriptor", ex);
+        }
+        
+        return info;
     }
 
     protected abstract String getDescription(Object bean);
@@ -47,5 +61,7 @@ public abstract class AbstractModelMBeanInfoAssembler implements
 
     protected abstract ModelMBeanNotificationInfo[] getNotificationInfo(
             Object bean);
+    
+    protected abstract void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean);
 
 }

@@ -59,7 +59,13 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
     
     public void testSetAttributeValue() throws Exception {
         IJmxTestBean proxy = getProxy();
+        try {
         proxy.setName("Rob Harrop");
+        } catch(Exception t) {
+            t.printStackTrace();
+            t.getCause().printStackTrace();
+            throw t;
+        }
         
         JmxTestBean bean = (JmxTestBean)getContext().getBean("testBean");
         assertEquals("The name of the bean should have been updated", "Rob Harrop", bean.getName());

@@ -9,12 +9,21 @@ package org.springframework.jmx.metadata.support;
 public class AbstractJmxAttribute {
 
     protected String description;
+    private int currencyTimeLimit;
     
     public void setDescription(String description) {
         this.description = description;
     }
     
+    public void setCurrencyTimeLimit(int currencyTimeLimit) {
+        this.currencyTimeLimit = currencyTimeLimit;
+    }
+
     public String getDescription() {
         return this.description;
+    }
+    
+    public int getCurrencyTimeLimit() {
+        return currencyTimeLimit;
     }
 }

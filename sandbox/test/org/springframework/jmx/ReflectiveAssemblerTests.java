@@ -23,7 +23,7 @@ public class ReflectiveAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 	
 	protected int getExpectedOperationCount() {
-	    return 9;
+	    return 11;
 	}
 	
 	protected int getExpectedAttributeCount() {
