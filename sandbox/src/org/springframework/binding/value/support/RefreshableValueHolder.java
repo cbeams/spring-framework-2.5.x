@@ -23,34 +23,46 @@ import org.springframework.util.closure.Closure;
  * @author Keith Donald
  */
 public class RefreshableValueHolder extends ValueHolder {
-    private Closure refreshFunction;
+	private Closure refreshFunction;
 
-    private boolean alwaysRefresh;
+	private boolean alwaysRefresh;
 
-    public RefreshableValueHolder(Closure refreshFunction) {
-        this(refreshFunction, false);
-    }
+	public RefreshableValueHolder(Closure refreshFunction) {
+		this(refreshFunction, false);
+	}
 
-    public RefreshableValueHolder(Closure refreshFunction, boolean alwaysRefresh) {
-        super();
-        Assert.notNull(refreshFunction, "The refresh callback cannot be null");
-        this.refreshFunction = refreshFunction;
-        this.alwaysRefresh = alwaysRefresh;
-        refresh();
-    }
+	public RefreshableValueHolder(Closure refreshFunction, boolean alwaysRefresh) {
+		this(refreshFunction, alwaysRefresh, true);
+	}
 
-    public Object getValue() {
-        if (alwaysRefresh) {
-            refresh();
-        }
-        return super.getValue();
-    }
+	public RefreshableValueHolder(Closure refreshFunction, boolean alwaysRefresh, boolean lazyInit) {
+		super();
+		Assert.notNull(refreshFunction, "The refresh callback cannot be null");
+		this.refreshFunction = refreshFunction;
+		this.alwaysRefresh = alwaysRefresh;
+		if (!lazyInit) {
+			refreshInternal();
+		}
+	}
 
-    public void refresh() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Refreshing held value '"
-                    + DefaultObjectStyler.call(getValue()) + "'");
-        }
-        setValue(refreshFunction.call(null));
-    }
+	public Object getValue() {
+		if (alwaysRefresh) {
+			refreshInternal();
+		}
+		return super.getValue();
+	}
+
+	private void refreshInternal() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Autorefreshing held value '" + DefaultObjectStyler.call(super.getValue()) + "'");
+		}
+		setValueInternal(refreshFunction.call(null));
+	}
+	
+	public void refresh() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Refreshing held value '" + DefaultObjectStyler.call(super.getValue()) + "'");
+		}
+		setValue(refreshFunction.call(null));
+	}
 }

@@ -48,10 +48,14 @@ public class ValueHolder extends AbstractValueModel {
                 logger.debug("Setting held value from " + oldValue + " to "
                         + value);
             }
-            this.value = value;
+            setValueInternal(value);
             fireValueChanged();
             firePropertyChange(VALUE_PROPERTY, oldValue, this.value);
         }
+    }
+    
+    protected void setValueInternal(Object value) {
+    	this.value = value;
     }
 
     public String toString() {

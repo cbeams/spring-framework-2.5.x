@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
-import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.closure.Closure;
 
 /**
@@ -33,80 +32,77 @@ import org.springframework.util.closure.Closure;
  * 
  * @author Keith Donald
  */
-public abstract class AbstractValueModel extends
-        AbstractPropertyChangePublisher implements BoundValueModel {
-    protected final Log logger = LogFactory.getLog(getClass());
+public abstract class AbstractValueModel extends AbstractPropertyChangePublisher implements BoundValueModel {
+	protected final Log logger = LogFactory.getLog(getClass());
 
-    private Set listeners;
+	private Set listeners;
 
-    public void addValueChangeListener(ValueChangeListener l) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Adding value listener " + l + "]");
-        }
-        getOrCreateListeners().add(l);
-    }
+	public void addValueChangeListener(ValueChangeListener l) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("[Adding value listener " + l + "]");
+		}
+		getOrCreateListeners().add(l);
+	}
 
-    public void removeValueChangeListener(ValueChangeListener l) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Removing value listener " + l + "]");
-        }
-        getOrCreateListeners().remove(l);
-    }
+	public void removeValueChangeListener(ValueChangeListener l) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("[Removing value listener " + l + "]");
+		}
+		getOrCreateListeners().remove(l);
+	}
 
-    private Collection getOrCreateListeners() {
-        if (listeners == null) {
-            listeners = new LinkedHashSet(9);
-        }
-        return listeners;
-    }
+	private Collection getOrCreateListeners() {
+		if (listeners == null) {
+			listeners = new LinkedHashSet(9);
+		}
+		return listeners;
+	}
 
-    protected void fireValueChanged() {
-        if (listeners != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[Firing value changed event; newValue="
-                        + DefaultObjectStyler.call(getValue()) + "]");
-            }
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                ((ValueChangeListener)it.next()).valueChanged();
-            }
-        }
-    }
+	protected void fireValueChanged() {
+		if (listeners != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("[Firing value changed event]");
+			}
+			Iterator it = listeners.iterator();
+			while (it.hasNext()) {
+				((ValueChangeListener)it.next()).valueChanged();
+			}
+		}
+	}
 
-    protected void fireValueChanged(boolean oldValue, boolean newValue) {
-        fireValueChanged(new Boolean(oldValue), new Boolean(newValue));
-    }
+	protected void fireValueChanged(boolean oldValue, boolean newValue) {
+		fireValueChanged(new Boolean(oldValue), new Boolean(newValue));
+	}
 
-    protected void fireValueChanged(int oldValue, int newValue) {
-        fireValueChanged(new Integer(oldValue), new Integer(newValue));
-    }
+	protected void fireValueChanged(int oldValue, int newValue) {
+		fireValueChanged(new Integer(oldValue), new Integer(newValue));
+	}
 
-    protected void fireValueChanged(long oldValue, long newValue) {
-        fireValueChanged(new Long(oldValue), new Long(newValue));
-    }
+	protected void fireValueChanged(long oldValue, long newValue) {
+		fireValueChanged(new Long(oldValue), new Long(newValue));
+	}
 
-    protected void fireValueChanged(double oldValue, double newValue) {
-        fireValueChanged(new Double(oldValue), new Double(newValue));
-    }
+	protected void fireValueChanged(double oldValue, double newValue) {
+		fireValueChanged(new Double(oldValue), new Double(newValue));
+	}
 
-    protected void fireValueChanged(float oldValue, float newValue) {
-        fireValueChanged(new Float(oldValue), new Float(newValue));
-    }
+	protected void fireValueChanged(float oldValue, float newValue) {
+		fireValueChanged(new Float(oldValue), new Float(newValue));
+	}
 
-    protected void fireValueChanged(Object oldValue, Object newValue) {
-        fireValueChanged();
-        firePropertyChange(VALUE_PROPERTY, oldValue, newValue);
-    }
+	protected void fireValueChanged(Object oldValue, Object newValue) {
+		fireValueChanged();
+		firePropertyChange(VALUE_PROPERTY, oldValue, newValue);
+	}
 
-    protected void updateSilently(ValueModel valueModel,
-            ValueChangeListener changeHandler, Closure updateBlock) {
-        try {
-            valueModel.removeValueChangeListener(changeHandler);
-            updateBlock.call(null);
-        }
-        finally {
-            valueModel.addValueChangeListener(changeHandler);
-        }
-    }
+	protected void updateSilently(ValueModel valueModel, ValueChangeListener changeHandler, Closure updateBlock) {
+		try {
+			valueModel.removeValueChangeListener(changeHandler);
+			updateBlock.call(null);
+		}
+		finally {
+			valueModel.addValueChangeListener(changeHandler);
+		}
+	}
 
 }
