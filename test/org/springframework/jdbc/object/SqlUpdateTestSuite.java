@@ -17,14 +17,22 @@
 package org.springframework.jdbc.object;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.hibernate.util.GetGeneratedKeysHelper;
 
 import org.easymock.MockControl;
 
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.mock.web.MockRequestDispatcher;
 
 public class SqlUpdateTestSuite extends AbstractJdbcTests {
 
@@ -38,10 +46,20 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		"update seat_status set booking_id = null where name = ?";
 	private static final String UPDATE_OBJECTS =
 		"update seat_status set booking_id = null where performance_id = ? and price_band_id = ? and name = ? and confirmed = ?";
+	private static final String INSERT_GENERATE_KEYS =
+		"insert into show (name) values(?)";
 
 	private MockControl ctrlPreparedStatement;
 
 	private PreparedStatement mockPreparedStatement;
+	
+	private MockControl ctrlResultSet;
+
+	private ResultSet mockResultSet;
+	
+	private  MockControl ctrlResultSetMetaData;
+	
+	private ResultSetMetaData mockResultSetMetaData;
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -159,6 +177,54 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		MixedUpdater pc = new MixedUpdater();
 		int rowsAffected = pc.run(1, 1, "rod", true);
 		assertEquals(1, rowsAffected);
+	}
+
+	public void testUpdateAndGeneratedKeys() throws SQLException {
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+		mockResultSetMetaData.getColumnName(1);
+		ctrlResultSetMetaData.setReturnValue("1", 2);
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(11));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+		
+		mockPreparedStatement.setString(1, "rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getGeneratedKeys();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(INSERT_GENERATE_KEYS, PreparedStatement.RETURN_GENERATED_KEYS);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+		ctrlResultSet.replay();
+		ctrlResultSetMetaData.replay();
+
+		GeneratedKeysUpdater pc = new GeneratedKeysUpdater();
+		List generatedKeys = new LinkedList();
+		int rowsAffected = pc.run("rod", generatedKeys);
+		assertEquals(1, rowsAffected);
+		assertEquals(1, generatedKeys.size());
+		Map keys = (Map)generatedKeys.get(0);
+		assertEquals(11, ((Integer)keys.get("1")).intValue());
 	}
 
 	public void testUpdateConstructor() throws SQLException {
@@ -365,6 +431,22 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		}
 	}
 
+	private class GeneratedKeysUpdater extends SqlUpdate {
+
+		public GeneratedKeysUpdater() {
+			setSql(INSERT_GENERATE_KEYS);
+			setDataSource(mockDataSource);
+			declareParameter(new SqlParameter(Types.VARCHAR));
+			setReturnGeneratedKeys(true);
+			compile();
+		}
+
+		public int run(String name, List generatedKeys) {
+			Object[] params =
+				new Object[] {name};
+			return update(params, generatedKeys);
+		}
+	}
 
 	private class ConstructorUpdater extends SqlUpdate {
 

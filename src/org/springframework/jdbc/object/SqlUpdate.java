@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.object;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -36,7 +38,7 @@ import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException
  * @author Rod Johnson
  * @author Isabelle Muszynski
  * @author Thomas Risberg
- * @version $Id: SqlUpdate.java,v 1.10 2004-06-09 17:46:29 trisberg Exp $
+ * @version $Id: SqlUpdate.java,v 1.11 2004-07-12 03:29:52 trisberg Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
@@ -150,6 +152,20 @@ public class SqlUpdate extends SqlOperation {
 	public int update(Object[] args) throws DataAccessException {
 		validateParameters(args);
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args));
+		checkRowsAffected(rowsAffected);
+		return rowsAffected;
+	}
+
+	/**
+	 * Generic method to execute the update given arguments.
+	 * All other update methods invoke this method.
+	 * @param args array of object arguments
+	 * @param generatedKeys List that will hold the generated keys
+	 * @return the number of rows affected by the update
+	 */
+	public int update(Object[] args, List generatedKeys) throws DataAccessException {
+		validateParameters(args);
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(args), generatedKeys);
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}

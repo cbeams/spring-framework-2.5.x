@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * set of parameter declarations.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.15 2004-06-28 21:22:08 jhoeller Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.16 2004-07-12 03:30:24 trisberg Exp $
  */
 public class PreparedStatementCreatorFactory {
 
@@ -47,6 +48,10 @@ public class PreparedStatementCreatorFactory {
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	private boolean updatableResults = false;
+
+	private boolean returnGeneratedKeys = false;
+	
+	private String[] generatedKeysColumnNames = null;
 
 	private NativeJdbcExtractor nativeJdbcExtractor;
 
@@ -104,9 +109,28 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Set whether to use prepared statements capable of returning
 	 * updatable ResultSets.
+	 * @param updatableResults Set to true for an updatable ResultSet.
 	 */
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
+	}
+
+	/**
+	 * Set to indicate prepared statements should be capable of returning
+	 * auto generated keys.
+	 * @param returnGeneratedKeys Set to true to be able to retrieve the 
+	 * generated keys.
+	 */
+	public void setReturnGeneratedKeys(boolean returnGeneratedKeys) {
+		this.returnGeneratedKeys = returnGeneratedKeys;
+	}
+
+	/**
+	 * Set the column names of the auto generated keys.
+	 * @param name The names of the columns for the auto generated keys 
+	 */
+	public void setGeneratedKeysColumnNames(String[] names) {
+		this.generatedKeysColumnNames = names;
 	}
 
 	/**
@@ -172,7 +196,20 @@ public class PreparedStatementCreatorFactory {
 		
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 			PreparedStatement ps = null;
-			if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
+			if (returnGeneratedKeys) {
+				try {
+					if (generatedKeysColumnNames == null) {
+						ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+					}
+					else {
+						ps = con.prepareStatement(sql, generatedKeysColumnNames);
+					}
+				}
+				catch (AbstractMethodError ex) {
+					throw new InvalidDataAccessResourceUsageException("The JDBC driver does not support retrieval of auto generated keys", ex);
+				}
+			}
+			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
 				ps = con.prepareStatement(sql);
 			}
 			else {

@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.10 2004-05-27 14:46:26 jhoeller Exp $
+ * @version $Id: JdbcOperations.java,v 1.11 2004-07-12 03:30:24 trisberg Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -372,6 +372,16 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int update(PreparedStatementCreator psc) throws DataAccessException;
+
+	/**
+	 * Issue an update using a PreparedStatementCreator to provide SQL and any
+	 * required parameters.  Generetaed keys will to be returned by the List parameter.
+	 * @param psc object that provides SQL and any necessary parameters
+	 * @param generatedKeys List that will hold the generated keys
+	 * @return the number of rows affected
+	 * @throws DataAccessException if there is any problem issuing the update
+	 */
+	int update(PreparedStatementCreator psc, List generatedKeys) throws DataAccessException;
 
 	/**
 	 * Issue an update using a PreparedStatementSetter to set bind parameters,

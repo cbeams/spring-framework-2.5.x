@@ -31,7 +31,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SqlOperation.java,v 1.12 2004-06-28 21:21:04 jhoeller Exp $
+ * @version $Id: SqlOperation.java,v 1.13 2004-07-12 03:29:52 trisberg Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 
@@ -64,6 +64,9 @@ public abstract class SqlOperation extends RdbmsOperation {
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
+		this.preparedStatementFactory.setReturnGeneratedKeys(isReturnGeneratedKeys());
+		if (getGeneratedKeysColumnNames() != null)
+			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
 		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
 
 		onCompileInternal();

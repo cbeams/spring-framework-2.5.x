@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.51 2004-07-08 04:52:47 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.52 2004-07-12 03:30:24 trisberg Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -485,7 +485,31 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	}
 
 	public int update(PreparedStatementCreator psc) throws DataAccessException {
-		return update(psc, null);
+		return update(psc, (PreparedStatementSetter)null);
+	}
+
+	public int update(final PreparedStatementCreator psc, final List generatedKeys)
+			throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			String sql = getSql(psc);
+			logger.debug("Executing SQL update and returning generated keys" + (sql != null ? " [" + sql  + "]" : ""));
+		}
+		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
+			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
+				int rows = ps.executeUpdate();
+				ResultSet keys = ps.getGeneratedKeys();
+				int key = 0;
+				if (keys != null) {
+					ListResultSetExtractor lrse = new ListResultSetExtractor();
+					generatedKeys.addAll((List) lrse.extractData(keys));
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("SQL update affected " + rows + " rows and returned " + key + "keys");
+				}
+				return new Integer(rows);
+			}
+		});
+		return result.intValue();
 	}
 
 	public int update(String sql, final PreparedStatementSetter pss) throws DataAccessException {

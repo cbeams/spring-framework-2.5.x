@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.182 2004-07-09 17:39:01 jhoeller Exp $
+$Id: changelog.txt,v 1.183 2004-07-12 03:30:26 trisberg Exp $
 
 
 Changes in version 1.1 RC1 (19.7.2004)
@@ -53,6 +53,7 @@ Package org.springframework.ejb
 * added explicit proxy type checks to LocalSlsbInvokerInterceptor and AbstractRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
+* added support for retrieving auto generated keys to SqlUpdate and JdbcTemplate
 * added translation category for CannotAcquireLockException to SqlErrorCodeSQLExceptionTranslator and sql-error-codes
 * allow for defining custom translations using CustomSQLErrorCodesTranslation defined in the sql-error-codes.xml file
 * removed CannotCloseJdbcConnectionException, as it is not used anymore
