@@ -185,7 +185,7 @@ public class Flow implements Serializable {
 	}
 
 	protected void setId(String id) {
-		Assert.notNull("The flow id is required");
+		Assert.notNull(id, "The flow id is required");
 		this.id = id;
 	}
 
