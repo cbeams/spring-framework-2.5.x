@@ -33,6 +33,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public abstract class BeanUtils {
 
