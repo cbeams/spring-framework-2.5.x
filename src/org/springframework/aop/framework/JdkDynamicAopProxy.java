@@ -33,7 +33,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.9 2004-03-09 04:51:09 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.10 2004-03-09 07:44:24 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -86,7 +86,9 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 		try {
 			// Try special rules for equals() method and implementation of the
 			// Advised AOP configuration interface
-			if (AopProxyUtils.EQUALS_METHOD.equals(method)) {
+			
+			// Short-circuit expensive Method.equals() call, as Object.equals() isn't overloaded
+			if (method.getDeclaringClass() == Object.class && "equals".equals(method.getName())) {
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
