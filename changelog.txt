@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.124 2004-04-07 14:28:47 trisberg Exp $
+$Id: changelog.txt,v 1.125 2004-04-07 14:33:36 trisberg Exp $
 
 
 Changes in version 1.0.1 (7.4.2003)
@@ -35,7 +35,7 @@ Package org.springframework.jdbc.object
 * added method setSqlReadyForUse to StoredProcedure for indicating that the sql should be used as provided, no need to add parameter placeholders
 
 Package org.springframework.jdbc.support
-* changed SQLErrorCodesFactory now does cache database product name in a Map based on hashCode from DataSource to avoid unnecessary meta data lookups
+* changed SQLErrorCodesFactory, it now caches database product name in a Map based on hashCode from DataSource to avoid unnecessary meta data lookups
 * added an extractDatabaseMetaData method to JdbcUtils.  This change also adds an interface named DatabaseMetaDataCallBackHandler that must be used for this method
 
 Package org.springframework.orm
