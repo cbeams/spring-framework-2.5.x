@@ -59,7 +59,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				getExpectedAttributeCount(), inf.getAttributes().length);
 	}
 
-	private IJmxTestBean getBean() {
+	protected IJmxTestBean getBean() {
 		Object bean = getContext().getBean("testBean");
 		return (IJmxTestBean) bean;
 	}
@@ -158,9 +158,9 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("set operation should have role \"setter\"", "setter", set.getDescriptor().getFieldValue("role"));
 	}
 
-	protected ModelMBeanInfo getMBeanInfoFromAssembler() throws JMException {
+	protected ModelMBeanInfo getMBeanInfoFromAssembler() throws Exception {
 		IJmxTestBean bean = getBean();
-		ModelMBeanInfo info = getAssembler().getMBeanInfo("foo", bean.getClass());
+		ModelMBeanInfo info = getAssembler().getMBeanInfo(getObjectName(), bean.getClass());
 		return info;
 	}
 
@@ -176,6 +176,6 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	protected abstract int getExpectedAttributeCount();
 
-	protected abstract ModelMBeanInfoAssembler getAssembler();
+	protected abstract ModelMBeanInfoAssembler getAssembler() throws Exception;
 
 }

@@ -142,7 +142,8 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 			}
 		}
 
-		return (ModelMBeanAttributeInfo[]) infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+		ModelMBeanAttributeInfo[] result = (ModelMBeanAttributeInfo[]) infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+		return result;
 	}
 
 	/**

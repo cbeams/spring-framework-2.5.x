@@ -1,11 +1,18 @@
+
 package org.springframework.jmx.assembler;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Marcus Brito
@@ -13,7 +20,9 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class InterfaceBasedModelMBeanInfoAssembler extends ReflectiveModelMBeanInfoAssembler implements InitializingBean {
 
-    private Map mappedManagedInterfaces;
+	private Properties mappings;
+
+	private Map convertedMappings;
 
 	private Class[] managedInterfaces;
 
@@ -21,9 +30,9 @@ public class InterfaceBasedModelMBeanInfoAssembler extends ReflectiveModelMBeanI
 		this.managedInterfaces = managedInterfaces;
 	}
 
-    public void setMappedManagedInterfaces(Map mappedManagedInterfaces) {
-        this.mappedManagedInterfaces = mappedManagedInterfaces;
-    }
+	public void setMappings(Properties mappings) {
+		this.mappings = mappings;
+	}
 
 	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return isPublicInInterface(method, beanKey);
@@ -44,14 +53,15 @@ public class InterfaceBasedModelMBeanInfoAssembler extends ReflectiveModelMBeanI
 
 	private boolean isDeclaredInInterface(Method method, String beanKey) {
 
-        Class[] ifaces = null;
-        if(mappedManagedInterfaces != null) {
-            ifaces = (Class[])mappedManagedInterfaces.get(beanKey);
-        }
+		Class[] ifaces = null;
 
-        if(ifaces == null) {
-		    ifaces = managedInterfaces;
-        }
+		if (convertedMappings != null) {
+			ifaces = (Class[]) convertedMappings.get(beanKey);
+		}
+
+		if (ifaces == null) {
+			ifaces = managedInterfaces;
+		}
 
 		if (ifaces == null || ifaces.length == 0) {
 			ifaces = method.getDeclaringClass().getInterfaces();
@@ -79,6 +89,46 @@ public class InterfaceBasedModelMBeanInfoAssembler extends ReflectiveModelMBeanI
 				}
 			}
 		}
+
+		if (mappings != null) {
+			convertedMappings = new HashMap();
+
+			for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
+				String beanKey = (String) en.nextElement();
+
+				String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
+
+				Class[] classes = convertToClasses(beanKey, classNames);
+
+				convertedMappings.put(beanKey, classes);
+			}
+
+			// no need to keep properties hanging around
+			mappings.clear();
+			mappings = null;
+		}
+	}
+
+	private Class[] convertToClasses(String beanKey, String[] names) {
+		Class[] classes = new Class[names.length];
+
+		for (int x = 0; x < classes.length; x++) {
+			try {
+				Class cls = ClassUtils.forName(names[x].trim());
+
+				if (!cls.isInterface()) {
+					throw new ApplicationContextException("Class [" + names[x] + "] mapped to beanKey ["
+							+ beanKey + "] is not an interface.");
+				}
+
+				classes[x] = cls;
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException("Class [" + names[x] + "] mapped to beanKey ["
+						+ beanKey + "] cannot be found.", ex);
+			}
+		}
+		return classes;
 	}
 
 	private boolean isPublic(Method method) {
