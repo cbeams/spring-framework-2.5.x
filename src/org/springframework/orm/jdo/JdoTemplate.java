@@ -79,6 +79,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	private boolean allowCreate = true;
 
+
 	/**
 	 * Create a new JdoTemplate instance.
 	 */
@@ -91,6 +92,18 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 */
 	public JdoTemplate(PersistenceManagerFactory pmf) {
 		setPersistenceManagerFactory(pmf);
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Create a new JdoTemplate instance.
+	 * @param pmf PersistenceManagerFactory to create PersistenceManagers
+	 * @param allowCreate if a new PersistenceManager should be created
+	 * if no thread-bound found
+	 */
+	public JdoTemplate(PersistenceManagerFactory pmf, boolean allowCreate) {
+		setPersistenceManagerFactory(pmf);
+		setAllowCreate(allowCreate);
 		afterPropertiesSet();
 	}
 
