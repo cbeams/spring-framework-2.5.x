@@ -9,6 +9,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
@@ -44,9 +45,9 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.13 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.14 2003-12-01 18:40:27 johnsonr Exp $
  */
-public class TransactionProxyFactoryBean implements FactoryBean, InitializingBean {
+public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
 	private PlatformTransactionManager transactionManager;
 
@@ -54,8 +55,6 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 
 	private Properties transactionAttributes;
 
-	private boolean proxyInterfacesOnly = true;
-	
 	/** 
 	 * Interfaces to proxy. If left null (the default)
 	 * the AOP infrastructure works out which interfaces need proxying
@@ -101,14 +100,6 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 		this.transactionAttributes = transactionAttributes;
 	}
 
-	/**
-	 * Set if the proxy should only implement the interfaces of the target.
-	 * If this is false, a dynamic runtime subclass of the target will be
-	 * created via CGLIB, castable to the target class. Default is true.
-	 */
-	public void setProxyInterfacesOnly(boolean proxyInterfacesOnly) {
-		this.proxyInterfacesOnly = proxyInterfacesOnly;
-	}
 
 	/**
 	 * Set a MethodPointcut, i.e a bean that can cause conditional invocation
@@ -211,11 +202,13 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 			}
 		}
 
+		proxyFactory.copyFrom(this);
+
 		proxyFactory.setTargetSource(createTargetSource(this.target));
 		if (this.interfaces != null) {
 			proxyFactory.setInterfaces(this.interfaces);
 		}
-		else if (this.proxyInterfacesOnly) {
+		else if (!getProxyTargetClass()) {
 			// Rely on AOP infrastucture to tell us what interfaces to proxy
 			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
 		}

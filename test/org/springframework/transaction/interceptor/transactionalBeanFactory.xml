@@ -46,7 +46,7 @@
 	<bean id="proxyFactory3" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="mockMan"/></property>
 		<property name="target"><ref local="target"/></property>
-		<property name="proxyInterfacesOnly"><value>false</value></property>
+		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
