@@ -13,22 +13,22 @@ import org.springframework.context.ApplicationContextException;
  * A property resource configurer that overrides bean property values in an application
  * context definition. It <i>pushes</i> values from a properties file into bean definitions.
  *
- * <p>Configuration lines are expected to be of the following form:<br>
+ * <p>Configuration lines are expected to be of the following form:<br><br>
  * <code>
- * beanName.property=value
+ * &nbsp;&nbsp;beanName.property=value
  * </code>
  *
- * <p>Example properties file:
+ * <p>Example properties file:<br><br>
  * <code>
- * dataSource.driverClassName=com.mysql.jdbc.Driver
- * dataSource.url=jdbc:mysql:mydb
+ * &nbsp;&nbsp;dataSource.driverClassName=com.mysql.jdbc.Driver<br>
+ * &nbsp;&nbsp;dataSource.url=jdbc:mysql:mydb
  * </code>
  *
  * <p>In contrast to PropertyPlaceholderConfigurer, the original definition can have default
  * values or no values at all for such bean properties. If an overriding properties file does
  * not have an entry for a certain bean property, the default context definition is used.
  *
- * <p>Note that the context definition <i>is not</i> aware of being overridden,
+ * <p>Note that the context definition <i>is not</i> aware of being overridden;
  * so this is not immediately obvious when looking at the XML definition file.
  *
  * <p>In case of multiple PropertyOverrideConfigurers that define different values for

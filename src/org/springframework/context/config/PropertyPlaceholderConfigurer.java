@@ -10,24 +10,23 @@ import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
  * A property resource configurer that resolves placeholders in bean property values of
  * context definitions. It <i>pulls</i> values from a properties file into bean definitions.
  *
- * <p>The default placeholder syntax follows the JSP EL resp.
- * Log4J style:<br>
+ * <p>The default placeholder syntax follows the JSP EL respectively Log4J style:<br><br>
  * <code>
- * ${...}
+ * &nbsp;&nbsp;${...}
  * </code>
  *
- * <p>Example properties file:
+ * <p>Example properties file:<br><br>
  * <code>
- * driver=com.mysql.jdbc.Driver
- * dbname=mysql:mydb
+ * &nbsp;&nbsp;driver=com.mysql.jdbc.Driver<br>
+ * &nbsp;&nbsp;dbname=mysql:mydb
  * </code>
  *
- * <p>Example XML context definition:
+ * <p>Example XML context definition:<br><br>
  * <code>
- * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
- * &lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;
- * &lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;
- * &lt;/bean&gt;
+ * &nbsp;&nbsp;&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;<br>
+ * &nbsp;&nbsp;&lt;/bean&gt;
  * </code>
  *
  * <p>In contrast to PropertyOverrideConfigurer, this configurer allows to fill in
@@ -35,7 +34,7 @@ import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
  * cannot specify any default values for such bean properties, and the placeholder
  * properties file has to contain an entry for each defined placeholder.
  *
- * <p>Note that the context definition <i>is</i> aware of being incomplete,
+ * <p>Note that the context definition <i>is</i> aware of being incomplete;
  * this is immediately obvious when looking at the XML definition file.
  *
  * <p>In case of multiple PropertyPlaceHolderConfigurers that define different values for

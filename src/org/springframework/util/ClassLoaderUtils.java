@@ -80,19 +80,21 @@ public abstract class ClassLoaderUtils {
   
   
 	/**
-	 * Returns a path suitable for use with	{@see Class.getResource} build by taking
+	 * Return a path suitable for use with Class.getResource. Built by taking
 	 * the package of the specified	class file,	converting all dots	('.') to slashes
 	 * ('/'), adding a trailing	slash, and concatenating the specified resource	name
 	 * to this.	As such, this function may be used to build	a path suitable	for	loading
 	 * a resource file that	is in the same package as a	class file.
 	 * @param clazz	the	Class whose	package	will be	used as	the	base.
 	 * @param resourceName the resource	name to	append.	A leading slash	is optional.
-	 * @return The built-up	resource path.
+	 * @return the built-up	resource path
+	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class	clazz, String resourceName)	{
 		if (!resourceName.startsWith("/"))
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
 		else
 			return classPackageAsResourcePath(clazz) + resourceName;
-	} 
+	}
+
 }
