@@ -25,7 +25,7 @@ import org.springframework.beans.PropertyValues;
  * BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.4 2003-10-21 13:37:07 jhoeller Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.5 2003-11-01 16:30:18 johnsonr Exp $
  */
 public abstract class AbstractBeanDefinition {
 	
@@ -151,7 +151,7 @@ public abstract class AbstractBeanDefinition {
 		if (!(other instanceof AbstractBeanDefinition))
 			return false;
 		AbstractBeanDefinition obd = (AbstractBeanDefinition) other;
-		return this.singleton = obd.singleton &&
+		return this.singleton == obd.singleton &&
 			this.pvs.changesSince(obd.pvs).getPropertyValues().length == 0;
 	}
 
