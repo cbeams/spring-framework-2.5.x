@@ -12,11 +12,19 @@
 			<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
 			<INPUT type="hidden" name="_eventId" value="newSearch">
 		</FORM>
-		<DIV align="left">Search Results</DIV>
-		<HR>
 		<DIV align="left">
 			<P>
-				<TABLE border="1" width="100%">
+				<TABLE border="0">
+					<TR>
+						<TD>
+							<DIV align="left">Search Results</DIV>
+						</TD>
+					</TR>
+					<TR>
+						<TD><HR></TD>
+					</TR>
+					<TR><TD>
+					<TABLE BORDER="1">
 					<TR>
 						<TD><B>First Name</B></TD>
 						<TD><B>Last Name</B></TD>
@@ -41,12 +49,20 @@
 					<%
 						}
 					%>
+					</TD></TR>
+					</TABLE>
+					<TR>
+						<TD><HR></TD>
+					</TR>
+					<TR>
+						<TD>
+							<DIV align="right">
+								<INPUT type="button" onclick="javascript:document.newSearchForm.submit()" value="New Search">
+							</DIV>
+						</TD>
+					</TR>
 				</TABLE>
 			</P>
-		</DIV>
-		<HR>
-		<DIV align="right">
-			<INPUT type="button" onclick="javascript:document.newSearchForm.submit()" value="New Search">
 		</DIV>
 	</BODY>
 </HTML>

@@ -10,14 +10,19 @@
 	<HEAD>
 	</HEAD>
 	<BODY>
-		<FORM name="backForm" action="detail.htm">
-			<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
-			<INPUT type="hidden" name="_eventId" value="back">
-		</FORM>
-		<DIV align="left">Person Detail</DIV>
-		<HR>
 		<DIV align="left">
-			<TABLE>
+			<FORM name="backForm" action="detail.htm">
+				<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
+				<INPUT type="hidden" name="_eventId" value="back">
+				<TABLE>
+					<TR>
+						<TD>
+							<DIV align="left">Person Details</DIV>
+						</TD>
+					</TR>
+					<TR>
+						<TD COLSPAN="2"><HR></TD>
+					</TR>
 				<TR>
 					<TD><B>First Name</B></TD>
 					<TD><jsp:getProperty name="person" property="firstName"/></TD>
@@ -34,7 +39,8 @@
 					<TD><B>Phone</B></TD>
 					<TD><jsp:getProperty name="person" property="phone"/></TD>
 				</TR>
-			</TABLE>
+			<BR>
+			<TR><TD COLSPAN="2">
 			<BR>
 			<B>Colleagues:</B>
 			<BR>
@@ -49,10 +55,18 @@
 			<%
 				}
 			%>
-		</DIV>
-		<HR>
-		<DIV align="right">
-			<INPUT type="button" onclick="javascript:document.backForm.submit()" value="Back">
-		</DIV>
+			</TD></TR>
+			<TR>
+				<TD COLSPAN="2"><HR></TD>
+			</TR>
+			<TR>
+				<TD COLSPAN="2">
+					<DIV align="right">
+						<INPUT type="button" onclick="javascript:document.backForm.submit()" value="Back">
+					</DIV>
+				</TD>
+			</TR>
+		</TABLE>
+		</FORM>
 	</BODY>
 </HTML>
