@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	
+	<!-- 
+		Not yet in use: illustration of possible approach
+	-->
+
+	<bean id="autoProxiedOverload" 
+		lazy-init="true"
+		class="org.springframework.beans.factory.xml.SPR391LookupMethodWrappedByCglibProxyTests$OverloadLookup">
+		
+		<lookup-method name="newTestBean" bean="jenny" />		
+	</bean>
+	
+	<bean id="regularlyProxiedOverloadTarget" 
+		singleton="false"
+		class="org.springframework.beans.factory.xml.SPR391LookupMethodWrappedByCglibProxyTests$OverloadLookup">
+		
+		<lookup-method name="newTestBean" bean="jenny" />		
+	</bean>
+	
+	<bean id="regularlyProxiedOverload"
+		lazy-init="true"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target"><ref local="regularlyProxiedOverloadTarget"/></property>
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="interceptorNames"><value>nopInterceptor</value></property>
+	</bean>
+	
+	<bean id="jenny" class="org.springframework.beans.TestBean"
+		singleton="false">	
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		
+	</bean>
+	
+	<!-- Add autoproxy -->
+	<bean id="autproxy"
+		class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames"><value>autoProxiedOverload</value></property>
+		<property name="proxyTargetClass"><value>true</value></property>
+		<property name="interceptorNames"><value>nopInterceptor</value></property>
+	</bean>
+	
+	<bean id="nopInterceptor"
+		class="org.springframework.aop.interceptor.NopInterceptor" />
+	
+</beans>
