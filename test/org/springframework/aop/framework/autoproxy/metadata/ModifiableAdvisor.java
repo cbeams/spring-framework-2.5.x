@@ -15,15 +15,14 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.enterpriseservices.MetadataDriven;
 import org.springframework.metadata.Attributes;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ModifiableAdvisor.java,v 1.1 2003-12-12 21:31:25 johnsonr Exp $
+ * @version $Id: ModifiableAdvisor.java,v 1.2 2003-12-12 21:36:32 johnsonr Exp $
  */
-public class ModifiableAdvisor extends SimpleIntroductionAdvisor implements MetadataDriven, InitializingBean {
+public class ModifiableAdvisor extends SimpleIntroductionAdvisor implements InitializingBean {
 
 	protected final Log log = LogFactory.getLog(getClass());
 	
