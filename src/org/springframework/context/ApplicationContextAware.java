@@ -9,17 +9,23 @@ import org.springframework.beans.BeansException;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
- * of the application context it runs in.
+ * of the ApplicationContext that it runs in.
  *
- * <p>Implementing this interface makes sense when an object requires access to
- * file resources, i.e. wants to call ApplicationContext.getResource, or access
- * to the MessageSource. Configuration via bean references is preferable to
- * implementing this interface just for bean lookup purposes.
+ * <p>Implementing this interface makes sense for example when an object
+ * requires access to a set of collaborating beans. Note that configuration
+ * via bean references is preferable to implementing this interface just
+ * for bean lookup purposes.
+ *
+ * <p>This interface can also be implemented if an object needs access to file
+ * resources, i.e. wants to call getResource, or access to the MessageSource.
+ * However, it is preferable to implement the more specific ResourceLoaderAware
+ * interface respectively receive a reference to the MessageSource bean in that
+ * scenario.
  *
  * <p>Note that Resource dependencies can also be exposed as bean properties
  * of type Resource, populated via Strings with automatic type conversion by
- * the bean factory or via ResourceFactoryBean. This removes the need
- * for implementing this interface just for resource access purposes.
+ * the bean factory. This removes the need for implementing any callback
+ * interface just for the purpose of accessing a specific file resource.
  *
  * <p>ApplicationObjectSupport is a convenience base class for
  * application objects, implementing this interface.
@@ -27,10 +33,7 @@ import org.springframework.beans.BeansException;
  * <p>For a list of all bean lifecycle methods, see the BeanFactory javadocs.
  *
  * @author Rod Johnson
- * @see org.springframework.context.ApplicationContext#getResource
- * @see org.springframework.core.io.Resource
- * @see org.springframework.beans.factory.config.ResourceFactoryBean
- * @see org.springframework.context.MessageSource
+ * @see ResourceLoaderAware
  * @see org.springframework.context.support.ApplicationObjectSupport
  * @see org.springframework.beans.factory.BeanFactoryAware
  * @see org.springframework.beans.factory.InitializingBean
@@ -39,10 +42,11 @@ import org.springframework.beans.BeansException;
 public interface ApplicationContextAware {
 	
 	/** 
-	 * Set the application context used by this object.
+	 * Set the ApplicationContext that this object runs in.
 	 * Normally this call will be used to initialize the object.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
+	 * Invoked after ResourceLoaderAware's setResourceLoader.
 	 * @param context ApplicationContext object to be used by this object
 	 * @throws ApplicationContextException in case of context initialization errors
 	 * @throws BeansException if thrown by application context methods

@@ -1,8 +1,6 @@
 package org.springframework.core.io;
 
 import java.beans.PropertyEditorSupport;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,51 +12,37 @@ import org.apache.commons.logging.LogFactory;
  * <p>The path may contain ${...} placeholders, to be resolved as
  * system properties: e.g. ${user.dir}.
  *
- * <p>Will return an UrlResource if the location value is a URL, and a
- * ClassPathResource if it is a non-URL path or a "classpath:" pseudo-URL.
+ * <p>Delegates to a ResourceLoader, by default DefaultResourceLoader.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
- * @see #CLASSPATH_URL_PREFIX
+ * @see #getResourceLoader
  * @see Resource
+ * @see ResourceLoader
+ * @see DefaultResourceLoader
  * @see System#getProperty(String)
  */
 public class ResourceEditor extends PropertyEditorSupport {
 
-	private static final Log logger = LogFactory.getLog(ResourceEditor.class);
+	protected static final Log logger = LogFactory.getLog(ResourceEditor.class);
 
 	public static final String PLACEHOLDER_PREFIX = "${";
 
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	/** Pseudo URL prefix for loading from the class path */
-	public static final String CLASSPATH_URL_PREFIX = "classpath:";
-
 	public void setAsText(String text) {
-		String resolvedPath = resolvePath(text);
-		if (resolvedPath.startsWith(CLASSPATH_URL_PREFIX)) {
-			setValue(new ClassPathResource(resolvedPath.substring(CLASSPATH_URL_PREFIX.length())));
-		}
-		else {
-			try {
-				// try URL
-				URL url = new URL(resolvedPath);
-				setValue(new UrlResource(url));
-			}
-			catch (MalformedURLException ex) {
-				// no URL -> try class path
-				setValue(new ClassPathResource(text));
-			}
-		}
+		setValue(getResourceLoader().getResource(resolvePath(text)));
 	}
 
 	/**
-	 * Resolve the given path, replacing placeholders with corresponding system
-	 * property values if necessary.
+	 * Resolve the given path, replacing placeholders with corresponding
+	 * system property values if necessary.
 	 * @param path the original file path
 	 * @return the resolved file path
+	 * @see #PLACEHOLDER_PREFIX
+	 * @see #PLACEHOLDER_SUFFIX
 	 */
 	protected String resolvePath(String path) {
 		int startIndex = path.indexOf(PLACEHOLDER_PREFIX);
@@ -77,6 +61,15 @@ public class ResourceEditor extends PropertyEditorSupport {
 			}
 		}
 		return path;
+	}
+
+	/**
+	 * Determine the ResourceLoader to use for converting the
+	 * property text to a Resource. Default is DefaultResourceLoader.
+	 * @see DefaultResourceLoader
+	 */
+	protected ResourceLoader getResourceLoader() {
+		return new DefaultResourceLoader();
 	}
 
 }

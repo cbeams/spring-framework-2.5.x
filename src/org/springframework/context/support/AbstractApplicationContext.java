@@ -42,7 +42,7 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 
 
@@ -60,7 +60,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -181,11 +181,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * pseudo-URL, and context-specific file paths via getResourceByPath.
 	 * Throws a FileNotFoundException if getResourceByPath returns null.
 	 * @see #getResourceByPath
-	 * @see org.springframework.core.io.ResourceEditor#CLASSPATH_URL_PREFIX
+	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
 	public Resource getResource(String location) {
-		if (location.startsWith(ResourceEditor.CLASSPATH_URL_PREFIX)) {
-			return new ClassPathResource(location.substring(ResourceEditor.CLASSPATH_URL_PREFIX.length()));
+		if (location.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
+			return new ClassPathResource(location.substring(ResourceLoader.CLASSPATH_URL_PREFIX.length()));
 		}
 		try {
 			// try URL
@@ -193,7 +193,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 			return new UrlResource(url);
 		}
 		catch (MalformedURLException ex) {
-			// no URL -> try path
+			// no URL -> try context-specific path
 			return getResourceByPath(location);
 		}
 	}
@@ -356,8 +356,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	/**
 	 * Add a listener. Any beans that are listeners are automatically added.
 	 */
-	protected void addListener(ApplicationListener l) {
-		this.eventMulticaster.addApplicationListener(l);
+	protected void addListener(ApplicationListener listener) {
+		this.eventMulticaster.addApplicationListener(listener);
 	}
 
 	/**
