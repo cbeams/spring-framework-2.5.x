@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanInitializationException;
 
 /**
  * A property resource configurer that overrides bean property values in an application
@@ -62,14 +62,44 @@ import org.springframework.beans.FatalBeanException;
  */
 public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
+	private boolean ignoreInvalidKeys = false;
+
 	/** Contains names of beans that have overrides */
 	private Set beanNames = Collections.synchronizedSet(new HashSet());
-	
+
+
+	/**
+	 * Set whether to ignore invalid keys. Default is false.
+	 * <p>If you ignore invalid keys, keys that do not follow the
+	 * 'beanName.property' format will just be logged as warning.
+	 * This allows to have arbitrary other keys in a properties file.
+	 */
+	public void setIgnoreInvalidKeys(boolean ignoreInvalidKeys) {
+		this.ignoreInvalidKeys = ignoreInvalidKeys;
+	}
+
+
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
 		for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
 			String key = (String) en.nextElement();
-			processKey(beanFactory, key, props.getProperty(key));
+			try {
+				processKey(beanFactory, key, props.getProperty(key));
+			}
+			catch (BeansException ex) {
+				String msg = "Could not process key [" + key + "] in PropertyOverrideConfigurer";
+				if (this.ignoreInvalidKeys) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(msg, ex);
+					}
+					else if (logger.isWarnEnabled()) {
+						logger.warn(msg + ": " + ex.getMessage());
+					}
+				}
+				else {
+					throw new BeanInitializationException(msg, ex);
+				}
+			}
 		}
 	}
 
@@ -80,7 +110,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 			throws BeansException {
 		int dotIndex = key.indexOf('.');
 		if (dotIndex == -1) {
-			throw new FatalBeanException("Invalid key [" + key + "]: expected 'beanName.property'");
+			throw new BeanInitializationException("Invalid key [" + key + "]: expected 'beanName.property'");
 		}
 		String beanName = key.substring(0, dotIndex);
 		String beanProperty = key.substring(dotIndex+1);
@@ -99,7 +129,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		BeanDefinition bd = factory.getBeanDefinition(beanName);
 		bd.getPropertyValues().addPropertyValue(property, value);
 	}
-	
+
+
 	/**
 	 * Were there overrides for this bean?
 	 * Only valid after processing has occurred at least once.

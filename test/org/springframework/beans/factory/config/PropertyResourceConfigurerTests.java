@@ -63,6 +63,47 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", tb2.getName());
 	}
 
+	public void testPropertyOverrideConfigurerWithInvalidKey() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "argh=hgra\ntb1.age=99\ntb2.name=test");
+		pvs.addPropertyValue("ignoreInvalidKeys", "true");
+		ac.registerSingleton("configurer1", PropertyOverrideConfigurer.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb2.age=99\ntb2.name=test2");
+		pvs.addPropertyValue("order", "0");
+		ac.registerSingleton("configurer2", PropertyOverrideConfigurer.class, pvs);
+		try {
+			ac.refresh();
+		}
+		catch (BeanInitializationException ex) {
+			assertTrue(ex.getMessage().toLowerCase().indexOf("argh") != -1);
+		}
+	}
+
+	public void testPropertyOverrideConfigurerWithIgnoreInvalidKeys() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "argh=hgra\ntb1.age=99\ntb2.name=test");
+		pvs.addPropertyValue("ignoreInvalidKeys", "true");
+		ac.registerSingleton("configurer1", PropertyOverrideConfigurer.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb2.age=99\ntb2.name=test2");
+		pvs.addPropertyValue("order", "0");
+		ac.registerSingleton("configurer2", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb1 = (TestBean) ac.getBean("tb1");
+		TestBean tb2 = (TestBean) ac.getBean("tb2");
+		assertEquals(99, tb1.getAge());
+		assertEquals(99, tb2.getAge());
+		assertEquals(null, tb1.getName());
+		assertEquals("test", tb2.getName());
+	}
+
 	public void testPropertyPlaceholderConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 
