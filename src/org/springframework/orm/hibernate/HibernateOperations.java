@@ -284,6 +284,16 @@ public interface HibernateOperations {
 	void deleteAll(Collection entities) throws DataAccessException;
 
 	/**
+	 * Flush all pending saves, updates and deletes to the database.
+	 * <p>Only invoke this for selective eager flushing, for example when JDBC code
+	 * needs to see certain changes within the same transaction. Else, it's preferable
+	 * to rely on auto-flushing at transaction completion.
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#flush
+	 */
+	void flush() throws DataAccessException;
+
+	/**
 	 * Remove all objects from the Session cache, and cancel all pending saves,
 	 * updates and deletes.
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors

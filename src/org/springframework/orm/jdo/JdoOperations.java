@@ -154,6 +154,16 @@ public interface JdoOperations {
 	 */
 	void deletePersistentAll(Collection entities) throws DataAccessException;
 
+	/**
+	 * Flush all transactional modifications to the database.
+	 * <p>Only invoke this for selective eager flushing, for example when JDBC code
+	 * needs to see certain changes within the same transaction. Else, it's preferable
+	 * to rely on auto-flushing at transaction completion.
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see JdoDialect#flush
+	 */
+	void flush() throws DataAccessException;
+
 
 	//-------------------------------------------------------------------------
 	// Convenience finder methods

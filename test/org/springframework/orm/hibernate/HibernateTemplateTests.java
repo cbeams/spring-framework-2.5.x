@@ -53,12 +53,29 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class HibernateTemplateTests extends TestCase {
 
-	public void testExecuteWithNewSession() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
+	private MockControl sfControl;
+	private SessionFactory sf;
+	private MockControl sessionControl;
+	private Session session;
 
+	protected void setUp() {
+		sfControl = MockControl.createControl(SessionFactory.class);
+		sf = (SessionFactory) sfControl.getMock();
+		sessionControl = MockControl.createControl(Session.class);
+		session = (Session) sessionControl.getMock();
+	}
+
+	protected void tearDown() {
+		try {
+			sfControl.verify();
+			sessionControl.verify();
+		}
+		catch (IllegalStateException ex) {
+			// ignore: test method didn't call replay
+		}
+	}
+
+	public void testExecuteWithNewSession() throws HibernateException {
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -81,16 +98,9 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testExecuteWithNewSessionAndFlushNever() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -112,8 +122,6 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testExecuteWithNotAllowCreate() {
@@ -133,11 +141,6 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	public void testExecuteWithNotAllowCreateAndThreadBound() {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		sfControl.replay();
@@ -160,17 +163,9 @@ public class HibernateTemplateTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.unbindResource(sf);
 		}
-
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.flush();
@@ -196,19 +191,12 @@ public class HibernateTemplateTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.unbindResource(sf);
 		}
-
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testExecuteWithEntityInterceptor() throws HibernateException {
 		MockControl interceptorControl = MockControl.createControl(net.sf.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
 		interceptorControl.replay();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
@@ -231,16 +219,10 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		sfControl.verify();
-		sessionControl.verify();
+		interceptorControl.verify();
 	}
 
 	public void testGet() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -258,16 +240,9 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.get(TestBean.class, "");
 		assertTrue("Correct result", result == tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testGetWithLockMode() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -285,16 +260,9 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.get(TestBean.class, "", LockMode.UPGRADE_NOWAIT);
 		assertTrue("Correct result", result == tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testLoad() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -312,16 +280,9 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.load(TestBean.class, "");
 		assertTrue("Correct result", result == tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testLoadWithNotFound() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -345,16 +306,9 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals("id", ex.getIdentifier());
 			assertEquals(onfex, ex.getCause());
 		}
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testLoadWithLockMode() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -372,16 +326,9 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.load(TestBean.class, "", LockMode.UPGRADE);
 		assertTrue("Correct result", result == tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testContains() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -398,16 +345,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertTrue(ht.contains(tb));
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testEvict() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -424,16 +364,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.evict(tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testLock() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -450,16 +383,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.lock(tb, LockMode.WRITE);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testSave() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -478,16 +404,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertEquals("Correct return value", ht.save(tb), new Integer(0));
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testSaveWithId() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -506,16 +425,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.save(tb, "id");
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testSaveOrUpdate() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -534,16 +446,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.saveOrUpdate(tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testSaveOrUpdateWithFlushModeNever() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -564,16 +469,9 @@ public class HibernateTemplateTests extends TestCase {
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
 		}
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testUpdate() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -592,16 +490,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.update(tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testUpdateWithLockMode() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -622,16 +513,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.update(tb, LockMode.UPGRADE);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testDelete() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -650,16 +534,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.delete(tb);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testDeleteWithLock() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -680,16 +557,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.delete(tb, LockMode.UPGRADE);
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testDeleteAll() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
 		sf.openSession();
@@ -714,16 +584,28 @@ public class HibernateTemplateTests extends TestCase {
 		tbs.add(tb1);
 		tbs.add(tb2);
 		ht.deleteAll(tbs);
-		sfControl.verify();
-		sessionControl.verify();
+	}
+
+	public void testFlush() throws HibernateException {
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setFlushMode(HibernateTemplate.FLUSH_NEVER);
+		ht.flush();
 	}
 
 	public void testClear() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -739,15 +621,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.clear();
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testFind() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -771,16 +647,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.find("some query string");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithParameter() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -806,16 +676,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.find("some query string", "myvalue");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithParameterAndType() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -841,16 +705,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.find("some query string", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithParameters() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -878,16 +736,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.find("some query string", new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithParametersAndTypes() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -914,11 +766,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.find("some query string",
-													new Object[] {"myvalue1", new Integer(2)},
-													new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+				new Object[] {"myvalue1", new Integer(2)},
+				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
@@ -936,10 +786,6 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	public void testFindWithNamedParameter() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -965,16 +811,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedParam("some query string", "myparam", "myvalue");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithNamedParameterAndType() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1000,16 +840,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedParam("some query string", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithNamedParameters() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1036,19 +870,13 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedParam("some query string",
-													new String[] {"myparam1", "myparam2"},
-													new Object[] {"myvalue1", new Integer(2)});
+				new String[] {"myparam1", "myparam2"},
+				new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithNamedParametersAndTypes() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1075,20 +903,14 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedParam("some query string",
-													new String[] {"myparam1", "myparam2"},
-													new Object[] {"myvalue1", new Integer(2)},
-													new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+				new String[] {"myparam1", "myparam2"},
+				new Object[] {"myvalue1", new Integer(2)},
+				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByValueBean() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1115,16 +937,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByValueBean("some query string", tb);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQuery() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1148,16 +964,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQuery("some query name");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithParameter() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1183,16 +993,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQuery("some query name", "myvalue");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithParameterAndType() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1218,16 +1022,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQuery("some query name", (Object) "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithParameters() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1255,16 +1053,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQuery("some query name", new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithParametersAndTypes() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1294,8 +1086,6 @@ public class HibernateTemplateTests extends TestCase {
 																			new Object[] {"myvalue1", new Integer(2)},
 																			new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
@@ -1313,10 +1103,6 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	public void testFindByNamedQueryWithNamedParameter() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1342,16 +1128,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithNamedParameterAndType() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1377,16 +1157,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithNamedParameters() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1413,19 +1187,13 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndNamedParam("some query name",
-																			new String[] {"myparam1", "myparam2"},
-																			new Object[] {"myvalue1", new Integer(2)});
+				new String[] {"myparam1", "myparam2"},
+				new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithNamedParametersAndTypes() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1452,20 +1220,14 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndNamedParam("some query name",
-																			new String[] {"myparam1", "myparam2"},
-																			new Object[] {"myvalue1", new Integer(2)},
-																			new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+				new String[] {"myparam1", "myparam2"},
+				new Object[] {"myvalue1", new Integer(2)},
+				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryAndValueBean() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1492,16 +1254,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndValueBean("some query name", tb);
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testFindWithCacheable() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1529,15 +1285,9 @@ public class HibernateTemplateTests extends TestCase {
 		List result = ht.find("some query string");
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
-		sessionControl.verify();
-		queryControl.verify();
 	}
 
 	public void testFindByNamedQueryWithCacheable() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1564,16 +1314,10 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setCacheQueries(true);
 		List result = ht.findByNamedQuery("some query name");
 		assertTrue("Correct list", result == list);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testIterate() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1597,16 +1341,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Iterator result = ht.iterate("some query string");
 		assertTrue("Correct list", result == it);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testIterateWithParameterAndType() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1632,16 +1370,10 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Iterator result = ht.iterate("some query string", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == it);
-		sfControl.verify();
-		sessionControl.verify();
 		queryControl.verify();
 	}
 
 	public void testIterateWithParametersAndTypes() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
 
@@ -1668,20 +1400,13 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Iterator result = ht.iterate("some query string",
-		                             new Object[] {"myvalue1", new Integer(2)},
-		                             new Type[] {Hibernate.STRING, Hibernate.INTEGER});
+				new Object[] {"myvalue1", new Integer(2)},
+				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == it);
 		sfControl.verify();
-		sessionControl.verify();
-		queryControl.verify();
 	}
 
 	public void testDeleteWithQuery() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -1699,16 +1424,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertEquals(2, ht.delete("from example.Example"));
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testDeleteWithQueryAndValue() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -1726,16 +1444,9 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertEquals(2, ht.delete("from example.Example", "test", Hibernate.STRING));
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testDeleteWithQueryAndValues() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
 		Object[] values = new Object[]{"test1", "test2"};
 		Type[] types = new Type[] {Hibernate.STRING, Hibernate.STRING};
 		sf.openSession();
@@ -1755,8 +1466,6 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertEquals(2, ht.delete("from example.Example", values, types));
-		sfControl.verify();
-		sessionControl.verify();
 	}
 
 	public void testExceptions() throws HibernateException {
@@ -1874,22 +1583,16 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	private HibernateTemplate createTemplate() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-
+		sfControl.reset();
+		sessionControl.reset();
 		sf.openSession();
 		sfControl.setReturnValue(session);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
-
 		return new HibernateTemplate(sf);
 	}
 

@@ -386,6 +386,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
+	public void flush() throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.flush();
+				return null;
+			}
+		});
+	}
+
 	public void clear() throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) {

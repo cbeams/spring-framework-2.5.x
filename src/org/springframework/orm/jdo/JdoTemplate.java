@@ -238,6 +238,15 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		});
 	}
 
+	public void flush() throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				getJdoDialect().flush(pm);
+				return null;
+			}
+		});
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Convenience finder methods
