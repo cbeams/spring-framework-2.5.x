@@ -36,13 +36,14 @@ import org.springframework.mock.web.MockHttpServletResponse;
 public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	public void testParameterParsing() throws Exception{
-
 		Map params = new HashMap();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
-			protected void renderReport(JasperReport report, Map model, JRDataSource dataSource,
-					HttpServletResponse response) throws Exception {
+			protected void renderReport(
+					JasperReport report, Map model, JRDataSource dataSource, HttpServletResponse response)
+					throws Exception {
+
 				assertEquals("Invalid number of exporter parameters", 1, getExporterParameters().size());
 
 				JRExporterParameter key = JRHtmlExporterParameter.IMAGES_URI;
@@ -57,7 +58,6 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		view.setExporterParameters(params);
 		view.initApplicationContext();
 		view.render(getModel(), new MockHttpServletRequest(), new MockHttpServletResponse());
-
 	}
 
 	public void testInvalidClass() throws Exception{
