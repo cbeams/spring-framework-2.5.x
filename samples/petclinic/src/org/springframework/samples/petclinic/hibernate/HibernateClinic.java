@@ -3,7 +3,7 @@ package org.springframework.samples.petclinic.hibernate;
 import java.util.Collection;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.hibernate.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;

@@ -10,19 +10,19 @@
 		<property name="password"><value></value></property>
 	</bean>
 
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
 		<property name="dataSource"><ref local="dataSource"/></property>
 		<property name="mappingResources">
 			<value>petclinic.hbm.xml</value>
 		</property>
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.dialect">net.sf.hibernate.dialect.HSQLDialect</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
 			</props>
 		</property>
 	</bean>
 
-	<bean id="transactionManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
+	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
 		<property name="sessionFactory"><ref local="sessionFactory"/></property>
 	</bean>
 

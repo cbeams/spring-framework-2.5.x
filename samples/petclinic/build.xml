@@ -26,7 +26,7 @@
 	<path id="master-classpath">
 
 		<fileset dir="${spring.root}/lib/hibernate">
-			<include name="hibernate2.jar"/>
+			<include name="hibernate3.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
@@ -61,9 +61,6 @@
 		</fileset>
 		<fileset dir="${spring.root}/lib/ehcache">
 			<include name="ehcache*.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/hibernate">
-			<include name="odmg.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hsqldb">
 			<include name="hsqldb.jar"/>
@@ -169,8 +166,7 @@
 				<include name="ehcache*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hibernate">
-				<include name="hibernate2.jar"/>
-				<include name="odmg.jar"/>
+				<include name="hibernate3.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
