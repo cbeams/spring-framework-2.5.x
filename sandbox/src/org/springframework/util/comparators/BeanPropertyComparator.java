@@ -22,10 +22,9 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 /**
- * This comparator compares two beans by the specified bean property. It is also
- * possible to compare beans based on nested, indexed, combined, mapped bean
- * properties. Please see the {@link PropertyUtilsBean}documentation for all
- * property name possibilities.
+ * Comparator that compares two beans by the specified bean property. It is also
+ * possible to compare beans based on nested, indexed, combined, or mapped bean
+ * properties.
  */
 public class BeanPropertyComparator implements Comparator, Serializable {
     private String property;
@@ -33,10 +32,9 @@ public class BeanPropertyComparator implements Comparator, Serializable {
     private Comparator comparator;
 
     /**
-     * Constructs a Bean Comparator without a property set. <strong>Note
-     * </strong> that this is intended to be used only in bean-centric
-     * environments. Until {@link #setProperty}is called with a non-null value.
-     * this comparator will compare the Objects only.
+     * Constructs a BeanPropertyComparator without a property set. Until
+     * {@link #setProperty} is called with a non-null value, this comparator
+     * will compare the beans by natural-order only.
      */
     public BeanPropertyComparator() {
         this(null);
@@ -45,19 +43,18 @@ public class BeanPropertyComparator implements Comparator, Serializable {
     /**
      * Constructs a property-based comparator for beans. This compares two beans
      * by the property specified in the property parameter. This constructor
-     * creates a <code>BeanComparator</code> that uses a
+     * creates a <code>BeanPropertyComparator</code> that uses a
      * <code>ComparableComparator</code> to compare the property values.
      * 
-     * Passing "null" to this constructor will cause the BeanComparator to
-     * compare objects based on natural order, that is
+     * Passing <code>null</code> to this constructor will cause the
+     * BeanPropertyComparator to compare beans based on natural order, that is
      * <code>java.lang.Comparable</code>.
      * 
      * @param property
      *            String Name of a bean property, which may contain the name of
-     *            a simple, nested, indexed, mapped, or combined property. See
-     *            {@link PropertyUtilsBean}for property query language syntax.
-     *            If the property passed in is null then the actual objects will
-     *            be compared
+     *            a simple, nested, indexed, mapped, or combined property. If
+     *            the property passed in is null then the actual objects, which
+     *            must be comparables in this case, will be compared.
      */
     public BeanPropertyComparator(String property) {
         this(property, ComparableComparator.instance());
@@ -65,17 +62,15 @@ public class BeanPropertyComparator implements Comparator, Serializable {
 
     /**
      * Constructs a property-based comparator for beans. This constructor
-     * creates a BeanComparator that uses the supplied Comparator to compare the
-     * property values.
+     * creates a BeanPropertyComparator that uses the supplied Comparator to
+     * compare the property values.
      * 
      * @param property
-     *            Name of a bean property, can contain the name of a simple,
+     *            Name of a bean property; may contain the name of a simple,
      *            nested, indexed, mapped, or combined property.
      * @param comparator
-     *            BeanComparator will pass the values of the specified bean
-     *            property to this Comparator. If your bean property is not a
-     *            comparable or contains null values, a suitable comparator may
-     *            be supplied in this constructor.
+     *            BeanPropertyComparator will pass the values of the specified
+     *            bean property to this Comparator.
      */
     public BeanPropertyComparator(String property, Comparator comparator) {
         setProperty(property);
@@ -122,7 +117,7 @@ public class BeanPropertyComparator implements Comparator, Serializable {
      */
     public int compare(Object o1, Object o2) {
         if (property == null) {
-            // compare the actual objects
+            // compare the actual comparable objects
             return comparator.compare(o1, o2);
         }
         BeanWrapper wrapper = new BeanWrapperImpl(o1);
