@@ -10,13 +10,14 @@ import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
 
@@ -34,19 +35,19 @@ public class XmlFlowBuilderTests extends TestCase {
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		builder.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
-			public Action getAction(String actionId) throws FlowServiceLookupException {
+			public Action getAction(String actionId) throws ServiceLookupException {
 				if ("action1".equals(actionId) || "action2".equals(actionId)) {
 					return new Action() {
-						public ActionResult execute(HttpServletRequest request, HttpServletResponse response,
+						public String execute(HttpServletRequest request, HttpServletResponse response,
 								MutableAttributesAccessor model) throws Exception {
-							return new ActionResult("testOk");
+							return "testOk";
 						}
 					};
 				}
 				throw new NoSuchActionException(actionId);
 			}
 
-			public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException {
+			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
 					return new Flow(flowDefinitionId);
 				}
@@ -54,7 +55,7 @@ public class XmlFlowBuilderTests extends TestCase {
 			}
 
 			public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
-					throws FlowServiceLookupException {
+					throws ServiceLookupException {
 				if ("attribMapper1".equals(flowAttributesMapperId)) {
 					return new FlowAttributesMapper() {
 						public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {

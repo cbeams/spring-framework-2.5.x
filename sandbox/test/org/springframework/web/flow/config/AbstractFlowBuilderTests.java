@@ -21,11 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.AbstractAction;
@@ -45,11 +45,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 	public void testDependencyLookup() {
 		TestMasterFlowDependencyLookup master = new TestMasterFlowDependencyLookup();
 		master.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
-			public Action getAction(String actionId) throws FlowServiceLookupException {
+			public Action getAction(String actionId) throws ServiceLookupException {
 				return new NoOpAction();
 			}
 
-			public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException {
+			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if (flowDefinitionId.equals(PERSON_DETAILS)) {
 					BaseFlowBuilder builder = new TestFlowDependencyLookup();
 					builder.setFlowServiceLocator(this);
@@ -147,7 +147,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 * Action bean stub that does nothing, just returns a "success" result
 	 */
 	private final class NoOpAction extends AbstractAction {
-		public ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+		public String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws Exception {
 			return success();
 		}
