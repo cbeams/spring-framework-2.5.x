@@ -58,7 +58,6 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	public final void setApplicationContext(ApplicationContext context) throws BeansException {
-		// ignore reinitialization
 		if (this.applicationContext == null) {
 			if (!requiredContextClass().isInstance(context)) {
 				throw new ApplicationContextException("Invalid application context: needs to be of type '" +
@@ -67,6 +66,12 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 			this.applicationContext = context;
 			this.messageSourceAccessor = new MessageSourceAccessor(context);
 			initApplicationContext();
+		}
+		else {
+			// ignore reinitialization if same context passed in
+			if (this.applicationContext != context) {
+				throw new ApplicationContextException("Cannot reinitialize with different application context");
+			}
 		}
 	}
 	
