@@ -33,7 +33,6 @@ import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.SessionKeyUtils;
 
 /**
  * Base class for flow integration tests; belongs in the spring-test.jar
@@ -69,17 +68,52 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return flowServiceLocator;
 	}
 
+	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
+		this.flowExecution = createFlowExecution(getFlow());
+		return this.flowExecution.start(input, request, response);
+	}
+
+	protected FlowExecution createFlowExecution(Flow flow) {
+		return flow.createFlowExecution();
+	}
+
+	protected ModelAndView startFlow(Map input) {
+		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
+	}
+
+	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
+		return getFlowExecution().signalEvent(eventId, getCurrentStateId(), request, response);
+	}
+
+	protected FlowExecution getFlowExecution() {
+		return flowExecution;
+	}
+
+	protected void assertActiveFlowEquals(String expectedActiveFlowId) {
+		assertEquals("The active flow id '" + getActiveFlowId() + "' does not equal the expected active flow '"
+				+ expectedActiveFlowId + "'", expectedActiveFlowId, getActiveFlowId());
+	}
+
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
 		assertEquals("The current state '" + getCurrentStateId() + "' does not equal the expected state '"
 				+ expectedCurrentStateId + "'", expectedCurrentStateId, getCurrentStateId());
+	}
+
+	protected void assertLastEventEquals(String expectedLastEventId) {
+		assertEquals("The last event '" + getLastEventId() + "' does not equal the expected event '"
+				+ expectedLastEventId + "'", expectedLastEventId, getLastEventId());
+	}
+
+	protected String getActiveFlowId() {
+		return flowExecution.getActiveFlowId();
 	}
 
 	protected String getCurrentStateId() {
 		return flowExecution.getCurrentStateId();
 	}
 
-	protected FlowExecution getFlowExecution() {
-		return flowExecution;
+	protected String getLastEventId() {
+		return flowExecution.getLastEventId();
 	}
 
 	protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
@@ -113,26 +147,5 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()), "Attribute value must be a bean");
 		BeanWrapper wrapper = new BeanWrapperImpl(value);
 		assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));
-	}
-
-	protected String generateUniqueFlowSessionId(FlowExecutionStack stack) {
-		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
-	}
-
-	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
-		this.flowExecution = createFlowExecution(getFlow());
-		return this.flowExecution.start(input, request, response);
-	}
-
-	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionStack(flow);
-	}
-
-	protected ModelAndView startFlow(Map input) {
-		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
-	}
-
-	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
-		return getFlowExecution().signalEvent(eventId, getCurrentStateId(), request, response);
 	}
 }

@@ -24,12 +24,12 @@ import junit.framework.TestCase;
  * 
  * @author Erwin Vervaet
  */
-public class XmlFlowBuilderTest extends TestCase {
+public class XmlFlowBuilderTests extends TestCase {
 	
 	private Flow flow;
 	
 	protected void setUp() throws Exception {
-		XmlFlowBuilder builder=new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTest.class));
+		XmlFlowBuilder builder=new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		
 		builder.setFlowServiceLocator(new FlowServiceLocator() {
 			public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException {
