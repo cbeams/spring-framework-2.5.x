@@ -1,56 +1,69 @@
 package org.springframework.jdbc.support.lob;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.Connection;
+import java.io.Reader;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Default implementation of the LobHandler interface. Its BlobHandler implementation
- * creates instances of DefaultBlobImpl in the createBlob methods, and invokes
- * PreparedStatement.setBytes/setBinaryStream in setBlobAsBytes/setBlobAsBinaryStream.
+ * Default implementation of the LobHandler interface. Invokes the direct accessor
+ * methods that java.sql.ResultSet and java.sql.PreparedStatement offer.
  *
- * <p>With some JDBC drivers, PreparedStatement's setBytes/setBinaryStream is
- * implemented more efficiently than setBlob. Therefore, this LobHandler
- * only creates java.sql.Blob instances when necessary, i.e. on createBlob invocations.
- *
- * <p>Note that PreparedStatement's setBlob implementation is broken with MySQL
- * Connector/J 3.0.9: Nevertheless, DefaultBlobCreator's setBlobAsBinaryStream
- * will work as it calls setBinaryStream instead of setBlob, as outlined above.
+ * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
+ * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see DefaultBlobImpl
+ * @see java.sql.ResultSet#getBytes
+ * @see java.sql.ResultSet#getBinaryStream
+ * @see java.sql.ResultSet#getString
+ * @see java.sql.ResultSet#getAsciiStream
+ * @see java.sql.ResultSet#getCharacterStream
  * @see java.sql.PreparedStatement#setBytes
  * @see java.sql.PreparedStatement#setBinaryStream
+ * @see java.sql.PreparedStatement#setString
+ * @see java.sql.PreparedStatement#setAsciiStream
+ * @see java.sql.PreparedStatement#setCharacterStream
  */
 public class DefaultLobHandler implements LobHandler {
 
-	public BlobCreator getBlobCreator() {
-		return new DefaultBlobCreator();
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
+		logger.debug("Returning BLOB as bytes");
+		return rs.getBytes(columnIndex);
+	}
+
+	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
+		logger.debug("Returning BLOB as binary stream");
+		return rs.getBinaryStream(columnIndex);
+	}
+
+	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
+		logger.debug("Returning CLOB as string");
+		return rs.getString(columnIndex);
+	}
+
+	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
+		logger.debug("Returning CLOB as ASCII stream");
+		return rs.getAsciiStream(columnIndex);
+	}
+
+	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
+		logger.debug("Returning CLOB as character stream");
+		return rs.getCharacterStream(columnIndex);
+	}
+
+	public LobCreator getLobCreator() {
+		return new DefaultLobCreator();
 	}
 
 
-	protected static class DefaultBlobCreator implements BlobCreator {
-
-		protected final Log logger = LogFactory.getLog(getClass());
-
-		public Blob createBlob(Connection con, byte[] content) {
-			DefaultBlobImpl blob = new DefaultBlobImpl(content);
-			logger.debug("Created new DefaultBlobImpl with length " + blob.length());
-			return blob;
-		}
-
-		public Blob createBlob(Connection con, InputStream contentStream) throws IOException {
-			DefaultBlobImpl blob = new DefaultBlobImpl(contentStream);
-			logger.debug("Created new DefaultBlobImpl with length " + blob.length());
-			return blob;
-		}
+	protected class DefaultLobCreator implements LobCreator {
 
 		public void setBlobAsBytes(PreparedStatement ps, int parameterIndex, byte[] content)
 				throws SQLException {
@@ -58,11 +71,32 @@ public class DefaultLobHandler implements LobHandler {
 			logger.debug("Set bytes for BLOB with length " + content.length);
 		}
 
-		public void setBlobAsBinaryStream(PreparedStatement ps, int parameterIndex, InputStream contentStream)
-				throws SQLException, IOException{
-			int contentLength = contentStream.available();
-			ps.setBinaryStream(parameterIndex, contentStream, contentLength);
+		public void setBlobAsBinaryStream(PreparedStatement ps, int parameterIndex, InputStream binaryStream,
+		                                  int contentLength)
+				throws SQLException {
+			ps.setBinaryStream(parameterIndex, binaryStream, contentLength);
 			logger.debug("Set binary stream for BLOB with length " + contentLength);
+		}
+
+		public void setClobAsString(PreparedStatement ps, int parameterIndex, String content)
+		    throws SQLException {
+			ps.setString(parameterIndex, content);
+			logger.debug("Set string for CLOB with length " + content.length());
+		}
+
+		public void setClobAsAsciiStream(PreparedStatement ps, int parameterIndex, InputStream asciiStream,
+		                                 int contentLength)
+		    throws SQLException {
+			ps.setAsciiStream(parameterIndex, asciiStream, contentLength);
+			logger.debug("Set ASCII stream for CLOB with length " + contentLength);
+		}
+
+
+		public void setClobAsCharacterStream(PreparedStatement ps, int parameterIndex, Reader characterStream,
+		                                     int contentLength)
+		    throws SQLException {
+			ps.setCharacterStream(parameterIndex, characterStream, contentLength);
+			logger.debug("Set character stream for CLOB with length " + contentLength);
 		}
 
 		public void close() {

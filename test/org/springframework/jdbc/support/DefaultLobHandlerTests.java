@@ -1,21 +1,20 @@
 package org.springframework.jdbc.support;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.sql.Blob;
-import java.sql.SQLException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
-import org.springframework.jdbc.support.lob.DefaultBlobImpl;
-import org.springframework.jdbc.support.lob.BlobCreator;
-import org.springframework.util.FileCopyUtils;
-
-import org.easymock.MockControl;
+import org.springframework.jdbc.support.lob.LobCreator;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * @author Juergen Hoeller
@@ -23,41 +22,76 @@ import org.easymock.MockControl;
  */
 public class DefaultLobHandlerTests extends TestCase {
 
-	public void testCreateBlob() throws SQLException, IOException {
-		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
+	public void testGetBlobAsBytes() throws SQLException {
+		LobHandler lobHandler = new DefaultLobHandler();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rs.getBytes(1);
+		rsControl.setReturnValue(null);
+		rsControl.replay();
+		lobHandler.getBlobAsBytes(rs, 1);
+		rsControl.verify();
+	}
 
-		Blob blob = blobCreator.createBlob(null, "testContent".getBytes());
-		assertTrue(blob instanceof DefaultBlobImpl);
-		assertEquals(11, blob.length());
-		assertEquals("testContent", new String(blob.getBytes(1, (int) blob.length())));
+	public void testGetBlobAsBinaryStream() throws SQLException {
+		LobHandler lobHandler = new DefaultLobHandler();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rs.getBinaryStream(1);
+		rsControl.setReturnValue(null);
+		rsControl.replay();
+		lobHandler.getBlobAsBinaryStream(rs, 1);
+		rsControl.verify();
+	}
 
-		blob = blobCreator.createBlob(null, "testContent".getBytes());
-		InputStream bis = blob.getBinaryStream();
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		FileCopyUtils.copy(bis, bos);
-		assertEquals("testContent", new String(bos.toByteArray()));
+	public void testGetClobAsString() throws SQLException {
+		LobHandler lobHandler = new DefaultLobHandler();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rs.getString(1);
+		rsControl.setReturnValue(null);
+		rsControl.replay();
+		lobHandler.getClobAsString(rs, 1);
+		rsControl.verify();
+	}
 
-		blob = blobCreator.createBlob(null, new ByteArrayInputStream("testContent".getBytes()));
-		assertTrue(blob instanceof DefaultBlobImpl);
-		assertEquals(11, blob.length());
-		assertEquals("testContent", new String(blob.getBytes(1, (int) blob.length())));
+	public void testGetClobAsAsciiStream() throws SQLException {
+		LobHandler lobHandler = new DefaultLobHandler();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rs.getAsciiStream(1);
+		rsControl.setReturnValue(null);
+		rsControl.replay();
+		lobHandler.getClobAsAsciiStream(rs, 1);
+		rsControl.verify();
+	}
+
+	public void testGetClobAsCharacterStream() throws SQLException {
+		LobHandler lobHandler = new DefaultLobHandler();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rs.getCharacterStream(1);
+		rsControl.setReturnValue(null);
+		rsControl.replay();
+		lobHandler.getClobAsCharacterStream(rs, 1);
+		rsControl.verify();
 	}
 
 	public void testSetBlobAsBytes() throws SQLException {
-		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
-		byte[] bytes = "testContent".getBytes();
+		LobCreator lobCreator = (new DefaultLobHandler()).getLobCreator();
+		byte[] content = "testContent".getBytes();
 
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		ps.setBytes(1, bytes);
+		ps.setBytes(1, content);
 		psControl.replay();
 
-		blobCreator.setBlobAsBytes(ps, 1, bytes);
+		lobCreator.setBlobAsBytes(ps, 1, content);
 		psControl.verify();
 	}
 
 	public void testSetBlobAsBinaryStream() throws SQLException, IOException {
-		BlobCreator blobCreator = (new DefaultLobHandler()).getBlobCreator();
+		LobCreator lobCreator = (new DefaultLobHandler()).getLobCreator();
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
@@ -65,7 +99,46 @@ public class DefaultLobHandlerTests extends TestCase {
 		ps.setBinaryStream(1, bis, 11);
 		psControl.replay();
 
-		blobCreator.setBlobAsBinaryStream(ps, 1, bis);
+		lobCreator.setBlobAsBinaryStream(ps, 1, bis, 11);
+		psControl.verify();
+	}
+
+	public void testSetClobAsString() throws SQLException, IOException {
+		LobCreator lobCreator = (new DefaultLobHandler()).getLobCreator();
+		String content = "testContent";
+
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		ps.setString(1, content);
+		psControl.replay();
+
+		lobCreator.setClobAsString(ps, 1, content);
+		psControl.verify();
+	}
+
+	public void testSetClobAsAsciiStream() throws SQLException, IOException {
+		LobCreator lobCreator = (new DefaultLobHandler()).getLobCreator();
+		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
+
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		ps.setAsciiStream(1, bis, 11);
+		psControl.replay();
+
+		lobCreator.setClobAsAsciiStream(ps, 1, bis, 11);
+		psControl.verify();
+	}
+
+	public void testSetClobAsCharacterStream() throws SQLException, IOException {
+		LobCreator lobCreator = (new DefaultLobHandler()).getLobCreator();
+		Reader str = new StringReader("testContent");
+
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+		ps.setCharacterStream(1, str, 11);
+		psControl.replay();
+
+		lobCreator.setClobAsCharacterStream(ps, 1, str, 11);
 		psControl.verify();
 	}
 
