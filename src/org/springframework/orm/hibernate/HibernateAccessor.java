@@ -105,7 +105,7 @@ public abstract class HibernateAccessor {
 	 * @see #FLUSH_AUTO
 	 */
 	public void setFlushModeName(String constantName) {
-		setFlushMode(constants.asInt(constantName));
+		setFlushMode(constants.asNumber(constantName).intValue());
 	}
 
 	/**

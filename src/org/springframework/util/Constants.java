@@ -9,6 +9,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * This class can be used to parse other classes containing constant definitions
@@ -23,10 +26,9 @@ import java.util.Map;
  * the same names as the constants themselves, and freeing them from
  * maintaining their own mapping.
  *
- * <p>TODO: add asBoolean, asDouble methods, keys method
- *
- * @version $Id: Constants.java,v 1.1.1.1 2003-08-14 16:20:42 trisberg Exp $
+ * @version $Id: Constants.java,v 1.2 2003-08-18 15:42:59 jhoeller Exp $
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16-Mar-2003
  */
 public class Constants {
@@ -53,45 +55,40 @@ public class Constants {
 				String name = f.getName();
 				try {
 					Object value = f.get(null);
-					map.put(name, value);
+					this.map.put(name, value);
 				}
 				catch (IllegalAccessException ex) {
 					// Just leave this field and continue
 				}
 			}
 		}
-	} // constructor
+	}
 
 	/**
-	 * Return the number of constants exposed
+	 * Return the number of constants exposed.
 	 * @return int the number of constants exposed
 	 */
 	public int getSize() {
 		return this.map.size();
 	}
 
-
-	//public String getKeys() {
-	//	throw new UnsupportedOperationException();
-	//}
-
 	/**
-	 * Return a constant value cast to an int
+	 * Return a constant value cast to a Number.
 	 * @param code name of the field
-	 * @return int int value if successfuly
+	 * @return long value if successful
 	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found or
-	 * if the type wasn't compatible with int
+	 * if the type wasn't compatible with Number
 	 */
-	public int asInt(String code) throws ConstantException {
+	public Number asNumber(String code) throws ConstantException {
 		Object o = asObject(code);
-		if (!(o instanceof Integer))
-			throw new ConstantException(code, this.clazz, "not an int");
-		return ((Integer) o).intValue();
+		if (!(o instanceof Number))
+			throw new ConstantException(this.clazz, code, "not a Number");
+		return (Number) o;
 	}
 
 	/**
-	 * Return a constant value as a String
+	 * Return a constant value as a String.
 	 * @param code name of the field
 	 * @return String string value if successful.
 	 * Works even if it's not a string (invokes toString()).
@@ -99,8 +96,7 @@ public class Constants {
 	 * @throws ConstantException if the field name wasn't found
 	 */
 	public String asString(String code) throws ConstantException {
-		Object o = asObject(code);
-		return o.toString();
+		return asObject(code).toString();
 	}
 
 	/**
@@ -113,8 +109,44 @@ public class Constants {
 		code = code.toUpperCase();
 		Object val = this.map.get(code);
 		if (val == null)
-			throw new ConstantException(code, this.clazz, "not found");
+			throw new ConstantException(this.clazz, code, "not found");
 		return val;
+	}
+
+	/**
+	 * Return all values of the given group of constants.
+	 * @param namePrefix prefix of the constant names to search
+	 * @return the set of values
+	 */
+	public Set getValues(String namePrefix) {
+		namePrefix = namePrefix.toUpperCase();
+		Set values = new HashSet();
+		for (Iterator it = this.map.keySet().iterator(); it.hasNext();) {
+			String code = (String) it.next();
+			if (code.startsWith(namePrefix)) {
+				values.add(this.map.get(code));
+			}
+		}
+		return values;
+	}
+
+	/**
+	 * Look up the given value within the given group of constants.
+	 * Will return the first match.
+	 * @param value constant value to look up
+	 * @param namePrefix prefix of the constant names to search
+	 * @return the name of the field
+	 * @throws ConstantException if the value wasn't found
+	 */
+	public String toCode(Object value, String namePrefix) throws ConstantException {
+		namePrefix = namePrefix.toUpperCase();
+		for (Iterator it = this.map.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String key = (String) entry.getKey();
+			if (key.startsWith(namePrefix) && entry.getValue().equals(value))
+				return key;
+		}
+		throw new ConstantException(this.clazz, namePrefix, value);
 	}
 
 }

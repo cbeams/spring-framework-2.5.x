@@ -5,12 +5,14 @@
  
 package org.springframework.util;
 
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
  * @since 28-Apr-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ConstantsTests extends TestCase {
 
@@ -18,22 +20,42 @@ public class ConstantsTests extends TestCase {
 		Constants c = new Constants(A.class);
 		assertTrue(c.getSize() == 3);
 		
-		assertTrue(c.asInt("DOG") == A.DOG);
-		assertTrue(c.asInt("dog") == A.DOG);
-		assertTrue(c.asInt("cat") == A.CAT);
+		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
+		assertEquals(c.asNumber("dog").intValue(), A.DOG);
+		assertEquals(c.asNumber("cat").intValue(), A.CAT);
+
 		try {
-			c.asInt("bogus");
+			c.asNumber("bogus");
 			fail("Can't get bogus field");
 		}
 		catch (ConstantException ex) {
 		}
+
 		assertTrue(c.asString("S1").equals(A.S1));
 		try {
-			c.asInt("S1");
+			c.asNumber("S1");
 			fail("Wrong type");
 		}
 		catch (ConstantException ex) {
 		}
+
+		assertEquals(c.toCode(new Integer(0), ""), "DOG");
+		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
+		assertEquals(c.toCode(new Integer(0), "DO"), "DOG");
+		assertEquals(c.toCode(new Integer(0), "DoG"), "DOG");
+		assertEquals(c.toCode(new Integer(66), ""), "CAT");
+		assertEquals(c.toCode(new Integer(66), "C"), "CAT");
+		assertEquals(c.toCode(new Integer(66), "ca"), "CAT");
+		assertEquals(c.toCode(new Integer(66), "cAt"), "CAT");
+		assertEquals(c.toCode("", ""), "S1");
+		assertEquals(c.toCode("", "s"), "S1");
+		assertEquals(c.toCode("", "s1"), "S1");
+
+		Set values = c.getValues("");
+		assertEquals(values.size(), c.getSize());
+		assertTrue(values.contains(new Integer(0)));
+		assertTrue(values.contains(new Integer(66)));
+		assertTrue(values.contains(""));
 	}
 	
 	
