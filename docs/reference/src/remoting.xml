@@ -180,7 +180,7 @@ public class SimpleObject {
 		</sect2>				
 	</sect1>
 	<sect1>
-		<title>Using Hessian to remotely call service via HTTP</title>
+		<title>Using Hessian or Burlap to remotely call services via HTTP</title>
 		<para>
 			Hessian offers a binary HTTP-based remoting protocol. It's created by
 			Caucho and more information about Hessian itself can be found 
@@ -304,6 +304,73 @@ public class SimpleObject {
 					have a look at the Acegi Security System for Spring, to be found at
 					<ulink url="http://acegisecurity.sourceforge.net"/>.
 				</emphasis>
+			</para>
+		</sect2>
+	</sect1>
+	
+	<sect1>
+		<title>Exposing services using HTTP invokers</title>
+		<para>
+			As opposed to Burlap and Hessian, which are both lightweight protocols using their
+			own slim serialization mechanisms, Spring Http invokers use the standard
+			Java serialization mechanism to expose services through HTTP. This has a huge
+			advantage if your arguments and return types are complex types that cannot be
+			serialized using the serialization mechanisms Hessian and Burlap use (refer to the
+			next section for more considerations when choosing a remoting technology).
+		</para>
+		<para>
+			Under the hood, Spring uses either the standard facilities provided by J2SE to
+			perform HTTP calls or Commons HttpClient. Use the latter if you need more advanced
+			and easy-to-use functionality. Refer to 
+			<ulink url="http://jakarta.apache.org/commons/httpclient">jakarta.apache.org/commons/httpclient</ulink>
+			for more info.
+		</para>
+		<sect2>
+			<title>Exposing the service object</title>
+			<para>
+				Setting up the HTTP invoker infrastructure for a service objects much resembles
+				the way you would do using Hessian or Burlap. Just as Hessian support provides
+				the <literal>HessianServiceExporter</literal>, Spring Http invoker support provides
+				the so-called <literal>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</literal>.
+				To expose the <literal>AccountService</literal> (mentioned above), the following
+				configuration needs to be in place:
+<programlisting><![CDATA[
+    <bean name="/AccountService" class="org.sprfr.remoting.httpinvoker.HttpInvokerServiceExporter">
+        <property name="service"><ref bean="accountService"/></property>
+        <property name="serviceInterface">
+            <value>example.AccountService</value>
+        </property>
+	</bean>
+]]></programlisting>
+			</para>
+		</sect2>
+		<sect2>
+			<title>Linking in the service at the client</title>
+			<para>
+				Again, linking in the service from the client much resembles the way you would
+				do it when using Hessian or Burlap. Using a proxy, Spring will be able to
+				translate your calls to HTTP POST requests to the URL pointing to the exported
+				service.
+<programlisting><![CDATA[	
+	<bean id="httpInvokerProxy" class="org.sprfr.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+		<property name="serviceUrl">
+			<value>http://remotehost:8080/AccountService</value>
+		</property>
+		<property name="serviceInterface">
+			<value>example.AccountService</value>
+		</property>
+	</bean>
+]]></programlisting>
+			</para>
+			<para>
+				As mentioned before, you can choose what HTTP client you want to use.
+				By default, the HttpInvokerProxy uses the J2SE HTTP functionality, but
+				you can also use the Commons HttpClient by setting the <literal>httpInvokerRequestExecutor</literal> property:
+<programlisting><![CDATA[
+<property name="httpInvokerRequestExecutor">
+	<bean class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor"/>
+</property>
+]]></programlisting>
 			</para>
 		</sect2>
 	</sect1>
