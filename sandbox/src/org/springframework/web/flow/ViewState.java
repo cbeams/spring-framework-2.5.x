@@ -92,7 +92,7 @@ public class ViewState extends TransitionableState {
 		return new ViewDescriptor(viewName, sessionExecution.getAttributes());
 	}
 
-	public String toString() {
-		return super.toString() + new ToStringCreator(this).append("viewName", viewName).toString();
+	protected void createToString(ToStringCreator creator) {
+		creator.append("viewName", viewName);
 	}
 }

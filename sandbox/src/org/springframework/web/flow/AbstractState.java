@@ -117,6 +117,12 @@ public abstract class AbstractState implements Serializable {
 			HttpServletRequest request, HttpServletResponse response);
 
 	public String toString() {
-		return new ToStringCreator(this).append("id", id).toString();
+		ToStringCreator creator = new ToStringCreator(this).append(id, getId());
+		createToString(creator);
+		return creator.toString();
+	}
+	
+	protected void createToString(ToStringCreator creator) {
+		
 	}
 }

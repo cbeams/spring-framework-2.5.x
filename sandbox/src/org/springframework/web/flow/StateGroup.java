@@ -22,7 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
+import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.Algorithms;
 
@@ -72,6 +72,6 @@ public class StateGroup implements Serializable {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("id", id).append("states", states).toString();
+		return "group:" + getId() + "<" + DefaultObjectStyler.call(states) + ">";
 	}
 }

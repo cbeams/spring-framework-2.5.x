@@ -21,7 +21,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
 
 /**
  * @author Keith Donald
@@ -130,6 +129,6 @@ public class StateGroups implements Serializable {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("stateGroups", stateGroups).toString();
+		return stateGroups.toString();
 	}
 }

@@ -364,6 +364,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.flowSessionExecutionListeners.add(listener);
 	}
 
+	public void removeFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+		this.flowSessionExecutionListeners.remove(listener);
+	}
+
+	public int getFlowSessionExecutionListenerCount() {
+		return flowSessionExecutionListeners.getListenerCount();
+	}
+
 	public boolean isFlowSessionExecutionListenerAdded(Class listenerClass) {
 		Assert.isTrue(FlowSessionExecutionListener.class.isAssignableFrom(listenerClass),
 				"Listener class must be a FlowSessionExecutionListener");
@@ -372,14 +380,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	public boolean isFlowSessionExecutionListenerAdded(FlowSessionExecutionListener listener) {
 		return this.flowSessionExecutionListeners.isAdded(listener);
-	}
-
-	public void removeFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
-		this.flowSessionExecutionListeners.remove(listener);
-	}
-
-	public int getFlowSessionExecutionListenerCount() {
-		return flowSessionExecutionListeners.getListenerCount();
 	}
 
 	public ProcessTemplate getFlowSessionExecutionListenerIterator() {
@@ -1878,6 +1878,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return onFinish(save(saveActionStateIdPrefix));
 	}
 
+	/**
+	 * @param resetStateIdPrefix
+	 * @return
+	 */
 	public Transition onReset(String resetStateIdPrefix) {
 		return onEvent(getResetEventId(), resetStateIdPrefix);
 	}
@@ -2088,8 +2092,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("id", id).append("startState", startState).append("stateGroups",
-				stateGroups).toString();
+		return new ToStringCreator(this).append("id", id).append("startState", startState)
+				.append("states", stateGroups).toString();
 	}
 
 }
