@@ -5,13 +5,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.tiles.ComponentContext;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -30,10 +27,8 @@ import org.springframework.web.servlet.view.tiles.ComponentControllerSupport;
  */
 public class NewsFeedController extends ComponentControllerSupport {
 
-	private Log log = LogFactory.getLog(NewsFeedController.class);
-	
-	protected void doPerform(ComponentContext componentContext, HttpServletRequest request,
-													 HttpServletResponse response) {
+	protected void doPerform(
+			ComponentContext componentContext, HttpServletRequest request, HttpServletResponse response) {
 
 		ApplicationContext ctx = getApplicationContext();
 		NewsFeedConfigurer configurer = (NewsFeedConfigurer) ctx.getBean("feedConfigurer");

@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**

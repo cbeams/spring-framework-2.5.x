@@ -1,11 +1,6 @@
-
- 
 package org.springframework.benchmark;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.load.AbortTestException;
 import org.springframework.load.AbstractTest;
 import org.springframework.load.TestFailedException;
@@ -15,7 +10,6 @@ import org.springframework.load.TestFailedException;
  * @author Rod Johnson
  */
 public abstract class AbstractBeansTest extends AbstractTest {
-	
 
 	protected BeanFactory beanFactory;
 	

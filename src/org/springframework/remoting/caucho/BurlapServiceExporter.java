@@ -56,14 +56,14 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 
 	public void afterPropertiesSet() throws Exception {
 		try {
-			// try Burlap 3.x (with service interface argument)
+			// Try Burlap 3.x (with service interface argument).
 			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
 			checkService();
 			checkServiceInterface();
 			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
 		}
 		catch (NoSuchMethodException ex) {
-			// fall back to Burlap 2.x (without service interface argument)
+			// Fall back to Burlap 2.x (without service interface argument).
 			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class});
 			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
 		}
@@ -90,6 +90,7 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 			throw ex;
 		}
 		catch (Throwable ex) {
+			// Should never happen: There are no Throwables other than Exceptions and Errors.
 		  throw new ServletException(ex);
 		}
 	}
