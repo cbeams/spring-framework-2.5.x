@@ -20,8 +20,10 @@ import org.springframework.validation.PropertyValidator;
 import org.springframework.validation.ValidationResultsCollector;
 
 /**
- * Encapsulates the algorithm for validated a bean, where property validators
- * are stored within the bean's <code>BeanInfo</code> metadata objects.
+ * Encapsulates the algorithm for validating a bean, where property validators
+ * are stored within the bean's <code>BeanInfo</code> metadata. This
+ * implementation also traverses nested beans and invokes any of their
+ * PropertyValidators as well.
  * 
  * @author Keith Donald
  */

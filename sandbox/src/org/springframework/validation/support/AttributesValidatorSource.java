@@ -23,6 +23,9 @@ import org.springframework.validation.BeanValidatorSource;
 import org.springframework.validation.PropertyValidationRule;
 
 /**
+ * A source that loads validators from attributes metadata declared in source
+ * markup. Currently this implementation uses commons-attributes.
+ * 
  * @author Seth Ladd
  * @author Keith Donald
  */
@@ -62,9 +65,11 @@ public class AttributesValidatorSource implements BeanValidatorSource {
                                 .debug("Found property validator via attributes '"
                                         + propValidator + "'");
                     }
-                    property.setValue(BeanValidatorConstants.VALIDATED_PROPERTY,
+                    property.setValue(
+                            BeanValidatorConstants.VALIDATED_PROPERTY,
                             Boolean.TRUE);
-                    property.setValue(BeanValidatorConstants.VALIDATOR_PROPERTY,
+                    property.setValue(
+                            BeanValidatorConstants.VALIDATOR_PROPERTY,
                             propValidator);
                     if (!validated) {
                         validated = true;

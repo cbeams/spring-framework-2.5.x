@@ -8,6 +8,9 @@ import org.springframework.util.Assert;
 import org.springframework.validation.BeanValidationService;
 
 /**
+ * A convenience static service locator for accessing a global
+ * BeanValidationService instance.
+ * 
  * @author Keith Donald
  */
 public class ValidationServiceSingletonLocator {

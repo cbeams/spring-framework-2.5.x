@@ -5,6 +5,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.validation.rules.MaxLength;
 import org.springframework.validation.rules.Required;
 import org.springframework.validation.support.AttributesValidatorSource;
@@ -18,28 +19,26 @@ import org.springframework.validation.support.ValidationResultsCollectorAdapter;
 public class BeanValidatorTestSuite extends TestCase {
     AttributesValidatorSource validatorSource;
     BeanValidationService validationService;
-    
+
     public void testBasicValidationWorkflow() {
-        Pet pet = new Pet();
-        pet.setName(new Name());
-        pet.setAge(0);
-        ValidationResultsCollectorAdapter results =
-            new ValidationResultsCollectorAdapter();
-        validationService.validate(pet, results);
+        ValidationResultsCollectorAdapter results = new ValidationResultsCollectorAdapter();
+        validationService.validate(getPet(), results);
     }
 
     public void testErrorsValidationWorkflow() {
-        Pet pet = new Pet();
-        pet.setName(new Name());
-        pet.setAge(0);
+        Pet pet = getPet();
         BindException b = new BindException(pet, "pet");
         validationService.validate(pet, b);
     }
-    
-    public void testValidatorBuilder() {
+
+    public Pet getPet() {
         Pet pet = new Pet();
         pet.setName(new Name());
         pet.setAge(0);
+        return pet;
+    }
+    
+    public void testValidatorBuilder() {
         BeanValidationService service = new DefaultBeanValidationService();
         BeanValidatorBuilder builder = new BeanValidatorBuilder(Pet.class);
 
@@ -47,12 +46,20 @@ public class BeanValidatorTestSuite extends TestCase {
         Set toyRules = new HashSet();
         toyRules.add(new Required());
         toyRules.add(new MaxLength(255));
-        
+
         builder.setPropertyValidator("favoriteToy", toyRules);
-        ValidationResultsCollectorAdapter results =
-            new ValidationResultsCollectorAdapter();
-        System.out.println("validating");
-        service.validate(pet, results);
+        ValidationResultsCollectorAdapter results = new ValidationResultsCollectorAdapter();
+        service.validate(getPet(), results);
+    }
+
+    public void testValidatorBuilderContext() {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+                "org/springframework/validation/application-context.xml");
+        BeanValidatorBuilder builder = (BeanValidatorBuilder)context
+                .getBean("beanValidatorBuilder");
+        BeanValidationService service = new DefaultBeanValidationService();
+        ValidationResultsCollectorAdapter results = new ValidationResultsCollectorAdapter();
+        service.validate(getPet(), results);
     }
 
     protected void setUp() {

@@ -2,26 +2,25 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	<bean id="validatorBuilder" class="org.springframework.validation.support.ValidatorBuilder"/>
+	<bean id="beanValidatorBuilder" class="org.springframework.validation.support.BeanValidatorBuilder">
 		<constructor-arg index="0">
 			<description>The validated bean type</description>
 			<value>org.springframework.validation.Pet</value>
 		</constructor-arg>
-		<map>
-			<entry key="name.lastName">
-				<value><bean class="org.springframework.validation.rules.Required"/></value>
-			</entry>
-			<entry key="favoriteToy">
-				<value>
+		<property name="propertyValidators">
+			<map>
+				<entry key="name.lastName">
+					<bean class="org.springframework.validation.rules.Required"/>
+				</entry>
+				<entry key="favoriteToy">
 					<set>
 						<bean class="org.springframework.validation.rules.Required"/>
 						<bean class="org.springframework.validation.rules.MaxLength">
-							<constructor-arg>25</constructor-arg>							
+							<constructor-arg index="0"><value>25</value></constructor-arg>							
 						</bean>
 					</set>
-				</value>
-			</entry>
-		</map>
+				</entry>
+			</map>
+		</property>
 	</bean>
-	
 </beans>

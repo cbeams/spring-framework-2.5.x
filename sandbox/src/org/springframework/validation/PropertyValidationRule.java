@@ -9,7 +9,7 @@ import org.springframework.context.MessageSourceResolvable;
 /**
  * A single property validation rule that can be declaratively associated with
  * one or more PropertyValidators. This interface should be implemented by all
- * rules, be them backed programatically or by a rules engine.
+ * rules.
  * 
  * @author Keith Donald
  */
