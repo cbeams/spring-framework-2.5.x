@@ -5,12 +5,12 @@
   	<title>Introduction</title>
   	<para>
   		Spring features integration classes for scheduling support. Currently, Spring
-  		supports the Timer, built in the JDK since 1.3 and the Quartz Scheduler
+  		supports the Timer, part of the JDK since 1.3, and the Quartz Scheduler
   		(<ulink url="http://www.quartzscheduler.org"/>). Both schedulers are set up
   		using a FactoryBean with optional references to Timers or Triggers, respectively.
   		Furthermore, a convenience class for both the Quartz Scheduler and the Timer is
-  		available that allows you to invoke a method an a target object that you can
-			specify yourself (analogous to normal <literal>MethodInvokingFactoryBeans</literal>).
+  		available that allows you to invoke a method of an existing target object
+			(analogous to normal <literal>MethodInvokingFactoryBeans</literal>).
   	</para>
   </sect1>
   
@@ -46,8 +46,8 @@
 			
 			The job detail bean has all information it needs to run the job (ExampleJob).
 			The timeout is specified as the job data map. The job data map is
-			available through the JobExecutionContext (passed to you at execution time), but
-			the <literal>JobDetailBean</literal> also maps the properties from the 
+			available through the JobExecutionContext (passed to you at execution time),
+			but the <literal>JobDetailBean</literal> also maps the properties from the
 			job data map to properties of the actual job. So in this case, if the ExampleJob contains
 			a property named <literal>timeout</literal>, the JobDetailBean will automatically apply it:
 			<programlisting><![CDATA[
@@ -67,19 +67,17 @@ public class ExampleJob extends QuartzJobBean {
   
   protected void executeInternal(JobExecutionContext ctx)
   throws JobExecutionException {
-  
       // do the actual work
-      
   }
 }
 			]]></programlisting>
 			
-			All additional settings from the job detail bean are by the way available to you as well.			
+			All additional settings from the job detail bean are of course available to you as well.
 		</para>
 		<para>
 			<emphasis>Note: Using the <literal>name</literal> and <literal>group</literal> properties,
-			you can modify in which group the job runs and using what name. By default the
-			name of the job equals the bean name of the job detail bean (in the example above this is
+			you can modify the name and the group of the job, respectively. By default the name of
+			the job equals the bean name of the job detail bean (in the example above, this is
 			<literal>exampleJob</literal>).</emphasis>
 		</para>
 			
@@ -87,7 +85,7 @@ public class ExampleJob extends QuartzJobBean {
 	<sect2>
 		<title>Using the MethodInvokingJobDetailFactoryBean</title>
 		<para>
-			Often times, you just need to invoke a method on a specific object. Using the
+			Often you just need to invoke a method on a specific object. Using the
 			<literal>MethodInvokingJobDetailFactoryBean</literal> you can do exactly this:
 			<programlisting><![CDATA[
 <bean id="methodInvokingJobDetail" 
@@ -139,15 +137,15 @@ public class BusinessObject {
 		<title>Wiring up jobs using triggers and the SchedulerFactoryBean</title>
 		<para>
 			We've created job details, jobs and we've reviewed the convenience bean
-			that allows to you invoke a method on a specific object. Of course we still need
+			that allows to you invoke a method on a specific object. Of course, we still need
 			to schedule the jobs themselves. This is done using triggers and a 
 			<literal>SchedulerFactoryBean</literal>. Several triggers are available
-			within Quartz. Spring offers two subclassed triggers, the <literal>CronTriggerBean</literal>
-			and the <literal>SimpleTriggerBean</literal>.
+			within Quartz. Spring offers two subclassed triggers with convenient defaults:
+			<literal>CronTriggerBean</literal> and <literal>SimpleTriggerBean</literal>.
 		</para>
 		<para>
 			Triggers need to be scheduled. Spring offers a SchedulerFactoryBean exposing properties
-			to set the triggers. The SchedulerFactoryBean schedules the actual triggers.
+			to set the triggers. SchedulerFactoryBean schedules the actual jobs with those triggers.
 		</para>
 		<para>
 			A couple of examples:
@@ -172,13 +170,13 @@ public class BusinessObject {
     <ref bean="exampleJob"/>
   </property>
   <property name="cronExpression">
-    <!-- run every morning at 6 am -->
-    <value>0 0 6 * * 1</value>
+    <!-- run every morning at 6 AM -->
+    <value>0 0 6 * * ?</value>
   </property>
 </bean>
 			]]></programlisting>
-			Ok, now we've set up two triggers, one running every 50 seconds with a starting delay of
-			10 seconds and one every morning at 6. To finalize everything we need to set up the 
+			OK, now we've set up two triggers, one running every 50 seconds with a starting delay of
+			10 seconds and one every morning at 6 AM. To finalize everything, we need to set up the
 			SchedulerFactoryBean:
 			<programlisting><![CDATA[
 <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
@@ -191,7 +189,7 @@ public class BusinessObject {
 </bean>
 			]]></programlisting>
 			More properties are available for the SchedulerFactoryBean for you to set, such as the
-			Calendars used by the job details, properties to customize Quartz with, etcetera. Have a look
+			calendars used by the job details, properties to customize Quartz with, etc. Have a look
 			at the JavaDoc (<ulink url="http://www.springframework.org/docs/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html"/>)
 			for more information.
 		</para>
@@ -201,8 +199,8 @@ public class BusinessObject {
   <sect1>
   	<title>Using JDK Timer support</title>
   	<para>
-  		The other way to schedule jobs is using the JDK Timer objects. More information
-  		about Timers themselves can be found at
+  		The other way to schedule jobs in Spring is using JDK Timer objects.
+  		More information about Timers themselves can be found at
   		<ulink url="http://java.sun.com/docs/books/tutorial/essential/threads/timer.html"/>.
   		The concepts discussed above also apply to the Timer support. You can create
   		custom timers or use the timer that invokes methods. Wiring timers has to be done
@@ -222,9 +220,7 @@ public class CheckEmailAddresses extends TimerTask {
   }
   
   public void run() {
-  
     // iterate over all email addresses and archive them
-    
   }
 }
 			]]></programlisting>
