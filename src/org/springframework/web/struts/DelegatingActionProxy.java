@@ -14,12 +14,12 @@ import org.apache.struts.action.ActionServlet;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Proxy for a Spring-managed Struts 1.1 Action that's defined
- * in ContextLoaderPlugIn's WebApplicationContext.
+ * Proxy for a Spring-managed Struts 1.1 Action that's defined in
+ * ContextLoaderPlugIn's WebApplicationContext.
  *
- * <p>The proxy is defined in the Struts config file,
- * specifying this class as action class. It will delegateAction to
- * a Struts Action bean in the ContextLoaderPlugIn context.
+ * <p>The proxy is defined in the Struts config file, specifying this
+ * class as action class. It will delegate to a Struts Action bean
+ * in the ContextLoaderPlugIn context.
  *
  * <p><code>
  * &lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;
@@ -64,8 +64,6 @@ public class DelegatingActionProxy extends Action {
 
 	private WebApplicationContext webApplicationContext;
 
-	private Action delegateAction;
-
 	/**
 	 * Initialize the WebApplicationContext for this Action.
 	 * @see #initWebApplicationContext
@@ -78,8 +76,8 @@ public class DelegatingActionProxy extends Action {
 	}
 
 	/**
-	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the ServletContext,
-	 * containing the Struts Action beans to delegateAction to.
+	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the
+	 * ServletContext, containing the Struts Action beans to delegate to.
 	 * @param actionServlet the associated ActionServlet
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
@@ -105,39 +103,32 @@ public class DelegatingActionProxy extends Action {
 	}
 
 	/**
-	 * Pass the execute call on to the Spring-managed delegateAction Action.
+	 * Pass the execute call on to the Spring-managed delegate Action.
 	 * @see #getDelegateAction
 	 */
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 															 HttpServletResponse response) throws Exception {
-		return getDelegateAction(mapping).execute(mapping, form, request, response);
+		Action delegateAction = getDelegateAction(mapping);
+		return delegateAction.execute(mapping, form, request, response);
 	}
 
 	/**
-	 * Determine a bean name from the given ActionMapping and
-	 * look up the corresponding bean in the WebApplicationContext.
+	 * Return the delegate Action for the given mapping.
+	 * <p>The default implementation determines a bean name from the
+	 * given ActionMapping and looks up the corresponding bean in the
+	 * WebApplicationContext.
 	 * @param mapping the Struts ActionMapping
-	 * @return the delegateAction Action
+	 * @return the delegate Action
 	 * @see #determineActionBeanName
 	 */
 	protected Action getDelegateAction(ActionMapping mapping) {
-		synchronized (this) {
-			if (this.delegateAction == null) {
-				String beanName = determineActionBeanName(mapping);
-				this.delegateAction = (Action) this.webApplicationContext.getBean(beanName, Action.class);
-				if (logger.isDebugEnabled()) {
-					logger.debug("DelegatingActionProxy with mapping path '" + mapping.getPath() +
-											 "' and module prefix '" + mapping.getModuleConfig().getPrefix() +
-											 "' delegating to Spring bean with name [" + beanName + "]");
-				}
-			}
-		}
-		return this.delegateAction;
+		String beanName = determineActionBeanName(mapping);
+		return (Action) this.webApplicationContext.getBean(beanName, Action.class);
 	}
 
 	/**
-	 * Determine the name of the Action bean, to be looked up in the
-	 * WebApplicationContext.
+	 * Determine the name of the Action bean, to be looked up in
+	 * the WebApplicationContext.
 	 * <p>The default implementation takes the mapping path and
 	 * prepends the module prefix, if any.
 	 * @param mapping the Struts ActionMapping
@@ -147,12 +138,13 @@ public class DelegatingActionProxy extends Action {
 	 */
 	protected String determineActionBeanName(ActionMapping mapping) {
 		String prefix = mapping.getModuleConfig().getPrefix();
-		if (prefix != null && prefix.length() > 0) {
-			return prefix + mapping.getPath();
+		String path = mapping.getPath();
+		String beanName = (prefix != null && prefix.length() > 0) ? prefix + path : path;
+		if (logger.isDebugEnabled()) {
+			logger.debug("DelegatingActionProxy with mapping path '" + path + "' and module prefix '" +
+			             prefix + "' delegating to Spring bean with name [" + beanName + "]");
 		}
-		else {
-			return mapping.getPath();
-		}
+		return beanName;
 	}
 
 }
