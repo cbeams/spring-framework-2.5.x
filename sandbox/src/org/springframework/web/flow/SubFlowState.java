@@ -74,7 +74,17 @@ public class SubFlowState extends TransitionableState {
 
 	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response) {
-		Flow subFlow = flow.getFlowDao().getFlow(subFlowId);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
+		}
+		Flow subFlow = flow.getFlowDao().getFlow(this.subFlowId);
+		Assert.notNull(subFlow, "The subflow is required");
+		if (logger.isInfoEnabled()) {
+			if (!subFlow.getId().equals(this.subFlowId)) {
+				logger.info("The subflow definition exported in the context under ID '" + this.subFlowId
+						+ "' has ID '" + subFlow.getId() + "' -- these ID values are NOT equal; is this OK?");
+			}
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + flow.getId() + "'");
 		}
