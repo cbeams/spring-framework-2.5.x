@@ -53,23 +53,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class HibernateTemplateTests extends TestCase {
 
-	public void testExecuteWithNewSession() {
+	public void testExecuteWithNewSession() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
-		try {
-			sf.openSession();
-			sfControl.setReturnValue(session, 1);
-			session.getSessionFactory();
-			sessionControl.setReturnValue(sf, 1);
-			session.flush();
-			sessionControl.setVoidCallable(1);
-			session.close();
-			sessionControl.setReturnValue(null, 1);
-		}
-		catch (HibernateException ex) {
-		}
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -88,23 +84,19 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testExecuteWithNewSessionAndFlushNever() {
+	public void testExecuteWithNewSessionAndFlushNever() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
-		try {
-			sf.openSession();
-			sfControl.setReturnValue(session, 1);
-			session.getSessionFactory();
-			sessionControl.setReturnValue(sf, 1);
-			session.setFlushMode(FlushMode.NEVER);
-			sessionControl.setVoidCallable(1);
-			session.close();
-			sessionControl.setReturnValue(null, 1);
-		}
-		catch (HibernateException ex) {
-		}
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -143,21 +135,29 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setAllowCreate(false);
+
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
-		final List l = new ArrayList();
-		l.add("test");
-		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return l;
-			}
-		});
-		assertTrue("Correct result list", result == l);
-		TransactionSynchronizationManager.unbindResource(sf);
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -167,6 +167,8 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
@@ -175,16 +177,22 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setFlushModeName("FLUSH_EAGER");
 		ht.setAllowCreate(false);
+
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
-		final List l = new ArrayList();
-		l.add("test");
-		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return l;
-			}
-		});
-		assertTrue("Correct result list", result == l);
-		TransactionSynchronizationManager.unbindResource(sf);
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
 		sfControl.verify();
 		sessionControl.verify();
 	}

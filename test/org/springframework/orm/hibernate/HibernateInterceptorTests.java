@@ -103,6 +103,8 @@ public class HibernateInterceptorTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -128,6 +130,8 @@ public class HibernateInterceptorTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
