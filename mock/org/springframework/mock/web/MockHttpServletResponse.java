@@ -104,10 +104,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return characterEncoding;
 	}
 
-	public byte[] getContent() {
-		return content.toByteArray();
-	}
-
 	public ServletOutputStream getOutputStream() {
 		return this.outputStream;
 	}
@@ -119,6 +115,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			this.writer = new PrintWriter(targetWriter);
 		}
 		return writer;
+	}
+
+	public byte[] getContentAsByteArray() {
+		return this.content.toByteArray();
+	}
+
+	public String getContentAsString() throws UnsupportedEncodingException {
+		return (this.characterEncoding != null) ?
+				this.content.toString(this.characterEncoding) : this.content.toString();
 	}
 
 	public void setContentLength(int contentLength) {
