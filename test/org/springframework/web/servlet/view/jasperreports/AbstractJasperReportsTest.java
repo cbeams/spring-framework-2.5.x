@@ -21,9 +21,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
  */
 public abstract class AbstractJasperReportsTest extends TestCase {
 
-	private static final String COMPILED_REPORT = "./sandbox/test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jasper";
+	private static final String COMPILED_REPORT = "./test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jasper";
 
-	private static final String UNCOMPILED_REPORT = "./sandbox/test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jrxml";
+	private static final String UNCOMPILED_REPORT = "./test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jrxml";
 
 	private MockHttpServletRequest request;
 

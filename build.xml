@@ -561,6 +561,8 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
+			<jvmarg line="-Djava.awt.headless=true"/>
+			
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -599,6 +601,8 @@
 
 		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
 
+			<jvmarg line="-Djava.awt.headless=true"/>
+			
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -661,6 +665,8 @@
 
 		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
+			<jvmarg line="-Djava.awt.headless=true"/>
+			
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>

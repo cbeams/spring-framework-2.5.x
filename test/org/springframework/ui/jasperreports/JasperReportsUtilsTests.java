@@ -33,9 +33,9 @@ import org.springframework.web.servlet.view.jasperreports.MyBean;
  */
 public class JasperReportsUtilsTests extends TestCase {
 
-	private static final String UNCOMPILED_REPORT = "./sandbox/test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jrxml";
+	private static final String UNCOMPILED_REPORT = "./test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jrxml";
 	
-	private static final String COMPILED_REPORT = "./sandbox/test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jasper";
+	private static final String COMPILED_REPORT = "./test/org/springframework/web/servlet/view/jasperreports/DataSourceReport.jasper";
 	
 	public void testCompileReportWithStringPath()  throws Exception {
 		JasperReport rpt = JasperReportsUtils.compileReport(UNCOMPILED_REPORT);
