@@ -35,8 +35,8 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.Validator;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.Validator;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -394,6 +394,36 @@ public class FormControllerTestSuite extends TestCase {
 		assertEquals("listobj", bean.getList().get(2));
 		assertEquals("mapobj1", bean.getMap().get("key1"));
 		assertEquals("mapobj2", bean.getMap().get("key3"));
+	}
+
+	public void testFormChangeRequest() throws Exception {
+		String formView = "fred";
+		String successView = "tony";
+
+		TestController mc = new TestController() {
+			protected boolean isFormChangeRequest(HttpServletRequest request) {
+				return (request.getParameter("formChange") != null);
+			}
+		};
+		mc.setFormView(formView);
+		mc.setSuccessView(successView);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo.html");
+		request.addParameter("name", "Rod");
+		request.addParameter("age", "99");
+		request.addParameter("formChange", "true");
+		HttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
+		mv.getViewName().equals(formView));
+
+		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
+		assertTrue("model is non null", person != null);
+		assertTrue("bean name bound ok", person.getName().equals("Rod"));
+		assertTrue("bean age is 99", person.getAge() == 99);
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + mc.getCommandName());
+		assertTrue("errors returned in model", errors != null);
+		assertTrue("No errors", errors.getErrorCount() == 0);
 	}
 
 

@@ -263,24 +263,27 @@ public abstract class BaseCommandController extends AbstractController {
 			throw new IllegalStateException("Cannot create command without commandClass being set - " +
 																			"either set commandClass or override formBackingObject");
 		}
-		logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
+		}
 		return this.commandClass.newInstance();
 	}
 
 	/**
 	 * Check if the given command object is a valid for this controller,
 	 * i.e. its command class.
-	 * @param command command object to check
+	 * @param command the command object to check
 	 * @return if the command object is valid for this controller
 	 */
 	protected final boolean checkCommand(Object command) {
 		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
+	
 
 	/**
 	 * Bind the parameters of the given request to the given command object.
 	 * @param request current HTTP request
-	 * @param command command to bind onto
+	 * @param command the command to bind onto
 	 * @return the ServletRequestDataBinder instance for additional custom validation
 	 * @throws Exception in case of invalid state or arguments
 	 */
@@ -289,7 +292,7 @@ public abstract class BaseCommandController extends AbstractController {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		onBind(request, command, binder.getErrors());
-		if (isValidateOnBinding() && this.validators != null) {
+		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
 			for (int i = 0; i < this.validators.length; i++) {
 				ValidationUtils.invokeValidator(this.validators[i], command, binder.getErrors());
 			}
@@ -305,8 +308,8 @@ public abstract class BaseCommandController extends AbstractController {
 	 * <p>Default implementation creates a standard ServletRequestDataBinder,
 	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
 	 * Note that initBinder will not be invoked if you override this method!
-	 * @param command command to bind onto
-	 * @param request current request
+	 * @param request current HTTP request
+	 * @param command the command to bind onto
 	 * @return the new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
@@ -331,7 +334,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
 	 * <p>Default implementation is empty.
-	 * @param request current request
+	 * @param request current HTTP request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #createBinder
@@ -347,7 +350,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Called on each submit, after standard binding but before validation.
 	 * <p>Default implementation delegates to onBind(request, command).
 	 * @param request current HTTP request
-	 * @param command command object to perform further binding on
+	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
 	 * custom registration of binding errors
 	 * @throws Exception in case of invalid state or arguments
@@ -365,11 +368,21 @@ public abstract class BaseCommandController extends AbstractController {
 	 * all parameters, after standard binding but before validation.
 	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
-	 * @param command command object to perform further binding on
+	 * @param command the command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #onBind(HttpServletRequest, Object, BindException)
 	 */
 	protected void onBind(HttpServletRequest request, Object command) throws Exception {
+	}
+
+	/**
+	 * Return whether to suppress validation for the given request.
+	 * Default implementations always returns false.
+	 * @param request current HTTP request
+	 * @return whether to suppress validation for the given request
+	 */
+	protected boolean suppressValidation(HttpServletRequest request) {
+		return false;
 	}
 
 	/**
@@ -378,7 +391,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * but before error evaluation.
 	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
-	 * @param command command object, still allowing for further binding
+	 * @param command the command object, still allowing for further binding
 	 * @param errors validation errors holder, allowing for additional
 	 * custom validation
 	 * @throws Exception in case of invalid state or arguments
