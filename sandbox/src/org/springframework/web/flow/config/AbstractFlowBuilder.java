@@ -46,7 +46,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
 
-	public Flow getFlow() {
+	public Flow getResult() {
 		return flow;
 	}
 
@@ -54,24 +54,19 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		this.flow = flow;
 	}
 
-	public final void buildStates() {
-		setFlow(createFlow());
-		doBuildStates();
-	}
-
-	protected Flow createFlow() {
-		return new Flow(flowId());
+	public void createFlow() {
+		setFlow(new Flow(flowId()));
 	}
 
 	protected abstract String flowId();
 
-	protected abstract void doBuildStates();
+	public abstract void buildStates();
 
 	public void buildExecutionListeners() {
 		Iterator it = flowExecutionListeners.iterator();
 		while (it.hasNext()) {
 			FlowExecutionListener listener = (FlowExecutionListener)it.next();
-			getFlow().addFlowExecutionListener(listener);
+			getResult().addFlowExecutionListener(listener);
 		}
 	}
 

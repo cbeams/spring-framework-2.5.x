@@ -74,7 +74,7 @@ public class FlowTests extends TestCase {
 			return "test.masterFlow";
 		}
 
-		protected void doBuildStates() {
+		public void buildStates() {
 			addGetState(PERSONS_LIST);
 			addViewState(PERSONS_LIST, onSubmit(edit(PERSON_DETAILS)));
 			addSubFlowState(edit(PERSON_DETAILS), edit(PERSON_DETAILS), null, get(PERSONS_LIST));
@@ -88,7 +88,7 @@ public class FlowTests extends TestCase {
 			return "test.detailFlow";
 		}
 
-		protected void doBuildStates() {
+		public void buildStates() {
 			addGetState(PERSON_DETAILS);
 			addViewState(PERSON_DETAILS);
 			addBindAndValidateState(PERSON_DETAILS);
@@ -101,8 +101,8 @@ public class FlowTests extends TestCase {
 		protected String flowId() {
 			return "test.detailFlow";
 		}
-
-		protected void doBuildStates() {
+		
+		public void buildStates() {
 			addGetState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
 			addViewState(PERSON_DETAILS);
 			addBindAndValidateState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
@@ -122,7 +122,7 @@ public class FlowTests extends TestCase {
 			return "test.detailFlow";
 		}
 
-		protected void doBuildStates() {
+		public void buildStates() {
 			addGetState(PERSON_DETAILS, noOpAction);
 			addViewState(PERSON_DETAILS);
 			addBindAndValidateState(PERSON_DETAILS, noOpAction);

@@ -26,7 +26,7 @@ public class FlowFactoryBean implements FactoryBean {
 	public Object getObject() throws Exception {
 		if (this.flow == null) {
 			new FlowAssembler(this.flowBuilder).assemble();
-			this.flow = this.flowBuilder.getFlow();
+			this.flow = this.flowBuilder.getResult();
 		}
 		return this.flow;
 	}
@@ -47,6 +47,7 @@ public class FlowFactoryBean implements FactoryBean {
 		}
 
 		public void assemble() {
+			this.builder.createFlow();
 			this.builder.buildStates();
 			this.builder.buildExecutionListeners();
 		}
