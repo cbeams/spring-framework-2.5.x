@@ -151,7 +151,6 @@ public class ResourceServlet extends HttpServletBean {
 	/**
 	 * Determine the URL of the target resource and include it.
 	 * @see #determineResourceUrl
-	 * @see #doInclude
 	 */
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {

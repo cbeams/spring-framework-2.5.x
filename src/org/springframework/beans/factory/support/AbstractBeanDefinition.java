@@ -25,7 +25,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * functionality from RootBeanDefinition and ChildBeanDefinition.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.12 2004-03-19 17:45:36 jhoeller Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.13 2004-04-28 07:41:26 jhoeller Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -39,7 +39,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private boolean lazyInit = false;
 
-
 	/**
 	 * Create a new bean definition.
 	 * @param pvs the PropertyValues to be applied to a new instance of the bean
@@ -48,6 +47,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		this.propertyValues = (pvs != null) ? pvs : new MutablePropertyValues();
 	}
 
+	/**
+	 * Return the PropertyValues to be applied to a new instance of the bean.
+	 */
 	public MutablePropertyValues getPropertyValues() {
 		return propertyValues;
 	}
@@ -68,6 +70,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		this.resourceDescription = resourceDescription;
 	}
 
+	/**
+	 * Return a description of the resource that this bean definition
+	 * came from.
+	 */
 	public String getResourceDescription() {
 		return resourceDescription;
 	}

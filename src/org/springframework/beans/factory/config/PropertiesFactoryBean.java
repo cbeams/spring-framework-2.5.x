@@ -85,7 +85,8 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 	}
 
 	/**
-	 * @deprecated in favor of {@link #setFileEncoding setFileEncoding}
+	 * @deprecated in favor of setFileEncoding
+	 * @see #setFileEncoding
 	 */
 	public void setCharset(String charset) {
 		this.fileEncoding = charset;
