@@ -44,7 +44,7 @@
 	</bean>
 	-->
 	
-	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateAction">
+	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.FormAction">
 		<property name="formObjectName"><value>query</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
 		<property name="formObjectScopeAsString"><value>flow</value></property>

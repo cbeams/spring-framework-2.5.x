@@ -5,10 +5,10 @@
 <web-flow id="person.Search" start-state="criteria.view">
 
 	<view-state id="criteria.view" view="person.Search.criteria.view">
-		<transition on="submit" to="criteria.bindAndValidate"/>
+		<transition on="submit" to="bindAndValidate"/>
 	</view-state>
 
-	<action-state id="criteria.bindAndValidate">
+	<action-state id="bindAndValidate">
 		<action bean="person.Search.criteria.bindAndValidate"/>
 		<transition on="success" to="executeQuery"/>
 		<transition on="error" to="criteria.view"/>
