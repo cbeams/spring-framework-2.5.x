@@ -33,7 +33,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 /**
  * Abstract base implementation of the HttpInvokerRequestExecutor interface.
  *
- * <p>Preimplements serialization of RemoteInvocation objects and
+ * <p>Pre-implements serialization of RemoteInvocation objects and
  * deserialization of RemoteInvocationResults objects.
  *
  * @author Juergen Hoeller
@@ -82,19 +82,53 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 	/**
 	 * Serialize the given RemoteInvocation to the given OutputStream.
+	 * <p>The default implementation gives <code>decorateOutputStream</code> a chance
+	 * to decorate the stream first (for example, for custom encryption or compression).
+	 * Creates an <code>ObjectOutputStream</code> for the final stream and calls
+	 * <code>doWriteRemoteInvocation</code> to actually write the object.
+	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param invocation the RemoteInvocation object
 	 * @param os the OutputStream to write to
 	 * @throws IOException if thrown by I/O methods
+	 * @see #decorateOutputStream
+	 * @see #doWriteRemoteInvocation
 	 */
 	protected void writeRemoteInvocation(RemoteInvocation invocation, OutputStream os) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(os);
+		ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os));
 		try {
-			oos.writeObject(invocation);
+			doWriteRemoteInvocation(invocation, oos);
 			oos.flush();
 		}
 		finally {
 			oos.close();
 		}
+	}
+
+	/**
+	 * Return the OutputStream to use for writing remote invocations,
+	 * potentially decorating the given original OutputStream.
+	 * <p>The default implementation returns the given stream as-is.
+	 * Can be overridden, for example, for custom encryption or compression.
+	 * @param os the original OutputStream
+	 * @return the potentially decorated OutputStream
+	 */
+	protected OutputStream decorateOutputStream(OutputStream os) throws IOException {
+		return os;
+	}
+
+	/**
+	 * Perform the actual writing of the given invocation object to the
+	 * given ObjectOutputStream.
+	 * <p>The default implementation simply calls <code>writeObject</code>.
+	 * Can be overridden for serialization of a custom wrapper object rather
+	 * than the plain invocation, for example an encryption-aware holder.
+	 * @param invocation the RemoteInvocation object
+	 * @param oos the ObjectOutputStream to write to
+	 * @throws IOException if thrown by I/O methods
+	 * @see java.io.ObjectOutputStream#writeObject
+	 */
+	protected void doWriteRemoteInvocation(RemoteInvocation invocation, ObjectOutputStream oos) throws IOException {
+		oos.writeObject(invocation);
 	}
 
 
@@ -125,24 +159,42 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	}
 
 	/**
-	 * Deserialize a RemoteInvocationResult from the given InputStream.
+	 * Deserialize a RemoteInvocationResult object from the given InputStream.
+	 * <p>Gives <code>decorateInputStream</code> a chance to decorate the stream
+	 * first (for example, for custom encryption or compression). Creates an
+	 * <code>ObjectInputStream</code> via <code>createObjectInputStream</code> and
+	 * calls <code>doReadRemoteInvocationResult</code> to actually read the object.
+	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param is the InputStream to read from
+	 * @param codebaseUrl the codebase URL to load classes from if not found locally
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O methods
+	 * @throws ClassNotFoundException if thrown during deserialization
+	 * @see #decorateInputStream
+	 * @see #createObjectInputStream
+	 * @see #doReadRemoteInvocationResult
 	 */
 	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
 			throws IOException, ClassNotFoundException {
-		ObjectInputStream ois = createObjectInputStream(is, codebaseUrl);
+		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
 		try {
-			Object obj = ois.readObject();
-			if (!(obj instanceof RemoteInvocationResult)) {
-				throw new IOException("Deserialized object needs to be a RemoteInvocationResult: " + obj);
-			}
-			return (RemoteInvocationResult) obj;
+			return doReadRemoteInvocationResult(ois);
 		}
 		finally {
 			ois.close();
 		}
+	}
+
+	/**
+	 * Return the InputStream to use for reading remote invocation results,
+	 * potentially decorating the given original InputStream.
+	 * <p>The default implementation returns the given stream as-is.
+	 * Can be overridden, for example, for custom encryption or compression.
+	 * @param is the original InputStream
+	 * @return the potentially decorated InputStream
+	 */
+	protected InputStream decorateInputStream(InputStream is) throws IOException {
+		return is;
 	}
 
 	/**
@@ -163,6 +215,27 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 		else {
 			return new ObjectInputStream(is);
 		}
+	}
+
+	/**
+	 * Perform the actual reading of an invocation object from the
+	 * given ObjectInputStream.
+	 * <p>The default implementation simply calls <code>readObject</code>.
+	 * Can be overridden for deserialization of a custom wrapper object rather
+	 * than the plain invocation, for example an encryption-aware holder.
+	 * @param ois the ObjectInputStream to read from
+	 * @return the RemoteInvocationResult object
+	 * @throws IOException if thrown by I/O methods
+	 * @see java.io.ObjectOutputStream#writeObject
+	 */
+	protected RemoteInvocationResult doReadRemoteInvocationResult(ObjectInputStream ois)
+			throws IOException, ClassNotFoundException {
+		Object obj = ois.readObject();
+		if (!(obj instanceof RemoteInvocationResult)) {
+			throw new IOException("Deserialized object needs to be assignable to type ["
+					+ RemoteInvocationResult.class.getName() + "]: " + obj);
+		}
+		return (RemoteInvocationResult) obj;
 	}
 
 }

@@ -19,7 +19,17 @@ package org.springframework.remoting.httpinvoker;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
@@ -42,6 +52,7 @@ public class HttpInvokerTests extends TestCase {
 
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
 		TestBean target = new TestBean("myname", 99);
+
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
@@ -60,7 +71,8 @@ public class HttpInvokerTests extends TestCase {
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
 				exporter.handleRequest(request, response);
-				return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()));
+				return readRemoteInvocationResult(
+						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
 		});
 
@@ -89,6 +101,7 @@ public class HttpInvokerTests extends TestCase {
 
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithIOException() throws Exception {
 		TestBean target = new TestBean("myname", 99);
+
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
@@ -117,8 +130,158 @@ public class HttpInvokerTests extends TestCase {
 		}
 	}
 
+	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithGzipCompression() throws Throwable {
+		TestBean target = new TestBean("myname", 99);
+
+		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
+			protected InputStream decorateInputStream(HttpServletRequest request, InputStream is) throws IOException {
+				if ("gzip".equals(request.getHeader("Compression"))) {
+					return new GZIPInputStream(is);
+				}
+				else {
+					return is;
+				}
+			}
+			protected OutputStream decorateOutputStream(
+					HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
+				if ("gzip".equals(request.getHeader("Compression"))) {
+					return new GZIPOutputStream(os);
+				}
+				else {
+					return os;
+				}
+			}
+		};
+		exporter.setServiceInterface(ITestBean.class);
+		exporter.setService(target);
+		exporter.afterPropertiesSet();
+
+		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
+		pfb.setServiceInterface(ITestBean.class);
+		pfb.setServiceUrl("http://myurl");
+
+		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			protected RemoteInvocationResult doExecuteRequest(
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
+					throws IOException, ClassNotFoundException {
+				assertEquals("http://myurl", config.getServiceUrl());
+				MockHttpServletRequest request = new MockHttpServletRequest();
+				request.addHeader("Compression", "gzip");
+				MockHttpServletResponse response = new MockHttpServletResponse();
+				request.setContent(baos.toByteArray());
+				exporter.handleRequest(request, response);
+				return readRemoteInvocationResult(
+						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
+			}
+			protected OutputStream decorateOutputStream(OutputStream os) throws IOException {
+				return new GZIPOutputStream(os);
+			}
+			protected InputStream decorateInputStream(InputStream is) throws IOException {
+				return new GZIPInputStream(is);
+			}
+		});
+
+		pfb.afterPropertiesSet();
+		ITestBean proxy = (ITestBean) pfb.getObject();
+		assertEquals("myname", proxy.getName());
+		assertEquals(99, proxy.getAge());
+		proxy.setAge(50);
+		assertEquals(50, proxy.getAge());
+
+		try {
+			proxy.exceptional(new IllegalStateException());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		try {
+			proxy.exceptional(new IllegalAccessException());
+			fail("Should have thrown IllegalAccessException");
+		}
+		catch (IllegalAccessException ex) {
+			// expected
+		}
+	}
+
+	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithWrappedInvocations() throws Throwable {
+		TestBean target = new TestBean("myname", 99);
+
+		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
+			protected RemoteInvocation doReadRemoteInvocation(ObjectInputStream ois)
+					throws IOException, ClassNotFoundException {
+				Object obj = ois.readObject();
+				if (!(obj instanceof TestRemoteInvocationWrapper)) {
+					throw new IOException("Deserialized object needs to be assignable to type [" +
+							TestRemoteInvocationWrapper.class.getName() + "]: " + obj);
+				}
+				return ((TestRemoteInvocationWrapper) obj).remoteInvocation;
+			}
+			protected void doWriteRemoteInvocationResult(RemoteInvocationResult result, ObjectOutputStream oos)
+					throws IOException {
+				oos.writeObject(new TestRemoteInvocationResultWrapper(result));
+			}
+		};
+		exporter.setServiceInterface(ITestBean.class);
+		exporter.setService(target);
+		exporter.afterPropertiesSet();
+
+		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
+		pfb.setServiceInterface(ITestBean.class);
+		pfb.setServiceUrl("http://myurl");
+
+		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			protected RemoteInvocationResult doExecuteRequest(
+					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
+					throws IOException, ClassNotFoundException {
+				assertEquals("http://myurl", config.getServiceUrl());
+				MockHttpServletRequest request = new MockHttpServletRequest();
+				MockHttpServletResponse response = new MockHttpServletResponse();
+				request.setContent(baos.toByteArray());
+				exporter.handleRequest(request, response);
+				return readRemoteInvocationResult(
+						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
+			}
+			protected void doWriteRemoteInvocation(RemoteInvocation invocation, ObjectOutputStream oos) throws IOException {
+				oos.writeObject(new TestRemoteInvocationWrapper(invocation));
+			}
+			protected RemoteInvocationResult doReadRemoteInvocationResult(ObjectInputStream ois)
+					throws IOException, ClassNotFoundException {
+				Object obj = ois.readObject();
+				if (!(obj instanceof TestRemoteInvocationResultWrapper)) {
+					throw new IOException("Deserialized object needs to be assignable to type ["
+							+ TestRemoteInvocationResultWrapper.class.getName() + "]: " + obj);
+				}
+				return ((TestRemoteInvocationResultWrapper) obj).remoteInvocationResult;
+			}
+		});
+
+		pfb.afterPropertiesSet();
+		ITestBean proxy = (ITestBean) pfb.getObject();
+		assertEquals("myname", proxy.getName());
+		assertEquals(99, proxy.getAge());
+		proxy.setAge(50);
+		assertEquals(50, proxy.getAge());
+
+		try {
+			proxy.exceptional(new IllegalStateException());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		try {
+			proxy.exceptional(new IllegalAccessException());
+			fail("Should have thrown IllegalAccessException");
+		}
+		catch (IllegalAccessException ex) {
+			// expected
+		}
+	}
+
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() throws Exception {
 		TestBean target = new TestBean("myname", 99);
+
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
@@ -165,7 +328,8 @@ public class HttpInvokerTests extends TestCase {
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
 				exporter.handleRequest(request, response);
-				return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()));
+				return readRemoteInvocationResult(
+						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
 		});
 
@@ -177,6 +341,7 @@ public class HttpInvokerTests extends TestCase {
 
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() throws Exception {
 		TestBean target = new TestBean("myname", 99);
+
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
@@ -212,7 +377,8 @@ public class HttpInvokerTests extends TestCase {
 				MockHttpServletResponse response = new MockHttpServletResponse();
 				request.setContent(baos.toByteArray());
 				exporter.handleRequest(request, response);
-				return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()));
+				return readRemoteInvocationResult(
+						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
 		});
 
@@ -261,7 +427,26 @@ public class HttpInvokerTests extends TestCase {
 		public TestRemoteInvocation(MethodInvocation methodInvocation) {
 			super(methodInvocation);
 		}
+	}
 
+
+	private static class TestRemoteInvocationWrapper implements Serializable {
+
+		private final RemoteInvocation remoteInvocation;
+
+		public TestRemoteInvocationWrapper(RemoteInvocation remoteInvocation) {
+			this.remoteInvocation = remoteInvocation;
+		}
+	}
+
+
+	private static class TestRemoteInvocationResultWrapper implements Serializable {
+
+		private final RemoteInvocationResult remoteInvocationResult;
+
+		public TestRemoteInvocationResultWrapper(RemoteInvocationResult remoteInvocationResult) {
+			this.remoteInvocationResult = remoteInvocationResult;
+		}
 	}
 
 }
