@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1.5 (February 2005)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2 RC1 (March 2005)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -94,17 +94,13 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~270 KB)
-- Contents: application context, validation, UI support, mail, JNDI, JMS, EJB, remoting, scheduling, caching
-- Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz, EHCache)
-
 * "spring-dao" (~245 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~200 KB)
-- Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
-- Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
+* "spring-context" (~150 KB)
+- Contents: application context, validation, JNDI, mail, scheduling, caching, UI support
+- Dependencies: spring-core, (spring-aop, JavaMail, Quartz, EHCache, Velocity, FreeMarker)
 
 * "spring-web" (~115 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
@@ -114,7 +110,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, JasperReports)
 
-* "spring" (~1415 KB)
+* "spring-remoting" (~170 KB)
+- Contents: remoting, EJB, JMS, JMX
+- Dependencies: spring-core, spring-aop, (spring-web, JAX-RPC, Hessian, Burlap, EJB, JMS, JMX)
+
+* "spring-orm" (~265 KB)
+- Contents: iBATIS SQL Maps support, Hibernate support, JDO support, Apache OJB
+- Dependencies: spring-dao, (spring-aop, spring-web, iBATIS SQL Maps, Hibernate, JDO, Apache OJB)
+
+* "spring" (~1525 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

@@ -207,9 +207,22 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/spring-orm.jar">
+		<jar jarfile="${dist.dir}/spring-web.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/**"/>
+				<include name="org/springframework/web/**"/>
+				<exclude name="org/springframework/web/servlet/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-webmvc.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
+				<include name="org/springframework/web/servlet/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -232,22 +245,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/spring-web.jar">
+		<jar jarfile="${dist.dir}/spring-orm.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/web/**"/>
-				<exclude name="org/springframework/web/servlet/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/spring-webmvc.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
-				<include name="org/springframework/web/servlet/**"/>
+				<include name="org/springframework/orm/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>

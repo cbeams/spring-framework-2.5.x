@@ -8,10 +8,18 @@ Changes in version 1.2 RC1 (14.3.2005)
 
 Overall
 * removed all deprecated classes and methods whose deprecation dated back to Spring <= 1.1 final
+* repackaged spring-context.jar as spring-context.jar (without remoting) and spring-remoting.jar (with EJB, JMS, JMX)
 
 Package org.springframework.aop
 * deprecated AopUtils' "getAllInterfaces(ForClass)AsList" methods in favor of "getAllInterfaces(ForClass)AsSet"
 * removed deprecated RegexpMethodPointcut class: use Perl5RegexpMethodPointcut or JdkRegexpMethodPointcut instead
+
+Package org.springframework.jdbc
+* LazyConnectionDataSourceProxy handles "toString", "equals" and "hashCode" itself (avoiding to fetch target Connection)
+* added debug logging to LazyConnectionDataSourceProxy, logging whether an operation is handled locally or in target
+
+Package org.springframework.jmx
+* added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
 
 Package org.springframework.orm
 * added "orm.hibernate3" support package for Hibernate3, mirroring the Hibernate 2.1 support in "orm.hibernate"
