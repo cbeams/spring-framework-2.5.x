@@ -391,7 +391,7 @@
 			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/lang/api/"/>
-			<link href="http://jakarta.apache.org/commons/logging/api/"/>	
+			<link href="http://jakarta.apache.org/commons/logging/api/"/>
 			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/discovery/apidocs/"/>
 			<!-- JasperReports -->
@@ -480,6 +480,7 @@
 				<include name="lib/itext/**"/>
 				<include name="lib/jakarta-commons/**"/>
 				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/jasperreports/**"/>
 				<include name="lib/j2ee/**"/>
 				<include name="lib/jdo/**"/>
 				<include name="lib/jdom/**"/>
@@ -562,7 +563,7 @@
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
-			
+
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -602,7 +603,7 @@
 		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
-			
+
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -666,7 +667,7 @@
 		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
-			
+
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -950,7 +951,7 @@
 			<classpath location="${sandbox.target.classes.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
 		    <classpath location="${target.mockclasses.dir}"/>
-			    
+
 			<!-- Need files loaded as resources -->
 			<classpath location="${sandbox.test.dir}"/>
 
@@ -967,13 +968,13 @@
 		</junit>
 
 	</target>
-	
+
 	<target name="test-sandbox-summary" depends="build-sandbox,buildtests-sandbox" description="Run tests and generate test summary">
-	
+
 			<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
 
 			<mkdir dir="${sandbox.reports.dir}"/>
-					
+
 			<property name="reports.dir" value="${sandbox.reports.dir}"/>
 			<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
 
@@ -982,7 +983,7 @@
 
 			<junit printsummary="yes" haltonfailure="no" haltonerror="no">
 				<jvmarg line="-Djava.awt.headless=true"/>
-			    
+
 				<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 				<classpath location="${sandbox.target.testclasses.dir}"/>
 				<classpath location="${sandbox.target.classes.dir}"/>
