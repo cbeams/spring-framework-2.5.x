@@ -19,24 +19,20 @@ package org.springframework.aop.target;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Jakarta Commons pooling implementation extending AbstractPoolingInvokerInterceptor
+ * Jakarta Commons pooling implementation extending AbstractPoolingTargetSource.
  * @author Rod Johnson
  */
 public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 				implements PoolableObjectFactory {
 
-	/**
-	 * Jakarta Commons object pool
-	 */
+	/** Jakarta Commons object pool */
 	private ObjectPool pool;
 
-	/**
-	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
-	 */
 	protected final void createPool(BeanFactory beanFactory) {
 		logger.info("Creating Commons object pool");
 		this.pool = createObjectPool();
@@ -45,7 +41,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Subclasses can override this if they want to return a different
 	 * Commons pool to GenericObject pool.
-	 * They should apply properties to the pool here
+	 * They should apply properties to the pool here.
 	 * @return an empty Commons pool 
 	 */
 	protected ObjectPool createObjectPool() {
@@ -61,11 +57,27 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	public void releaseTarget(Object target) throws Exception {
 		this.pool.returnObject(target);
 	}
-	
+
+	public int getActiveCount() throws UnsupportedOperationException {
+		return this.pool.getNumActive();
+	}
+
+	public int getIdleCount() throws UnsupportedOperationException {
+		return this.pool.getNumIdle();
+	}
+
+	/**
+	 * @deprecated in favor of getActiveCount
+	 * @see #getActiveCount
+	 */
 	public int getActive() {
 		return this.pool.getNumActive();
 	}
 
+	/**
+	 * @deprecated in favor of getIdleCount
+	 * @see #getIdleCount
+	 */
 	public int getFree() {
 		return this.pool.getNumIdle();
 	}
@@ -74,11 +86,9 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	//---------------------------------------------------------------------
 	// Implementation of DisposableBean interface
 	//---------------------------------------------------------------------
-	/**
-	 * @see org.springframework.beans.factory.DisposableBean#destroy()
-	 */
+
 	public void destroy() throws Exception {
-		logger.info("Closing Commons pool");
+		logger.info("Closing Commons object pool");
 		this.pool.close();
 	}
 
@@ -87,38 +97,23 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	// Implementation of org.apache.commons.pool.PoolableObjectFactory interface
 	//----------------------------------------------------------------------------
 
-	/**
-	 * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
-	 */
 	public Object makeObject() {
 		return newPrototypeInstance();
 	}
 
-	/**
-	 * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-	 */
 	public void destroyObject(Object o) throws Exception {
 		if (o instanceof DisposableBean) {
 			((DisposableBean) o).destroy();
 		}
 	}
 
-	/**
-	 * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-	 */
 	public boolean validateObject(Object o) {
 		return true;
 	}
 
-	/**
-	 * @see org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
-	 */
 	public void activateObject(Object o) throws Exception {
 	}
 
-	/**
-	 * @see org.apache.commons.pool.PoolableObjectFactory#passivateObject(java.lang.Object)
-	 */
 	public void passivateObject(Object o) throws Exception {
 	}
 
