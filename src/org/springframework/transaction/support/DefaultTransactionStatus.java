@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -62,8 +63,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 
 	/**
 	 * Create a new TransactionStatus instance.
-	 * @param transaction underlying transaction object,
-	 * e.g. a JTA UserTransaction
+	 * @param transaction underlying transaction object that can hold
+	 * state for the internal transaction implementation
 	 * @param newTransaction if the transaction is new,
 	 * else participating in an existing transaction
 	 * @param newSynchronization if a new transaction synchronization
@@ -164,10 +165,16 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		return (getTransaction() instanceof SavepointManager);
 	}
 
+	/**
+	 * Return the underlying transaction as SavepointManager,
+	 * if possible.
+	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
+	 * if the underlying transaction does not support savepoints
+	 */
 	protected SavepointManager getSavepointManager() {
 		if (!isTransactionSavepointManager()) {
-			throw new TransactionUsageException("Transaction object [" + getTransaction() +
-																					"] does not support savepoints");
+			throw new NestedTransactionNotSupportedException("Transaction object [" + getTransaction() +
+																											 "] does not support savepoints");
 		}
 		return (SavepointManager) getTransaction();
 	}
@@ -175,6 +182,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	/**
 	 * This implementation delegates to the transaction object
 	 * if it implements the SavepointManager interface.
+	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
+	 * if the underlying transaction does not support savepoints
 	 * @see #getTransaction
 	 * @see org.springframework.transaction.SavepointManager
 	 */
@@ -205,6 +214,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 
 	/**
 	 * Create a savepoint and hold it for the transaction.
+	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
+	 * if the underlying transaction does not support savepoints
 	 */
 	public void createAndHoldSavepoint() throws TransactionException {
 		setSavepoint(getSavepointManager().createSavepoint());
