@@ -96,15 +96,15 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		}
 	}
 
-	public LabeledEnum getLabeledEnum(Class type, Comparable code) {
+	public LabeledEnum getLabeledEnum(Class type, Comparable code) throws IllegalArgumentException {
 		return getLabeledEnum(type.getName(), code);
 	}
 
-	public Collection getLabeledEnumCollection(Class type) {
+	public Collection getLabeledEnumCollection(Class type) throws IllegalArgumentException {
 		return getLabeledEnumCollection(type.getName());
 	}
 
-	public Map getLabeledEnumMap(Class type) {
+	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException {
 		return getLabeledEnumMap(type.getName());
 	}
 }

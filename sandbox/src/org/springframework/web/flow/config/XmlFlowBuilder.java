@@ -24,6 +24,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.springframework.binding.convert.support.TextToClassConverter;
+import org.springframework.binding.format.InvalidFormatException;
+import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -52,8 +55,20 @@ import org.xml.sax.SAXParseException;
  * 
  *  
  *   
- *    &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
- *    		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
+ *    
+ *     
+ *      
+ *       
+ *        
+ *         
+ *          &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
+ *          		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
+ *          
+ *         
+ *        
+ *       
+ *      
+ *     
  *    
  *   
  *  
@@ -120,6 +135,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String ACTION_ELEMENT = "action";
 
 	private static final String CLASS_ATTRIBUTE = "class";
+
+	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
+
+	private static final String CLASSREF_ATTRIBUTE = "classref";
 
 	private static final String NAME_ATTRIBUTE = "name";
 
@@ -411,7 +430,31 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Action parseAction(Element element) {
 		String actionId = element.getAttribute(ID_ATTRIBUTE);
-		return getFlowServiceLocator().getAction(actionId);
+		if (StringUtils.hasText(actionId)) {
+			return getFlowServiceLocator().getAction(actionId);
+		}
+		else {
+			String actionClassName = element.getAttribute(CLASS_ATTRIBUTE);
+			if (StringUtils.hasText(actionClassName)) {
+				String autowireLabel = element.getAttribute(AUTOWIRE_ATTRIBUTE);
+				try {
+					AutowireMode autowireMode = (AutowireMode)new LabeledEnumFormatter(AutowireMode.class)
+							.parseValue(autowireLabel);
+					Class actionClass = (Class)new TextToClassConverter().convert(actionClassName);
+					return getFlowServiceLocator().createAction(actionClass, autowireMode);
+				}
+				catch (InvalidFormatException e) {
+					throw new FlowBuilderException("Unsupported autowire mode '" + autowireLabel + "'", e);
+				}
+			}
+			else {
+				actionClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
+				Assert.hasText(actionClassName, "Exactly one of the action id, class, or classref attributes "
+						+ "are required for this action definition");
+				Class actionClass = (Class)new TextToClassConverter().convert(actionClassName);				
+				return getFlowServiceLocator().getAction(actionClass);
+			}
+		}
 	}
 
 	/**

@@ -24,6 +24,10 @@ import org.springframework.binding.convert.Converter;
  */
 public abstract class AbstractConverter implements Converter {
 
+	public Object convert(Object source) throws ConversionException {
+		return convert(source, getTargetClasses()[0]);
+	}
+	
 	public Object convert(Object source, Class targetClass) throws ConversionException {
 		try {
 			return doConvert(source, targetClass);

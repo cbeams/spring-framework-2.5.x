@@ -16,6 +16,7 @@
 package org.springframework.web.flow.action;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
@@ -271,8 +272,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws ObjectRetrievalFailureException the form object could not be
 	 *         loaded
 	 */
-	protected final Object loadRequiredFormObject(FlowExecutionContext context) throws IllegalStateException,
-			FormObjectRetrievalFailureException {
+	protected final Object loadRequiredFormObject(FlowExecutionContext context)
+			throws FormObjectRetrievalFailureException, IllegalStateException {
 		try {
 			// get the form object
 			Object formObject = loadFormObject(context);

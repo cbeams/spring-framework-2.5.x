@@ -42,12 +42,8 @@ public class LabeledEnumFormatter extends AbstractFormatter {
 	}
 
 	public void setResolver(LabeledEnumResolver resolver) {
-		if (resolver != null) {
-			this.resolver = resolver;
-		}
-		else {
-			this.resolver = StaticLabeledEnumResolver.instance();
-		}
+		Assert.notNull(resolver, "The labeled enum resolver is required");
+		this.resolver = resolver;
 	}
 
 	protected String doFormatValue(Object value) {

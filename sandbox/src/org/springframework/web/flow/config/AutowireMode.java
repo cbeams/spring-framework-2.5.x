@@ -26,6 +26,10 @@ public class AutowireMode extends ShortCodedLabeledEnum {
 
 	public static final AutowireMode AUTODETECT = new AutowireMode(4, "autodetect");
 
+	public static final AutowireMode NONE = new AutowireMode(5, "none");
+
+	public static final AutowireMode DEFAULT = new AutowireMode(6, "default");
+
 	private AutowireMode(int code, String label) {
 		super(code, label);
 	}

@@ -27,11 +27,17 @@ public class ConversionException extends RuntimeException {
 	private Class convertFromClass;
 
 	public ConversionException(Object value, Class convertToClass) {
-		this(value, convertToClass, null, null, null);
+		super("Unable to convert value '" + value + "' of type '" + value.getClass().getName() + "' to class '"
+				+ convertToClass.getName() + "'");
+		this.value = value;
+		this.convertToClass = convertToClass;
 	}
 
 	public ConversionException(Object value, Class convertToClass, Throwable cause) {
-		this(value, convertToClass, null, cause, null);
+		super("Unable to convert value '" + value + "' of type '" + value.getClass().getName() + "' to class '"
+				+ convertToClass.getName() + "'", cause);
+		this.value = value;
+		this.convertToClass = convertToClass;
 	}
 
 	public ConversionException(Object value, Class convertToClass, Throwable cause, String message) {
@@ -70,5 +76,4 @@ public class ConversionException extends RuntimeException {
 	public Class getConvertToClass() {
 		return convertFromClass;
 	}
-
 }

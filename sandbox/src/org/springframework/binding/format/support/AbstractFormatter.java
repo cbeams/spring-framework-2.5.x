@@ -29,8 +29,14 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractFormatter implements Formatter {
 
+	/**
+	 * The type of value to be formatted.
+	 */
 	private Class valueClass;
 
+	/**
+	 * Does this formatter allow empty values?
+	 */
 	private boolean allowEmpty;
 
 	/**
@@ -85,7 +91,7 @@ public abstract class AbstractFormatter implements Formatter {
 	public final Object parseValue(String formattedString) throws InvalidFormatException {
 		try {
 			if (allowEmpty && isEmpty(formattedString)) {
-				return null;
+				return getEmptyValue();
 			}
 			return doParseValue(formattedString);
 		}
@@ -94,6 +100,9 @@ public abstract class AbstractFormatter implements Formatter {
 		}
 	}
 
+	protected Object getEmptyValue() {
+		return null;
+	}
 	protected abstract Object doParseValue(String formattedString) throws InvalidFormatException, ParseException;
 
 	protected boolean isEmpty(Object o) {
@@ -101,7 +110,7 @@ public abstract class AbstractFormatter implements Formatter {
 			return true;
 		}
 		else if (o instanceof String) {
-			return StringUtils.hasText((String)o);
+			return !StringUtils.hasText((String)o);
 		}
 		else {
 			return false;

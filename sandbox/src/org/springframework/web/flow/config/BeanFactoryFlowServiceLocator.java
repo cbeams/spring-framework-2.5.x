@@ -15,12 +15,14 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -34,6 +36,8 @@ import org.springframework.web.flow.ServiceLookupException;
  * @author Erwin Vervaet
  */
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
+
+	private AutowireMode defaultAutowireMode = AutowireMode.NONE;
 
 	/**
 	 * The wrapped bean factory.
@@ -70,6 +74,21 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
+	 * @return Returns the defaultAutowireMode.
+	 */
+	public AutowireMode getDefaultAutowireMode() {
+		return defaultAutowireMode;
+	}
+
+	/**
+	 * @param defaultAutowireMode The defaultAutowireMode to set.
+	 */
+	public void setDefaultAutowireMode(AutowireMode defaultAutowireMode) {
+		Assert.isTrue(defaultAutowireMode != AutowireMode.DEFAULT, "The default auto wire must not equal 'default'");
+		this.defaultAutowireMode = defaultAutowireMode;
+	}
+
+	/**
 	 * Returns the bean factory used to lookup services.
 	 */
 	protected ListableBeanFactory getListableBeanFactory() {
@@ -84,8 +103,16 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
-		return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
-				false);
+		if (autowireMode == AutowireMode.DEFAULT) {
+			return createAction(implementationClass, getDefaultAutowireMode());
+		}
+		if (autowireMode == AutowireMode.NONE) {
+			return (Action)BeanUtils.instantiateClass(implementationClass);
+		}
+		else {
+			return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
+					false);
+		}
 	}
 
 	public Action getAction(String actionId) throws ServiceLookupException {

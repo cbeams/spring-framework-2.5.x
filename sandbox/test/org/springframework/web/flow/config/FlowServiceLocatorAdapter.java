@@ -26,6 +26,10 @@ import org.springframework.web.flow.ServiceLookupException;
  */
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+		throw new UnsupportedOperationException();
+	}
+
 	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}

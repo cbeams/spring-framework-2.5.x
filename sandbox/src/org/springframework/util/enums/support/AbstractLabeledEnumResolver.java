@@ -66,7 +66,6 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 		Assert.notNull(code, "No enum code specified");
 		Map typeEnums = getLabeledEnumMap(type);
 		LabeledEnum codedEnum = (LabeledEnum)typeEnums.get(code);
-
 		if (codedEnum == null) {
 			throw new IllegalArgumentException("No enumeration with code '" + code + "'" + " of type '" + type
 					+ "' exists--this is likely a configuration error;"
