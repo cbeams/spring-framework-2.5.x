@@ -13,18 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.binding.value;
+package org.springframework.rules.closure;
 
-/**
- * A sub-interface of ValueModel that adds support for bound javabean
- * properties. Clients may subscribe as property change listeners for the
- * "value" property. This is useful when clients need to process both the
- * "oldValue" and "newValue" on value change events.
- * 
- * @author Keith Donald
- */
-public interface BoundValueModel extends ValueModel, PropertyChangePublisher {
+import java.io.Serializable;
 
-    public static final String VALUE_PROPERTY = "value";
+import org.springframework.rules.Closure;
+
+public abstract class ClosureWithoutResult implements Closure, Serializable {
+    public Object call(Object argument) {
+        doCallAction(argument);
+        return NULL_VALUE;
+    }
+
+    protected abstract void doCallAction(Object argument);
 
 }

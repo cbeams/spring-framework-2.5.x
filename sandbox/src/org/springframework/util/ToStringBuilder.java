@@ -168,7 +168,7 @@ public class ToStringBuilder {
         styler.styleField(buffer, fieldName, value);
         return this;
     }
-
+    
     public ToStringBuilder appendProperties() {
         BeanWrapper wrapper = new BeanWrapperImpl(object);
         PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();

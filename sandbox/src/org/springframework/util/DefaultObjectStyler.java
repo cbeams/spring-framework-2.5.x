@@ -27,23 +27,31 @@ import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
 /**
- * Visitor that encapsulates value string styling algorithms according
- * to Spring conventions.
+ * Visitor that encapsulates value string styling algorithms according to Spring
+ * conventions.
  * 
  * @author Keith Donald
  */
 public class DefaultObjectStyler implements Visitor, ObjectStyler {
-    private ReflectiveVisitorSupport visitorSupport =
-        new ReflectiveVisitorSupport();
+    private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
+
     private static final String EMPTY = "[empty]";
+
     private static final String NULL = "[null]";
 
     private static final ObjectStyler INSTANCE = new DefaultObjectStyler();
-    
-    public static String evaluate(Object o) {
+
+    /**
+     * Static accessor that calls the default styler's style method.
+     * 
+     * @param o
+     *            the argument to style
+     * @return The styled string.
+     */
+    public static String call(Object o) {
         return INSTANCE.style(o);
     }
-    
+
     /**
      * Styles the string form of this object using the reflective visitor
      * pattern. The reflective help removes the need to define a vistable class
@@ -70,9 +78,8 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     }
 
     String visit(Method method) {
-        return method.getName()
-            + "@"
-            + ClassUtils.getShortName(method.getDeclaringClass());
+        return method.getName() + "@"
+                + ClassUtils.getShortName(method.getDeclaringClass());
     }
 
     String visit(Map value) {
@@ -111,13 +118,15 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         buffer.append("]");
         return buffer.toString();
     }
-    
+
     private String getTypeString(Collection value) {
         if (value instanceof List) {
             return "list";
-        } else if (value instanceof Set) {
+        }
+        else if (value instanceof Set) {
             return "set";
-        } else {
+        }
+        else {
             return "collection";
         }
     }
@@ -125,7 +134,8 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     String visit(Object value) {
         if (value.getClass().isArray()) {
             return styleArray(getObjectArray(value));
-        } else {
+        }
+        else {
             return String.valueOf(value);
         }
     }
@@ -136,14 +146,17 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
 
     private String styleArray(Object[] array) {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-        buffer.append("array<" + StringUtils.delete(ClassUtils.getShortName(array.getClass()), ";") + ">[");
+        buffer.append("array<"
+                + StringUtils.delete(ClassUtils.getShortName(array.getClass()),
+                        ";") + ">[");
         for (int i = 0; i < array.length - 1; i++) {
             buffer.append(style(array[i]));
             buffer.append(',').append(' ');
         }
         if (array.length > 0) {
             buffer.append(style(array[array.length - 1]));
-        } else {
+        }
+        else {
             buffer.append(EMPTY);
         }
         buffer.append("]");
@@ -153,7 +166,8 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     private Object[] getObjectArray(Object value) {
         if (value.getClass().getComponentType().isPrimitive()) {
             return ArrayUtils.toObjectArrayFromPrimitive(value);
-        } else {
+        }
+        else {
             return (Object[])value;
         }
     }

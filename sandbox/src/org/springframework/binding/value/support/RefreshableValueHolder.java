@@ -46,7 +46,7 @@ public class RefreshableValueHolder extends ValueHolder {
     public void refresh() {
         if (logger.isDebugEnabled()) {
             logger.debug("Refreshing held value '"
-                    + DefaultObjectStyler.evaluate(getValue()) + "'");
+                    + DefaultObjectStyler.call(getValue()) + "'");
         }
         setValue(refreshFunction.call(null));
     }

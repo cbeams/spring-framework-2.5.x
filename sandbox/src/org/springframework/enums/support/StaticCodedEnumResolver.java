@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.enums.CodedEnum;
 import org.springframework.rules.Closure;
 import org.springframework.rules.Generator;
-import org.springframework.rules.support.ClosureWithoutResult;
+import org.springframework.rules.closure.ClosureWithoutResult;
 import org.springframework.util.Assert;
 
 /**
@@ -54,8 +54,8 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                     .debug("Registering statically defined coded enums for class "
                             + clazz);
         }
-        new FieldValueGenerator(clazz).generate(new ClosureWithoutResult() {
-            protected void doCall(Object value) {
+        new CodedEnumFieldValueGenerator(clazz).generate(new ClosureWithoutResult() {
+            protected void doCallAction(Object value) {
                 add((CodedEnum)value);
             }
         });
@@ -67,18 +67,18 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
      * 
      * @author Keith Donald
      */
-    private static class FieldValueGenerator implements Generator {
+    private static class CodedEnumFieldValueGenerator implements Generator {
         private static final Log logger = LogFactory
-                .getLog(FieldValueGenerator.class);
+                .getLog(CodedEnumFieldValueGenerator.class);
 
         private Class clazz;
 
-        public FieldValueGenerator(Class clazz) {
+        public CodedEnumFieldValueGenerator(Class clazz) {
             Assert.notNull(clazz);
             this.clazz = clazz;
         }
 
-        public void generate(Closure procedure) {
+        public void generate(Closure fieldValueCallback) {
             Field[] fields = clazz.getFields();
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
@@ -90,7 +90,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                             Assert
                                     .isTrue(CodedEnum.class.isInstance(value),
                                             "Field value must be a CodedEnum instance.");
-                            procedure.call(value);
+                            fieldValueCallback.call(value);
                         }
                         catch (IllegalAccessException e) {
                             logger.warn(

@@ -13,17 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.rules.support;
+package org.springframework.rules;
 
-import org.springframework.rules.Closure;
-
-public abstract class ClosureWithoutResult implements Closure {
-    
-    public Object call(Object argument) {
-        doCall(argument);
-        return null;
-    }
-
-    protected abstract void doCall(Object argument);
-
+public interface NoArgClosure extends Closure {
+    public Object call();
 }

@@ -17,7 +17,6 @@ package org.springframework.rules.closure;
 
 import org.springframework.rules.Closure;
 import org.springframework.rules.Constraint;
-import org.springframework.rules.support.ClosureWithoutResult;
 
 /**
  * Only execute the specified procedure if a provided constraint is also true.
@@ -29,7 +28,8 @@ public class ConstrainedClosureWithoutResult extends ClosureWithoutResult {
 
     private Constraint constraint;
 
-    public ConstrainedClosureWithoutResult(Closure procedure, Constraint constraint) {
+    public ConstrainedClosureWithoutResult(Closure procedure,
+            Constraint constraint) {
         this.closure = procedure;
         this.constraint = constraint;
     }
@@ -38,7 +38,7 @@ public class ConstrainedClosureWithoutResult extends ClosureWithoutResult {
      * Will only invoke the procedure against the provided argument if the
      * constraint permits; else no action will be taken.
      */
-    public void doCall(Object argument) {
+    public void doCallAction(Object argument) {
         if (constraint.test(argument)) {
             closure.call(argument);
         }

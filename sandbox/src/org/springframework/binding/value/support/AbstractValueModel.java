@@ -36,8 +36,6 @@ public abstract class AbstractValueModel extends
     protected static final Log logger = LogFactory
             .getLog(AbstractValueModel.class);
 
-    public static final String VALUE_PROPERTY = "value";
-
     private Set listeners;
 
     public void addValueChangeListener(ValueChangeListener l) {
@@ -65,7 +63,7 @@ public abstract class AbstractValueModel extends
         if (listeners != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("[Firing value changed event; newValue="
-                        + DefaultObjectStyler.evaluate(getValue()) + "]");
+                        + DefaultObjectStyler.call(getValue()) + "]");
             }
             Iterator it = listeners.iterator();
             while (it.hasNext()) {

@@ -62,7 +62,7 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         if (logger.isDebugEnabled()) {
             logger.debug("Returned map of enums of type '" + type
                     + "; map contents="
-                    + DefaultObjectStyler.evaluate(typeEnums));
+                    + DefaultObjectStyler.call(typeEnums));
         }
         return Collections.unmodifiableMap(typeEnums);
     }

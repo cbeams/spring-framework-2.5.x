@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.rules.Constraint;
+import org.springframework.rules.closure.ClosureWithoutResult;
 import org.springframework.rules.support.Algorithms;
-import org.springframework.rules.support.ClosureWithoutResult;
 import org.springframework.util.Assert;
 
 /**
@@ -91,7 +91,7 @@ public abstract class CompoundConstraint implements Constraint,
     public CompoundConstraint addAll(List constraints) {
         Algorithms.instance().forEach(constraints,
                 new ClosureWithoutResult() {
-                    public void doCall(Object o) {
+                    public void doCallAction(Object o) {
                         add((Constraint)o);
                     }
                 });

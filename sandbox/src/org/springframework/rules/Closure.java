@@ -26,6 +26,8 @@ package org.springframework.rules;
  * @author Keith Donald
  */
 public interface Closure {
+    
+    public static final Object NULL_VALUE = new Object();
 
     /**
      * Evaluate the function with the provided argument, returning the result.

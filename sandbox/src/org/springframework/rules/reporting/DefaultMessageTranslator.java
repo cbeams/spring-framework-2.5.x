@@ -106,7 +106,7 @@ public class DefaultMessageTranslator implements Visitor {
         StringBuffer buf = new StringBuffer(255);
         MessageSourceResolvable[] args = resolveArguments(constraint);
         if (logger.isDebugEnabled()) {
-            logger.debug(DefaultObjectStyler.evaluate(args));
+            logger.debug(DefaultObjectStyler.call(args));
         }
         if (objectName != null) {
             buf.append(messages.getMessage(resolvableObjectName(objectName),
