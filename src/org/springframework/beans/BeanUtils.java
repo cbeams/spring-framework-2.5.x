@@ -16,7 +16,7 @@ import java.util.List;
  * Provides e.g. methods for sorting lists of beans by any property.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.7 2003-11-18 17:04:15 johnsonr Exp $
+ * @version $Id: BeanUtils.java,v 1.8 2003-11-22 15:03:25 johnsonr Exp $
  */
 public abstract class BeanUtils {
 
@@ -48,6 +48,9 @@ public abstract class BeanUtils {
 	public static Object instantiateClass(Constructor constructor, Object[] arguments) throws BeansException {
 		try {
 			return constructor.newInstance(arguments);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new FatalBeanException("Illegal arguments when trying to instantiate constructor: " + constructor, ex);
 		}
 		catch (InstantiationException ex) {
 			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; is it an interface or an abstract class?", ex);
