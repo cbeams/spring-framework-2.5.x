@@ -37,7 +37,7 @@ public class TextToMappingConverter extends AbstractConverter {
 	 * @param conversionService the service
 	 */
 	public void setConversionService(ConversionService conversionService) {
-		Assert.notNull(this.conversionService, "The conversionService property is required");
+		Assert.notNull(conversionService, "The conversionService property is required");
 		this.conversionService = conversionService;
 	}
 
