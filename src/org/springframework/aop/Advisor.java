@@ -26,9 +26,9 @@ import org.aopalliance.aop.Advice;
  *
  * <p>Spring AOP is based around <b>around advice</b> delivered via method
  * <b>interception</b>, compliant with the AOP Alliance interception API. 
- * The Advisor interface allows support for
- * different types of advice, such as <b>before</b> and <b>after</b> advice,
- * which need not be implemented using interception.
+ * The Advisor interface allows support for different types of advice,
+ * such as <b>before</b> and <b>after</b> advice, which need not be
+ * implemented using interception.
  *
  * @author Rod Johnson
  */
@@ -38,7 +38,7 @@ public interface Advisor {
 	 * Return whether this advice is associated with a particular instance
 	 * (for example, creating a mixin) or is it shared with all instances of
 	 * the advised class obtained from the same Spring bean factory.
-	 * <b>Note that this method is not currently used by the framework</b>.
+	 * <b>Note that this method is not currently used by the framework.</b>
 	 * Use singleton/prototype bean definitions or appropriate programmatic
 	 * proxy creation to ensure that Advisors have the correct lifecycle model. 
 	 */
@@ -46,10 +46,12 @@ public interface Advisor {
 	
 	/**
 	 * Return the advice part of this aspect. An advice may be an
-	 * interceptor, a throws advice, before advice etc.
-	 * <br>Spring supports user-defined advice, via the org.springframework.aop.adapter
-	 * package.
+	 * interceptor, a before advice, a throws advice, etc.
 	 * @return the advice that should apply if the pointcut matches
+	 * @see org.aopalliance.intercept.MethodInterceptor
+	 * @see BeforeAdvice
+	 * @see ThrowsAdvice
+	 * @see AfterReturningAdvice
 	 */
 	Advice getAdvice();
 

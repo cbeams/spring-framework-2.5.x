@@ -59,8 +59,8 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 		Matcher matcher = this.compiledPatterns[patternIndex].matcher(pattern);
 		boolean matched = matcher.matches();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is: '" + pattern + "'; pattern is '" +
-					this.compiledPatterns[patternIndex].pattern() + "'; matched=" + matched);
+			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
+					this.compiledPatterns[patternIndex].pattern() + "]; matched=" + matched);
 		}
 		return matched;
 	}

@@ -38,12 +38,14 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>Necessary as Introspector.getBeanInfo() in JDK 1.3 will return a new
  * deep copy of the BeanInfo every time we ask for it. We take the opportunity
- * to hash property descriptors by method name for fast lookup.
+ * to hash property descriptors by method name for fast lookup. Furthermore,
+ * we do our own caching of descriptors here, rather than rely on the JDK's
+ * system-wide BeanInfo cache (to avoid leaks on class loader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Thus this class
  * implements the factory design pattern, using a private constructor
- * and a static forClass method to obtain instances.
+ * and a static <code>forClass</code> method to obtain instances.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -157,8 +159,11 @@ final class CachedIntrospectionResults {
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
-											 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
+					logger.debug("Found property '" + pds[i].getName() + "'" +
+							(pds[i].getPropertyType() != null ?
+							" of type [" + pds[i].getPropertyType().getName() + "]" : "") +
+							(pds[i].getPropertyEditorClass() != null ?
+							"; editor [" + pds[i].getPropertyEditorClass().getName() + "]" : ""));
 				}
 
 				// Set methods accessible if declaring class is not public, for example

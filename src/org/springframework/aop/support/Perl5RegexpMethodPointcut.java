@@ -75,8 +75,8 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	protected boolean matches(String pattern, int patternIndex) {
 		boolean matched = this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is: '" + pattern + "'; pattern is '" +
-					this.compiledPatterns[patternIndex].getPattern() + "'; matched=" + matched);
+			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
+					this.compiledPatterns[patternIndex].getPattern() + "]; matched=" + matched);
 		}
 		return matched;
 	}
