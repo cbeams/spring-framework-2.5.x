@@ -77,7 +77,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.31 2004-06-19 22:36:47 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.32 2004-08-05 13:25:23 dkopylenko Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -132,7 +132,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * Set the names of the interfaces we're proxying. If no interface
 	 * is given, a CGLIB for the actual class will be created.
 	 */
-	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+	public void setProxyInterfaces(String[] interfaceNames) throws ClassNotFoundException {
 		Class[] interfaces = AopUtils.toInterfaceArray(interfaceNames);
 		setInterfaces(interfaces);
 	}
