@@ -766,7 +766,7 @@ public class AnotherExampleBean implements DisposableBean {
 
       <para>The
       <literal>org.springframework.beans.factory.FactoryBean</literal> is to
-      be implemented objects that <emphasis>are themselves
+      be implemented by objects that <emphasis>are themselves
       factories</emphasis>. The BeanFactory interface provides three method:
       <itemizedlist spacing="compact">
           <listitem>
@@ -871,8 +871,10 @@ XmlBeanFactory factory = new XmlBeanFactory(is);
       mentioned in <xref linkend="beans-beans-conversion" />). Some
       out-of-the-box post processors are available, like the
       <literal>PropertyResourceConfigurer</literal> and the
-      <literal>PropertyPlaceHolderConfigurer</literal>, both described
-      below.</para>
+      <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
+      and <literal>BeanNameAutoProxyCreator</literal>, very useful for
+      wrapping other beans transactionally, as described later in this
+      manual.</para>
     </sect2>
 
     <sect2 id="beans-factory-placeholderconfigurer">
@@ -1411,8 +1413,8 @@ public class BlackListNotifier implement ApplicationListener {
     lifecycle features, the ApplicationContext has one extra marker interface
     you can add to your beans, the <literal>ApplicationContextAware</literal>
     interface. This interface will be used to let the bean know about the
-    ApplicationContext is <emphasis>lives</emphasis> in, using the
-    <literal>setApplicationContext()</literal> method, that takes an
+    ApplicationContext it is <emphasis>contained</emphasis> in, using the
+    <literal>setApplicationContext()</literal> method, which provides the
     ApplicationContext as an argument.</para>
   </sect1>
 
@@ -1500,8 +1502,66 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     to do this.</para>
   </sect1>
 
+  <sect1>
+    <title>Setting a bean property as the result of a method
+    invocation</title>
+
+    <para>It is sometimes necessary to set a property on a bean, as the result
+    of a method call on another bean in the container, or a static method call
+    on any arbitrary class. Additionally, it is sometimes necessary to call a
+    static or non-static method just to perform some sort of initialization.
+    For both of these purposes, a helper class called
+    <classname>MethodInvokingFactoryBean</classname> may be used. This is a
+    <literal><classname>FactoryBean</classname></literal> which returns a
+    value which is the result of a static or instance method
+    invocation.</para>
+
+    <para>An example (in an XML based BeanFactory definition) of a bean
+    definition which uses this class to call a static factory method:</para>
+
+    <para><programlisting>&lt;bean id="myClass" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+  &lt;property name="staticMethod"&gt;&lt;value&gt;com.whatever.MyClassFactory.getInstance&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>An example of calling a static method then an instance method to get
+    at a Java System property. Somewhat verbose, but it works.</para>
+
+    <para><programlisting>&lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+  &lt;property name="targetClass"&gt;&lt;value&gt;java.lang.System&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="targetMethod"&gt;&lt;value&gt;getProperties&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+  &lt;property name="targetObject"&gt;&lt;ref local='sysProps'/&gt;&lt;/property&gt;
+  &lt;property name="targetMethod"&gt;&lt;value&gt;getProperty&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="args"&gt;
+    &lt;list&gt;
+      &lt;value&gt;|java.version|&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>Note that as it is expected to be used mostly for accessing factory
+    methods, MethodInvokingFactoryBean by default operates in a
+    <emphasis>singleton</emphasis> fashion. The first request by the container
+    for the factory to produce an object will cause the specified method
+    invocation, whose return value will cached and returned for the current
+    and subsequent requests. An internal <property>singleton</property>
+    property of the factory may be set to false, to cause it to invoke the
+    target method each time it is asked for an object.</para>
+
+    <para>A static target method may be specified by setting
+    <property>targetMethod</property> property to a String representing the
+    static method name, with <property>targetClass</property> specifying the
+    Class that the static method is defined on. Alternatively, a target
+    instance method may be specified, by setting the
+    <property>targetObject</property> property as the target object, and the
+    <property>targetMethod</property> property as the name of the method to
+    call on that target object. Arguments for the method invocation may be
+    specified by setting the <property>args</property> property.</para>
+  </sect1>
+
   <sect1 id="context-create">
-    <title>Creating an ApplicationContext from a webapplication</title>
+    <title>Creating an ApplicationContext from a web application</title>
 
     <para>As opposed to the BeanFactory, which will often be created
     programmatically, ApplicationContexts can be created declaratively using
@@ -1555,12 +1615,12 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1>
-    <title>Glue Code and the Evil Singleton</title>
+    <title>Glue code and the evil singleton</title>
 
-    <para>By far the vast majority of the code inside an application is best
-    written in a Dependency Injection (Inversion of Control) style, where that
-    code is served out of a BeanFactory or ApplicationContext container, has
-    its own dependencies supplied by the container when it is created, and is
+    <para>The majority of the code inside an application is best written in a
+    Dependency Injection (Inversion of Control) style, where that code is
+    served out of a BeanFactory or ApplicationContext container, has its own
+    dependencies supplied by the container when it is created, and is
     completely unaware of the container. However, for the small glue layers of
     code that are sometimes needed to tie other code together, there is
     sometimes a need for singleton (or quasi-singleton) style access to a
@@ -1611,17 +1671,17 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
       <literal>SingletonBeanFactoryLocator</literal> and
       <literal>ContextSingletonBeanFactoryLocator</literal> by viewing their
       respective JavaDocs, available at <ulink
-      url="http://martinfowler.com/articles/injection.html">http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html</ulink>
+      url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html</ulink>
       and <ulink
-      url="http://martinfowler.com/articles/injection.html">http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html</ulink>.
+      url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html</ulink>.
       </para>
 
       <para>As mentioned in the chapter on EJBs, the Spring convenience base
       classes for EJBs normally use a non-singleton
-      <literal>BeanFactoryLocator</literal> implementation, which easily
+      <literal>BeanFactoryLocator</literal> implementation, which is easily
       replaced by the use of <literal>SingletonBeanFactoryLocator</literal>
-      and <literal>ContextSingletonBeanFactoryLocator</literal> if
-      needed.</para>
+      and <literal>ContextSingletonBeanFactoryLocator</literal> if there is a
+      need.</para>
 
       <para></para>
     </sect2>
