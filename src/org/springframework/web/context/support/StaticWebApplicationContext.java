@@ -18,9 +18,10 @@ package org.springframework.web.context.support;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
@@ -47,6 +48,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	private ThemeSource themeSource;
 
+
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -57,6 +59,12 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
+		if (this.namespace != null) {
+			setDisplayName("WebApplicationContext for namespace '" + this.namespace + "'");
+		}
+		else {
+			setDisplayName("Root WebApplicationContext");
+		}
 	}
 
 	protected String getNamespace() {
@@ -67,14 +75,14 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		throw new UnsupportedOperationException("StaticWebApplicationContext does not support configLocations");
 	}
 
-	public void refresh() throws BeansException {
-		if (this.namespace != null) {
-			setDisplayName("StaticWebApplicationContext for namespace '" + this.namespace + "'");
-		}
-		else {
-			setDisplayName("Root StaticWebApplicationContext");
-		}
-		super.refresh();
+
+	/**
+	 * Register ServletContextAwareProcessor.
+	 * @see ServletContextAwareProcessor
+	 */
+	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+		beanFactory.ignoreDependencyType(ServletContext.class);
 	}
 
 	/**
@@ -82,6 +90,16 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 */
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
+	}
+
+	/**
+	 * Use a ServletContextResourcePatternResolver, to be able to find
+	 * matching resources below the web application root directory
+	 * even in a WAR file which has not been expanded.
+	 * @see ServletContextResourcePatternResolver
+	 */
+	protected ResourcePatternResolver getResourcePatternResolver() {
+		return new ServletContextResourcePatternResolver(this);
 	}
 
 	/**
