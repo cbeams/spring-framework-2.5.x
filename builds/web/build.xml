@@ -48,7 +48,7 @@
 			</fileset>
 		</copy>
 
-		<copy todir="${target.webclasses.dir}" file="${devtools.templates.dir}/conf/log4j.properties" filtering="on" failonerror="false" />
+		<copy todir="${target.webclasses.dir}" file="${templates.dir}/log4j/log4j.properties" filtering="on" failonerror="false" />
 
 		<available file="${conf.dir}" property="conf.exists" />
 		<antcall target="build.conf" />

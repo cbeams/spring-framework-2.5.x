@@ -76,7 +76,7 @@
 			<fileset dir="${target.conf.dir}" includes="**/*.properties, **/*.xml, **/*.txt" />
 		</copy>
 		<copy todir="${dist.conf.dir}" filtering="on">
-			<fileset dir="${devtools.templates.dir}/conf" includes="*.properties" />
+			<fileset dir="${templates.dir}/conf" includes="*.properties" />
 		</copy>
 	</target>
 
