@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 /**
  * Bean that checks if a database has already started up. To be referenced
@@ -109,14 +109,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 			}
 			finally {
-				if (stmt != null) {
-					try {
-						stmt.close();
-					}
-					catch (SQLException ex) {
-						// ignore
-					}
-				}
+				JdbcUtils.closeStatement(stmt);
 				if (con != null) {
 					try {
 						con.close();

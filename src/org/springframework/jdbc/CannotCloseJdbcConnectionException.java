@@ -3,7 +3,9 @@
  * of the Apache Software License.
  */
 
-package org.springframework.jdbc.datasource;
+package org.springframework.jdbc;
+
+import java.sql.SQLException;
 
 import org.springframework.dao.CleanupFailureDataAccessException;
 
@@ -18,18 +20,10 @@ public class CannotCloseJdbcConnectionException extends CleanupFailureDataAccess
 
 	/**
 	 * Constructor for CannotCloseJdbcConnectionException.
-	 * @param ex root cause from data access API in use
-	 */
-	public CannotCloseJdbcConnectionException(Throwable ex) {
-		super("Could not close JDBC connection", ex);
-	}
-
-	/**
-	 * Constructor for CannotCloseJdbcConnectionException.
 	 * @param msg message
-	 * @param ex root cause from data access API in use
+	 * @param ex SQLException root cause
 	 */
-	public CannotCloseJdbcConnectionException(String msg, Throwable ex) {
+	public CannotCloseJdbcConnectionException(String msg, SQLException ex) {
 		super(msg, ex);
 	}
 	

@@ -8,9 +8,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.CannotCloseJdbcConnectionException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.CannotCloseJdbcConnectionException;
-import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
@@ -83,7 +83,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	/**
 	 * Get a JDBC Connection, either from the current transaction or a new one.
 	 * @return the JDBC Connection
-	 * @throws CannotGetJdbcConnectionException if the attempt to get a Connection failed
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed
 	 */
 	protected final Connection getConnection() throws CannotGetJdbcConnectionException {
 		return DataSourceUtils.getConnection(getDataSource());
@@ -101,7 +101,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Close the given JDBC Connection if necessary, created via this bean's
 	 * DataSource, if it isn't bound to the thread.
 	 * @param con Connection to close
-	 * @throws CannotCloseJdbcConnectionException if the attempt to close the
+	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException if the attempt to close the
 	 * Connection failed
 	 */
 	protected final void closeConnectionIfNecessary(Connection con) throws CannotCloseJdbcConnectionException {

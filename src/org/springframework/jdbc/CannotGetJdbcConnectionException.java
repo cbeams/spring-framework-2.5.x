@@ -3,7 +3,11 @@
  * of the Apache Software License.
  */
 
-package org.springframework.jdbc.datasource;
+package org.springframework.jdbc;
+
+import java.sql.SQLException;
+
+import javax.naming.NamingException;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 
@@ -15,18 +19,19 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 
 	/**
 	 * Constructor for CannotGetJdbcConnectionException.
-	 * @param ex root cause from data access API in use
+	 * @param msg message
+	 * @param ex SQLException root cause
 	 */
-	public CannotGetJdbcConnectionException(Throwable ex) {
-		super("Could not get JDBC connection", ex);
+	public CannotGetJdbcConnectionException(String msg, SQLException ex) {
+		super(msg, ex);
 	}
 
 	/**
 	 * Constructor for CannotGetJdbcConnectionException.
 	 * @param msg message
-	 * @param ex root cause from data access API in use
+	 * @param ex NamingException root cause
 	 */
-	public CannotGetJdbcConnectionException(String msg, Throwable ex) {
+	public CannotGetJdbcConnectionException(String msg, NamingException ex) {
 		super(msg, ex);
 	}
 

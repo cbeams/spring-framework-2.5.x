@@ -19,6 +19,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.jdbc.CannotCloseJdbcConnectionException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jndi.AbstractJndiLocator;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -37,7 +39,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.7 2004-02-18 19:39:02 colins Exp $
+ * @version $Id: DataSourceUtils.java,v 1.8 2004-02-26 14:27:53 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -54,10 +56,11 @@ public abstract class DataSourceUtils {
 	 * <p>Use getDataSourceFromJndi(jndiName,false) in case of a custom JNDI name.
 	 * @param jndiName jndiName of the DataSource
 	 * @return the DataSource
-	 * @throws CannotGetJdbcConnectionException if the data source cannot be located
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the data source cannot be located
 	 * @see #getDataSourceFromJndi(String, boolean)
 	 */
-	public static DataSource getDataSourceFromJndi(String jndiName) throws CannotGetJdbcConnectionException {
+	public static DataSource getDataSourceFromJndi(String jndiName)
+	    throws CannotGetJdbcConnectionException {
 		return getDataSourceFromJndi(jndiName, true);
 	}
 
@@ -68,9 +71,10 @@ public abstract class DataSourceUtils {
 	 * @param resourceRef if the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already contain it.
 	 * @return the DataSource
-	 * @throws CannotGetJdbcConnectionException if the data source cannot be located
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the data source cannot be located
 	 */
-	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef) throws CannotGetJdbcConnectionException {
+	public static DataSource getDataSourceFromJndi(String jndiName, boolean resourceRef)
+	    throws CannotGetJdbcConnectionException {
 		if (jndiName == null || "".equals(jndiName)) {
 			throw new IllegalArgumentException("jndiName must not be empty");
 		}
@@ -95,7 +99,7 @@ public abstract class DataSourceUtils {
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * @param ds DataSource to get connection from
 	 * @return a JDBC connection from this DataSource
-	 * @throws CannotGetJdbcConnectionException if the attempt to get a Connection failed
+	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
@@ -123,7 +127,7 @@ public abstract class DataSourceUtils {
 				return con;
 			}
 			catch (SQLException ex) {
-				throw new CannotGetJdbcConnectionException(ex);
+				throw new CannotGetJdbcConnectionException("Could not get JDBC connection", ex);
 			}
 		}
 	}
@@ -147,11 +151,12 @@ public abstract class DataSourceUtils {
 	 * @param con connection to close if necessary
 	 * (if this is null, the call will be ignored)
 	 * @param ds DataSource that the connection came from
-	 * @throws CannotCloseJdbcConnectionException if the attempt to close the
+	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException if the attempt to close the
 	 * Connection failed
 	 * @see SmartDataSource#shouldClose
 	 */
-	public static void closeConnectionIfNecessary(Connection con, DataSource ds) throws CannotCloseJdbcConnectionException {
+	public static void closeConnectionIfNecessary(Connection con, DataSource ds)
+	    throws CannotCloseJdbcConnectionException {
 		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
 			return;
 		}
@@ -162,7 +167,7 @@ public abstract class DataSourceUtils {
 				con.close();
 			}
 			catch (SQLException ex) {
-				throw new CannotCloseJdbcConnectionException(ex);
+				throw new CannotCloseJdbcConnectionException("Could not close JDBC connection", ex);
 			}
 		}
 	}

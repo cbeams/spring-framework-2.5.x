@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Implementation of SmartDataSource that wraps a single connection which is not
@@ -49,7 +48,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * proxy or the physical connection.
 	 */
 	public SingleConnectionDataSource(String driverClassName, String url, String username, String password,
-	                                  boolean suppressClose) throws CannotGetJdbcConnectionException {
+	                                  boolean suppressClose) throws ClassNotFoundException {
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -61,10 +60,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * suppresses close() calls (to allow for normal close() usage in applications that
 	 * expect a pooled connection but do not know our SmartDataSource interface).
 	 */
-	public SingleConnectionDataSource(Connection source, boolean suppressClose)
-	    throws CannotGetJdbcConnectionException, InvalidDataAccessApiUsageException {
+	public SingleConnectionDataSource(Connection source, boolean suppressClose) {
 		if (source == null) {
-			throw new InvalidDataAccessApiUsageException("Connection is null in SingleConnectionDataSource");
+			throw new IllegalArgumentException("Connection is null in SingleConnectionDataSource");
 		}
 		this.suppressClose = suppressClose;
 		init(source);
@@ -96,13 +94,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Initialize the underlying connection via DriverManager.
 	 */
-	protected void init() throws CannotGetJdbcConnectionException {
-		try {
-			init(getConnectionFromDriverManager());
-		}
-		catch (SQLException ex) {
-			throw new CannotGetJdbcConnectionException("Could not create connection", ex);
-		}
+	protected void init() throws SQLException {
+		init(getConnectionFromDriverManager());
 	}
 
 	/**
@@ -110,7 +103,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Wraps the connection with a close-suppressing proxy if necessary.
 	 * @param source the JDBC Connection to use
 	 */
-	protected void init(Connection source) throws CannotGetJdbcConnectionException {
+	protected void init(Connection source) {
 		// wrap connection?
 		this.connection = this.suppressClose ? DataSourceUtils.getCloseSuppressingConnectionProxy(source) : source;
 	}
