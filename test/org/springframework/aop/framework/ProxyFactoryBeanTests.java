@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -45,8 +45,11 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ConsoleListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
@@ -54,14 +57,16 @@ import org.springframework.util.SerializationTestUtils;
  * Test cases for AOP FactoryBean, using XML bean factory.
  * Note that this FactoryBean will work in any bean factory implementation.
  * @author Rod Johnson
- * @since 13-Mar-2003
+ * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
 	private BeanFactory factory;
 
 	protected void setUp() throws Exception {
-		this.factory = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()));
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		parent.registerBeanDefinition("target2", new RootBeanDefinition(ConsoleListener.class));
+		this.factory = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()), parent);
 	}
 
 	public void testIsDynamicProxy() {

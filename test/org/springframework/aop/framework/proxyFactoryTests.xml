@@ -107,8 +107,6 @@
 	-->
 	<bean id="global_aspectInterface" class="org.springframework.aop.framework.ProxyFactoryBeanTests$GlobalIntroductionAdvice"/>
 
-	<bean id="target2" class="org.springframework.context.event.ConsoleListener"/>
-
 	<bean id="prototypeLockMixinAdvisor" class="org.springframework.aop.framework.LockMixinAdvisor" singleton="false"/>
 
 	<bean id="prototypeTestBean" class="org.springframework.beans.TestBean" singleton="false"/>
