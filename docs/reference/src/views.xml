@@ -1,183 +1,152 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!--$Id: views.xml,v 1.8 2004-02-25 22:58:56 aarendsen Exp $-->
+<!--$Id: views.xml,v 1.9 2004-02-27 01:58:08 davison Exp $-->
 <chapter id="view">
+  <title>Integrating view technologies</title>
 
-    <title>Integrating view technologies</title>
-    
-	<!-- ============================================================ -->
-	<!-- Introduction                                                 -->
-	<!-- ============================================================ -->
-	<sect1 id="view-introduction">	
-		
-		<title>Introduction</title>
+  <sect1 id="view-introduction">
+    <title>Introduction</title>
 
-		<para>
-			One of the areas in which Spring excels is its separation of view
-            technologies from the rest of the MVC framework.  Deciding to use
-            Velocity or XSLT in place of an existing JSP for example, is
-            primarily a matter of configuration.  This chapter covers the
-            major view technologies that work with Spring and touches briefly
-            on how to add new ones.  This chapter assumes you are already
-            familiar with <xref linkend="mvc-viewresolver"/> which covers the
-            basics of how views in general are coupled to the MVC
-            framework.</para>
-		
-	</sect1>
-	
-	<sect1 id="view-jsp">
-		<title>Using Spring together with JSP &amp; JSTL</title>
-		<para>
-			Spring provides a couple out-of-the-box view when in need for
-			JSP and JSTL views (which in fact happen to be the most popular ones).
-			Using JSP (and also JSTL) is done using a normal viewresolver defined
-			in the WebApplicationContext. Furthermore, of course you need to write
-			some JSPs that will actually render the view. This part describes some
-			of the features and additional things Spring provides to facilitate
-			JSP development.
-		</para>
-		<sect2 id="view-jsp-resolver">
-			<title>View resolvers</title>
-			<para> 
-				Just as with any other view technology you're integrating with
-				Spring, for JSPs you'll need a view resolver that will resolve your
-				views. The most commonly used view resolvers when developing with JSPs				
-				are the <literal>InternalResourceViewResolver</literal> and the
-				<literal>ResourceBundleViewResolver</literal>. Both are declared in
-				the WebApplicationContext:				
-			</para>
-			<programlisting><![CDATA[
+    <para>One of the areas in which Spring excels is its separation of view
+    technologies from the rest of the MVC framework. Deciding to use Velocity
+    or XSLT in place of an existing JSP for example, is primarily a matter of
+    configuration. This chapter covers the major view technologies that work
+    with Spring and touches briefly on how to add new ones. This chapter
+    assumes you are already familiar with <xref linkend="mvc-viewresolver" />
+    which covers the basics of how views in general are coupled to the MVC
+    framework.</para>
+  </sect1>
+
+  <sect1 id="view-jsp">
+    <title>Using Spring together with JSP &amp; JSTL</title>
+
+    <para>Spring provides a couple out-of-the-box view when in need for JSP
+    and JSTL views (which in fact happen to be the most popular ones). Using
+    JSP (and also JSTL) is done using a normal viewresolver defined in the
+    WebApplicationContext. Furthermore, of course you need to write some JSPs
+    that will actually render the view. This part describes some of the
+    features and additional things Spring provides to facilitate JSP
+    development.</para>
+
+    <sect2 id="view-jsp-resolver">
+      <title>View resolvers</title>
+
+      <para>Just as with any other view technology you're integrating with
+      Spring, for JSPs you'll need a view resolver that will resolve your
+      views. The most commonly used view resolvers when developing with JSPs
+      are the <literal>InternalResourceViewResolver</literal> and the
+      <literal>ResourceBundleViewResolver</literal>. Both are declared in the
+      WebApplicationContext:</para>
+
+      <programlisting>
 # The ResourceBundleViewResolver:
-<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-	<property name="basename"><value>views</value></property>
-</bean>
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
+  &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
 
 # And a sample properties file is uses (views.properties in WEB-INF/classes):
 welcome.class=org.springframework.web.servlet.view.JstlView
 welcome.url=/WEB-INF/jsp/welcome.jsp
 
 productList.class=org.springframework.web.servlet.view.JstlView
-productList.url=/WEB-INF/jsp/productlist.jsp
-			]]></programlisting>
+productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
-			<para>
-				As you can see, the ResourceBundleViewResolver needs a properties file defining
-				the view names mapped to 1) a class and 2) a URL. With a ResourceBundleViewResolver
-				you can mix different types of views using only one resolver.
-			</para>
-			<programlisting><![CDATA[
-<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-	<property name="viewClass"><value>org.springframework.web.servlet.view.JstlView</value></property>
-	<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-	<property name="suffix"><value>.jsp</value></property>
-</bean>			
-			]]></programlisting>
-			<para>
-				The InternalResourceBundleViewResolver can be configured for using JSPs as
-				described above. As probably already stated earlier on, we strongly encourage to
-				place JSP files in a a directory under the WEB-INF directory, since there they can't
-				be access directly by clients.
-			</para>
-		</sect2>
-		<sect2 id="view-jsp-jstl">
-			<title>'Plain-old' JSPs versus JSTL</title>
-			<para>
-				When using Java Standard Tag Library you need to use a special viewclass, i.e.
-				the <literal>JstlView</literal>. JSTL needs some preparation before things
-				like the i18N features. So remember: when using JSTL, use the JstlView.
-			</para>
-		</sect2>
-		<sect2 id="view-jsp-tags">
-			<title>Additional tags facilitating development</title>
-			<para>
-				Spring provides data binding of request parameters to command objects as described
-				in earlier chapters. To facilitate the development of JSP pages in combination
-				with those data binding features, Spring provides a couple of tags that ease the pain
-				(if that should even arise ;-). All Spring have <emphasis>html escaping</emphasis>
-				features to enable or disable escaping of characters.
-			</para>
-			<para>
-				The tag libarry descriptor (TLD) is included in the <literal>spring.jar</literal> as well
-				in the distribution itself.	More information about the individual tags can be found online:
-				<ulink url="http://www.springframework.org/docs/taglib/index.html"/>.
-			</para>
-		</sect2>
-	</sect1>
-	
-	<!-- ============================================================ -->
-	<!-- Velocity                                                     -->
-	<!-- ============================================================ -->
-	<sect1 id="view-velocity">
-	
-		<title>Velocity</title>
-		
-		<para>
-		    Velocity is a view technology developed the Jakarta Project. More
-		    information about Velocity can be found at
-		    http://jakarta.apache.org/velocity. This section describes how to
-		    integrate the Velocity view technology for use with Spring.
-		</para>
-		
-		<sect2 id="view-velocity-dependencies">
-		
-			<title>Dependencies</title> 
+      <para>As you can see, the ResourceBundleViewResolver needs a properties
+      file defining the view names mapped to 1) a class and 2) a URL. With a
+      ResourceBundleViewResolver you can mix different types of views using
+      only one resolver.</para>
 
-            <para>
+      <programlisting>
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+  &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="suffix"&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
 
-                There is one dependency that your web application will need to
-     			satisfy before working with Velocity, namely that
-     			<literal>velocity-1.x.x.jar</literal> needs to be
-     			available. Typically this is included in the
-     			<literal>WEB-INF/lib</literal> folder where it is guaranteed
-     			to be found by a J2EE server and added to the classpath for
-     			your application. It is of course assumed that you already
-     			have the spring.jar in your <literal>WEB-INF/lib</literal>
-     			folder too! The latest stable velocity jar is supplied with
-     			the Spring framework and can be copied from the
-     			<literal>/lib/velocity</literal> directory.
+      <para>The InternalResourceBundleViewResolver can be configured for using
+      JSPs as described above. As probably already stated earlier on, we
+      strongly encourage to place JSP files in a a directory under the WEB-INF
+      directory, since there they can't be access directly by clients.</para>
+    </sect2>
 
-            </para>
-			
-		</sect2>
-		
-		<sect2 id="view-velocity-configuration-dispatcher">
+    <sect2 id="view-jsp-jstl">
+      <title>'Plain-old' JSPs versus JSTL</title>
 
-			<title>Dispatcher Servlet Context</title>
-			<para>	
-			
-                The configuration file for your Spring dispatcher servlet
-			    (usually <literal>WEB-INF/[servletname]-servlet.xml</literal>)
-			    should already contain a bean definition for the view
-			    resolver. We'll also add a bean here to configure the Velocity
-			    environment. I've chosen to call my dispatcher
-			    'frontcontroller' so my config file names reflect this.
-  
-            </para>
+      <para>When using Java Standard Tag Library you need to use a special
+      viewclass, i.e. the <literal>JstlView</literal>. JSTL needs some
+      preparation before things like the i18N features. So remember: when
+      using JSTL, use the JstlView.</para>
+    </sect2>
 
-			<para>
-				The following code examples show the various configuration
-			    files with appropriate comments.
-            </para>
+    <sect2 id="view-jsp-tags">
+      <title>Additional tags facilitating development</title>
 
-			<programlisting><![CDATA[		        
-<!-- ===========================================================-->
-<!-- View resolver. Required by web framework.                  -->
-<!-- ===========================================================-->
-<!--
+      <para>Spring provides data binding of request parameters to command
+      objects as described in earlier chapters. To facilitate the development
+      of JSP pages in combination with those data binding features, Spring
+      provides a couple of tags that ease the pain (if that should even arise
+      ;-). All Spring have <emphasis>html escaping</emphasis> features to
+      enable or disable escaping of characters.</para>
+
+      <para>The tag libarry descriptor (TLD) is included in the
+      <literal>spring.jar</literal> as well in the distribution itself. More
+      information about the individual tags can be found online: <ulink
+      url="http://www.springframework.org/docs/taglib/index.html"></ulink>.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="view-velocity">
+    <title>Velocity</title>
+
+    <para>Velocity is a view technology developed the Jakarta Project. More
+    information about Velocity can be found at
+    http://jakarta.apache.org/velocity. This section describes how to
+    integrate the Velocity view technology for use with Spring.</para>
+
+    <sect2 id="view-velocity-dependencies">
+      <title>Dependencies</title>
+
+      <para>There is one dependency that your web application will need to
+      satisfy before working with Velocity, namely that
+      <literal>velocity-1.x.x.jar</literal> needs to be available. Typically
+      this is included in the <literal>WEB-INF/lib</literal> folder where it
+      is guaranteed to be found by a J2EE server and added to the classpath
+      for your application. It is of course assumed that you already have the
+      spring.jar in your <literal>WEB-INF/lib</literal> folder too! The latest
+      stable velocity jar is supplied with the Spring framework and can be
+      copied from the <literal>/lib/velocity</literal> directory.</para>
+    </sect2>
+
+    <sect2 id="view-velocity-configuration-dispatcher">
+      <title>Dispatcher Servlet Context</title>
+
+      <para>The configuration file for your Spring dispatcher servlet (usually
+      <literal>WEB-INF/[servletname]-servlet.xml</literal>) should already
+      contain a bean definition for the view resolver. We'll also add a bean
+      here to configure the Velocity environment. I've chosen to call my
+      dispatcher 'frontcontroller' so my config file names reflect
+      this.</para>
+
+      <para>The following code examples show the various configuration files
+      with appropriate comments.</para>
+
+      <programlisting>&lt;!-- ===========================================================--&gt;
+&lt;!-- View resolver. Required by web framework.                  --&gt;
+&lt;!-- ===========================================================--&gt;
+&lt;!--
   View resolvers can be configured with ResourceBundles or XML files.  If you need
   different view resolving based on Locale, you have to use the resource bundle resolver, 
   otherwise it makes no difference.  I simply prefer to keep the Spring configs and 
   contexts in XML.  See Spring documentation for more info.
--->
-<bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
-  <property name="cache"><value>true</value></property>
-  <property name="location"><value>/WEB-INF/frontcontroller-views.xml</value></property>
-</bean>
+--&gt;
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
+  &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+  &lt;property name="location"&gt;&lt;value&gt;/WEB-INF/frontcontroller-views.xml&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
 
-<!-- ===========================================================-->
-<!-- Velocity configurer.                                       -->
-<!-- ===========================================================-->
-<!--
+&lt;!-- ===========================================================--&gt;
+&lt;!-- Velocity configurer.                                       --&gt;
+&lt;!-- ===========================================================--&gt;
+&lt;!--
   The next bean sets up the Velocity environment for us based on a properties file, the 
   location of which is supplied here and set on the bean in the normal way.  My example shows
   that the bean will expect to find our velocity.properties file in the root of the 
@@ -185,73 +154,58 @@ productList.url=/WEB-INF/jsp/productlist.jsp
   to supply it here.  Another possibility would be to specify all of the velocity
   properties here in a property set called "velocityProperties" and dispense with the
   actual velocity.properties file altogether.
--->
-<bean 
+--&gt;
+&lt;bean 
   id="velocityConfig" 
   class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
-  singleton="true">
-  <property name="configLocation"><value>/WEB-INF/velocity.properties</value></property>          
-</bean>
-				]]></programlisting>
-		</sect2>
-			
-		<sect2 id="view-velocity-configuration-velocityprops">
-			
-			<title>Velocity.properties</title>
+  singleton="true"&gt;
+  &lt;property name="configLocation"&gt;&lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;&lt;/property&gt;          
+&lt;/bean&gt;</programlisting>
+    </sect2>
 
-			<para>
-				This file contains the values that are passed to the Velocity
-			    runtime in order to configure velocity itself. Only a few
-			    properties are actually required, but many more optional
-			    properties are available - see the Velocity docs for more
-			    information. Here, I'm just demonstrating the bare minimum to
-			    get Velocity up and running in your Spring MVC application.
-			</para>
+    <sect2 id="view-velocity-configuration-velocityprops">
+      <title>Velocity.properties</title>
 
-			<sect3 id="view-velocity-template-locations">
-			<title>Template Locations</title>
-			<para>
+      <para>This file contains the values that are passed to the Velocity
+      runtime in order to configure velocity itself. Only a few properties are
+      actually required, but many more optional properties are available - see
+      the Velocity docs for more information. Here, I'm just demonstrating the
+      bare minimum to get Velocity up and running in your Spring MVC
+      application.</para>
 
-				The main property values concern the location of the Velocity
-			    templates themselves. Velocity templates can be loaded from
-			    the classpath or the file system and there are pros and cons
-			    for both. Loading from the classpath is entirely portable and
-			    will work on all target servers, but you may find that the
-			    templates clutter your java packages (unless you create a new
-			    source tree for them). A further downside of classpath storage
-			    is that during development, changing anything in the source
-			    tree often causes a refresh of the resource in the
-			    <literal>WEB-INF/classes</literal> tree and this in turn may
-			    cause your development server to restart the application
-			    (hot-deploying of code). This can be irritating. Once most of
-			    the development is complete though, you could store the
-			    templates in a jar file which would make them available to the
-			    application if this were placed in
-			    <literal>WEB-INF/lib</literal>
+      <sect3 id="view-velocity-template-locations">
+        <title>Template Locations</title>
 
-            </para>
+        <para>The main property values concern the location of the Velocity
+        templates themselves. Velocity templates can be loaded from the
+        classpath or the file system and there are pros and cons for both.
+        Loading from the classpath is entirely portable and will work on all
+        target servers, but you may find that the templates clutter your java
+        packages (unless you create a new source tree for them). A further
+        downside of classpath storage is that during development, changing
+        anything in the source tree often causes a refresh of the resource in
+        the <literal>WEB-INF/classes</literal> tree and this in turn may cause
+        your development server to restart the application (hot-deploying of
+        code). This can be irritating. Once most of the development is
+        complete though, you could store the templates in a jar file which
+        would make them available to the application if this were placed in
+        <literal>WEB-INF/lib</literal></para>
+      </sect3>
 
-			</sect3>
+      <sect3 id="view-velocity-example-velocityproperties">
+        <title>Example velocity.properties</title>
 
-			<sect3 id="view-velocity-example-velocityproperties">
-			<title>Example velocity.properties</title>
+        <para>This example stores velocity templates on the file system
+        somewhere under <literal>WEB-INF</literal> so that they are not
+        directly available to the client browsers, but don't cause an
+        application restart in development every time you change one. The
+        downside is that the target server may not be able to resolve the path
+        to these files correctly, particularly if the target server doesn't
+        explode WAR modules on the file system. The file method works fine for
+        Tomcat 4.1.x/5.x, WebSphere 4.x and WebSphere 5.x. Your mileage may
+        vary.</para>
 
-			<para> 
-
-                This example stores velocity templates on the file system
-                somewhere under <literal>WEB-INF</literal> so that they are
-                not directly available to the client browsers, but don't cause
-                an application restart in development every time you change
-                one. The downside is that the target server may not be able to
-                resolve the path to these files correctly, particularly if the
-                target server doesn't explode WAR modules on the file
-                system. The file method works fine for Tomcat 4.1.x/5.x,
-                WebSphere 4.x and WebSphere 5.x. Your mileage may vary.
-
-            </para>
-
-			<programlisting><![CDATA[
-#
+        <programlisting>#
 # velocity.properties - example configuration
 #
 
@@ -282,249 +236,184 @@ file.resource.loader.cache=false
 # override default logging to direct velocity messages
 # to our application log for example.  Assumes you have 
 # defined a log4j.properties file
-runtime.log.logsystem.log4j.category=com.mycompany.myapplication 
-			]]></programlisting>		
+runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlisting>
+      </sect3>
 
-			</sect3>
+      <sect3 id="view-velocity-root-markers">
+        <title>Web application root marker</title>
 
-			<sect3 id="view-velocity-root-markers">
-			<title>Web application root marker</title>		        
-			<para>
+        <para>The file resource loader configuration above uses a marker to
+        denote the root of the web application on the file system
+        <literal>${webapp.root}</literal>. This marker will be translated into
+        the actual OS-specific path by the Spring code prior to supplying the
+        properties to Velocity. This is what makes the file resource loader
+        non-portable in some servers. The actual name of the marker itself can
+        be changed if you consider it important by defining a different
+        "appRootMarker" for VelocityConfigurer. See the Spring documentation
+        for details on how to do this.</para>
+      </sect3>
 
-				The file resource loader configuration above uses a marker to
-			    denote the root of the web application on the file system
-			    <literal>${webapp.root}</literal>. This marker will be
-			    translated into the actual OS-specific path by the Spring code
-			    prior to supplying the properties to Velocity. This is what
-			    makes the file resource loader non-portable in some
-			    servers. The actual name of the marker itself can be changed
-			    if you consider it important by defining a different
-			    "appRootMarker" for VelocityConfigurer. See the Spring
-			    documentation for details on how to do this.
+      <sect3 id="view-velocity-alternate-properties">
+        <title>Alternative property specifications</title>
 
-            </para>
+        <para>Alternatively, you can specify velocity properties directly in
+        the bean definition for the Velocity config bean by replacing the
+        "configLocation" property with the following inline
+        properties..</para>
 
-			</sect3>
+        <programlisting>&lt;property name="velocityProperties"&gt;
+  &lt;props&gt;
+    &lt;prop key="resource.loader"&gt;file&lt;/prop&gt;
+    &lt;prop key="file.resource.loader.class"&gt;org.apache.velocity.runtime.resource.loader.FileResourceLoader&lt;/prop&gt;
+    &lt;prop key="file.resource.loader.path"&gt;${webapp.root}/WEB-INF/velocity&lt;/prop&gt;
+    &lt;prop key="file.resource.loader.cache"&gt;false&lt;/prop&gt;
+  &lt;/props&gt;
+&lt;/property&gt;</programlisting>
+      </sect3>
 
-			<sect3 id="view-velocity-alternate-properties">
-			<title>Alternative property specifications</title>
+      <sect3 id="view-velocity-default-properties">
+        <title>Default configuration (file resource loaders)</title>
 
-            <para>
+        <para>Note that as of Spring version 1.0-m4 you can avoid using a
+        properties file or inline properties to define file system loading of
+        templates by putting the following property in the Velocity config
+        bean which will cause the other values to be figured out.</para>
 
-			    Alternatively, you can specify velocity properties directly in
-				the bean definition for the Velocity config bean by replacing
-				the "configLocation" property with the following inline
-				properties..
+        <programlisting>&lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;&lt;/property&gt;</programlisting>
+      </sect3>
+    </sect2>
 
-			</para>
+    <sect2 id="view-velocity-configuration-viewconfig">
+      <title>View configuration</title>
 
-			<programlisting><![CDATA[
-<property name="velocityProperties">
-  <props>
-    <prop key="resource.loader">file</prop>
-    <prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
-    <prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
-   	<prop key="file.resource.loader.cache">false</prop>
-  </props>
-</property>
-			]]></programlisting>		
+      <para>The last step in configuration is to define some views that will
+      be rendered with velocity templates. Views are always defined in a
+      consistent manner in Spring context files. As noted earlier, this
+      example uses an XML file to define view beans, but a properties file
+      (ResourceBundle) can also be used. The name of the view definition file
+      was defined earlier in the ViewResolver bean - part of the
+      <literal>WEB-INF/frontcontroller-servlet.xml</literal> file.</para>
 
-			</sect3>
-
-			<sect3 id="view-velocity-default-properties">
-			<title>Default configuration (file resource loaders)</title>
-            <para>
-
-                Note that as of Spring version 1.0-m4 you can avoid using a
-                properties file or inline properties to define file system
-                loading of templates by putting the following property in the
-                Velocity config bean which will cause the other values to be 
-				figured out.
-
-            </para>
-
-			<programlisting><![CDATA[
-<property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>
-			]]></programlisting>		
-
-			</sect3>
-            
-        </sect2>
-			
-		<sect2 id="view-velocity-configuration-viewconfig">
-			
-			<title>View configuration</title>
-
-			<para>
-				The last step in configuration is to define some views that
-			    will be rendered with velocity templates. Views are always
-			    defined in a consistent manner in Spring context files. As
-			    noted earlier, this example uses an XML file to define view
-			    beans, but a properties file (ResourceBundle) can also be
-			    used. The name of the view definition file was defined earlier
-			    in the ViewResolver bean - part of the
-			    <literal>WEB-INF/frontcontroller-servlet.xml</literal> file.
-
-		    </para>
-
-			<programlisting><![CDATA[
-<!--
+      <programlisting>&lt;!--
   Views can be hierarchical, here's an example of a parent view that 
   simply defines the class to use and sets a default template which
   will normally be overridden in child definitions.
--->
-<bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView">
-  <property name="url"><value>mainTemplate.vm</value></property>        
-</bean>
+--&gt;
+&lt;bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView"&gt;
+  &lt;property name="url"&gt;&lt;value&gt;mainTemplate.vm&lt;/value&gt;&lt;/property&gt;        
+&lt;/bean&gt;
 
-<!--
+&lt;!--
   - The main view for the home page.  Since we don't set a template name, the value
   from the parent is used.
--->
-<bean id="welcomeView" parent="parentVelocityView">
-  <property name="attributes">
-    <props>
-      <prop key="title">My Velocity Home Page</prop>
-    </props>
-  </property>     
-</bean>  
+--&gt;
+&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
+  &lt;property name="attributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;     
+&lt;/bean&gt;  
 
-<!--
+&lt;!--
   - Another view - this one defines a different velocity template.
--->
-<bean id="secondaryView" parent="parentVelocityView">
-  <property name="url"><value>secondaryTemplate.vm</value></property>  
-  <property name="attributes">
-    <props>
-      <prop key="title">My Velocity Secondary Page</prop>
-    </props>
-  </property>    
-</bean>   
-			]]></programlisting>
-		</sect2>
+--&gt;
+&lt;bean id="secondaryView" parent="parentVelocityView"&gt;
+  &lt;property name="url"&gt;&lt;value&gt;secondaryTemplate.vm&lt;/value&gt;&lt;/property&gt;  
+  &lt;property name="attributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="title"&gt;My Velocity Secondary Page&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;    
+&lt;/bean&gt;</programlisting>
+    </sect2>
 
-		<sect2 id="view-velocity-templates">
-			<title>Creating the Velocity templates</title>
+    <sect2 id="view-velocity-templates">
+      <title>Creating the Velocity templates</title>
 
-			<para>
+      <para>Finally, you simply need to create the actual velocity templates.
+      We have defined views that reference two templates, mainTemplate.vm and
+      secondaryTemplate.vm Both of these files will live in
+      <literal>WEB-INF/velocity/</literal> as noted in the velocity.properties
+      file above. If you chose a classpath loader in velocity.properties,
+      these files would live in the default package
+      (<literal>WEB-INF/classes</literal>), or in a jar file under
+      <literal>WEB-INF/lib</literal>. Here's what our 'secondaryView' might
+      look like (simplified HTML)</para>
 
-				Finally, you simply need to create the actual velocity
-				templates. We have defined views that reference two templates,
-				mainTemplate.vm and secondaryTemplate.vm Both of these files
-				will live in <literal>WEB-INF/velocity/</literal> as noted in
-				the velocity.properties file above. If you chose a classpath
-				loader in velocity.properties, these files would live in the
-				default package (<literal>WEB-INF/classes</literal>), or in a
-				jar file under <literal>WEB-INF/lib</literal>.  Here's what
-				our 'secondaryView' might look like (simplified HTML)
+      <programlisting>## $title is set in the view definition file for this view.
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;$title&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;This is $title!!&lt;/h1&gt;
 
-            </para>
-
-			<programlisting><![CDATA[
-## $title is set in the view definition file for this view.
-<html>
-  <head><title>$title</title></head>
-  <body>
-    <h1>This is $title!!</h1>
-
-	## model objects are set in the controller and referenced
+    ## model objects are set in the controller and referenced
     ## via bean properties o method names.  See the Velocity 
     ## docs for info
 
     Model Value: $model.value
     Model Method Return Value: $model.getReturnVal()
 
-  </body>
-</html>
-			]]></programlisting>
+  &lt;/body&gt;
+&lt;/html&gt;</programlisting>
 
-                <para>
-				    Now, when your controllers return a ModelAndView with the
-				    "secondaryView" set as the view to render, Velocity should
-				    kick in with the above page.
-                </para>
+      <para>Now, when your controllers return a ModelAndView with the
+      "secondaryView" set as the view to render, Velocity should kick in with
+      the above page.</para>
+    </sect2>
 
-		</sect2>
-		
-		<sect2 id="view-velocity-forms">
+    <sect2 id="view-velocity-forms">
+      <title>Form Handling</title>
 
-		    <title>Form Handling</title>
+      <para>Spring provides a tag library for use in JSP's that contains
+      (amongst other things) a <literal>&lt;spring:bind&gt;</literal> tag.
+      This tag primarily enables forms to display the results of failed
+      validations from a <literal>Validator</literal> in the web or business
+      tier. This behaviour can be simulated with a Velocity macro and some
+      additional Spring functionality.</para>
 
-			<para>
-			
-			    Spring provides a tag library for use in JSP's that contains
-			    (amongst other things) a
-			    <literal><![CDATA[<spring:bind>]]></literal> tag.  This tag
-			    primarily enables forms to display the results of failed
-			    validations from a <literal>Validator</literal> in the web or
-			    business tier.  This behaviour can be simulated with a
-			    Velocity macro and some additional Spring functionality.
+      <sect3 id="view-velocity-validation">
+        <title>Validation errors</title>
 
-			</para>
+        <para>The error messages that are actually produced from the
+        validation of a form submission can be read from a properties file to
+        make them easily maintainable or internationalised. Spring handles
+        this elegantly in its own way and you should refer to the MVC tutorial
+        or relevant parts of the javadocs for details on how this works. In
+        order to gain access to the messages, the
+        <literal>RequestContext</literal> object needs to be exposed to your
+        Velocity templates in the <literal>VelocityContext</literal>. Amend
+        your template definition in views.properties or views.xml file to give
+        a name to this attribute (giving it a name is what causes it to be
+        exposed)</para>
 
-			<sect3 id="view-velocity-validation">
-			<title>Validation errors</title>
-			<para>
-			
-			    The error messages that are actually produced from the
-			    validation of a form submission can be read from a properties
-			    file to make them easily maintainable or internationalised.
-			    Spring handles this elegantly in its own way and you should
-			    refer to the MVC tutorial or relevant parts of the javadocs
-			    for details on how this works.  In order to gain access to the
-			    messages, the <literal>RequestContext</literal> object needs
-			    to be exposed to your Velocity templates in the
-			    <literal>VelocityContext</literal>.  Amend your template
-			    definition in views.properties or views.xml file to give a
-			    name to this attribute (giving it a name is what causes it to
-			    be exposed)
+        <programlisting>&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
+  &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;  
+  &lt;property name="attributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;     
+&lt;/bean&gt;</programlisting>
 
-			</para>
+        <para>The example above is based on our earlier example and sets the
+        RequestContext attribute name to be rc. All Velocity views that
+        inherit from this parent view will now have an additional object
+        available to them via the reference <literal>$rc</literal></para>
+      </sect3>
 
-			<programlisting><![CDATA[
-<bean id="welcomeView" parent="parentVelocityView">
-  <property name="requestContextAttribute"><value>rc</value></property>  
-  <property name="attributes">
-    <props>
-      <prop key="title">My Velocity Home Page</prop>
-    </props>
-  </property>     
-</bean>
-			]]></programlisting>
+      <sect3 id="view-velocity-macrohelper">
+        <title>Velocity macro helper</title>
 
-			<para>
+        <para>Next, a velocity macro needs to be defined. It makes sense to
+        create this macro in a global macro file since it will be reusable
+        across many Velocity templates (html forms). Refer to the Velocity
+        documentation for more information on creating macros.</para>
 
-			    The example above is based on our earlier example and sets the
-			    RequestContext attribute name to be rc.  All Velocity views
-			    that inherit from this parent view will now have an additional
-			    object available to them via the reference
-			    <literal>$rc</literal>
+        <para>The code below should go into the file VM_global_library.vm in
+        the root directory of your Velocity template location..</para>
 
-			</para>
-
-			</sect3>
-
-			<sect3 id="view-velocity-macrohelper">
-			<title>Velocity macro helper</title>
-			<para>
-
-			    Next, a velocity macro needs to be defined.  It makes sense to
-			    create this macro in a global macro file since it will be
-			    reusable across many Velocity templates (html forms).  Refer
-			    to the Velocity documentation for more information on creating
-			    macros.  
-
-			</para>
-
-			<para>
-
-			    The code below should go into the file VM_global_library.vm in
-			    the root directory of your Velocity template location..
-
-			</para>
-
-			<programlisting><![CDATA[
-#*
+        <programlisting>#*
  * showerror
  *
  * display an error for the field name supplied if one exists
@@ -538,58 +427,43 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication
   #if( $errors )
     #if( $errors.getFieldErrors( $field ))
       #foreach($err in $errors.getFieldErrors( $field ))
-        <span class="fieldErrorText">$rc.getMessage($err)</span><br />
+        &lt;span class="fieldErrorText"&gt;$rc.getMessage($err)&lt;/span&gt;&lt;br /&gt;
       #end
     #end
   #end
-#end
-            ]]></programlisting>
+#end      </programlisting>
+      </sect3>
 
-			</sect3>
+      <sect3 id="view-velocity-validationmessages">
+        <title>Associating error messages with the HTML field</title>
 
-			<sect3 id="view-velocity-validationmessages">
-			<title>Associating error messages with the HTML field</title>
-			<para>
+        <para>Finally, in your html forms, you can use code similar to the
+        following to display bound error messages for each input field.</para>
 
-			    Finally, in your html forms, you can use code similar to the
-			    following to display bound error messages for each input
-			    field.
-
-			</para>
-
-			<programlisting><![CDATA[
-## set the following variable once somewhere at the top of
+        <programlisting>## set the following variable once somewhere at the top of
 ## the velocity template
 #set ($errors=$rc.getErrors("commandBean"))
-<html>
+&lt;html&gt;
 ...
-<form ...>
-  <input name="query" value="$!commandBean.query"><br>
+&lt;form ...&gt;
+  &lt;input name="query" value="$!commandBean.query"&gt;&lt;br&gt;
   #showerror($errors "query")
-</form>
+&lt;/form&gt;
 ...
-</html>
-            ]]></programlisting>
+&lt;/html&gt;        </programlisting>
+      </sect3>
+    </sect2>
 
-			</sect3>
-		</sect2>		
-		
-   		<sect2 id="view-velocity-summary">
-			<title>Summary</title> 
+    <sect2 id="view-velocity-summary">
+      <title>Summary</title>
 
-            <para>
+      <para>To summarize, this is the tree structure of files discussed in the
+      example above. Only a partial tree is shown, some required directories
+      are not highlighted here. Incorrect file locations are probably the
+      major reason for velocity views not working, with incorrect properties
+      in the view definitions a close second.</para>
 
-                To summarize, this is the tree structure of files discussed in
-			    the example above. Only a partial tree is shown, some required
-			    directories are not highlighted here. Incorrect file locations
-			    are probably the major reason for velocity views not working,
-			    with incorrect properties in the view definitions a close
-			    second.
-
-            </para>
-
-			<programlisting><![CDATA[
-ProjectRoot
+      <programlisting>ProjectRoot
   |
   +- WebContent
       |
@@ -608,76 +482,46 @@ ProjectRoot
           |
           +- frontcontroller-servlet.xml
           +- frontcontroller-views.xml
-          +- velocity.properties
+          +- velocity.properties</programlisting>
+    </sect2>
+  </sect1>
 
-]]></programlisting>
-			
-		</sect2>
-	</sect1>
-	
-	
-	
-	<!-- ============================================================ -->
-	<!-- XSLT                                                         -->
-	<!-- ============================================================ -->
-	<sect1 id="view-xslt">
-		<title>XSLT Views</title>
+  <sect1 id="view-xslt">
+    <title>XSLT Views</title>
 
-		<para>
+    <para>XSLT is a transformation language for XML and is popular as a view
+    technology within web applications. XSLT can be a good choice as a view
+    technology if your application naturally deals with XML, or if your model
+    can easily be converted to XML. The following section shows how to produce
+    an XML document as model data and have it transformed with XSLT in a
+    Spring application.</para>
 
-			XSLT is a transformation language for XML and is popular as a view
-			technology within web applications.  XSLT can be a good choice as
-			a view technology if your application naturally deals with XML, or
-			if your model can easily be converted to XML.  The following
-			section shows how to produce an XML document as model data and
-			have it transformed with XSLT in a Spring application.
+    <sect2 id="view-xslt-firstwords">
+      <title>My First Words</title>
 
-		</para>
-		
-		<sect2 id="view-xslt-firstwords">
+      <para>This example is a trivial Spring application that creates a list
+      of words in the Controller and adds them to the model map. The map is
+      returned along with the view name of our XSLT view. See <xref
+      linkend="mvc-controller" /> for details of Spring
+      <literal>Controller</literal>s. The XSLT view will turn the list of
+      words into a simple XML document ready for transformation.</para>
 
-			<title>My First Words</title> 
+      <sect3 id="view-xslt-beandefs">
+        <title>Bean definitions</title>
 
-            <para>
+        <para>Configuration is standard for a simple Spring application. The
+        dispatcher servlet config file contains a reference to a
+        <literal>ViewResolver</literal>, URL mappings and a single controller
+        bean.. <programlisting>&lt;bean id="homeController"class="xslt.HomeController"/&gt; </programlisting>
+        ..that implements our word generation 'logic'.</para>
+      </sect3>
 
-			    This example is a trivial Spring application that creates a
-			    list of words in the Controller and adds them to the model
-			    map.  The map is returned along with the view name of our XSLT
-			    view.  See <xref linkend="mvc-controller"/> for details of
-			    Spring <literal>Controller</literal>s.  The XSLT view will
-			    turn the list of words into a simple XML document ready for
-			    transformation.
+      <sect3 id="view-xslt-controllercode">
+        <title>Standard MVC controller code</title>
 
-			</para>
-			
-
-			<sect3 id="view-xslt-beandefs">
-			<title>Bean definitions</title> 
-
-            <para>
-
-			    Configuration is standard for a simple Spring application.
-			    The dispatcher servlet config file contains a reference to a
-			    <literal>ViewResolver</literal>, URL mappings and a single
-			    controller bean..
-<programlisting><![CDATA[
-<bean id="homeController"class="xslt.HomeController"/> ]]></programlisting>
-				..that implements our word generation 'logic'.
-
-             </para>
-
-			 </sect3>
-
-			 <sect3 id="view-xslt-controllercode">
-			 <title>Standard MVC controller code</title>
-			 <para>
-
-                The controller logic is encapsulated in a subclass of
-                AbstractController, with the handler method being defined like
-                so..
-
-<programlisting><![CDATA[
-protected ModelAndView handleRequestInternal(
+        <para>The controller logic is encapsulated in a subclass of
+        AbstractController, with the handler method being defined like so..
+        <programlisting>protected ModelAndView handleRequestInternal(
   HttpServletRequest req,
   HttpServletResponse resp)
   throws Exception {
@@ -691,49 +535,36 @@ protected ModelAndView handleRequestInternal(
   map.put("wordList", wordList);
       
   return new ModelAndView("home", map);
-} ]]></programlisting>
+} </programlisting></para>
 
-			</para>
+        <para>So far we've done nothing that's XSLT specific. The model data
+        has been created in the same way as you would for any other Spring MVC
+        application. Depending on the configuration of the application now,
+        that list of words could be rendered by JSP/JSTL by having them added
+        as request attributes, or they could be handled by Velocity by adding
+        the object to the VelocityContext. In order to have XSLT render them,
+        they of course have to be converted into an XML document somehow.
+        There are software packages available that will automatically 'domify'
+        an object graph, but within Spring, you have complete flexibility to
+        create the DOM from your model in any way you choose. This prevents
+        the transformation of XML playing too great a part in the structure of
+        your model data which is a danger when using tools to manage the
+        domification process.</para>
+      </sect3>
 
-			<para>
-			
-			    So far we've done nothing that's XSLT specific.  The model
-			    data has been created in the same way as you would for any
-			    other Spring MVC application.  Depending on the configuration
-			    of the application now, that list of words could be rendered
-			    by JSP/JSTL by having them added as request attributes, or
-			    they could be handled by Velocity by adding the object to the
-			    VelocityContext.  In order to have XSLT render them, they of
-			    course have to be converted into an XML document somehow.
-			    There are software packages available that will automatically
-			    'domify' an object graph, but within Spring, you have complete
-			    flexibility to create the DOM from your model in any way you
-			    choose.  This prevents the transformation of XML playing too
-			    great a part in the structure of your model data which is a
-			    danger when using tools to manage the domification process.
+      <sect3 id="view-xslt-subclassing">
+        <title>Convert the model data to XML</title>
 
-	        </para>		
-		</sect3>
-
-
-		<sect3 id="view-xslt-subclassing">
-
-			<title>Convert the model data to XML</title> 
-
-            <para>
-
-			    In order to create a DOM document from our list of words or
-			    any other model data, we subclass
-			    <literal>org.springframework.web.servlet.view.xslt.AbstractXsltView</literal>.
-			    In doing so, we must implement the abstract method
-			    <literal>createDomNode()</literal>.  The first parameter
-			    passed to this method is our model Map.  Here's the complete
-			    listing of the HomePage class in our trivial word application
-			    - it uses JDOM to build the XML document before converting it
-			    to the required W3C Node, but this is simply because I find
-			    JDOM (and Dom4J) easier API's to handle than the W3C API.
-
-<programlisting><![CDATA[
+        <para>In order to create a DOM document from our list of words or any
+        other model data, we subclass
+        <literal>org.springframework.web.servlet.view.xslt.AbstractXsltView</literal>.
+        In doing so, we must implement the abstract method
+        <literal>createDomNode()</literal>. The first parameter passed to this
+        method is our model Map. Here's the complete listing of the HomePage
+        class in our trivial word application - it uses JDOM to build the XML
+        document before converting it to the required W3C Node, but this is
+        simply because I find JDOM (and Dom4J) easier API's to handle than the
+        W3C API. <programlisting>
 package xslt;
 
 // imports omitted for brevity
@@ -747,126 +578,100 @@ public class HomePage extends AbstractXsltView {
     org.jdom.Document doc = new org.jdom.Document();
     Element root = new Element(rootName);
     doc.setRootElement(root);
-		
+
     List words = (List) model.get("wordList");
-    for (Iterator it = words.iterator(); it.hasNext();) {	
-      String nextWord = (String) it.next();	
+    for (Iterator it = words.iterator(); it.hasNext();) {
+      String nextWord = (String) it.next();
       Element e = new Element("word");
       e.setText(nextWord);
       root.addContent(e);
     }
-		
+
     // convert JDOM doc to a W3C Node and return
     return new DOMOutputter().output( doc );
-  }	
+  }
 
-}
-]]></programlisting>
+}</programlisting></para>
 
-			</para>
-			
-			
-			<sect4 id="view-xslt-formathelper">
-			
-				<title>Formatting dates and currency</title>
-				
-				<para>
+        <sect4>
+          <title>Adding stylesheet parameters</title>
 
-					Unlike JSTL and Velocity, XSLT has relatively poor support
-					for locale based currency and date formatting.  In
-					recognition of the fact, Spring provides a helper class
-					that you can use from within your
-					<literal>createDomNode()</literal> methods to get such
-					support.  See the javadocs for
-					<literal>org.springframework.web.servlet.view.xslt.FormatHelper</literal>
+          <para>A series of parameter name/value pairs can optionally be
+          defined by your subclass which will be added to the transformation
+          object. The parameter names must match those defined in your XSLT
+          template declared with <literal>&lt;xsl:param
+          name="myParam"&gt;defaultValue&lt;/xsl:param&gt;</literal> To
+          specify the parameters, override the method
+          <literal>getParameters()</literal> from AbstractXsltView and return
+          a <literal>Map</literal> of the name/value pairs.</para>
+        </sect4>
 
-				</para>	
-				
-			</sect4>
-		</sect3>
+        <sect4 id="view-xslt-formathelper">
+          <title>Formatting dates and currency</title>
 
-		<sect3 id="view-xslt-viewdefinitions">
+          <para>Unlike JSTL and Velocity, XSLT has relatively poor support for
+          locale based currency and date formatting. In recognition of the
+          fact, Spring provides a helper class that you can use from within
+          your <literal>createDomNode()</literal> methods to get such support.
+          See the javadocs for
+          <literal>org.springframework.web.servlet.view.xslt.FormatHelper</literal></para>
+        </sect4>
+      </sect3>
 
-			<title>Defining the view properties</title> 
+      <sect3 id="view-xslt-viewdefinitions">
+        <title>Defining the view properties</title>
 
-            <para>
-			    
-				The views.properties file (or equivalent xml definition if
-				you're using an XML based view resolver as we did in the
-				Velocity examples above) looks like this for the one-view
-				application that is 'My First Words'..
-
-<programlisting><![CDATA[
+        <para>The views.properties file (or equivalent xml definition if
+        you're using an XML based view resolver as we did in the Velocity
+        examples above) looks like this for the one-view application that is
+        'My First Words'.. <programlisting>
 home.class=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
 home.root=words
-]]></programlisting>
+</programlisting> Here, you can see how the view is tied in with the HomePage
+        class just written which handles the model domification in the first
+        property '.class'. The stylesheetLocation property obviously points to
+        the XSLT file which will handle the XML transformation into HTML for
+        us and the final property '.root' is the name that will be used as the
+        root of the XML document. This gets passed to the HomePage class above
+        in the second parameter to the <literal>createDomNode</literal>
+        method.</para>
+      </sect3>
 
-                 Here, you can see how the view is tied in with the HomePage
-                 class just written which handles the model domification in
-                 the first property '.class'.  The stylesheetLocation property
-                 obviously points to the XSLT file which will handle the XML
-                 transformation into HTML for us and the final property
-                 '.root' is the name that will be used as the root of the XML
-                 document.  This gets passed to the HomePage class above in
-                 the second parameter to the <literal>createDomNode</literal>
-                 method.
+      <sect3 id="view-xslt-transforming">
+        <title>Document transformation</title>
 
-			 </para>
+        <para>Finally, we have the XSLT code used for transforming the above
+        document. As highlighted in the views.properties file, it is called
+        <literal>home.xslt</literal> and it lives in the war file under
+        <literal>WEB-INF/xsl</literal>. <programlisting>&lt;?xml version="1.0"?&gt;
 
-			 			
-		</sect3>
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;xsl:output method="text/html" omit-xml-declaration="yes"/&gt;
 
+  &lt;xsl:template match="/"&gt;
+    &lt;html&gt;
+      &lt;head&gt;&lt;title&gt;Hello!&lt;/title&gt;&lt;/head&gt;
+      &lt;body&gt;
 
-		<sect3 id="view-xslt-transforming">
+        &lt;h1&gt;My First Words&lt;/h1&gt;
+        &lt;xsl:for-each select="wordList/word"&gt;
+          &lt;xsl:value-of select="."/&gt;&lt;br /&gt;
+        &lt;/xsl:for-each&gt; 
 
-			<title>Document transformation</title>
+      &lt;/body&gt;
+    &lt;/html&gt;
+  &lt;/xsl:template&gt;
 
-            <para>
+&lt;/xsl:stylesheet&gt;</programlisting></para>
+      </sect3>
+    </sect2>
 
-			    Finally, we have the XSLT code used for transforming the above
-			    document.  As highlighted in the views.properties file, it is
-			    called <literal>home.xslt</literal> and it lives in the war
-			    file under <literal>WEB-INF/xsl</literal>.
+    <sect2 id="view-xslt-summary">
+      <title>Summary</title>
 
-<programlisting><![CDATA[<?xml version="1.0"?>
-
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <xsl:output method="text/html" omit-xml-declaration="yes"/>
-
-  <xsl:template match="/">	
-    <html>
-      <head><title>Hello!</title></head>				
-      <body>
-
-        <h1>My First Words</h1>
-        <xsl:for-each select="wordList/word">
-          <xsl:value-of select="."/><br />
-        </xsl:for-each> 
-				
-      </body>
-    </html>	
-  </xsl:template>
-	
-</xsl:stylesheet>]]></programlisting>
-
-			</para>
-
-		</sect3>
-
-		</sect2>
-
-		<sect2 id="view-xslt-summary">
-
-			<title>Summary</title> 
-
-            <para>
-
-			    A summary of the files discussed and their location in the WAR
-			    file is shown in the simplified WAR structure below.
-
-<programlisting><![CDATA[
-ProjectRoot
+      <para>A summary of the files discussed and their location in the WAR
+      file is shown in the simplified WAR structure below. <programlisting>ProjectRoot
   |
   +- WebContent
       |
@@ -889,129 +694,81 @@ ProjectRoot
           |   |
           |   +- home.xslt
           |
-          +- frontcontroller-servlet.xml
+          +- frontcontroller-servlet.xml</programlisting> You will also need
+      to ensure that an XML parser and an XSLT engine are available on the
+      classpath. JDK 1.4 provides them by default, and most J2EE containers
+      will also make them available by default, but it's a possible source of
+      errors to be aware of.</para>
+    </sect2>
+  </sect1>
 
-]]></programlisting>
+  <sect1 id="view-document">
+    <title>Document views (PDF/Excel)</title>
 
-                You will also need to ensure that an XML parser and an XSLT
-                engine are available on the classpath.  JDK 1.4 provides them
-                by default, and most J2EE containers will also make them
-                available by default, but it's a possible source of errors to
-                be aware of.
-			
-			</para>
+    <sect2 id="view-document-intro">
+      <title>Introduction</title>
 
-		</sect2>
+      <para>Returning an HTML page isn't always the best way for the user to
+      view the model output, and Spring makes it simple to generate a PDF
+      document or an Excel spreadsheet dynamically from the model data. The
+      document is the view and will be streamed from the server with the
+      corrdct content type to (hopefully) enable the client PC to run the
+      spreadsheet or PDF viewer application in response.</para>
 
+      <para>In order to use Excel views, you need to add the 'poi' library to
+      your classpath, and for PDF generation, the iText.jar. Both are included
+      in the main Spring distribution.</para>
+    </sect2>
 
-	</sect1>
+    <sect2 id="view-document-config">
+      <title>Configuration and setup</title>
 
+      <para>Document based views are handled in an almost identical fashion to
+      XSLT views, and the following sections build upon the previous one by
+      demonstrating how the same controller used in the XSLT example is
+      invoked to render the same model as both a PDF document and an Excel
+      spreadsheet (which can also be viewed or manipulated in Open
+      Office).</para>
 
-	<!-- ============================================================ -->
-	<!-- Document                                                     -->
-	<!-- ============================================================ -->
-    <sect1 id="view-document">
-		<title>Document views (PDF/Excel)</title>
+      <sect3 id="view-document-configviews">
+        <title>Document view definitions</title>
 
-		
-		<sect2 id="view-document-intro">
-		<title>Introduction</title> 
-
-		<para>
-
-			Returning an HTML page isn't always the best way for the user to
-			view the model output, and Spring makes it simple to generate a
-			PDF document or an Excel spreadsheet dynamically from the model
-			data.  The document is the view and will be streamed from the
-			server with the corrdct content type to (hopefully) enable the
-			client PC to run the spreadsheet or PDF viewer application in
-			response.
-
-		</para>
-
-		<para>
-
-		    In order to use Excel views, you need to add the 'poi' library to
-		    your classpath, and for PDF generation, the iText.jar.  Both are
-		    included in the main Spring distribution.
-
-		</para>
-
-		</sect2>
-
-		<sect2 id="view-document-config">
-
-			<title>Configuration and setup</title> 
-
-            <para>
-
-			    Document based views are handled in an almost identical
-			    fashion to XSLT views, and the following sections build upon
-			    the previous one by demonstrating how the same controller used
-			    in the XSLT example is invoked to render the same model as
-			    both a PDF document and an Excel spreadsheet (which can also
-			    be viewed or manipulated in Open Office).
-
-			</para>
-
-			<sect3 id="view-document-configviews">
-			<title>Document view definitions</title>
-			<para>
-			
-			    Firstly, let's amend the views.properties file (or xml
-			    equivalent) and add a simple view definition for both document
-			    types.  The entire file now looks like this with the XSLT view
-			    shown from earlier..
-
-<programlisting><![CDATA[home.class=xslt.HomePage
+        <para>Firstly, let's amend the views.properties file (or xml
+        equivalent) and add a simple view definition for both document types.
+        The entire file now looks like this with the XSLT view shown from
+        earlier.. <programlisting>home.class=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
 home.root=words
 
 xl.class=excel.HomePage
 
-pdf.class=pdf.HomePage]]></programlisting>
+pdf.class=pdf.HomePage</programlisting> <emphasis>If you want to start with a
+        template spreadsheet to add your model data to, specify the location
+        as the 'url' property in the view definition</emphasis></para>
+      </sect3>
 
-                <emphasis>If you want to start with a template spreadsheet to
-			    add your model data to, specify the location as the 'url'
-			    property in the view definition</emphasis>
+      <sect3 id="view-document-configcontroller">
+        <title>Controller code</title>
 
-			</para>
-			</sect3>
+        <para>The controller code we'll use remains exactly the same from the
+        XSLT example earlier other than to change the name of the view to use.
+        Of course, you could be clever and have this selected based on a URL
+        parameter or some other logic - proof that Spring really is very good
+        at decoupling the views from the controllers!</para>
+      </sect3>
 
-			<sect3 id="view-document-configcontroller">
-			<title>Controller code</title>
-			<para>
+      <sect3 id="view-document-configsubclasses">
+        <title>Subclassing for Excel views</title>
 
-			    The controller code we'll use remains exactly the same from
-			    the XSLT example earlier other than to change the name of the
-			    view to use.  Of course, you could be clever and have this
-			    selected based on a URL parameter or some other logic - proof
-			    that Spring really is very good at decoupling the views from
-			    the controllers!
+        <para>Exactly as we did for the XSLT example, we'll subclass suitable
+        abstract classes in order to implement custom behaviour in generating
+        our output documents. For Excel, this involves writing a subclass of
+        <literal>org.springframework.web.servlet.view.document.AbstractExcelView</literal>
+        and implementing the <literal>buildExcelDocument</literal></para>
 
-			</para>
-			</sect3>
-
-			<sect3 id="view-document-configsubclasses">
-			<title>Subclassing for Excel views</title>
-			<para>
-
-			    Exactly as we did for the XSLT example, we'll subclass
-			    suitable abstract classes in order to implement custom
-			    behaviour in generating our output documents.  For Excel, this
-			    involves writing a subclass of
-			    <literal>org.springframework.web.servlet.view.document.AbstractExcelView</literal>
-			    and implementing the <literal>buildExcelDocument</literal>
-
-			</para>
-
-			<para>
-			
-			    Here's the complete listing for our Excel view which displays
-			    the word list from the model map in consecutive rows of the
-			    first column of a new spreadsheet..
-
-<programlisting><![CDATA[package excel;
+        <para>Here's the complete listing for our Excel view which displays
+        the word list from the model map in consecutive rows of the first
+        column of a new spreadsheet.. <programlisting>package excel;
 
 // imports omitted for brevity
 
@@ -1033,45 +790,35 @@ public class HomePage extends AbstractExcelView {
     //sheet = wb.getSheetAt( 0 );
     sheet = wb.createSheet("Spring");
     sheet.setDefaultColumnWidth((short)12);
-		
+
     // write a text at A1
     cell = getCell( sheet, 0, 0 );
     setText(cell,"Spring-Excel test");
-		
+
     List words = (List ) model.get("wordList");
-    for (int i=0; i < words.size(); i++) {
+    for (int i=0; i &lt; words.size(); i++) {
       cell = getCell( sheet, 2+i, 0 );
       setText(cell, (String) words.get(i));
-	
+
     }
   }
-}]]></programlisting>
+}</programlisting></para>
 
-            </para>
+        <para>If you now amend the controller such that it returns
+        <literal>xl</literal> as the name of the view (<literal>return new
+        ModelAndView("xl", map);</literal>) and run your application again,
+        you should find that the Excel spreadsheet is created and downloaded
+        automagically when you request the same page as before.</para>
+      </sect3>
 
-			<para>
+      <sect3 id="view-document-configsubclasspdf">
+        <title>Subclassing for PDF views</title>
 
-			    If you now amend the controller such that it returns
-			    <literal>xl</literal> as the name of the view (<literal>return
-			    new ModelAndView("xl", map);</literal>) and run your
-			    application again, you should find that the Excel spreadsheet
-			    is created and downloaded automagically when you request the
-			    same page as before.
-
-			</para>
-		    </sect3>
-
-			<sect3 id="view-document-configsubclasspdf">
-			<title>Subclassing for PDF views</title>
-			<para>
-			
-			    The PDF version of the word list is even simpler.  This time,
-			    the class extends
-			    <literal>org.springframework.web.servlet.view.document.AbstractPdfView</literal>
-			    and implements the <literal>buildPdfDocument()</literal>
-			    method as follows..
-
-<programlisting><![CDATA[package pdf;
+        <para>The PDF version of the word list is even simpler. This time, the
+        class extends
+        <literal>org.springframework.web.servlet.view.document.AbstractPdfView</literal>
+        and implements the <literal>buildPdfDocument()</literal> method as
+        follows.. <programlisting>package pdf;
 
 // imports omitted for brevity
 
@@ -1087,237 +834,182 @@ public class PDFPage extends AbstractPdfView {
         
     List words = (List) model.get("wordList");
         
-    for (int i=0; i<words.size(); i++)
+    for (int i=0; i&lt;words.size(); i++)
       doc.add( new Paragraph((String) words.get(i)));
-        	
+    
   }
-}]]></programlisting>
+}</programlisting> Once again, amend the controller to return the
+        <literal>pdf</literal> view with a <literal>return new
+        ModelAndView("pdf", map);</literal> and reload the URL in your
+        application. This time a PDF document should appear listing each of
+        the words in the model map.</para>
+      </sect3>
+    </sect2>
+  </sect1>
 
-                Once again, amend the controller to return the
-                <literal>pdf</literal> view with a <literal>return new
-                ModelAndView("pdf", map);</literal> and reload the URL in your
-                application.  This time a PDF document should appear listing
-                each of the words in the model map.
+  <sect1 id="view-tapestry">
+    <title>Tapestry</title>
 
-			</para>
-			</sect3>
+    <para>Tapestry is a powerful, component-oriented web application framework
+    from Apache's Jakarta project (<ulink
+    url="http://jakarta.apache.org/tapestry"></ulink>). Spring Framework is a
+    powerful J2EE application framework which is built around the concept of a
+    lightweight container. While Spring has its own powerful web ui layer,
+    there are a number of unique advantages to building a J2EE application
+    using a combination of Tapestry for the web ui, and the Spring container
+    for the lower layers. This document attempts to detail a few best
+    practices for combining these two frameworks. It is expected that you are
+    relatively familiar with both Tapestry and Spring Framework basics, so
+    they will not be explained here. General introductory documentation for
+    both Tapestry and Spring Framework are available on their respective web
+    sites.</para>
 
-			
-		</sect2>
+    <sect2 id="view-tapestry-architecture">
+      <title>Architecture</title>
 
+      <para>A typical layered J2EE application built with Tapestry and Spring
+      will consist of a top UI layer built with Tapestry, and a number of
+      lower layers, hosted out of one or more Spring Application
+      Contexts.</para>
 
-	</sect1>
+      <para>//TODO Graphic insert</para>
+    </sect2>
 
+    <sect2 id="view-tapestry-implementation">
+      <title>Implementation</title>
 
+      <para>The only real question (which needs to be addressed by this
+      document), is how Tapestry pages get access to service implementations,
+      which are simply beans defined in an instance of the Spring Application
+      Context.</para>
 
-	<!-- ============================================================ -->
-	<!-- Tapestry                                                     -->
-	<!-- ============================================================ -->
-    <sect1 id="view-tapestry">
-		<title>Tapestry</title>
+      <sect3 id="view-tapestry-context">
+        <title>Sample application context</title>
 
-		<para>
-
-			Tapestry is a powerful, component-oriented web application
-			framework from Apache's Jakarta project (<ulink
-			url="http://jakarta.apache.org/tapestry"/>). Spring Framework is a
-			powerful J2EE application framework which is built around the
-			concept of a lightweight container. While Spring has its own
-			powerful web ui layer, there are a number of unique advantages to
-			building a J2EE application using a combination of Tapestry for
-			the web ui, and the Spring container for the lower layers. This
-			document attempts to detail a few best practices for combining
-			these two frameworks. It is expected that you are relatively
-			familiar with both Tapestry and Spring Framework basics, so they
-			will not be explained here. General introductory documentation for
-			both Tapestry and Spring Framework are available on their
-			respective web sites.
+        <para>Assume we have the following simple Application Context
+        definition, in xml form: <programlisting>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+       "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
  
-
-		</para>
-		
-		<sect2 id="view-tapestry-architecture">
-			<title>Architecture</title> 
-            <para>
-
-			    A typical layered J2EE application built with Tapestry and
-			    Spring will consist of a top UI layer built with Tapestry, and
-			    a number of lower layers, hosted out of one or more Spring
-			    Application Contexts.
-
-			</para>
-
-			<para>
-
-			    //TODO Graphic insert
-
-			</para>			
-		</sect2>
-
-
-		<sect2 id="view-tapestry-implementation">
-			<title>Implementation</title> 
-            <para>
-
-			    The only real question (which needs to be addressed by this
-			    document), is how Tapestry pages get access to service
-			    implementations, which are simply beans defined in an instance
-			    of the Spring Application Context.
-
-			</para>
-
-			<sect3 id="view-tapestry-context">
-			<title>Sample application context</title>
-			<para>
-
-			    Assume we have the following simple Application Context
-			    definition, in xml form:
-
-<programlisting><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
- <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
-       "http://www.springframework.org/dtd/spring-beans.dtd">
+ &lt;beans&gt;
  
- <beans>
+   &lt;!-- ========================= GENERAL DEFINITIONS ========================= --&gt;
  
-   <!-- ========================= GENERAL DEFINITIONS ========================= -->
+   &lt;!-- ========================= PERSISTENCE DEFINITIONS ========================= --&gt;
  
-   <!-- ========================= PERSISTENCE DEFINITIONS ========================= -->
+   &lt;!-- the DataSource --&gt;
+   &lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+     &lt;property name="jndiName"&gt;&lt;value&gt;java:DefaultDS&lt;/value&gt;&lt;/property&gt;
+     &lt;property name="resourceRef"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
+   &lt;/bean&gt;
  
-   <!-- the DataSource -->
-   <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-     <property name="jndiName"><value>java:DefaultDS</value></property>
-     <property name="resourceRef"><value>false</value></property>
-   </bean>
+   &lt;!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean --&gt;
+   &lt;bean id="hibSessionFactory" 
+     class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+     &lt;property name="dataSource"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
+   &lt;/bean&gt;
  
-   <!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean -->
-   <bean id="hibSessionFactory" 
-     class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
-     <property name="dataSource"><ref bean="dataSource"/></property>
-   </bean>
- 
-   <!--
+   &lt;!--
       - Defines a transaction manager for usage in business or data access objects.
       - No special treatment by the context, just a bean instance available as reference
       - for business objects that want to handle transactions, e.g. via TransactionTemplate.
-     -->
-   <bean id="transactionManager" 
-     class="org.springframework.transaction.jta.JtaTransactionManager">
-   </bean>
+     --&gt;
+   &lt;bean id="transactionManager" 
+     class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+   &lt;/bean&gt;
  
-   <bean id="mapper" 
-     class="com.whatever.dataaccess.mapper.hibernate.MapperImpl">
-     <property name="sessionFactory"><ref bean="hibSessionFactory"/></property>
-   </bean>
+   &lt;bean id="mapper" 
+     class="com.whatever.dataaccess.mapper.hibernate.MapperImpl"&gt;
+     &lt;property name="sessionFactory"&gt;&lt;ref bean="hibSessionFactory"/&gt;&lt;/property&gt;
+   &lt;/bean&gt;
    
-   <!-- ========================= BUSINESS DEFINITIONS ========================= -->
+   &lt;!-- ========================= BUSINESS DEFINITIONS ========================= --&gt;
  
-   <!-- AuthenticationService, including tx interceptor -->
-   <bean id="authenticationServiceTarget"
-         class="com.whatever.services.service.user.AuthenticationServiceImpl">
-     <property name="mapper"><ref bean="mapper"/></property>
-   </bean>
-   <bean id="authenticationService" 
-     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-     <property name="transactionManager"><ref bean="transactionManager"/></property>
-     <property name="target"><ref bean="authenticationServiceTarget"/></property>
-     <property name="proxyInterfacesOnly"><value>true</value></property>
-     <property name="transactionAttributes">
-       <props>
-         <prop key="*">PROPAGATION_REQUIRED</prop>
-       </props>
-     </property>
-   </bean>  
+   &lt;!-- AuthenticationService, including tx interceptor --&gt;
+   &lt;bean id="authenticationServiceTarget"
+         class="com.whatever.services.service.user.AuthenticationServiceImpl"&gt;
+     &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+   &lt;/bean&gt;
+   &lt;bean id="authenticationService" 
+     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+     &lt;property name="target"&gt;&lt;ref bean="authenticationServiceTarget"/&gt;&lt;/property&gt;
+     &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+     &lt;property name="transactionAttributes"&gt;
+       &lt;props&gt;
+         &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+       &lt;/props&gt;
+     &lt;/property&gt;
+   &lt;/bean&gt;  
  
-   <!-- UserService, including tx interceptor -->
-   <bean id="userServiceTarget"
-         class="com.whatever.services.service.user.UserServiceImpl">
-     <property name="mapper"><ref bean="mapper"/></property>
-   </bean>
-   <bean id="userService" 
-      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-     <property name="transactionManager"><ref bean="transactionManager"/></property>
-     <property name="target"><ref bean="userServiceTarget"/></property>
-     <property name="proxyInterfacesOnly"><value>true</value></property>
-     <property name="transactionAttributes">
-       <props>
-         <prop key="*">PROPAGATION_REQUIRED</prop>
-       </props>
-     </property>
-   </bean>  
+   &lt;!-- UserService, including tx interceptor --&gt;
+   &lt;bean id="userServiceTarget"
+         class="com.whatever.services.service.user.UserServiceImpl"&gt;
+     &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+   &lt;/bean&gt;
+   &lt;bean id="userService" 
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+     &lt;property name="target"&gt;&lt;ref bean="userServiceTarget"/&gt;&lt;/property&gt;
+     &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+     &lt;property name="transactionAttributes"&gt;
+       &lt;props&gt;
+         &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+       &lt;/props&gt;
+     &lt;/property&gt;
+   &lt;/bean&gt;  
  
- </beans>
+ &lt;/beans&gt;
 
- ]]></programlisting>
+ </programlisting> Inside the Tapestry application, we need to load this
+        application context, and allow Tapestry pages to get the
+        authenticationService and userService beans, which implement the
+        AuthenticationService and UserService interfaces, respectively.</para>
+      </sect3>
 
-                 Inside the Tapestry application, we need to load this
-                 application context, and allow Tapestry pages to get the
-                 authenticationService and userService beans, which implement
-                 the AuthenticationService and UserService interfaces,
-                 respectively.
+      <sect3 id="view-tapestry-appctx">
+        <title>Obtaining beans in Tapestry pages</title>
 
-			</para>
-			</sect3>
-
-			<sect3 id="view-tapestry-appctx">
-			<title>Obtaining beans in Tapestry pages</title>
-			<para>
-
-				At this point, the application context is available to a
-				web-app by calling Spring's static utility function
-				WebApplicationContextUtils.getApplicationContext(servletContext),
-				where servletContext is the standard ServletContext from the
-				J2EE Servlet spec. As such, one simple mechanism for a page to
-				get an instance of the UserService, for example, would be with
-				code such as:
-
-<programlisting><![CDATA[
+        <para>At this point, the application context is available to a web-app
+        by calling Spring's static utility function
+        WebApplicationContextUtils.getApplicationContext(servletContext),
+        where servletContext is the standard ServletContext from the J2EE
+        Servlet spec. As such, one simple mechanism for a page to get an
+        instance of the UserService, for example, would be with code such as:
+        <programlisting>
    WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
            getRequestCycle().getRequestContext().getServlet().getServletContext());
    UserService userService = appContext.getBean("userService");
    ... some code which uses UserService
-]]></programlisting> 
+</programlisting> This mechanism does work. It can be made a lot less verbose
+        by encapsulating most of the functionality in a method in the base
+        class for the page or component. However, in some respects it goes
+        against the Inversion of Control approach which Spring encourages,
+        which is being used in other layers of this app, in that ideally you
+        would like the page to not have to ask the context for a specific bean
+        by name, and in fact, the page would ideally not know about the
+        context at all.</para>
 
-                This mechanism does work. It can be made a lot less verbose by
-                encapsulating most of the functionality in a method in the
-                base class for the page or component. However, in some
-                respects it goes against the Inversion of Control approach
-                which Spring encourages, which is being used in other layers
-                of this app, in that ideally you would like the page to not
-                have to ask the context for a specific bean by name, and in
-                fact, the page would ideally not know about the context at
-                all.
+        <para>Luckilly, there is a mechanism to allow this. We rely upon the
+        fact that Tapestry already has a mechanism to declaratively add
+        properties to a page, and it is in fact the preferred approach to
+        manage all properties on a page in this declarative fashion, so that
+        Tapestry can properly maange their lifecycle as part of the page and
+        component lifecycle.</para>
+      </sect3>
 
-			</para>
+      <sect3 id="view-tapestry-exposeappctx">
+        <title>Exposing the application context to Tapestry</title>
 
-			<para>
- 
-                Luckilly, there is a mechanism to allow this. We rely upon the
-                fact that Tapestry already has a mechanism to declaratively
-                add properties to a page, and it is in fact the preferred
-                approach to manage all properties on a page in this
-                declarative fashion, so that Tapestry can properly maange
-                their lifecycle as part of the page and component lifecycle.
-
-			</para>
-			</sect3>
-
-			<sect3 id="view-tapestry-exposeappctx">
-			<title>Exposing the application context to Tapestry</title>
-			<para>
- 
-                First we need to make the Application Context available to the
-                Tapestry page or Component without having to have the
-                ServletContext; this is because at the stage in the
-                page's/component's lifecycle when we need to access the
-                Application Context, the ServletContext won't be easily
-                available to the page, so we can't use
-                WebApplicationContextUtils.getApplicationContext(servletContext)
-                directly. One way is by defining a custom version of the
-                Tapestry IEngine which exposes this for us:
- 
-
-<programlisting><![CDATA[
+        <para>First we need to make the Application Context available to the
+        Tapestry page or Component without having to have the ServletContext;
+        this is because at the stage in the page's/component's lifecycle when
+        we need to access the Application Context, the ServletContext won't be
+        easily available to the page, so we can't use
+        WebApplicationContextUtils.getApplicationContext(servletContext)
+        directly. One way is by defining a custom version of the Tapestry
+        IEngine which exposes this for us: <programlisting>
  package com.whatever.web.xportal;
  ...
  import ...
@@ -1343,129 +1035,104 @@ public class PDFPage extends AbstractPdfView {
      }
    }
  }
-]]></programlisting> 
- 
-                This engine class places the Spring Application Context as an
-                attribute called "appContext" in this Tapestry app's 'Global'
-                object. Make sure to register the fact that this special
-                IEngine instance should be used for this Tapestry application,
-                with an entry in the Tapestry application definition file. For
-                example:
- 
-
-<programlisting><![CDATA[
+</programlisting> This engine class places the Spring Application Context as
+        an attribute called "appContext" in this Tapestry app's 'Global'
+        object. Make sure to register the fact that this special IEngine
+        instance should be used for this Tapestry application, with an entry
+        in the Tapestry application definition file. For example:
+        <programlisting>
  file: xportal.application:
  
- <?xml version="1.0" encoding="UTF-8"?>
- <!DOCTYPE application PUBLIC 
+ &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ &lt;!DOCTYPE application PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
-   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
- <application
+   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+ &lt;application
      name="Whatever xPortal"
-     engine-class="com.whatever.web.xportal.MyEngine">
- </application>
-]]></programlisting> 
+     engine-class="com.whatever.web.xportal.MyEngine"&gt;
+ &lt;/application&gt;
+</programlisting></para>
+      </sect3>
 
-                </para>
-			</sect3>
+      <sect3 id="view-tapestry-componentdefs">
+        <title>Component definition files</title>
 
-
-			<sect3 id="view-tapestry-componentdefs">
-			<title>Component definition files</title>
-			<para>
-                 Now in our page or component definition file (*.page or
-                 *.jwc), we simply add property-specification elements to grab
-                 the beans we need out of the ApplicationContext, and create
-                 page or component properties for them. For example:
-
-<programlisting><![CDATA[
-   <property-specification name="userService"
-                           type="com.whatever.services.service.user.UserService">
+        <para>Now in our page or component definition file (*.page or *.jwc),
+        we simply add property-specification elements to grab the beans we
+        need out of the ApplicationContext, and create page or component
+        properties for them. For example: <programlisting>
+   &lt;property-specification name="userService"
+                           type="com.whatever.services.service.user.UserService"&gt;
      global.appContext.getBean("userService")
-   </property-specification>
-   <property-specification name="authenticationService"
-                           type="com.whatever.services.service.user.AuthenticationService">
+   &lt;/property-specification&gt;
+   &lt;property-specification name="authenticationService"
+                           type="com.whatever.services.service.user.AuthenticationService"&gt;
      global.appContext.getBean("authenticationService")
-   </property-specification>
-]]></programlisting> 
- 
-                 The OGNL expression inside the property-specification
-                 specifies the initial value for the property, as a bean
-                 obtained from the context. The entire page definition might
-                 look like this:
- 
-
-<programlisting><![CDATA[
- <?xml version="1.0" encoding="UTF-8"?>
- <!DOCTYPE page-specification PUBLIC 
+   &lt;/property-specification&gt;
+</programlisting> The OGNL expression inside the property-specification
+        specifies the initial value for the property, as a bean obtained from
+        the context. The entire page definition might look like this:
+        <programlisting>
+ &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ &lt;!DOCTYPE page-specification PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
-   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
+   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
      
- <page-specification class="com.whatever.web.xportal.pages.Login">
+ &lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
  
-   <property-specification name="username" type="java.lang.String"/>
-   <property-specification name="password" type="java.lang.String"/>
-   <property-specification name="error" type="java.lang.String"/>
-   <property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/>
-   <property-specification name="userService"
-                           type="com.whatever.services.service.user.UserService">
+   &lt;property-specification name="username" type="java.lang.String"/&gt;
+   &lt;property-specification name="password" type="java.lang.String"/&gt;
+   &lt;property-specification name="error" type="java.lang.String"/&gt;
+   &lt;property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/&gt;
+   &lt;property-specification name="userService"
+                           type="com.whatever.services.service.user.UserService"&gt;
      global.appContext.getBean("userService")
-   </property-specification>
-   <property-specification name="authenticationService"
-                           type="com.whatever.services.service.user.AuthenticationService">
+   &lt;/property-specification&gt;
+   &lt;property-specification name="authenticationService"
+                           type="com.whatever.services.service.user.AuthenticationService"&gt;
      global.appContext.getBean("authenticationService")
-   </property-specification>
+   &lt;/property-specification&gt;
    
-   <bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/>
+   &lt;bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/&gt;
  
-   <bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page">
-       <set-property name="required" expression="true"/>
-       <set-property name="clientScriptingEnabled" expression="true"/>
-   </bean>
+   &lt;bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page"&gt;
+       &lt;set-property name="required" expression="true"/&gt;
+       &lt;set-property name="clientScriptingEnabled" expression="true"/&gt;
+   &lt;/bean&gt;
  
-   <component id="inputUsername" type="ValidField">
-     <static-binding name="displayName" value="Username"/>
-     <binding name="value" expression="username"/>
-     <binding name="validator" expression="beans.validator"/>
-   </component>
+   &lt;component id="inputUsername" type="ValidField"&gt;
+     &lt;static-binding name="displayName" value="Username"/&gt;
+     &lt;binding name="value" expression="username"/&gt;
+     &lt;binding name="validator" expression="beans.validator"/&gt;
+   &lt;/component&gt;
    
-   <component id="inputPassword" type="ValidField">
-     <binding name="value" expression="password"/>
-     <binding name="validator" expression="beans.validator"/>
-     <static-binding name="displayName" value="Password"/>
-     <binding name="hidden" expression="true"/>
-   </component>
+   &lt;component id="inputPassword" type="ValidField"&gt;
+     &lt;binding name="value" expression="password"/&gt;
+     &lt;binding name="validator" expression="beans.validator"/&gt;
+     &lt;static-binding name="displayName" value="Password"/&gt;
+     &lt;binding name="hidden" expression="true"/&gt;
+   &lt;/component&gt;
  
- </page-specification>
-]]></programlisting> 
+ &lt;/page-specification&gt;
+</programlisting></para>
+      </sect3>
 
-                </para>
-				</sect3>
+      <sect3 id="view-tapestry-getters">
+        <title>Adding abstract accessors</title>
 
-				<sect3 id="view-tapestry-getters">
-				<title>Adding abstract accessors</title>
-				<para> 
-                Now in the Java class definition for the page or component
-                itself, all we need to do is add an abstract getter method for
-                the properties we have defined, to access them. When the page
-                or component is actually loaded by Tapestry, it performs
-                runtime code instrumentation on the classfile to add the
-                properties which have been defined, and hook up the abstract
-                getter methods to the newly created fields. For example:
- 
-
-<programlisting><![CDATA[
+        <para>Now in the Java class definition for the page or component
+        itself, all we need to do is add an abstract getter method for the
+        properties we have defined, to access them. When the page or component
+        is actually loaded by Tapestry, it performs runtime code
+        instrumentation on the classfile to add the properties which have been
+        defined, and hook up the abstract getter methods to the newly created
+        fields. For example: <programlisting>
    // our UserService implementation; will come from page definition
    public abstract UserService getUserService();
    // our AuthenticationService implementation; will come from page definition
    public abstract AuthenticationService getAuthenticationService();
-]]></programlisting> 
- 
-                For completeness, the entire Java class, for a login page in
-                this example, might look like this:
- 
-
-<programlisting><![CDATA[
+</programlisting> For completeness, the entire Java class, for a login page in
+        this example, might look like this: <programlisting>
  package com.whatever.web.xportal.pages;
  
  /**
@@ -1517,7 +1184,7 @@ public class PDFPage extends AbstractPdfView {
    /**
     *  Attempts to login. 
     *
-    *  <p>If the user name is not known, or the password is invalid, then an error
+    *  &lt;p&gt;If the user name is not known, or the password is invalid, then an error
     *  message is displayed.
     *
     **/
@@ -1595,71 +1262,39 @@ public class PDFPage extends AbstractPdfView {
        setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
    }
  }
-]]></programlisting> 
+</programlisting></para>
+      </sect3>
+    </sect2>
 
-                </para>
-				</sect3>
+    <sect2 id="view-tapestry-summary">
+      <title>Summary</title>
 
-			</sect2>
+      <para>In this example, we've managed to allow service beans defined in
+      the Spring Application Context to be provided to the page in a
+      declarative fashion. The page class does not know where the service
+      implementations are coming from, and in fact it is easy to slip in
+      another implementation, for example, during testing. This inversion of
+      control is one of the prime goals and benefits of the Spring Framework,
+      and we have managed to extend it all the way up the J2EE stack in this
+      Tapestry application.</para>
+    </sect2>
+  </sect1>
 
-			<sect2 id="view-tapestry-summary">
-			<title>Summary</title>
-			<para> 
-                In this example, we've managed to allow service beans defined
-                in the Spring Application Context to be provided to the page
-                in a declarative fashion. The page class does not know where
-                the service implementations are coming from, and in fact it is
-                easy to slip in another implementation, for example, during
-                testing. This inversion of control is one of the prime goals
-                and benefits of the Spring Framework, and we have managed to
-                extend it all the way up the J2EE stack in this Tapestry
-                application.
+  <sect1 id="view-tiles">
+    <title>Tiles</title>
 
-			</para>
-		</sect2>
+    <para>intro</para>
 
+    <sect2 id="view-tiles-config">
+      <title>Configuration</title>
 
-	</sect1>
+      <para>config</para>
+    </sect2>
 
+    <sect2 id="view-tiles-summary">
+      <title>Summary</title>
 
-	<!-- ============================================================ -->
-	<!-- Tiles                                                        -->
-	<!-- ============================================================ -->
-	<sect1 id="view-tiles">
-		<title>Tiles</title>
-
-		<para>
-
-			intro
-
-		</para>
-		
-		<sect2 id="view-tiles-config">
-
-			<title>Configuration</title> 
-
-            <para>
-
-			    config
-
-			</para>
-			
-		</sect2>
-
-
-		<sect2 id="view-tiles-summary">
-
-			<title>Summary</title> 
-
-            <para>
-
-			    summarize files / libs involved
-			
-			</para>
-
-		</sect2>
-
-
-	</sect1>
-
+      <para>summarize files / libs involved</para>
+    </sect2>
+  </sect1>
 </chapter>
