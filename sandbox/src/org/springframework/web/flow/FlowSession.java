@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.Styler;
 import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.IteratorProcessTemplate;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
@@ -277,16 +277,8 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		return Collections.unmodifiableCollection(attributes.entrySet());
 	}
 
-	public Collection findAttributes(Constraint criteria) {
-		Iterator it = attributeEntries().iterator();
-		Collection filteredEntries = new LinkedHashSet();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry)it.next();
-			if (criteria.test(entry)) {
-				filteredEntries.add(entry);
-			}
-		}
-		return filteredEntries;
+	public ProcessTemplate iteratorTemplate() {
+		return new IteratorProcessTemplate(attributeEntries().iterator());
 	}
 
 	// methods implementing MutableFlowModel

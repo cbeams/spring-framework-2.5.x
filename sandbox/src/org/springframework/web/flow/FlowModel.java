@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.binding.AttributeAccessor;
-import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * An interface that provides access to the data model of an executing flow
@@ -155,12 +155,11 @@ public interface FlowModel extends AttributeAccessor {
 	public Collection attributeEntries();
 
 	/**
-	 * Find a collection of all attribute entries that meet the specified
-	 * criteria.
-	 * @param criteria The criteria
-	 * @return The entries that match the criteria.
+	 * Return a process template capable of iterating over the entries of this
+	 * flow model.
+	 * @return The entries iterator template.
 	 */
-	public Collection findAttributes(Constraint criteria);
+	public ProcessTemplate iteratorTemplate();
 
 	/**
 	 * Returns the data model for this flow model, suitable for exposing to web

@@ -35,7 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
 import org.springframework.web.flow.support.RandomGuid;
 import org.springframework.web.servlet.ModelAndView;
@@ -544,8 +544,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return getActiveFlowSession().attributeEntries();
 	}
 
-	public Collection findAttributes(Constraint criteria) {
-		return getActiveFlowSession().findAttributes(criteria);
+	public ProcessTemplate iteratorTemplate() {
+		return getActiveFlowSession().iteratorTemplate();
 	}
 
 	// methods implementing MutableFlowModel
@@ -704,7 +704,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			}
 		});
 	}
-	
+
 	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
@@ -736,7 +736,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		this.listenerList.add(this.rootFlow.getFlowExecutionListenerList());
 		this.listenerList.add(listeners);
 	}
-	
+
 	public String toString() {
 		return executingFlowSessions.isEmpty() ? "[Empty FlowExecutionStack " + getId() + "; no flows are active]"
 				: new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId()).append(
