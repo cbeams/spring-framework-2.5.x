@@ -22,8 +22,9 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * FactoryBean that looks up a JNDI object. Behaves like the object when
- * used as bean reference, e.g. for JdbcTemplate's dataSource property.
+ * FactoryBean that looks up a JNDI object. Exposes the object found in JNDI
+ * when used as bean reference, e.g. for JdbcTemplate's "dataSource" property
+ * in case of a <code>javax.sql.DataSource</code>.
  *
  * <p>The typical usage will be to register this as singleton factory
  * (e.g. for a certain JNDI DataSource) in an application context,
@@ -50,7 +51,9 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setLookupOnStartup
  * @see #setCache
  * @see JndiObjectTargetSource
+ * @see javax.sql.DataSource
  * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+ * @see org.springframework.jdbc.datasource.DriverManagerDataSource
  */
 public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean {
 
