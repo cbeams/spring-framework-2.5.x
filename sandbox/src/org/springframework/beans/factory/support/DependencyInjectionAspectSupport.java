@@ -37,10 +37,19 @@ import org.springframework.beans.propertyeditors.ClassEditor;
  * Convenient superclass for aspects/persistence API
  * configuration classes that should be able to autowire
  * objects into a factory.
+ * <p>
+ * There are two ways of doing this: by mapping managed classes to prototype bean definitions
+ * in the factory; and by identifying classes of which instances should be autowired into the factory
+ * using the autowiring capables of AutowireCapableBeanFactory. If your managed class implements
+ * Spring lifecycle interfaces such as BeanFactoryAware or ApplicationContextAware, you must use the
+ * former method. With the latter method, only properties will be set, based on automatic satisfaction
+ * of dependencies from other beans (singleton or non-singleton) defined in the factory. 
  * 
- * Could also use attributes on persistent classes to identify those eligible for autowiring, or
+ * <p>Could also use attributes on persistent classes to identify those eligible for autowiring, or
  * even the prototype bean name.
+ * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  * 
+ * @since 1.2
  * @author Rod Johnson
  */
 public abstract class DependencyInjectionAspectSupport implements InitializingBean, BeanFactoryAware {
@@ -234,6 +243,11 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 			return o;
 		}
 	}
+	
+	// TODO newObject(Class c): returns a new object unless configured
+	// Could be on an interface
+	// Inject that interface into classes needed it to instantiate
+	// or lookup method? protected Whatever newWhatever(): finds DIAS (how?) and calls newObject() on it
 	
 	protected class NoAutowiringConfigurationForClassException extends Exception {
 		public NoAutowiringConfigurationForClassException(Class clazz) {
