@@ -28,15 +28,13 @@ import org.springframework.util.ClassUtils;
 public class SingletonBeanFactoryLocatorTests extends TestCase {
 
 	public void testBaseBeanFactoryDefs() {
-		// just test the base BeanFactory/AppContext defs we are going to work with
-		// in other tests
+		// Just test the base BeanFactory/AppContext defs we are going to work with
+		// in other tests.
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				new String[] {"/org/springframework/beans/factory/access/beans1.xml",
-				              "/org/springframework/beans/factory/access/beans2.xml"});
+				"/org/springframework/beans/factory/access/beans*.xml");
 	}
 
 	public void testBasicFunctionality() {
-		
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		
@@ -65,14 +63,14 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		bfr.release();
 		bfr.release();
 	}
-	
-	
-	// this test can run multiple times, but due to static keyed lookup of the locators,
-	// 2nd and subsequent calls will actuall get back same locator instance. This is not
-	// an issue really, since the contained beanfactories will still be loaded and released
+
+	/**
+	 * This test can run multiple times, but due to static keyed lookup of the locators,
+	 * 2nd and subsequent calls will actuall get back same locator instance. This is not
+	 * an issue really, since the contained beanfactories will still be loaded and released.
+	 */
 	public void testGetInstance() {
-		
-        // try with and without 'classpath*:' prefix, and with 'classpath:' prefix
+    // try with and without 'classpath*:' prefix, and with 'classpath:' prefix
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		
@@ -100,7 +98,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		bfr.release();
 		
 		facLoc = SingletonBeanFactoryLocator.getInstance(
-				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
+				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		
 		bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		fac = bfr.getFactory();
@@ -152,4 +150,5 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		bfr.release();
 		bfr.release();
 	}
+
 }
