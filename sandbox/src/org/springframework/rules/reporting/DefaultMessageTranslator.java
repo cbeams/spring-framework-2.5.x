@@ -145,10 +145,6 @@ public class DefaultMessageTranslator implements Visitor {
         this.args.add(resolvable);
     }
 
-    private String getMessageCode(Object o) {
-        return ClassUtils.getShortNameAsProperty(o.getClass());
-    }
-
     private MessageSourceResolvable resolvableObjectName(String objectName) {
         return new DefaultMessageSourceResolvable(new String[] { objectName },
                 null, objectName);
@@ -222,5 +218,14 @@ public class DefaultMessageTranslator implements Visitor {
     void visit(UnaryPredicate constraint) {
         add(getMessageCode(constraint), null, constraint.toString());
     }
+
+    private String getMessageCode(Object o) {
+        if (o instanceof TypeResolvable) {
+            return ((TypeResolvable)o).getType();
+        } else {
+            return ClassUtils.getShortNameAsProperty(o.getClass());
+        }
+    }
+
 
 }
