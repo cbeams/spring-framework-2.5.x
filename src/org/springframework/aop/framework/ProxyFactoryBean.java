@@ -249,23 +249,28 @@ public class ProxyFactoryBean extends AdvisedSupport
 			throw new AopConfigException("Target required after globals");
 		}
 
-		// Materialize interceptor chain from bean names
+		// materialize interceptor chain from bean names
 		for (int i = 0; i < this.interceptorNames.length; i++) {
 			String name = this.interceptorNames[i];
-			logger.debug("Configuring advisor or advice '" + name + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Configuring advisor or advice '" + name + "'");
+			}
 
 			if (name.endsWith(GLOBAL_SUFFIX)) {
 				if (!(this.beanFactory instanceof ListableBeanFactory)) {
-					throw new AopConfigException("Can only use global advisors or interceptors with a ListableBeanFactory");
+					throw new AopConfigException(
+					    "Can only use global advisors or interceptors with a ListableBeanFactory");
 				}
-				else {
-					addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
-					                 name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
-				}
+				addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
+				    name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 			}
 			else {
 				// add a named interceptor
-				Object advice = this.beanFactory.getBean(this.interceptorNames[i]);
+				Object advice = null;
+				// avoid unnecessary creation of prototype bean just for advisor chain initialization
+				if (isSingleton() || this.beanFactory.isSingleton(this.interceptorNames[i])) {
+					advice = this.beanFactory.getBean(this.interceptorNames[i]);
+				}
 				addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 			}
 		}
@@ -281,12 +286,14 @@ public class ProxyFactoryBean extends AdvisedSupport
 		for (int i = 0; i < advisors.length; i++) {
 			String beanName = (String) this.sourceMap.get(advisors[i]);
 			if (beanName != null) {
-				logger.info("Refreshing bean named '" + beanName + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Refreshing bean named '" + beanName + "'");
+				}
 				Object bean = this.beanFactory.getBean(beanName);
 				Object refreshedAdvisor = namedBeanToAdvisorOrTargetSource(bean);
 				// might have just refreshed target source
 				if (refreshedAdvisor instanceof Advisor) {
-					// What about aspect interfaces!? we're only updating
+					// What about aspect interfaces!? We're only updating.
 					replaceAdvisor(advisors[i], (Advisor) refreshedAdvisor);
 				}
 				else {
@@ -298,8 +305,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 			else {
 				// We can't throw an exception here, as the user may have added additional
 				// pointcuts programmatically we don't know about.
-				logger.info("Cannot find bean name for Advisor [" + advisors[i] +
-										"] when refreshing advisor chain");
+				logger.debug("Cannot find bean name for Advisor [" + advisors[i] +
+				    "] when refreshing advisor chain");
 			}
 		}
 	}
@@ -336,10 +343,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Invoked when advice chain is created.
-	 * Add the given advice, advisor or object to the interceptor list.
+	 * <p>Add the given advice, advisor or object to the interceptor list.
 	 * Because of these three possibilities, we can't type the signature
 	 * more strongly.
-	 * @param next advice, advisor or target object.
+	 * @param next advice, advisor or target object
 	 * @param name bean name from which we obtained this object in our owning
 	 * bean factory
 	 */
@@ -347,7 +354,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
 		
 		// Can only use interceptorName -> TargetSource conversion once,
-		// for the last entry in the interceptorNames list
+		// for the last entry in the interceptorNames list.
 		if (this.targetName != null) {
 			throw new AopConfigException("TargetSource specified more than once in interceptorNames list:" +
 					"Specify in targetSource property or ONCE at the END of the interceptorNames list");
@@ -358,7 +365,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 		Object advisor = namedBeanToAdvisorOrTargetSource(next);
 		if (advisor instanceof Advisor) {
 			// if it wasn't just updating the TargetSource
-			logger.debug("Adding advisor with name [" + name + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Adding advisor with name [" + name + "]");
+			}
 			addAdvisor((Advisor) advisor);
 			// Record the pointcut as descended from the given bean name.
 			// This allows us to refresh the interceptor list, which we'll need to
@@ -376,8 +385,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 				throw new AopConfigException("TargetSource specified more than once: " +
 						"Specify in targetSource property or at the END of the interceptorNames list");
 			}
-			
-			logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
+			}
 			setTargetSource((TargetSource) advisor);
 			// save target name
 			this.targetName = name;
@@ -385,7 +395,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 	
 	private void refreshTarget() {
-		logger.debug("Refreshing target with name '" + this.targetName + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Refreshing target with name '" + this.targetName + "'");
+		}
 		if (this.targetName == null) {
 			throw new AopConfigException("Target name cannot be null when refreshing!");
 		}
