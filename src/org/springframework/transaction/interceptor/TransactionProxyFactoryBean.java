@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -28,8 +28,12 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -37,8 +41,22 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Alternative to the standard AOP ProxyFactoryBean with a TransactionInterceptor.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
- * transaction demarcation: namely, wrapping a (singleton) target object with a
+ * transaction demarcation: namely, wrapping a singleton target object with a
  * transactional proxy, proxying all the interfaces that the target implements.
+ *
+ * <p>There are three main properties to be specified:
+ *
+ * <ul>
+ * <li>"transactionManager": the PlatformTransactionManager implementation to use
+ * (for example, a JtaTransactionManager instance)
+ * <li>"target": the target object that a transactional proxy shouls be created for
+ * <li>"transactionAttributes": the transaction attributes (for example, propagation
+ * behavior and "readOnly" flag) per target method name (or method name pattern)
+ * </ul>
+ *
+ * <p>If the "transactionManager" property is not set explicitly and this FactoryBean
+ * is running in a ListableBeanFactory, a single matching bean of type
+ * PlatformTransactionManager will be fetched from the BeanFactory.
  *
  * <p>In contrast to TransactionInterceptor, the transaction attributes are
  * specified as properties, with method names as keys and transaction attribute
@@ -48,7 +66,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * class does not have to care. Optionally, a MethodPointcut can be specified
  * to cause conditional invocation of the underlying TransactionInterceptor.
  *
- * <p>The preInterceptors and postInterceptors properties can be set to add
+ * <p>The "preInterceptors" and "postInterceptors" properties can be set to add
  * additional interceptors to the mix, like PerformanceMonitorInterceptor or
  * HibernateInterceptor/JdoInterceptor.
  *
@@ -56,11 +74,14 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Dmitriy Kopylenko
  * @author Rod Johnson
  * @since 21.08.2003
- * @see org.springframework.aop.framework.ProxyFactoryBean
- * @see TransactionInterceptor
+ * @see #setTransactionManager
+ * @see #setTarget
  * @see #setTransactionAttributes
+ * @see TransactionInterceptor
+ * @see org.springframework.aop.framework.ProxyFactoryBean
  */
-public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
+public class TransactionProxyFactoryBean extends ProxyConfig
+		implements FactoryBean, BeanFactoryAware, InitializingBean {
 
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
@@ -186,6 +207,23 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 */
 	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
 		this.advisorAdapterRegistry = advisorAdapterRegistry;
+	}
+
+	/**
+	 * This callback is optional: If running in a BeanFactory and no transaction
+	 * manager has been set explicitly, a single matching bean of type
+	 * PlatformTransactionManager will be fetched from the BeanFactory.
+	 * @see org.springframework.beans.factory.BeanFactoryUtils#beanOfTypeIncludingAncestors
+	 * @see org.springframework.transaction.PlatformTransactionManager
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (this.transactionInterceptor.getTransactionManager() == null &&
+				beanFactory instanceof ListableBeanFactory) {
+			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
+			PlatformTransactionManager ptm = (PlatformTransactionManager)
+					BeanFactoryUtils.beanOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
+			this.transactionInterceptor.setTransactionManager(ptm);
+		}
 	}
 
 
