@@ -61,30 +61,34 @@ public class XmlFlowBuilderTests extends TestCase {
 
 		ActionState actionState1 = (ActionState)flow.getState("actionState1");
 		assertNotNull(actionState1);
-		assertEquals(2, actionState1.getActionCount());
+		assertEquals(5, actionState1.getActionCount());
 		assertEquals(null, actionState1.getActionName(actionState1.getActions()[0]));
 		assertEquals("action2Name", actionState1.getActionName(actionState1.getActions()[1]));
 		assertEquals(2, actionState1.getTransitions().length);
-		//assertNotNull(actionState1.getTransition("event1"));
-		//assertEquals("viewState1", actionState1.getTransition("event1").getTargetStateId());
-		//assertNotNull(actionState1.getTransition("action2Name.event2"));
-		//assertEquals("viewState2", actionState1.getTransition("action2Name.event2").getTargetStateId());
+		// assertNotNull(actionState1.getTransition("event1"));
+		// assertEquals("viewState1",
+		// actionState1.getTransition("event1").getTargetStateId());
+		// assertNotNull(actionState1.getTransition("action2Name.event2"));
+		// assertEquals("viewState2",
+		// actionState1.getTransition("action2Name.event2").getTargetStateId());
 
 		ViewState viewState1 = (ViewState)flow.getState("viewState1");
 		assertNotNull(viewState1);
 		assertFalse(viewState1.isMarker());
 		assertEquals("view1", viewState1.getViewName());
 		assertEquals(1, viewState1.getTransitions().length);
-		//assertNotNull(viewState1.getTransition("event1"));
-		//assertEquals("subFlowState1", viewState1.getTransition("event1").getTargetStateId());
+		// assertNotNull(viewState1.getTransition("event1"));
+		// assertEquals("subFlowState1",
+		// viewState1.getTransition("event1").getTargetStateId());
 
 		ViewState viewState2 = (ViewState)flow.getState("viewState2");
 		assertNotNull(viewState2);
 		assertTrue(viewState2.isMarker());
 		assertNull(viewState2.getViewName());
 		assertEquals(1, viewState2.getTransitions().length);
-		//assertNotNull(viewState2.getTransition("event2"));
-		//assertEquals("subFlowState2", viewState2.getTransition("event2").getTargetStateId());
+		// assertNotNull(viewState2.getTransition("event2"));
+		// assertEquals("subFlowState2",
+		// viewState2.getTransition("event2").getTargetStateId());
 
 		SubFlowState subFlowState1 = (SubFlowState)flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);
@@ -92,8 +96,9 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("subFlow1", subFlowState1.getSubFlow().getId());
 		assertNotNull(subFlowState1.getFlowAttributeMapper());
 		assertEquals(1, subFlowState1.getTransitions().length);
-		//assertNotNull(subFlowState1.getTransition("event1"));
-		//assertEquals("endState1", subFlowState1.getTransition("event1").getTargetStateId());
+		// assertNotNull(subFlowState1.getTransition("event1"));
+		// assertEquals("endState1",
+		// subFlowState1.getTransition("event1").getTargetStateId());
 
 		SubFlowState subFlowState2 = (SubFlowState)flow.getState("subFlowState2");
 		assertNotNull(subFlowState2);
@@ -101,8 +106,9 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("subFlow2", subFlowState2.getSubFlow().getId());
 		assertNull(subFlowState2.getFlowAttributeMapper());
 		assertEquals(1, subFlowState2.getTransitions().length);
-		//assertNotNull(subFlowState2.getTransition("event2"));
-		//assertEquals("endState2", subFlowState2.getTransition("event2").getTargetStateId());
+		// assertNotNull(subFlowState2.getTransition("event2"));
+		// assertEquals("endState2",
+		// subFlowState2.getTransition("event2").getTargetStateId());
 
 		EndState endState1 = (EndState)flow.getState("endState1");
 		assertNotNull(endState1);
@@ -122,6 +128,14 @@ public class XmlFlowBuilderTests extends TestCase {
 	 * @author Erwin Vervaet
 	 */
 	public static class TestFlowServiceLocator extends FlowServiceLocatorAdapter {
+		public Action createAction(Class implementationClass, AutowireMode autowire) {
+			return new TestAction();
+		}
+
+		public Action getAction(Class implementationClass) throws ServiceLookupException {
+			return new TestAction();
+		}
+
 		public Action getAction(String actionId) throws ServiceLookupException {
 			if ("action1".equals(actionId) || "action2".equals(actionId)) {
 				return new Action() {
@@ -141,7 +155,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		}
 
 		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
-			if ("modelMapper1".equals(flowModelMapperId)) {
+			if ("attributeMapper1".equals(flowModelMapperId)) {
 				return new FlowAttributeMapper() {
 					public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
 						return new HashMap();
@@ -156,4 +170,9 @@ public class XmlFlowBuilderTests extends TestCase {
 		}
 	};
 
+	public static class TestAction implements Action {
+		public Event execute(FlowExecutionContext context) throws Exception {
+			return new LocalEvent("success");
+		}
+	}
 }

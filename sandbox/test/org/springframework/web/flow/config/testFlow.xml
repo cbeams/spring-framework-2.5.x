@@ -7,10 +7,10 @@
 
 	<action-state id="actionState1">
 		<action id="action1"/>
+		<action name="action2Name" id="action2"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction" autowire="byType"/>
 		<action classref="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
-		<action name="action2Name" id="action2"/>
 		<transition on="event1" to="viewState1"/>
 		<transition on="action2Name.event2" to="viewState2"/>
 	</action-state>
