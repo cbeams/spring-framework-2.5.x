@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.10 2004-06-24 14:33:18 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.11 2004-06-25 09:42:23 jhoeller Exp $
  */
 
 /*
@@ -53,15 +53,17 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	private String touchy;
 
+	private String[] stringArray;
+
+	private Date date = new Date();
+
+	private Float myFloat = new Float(0.0);
+
 	private Collection friends = new LinkedList();
 
 	private Set someSet = new HashSet();
 
 	private Map someMap = new HashMap();
-
-	private Date date = new Date();
-
-	private Float myFloat = new Float(0.0);
 
 	private INestedTestBean doctor = new NestedTestBean();
 
@@ -131,6 +133,14 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	public void setSpouse(ITestBean spouse) {
 		this.spouse = spouse;
+	}
+
+	public String[] getStringArray() {
+		return stringArray;
+	}
+
+	public void setStringArray(String[] stringArray) {
+		this.stringArray = stringArray;
 	}
 
 	public Date getDate() {

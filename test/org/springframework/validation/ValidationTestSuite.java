@@ -22,11 +22,11 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.DerivedTestBean;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.StringUtils;
 
@@ -468,7 +468,7 @@ public class ValidationTestSuite extends TestCase {
 	}
 
 	public void testBindToStringArrayWithArrayEditor() {
-		StringArrayTestBean tb = new StringArrayTestBean();
+		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String[].class, "stringArray", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
@@ -485,7 +485,7 @@ public class ValidationTestSuite extends TestCase {
 	}
 
 	public void testBindToStringArrayWithComponentEditor() {
-		StringArrayTestBean tb = new StringArrayTestBean();
+		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
@@ -601,20 +601,6 @@ public class ValidationTestSuite extends TestCase {
 		tb.getList().set(1, tb1);
 		assertEquals(tb2.getName(), binder.getErrors().getFieldValue("list[0].name"));
 		assertEquals(tb1.getName(), binder.getErrors().getFieldValue("list[1].name"));
-	}
-
-
-	public static class StringArrayTestBean {
-
-		private String[] stringArray = new String[1];
-
-		public void setStringArray(String[] stringArray) {
-			this.stringArray = stringArray;
-		}
-
-		public String[] getStringArray() {
-			return stringArray;
-		}
 	}
 
 
