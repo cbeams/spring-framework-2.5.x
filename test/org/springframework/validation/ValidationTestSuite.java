@@ -61,6 +61,7 @@ public class ValidationTestSuite extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
+		pvs.addPropertyValue(new PropertyValue("touchy", "m.y"));
 		binder.bind(pvs);
 
 		try {
@@ -79,12 +80,68 @@ public class ValidationTestSuite extends TestCase {
 			BindException be = (BindException) m.get(BindException.ERROR_KEY_PREFIX + "person");
 			assertTrue("Added itself to map", ex == be);
 			assertTrue(be.hasErrors());
-			assertTrue("Correct number of errors", be.getErrorCount() == 1);
+			assertTrue("Correct number of errors", be.getErrorCount() == 2);
+
 			assertTrue("Has age errors", be.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", be.getFieldErrorCount("age") == 1);
 			assertEquals("32x", binder.getErrors().getFieldValue("age"));
 			assertEquals("32x", binder.getErrors().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
+
+			assertTrue("Has touchy errors", be.hasFieldErrors("touchy"));
+			assertTrue("Correct number of touchy errors", be.getFieldErrorCount("touchy") == 1);
+			assertEquals("m.y", binder.getErrors().getFieldValue("touchy"));
+			assertEquals("m.y", binder.getErrors().getFieldError("touchy").getRejectedValue());
+			assertNull(tb.getTouchy());
+		}
+	}
+
+	public void testBindingWithErrorsAndCustomEditors() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		binder.registerCustomEditor(String.class, "touchy", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("prefix_" + text);
+			}
+			public String getAsText() {
+				return getValue().toString().substring(7);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		pvs.addPropertyValue(new PropertyValue("age", "32x"));
+		pvs.addPropertyValue(new PropertyValue("touchy", "m.y"));
+		binder.bind(pvs);
+
+		try {
+			binder.close();
+			fail("Should have thrown BindException");
+		}
+		catch (BindException ex) {
+			assertTrue("changed name correctly", rod.getName().equals("Rod"));
+			//assertTrue("changed age correctly", rod.getAge() == 32);
+
+			Map m = binder.getErrors().getModel();
+			//assertTrue("There are 3 element in map", m.size() == 1);
+			TestBean tb = (TestBean) m.get("person");
+			assertTrue("Same object", tb.equals(rod));
+
+			BindException be = (BindException) m.get(BindException.ERROR_KEY_PREFIX + "person");
+			assertTrue("Added itself to map", ex == be);
+			assertTrue(be.hasErrors());
+			assertTrue("Correct number of errors", be.getErrorCount() == 2);
+
+			assertTrue("Has age errors", be.hasFieldErrors("age"));
+			assertTrue("Correct number of age errors", be.getFieldErrorCount("age") == 1);
+			assertEquals("32x", binder.getErrors().getFieldValue("age"));
+			assertEquals("32x", binder.getErrors().getFieldError("age").getRejectedValue());
+			assertEquals(0, tb.getAge());
+
+			assertTrue("Has touchy errors", be.hasFieldErrors("touchy"));
+			assertTrue("Correct number of touchy errors", be.getFieldErrorCount("touchy") == 1);
+			assertEquals("m.y", binder.getErrors().getFieldValue("touchy"));
+			assertEquals("m.y", binder.getErrors().getFieldError("touchy").getRejectedValue());
+			assertNull(tb.getTouchy());
 		}
 	}
 
