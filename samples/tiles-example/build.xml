@@ -6,7 +6,6 @@
 
 	<property name="war.dir" value="war"/>
 	<property name="src.dir" value="src"/>
-	<property name="lib.dir" value="lib"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
@@ -16,9 +15,6 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${lib.dir}">
-			<include name="*.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/dom4j">
 			<include name="dom4j.jar"/>
 		</fileset>
@@ -28,11 +24,11 @@
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist">
-			<include name="spring.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/struts">
 			<include name="struts-1.1.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist">
+			<include name="spring.jar"/>
 		</fileset>
 
 	</path>
@@ -67,7 +63,6 @@
 
 	<target name="build" description="Compile main source tree java files into class files, generate jar files">
 
-		<mkdir dir="${lib.dir}"/>
 		<mkdir dir="${build.dir}"/>
 
 		<javac destdir="${build.dir}" target="1.3" debug="true"
@@ -81,12 +76,11 @@
 		<jar jarfile="${weblib.dir}/tiles-example.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${lib.dir}">
-				<include name="hsqldb.jar"/>
-				<include name="mysql*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/j2ee">
+				<include name="jstl.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-beanutils.jar"/>
@@ -94,12 +88,11 @@
 				<include name="commons-digester.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jstl">
-				<include name="jstl.jar"/>
+			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
-				<include name="*.jar"/>
+				<include name="struts-1.1.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>

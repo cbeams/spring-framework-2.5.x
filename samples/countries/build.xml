@@ -21,8 +21,8 @@
 			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/itext-pdf">
 			<include name="*.jar"/>
@@ -83,18 +83,20 @@
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-logging.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jstl">
+			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jstl.jar"/>
-				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/dist">
-				<include name="spring.jar"/>
+			<fileset dir="${spring.root}/lib/jakarta-taglibs">
+				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/itext-pdf">
 				<include name="iText.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/poi">
 				<include name="*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist">
+				<include name="spring.jar"/>
 			</fileset>
 		</copy>
 

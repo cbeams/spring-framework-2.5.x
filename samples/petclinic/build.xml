@@ -23,6 +23,7 @@
 
 
 	<path id="master-classpath">
+
 		<fileset dir="${spring.root}/lib/hibernate">
 			<include name="hibernate2.jar"/>
 		</fileset>
@@ -30,15 +31,18 @@
 			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
+
 	</path>
 
+
 	<path id="test-classpath">
+
 		<fileset dir="${db.dir}/mysql">
 			<include name="mysql*.jar"/>
 		</fileset>
@@ -49,22 +53,23 @@
 			<include name="asm.jar"/>
 			<include name="cglib*.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/hsqldb">
-			<include name="hsqldb.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/dom4j">
 			<include name="dom4j.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/hsqldb">
+			<include name="hsqldb.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hibernate">
 			<include name="odmg.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-collections.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
-			<include name="jdbc2_0-stdext.jar"/>
-		</fileset>
+		
 	</path>
 
 
@@ -131,24 +136,26 @@
 				<include name="asm.jar"/>
 				<include name="cglib*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/hsqldb">
-				<include name="hsqldb.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/hsqldb">
+				<include name="hsqldb.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/hibernate">
+				<include name="ehcache.jar"/>
 				<include name="hibernate2.jar"/>
 				<include name="odmg.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-beanutils.jar"/>
 				<include name="commons-collections.jar"/>
 				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jstl">
+			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jstl.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
