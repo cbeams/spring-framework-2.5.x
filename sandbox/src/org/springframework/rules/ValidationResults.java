@@ -17,7 +17,10 @@ package org.springframework.rules;
 
 import java.util.Stack;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.functions.GetProperty;
+import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
@@ -32,10 +35,12 @@ import org.springframework.validation.Errors;
  * @author Keith Donald
  */
 public class ValidationResults implements Visitor {
+    private static final Log logger = LogFactory.getLog(ValidationResults.class);
+    
     private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
     private Object bean;
-    private Errors errors;
     private String propertyName;
+    private Errors errors;
     private Stack levels = new Stack();
     GetProperty getProperty;
 
@@ -45,7 +50,15 @@ public class ValidationResults implements Visitor {
         this.getProperty = new GetProperty(bean);
     }
 
-    public void visit(BeanPropertiesExpression rule) {
+    public Errors collectResults(BeanPropertyExpression rootExpression) {
+        visitorSupport.invokeVisit(this, rootExpression);
+        return errors;
+    }
+
+    void visit(BeanPropertiesExpression rule) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validating bean property expression [" + rule + "]...");
+        }
         if (!rule.test(bean)) {
             String errorCode = getErrorCode(rule.getPredicate());
             Object[] errorArgs = getArgs(rule.getPropertyName(), rule
@@ -55,6 +68,85 @@ public class ValidationResults implements Visitor {
             errors.rejectValue(rule.getPropertyName(), errorCode, errorArgs,
                     defaultMessage);
         }
+    }
+    
+    void visit(CompoundBeanPropertyExpression rule) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validating 1bean property expression [" + rule + "]...");
+        }
+    }
+
+    void visit(ParameterizedBeanPropertyExpression rule) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validating parameterized bean property expression [" + rule + "]...");
+        }
+        if (!rule.test(bean)) {
+            String errorCode = getErrorCode(rule.getPredicate());
+            Object[] errorArgs = getArgs(rule.getPropertyName(), rule
+                    .getParameter());
+            String defaultMessage = getDefaultMessage(rule.getPropertyName(),
+                    rule.getPredicate(), rule.getParameter());
+            errors.rejectValue(rule.getPropertyName(), errorCode, errorArgs,
+                    defaultMessage);
+        }
+    }
+
+    void visit(BeanPropertyValueConstraint valueConstraint) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validating property value constraint [" + valueConstraint + "]...");
+        }
+        this.propertyName = valueConstraint.getPropertyName();
+        visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
+    }
+
+    void visit(UnaryAnd and) {
+        levels.push(and);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting <and>...");
+        }
+        Algorithms.forEach(and.iterator(), new UnaryProcedure() {
+            public void run(Object predicate) {
+                boolean result = ((Boolean)visitorSupport.invokeVisit(
+                        ValidationResults.this, predicate)).booleanValue();
+                UnaryPredicate top = (UnaryPredicate)levels.pop();
+                if (!result) {
+                    errors.rejectValue(propertyName, getErrorCode(top),
+                            getArgs(top), getDefaultMessage(top));
+                }
+            }
+        });
+        if (logger.isDebugEnabled()) {
+            logger.debug("Finished <and>...");
+        }
+        levels.pop();
+    }
+
+    boolean visit(UnaryPredicate constraint) {
+        boolean negated = (levels.peek() instanceof UnaryNot);
+        if (logger.isDebugEnabled()) {
+            if (negated) {
+                logger.debug("Result will be negated");
+            }
+        }
+        levels.push(constraint);
+        boolean result = constraint.test(getProperty.evaluate(propertyName));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Single constraint [" + constraint + "] returned " + result);
+        }
+        return negated ? !result : result;
+    }
+
+    Boolean visit(UnaryNot not) {
+        levels.push(not);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting <not>...");
+        }
+        Boolean result = (Boolean)visitorSupport.invokeVisit(this, not.getPredicate());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Finished <not>...");
+        }
+        levels.pop();
+        return result;
     }
 
     private String getErrorCode(BinaryPredicate predicate) {
@@ -70,65 +162,16 @@ public class ValidationResults implements Visitor {
         return arg1 + " must be " + predicate.toString() + " " + arg2;
     }
 
-    public void visit(ParameterizedBeanPropertyExpression rule) {
-        if (!rule.test(bean)) {
-            String errorCode = getErrorCode(rule.getPredicate());
-            Object[] errorArgs = getArgs(rule.getPropertyName(), rule
-                    .getParameter());
-            String defaultMessage = getDefaultMessage(rule.getPropertyName(),
-                    rule.getPredicate(), rule.getParameter());
-            errors.rejectValue(rule.getPropertyName(), errorCode, errorArgs,
-                    defaultMessage);
-        }
-    }
-
-    public void visit(BeanPropertyValueConstraint valueConstraint) {
-        this.propertyName = valueConstraint.getPropertyName();
-        visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
-    }
-
-    public boolean visit(UnaryPredicate predicate) {
-        levels.push(predicate);
-        return predicate.test(getProperty.evaluate(propertyName));
-    }
-
-    public void visit(UnaryAnd and) {
-        levels.push(and);
-        Algorithms.forEach(and.iterator(), new UnaryProcedure() {
-            public void run(Object predicate) {
-                boolean result = ((Boolean)visitorSupport.invokeVisit(
-                        ValidationResults.this, predicate)).booleanValue();
-                UnaryPredicate top = (UnaryPredicate)levels.pop();
-                boolean negated = (levels.peek() instanceof UnaryNot);
-                result = negated ? !result : result;
-                if (!result) {
-                    errors.rejectValue(propertyName, getErrorCode(top),
-                            getArgs(top), getDefaultMessage(top));
-                }
-            }
-        });
-        levels.pop();
-    }
-
-    public String getErrorCode(UnaryPredicate predicate) {
+    private String getErrorCode(UnaryPredicate predicate) {
         return ClassUtils.getShortNameAsProperty(predicate.getClass());
     }
 
-    public Object[] getArgs(UnaryPredicate predicate) {
+    private Object[] getArgs(UnaryPredicate predicate) {
         return new Object[] { propertyName };
     }
 
-    public String getDefaultMessage(UnaryPredicate predicate) {
+    private String getDefaultMessage(UnaryPredicate predicate) {
         return propertyName + " is " + predicate.toString();
     }
 
-    public void visit(UnaryNot not) {
-        levels.push(not);
-        visitorSupport.invokeVisit(this, not.getPredicate());
-        levels.pop();
-    }
-
-    public void collectResults(BeanPropertyExpression rootExpression) {
-        visitorSupport.invokeVisit(this, rootExpression);
-    }
 }
