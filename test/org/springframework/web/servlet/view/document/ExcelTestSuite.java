@@ -16,7 +16,6 @@
 package org.springframework.web.servlet.view.document;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -24,11 +23,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import junit.framework.TestCase;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -36,38 +37,32 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
 
-import junit.framework.TestCase;
-
 /**
  * @author Alef Arendsen
  */
 public class ExcelTestSuite extends TestCase {	
 	
-	MockHttpServletRequest request;
-	MockHttpServletResponse response;
-	MockServletContext servletCtx;
-	StaticWebApplicationContext webAppCtx;
+	private MockServletContext servletCtx;
+
+	private MockHttpServletRequest request;
+
+	private MockHttpServletResponse response;
 	
-	public void setUp() {		
-		servletCtx = new MockServletContext() {			
-			public String getRealPath(String path) {
-				File f = new File("./test/org/springframework/web/servlet/view/document/" + path);
-				return f.getAbsolutePath();
-			}
-		};
-		request = new MockHttpServletRequest(servletCtx);		
+	private StaticWebApplicationContext webAppCtx;
+
+	public void setUp() {
+		servletCtx = new MockServletContext("org/springframework/web/servlet/view/document");
+		request = new MockHttpServletRequest(servletCtx);
 		response = new MockHttpServletResponse();
 		webAppCtx = new StaticWebApplicationContext();
 		webAppCtx.setServletContext(servletCtx);
 	}
 	
-	public void testExcel()
-	throws Exception {
-		
-		AbstractExcelView excelView = new AbstractExcelView() {			
+	public void testExcel() throws Exception {
+		AbstractExcelView excelView = new AbstractExcelView() {
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-				HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+																				HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
 				HSSFSheet sheet = wb.createSheet();				
 				wb.setSheetName(0, "Test Sheet");
 				
@@ -81,7 +76,6 @@ public class ExcelTestSuite extends TestCase {
 				cell = getCell(sheet, 2, 4);
 				setText(cell, "Test Value");				
 			}
-			
 		};
 		
 		excelView.render(new HashMap(), request, response);
@@ -95,17 +89,14 @@ public class ExcelTestSuite extends TestCase {
 		assertEquals("Test Value", cell.getStringCellValue());		
 	}
 	
-	public void testExcelWithTemplateNoLoc()
-	throws Exception {				
-		
+	public void testExcelWithTemplateNoLoc() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("nl","nl"));		
-		
-		
+
 		AbstractExcelView excelView = new AbstractExcelView() {			
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-				HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+																				HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
 				
 				// test all possible permutation of row or column not existing
@@ -118,11 +109,9 @@ public class ExcelTestSuite extends TestCase {
 				cell = getCell(sheet, 2, 4);
 				setText(cell, "Test Value");				
 			}
-			
 		};
 		
 		excelView.setApplicationContext(webAppCtx);		
-		
 		excelView.setUrl("template");
 		excelView.render(new HashMap(), request, response);
 		
@@ -134,17 +123,14 @@ public class ExcelTestSuite extends TestCase {
 		assertEquals("Test Template", cell.getStringCellValue());
 	}
 	
-	public void testExcelWithTemplateAndCountryAndLanguage()
-	throws Exception {				
-		
+	public void testExcelWithTemplateAndCountryAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
-				newDummyLocaleResolver("en","us"));		
-		
-		
+				newDummyLocaleResolver("en", "US"));
+
 		AbstractExcelView excelView = new AbstractExcelView() {			
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
-				HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+																				HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
 				
 				// test all possible permutation of row or column not existing
@@ -157,11 +143,9 @@ public class ExcelTestSuite extends TestCase {
 				cell = getCell(sheet, 2, 4);
 				setText(cell, "Test Value");				
 			}
-			
 		};
 		
 		excelView.setApplicationContext(webAppCtx);		
-		
 		excelView.setUrl("template");
 		excelView.render(new HashMap(), request, response);
 		
@@ -173,13 +157,10 @@ public class ExcelTestSuite extends TestCase {
 		assertEquals("Test Template American English", cell.getStringCellValue());
 	}
 	
-	public void testExcelWithTemplateAndLanguage()
-	throws Exception {				
-		
+	public void testExcelWithTemplateAndLanguage() throws Exception {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,
 				newDummyLocaleResolver("de", ""));		
-		
-		
+
 		AbstractExcelView excelView = new AbstractExcelView() {			
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
 				HttpServletRequest request, HttpServletResponse response)
@@ -196,11 +177,9 @@ public class ExcelTestSuite extends TestCase {
 				cell = getCell(sheet, 2, 4);
 				setText(cell, "Test Value");				
 			}
-			
 		};
 		
 		excelView.setApplicationContext(webAppCtx);		
-		
 		excelView.setUrl("template");
 		excelView.render(new HashMap(), request, response);
 		
