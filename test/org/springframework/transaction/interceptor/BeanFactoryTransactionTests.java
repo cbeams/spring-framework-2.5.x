@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -58,20 +59,20 @@ public class BeanFactoryTransactionTests extends TestCase {
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		executeGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean);
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
 		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		executeGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean);
 	}
 	
 	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
-		executeGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean);
 	}
 	
 	public void testCglibTransactionProxyImplementsNoInterfaces() throws NoSuchMethodException {
@@ -98,14 +99,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		txnCounter.counter = 0;
 		preCounter.counter = 0;
 		postCounter.counter = 0;
-		executeGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean);
 		// Can't assert it's equal to 4 as the pointcut may be optimized and only invoked once
 		assertTrue(0 < txnCounter.counter && txnCounter.counter <= 4);
 		assertEquals(4, preCounter.counter);
 		assertEquals(4, postCounter.counter);
 	}
 
-	public void executeGetsAreNotTransactional(ITestBean testBean) throws NoSuchMethodException {
+	private void doTestGetsAreNotTransactional(ITestBean testBean) {
 		// Install facade
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
@@ -144,10 +145,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertTrue(testBean.getAge() == age);
 		ptmControl.verify();
 	}
-	
+
+	public void testGetBeansOfTypeWithAbstract() {
+		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		System.out.println(beansOfType.size());
+	}
+
 	/**
-	 * Check that we fail gracefully if the user doesn't
-	 * set any transaction attributes.
+	 * Check that we fail gracefully if the user doesn't set any transaction attributes.
 	 */
 	public void testNoTransactionAttributeSource() {
 		try {
@@ -161,8 +166,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	}
 	
 	/**
-	 * Test that we can set the target to a dynamic TargetSource
-	 * @throws NoSuchMethodException
+	 * Test that we can set the target to a dynamic TargetSource.
 	 */
 	public void testDynamicTargetSource() throws NoSuchMethodException {
 		// Install facade

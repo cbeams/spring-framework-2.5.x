@@ -191,6 +191,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 					// ignore
 				}
+				catch (BeanIsAbstractException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to abstract bean definition '" + beanNames[i] + "'");
+					}
+					// ignore
+				}
 				catch (BeanCreationException ex) {
 					// We're currently creating that FactoryBean.
 					// Sensible to ignore it, as we are just looking for a certain type.
