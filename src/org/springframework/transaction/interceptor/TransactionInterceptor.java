@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -39,7 +39,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.19 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.20 2004-03-19 21:35:54 johnsonr Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.ProxyFactoryBean

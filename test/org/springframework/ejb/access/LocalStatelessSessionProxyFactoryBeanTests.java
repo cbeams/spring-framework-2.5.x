@@ -24,7 +24,7 @@ import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.easymock.MockControl;
 
 import org.springframework.jndi.JndiTemplate;
@@ -33,7 +33,7 @@ import org.springframework.jndi.JndiTemplate;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.9 2004-03-19 16:54:42 johnsonr Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 

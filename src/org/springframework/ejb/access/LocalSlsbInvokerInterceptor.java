@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
@@ -41,7 +41,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * the "lazy-init" attribute.
  *
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.9 2004-03-19 07:41:45 jhoeller Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 

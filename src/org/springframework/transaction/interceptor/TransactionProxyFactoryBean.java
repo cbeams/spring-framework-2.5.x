@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Properties;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
@@ -61,7 +61,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.23 2004-03-18 14:32:29 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.24 2004-03-19 21:35:54 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 

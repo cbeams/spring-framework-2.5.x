@@ -29,7 +29,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +48,7 @@ import org.springframework.aop.TargetSource;
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: Cglib2AopProxy.java,v 1.5 2004-03-19 16:54:42 johnsonr Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
  */
 class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	

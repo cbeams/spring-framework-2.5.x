@@ -24,7 +24,7 @@ import java.util.Arrays;
 import javax.ejb.CreateException;
 import javax.ejb.EJBObject;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteAccessException;
@@ -55,7 +55,7 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 09-May-2003
- * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.9 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
  * @see org.springframework.remoting.RemoteAccessException
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {

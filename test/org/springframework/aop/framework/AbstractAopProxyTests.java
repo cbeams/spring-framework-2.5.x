@@ -26,7 +26,7 @@ import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.Advisor;
@@ -46,7 +46,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.24 2004-03-19 18:43:17 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.25 2004-03-19 21:35:47 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	

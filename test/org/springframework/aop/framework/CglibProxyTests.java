@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 
 import net.sf.cglib.core.CodeGenerationException;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.7 2004-03-19 16:54:41 johnsonr Exp $
+ * @version $Id: CglibProxyTests.java,v 1.8 2004-03-19 21:35:47 johnsonr Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 	

@@ -16,14 +16,14 @@
 
 package org.springframework.aop.framework;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
  * @author Rod Johnson
- * @version $Id: ExposeInvocationInterceptor.java,v 1.2 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: ExposeInvocationInterceptor.java,v 1.3 2004-03-19 21:35:47 johnsonr Exp $
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor {
 	

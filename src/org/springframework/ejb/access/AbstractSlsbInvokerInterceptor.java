@@ -19,7 +19,7 @@ package org.springframework.ejb.access;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.beans.FatalBeanException;
@@ -30,7 +30,7 @@ import org.springframework.jndi.AbstractJndiLocator;
  * Such an interceptor must be the last interceptor in the advice chain. In this case,
  * there is no target object.
  * @author Rod Johnson
- * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.9 2004-03-19 07:41:45 jhoeller Exp $
+ * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
  */
 public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 		implements MethodInterceptor {

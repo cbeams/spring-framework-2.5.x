@@ -22,7 +22,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
@@ -32,7 +32,7 @@ import org.springframework.aop.PointcutAdvisor;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.14 2004-03-18 02:46:09 trisberg Exp $
+ * @version $Id: AopUtils.java,v 1.15 2004-03-19 21:35:54 johnsonr Exp $
  */
 public abstract class AopUtils {
 	

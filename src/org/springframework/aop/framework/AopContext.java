@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 
 /**
  * Class containing static methods used to obtain information about the
@@ -39,7 +39,7 @@ import org.aopalliance.intercept.AspectException;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: AopContext.java,v 1.5 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: AopContext.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
  */
 public abstract class AopContext {
 	

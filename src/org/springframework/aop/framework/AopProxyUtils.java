@@ -20,12 +20,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.aopalliance.intercept.AspectException;
+import org.aopalliance.aop.AspectException;
 
 /**
  * Miscellaneous utilities for AOP proxies
  * @author Rod Johnson
- * @version $Id: AopProxyUtils.java,v 1.5 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: AopProxyUtils.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
  */
 public abstract class AopProxyUtils {
 	
