@@ -20,8 +20,7 @@
 	
 	<action-state id="item.add">
 		<action bean="item.add"/>
-		<transition event="success" to="itemList.view"/>
-		<transition event="txError" to="itemList.view"/>
+		<transition event="*" to="itemList.view"/>
 	</action-state>
 	
 </web-flow>

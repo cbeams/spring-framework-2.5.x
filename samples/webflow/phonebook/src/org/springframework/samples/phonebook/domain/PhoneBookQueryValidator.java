@@ -1,6 +1,5 @@
-package org.springframework.samples.phonebook.web.flow;
+package org.springframework.samples.phonebook.domain;
 
-import org.springframework.samples.phonebook.domain.PhoneBookQuery;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

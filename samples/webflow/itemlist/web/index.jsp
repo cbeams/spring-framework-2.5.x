@@ -16,7 +16,7 @@
 			</P>
 			
 			<P>
-				This Spring web flow sample application illustrates 2 things:
+				This Spring web flow sample application illustrates 3 features:
 				<UL>
 					<LI>
 						Double submit prevention using the synchronizer token
@@ -28,6 +28,10 @@
 						after 1 minute of idle time, a web flow will expire and
 						will no longer be available for request processing.
 					</LI>
+					<LI>
+						Event pattern matching, for matching eventId expressions to transitions.
+					</LI>
+
 				</UL>
 			</P>
 		</DIV>
