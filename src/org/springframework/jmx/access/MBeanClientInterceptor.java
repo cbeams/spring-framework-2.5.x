@@ -92,7 +92,19 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	private final Map signatureCache = new HashMap();
 
-	private boolean useStrictCasing = true;
+	/**
+	 * Indicates whether or not strict casing is being used for attributes.
+	 */
+  private boolean useStrictCasing = true;
+	
+	/**
+	 * Enables and disables strict casing for attributes. When using strict casing a JavaBean property
+	 * with a getter such as <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
+	 * With strict casing disable <code>getFoo()</code> would translate to just <code>foo</code>.
+	 */
+	public void setUseStrictCasing(boolean useStrictCasing) {
+		this.useStrictCasing = useStrictCasing;
+	}
 
 
 	/**
