@@ -11,10 +11,10 @@ import org.springframework.beans.TestBean;
  * We don't need an import for this attribute, because it's in this package.
  * Attributes syntax is Commons Attributes.
  * 
- * @PrototypeAttribute()
+ * @@PrototypeAttribute()
  * 
  * @author Rod Johnson
- * @version $Id: PrototypeTestBean.java,v 1.1 2003-12-15 17:14:43 johnsonr Exp $
+ * @version $Id: PrototypeTestBean.java,v 1.2 2004-02-23 10:44:06 jhoeller Exp $
  */
 public class PrototypeTestBean extends TestBean {
 
