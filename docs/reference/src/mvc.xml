@@ -1134,6 +1134,15 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     &lt;property name="baseName"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
     &lt;property name="defaultParentView"&gt;&lt;value&gt;parentView&lt;/value&gt;&lt;/property
 &lt;/bean&gt;</programlisting></para>
+	<para>
+		<emphasis>A note on caching:</emphasis> subclasses of <literal>AbstractCachingViewResolver</literal>
+		cache view instances they've resolved. This greatly improves performance when using
+		certain view technology. It's possible to turn off the cache, by setting the
+		<literal>cache</literal> property to false. Furthermore, if you have the requirement to
+		be able to refresh a certain view at runtime (for example when a Velocity template
+		has been modified), you can use the <literal>removeFromCache(String viewName, Locale loc)</literal>
+		method.		
+	</para>
     </sect2>
   </sect1>
 
