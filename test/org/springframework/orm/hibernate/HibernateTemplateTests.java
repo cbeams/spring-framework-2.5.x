@@ -58,6 +58,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -89,6 +90,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -135,6 +137,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		sfControl.replay();
@@ -167,6 +170,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
 		session.flush();
@@ -205,6 +209,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -235,6 +240,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -261,6 +267,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -287,6 +294,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -313,6 +321,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -345,6 +354,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -371,6 +381,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -396,6 +407,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -421,6 +433,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -446,11 +459,14 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.save(tb);
 		sessionControl.setReturnValue(new Integer(0), 1);
 		session.flush();
@@ -471,11 +487,14 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.save(tb, "id");
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -496,17 +515,20 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.saveOrUpdate(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -516,22 +538,55 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testUpdate() throws HibernateException {
+	public void testSaveOrUpdateWithFlushModeNever() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		try {
+			ht.saveOrUpdate(tb);
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+		}
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testUpdate() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.update(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -546,11 +601,14 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.update(tb);
 		sessionControl.setVoidCallable(1);
 		session.lock(tb, LockMode.UPGRADE);
@@ -558,7 +616,7 @@ public class HibernateTemplateTests extends TestCase {
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -573,11 +631,14 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.delete(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
@@ -598,11 +659,14 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.lock(tb, LockMode.UPGRADE);
 		sessionControl.setVoidCallable(1);
 		session.delete(tb);
@@ -625,12 +689,15 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.delete(tb1);
 		sessionControl.setVoidCallable(1);
 		session.delete(tb2);
@@ -638,7 +705,7 @@ public class HibernateTemplateTests extends TestCase {
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -656,6 +723,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -682,6 +750,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -714,6 +783,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -748,6 +818,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -782,6 +853,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -818,6 +890,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -869,6 +942,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		TestBean tb = new TestBean();
 		List list = new ArrayList();
 		sf.openSession();
@@ -904,6 +978,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -936,6 +1011,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -970,6 +1046,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1004,6 +1081,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1040,6 +1118,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1091,6 +1170,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1125,6 +1205,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1159,6 +1240,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1195,6 +1277,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1234,6 +1317,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		TestBean tb = new TestBean();
 		List list = new ArrayList();
 		sf.openSession();
@@ -1269,6 +1353,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1304,6 +1389,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		List list = new ArrayList();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1339,6 +1425,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1371,6 +1458,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1405,6 +1493,7 @@ public class HibernateTemplateTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
@@ -1441,10 +1530,13 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.delete("from example.Example");
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1465,10 +1557,13 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.delete("from example.Example", "test", Hibernate.STRING);
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1489,12 +1584,15 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		Object[] values = new Object[]{"test1", "test2"};
 		Type[] types = new Type[] {Hibernate.STRING, Hibernate.STRING};
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
 		session.delete("from example.Example", values, types);
 		sessionControl.setReturnValue(2);
 		session.flush();
@@ -1629,6 +1727,7 @@ public class HibernateTemplateTests extends TestCase {
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session);
 		session.getSessionFactory();
@@ -1639,6 +1738,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
+
 		return new HibernateTemplate(sf);
 	}
 

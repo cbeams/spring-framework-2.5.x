@@ -32,6 +32,7 @@ import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -291,6 +292,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Serializable save(final Object entity) throws DataAccessException {
 		return (Serializable) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				return session.save(entity);
 			}
 		});
@@ -299,6 +301,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void save(final Object entity, final Serializable id) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.save(entity, id);
 				return null;
 			}
@@ -308,6 +311,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void saveOrUpdate(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.saveOrUpdate(entity);
 				return null;
 			}
@@ -317,6 +321,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException {
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				return session.saveOrUpdateCopy(entity);
 			}
 		});
@@ -325,6 +330,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void update(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.update(entity);
 				return null;
 			}
@@ -334,6 +340,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void update(final Object entity, final LockMode lockMode) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.update(entity);
 				session.lock(entity, lockMode);
 				return null;
@@ -344,6 +351,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void delete(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.delete(entity);
 				return null;
 			}
@@ -353,6 +361,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				session.lock(entity, lockMode);
 				session.delete(entity);
 				return null;
@@ -363,6 +372,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public void deleteAll(final Collection entities) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				for (Iterator it = entities.iterator(); it.hasNext();) {
 					session.delete(it.next());
 				}
@@ -621,6 +631,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public int delete(final String queryString) throws DataAccessException {
 		Integer deleteCount = (Integer) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString));
 			}
 		});
@@ -631,6 +642,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws DataAccessException {
 		Integer deleteCount = (Integer) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString, value, type));
 			}
 		});
@@ -641,6 +653,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws DataAccessException {
 		Integer deleteCount = (Integer) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				checkWriteOperationAllowed(session);
 				return new Integer(session.delete(queryString, values, types));
 			}
 		});
@@ -709,6 +722,24 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 		SessionFactoryUtils.applyTransactionTimeout(criteria, getSessionFactory());
 		return criteria;
+	}
+
+
+	/**
+	 * Check whether write operations are allowed on the given Session.
+	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
+	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
+	 * @param session current Hibernate Session
+	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
+	 * @see net.sf.hibernate.Session#getFlushMode
+	 * @see net.sf.hibernate.FlushMode#NEVER
+	 */
+	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
+		if (FlushMode.NEVER.equals(session.getFlushMode())) {
+			throw new InvalidDataAccessApiUsageException("Write operations are not allowed in read-only mode - " +
+			                                             "turn your Session into FlushMode.AUTO respectively remove " +
+			                                             "'readOnly' marker from transaction definition");
+		}
 	}
 
 }
