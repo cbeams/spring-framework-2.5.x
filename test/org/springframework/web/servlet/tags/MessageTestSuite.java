@@ -19,14 +19,6 @@ import com.mockobjects.servlet.MockPageContext;
  */
 public class MessageTestSuite extends AbstractTagTest {
 
-	/**
-	 * Constructor for HtmlEscapeTestSuite.
-	 * @param arg0
-	 */
-	public MessageTestSuite(String name) {
-		super(name);
-	}
-	
 	public void testMessageTagWithCode1() throws JspException {
 		MockPageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();

@@ -14,14 +14,6 @@ import com.mockobjects.servlet.MockPageContext;
  */
 public class ThemeTestSuite extends AbstractTagTest {
 
-	/**
-	 * Constructor for HtmlEscapeTestSuite.
-	 * @param arg0
-	 */
-	public ThemeTestSuite(String name) {
-		super(name);
-	}	
-
 	public void testThemeTag() throws JspException {
 		MockPageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();

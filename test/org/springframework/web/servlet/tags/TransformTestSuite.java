@@ -19,16 +19,7 @@ import com.mockobjects.servlet.MockPageContext;
  */
 public class TransformTestSuite extends AbstractTagTest {
 
-	/**
-	 * Constructor for HtmlEscapeTestSuite.
-	 * @param arg0
-	 */
-	public TransformTestSuite(String name) {
-		super(name);
-	}
-	
-	public void testTransformTagCorrectBehavior() 
-	throws JspException {
+	public void testTransformTagCorrectBehavior() throws JspException {
 		// first set up the pagecontext and the bean
 		MockPageContext pc = createPageContext();
 		TestBean tb = new TestBean();

@@ -1,35 +1,15 @@
-/*
- * Copyright (c) 2003 JTeam B.V.
- * www.jteam.nl
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of
- * JTeam B.V. ("Confidential Information").
- * You shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement you
- * entered into with JTeam.
- */
 package org.springframework.util;
 
 import java.io.FileNotFoundException;
 
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import junit.framework.TestCase;
 
 /**
  * @author Alef Arendsen
  */
 public class Log4jConfigurerTestSuite extends TestCase {
-
-	/**
-	 * Constructor for Log4jConfigurerTestSuite.
-	 * @param arg0
-	 */
-	public Log4jConfigurerTestSuite(String name) {
-		super(name);
-	}
 
 	/*
 	 * Class to test for void initLogging(String)
@@ -57,8 +37,6 @@ public class Log4jConfigurerTestSuite extends TestCase {
 		assertTrue(MockLog4jAppender.loggingStrings.contains("warn"));
 		assertTrue(MockLog4jAppender.loggingStrings.contains("error"));
 		assertTrue(MockLog4jAppender.loggingStrings.contains("fatal"));
-		
-		
 	}
 
 	public void testInitLoggingStringlong() {
@@ -75,4 +53,5 @@ public class Log4jConfigurerTestSuite extends TestCase {
 	public void testSetWorkingDirSystemProperty() {
 		//TODO Implement setWorkingDirSystemProperty().
 	}
+
 }

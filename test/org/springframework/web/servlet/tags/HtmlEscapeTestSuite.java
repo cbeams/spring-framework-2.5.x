@@ -12,14 +12,6 @@ import org.springframework.web.mock.MockServletContext;
  */
 public class HtmlEscapeTestSuite extends AbstractTagTest {
 
-	/**
-	 * Constructor for HtmlEscapeTestSuite.
-	 * @param arg0
-	 */
-	public HtmlEscapeTestSuite(String name) {
-		super(name);
-	}
-	
 	public void testHtmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();

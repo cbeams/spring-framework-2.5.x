@@ -15,14 +15,6 @@ import com.mockobjects.servlet.MockPageContext;
  */
 public class BindTestSuite extends AbstractTagTest {
 
-	/**
-	 * Constructor for HtmlEscapeTestSuite.
-	 * @param arg0
-	 */
-	public BindTestSuite(String name) {
-		super(name);
-	}
-	
 	public void testBindErrorsTagWithErrors() throws JspException {
 		MockPageContext pc = createPageContext();
 		ServletRequestDataBinder errors = new ServletRequestDataBinder(new TestBean(), "tb");

@@ -23,11 +23,7 @@ import com.mockobjects.servlet.MockPageContext;
  * Abstract test for testing tags (provides createPageContext)
  * @author Alef Arendsen
  */
-public class AbstractTagTest extends TestCase {
-	
-	public AbstractTagTest(String name) {
-		super(name);
-	} 
+public abstract class AbstractTagTest extends TestCase {
 	
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
