@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -152,7 +151,7 @@ public class ConfigurerTests extends TestCase {
        
         assertEquals(1, nop.getCount());
         Advised advised = (Advised) tb;
-        assertTrue(advised.getExposeProxy());
+        assertTrue(advised.isExposeProxy());
         assertEquals(2, advised.getAdvisors().length);
         CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean(CountingBeforeAdvice.class.getName());
         assertEquals(1, cba.getCalls());
