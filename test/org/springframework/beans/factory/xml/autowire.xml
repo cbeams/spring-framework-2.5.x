@@ -5,14 +5,14 @@
 
 	<bean id="rod1" class="org.springframework.beans.factory.xml.DependenciesBean"
 		autowire="byType"
-		dependencyCheck="objects"
+		dependency-check="objects"
 	>
 		<!-- Should pick up spouse automatically -->
 	</bean>
 	
 	<bean id="rod2" class="org.springframework.beans.factory.xml.DependenciesBean"
 		autowire="byName"
-		dependencyCheck="objects"
+		dependency-check="objects"
 	>
 		<!-- Should pick up spouse automatically -->
 	</bean>
@@ -22,15 +22,12 @@
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 	
-	
 	<!--
 	<bean id="unsatisfiedAutoWireByType" class="org.springframework.beans.TestBean"
 		autowire="byType"
-		dependencyCheck="objects"
+		dependency-check="objects"
 	>
 	</bean>
 	-->
-	
-	
 
 </beans>
