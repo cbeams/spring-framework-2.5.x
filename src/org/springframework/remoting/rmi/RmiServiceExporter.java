@@ -1,5 +1,7 @@
 package org.springframework.remoting.rmi;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -15,14 +17,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
+import org.springframework.remoting.support.RemoteInvocation;
 
 /**
  * RMI exporter that exposes the specified service as RMI object with the specified
  * name. Such services can be accessed via plain RMI or via RmiProxyFactoryBean.
  * Also supports exposing any non-RMI service via RMI invokers, to be accessed via
- * RmiProxyFactoryBean's automatic detection of such invokers.
+ * RmiClientInterceptor/RmiProxyFactoryBean's automatic detection of such invokers.
  *
- * <p>With an RMI invoker, RMI communication works on the RemoteInvocationHandler
+ * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
  * level, needing only one stub for any service. Service interfaces do not have to
  * extend java.rmi.Remote or throw RemoteException on all methods, but in and out
  * parameters have to be serializable.
@@ -34,6 +37,7 @@ import org.springframework.remoting.support.RemoteExporter;
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see RmiClientInterceptor
  * @see RmiProxyFactoryBean
  * @see org.springframework.remoting.caucho.HessianServiceExporter
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
@@ -140,7 +144,7 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 		else {
 			// RMI invoker
 			logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
-			this.exportedObject = new RemoteInvocationWrapper(getProxyForService());
+			this.exportedObject = new RmiInvocationWrapper(getProxyForService(), this);
 		}
 
 		// export remote object and bind it to registry
@@ -153,6 +157,28 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort);
 		}
 		registry.rebind(this.serviceName, this.exportedObject);
+	}
+
+	/**
+	 * Apply the given remote invocation to the given target object.
+	 * The default implementation performs a plain method invocation.
+	 * <p>Can be overridden in subclasses for custom invocation behavior,
+	 * possibly for applying additional invocation parameters from a
+	 * custom RemoteInvocation subclass. Will typically match a corresponding
+	 * custom invoke implementation in RmiClientInterceptor/RmiProxyFactoryBean.
+	 * @param invocation the remote invocation
+	 * @param targetObject the target object to apply the invocation to
+	 * @return the invocation result
+	 * @throws NoSuchMethodException if the method name could not be resolved
+	 * @throws IllegalAccessException if the method could not be accessed
+	 * @throws InvocationTargetException if the method invocation resulted in an exception
+	 * @see RmiClientInterceptor#invoke
+	 */
+	protected Object invoke(RemoteInvocation invocation, Object targetObject)
+	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method method = targetObject.getClass().getMethod(invocation.getMethodName(),
+		                                                  invocation.getParameterTypes());
+		return method.invoke(targetObject, invocation.getArguments());
 	}
 
 	public void destroy() throws RemoteException, NotBoundException {

@@ -4,14 +4,14 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Factory bean for RMI proxies, supporting both plain and transparent RMI.
- * Behaves like the proxied service when used as bean reference, exposing the
- * specified service interface. Proxies will throw RemoteAccessException on
- * remote invocation failure instead of RMI's RemoteException.
+ * Factory bean for RMI proxies, supporting both conventional RMI services and
+ * RMI invokers. Behaves like the proxied service when used as bean reference,
+ * exposing the specified service interface. Proxies will throw RemoteAccessException
+ * on remote invocation failure instead of RMI's RemoteException.
  *
  * <p>The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
- * "Transparent RMI" works at the RemoteInvocationHandler level, needing only one
- * stub for any service. Service interfaces do not have to extend java.rmi.Remote or
+ * RMI invokers work at the RmiInvocationHandler level, needing only one stub
+ * for any service. Service interfaces do not have to extend java.rmi.Remote or
  * throw RemoteException. Of course, in and out parameters have to be serializable.
  *
  * <p>This proxy factory bean can also apply non-RMI service interfaces to

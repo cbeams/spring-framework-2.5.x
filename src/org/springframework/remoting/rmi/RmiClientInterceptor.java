@@ -7,26 +7,27 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 
-import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
- * Interceptor for accessing conventional or transparent RMI services.
+ * Interceptor for accessing conventional RMI services or RMI invokers.
  * The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
  *
- * <p>"Transparent RMI" works at the RemoteInvocationHandler level, needing only one
- * stub for any service. Service interfaces do not have to extend java.rmi.Remote or
+ * <p>RMI invokers work at the RmiInvocationHandler level, needing only one stub
+ * for any service. Service interfaces do not have to extend java.rmi.Remote or
  * throw RemoteException; Spring's unchecked RemoteAccessException will be thrown on
  * remote invocation failure. Of course, in and out parameters have to be serializable.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see RmiServiceExporter
+ * @see RmiInvocationHandler
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
@@ -40,7 +41,7 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
 		Remote remoteObj = createRmiProxy();
-		if (remoteObj instanceof RemoteInvocationHandler) {
+		if (remoteObj instanceof RmiInvocationHandler) {
 			logger.info("RMI object [" + getServiceUrl() + "] is an RMI invoker");
 		}
 		else if (getServiceInterface() != null) {
@@ -69,11 +70,9 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
-			if (this.rmiProxy instanceof RemoteInvocationHandler) {
-				RemoteInvocationHandler invoker = (RemoteInvocationHandler) this.rmiProxy;
-				return invoker.invokeRemote(invocation.getMethod().getName(),
-																		invocation.getMethod().getParameterTypes(),
-																		invocation.getArguments());
+			if (this.rmiProxy instanceof RmiInvocationHandler) {
+				RmiInvocationHandler invocationHandler = (RmiInvocationHandler) this.rmiProxy;
+				return invoke(invocation, invocationHandler);
 			}
 			else {
 				Method method = invocation.getMethod();
@@ -108,9 +107,28 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 				throw targetException;
 			}
 		}
-		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke RMI service [" + getServiceUrl() + "]", ex);
+		catch (RuntimeException ex) {
+			throw new RemoteAccessException("Failed to invoke RMI service [" + getServiceUrl() + "]", ex);
 		}
+	}
+
+	/**
+	 * Apply the given AOP method invocation to the given RmiInvocationHandler.
+	 * The default implementation calls invoke with a plain RemoteInvocation.
+	 * <p>Can be overridden in subclasses to provide custom RemoteInvocation
+	 * subclasses, containing additional invocation parameters like user
+	 * credentials. Can also process the returned result object.
+	 * @param methodInvocation the current AOP method invocation
+	 * @param invocationHandler the RmiInvocationHandler to apply the invocation to
+	 * @return the invocation result
+	 * @throws NoSuchMethodException if the method name could not be resolved
+	 * @throws IllegalAccessException if the method could not be accessed
+	 * @throws InvocationTargetException if the method invocation resulted in an exception
+	 * @see org.springframework.remoting.support.RemoteInvocation(org.aopalliance.intercept.MethodInvocation)
+	 */
+	protected Object invoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
+	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		return invocationHandler.invoke(new RemoteInvocation(methodInvocation));
 	}
 
 }

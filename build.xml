@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.39 2004-02-23 10:49:33 jhoeller Exp $
+    $Id: build.xml,v 1.40 2004-02-26 14:41:15 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -118,7 +118,7 @@
 			<classpath refid="all-libs"/>
 		</javac>
 
-		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
 
 		<copy todir="${target.classes.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">

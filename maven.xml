@@ -5,7 +5,7 @@
    
    <postGoal name="java:compile">
       <!-- Compile RMI stubs  -->
-      <rmic base="${maven.build.dest}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
+      <rmic base="${maven.build.dest}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
       
       <copy todir="${maven.build.dest}">
          <fileset dir="${pom.build.sourceDirectory}">
