@@ -121,7 +121,8 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
                 e.setSuperclass(instanceClass);
             }
 
-            e.setCallbackFilter(new JmxProxyCallbackFilter(info));
+            e.setCallbackFilter(new JmxProxyCallbackFilter(info,
+                    ignoreInvalidInvocations));
 
             Callback[] callbacks = new Callback[5];
             callbacks[0] = new ReadAttributeInterceptor();
@@ -158,6 +159,8 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
          */
         private MBeanInfo info;
 
+        private boolean ignoreInvalidInvocations;
+
         /**
          * Creates a new instance of JmxProxyCallbackFilter for a managed
          * resource with the supplied setup.
@@ -165,8 +168,10 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
          * @param info
          *            The MBeanInfo for the managed resource we are proxying
          */
-        public JmxProxyCallbackFilter(MBeanInfo info) {
+        public JmxProxyCallbackFilter(MBeanInfo info,
+                boolean ignoreInvalidInvocations) {
             this.info = info;
+            this.ignoreInvalidInvocations = ignoreInvalidInvocations;
         }
 
         /**
@@ -283,14 +288,15 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
 
             if (other instanceof JmxProxyCallbackFilter) {
                 otherFilter = (JmxProxyCallbackFilter) other;
-                return info.equals(otherFilter.info);
+                return (ignoreInvalidInvocations == otherFilter.ignoreInvalidInvocations && info
+                        .equals(otherFilter.info));
             } else {
                 return false;
             }
         }
 
         public int getNonExposedInterceptor() {
-            if (CglibJmxObjectProxyFactory.this.ignoreInvalidInvocations) {
+            if (ignoreInvalidInvocations) {
                 return NO_OP_INTERCEPTOR;
             } else {
                 return INVALID_INVOCATION_INTERCEPTOR;

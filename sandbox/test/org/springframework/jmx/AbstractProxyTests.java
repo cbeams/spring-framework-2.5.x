@@ -80,6 +80,7 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
     public void testInvokeArgs() throws Exception {
         IJmxTestBean proxy = getProxy();
         int result = proxy.add(1, 2);
+
         assertEquals("The operation should return 3", 3, result);
     }
 

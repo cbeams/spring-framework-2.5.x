@@ -35,4 +35,15 @@ public class CglibProxyTests extends AbstractProxyTests {
         ObjectName objectName = getObjectNameForProxy();
         return (JmxTestBean) factory.createProxy(server, objectName);
     }
+    
+    public void testDifferentProxiesForIgnoreInvocations() throws Exception {
+        JmxObjectProxyFactory pf = getProxyFactory();
+        pf.setIgnoreInvalidInvocations(false);
+        
+        IJmxTestBean proxy1 = getProxy();
+        IJmxTestBean proxy2 = getProxy(pf);
+        
+        assertFalse("The classes should be different", proxy1.getClass().equals(proxy2.getClass()));
+        
+    }
 }
