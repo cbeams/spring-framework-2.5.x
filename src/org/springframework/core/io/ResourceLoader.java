@@ -37,7 +37,7 @@ public interface ResourceLoader {
 	/**
 	 * Return a Resource handle for the specified resource.
 	 * The handle should always be a reusable resource descriptor,
-	 * allowing for multiple getInputStream calls.
+	 * allowing for multiple <code>getInputStream</code> calls.
 	 * <p><ul>
 	 * <li>Must support fully qualified URLs, e.g. "file:C:/test.dat".
 	 * <li>Must support classpath pseudo-URLs, e.g. "classpath:test.dat".
@@ -47,8 +47,8 @@ public interface ResourceLoader {
 	 * </ul>
 	 * <p>Note that a Resource handle does not imply an existing resource;
 	 * you need to invoke Resource's "exists" to check for existence.
-	 * @param location resource location
-	 * @return Resource handle
+	 * @param location the resource location
+	 * @return a corresponding Resource handle
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see org.springframework.core.io.Resource#exists
 	 * @see org.springframework.core.io.Resource#getInputStream
