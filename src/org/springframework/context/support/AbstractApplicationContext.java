@@ -62,7 +62,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -464,6 +464,10 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	public Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
 		return getBeanFactory().applyBeanPostProcessors(existingBean, name);
+	}
+	
+	public Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException {
+		return getBeanFactory().registerBeanOfClass(beanName, beanClass, dependencyCheck);
 	}
 
 

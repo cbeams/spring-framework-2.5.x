@@ -59,5 +59,19 @@ public interface AutowireCapableBeanFactory extends ListableBeanFactory {
 	 * @see BeanFactoryAware
 	 */
 	Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException;
+	
+	/**
+	 * Register a singleton instance of the given class, with autowiring via constructor
+	 * or bean properties if possible.
+	 * This is useful when we have a bean class, and want to add a bean of that class
+	 * to an existing factory, benefiting from autowiring.
+	 * <br>Unlike other autowire methods, the instance is added to this factory.
+	 * @param beanName name of the registered bean
+	 * @param beanClass class of bean to add to context
+	 * @param dependencyCheck whether dependency check should be performed for objects.
+	 * Dependency check for simple parameters is impossible.
+	 * @return the configured bean if successful
+	 */
+	Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException;
 
 }

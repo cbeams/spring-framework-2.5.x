@@ -20,7 +20,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.6 2003-12-24 14:13:38 johnsonr Exp $
+ * @version $Id: ConfigurableBeanFactory.java,v 1.7 2003-12-24 14:48:11 johnsonr Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
@@ -101,18 +101,5 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * To be called on shutdown of a factory.
 	 */
 	void destroySingletons();
-	
-	/**
-	 * Register a singleton bean of the given class, with autowiring via constructor
-	 * or bean properties if possible.
-	 * This is useful when we have a bean class, and want to add a bean of that class
-	 * to an existing factory, benefiting from autowiring.
-	 * @param beanName name of the registered bean
-	 * @param beanClass class of bean to add to context
-	 * @param dependencyCheck whether dependency check should be performed for objects.
-	 * Dependency check for simple parameters is impossible.
-	 * @return the configured bean if successful
-	 */
-	Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException;
 
 }
