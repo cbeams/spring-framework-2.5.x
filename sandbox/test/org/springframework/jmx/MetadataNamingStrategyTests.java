@@ -20,4 +20,8 @@ public class MetadataNamingStrategyTests extends AbstractJmxTests {
         ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance(OBJECT_NAME));
         assertNotNull("The instance should not be null", instance);
     }
+
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/metadataAssembler.xml";
+    }
 }

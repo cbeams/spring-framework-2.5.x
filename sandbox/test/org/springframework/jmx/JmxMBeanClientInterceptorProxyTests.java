@@ -32,4 +32,8 @@ public class JmxMBeanClientInterceptorProxyTests extends AbstractProxyTests {
         return server;
     }
 
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/metadataAssembler.xml";
+    }
+
 }

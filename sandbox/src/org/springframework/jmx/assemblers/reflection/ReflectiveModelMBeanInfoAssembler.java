@@ -31,20 +31,20 @@ public class ReflectiveModelMBeanInfoAssembler extends
 
     
     protected String getDescription(Object bean) {
-        return "";
+        return bean.getClass().getName() + " instance";
     }
 
     protected boolean includeReadAttribute(Method method) {
-        return isPublic(method);
+        return true;
     }
 
 
     protected boolean includeWriteAttribute(Method method) {
-        return isPublic(method);
+        return true;
     }
 
     protected boolean includeOperation(Method method) {
-        return isPublic(method);
+        return true;
     }
 
     protected String getOperationDescription(Method method) {
@@ -71,7 +71,4 @@ public class ReflectiveModelMBeanInfoAssembler extends
         // no-op
     }
 
-    private boolean isPublic(Method method) {
-        return (method.getModifiers() & Modifier.PUBLIC) > 0;
-    }
 }

@@ -26,4 +26,8 @@ public class CommonsAttributesMetadataAssemblerTests extends
     protected String getObjectName() {
         return OBJECT_NAME;
     }
+
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/metadataAssembler.xml";
+    }
 }

@@ -46,7 +46,6 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
     private static final String GET_CLASS = "getClass";
 
     protected ModelMBeanAttributeInfo[] getAttributeInfo(Object bean) {
-        Class beanClass = bean.getClass();
         BeanWrapper bw = new BeanWrapperImpl(bean);
 
         PropertyDescriptor[] props = bw.getPropertyDescriptors();
@@ -117,14 +116,18 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler extends
     }
 
     protected ModelMBeanOperationInfo[] getOperationInfo(Object bean) {
-        Method[] methods = bean.getClass().getDeclaredMethods();
+        Method[] methods = bean.getClass().getMethods();
         ModelMBeanOperationInfo[] info = new ModelMBeanOperationInfo[methods.length];
         int attrCount = 0;
 
         for (int x = 0; x < methods.length; x++) {
             Method method = methods[x];
             ModelMBeanOperationInfo inf = null;
-            
+
+            if(method.getDeclaringClass() == Object.class) {
+                continue;
+            }
+
             if ((JmxUtils.isGetter(method) && includeReadAttribute(method))
                     || (JmxUtils.isSetter(method) && includeWriteAttribute(method))) {
                 // attributes need to have their methods exposed as

@@ -51,4 +51,8 @@ public class CglibProxyTests extends AbstractProxyTests {
 	protected MBeanServerConnection getServerConnection() throws Exception{
 		return server;
 	}
+
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/metadataAssembler.xml";
+    }
 }
