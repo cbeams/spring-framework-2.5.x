@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.167 2004-06-21 20:38:18 jhoeller Exp $
+$Id: changelog.txt,v 1.168 2004-06-23 11:31:39 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -10,6 +10,7 @@ Package org.springframework.aop
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
 
 Package org.springframework.beans
+* BeanUtils' "instantiateClass" methods try to set the constructors accessible if given non-accessible constructors
 * factored out PropertyAccessor base interface from BeanWrapper
 * BeanWrapperImpl supports dots in keys, for example "map[my.key]"
 * refined BeanWrapperImpl to apply a custom editor strictly either to an array/Collection or to each of their elements
@@ -21,12 +22,18 @@ Package org.springframework.beans
 * MethodInvokingFactoryBean derives from ArgumentConvertingMethodInvoker to inherit argument conversion
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
 * fixed PropertyPlaceholderConfigurer's circular reference detection to allow repeated placeholder in single value
+* PropertyPlaceholderConfigurer and PropertiesFactoryBean respect the defaults of a given Properties instance
 * added "parent" option to "ref" tag in spring-beans.dtd, allowing to explicitly reference a bean in the parent factory
+* AbstractAutowireCapableBeanFactory's "autowireConstructor" regards all constructors, just preferring public ones
 
 Package org.springframework.context
 * reworked ApplicationEventMulticaster to have a "multicastEvent" method rather than derive from ApplicationListener
 * renamed ApplicationEventMulticasterImpl to SimpleApplicationEventMulticaster, indicating alternative implementations
 * AbstractApplicationContext auto-detects an "applicationEventMulticaster" bean, using it instead of the default
+
+Package org.springframework.core
+* added ClassPathResourcePatternResolver which can retrieve multiple class path resources with the same name
+* PathMatchingResourcePatternResolver derives from ClassPathResourcePatternResolver to inherit its behavior
 
 Package org.springframework.dao
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
@@ -42,6 +49,7 @@ Package org.springframework.jdbc
 * added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
 * added BatchSqlUpdate class to jdbc.object package, for convenient execution of batch updates
 * adapted CommonsDbcpNativeJdbcExtractor for Commons DBCP 1.2, to support both DBCP 1.1 and 1.2
+* adapted JBossNativeJdbcExtractor for JBoss 3.2.4, also supporting ResultSet unwrapping
 * added WebSphereNativeJdbcExtractor, using WSJdbcUtil's "getNativeConnection" method (tested with WLS 5.1.0)
 
 Package org.springframework.mail
@@ -92,7 +100,7 @@ Package org.springframework.validation
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
 * added "getContextLoader" accessor to ContextLoaderListener and ContextLoaderServlet
-* deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getUrl/getProcessingTime/getClientAddress
+* deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getRequestUrl/getProcessingTime/getClientAddress
 * added optional "sessionId" and "userName" fields to RequestHandledEvent, for easier session and user tracking
 * support multiple delimited URLs in ResourceServlet, including them one by one (and taking the latest file timestamp)
 * added FixedLocaleResolver implementation, returning a given "defaultLocale" for any request
