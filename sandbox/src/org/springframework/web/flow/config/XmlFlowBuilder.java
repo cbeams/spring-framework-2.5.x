@@ -193,13 +193,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		this.entityResolver = entityResolver;
 	}
 	
-	public void init() throws FlowBuilderException {
+	public Flow init() throws FlowBuilderException {
 		Assert.notNull(resource, "resource is a required property");
 		Assert.notNull(getFlowServiceLocator(), "flowServiceLocator is a required property");
 		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
 		
 		try {
-			doc = loadFlowDefinition();
+			loadFlowDefinition();
 		}
 		catch (IOException e) {
 			throw new FlowBuilderException("Cannot load the XML flow definition resource", e);
@@ -210,16 +210,20 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		catch (SAXException e) {
 			throw new FlowBuilderException("Cannot parse the flow definition XML document", e);
 		}
+		
+		parseFlowDefinition();
+		
+		return getFlow();
 	}
-
+	
 	public void buildStates() throws FlowBuilderException {
-		setFlow(parseFlowDefinition(doc));
+		parseStateDefinitions();
 	}
 
 	/**
 	 * Load the flow definition from the configured resource. 
 	 */
-	protected Document loadFlowDefinition() throws IOException, ParserConfigurationException, SAXException {
+	protected void loadFlowDefinition() throws IOException, ParserConfigurationException, SAXException {
 		InputStream is = null;
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -240,7 +244,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			});
 			docBuilder.setEntityResolver(this.entityResolver);
 			is = resource.getInputStream();
-			return docBuilder.parse(is);
+			doc = docBuilder.parse(is);
 		}
 		finally {
 			if (is != null) {
@@ -255,14 +259,26 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Parse given XML flow definitions and construct a Flow object.
+	 * Parse the XML flow definitions and construct a Flow object.
 	 */
-	protected Flow parseFlowDefinition(Document doc) {
+	protected void parseFlowDefinition() {
 		Element root = doc.getDocumentElement();
 		String id = root.getAttribute(ID_ATTRIBUTE);
+		
+		//set the flow under construction
+		setFlow(createFlow(id));
+	}
+		
+	/**
+	 * Parse the state definitions in the XML file and add them
+	 * to the flow object we're constructing.
+	 */
+	protected void parseStateDefinitions() {
+		Element root = doc.getDocumentElement();
 		String startStateId = root.getAttribute(START_STATE_ELEMENT_ATTRIBUTE);
-
-		Flow flow = createFlow(id);
+		
+		//get the flow under construction
+		Flow flow=getFlow();
 
 		NodeList nodeList = root.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
@@ -285,8 +301,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 
 		flow.setStartState(startStateId);
-
-		return flow;
 	}
 
 	/**

@@ -65,7 +65,7 @@ import org.springframework.web.flow.Flow;
  * @author Erwin Vervaet
  */
 public class FlowFactoryBean implements FactoryBean, InitializingBean {
-
+	
 	private FlowBuilder flowBuilder;
 
 	private Flow flow;
@@ -127,9 +127,12 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	/**
 	 * @return The flow built by this factory.
 	 */
-	public Flow getFlow() {
+	public synchronized Flow getFlow() {
 		if (this.flow == null) {
-			new FlowAssembler(this.flowBuilder).assemble();
+			//already set the flow handle to avoid infinite loops!
+			this.flow = this.flowBuilder.init();
+			this.flowBuilder.buildStates();
+			this.flowBuilder.buildExecutionListeners();
 			this.flow = this.flowBuilder.getResult();
 		}
 		return this.flow;
@@ -141,23 +144,5 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
 	public boolean isSingleton() {
 		return true;
-	}
-
-	/**
-	 * Helper class to direct flow construction using the builder. This object
-	 * is the "director" in the GoF builder pattern.
-	 */
-	private static class FlowAssembler {
-		private FlowBuilder builder;
-
-		public FlowAssembler(FlowBuilder builder) {
-			this.builder = builder;
-		}
-
-		public void assemble() {
-			this.builder.init();
-			this.builder.buildStates();
-			this.builder.buildExecutionListeners();
-		}
 	}
 }

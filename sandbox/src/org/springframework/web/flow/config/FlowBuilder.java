@@ -35,11 +35,13 @@ import org.springframework.web.flow.Flow;
 public interface FlowBuilder {
 
 	/**
-	 * Initialize this builder; typically constructs the initial Flow
-	 * definition.
+	 * Initialize this builder and return a handle to the flow under construction.
+	 * This handle is needed to avoid infinite loops in the build process.
+	 * The returned flow object is still under construction and not yet ready for
+	 * use. The only property that is guaranteed to be filled is the id of the flow.
 	 */
-	public void init() throws FlowBuilderException;
-
+	public Flow init() throws FlowBuilderException;
+	
 	/**
 	 * Creates and adds all states to the flow built by this builder.
 	 */

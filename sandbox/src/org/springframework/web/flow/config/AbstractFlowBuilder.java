@@ -139,8 +139,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		super(flowServiceLocator, flowCreator);
 	}
 
-	public final void init() throws FlowBuilderException {
+	public final Flow init() throws FlowBuilderException {
 		setFlow(createFlow(flowId()));
+		return getFlow();
 	}
 
 	/**
