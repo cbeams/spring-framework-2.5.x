@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
 
-<web-flow id="person.Search" start-state="criteria.view">
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
+
+<webflow id="person.Search" start-state="criteria.view">
 
 	<view-state id="criteria.view" view="person.Search.criteria.view">
 		<transition on="submit" to="bindAndValidate"/>
@@ -38,4 +39,4 @@
 	
 	<end-state id="error" view="error.view"/>
 	
-</web-flow>
+</webflow>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<web-flow id="Upload" start-state="selectFile.view">
+<webflow id="Upload" start-state="selectFile.view">
 
 	<view-state id="selectFile.view" view="selectFile.view">
 		<transition on="submit" to="bindAndValidate"/>
@@ -19,4 +19,4 @@
 		<transition on="back" to="selectFile.view"/>
 	</view-state>
 	
-</web-flow>
+</webflow>

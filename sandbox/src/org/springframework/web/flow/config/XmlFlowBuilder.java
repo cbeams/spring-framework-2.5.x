@@ -55,8 +55,8 @@ import org.xml.sax.SAXParseException;
  * file. The XML files read by this class should use the following doctype:
  * 
  * <pre>
- *    &lt;!DOCTYPE web-flow PUBLIC &quot;-//SPRING//DTD WEB FLOW//EN&quot;
- * 		&quot;http://www.springframework.org/dtd/web-flow.dtd&quot;&gt;
+ *    &lt;!DOCTYPE webflow PUBLIC &quot;-//SPRING//DTD WEBFLOW//EN&quot;
+ * 		&quot;http://www.springframework.org/dtd/webflow.dtd&quot;&gt;
  * </pre>
  * 
  * Consult the web flow DTD for more information on the XML definition format.

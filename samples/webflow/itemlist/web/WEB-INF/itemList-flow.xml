@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<web-flow id="itemList" start-state="itemList.view">
+<webflow id="itemList" start-state="itemList.view">
 
 	<view-state id="itemList.view" view="itemList.view">
 		<transition on="add" to="item.create"/>
@@ -23,4 +23,4 @@
 		<transition on="*" to="itemList.view"/>
 	</action-state>
 	
-</web-flow>
+</webflow>

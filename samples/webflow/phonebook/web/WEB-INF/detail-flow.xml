@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<web-flow id="person.Detail" start-state="detail.get">
+<webflow id="person.Detail" start-state="detail.get">
 
 	<action-state id="detail.get">
 		<action class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType"/>
@@ -32,4 +32,4 @@
 	
 	<end-state id="error" view="error.view"/>
 	
-</web-flow>
+</webflow>

@@ -1413,49 +1413,6 @@
             <zipfileset refid="webflow.javadoc" prefix="${release.path}/docs/api"/>
 		</zip>
 
-		<zip zipfile="${target.release.dir}/${webflow-release-with-dependencies.zip}">
-			<zipfileset refid="webflow.main" prefix="${release.path}"/>
-            <zipfileset refid="webflow.javadoc" prefix="${release.path}/docs/api"/>
-			<zipfileset dir="." prefix="${release.path}">
-				<!-- KEITH: ADAPT!!! -->
-                <include name="lib/*.txt"/>
-				<!--include name="lib/ant/**"/>
-				<include name="lib/axis/**"/>
-				<include name="lib/aopalliance/**"/>
-				<include name="lib/bsh/**"/>
-				<include name="lib/c3p0/**"/>
-				<include name="lib/caucho/**"/>
-				<include name="lib/cglib/**"/>
-				<include name="lib/cos/**"/>
-				<include name="lib/dom4j/**"/>
-				<include name="lib/easymock/**"/>
-				<include name="lib/ehcache/**"/>
-				<include name="lib/freemarker/**"/>
-				<include name="lib/hibernate/**"/>
-				<include name="lib/hsqldb/**"/>
-				<include name="lib/ibatis/**"/>
-				<include name="lib/itext/**"/>
-				<include name="lib/j2ee/**"/>
-				<include name="lib/jakarta-commons/**"/>
-				<include name="lib/jakarta-taglibs/**"/>
-				<include name="lib/jamon/**"/>
-				<include name="lib/jasperreports/**"/>
-				<include name="lib/jdo/**"/>
-				<include name="lib/jmx/**"/>
-				<include name="lib/jotm/**"/>
-				<include name="lib/jsf/**"/>
-				<include name="lib/junit/**"/>
-				<include name="lib/log4j/**"/>
-				<include name="lib/ojb/**"/>
-				<include name="lib/oro/**"/>
-				<include name="lib/poi/**"/>
-				<include name="lib/quartz/**"/>
-				<include name="lib/struts/**"/>
-				<include name="lib/velocity/**"/>
-				<include name="lib/xdoclet/**"/-->
-			</zipfileset>
-		</zip>
-
     </target>
 
 	<target name="loadjar" depends="initdist" description="Build load test jar">
@@ -1493,7 +1450,6 @@
 		</jar>
 
 	</target>
-
 
 	<!--
 		 Targets for the automated build.
