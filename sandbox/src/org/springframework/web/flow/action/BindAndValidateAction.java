@@ -80,7 +80,6 @@ import org.springframework.web.flow.FlowExecutionContext;
  * <td>Set the strategy to use for resolving errors into message codes.</td>
  * </tr>
  * </table>
- * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
@@ -530,5 +529,4 @@ public class BindAndValidateAction extends AbstractAction {
 	protected Event onBindAndValidateSuccess(FlowExecutionContext context, Object formObject) {
 		return null;
 	}
-
 }

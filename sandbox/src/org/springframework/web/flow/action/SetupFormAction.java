@@ -40,7 +40,6 @@ import org.springframework.web.flow.FlowExecutionContext;
  * standard BindAndValidateAction in that it doesn't do validation (not needed
  * during form setup), is capable of form prepopulation from request parameters,
  * and has a specific <code>setupReferenceData</code> hook.
- * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
@@ -142,7 +141,6 @@ public class SetupFormAction extends BindAndValidateAction {
 
 	/**
 	 * Exception thrown when reference data setup fails.
-	 * 
 	 * @author Keith Donald
 	 */
 	protected static class ReferenceDataSetupException extends RuntimeException {

@@ -34,7 +34,6 @@ import org.springframework.web.flow.LocalEvent;
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -117,10 +116,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * calling action state. If this method returns <code>null</code>,
 	 * <code>doExecuteAction()</code> will be called to obtain an action
 	 * result.
-	 * 
 	 * <p>
 	 * This implementation just returns <code>null</code>.
-	 * 
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model
@@ -138,7 +135,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	/**
 	 * Template hook method subclasses should override to encapsulate their
 	 * specific action execution logic.
-	 * 
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model
@@ -150,10 +146,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Post-action execution hook, subclasses may override.
-	 * 
 	 * <p>
 	 * This implementation does nothing.
-	 * 
 	 * @param request The http request
 	 * @param response The http response
 	 * @param model The flow data model

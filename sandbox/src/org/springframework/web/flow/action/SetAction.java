@@ -28,7 +28,6 @@ import org.springframework.web.flow.FlowExecutionContext;
 /**
  * Maps parameters in the http servlet request to attributes <i>set</i> in the
  * flow model.
- * 
  * @author Keith Donald
  */
 public class SetAction extends AbstractAction {
