@@ -26,14 +26,14 @@ import org.springframework.util.comparators.NullSafeComparator;
  * 
  * @author Keith Donald
  */
-public abstract class ComparingBinaryPredicate implements BinaryPredicate {
+public abstract class ComparisonBinaryPredicate implements BinaryPredicate {
     private Comparator comparator;
 
     /**
      * Creates a comparing binary predicate which operates on
      * <code>Comparable</code> objects.
      */
-    public ComparingBinaryPredicate() {
+    public ComparisonBinaryPredicate() {
 
     }
 
@@ -44,7 +44,7 @@ public abstract class ComparingBinaryPredicate implements BinaryPredicate {
      * @param comparator
      *            the comparator, may be null
      */
-    public ComparingBinaryPredicate(Comparator comparator) {
+    public ComparisonBinaryPredicate(Comparator comparator) {
         this.comparator = comparator;
     }
 

@@ -25,7 +25,7 @@ import org.springframework.functor.BinaryPredicate;
  * 
  * @author Keith Donald
  */
-public class GreaterThanEqualTo extends ComparingBinaryPredicate implements
+public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
         BinaryPredicate {
     private static final GreaterThanEqualTo INSTANCE = new GreaterThanEqualTo();
 
