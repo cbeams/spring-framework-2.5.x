@@ -7,12 +7,12 @@
 		<DIV align="left">Enter price and item count</DIV>
 		<HR>
 		<DIV align="left">
-			<FORM name="submitForm" method="post">
+			<FORM name="priceAndItemCountForm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 				
 				Price:
-				<spring:bind path="pos.price">
+				<spring:bind path="sale.price">
 					<INPUT
 						type="text"
 						name="<c:out value="${status.expression}"/>"
@@ -25,7 +25,7 @@
 				<BR>
 				
 				Item count:
-				<spring:bind path="pos.itemCount">
+				<spring:bind path="sale.itemCount">
 					<INPUT
 						type="text"
 						name="<c:out value="${status.expression}"/>"

@@ -7,17 +7,17 @@
 		<DIV align="left">Enter shipping details</DIV>
 		<HR>
 		<DIV align="left">
-			Price: <c:out value="${pos.price}"/><BR>
-			Item count: <c:out value="${pos.itemCount}"/><BR>
-			Category: <c:out value="${pos.category}"/><BR>
-			Shipping: <c:out value="${pos.shipping}"/>
+			Price: <c:out value="${sale.price}"/><BR>
+			Item count: <c:out value="${sale.itemCount}"/><BR>
+			Category: <c:out value="${sale.category}"/><BR>
+			Shipping: <c:out value="${sale.shipping}"/>
 
-			<FORM name="submitForm" method="post">
+			<FORM name="shippingForm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 		
 				Shipping type:
-				<spring:bind path="pos.shippingType">
+				<spring:bind path="sale.shippingType">
 					<SELECT name="<c:out value="${status.expression}"/>">
 						<OPTION value="S" <c:if test="${status.value=='S'}">selected</c:if>>
 							Standard (10 extra cost)
@@ -35,4 +35,3 @@
 		</DIV>
 	</BODY>
 </HTML>
-				

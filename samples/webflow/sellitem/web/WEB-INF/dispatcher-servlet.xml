@@ -4,16 +4,16 @@
 <beans>
 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
-		<property name="suffix"><value>.jsp</value></property>
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
 	</bean>
 
 	<!--
 		A general purpose FlowController. Note that there is no default top-level flow configured.
 		The flow id of the flow to start should be passed in using the "_flowId" request parameter.
 	-->
-	<bean id="frontController" name="/flow.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flowExecutionManager"><ref bean="flowExecutionManager"/></property>
+	<bean id="frontController" name="/sellitem.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<property name="flowExecutionManager" ref="flowExecutionManager"/>
 	</bean>
 
 	<!--
@@ -25,17 +25,17 @@
 		<property name="flowLocator">
 			<bean class="org.springframework.web.flow.config.BeanFactoryFlowServiceLocator"/>
 		</property>
+		<property name="flowExecutionStorage">
+			<bean class="org.springframework.web.flow.execution.http.HttpSessionContinuationFlowExecutionStorage"/>
+		</property>
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.HttpSessionFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.http.HttpSessionFlowExecutionStorage"/>
 		</property>
 		-->
-		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.HttpSessionContinuationsFlowExecutionStorage"/>
-		</property>
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.ClientSideContinuationsFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.http.ClientSideContinuationFlowExecutionStorage"/>
 		</property>
 		-->
 	</bean>
@@ -43,11 +43,11 @@
 	<bean id="sellItemFlow" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource"><value>/WEB-INF/sellItem-flow.xml</value></property>
+				<property name="resource" value="/WEB-INF/sellitem-flow.xml"/>
 			</bean>
 		</property>
 	</bean>
 	
-	<bean id="sellItemFlowAction" class="org.springframework.samples.sellitem.web.flow.action.SellItemFlowAction"/>
+	<bean id="sellItemAction" class="org.springframework.samples.sellitem.web.flow.action.SellItemAction"/>
 
 </beans>

@@ -7,15 +7,15 @@
 		<DIV align="left">Enter category</DIV>
 		<HR>
 		<DIV align="left">
-			Price: <c:out value="${pos.price}"/><BR>
-			Item count: <c:out value="${pos.itemCount}"/>
+			Price: <c:out value="${sale.price}"/><BR>
+			Item count: <c:out value="${sale.itemCount}"/>
 			
-			<FORM name="submitForm" method="post">
+			<FORM name="categoryForm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 			
 				Category:
-				<spring:bind path="pos.category">
+				<spring:bind path="sale.category">
 					<SELECT name="<c:out value="${status.expression}"/>">
 						<OPTION value="" <c:if test="${status.value==''}">selected</c:if>>
 							None (0.02 discount rate)
@@ -32,7 +32,7 @@
 				<BR>
 				
 				Ship item to you?:
-				<spring:bind path="pos.shipping"> 
+				<spring:bind path="sale.shipping"> 
 					<INPUT type="hidden" name="_<c:out value="${status.expression}"/>"  value="visible" /> 
 					<INPUT type="checkbox" name="<c:out value="${status.expression}"/>" value="true" <c:if test="${status.value}">checked</c:if>> 
 				</spring:bind>

@@ -5,7 +5,7 @@
 <webflow id="sellItemFlow" start-state="setupForm">
 
 	<action-state id="setupForm">
-		<action bean="sellItemFlowAction"/>
+		<action bean="sellItemAction"/>
 		<transition on="success" to="enterPriceAndItemCount"/>
 	</action-state>
 
@@ -14,9 +14,7 @@
 	</view-state>
 	
 	<action-state id="bindAndValidatePriceAndItemCount">
-		<action bean="sellItemFlowAction">
-			<property name="executeMethodName" value="bindAndValidate"/>
-		</action>
+		<action bean="sellItemAction" method="bindAndValidate"/>
 		<transition on="success" to="enterCategory"/>
 		<transition on="error" to="enterPriceAndItemCount"/>
 	</action-state>
@@ -26,17 +24,16 @@
 	</view-state>
 
 	<action-state id="bindAndValidateCategory">
-		<action bean="sellItemFlowAction">
-			<property name="executeMethodName" value="bindAndValidate"/>
-		</action>
-		<transition on="success" to="processShippingDetails"/>
+		<action bean="sellItemAction" method="bindAndValidate"/>
+		<transition on="success" to="isShipping"/>
 		<transition on="error" to="enterCategory"/>
 	</action-state>
 	
-	<action-state id="processShippingDetails">
-		<action bean="sellItemFlowAction"/>
-		<transition on="shipping" to="enterShippingDetails"/>
-		<transition on="pickedUp" to="showCostOverview"/>
+	<!-- TODO: improve this with conditional transitions -->
+	<action-state id="isShipping">
+		<action bean="sellItemAction"/>
+		<transition on="yes" to="enterShippingDetails"/>
+		<transition on="no" to="showCostOverview"/>
 	</action-state>
 	
 	<view-state id="enterShippingDetails" view="shippingDetailsForm">
@@ -44,9 +41,7 @@
 	</view-state>
 
 	<action-state id="bindAndValidateShippingDetails">
-		<action bean="sellItemFlowAction">
-			<property name="executeMethodName" value="bindAndValidate"/>
-		</action>
+		<action bean="sellItemAction" method="bindAndValidate"/>
 		<transition on="success" to="showCostOverview"/>
 		<transition on="error" to="enterShippingDetails"/>
 	</action-state>

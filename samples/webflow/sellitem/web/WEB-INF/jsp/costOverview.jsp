@@ -7,13 +7,13 @@
 		<DIV align="left">Cost overview</DIV>
 		<HR>
 		<DIV align="left">
-			Price: <c:out value="${pos.price}"/><BR>
-			Item count: <c:out value="${pos.itemCount}"/><BR>
-			Category: <c:out value="${pos.category}"/><BR>
+			Price: <c:out value="${sale.price}"/><BR>
+			Item count: <c:out value="${sale.itemCount}"/><BR>
+			Category: <c:out value="${sale.category}"/><BR>
 			<c:choose>
-				<c:when test="${pos.shipping}">
-					Shipping: <c:out value="${pos.shipping}"/><BR>
-					Shipping type: <c:out value="${pos.shippingType}"/>
+				<c:when test="${sale.shipping}">
+					Shipping: <c:out value="${sale.shipping}"/><BR>
+					Shipping type: <c:out value="${sale.shippingType}"/>
 				</c:when>
 				<c:otherwise>
 					No shipping, you're doing pickup of the items.
@@ -23,10 +23,10 @@
 			<BR>
 			<BR>
 			
-			<B>Amount:</B> <c:out value="${pos.amount}"/><BR>
-			<B>Delivery cost:</B> + <c:out value="${pos.deliveryCost}"/><BR>
-			<B>Discount:</B> - <c:out value="${pos.savings}"/> (Discount rate: <c:out value="${pos.discountRate}"/>)<BR>
-			<B>Total:</B> <c:out value="${pos.totalCost}"/><BR>
+			<B>Amount:</B> <c:out value="${sale.amount}"/><BR>
+			<B>Delivery cost:</B> + <c:out value="${sale.deliveryCost}"/><BR>
+			<B>Discount:</B> - <c:out value="${sale.savings}"/> (Discount rate: <c:out value="${sale.discountRate}"/>)<BR>
+			<B>Total:</B> <c:out value="${sale.totalCost}"/><BR>
 		</DIV>
 		<HR>
 		<DIV align="right">
