@@ -25,14 +25,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * State that executes a sub flow.
- * 
+ * State that spawns a subflow when executed.
  * <p>
  * A sub flow state has the ability to map between the parent and sub flow
- * models. Set an appropriate FlowAttributesMapper to do this.
+ * models. Set the <code>FlowAttributesMapper</code> interface definition for
+ * how to do this.
  * 
  * @see org.springframework.web.flow.FlowAttributesMapper
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -48,7 +47,8 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param subFlow The sub flow to spawn
 	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, Transition transition) throws IllegalArgumentException {
 		this(flow, id, subFlow, new Transition[] { transition });
@@ -60,7 +60,8 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param subFlow The sub flow to spawn
 	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, Transition[] transitions) throws IllegalArgumentException {
 		this(flow, id, subFlow, null, transitions);
@@ -73,10 +74,11 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @param subFlow The sub flow to spawn
 	 * @param attributesMapper The attributes mapper to use
 	 * @param transition The sole transition of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper,
-			Transition transition) throws IllegalArgumentException {
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition)
+			throws IllegalArgumentException {
 		this(flow, id, subFlow, attributesMapper, new Transition[] { transition });
 	}
 
@@ -87,7 +89,8 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 	 * @param subFlow The sub flow to spawn
 	 * @param attributesMapper The attributes mapper to use
 	 * @param transitions The transitions of this state
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
 	 */
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) throws IllegalArgumentException {
@@ -113,8 +116,8 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 
 	/**
 	 * @param attributesMapper The attributes mapper to use to map model data
-	 *                         between parent and sub flow model. Can be null
-	 *                         if no mapper is needed.
+	 *        between parent and sub flow model. Can be null if no mapper is
+	 *        needed.
 	 */
 	protected void setFlowAttributesMapper(FlowAttributesMapper attributesMapper) {
 		this.flowAttributesMapper = attributesMapper;
@@ -128,11 +131,15 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 		return this.flowAttributesMapper;
 	}
 
+	/**
+	 * Enter this state, creating the sub flow input map and spawning the sub
+	 * flow in the current flow execution.
+	 */
 	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '"	+ getFlow() + "'");
+			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + getFlow() + "'");
 		}
 		Map subFlowInput = createSubFlowInputAttributes(flowExecution);
 		return flowExecution.spawn(getSubFlow(), subFlowInput, request, response);

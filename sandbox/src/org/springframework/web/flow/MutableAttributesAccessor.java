@@ -20,11 +20,9 @@ import java.util.Map;
 /**
  * Extension of attributes accessor allowing for mutable operations; if you dont
  * need mutability, pass AttributesAccessor around instead--it's safer.
- * 
  * <p>
  * The attributes stored in the flow model are accessed using this interface.
- * 
- * <p>
+* <p>
  * Implementers of this interface (e.g. the flow model) can have an 
  * <i>active transaction</i> and to start and stop transactions.
  * 

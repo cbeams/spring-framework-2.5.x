@@ -28,27 +28,26 @@ import org.springframework.util.closure.Constraint;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A transition that transitions the flow from one state to another
- * when an event occurs in a transitionable state.
+ * A transition takes the flow from one state to another when executed. A
+ * transition is associated with exactly one source state.
  * 
  * @see org.springframework.web.flow.TransitionableState
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class Transition implements Serializable {
-	
+
 	protected final Log logger = LogFactory.getLog(Transition.class);
 
 	/**
-	 * Event id value ("*") that will cause this transition
-	 * to match on any event. 
+	 * Event id value ("*") that will cause this transition to match on any
+	 * event.
 	 */
-	public static final String WILDCARD_EVENT_ID="*";
-	
+	public static final String WILDCARD_EVENT_ID = "*";
+
 	/**
 	 * Event matching criteria that matches on any event.
-	 */ 
+	 */
 	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
 		public boolean test(Object o) {
 			return true;
@@ -58,21 +57,35 @@ public class Transition implements Serializable {
 			return WILDCARD_EVENT_ID;
 		}
 	};
-	
+
+	/**
+	 * The criteria that determines whether or not this criteria handles a given
+	 * event. The event is identified by a String identifier.
+	 */
 	private Constraint eventIdCriteria;
 
+	/**
+	 * The source state that owns this transition.
+	 */
 	private TransitionableState sourceState;
 
+	/**
+	 * The target state that this transition should transition to when executed.
+	 */
 	private AbstractState targetState;
 
+	/**
+	 * The state id for the target state; needed to lazily resolve the target
+	 * state once on first execution (after configuration.)
+	 */
 	private String targetStateId;
 
 	/**
-	 * Create a new transition. 
-	 * @param eventId Id of the event on which this transition should be executed,
-	 *                or "*" if it should execute on any event 
+	 * Create a new transition.
+	 * @param eventId Id of the event on which this transition should be
+	 *        executed, or "*" if it should execute on any event
 	 * @param targetStateId The id of the state to transition to when this
-	 *                      transition is executed
+	 *        transition is executed
 	 */
 	public Transition(String eventId, String targetStateId) {
 		Assert.notNull(eventId, "The event id property is required");
@@ -83,10 +96,10 @@ public class Transition implements Serializable {
 
 	/**
 	 * Create a new transition.
-	 * @param eventIdCriteria Constraint object used to determine if this transition
-	 *                        should be executed for a particular event id
+	 * @param eventIdCriteria Constraint object used to determine if this
+	 *        transition should be executed for a particular event id
 	 * @param targetStateId The id of the state to transition to when this
-	 *                      transition is executed
+	 *        transition is executed
 	 */
 	public Transition(Constraint eventIdCriteria, String targetStateId) {
 		Assert.notNull(eventIdCriteria, "The eventIdCriteria property is required");
@@ -96,19 +109,20 @@ public class Transition implements Serializable {
 	}
 
 	/**
-	 * @return The owning source (<i>from</i>) state of this transition. 
+	 * @return The owning source (<i>from</i>) state of this transition.
 	 */
 	protected TransitionableState getSourceState() {
 		return sourceState;
 	}
 
 	/**
-	 * @param owningState The owning source (<i>from</i>) state of this transition. 
+	 * @param owningState The owning source (<i>from</i>) state of this
+	 *        transition.
 	 */
 	protected void setSourceState(TransitionableState owningState) {
 		this.sourceState = owningState;
 	}
-	
+
 	/**
 	 * @return The id of the target (<i>to</i>) state of this transition.
 	 */
@@ -136,11 +150,10 @@ public class Transition implements Serializable {
 	/**
 	 * Create a constraint object used to match event ids with this transition
 	 * based on given event id.
-	 * 
 	 * <p>
-	 * If the given event id is "*", a wildcard event criteria object will
-	 * be returned that matches any event. Otherwise you get a criteria object
-	 * that matches given event id exactly.
+	 * If the given event id is "*", a wildcard event criteria object will be
+	 * returned that matches any event. Otherwise you get a criteria object that
+	 * matches given event id exactly.
 	 */
 	protected Constraint createDefaultEventIdCriteria(final String eventId) {
 		if (WILDCARD_EVENT_ID.equals(eventId)) {
@@ -153,7 +166,7 @@ public class Transition implements Serializable {
 				public boolean test(Object argument) {
 					return eventId.equals(argument);
 				}
-	
+
 				public String toString() {
 					return eventId;
 				}
@@ -179,14 +192,14 @@ public class Transition implements Serializable {
 
 	/**
 	 * Execute this transition.
-	 * @param flowExecution A flow execution stack, tracking any
-	 *        suspended parent flows that spawned this flow (as a subflow)
+	 * @param flowExecution A flow execution stack, tracking any suspended
+	 *        parent flows that spawned this flow (as a subflow)
 	 * @param request the client http request
 	 * @param response the server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the transition execution.
-	 * @throws CannotExecuteStateTransitionException When the transition cannot
-	 *                                               be executed
+	 * @throws CannotExecuteStateTransitionException thrown when this transition cannot
+	 *         be executed
 	 */
 	protected ModelAndView execute(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {
@@ -194,9 +207,10 @@ public class Transition implements Serializable {
 			ModelAndView viewDescriptor = getTargetState().enter(flowExecution, request, response);
 			if (logger.isDebugEnabled()) {
 				if (flowExecution.isActive()) {
-					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-							+ flowExecution.getCurrentStateId() + "' in flow '"
-							+ flowExecution.getActiveFlowId() + "'");
+					logger
+							.debug("Transition '" + this + "' executed; as a result, the new state is '"
+									+ flowExecution.getCurrentStateId() + "' in flow '"
+									+ flowExecution.getActiveFlowId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"

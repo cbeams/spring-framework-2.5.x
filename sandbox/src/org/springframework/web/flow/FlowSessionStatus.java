@@ -18,26 +18,27 @@ package org.springframework.web.flow;
 import org.springframework.enums.ShortCodedEnum;
 
 /**
- * Flow session statuses.
+ * Possible flow session status enumerations.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowSessionStatus extends ShortCodedEnum {
-	
+
 	/**
-	 * Initial status of a flow session.
+	 * Initial status of a flow session; the session has been created but not
+	 * yet activated.
 	 */
 	public static FlowSessionStatus CREATED = new FlowSessionStatus(0, "Created");
-	
+
 	/**
-	 * A flow session with ACTIVE status is actively executing a flow.
+	 * A flow session with ACTIVE status is currently executing.
 	 */
 	public static FlowSessionStatus ACTIVE = new FlowSessionStatus(1, "Active");
 
 	/**
-	 * A flow session that is SUSPENDED is not actively executing a flow. It
-	 * is waiting for subflow execution to complete before continuing.
+	 * A flow session that is SUSPENDED is not actively executing a flow. It is
+	 * waiting for subflow execution to complete before continuing.
 	 */
 	public static FlowSessionStatus SUSPENDED = new FlowSessionStatus(2, "Suspended");
 
