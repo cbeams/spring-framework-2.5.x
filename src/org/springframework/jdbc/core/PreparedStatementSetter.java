@@ -1,10 +1,6 @@
-/**
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 
 package org.springframework.jdbc.core;
@@ -26,7 +22,7 @@ import java.sql.SQLException;
  * with SQLExceptions that may be thrown from operations they
  * attempt. The JdbcTemplate class will catch and handle
  * SQLExceptions appropriately.
- * @version $Id: PreparedStatementSetter.java,v 1.1.1.1 2003-08-14 16:20:27 trisberg Exp $
+ * @version $Id: PreparedStatementSetter.java,v 1.2 2003-11-03 09:16:24 johnsonr Exp $
  * @author Rod Johnson
  * @since March 2, 2003
  */
