@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
  * <p>Supports direct matches (given "/test" -> registered "/test")
  * and "*" matches (given "/test" -> registered "/t*").
  *
- @author Rod Johnson
+ * @author Rod Johnson
  * @author Juergen Hoeller
  * @see SimpleUrlHandlerMapping
  */
@@ -30,14 +30,14 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		logger.debug("Looking for URL mappings...");
 		String[] urlMaps = getApplicationContext().getBeanDefinitionNames();
 
-		// Take anything beginning with a / in the bean name
+		// take anything beginning with a slash in the bean name
 		for (int i = 0; i < urlMaps.length; i++) {
 			String url = checkForUrl(urlMaps[i]);
 			if (url != null) {
 				logger.debug("Found URL mapping [" + urlMaps[i] + "]");
-				Object handler = initHandler(urlMaps[i], url);
+				Object handler = initHandler(getApplicationContext().getBean(urlMaps[i]), url);
 
-				// Create a mapping to each part of the path
+				// create a mapping to each part of the path
 				String[] mappedUrls = StringUtils.delimitedListToStringArray(url, MULTI_URL_DELIMITER);
 				for (int j = 0; j < mappedUrls.length; j++) {
 					registerHandler(mappedUrls[j], handler);

@@ -6,13 +6,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Abstract base class for url-mapped HandlerMapping implementations.
+ * Abstract base class for URL-mapped HandlerMapping implementations.
  * Provides infrastructure for mapping handlers to URLs and configurable
  * URL lookup. For information on the latter, see alwaysUseFullPath property.
  *
@@ -23,7 +21,6 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 16.04.2003
  * @see #setAlwaysUseFullPath
- * @see #setDefaultHandler
  * @see org.springframework.util.PathMatcher
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
@@ -43,17 +40,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Register the given handler instance for the given URL path.
-	 * @param urlPath URL the bean is mapped to
-	 * @param handler the handler instance
-	 */
-	protected final void registerHandler(String urlPath, Object handler) {
-		this.handlerMap.put(urlPath, handler);
-		logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
-	}
-
-	/**
-	 * Lookup a handler for the URL path of the given request.
+	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or null
 	 */
@@ -88,27 +75,29 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Initialize the handler object with the given name in the bean factory.
-	 * This includes setting the LocaleResolver and mapped URL if aware.
-	 * @param beanName name of the bean in the application context
+	 * Register the given handler instance for the given URL path.
+	 * @param urlPath URL the bean is mapped to
+	 * @param handler the handler instance
+	 */
+	protected final void registerHandler(String urlPath, Object handler) {
+		this.handlerMap.put(urlPath, handler);
+		logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+	}
+
+	/**
+	 * Initialize the given handler object for the given URL.
+	 * Sets the mapped URL if the handler is UrlHandlerAware.
+	 * @param handler name of the bean in the application context
 	 * @param urlPath URL the bean is mapped to
 	 * @return the initialized handler instance
-	 * @throws ApplicationContextException if the bean wasn't found in the context
+	 * @see UrlAwareHandler
 	 */
-	protected final Object initHandler(String beanName, String urlPath) throws ApplicationContextException {
-		try {
-			Object handler = getApplicationContext().getBean(beanName);
-			logger.debug("Initializing handler [" + handler + "] for URL path [" + urlPath + "]");
-			if (handler instanceof UrlAwareHandler) {
-				((UrlAwareHandler) handler).setUrlMapping(urlPath);
-			}
-			return handler;
+	protected final Object initHandler(Object handler, String urlPath) {
+		logger.debug("Initializing handler [" + handler + "] for URL path [" + urlPath + "]");
+		if (handler instanceof UrlAwareHandler) {
+			((UrlAwareHandler) handler).setUrlMapping(urlPath);
 		}
-		catch (BeansException ex) {
-			// We don't need to worry about NoSuchBeanDefinitionException:
-			// we should have got the name from the bean factory.
-			throw new ApplicationContextException("Error initializing handler bean for URL mapping '" + beanName + "': " + ex.getMessage(), ex);
-		}
+		return handler;
 	}
 
 }
