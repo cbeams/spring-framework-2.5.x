@@ -22,7 +22,15 @@ import org.springframework.core.io.Resource;
  */
 public class MockApplicationContext implements ApplicationContext {
 
-	/* (non-Javadoc)
+    public Map getBeansOfType(Class type) throws BeansException {
+        return null;
+    }
+    
+    public Class getType(String name) throws NoSuchBeanDefinitionException {
+        return null;
+    }
+    
+    /* (non-Javadoc)
 	 * @see org.springframework.context.ApplicationContext#getParent()
 	 */
 	public ApplicationContext getParent() {
