@@ -25,6 +25,7 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 
+import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.invokers.AbstractMBeanInvoker;
 import org.springframework.jmx.invokers.MethodKey;
 
@@ -104,7 +105,7 @@ public class CglibMBeanInvoker extends AbstractMBeanInvoker {
 			if (fm != null)
 				return fm;
 
-			fm = fastClass.getMethod(method, typeNamesToTypes(signature));
+			fm = fastClass.getMethod(method, JmxUtils.typeNamesToTypes(signature));
 			methodCache.put(mk, fm);
 			
 			return fm;

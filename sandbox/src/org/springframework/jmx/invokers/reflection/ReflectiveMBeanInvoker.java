@@ -28,6 +28,7 @@ import javax.management.ReflectionException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.invokers.AbstractMBeanInvoker;
 import org.springframework.jmx.invokers.MethodKey;
 
@@ -96,7 +97,7 @@ public class ReflectiveMBeanInvoker extends AbstractMBeanInvoker {
 
 			// if the method was not in cache then locate it
 			if (m == null) {
-				Class[] types = typeNamesToTypes(signature);
+				Class[] types = JmxUtils.typeNamesToTypes(signature);
 
 				m = managedResourceClass.getMethod(method, types);
 				methodCache.put(mk, m);

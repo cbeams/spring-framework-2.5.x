@@ -9,5 +9,13 @@ package org.springframework.jmx;
 public interface IJmxTestBean {
 
     public int add(int x, int y);
-    public void myOperation();
+    public long myOperation();
+    
+    public int getAge();
+    public void setAge(int age);
+    
+    public void setName(String name);
+    
+    // used to test invalid methods that exist in the proxy interface
+    public void dontExposeMe();
 }

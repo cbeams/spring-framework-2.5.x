@@ -20,13 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.Attribute;
-import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import net.sf.cglib.proxy.Callback;
@@ -35,9 +33,9 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
+import org.springframework.jmx.InvalidInvocationException;
 import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
-import org.springframework.jmx.invokers.cglib.InvalidInvocationException;
 
 /**
  * Proxy to a JMX managed resource. Uses CGLIB to capture invocations and
@@ -54,7 +52,7 @@ import org.springframework.jmx.invokers.cglib.InvalidInvocationException;
  * 
  * @author Rob Harrop
  */
-public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
+public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
 
     /**
      * The MBeanServer instance to redirect calls to
@@ -82,14 +80,22 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
     private static final int OPERATION_INTERCEPTOR = 2;
 
     /**
-     * Index for the NoOpInterceptor/InvalidInvocationInterceptor
+     * Index for the NoOpInterceptor
      */
-    private static final int NON_EXPOSED_INTERCEPTOR = 3;
+    private static final int NO_OP_INTERCEPTOR = 3;
+
+    /**
+     * Index for the InvalidInvocationInterceptor
+     */
+    private static final int INVALID_INVOCATION_INTERCEPTOR = 4;
 
     /**
      * Creates a proxy for the managed resource specified by objectName.
-     * @param objectName The ObjectName of the resource to proxy
-     * @param server The MBeanServer that the resource is registered with
+     * 
+     * @param objectName
+     *            The ObjectName of the resource to proxy
+     * @param server
+     *            The MBeanServer that the resource is registered with
      */
     public Object createProxy(final MBeanServer server,
             final ObjectName objectName) {
@@ -98,55 +104,36 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
         this.server = server;
         this.objectName = objectName;
 
-        ObjectInstance instance = null;
         MBeanInfo info = null;
 
         try {
-            // get the object instance info
-            instance = server.getObjectInstance(objectName);
-            info = server.getMBeanInfo(objectName);
 
-            // get the class represented by this object
-            Class instanceClass = Class.forName(instance.getClassName());
+            info = server.getMBeanInfo(objectName);
 
             // now make the proxy
             Enhancer e = new Enhancer();
-            
-            e.setSuperclass(instanceClass);
-            
-            if(proxyInterfaces != null) {
+
+            if (proxyInterfaces != null) {
                 e.setInterfaces(proxyInterfaces);
+            } else {
+                //  get the class represented by this object
+                Class instanceClass = getClassForInstance(objectName, server);
+                e.setSuperclass(instanceClass);
             }
-            
+
             e.setCallbackFilter(new JmxProxyCallbackFilter(info));
 
             Callback[] callbacks = new Callback[4];
             callbacks[0] = new ReadAttributeInterceptor();
             callbacks[1] = new WriteAttributeInterceptor();
             callbacks[2] = new OperationInvokeInterceptor();
-            
-            if(ignoreInvalidInvocations) {
-                callbacks[3] = new NoOpInterceptor();
-            } else {
-                callbacks[3] = new InvalidInvocationInterceptor();
-            }
-             
+            callbacks[3] = new NoOpInterceptor();
+            callbacks[4] = new InvalidInvocationInterceptor();
 
             e.setCallbacks(callbacks);
 
             return e.create();
 
-        } catch (InstanceNotFoundException ex) {
-            // invalid ObjectName provided
-            throw new ProxyCreationException(
-                    "Unable to locate object specified by object name:"
-                            + objectName
-                            + ". Check the supplied ObjectName is valid");
-        } catch (ClassNotFoundException ex) {
-            // Unable to load class
-            throw new ProxyCreationException("Unable to load class ["
-                    + instance.getClassName() + "] for MBean [" + objectName
-                    + "]. Ensure that this class is on the classpath.");
         } catch (JMException ex) {
             // a problem occured - most likely at the server
             throw new ProxyCreationException(
@@ -199,12 +186,9 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
 
             String methodName = method.getName();
 
-            if ((method.getParameterTypes().length == 0 && (method.getReturnType() != void.class))
-                    && (methodName.startsWith("get"))) {
+            if (JmxUtils.isGetter(method)) {
                 return acceptGetter(method);
-            } else if ((method.getParameterTypes().length == 1)
-                    && (method.getReturnType() == void.class)
-                    && (methodName.startsWith("set"))) {
+            } else if (JmxUtils.isSetter(method)) {
                 return acceptSetter(method);
             } else {
                 return acceptMethod(method);
@@ -212,10 +196,12 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
         }
 
         /**
-         * Checks to see if the getter method is exposed in the managed
+         * Checks to see if the setter method is exposed on the managed
          * resource's management interface and if the attribute is readable. If
-         * so then this returns <tt>READ_ATTRIBUTE_INTERCEPTOR</tt> otherwise
-         * it returns <tt>NON_EXPOSED_INTERCEPTOR</tt>
+         * the attribute is not exposed then either NO_OP_INTERCEPTOR or
+         * INVALID_INVOCATION_INTERCEPTOR is used, dependent on the setting of
+         * ignoreInvalidInvocations. If the attribute is write only uses
+         * INVALID_INVOCATION_INTERCEPTOR
          * 
          * @param method
          * @return
@@ -231,19 +217,21 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
                     if (inf[x].isReadable()) {
                         return READ_ATTRIBUTE_INTERCEPTOR;
                     } else {
-                        return NON_EXPOSED_INTERCEPTOR;
+                        return INVALID_INVOCATION_INTERCEPTOR;
                     }
                 }
             }
 
-            return NON_EXPOSED_INTERCEPTOR;
+            return getNonExposedInterceptor();
         }
 
         /**
          * Checks to see if the setter method is exposed on the managed
          * resource's management interface and if the attribute is writable. If
-         * so this returns <tt>WRITE_ATTRIBUTE_INTERCEPTOR</tt> otherwise it
-         * returns <tt>NON_EXPOSED_INTERCEPTOR</tt>
+         * the attribute is not exposed then either NO_OP_INTERCEPTOR or
+         * INVALID_INVOCATION_INTERCEPTOR is used, dependent on the setting of
+         * ignoreInvalidInvocations. If the attribute is read only uses
+         * INVALID_INVOCATION_INTERCEPTOR
          * 
          * @param method
          * @return
@@ -259,12 +247,12 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
                     if (inf[x].isWritable()) {
                         return WRITE_ATTRIBUTE_INTERCEPTOR;
                     } else {
-                        return NON_EXPOSED_INTERCEPTOR;
+                        return INVALID_INVOCATION_INTERCEPTOR;
                     }
                 }
             }
 
-            return NON_EXPOSED_INTERCEPTOR;
+            return getNonExposedInterceptor();
         }
 
         private int acceptMethod(Method method) {
@@ -277,7 +265,7 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
                 }
             }
 
-            return NON_EXPOSED_INTERCEPTOR;
+            return getNonExposedInterceptor();
         }
 
         public int hashCode() {
@@ -298,6 +286,14 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
                 return info.equals(otherFilter.info);
             } else {
                 return false;
+            }
+        }
+
+        public int getNonExposedInterceptor() {
+            if (CglibJmxObjectProxyFactory.this.ignoreInvalidInvocations) {
+                return NO_OP_INTERCEPTOR;
+            } else {
+                return INVALID_INVOCATION_INTERCEPTOR;
             }
         }
     }
@@ -353,30 +349,15 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
 
             // if not retreived from cache then create and cache
             if (signature == null) {
-                signature = getMethodSignature(method);
+                signature = JmxUtils.getMethodSignature(method);
+
+                synchronized (signatureCache) {
+                    signatureCache.put(method, signature);
+                }
             }
 
             return server.invoke(objectName, method.getName(), args, signature);
 
-        }
-
-        /**
-         * @param method
-         * @return
-         */
-        private String[] getMethodSignature(Method method) {
-            Class[] types = method.getParameterTypes();
-            String[] signature = new String[types.length];
-
-            for (int x = 0; x < types.length; x++) {
-                signature[x] = types[x].getName();
-            }
-
-            synchronized (signatureCache) {
-                signatureCache.put(method, signature);
-            }
-
-            return signature;
         }
     }
 

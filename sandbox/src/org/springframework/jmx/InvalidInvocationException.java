@@ -1,7 +1,7 @@
 /*
  * Created on Jul 22, 2004
  */
-package org.springframework.jmx.invokers.cglib;
+package org.springframework.jmx;
 
 /**
  * @author robh
