@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.53 2004-04-28 18:40:39 jhoeller Exp $
+    $Id: build.xml,v 1.54 2004-04-29 22:04:29 luke_t Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -276,7 +276,7 @@
 	</target>
 
 
-	<target name="mockjar" depends="build,initdist" description="Create JAR file with Spring mock classes">
+	<target name="mockjar" depends="buildmock,initdist" description="Create JAR file with Spring mock classes">
 
 		<delete file="${dist.dir}/spring-mock.jar"/>
 
