@@ -20,10 +20,10 @@ import java.util.Comparator;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.comparator.ComparableComparator;
+import org.springframework.core.comparator.NullSafeComparator;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.comparator.ComparableComparator;
-import org.springframework.util.comparator.NullSafeComparator;
 
 /**
  * Comparator that compares two beans by the specified bean property. It is also
