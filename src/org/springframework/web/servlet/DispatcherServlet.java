@@ -12,7 +12,6 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.OrderComparator;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -94,7 +94,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.7 $
+ * @version $Id: DispatcherServlet.java,v 1.8 2003-10-14 15:15:51 dkopylenko Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -260,14 +260,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
 	private void initHandlerMappings() throws ServletException {
-		this.handlerMappings = new ArrayList();
+		//Find all HandlerMappings in the ApplicationContext
+		this.handlerMappings = BeanFactoryUtils.beansOfType(HandlerMapping.class, getWebApplicationContext());
 
-		// Find all HandlerMappings in the ApplicationContext
-		String[] hms = getWebApplicationContext().getBeanDefinitionNames(HandlerMapping.class);
+		// TODO: remove this
+		/*String[] hms = getWebApplicationContext().getBeanDefinitionNames(HandlerMapping.class);
 		for (int i = 0; i < hms.length; i++) {
 			initHandlerMapping(hms[i]);
 			logger.info("Loaded handler mapping [" + hms[i] + "]");
-		}
+		}*/
 
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
@@ -286,6 +287,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param beanName bean name in the current web application context
 	 */
 	private void initHandlerMapping(String beanName) throws ServletException {
+		//TODO: Don't need this method anymore since we're using BeanFactoryUtils.beansOfType()
 		try {
 			HandlerMapping hm = (HandlerMapping) getWebApplicationContext().getBean(beanName);
 			this.handlerMappings.add(hm);
@@ -317,13 +319,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters() throws ServletException {
-		this.handlerAdapters = new ArrayList();
+		//Find all HandlerAdapters in the ApplicationContext
+		this.handlerAdapters = BeanFactoryUtils.beansOfType(HandlerAdapter.class, getWebApplicationContext());
 
-		String[] has = getWebApplicationContext().getBeanDefinitionNames(HandlerAdapter.class);
+		//TODO: remove this
+		/*String[] has = getWebApplicationContext().getBeanDefinitionNames(HandlerAdapter.class);
 		for (int i = 0; i < has.length; i++) {
 			initHandlerAdapter(has[i]);
 			logger.info("Loaded handler adapter [" + has[i] + "]");
-		}
+		}*/
 
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
@@ -343,6 +347,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws ServletException if there is an error trying to instantiate and initialize the handler bean
 	 */
 	private void initHandlerAdapter(String beanName) throws ServletException {
+		//TODO: Don't need this method anymore since we're using BeanFactoryUtils.beansOfType()
 		try {
 			HandlerAdapter ha = (HandlerAdapter) getWebApplicationContext().getBean(beanName);
 			this.handlerAdapters.add(ha);
