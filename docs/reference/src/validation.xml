@@ -1,178 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="validation">
+  <title>PropertyEditors, data binding, validation and the BeanWrapper</title>
 
-    <title>PropertyEditors, data binding, validation and the BeanWrapper</title>
-    
-    <sect1 id="validation-introduction">
-    	<title>Introduction</title>
-    	<para>
-			The big question is whether or not validation should be considered <emphasis>business
-			logic</emphasis>. There are pros and cons for both answers, and Spring offers a design
-			for validation (and data binding) that does not exclude either one of them. Validation
-			should specifically not be tied to the web tier, should be easily localizable and it should
-			be possible to plug in any validator available. Considering the above, Spring has come up
-			with a <literal>Validator</literal> interface that's both basic and usable in every layer
-			of an application.
-		</para>
-		<para>
-			Data binding is useful for allowing user input to be dynamically bound to the domain model
-			of an application (or whatever objects you use to process user input). Spring provides the
-			so-called <literal>DataBinder</literal> to do exactly that. The Validator and the DataBinder
-			make up the <literal>validation</literal> package, which is primarily used in but not limited to
-			the MVC framework.
-		</para>
-		<para>
-			The <literal>BeanWrapper</literal> is a fundamental concept in the Spring Framework and 
-			is used in a lot of places. However, you probably will not ever have the need to use the
-			BeanWrapper directly. Because this is reference documentation however, we felt that some
-			explanation might be right. We're explaining the BeanWrapper in this chapter since if
-			you were going to use it at all, you would probably do that when trying to bind data to objects,
-			which is strongly related to the BeanWrapper.
-		</para>
-		<para>
-			Spring uses PropertyEditors all over the place. The concept of a PropertyEditor is
-			part of the JavaBeans specification. Just as the BeanWrapper, it's best to explain
-			the use of PropertyEditors in this chapter as well, since it's closely related to
-			the BeanWrapper and the DataBinder.
-		</para>
-	</sect1>
-	
-	<sect1 id="validation-databinding">
-		<title>Binding data using the <literal>DataBinder</literal></title>
-		<para>
-			The DataBinder builds on top of the BeanWrapper<footnote>
-				<para>
-					See <link linkend="beans-beans">the beans chapter</link> for more information
-				</para>
-			</footnote>.
-		</para>
-	</sect1>
-	
-    <sect1 id="beans-beans">
-    	<title>Bean manipulation and the <literal>BeanWrapper</literal></title>
-    	<para>
-    		The <literal>org.springframework.beans</literal> package adheres to the JavaBeans standard
-    		provided by Sun. A JavaBean is simply a class with a default no-argument constructor, which
-    		follows a naming conventions where a property named <literal>prop</literal> has a setter
-    		<literal>setProp(...)</literal> and a getter <literal>getProp()</literal>. For more
-    		information about JavaBeans and the specification, please refer to Sun's website
-    		(<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).
-    	</para>
-    	<para>
-    		One quite important concept of the beans package is the <literal>BeanWrapper</literal>
-    		interface and its corresponding implementation (<literal>BeanWrapperImpl</literal>).
-    		As quoted from the JavaDoc,  the BeanWrapper offers functionnality to set and get property 
-    		values (individually or in bulk), get property descriptors and query the readability and
-    		writability of properties. Also, the BeanWrapper offers support for
-    		nested properties, enabling the setting of properties on subproperties to an unlimited
-    		depth. Then, the BeanWrapper support the ability to add standard
-    		JavaBeans <literal>PropertyChangeListeners</literal> and <literal>VetoableChangeListeners</literal>,
-    		without the need for supporting code in the target class. Last but not least, the
-    		BeanWrapper provides support for the setting of indexed properties.	The BeanWrapper 
-    		usually isn't used by application code directly, but by the <literal>DataBinder</literal> 
-    		and the <literal>BeanFactory</literal>.
-    	</para>
-    	<para>
-    		The way the BeanWrapper works is partly indicated by its name: 
-    		<emphasis>it wraps a bean</emphasis> to perform actions on that bean, like setting
-    		and retrieving properties.
-    	</para>
-    	
-    	<sect2 id="beans-beans-conventions">
-    		<title>Setting and getting basic and nested properties</title>
-    		<para>
-    			Setting and getting properties is done using the <literal>setPropertyValue(s)</literal>
-    			and <literal>getPropertyValue(s)</literal> methods that both come with a couple of
-    			overloaded variants. They're all described in more detail in the JavaDoc Spring
-    			comes with. What's important to know is that there are a couple of conventions for 
-    			indicating properties of an object. A couple of examples:
-				<table frame="all">
-		            <title>Examples of properties</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="1*"/>
-		                <colspec colname="c2" colwidth="5*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Expression</entry>
-		                        <entry>Explanation</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry><literal>name</literal></entry>
-				            	<entry>Indicates the property <literal>name</literal> corresponding to the
-				            		methods <literal>getName()</literal> or <literal>isName()</literal> and
-				            		<literal>setName()</literal>
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account.name</literal></entry>
-				            	<entry>Indicates the nested property <literal>name</literal> of the property
-					            	<literal>account</literal> corresponding e.g. to the methods
-					            	<literal>getAccount().setName()</literal> or <literal>getAccount().getName()</literal>
-					            </entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account[2]</literal></entry>
-				            	<entry>Indicates the <emphasis>third</emphasis> element of the indexed property
-					            	<literal>account</literal>. Indexed properties can be of type <literal>array</literal>,
-					            	<literal>list</literal> or other <emphasis>naturally ordered</emphasis> collection
-					            </entry>
-				            </row>
-				        </tbody>
-			        </tgroup>
-		        </table>
-    		</para>
-    		
-			<para>
-				Below you'll find some examples of working with the BeanWrapper to get
-				and set properties.
-			</para>
-    		<para><emphasis>Note: this part is not important to you if you're not planning to
-    			work with the BeanWrapper directly. If you're just using the 
-    			<literal>DataBinder</literal> and the <literal>BeanFactory</literal> and their
-    			out-of-the-box implementation, don't mind reading this and go on with
-    			reading about <literal>PropertyEditors</literal>.</emphasis>
-    		</para>
-       		<para>    
-       			Consider the following two classes:			
-				<programlisting><![CDATA[
-public class Company {
-	private String name;
-	private Employee managingDirector;
-	
-	public String getName()	{ 
-		return this.name; 
-	}
-	public void setName(String name) { 
-		this.name = name; 
-	} 
-	public Employee getManagingDirector() { 
-		return this.managingDirector; 
-	}
-	public void setManagingDirector(Employee managingDirector) {
-		this.managingDirector = managingDirector;							
-	}
-}
-				]]></programlisting>
-				<programlisting><![CDATA[
-public class Employee {
-	private float salary;
-	
-	public float getSalary() {
-		return salary;
-	}						
-	public void setSalary(float salary) {
-		this.salary = salary;
-	}
-}					
-				]]></programlisting>
-			</para>
-			<para>
-				The following code snippets show some examples of how to retrieve and
-				manipulate some of the properties of instantiated:
-				<literal>Companies</literal> and <literal>Employees</literal>
-				<programlisting><![CDATA[
-Company c = new Company();
+  <sect1 id="validation-introduction">
+    <title>Introduction</title>
+
+    <para>The big question is whether or not validation should be considered
+    <emphasis>business logic</emphasis>. There are pros and cons for both
+    answers, and Spring offers a design for validation (and data binding) that
+    does not exclude either one of them. Validation should specifically not be
+    tied to the web tier, should be easily localizable and it should be
+    possible to plug in any validator available. Considering the above, Spring
+    has come up with a <literal>Validator</literal> interface that's both
+    basic and usable in every layer of an application.</para>
+
+    <para>Data binding is useful for allowing user input to be dynamically
+    bound to the domain model of an application (or whatever objects you use
+    to process user input). Spring provides the so-called
+    <literal>DataBinder</literal> to do exactly that. The Validator and the
+    DataBinder make up the <literal>validation</literal> package, which is
+    primarily used in but not limited to the MVC framework.</para>
+
+    <para>The <literal>BeanWrapper</literal> is a fundamental concept in the
+    Spring Framework and is used in a lot of places. However, you probably
+    will not ever have the need to use the BeanWrapper directly. Because this
+    is reference documentation however, we felt that some explanation might be
+    right. We're explaining the BeanWrapper in this chapter since if you were
+    going to use it at all, you would probably do that when trying to bind
+    data to objects, which is strongly related to the BeanWrapper.</para>
+
+    <para>Spring uses PropertyEditors all over the place. The concept of a
+    PropertyEditor is part of the JavaBeans specification. Just as the
+    BeanWrapper, it's best to explain the use of PropertyEditors in this
+    chapter as well, since it's closely related to the BeanWrapper and the
+    DataBinder.</para>
+  </sect1>
+
+  <sect1 id="validation-databinding">
+    <title>Binding data using the <literal>DataBinder</literal></title>
+
+    <para>The DataBinder builds on top of the BeanWrapper<footnote>
+        <para>See <link linkend="beans-beans">the beans chapter</link> for
+        more information</para>
+      </footnote>.</para>
+  </sect1>
+
+  <sect1 id="beans-beans">
+    <title>Bean manipulation and the <literal>BeanWrapper</literal></title>
+
+    <para>The <literal>org.springframework.beans</literal> package adheres to
+    the JavaBeans standard provided by Sun. A JavaBean is simply a class with
+    a default no-argument constructor, which follows a naming conventions
+    where a property named <literal>prop</literal> has a setter
+    <literal>setProp(...)</literal> and a getter <literal>getProp()</literal>.
+    For more information about JavaBeans and the specification, please refer
+    to Sun's website (<ulink
+    url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).</para>
+
+    <para>One quite important concept of the beans package is the
+    <literal>BeanWrapper</literal> interface and its corresponding
+    implementation (<literal>BeanWrapperImpl</literal>). As quoted from the
+    JavaDoc, the BeanWrapper offers functionnality to set and get property
+    values (individually or in bulk), get property descriptors and query the
+    readability and writability of properties. Also, the BeanWrapper offers
+    support for nested properties, enabling the setting of properties on
+    subproperties to an unlimited depth. Then, the BeanWrapper support the
+    ability to add standard JavaBeans
+    <literal>PropertyChangeListeners</literal> and
+    <literal>VetoableChangeListeners</literal>, without the need for
+    supporting code in the target class. Last but not least, the BeanWrapper
+    provides support for the setting of indexed properties. The BeanWrapper
+    usually isn't used by application code directly, but by the
+    <literal>DataBinder</literal> and the
+    <literal>BeanFactory</literal>.</para>
+
+    <para>The way the BeanWrapper works is partly indicated by its name:
+    <emphasis>it wraps a bean</emphasis> to perform actions on that bean, like
+    setting and retrieving properties.</para>
+
+    <sect2 id="beans-beans-conventions">
+      <title>Setting and getting basic and nested properties</title>
+
+      <para>Setting and getting properties is done using the
+      <literal>setPropertyValue(s)</literal> and
+      <literal>getPropertyValue(s)</literal> methods that both come with a
+      couple of overloaded variants. They're all described in more detail in
+      the JavaDoc Spring comes with. What's important to know is that there
+      are a couple of conventions for indicating properties of an object. A
+      couple of examples: <table frame="all">
+          <title>Examples of properties</title>
+
+          <tgroup cols="2">
+            <colspec colname="c1" colwidth="1*" />
+
+            <colspec colname="c2" colwidth="5*" />
+
+            <thead>
+              <row>
+                <entry>Expression</entry>
+
+                <entry>Explanation</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>name</literal></entry>
+
+                <entry>Indicates the property <literal>name</literal>
+                corresponding to the methods <literal>getName()</literal> or
+                <literal>isName()</literal> and
+                <literal>setName()</literal></entry>
+              </row>
+
+              <row>
+                <entry><literal>account.name</literal></entry>
+
+                <entry>Indicates the nested property <literal>name</literal>
+                of the property <literal>account</literal> corresponding e.g.
+                to the methods <literal>getAccount().setName()</literal> or
+                <literal>getAccount().getName()</literal></entry>
+              </row>
+
+              <row>
+                <entry><literal>account[2]</literal></entry>
+
+                <entry>Indicates the <emphasis>third</emphasis> element of the
+                indexed property <literal>account</literal>. Indexed
+                properties can be of type <literal>array</literal>,
+                <literal>list</literal> or other <emphasis>naturally
+                ordered</emphasis> collection</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+
+      <para>Below you'll find some examples of working with the BeanWrapper to
+      get and set properties.</para>
+
+      <para><emphasis>Note: this part is not important to you if you're not
+      planning to work with the BeanWrapper directly. If you're just using the
+      <literal>DataBinder</literal> and the <literal>BeanFactory</literal> and
+      their out-of-the-box implementation, don't mind reading this and go on
+      with reading about <literal>PropertyEditors</literal>.</emphasis></para>
+
+      <para>Consider the following two classes: <programlisting>public class Company {
+    private String name;
+    private Employee managingDirector;
+
+    public String getName()	{ 
+        return this.name; 
+    }
+    public void setName(String name) { 
+        this.name = name; 
+    } 
+    public Employee getManagingDirector() { 
+        return this.managingDirector; 
+    }
+    public void setManagingDirector(Employee managingDirector) {
+        this.managingDirector = managingDirector;
+    }
+}</programlisting> <programlisting>public class Employee {
+    private float salary;
+
+    public float getSalary() {
+        return salary;
+    }
+    public void setSalary(float salary) {
+        this.salary = salary;
+    }
+}</programlisting></para>
+
+      <para>The following code snippets show some examples of how to retrieve
+      and manipulate some of the properties of instantiated:
+      <literal>Companies</literal> and <literal>Employees</literal>
+      <programlisting>Company c = new Company();
 BeanWrapper bwComp = BeanWrapperImpl(c);
 // setting the company name...
 bwComp.setPropertyValue("name", "Some Company Inc.");
@@ -183,148 +185,147 @@ bwComp.setPropertyValue(v);
 // ok, let's create the director and tie it to the company:
 Employee jim = new Employee();
 BeanWrapper bwJim = BeanWrapperImpl(jim);
-bwJim.setPropertyValue("name", "Jim Stravinsky");					
+bwJim.setPropertyValue("name", "Jim Stravinsky");
 bwComp.setPropertyValue("managingDirector", jim);
 
 // retrieving the salary of the managingDirector through the company
-Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
-				]]></programlisting>				
-			</para>
-    	</sect2>
-    	
-    	<sect2 id="beans-beans-conversion">
-    		<title>Built-in <literal>PropertyEditors</literal>, converting types</title>
-    		<para>
-    			Spring heavily uses the concept of <literal>PropertyEditors</literal>.
-    			Sometimes it might be handy to be able to represent properties in a different
-    			way than the object itself. For example, a date can be represented in a human
-    			readable way, while we're still able to convert the human readable form back to
-    			the original date (or even better: convert any date entered in a human readable form,
-    			back to Date objects). This behavior can be achieved by <emphasis>registering
-    			custom editors</emphasis>, of type <literal>java.beans.PropertyEditor</literal>.
-    			Registering custom editors on a BeanWrapper gives it the knowledge of how to convert
-    			properties to the desired type. Read more about PropertyEditors in the JavaDoc of the
-    			<literal>java.beans</literal> package provided by Sun.
-    		</para>
-    		<para>
-    			A couple of examples where property editing is used in Spring
-    			<itemizedlist spacing="compact">
-    				<listitem>
-    					<para><emphasis>setting properties on beans</emphasis> is done using
-    						PropertyEditors. When mentioning <literal>java.lang.String</literal>
-    						as the value of a property of some bean you're declaring in XML file,
-    						Spring will (if the setter of the corresponding property has a 
-    						Class-parameter) use the <literal>ClassEditor</literal> to try
-    						to resolve the parameter to a Class object</para>
-    				</listitem>
-    				<listitem>
-    					<para><emphasis>parsing HTTP request parameters</emphasis> in Spring's
-    						MVC framework is done using all kinds of PropertyEditors that you
-    						can manually bind in all subclasses of the <literal>CommandController</literal></para>
-    				</listitem>
-    			</itemizedlist>
-    		</para>
-			<para>
-				Spring has a number of built-in PropertyEditors to make life easy. Each of those is listed below and
-				they are all located in the <literal>org.springframework.beans.propertyeditors</literal> package:
-				<table frame="all">
-		            <title>Built-in PropertyEditors</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="3*"/>
-		                <colspec colname="c2" colwidth="5*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Class</entry>
-		                        <entry>Explanation</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry><literal>ClassEditor</literal></entry>
-				            	<entry>
-				            		Parses Strings representing classes to actual classes and
-				            		the other way around. When a class is not found,
-				            		an IllegalArgumentException is thrown
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>FileEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving String to <literal>File</literal>-objects
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>LocaleEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving Strings to <literal>Locale</literal>-objects
-				            		and vice versa (the String format is [language]_[country]_[variant],
-				            		which is the same thing the toString() method of Locale provides
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>PropertiesEditor</literal></entry>
-				            	<entry>
-				            		Capable of converting Strings (formatted using the 
-				            		format as defined in the JavaDOC for the java.lang.Properties class)
-				            		to <literal>Properties</literal>-objects
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>StringArrayPropertyEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving a comma-delimited list of String to
-				            		a String-array and vice versa
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>URLEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving a String representation of a URL
-				            		to an actual <literal>URL</literal>-object
-				            	</entry>
-				            </row>				            				            
-				        </tbody>
-			        </tgroup>
-		        </table>
-			</para>
-			<para>
-				Spring uses the <literal>java.beans.PropertyEditorManager</literal> to
-				set the search-path for property editors that might be needed. The search-path
-				also includes <literal>sun.bean.editors</literal>, which includes
-				PropertyEditors for Font, Color and all the primitive types.
-			</para>
-		</sect2>
-		
-		<sect2 id="beans-beans-other">
-			<title>Other features worth mentioning</title>
-			<para>
-				Besides the features you've seen in the previous sections there a couple of
-				features that might be interesting to you, though not worth an entire section.
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para>
-							<emphasis>determining readability and writability</emphasis>: using
-							the <literal>isReadable()</literal> and <literal>isWritable()</literal>
-							methods, you can determine whether or not a property is readable or
-							writable
-						</para>
-					</listitem>
-					<listitem>
-						<para>
-							<emphasis>retrieving PropertyDescriptors</emphasis>: using
-							<literal>getPropertyDescriptor(String)</literal> and
-							<literal>getPropertyDescriptors()</literal> you can retrieve
-							objects of type <literal>java.beans.PropertyDescriptor</literal>,
-							that might come in handy sometimes
-						</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-		</sect2>			  		
+Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</programlisting></para>
+    </sect2>
 
-    </sect1>
-	
+    <sect2 id="beans-beans-conversion">
+      <title>Built-in <literal>PropertyEditors</literal>, converting
+      types</title>
 
+      <para>Spring heavily uses the concept of
+      <literal>PropertyEditors</literal>. Sometimes it might be handy to be
+      able to represent properties in a different way than the object itself.
+      For example, a date can be represented in a human readable way, while
+      we're still able to convert the human readable form back to the original
+      date (or even better: convert any date entered in a human readable form,
+      back to Date objects). This behavior can be achieved by
+      <emphasis>registering custom editors</emphasis>, of type
+      <literal>java.beans.PropertyEditor</literal>. Registering custom editors
+      on a BeanWrapper gives it the knowledge of how to convert properties to
+      the desired type. Read more about PropertyEditors in the JavaDoc of the
+      <literal>java.beans</literal> package provided by Sun.</para>
+
+      <para>A couple of examples where property editing is used in Spring
+      <itemizedlist spacing="compact">
+          <listitem>
+            <para><emphasis>setting properties on beans</emphasis> is done
+            using PropertyEditors. When mentioning
+            <literal>java.lang.String</literal> as the value of a property of
+            some bean you're declaring in XML file, Spring will (if the setter
+            of the corresponding property has a Class-parameter) use the
+            <literal>ClassEditor</literal> to try to resolve the parameter to
+            a Class object</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>parsing HTTP request parameters</emphasis> in
+            Spring's MVC framework is done using all kinds of PropertyEditors
+            that you can manually bind in all subclasses of the
+            <literal>CommandController</literal></para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>Spring has a number of built-in PropertyEditors to make life easy.
+      Each of those is listed below and they are all located in the
+      <literal>org.springframework.beans.propertyeditors</literal> package:
+      <table frame="all">
+          <title>Built-in PropertyEditors</title>
+
+          <tgroup cols="2">
+            <colspec colname="c1" colwidth="3*" />
+
+            <colspec colname="c2" colwidth="5*" />
+
+            <thead>
+              <row>
+                <entry>Class</entry>
+
+                <entry>Explanation</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>ClassEditor</literal></entry>
+
+                <entry>Parses Strings representing classes to actual classes
+                and the other way around. When a class is not found, an
+                IllegalArgumentException is thrown</entry>
+              </row>
+
+              <row>
+                <entry><literal>FileEditor</literal></entry>
+
+                <entry>Capable of resolving String to
+                <literal>File</literal>-objects</entry>
+              </row>
+
+              <row>
+                <entry><literal>LocaleEditor</literal></entry>
+
+                <entry>Capable of resolving Strings to
+                <literal>Locale</literal>-objects and vice versa (the String
+                format is [language]_[country]_[variant], which is the same
+                thing the toString() method of Locale provides</entry>
+              </row>
+
+              <row>
+                <entry><literal>PropertiesEditor</literal></entry>
+
+                <entry>Capable of converting Strings (formatted using the
+                format as defined in the JavaDOC for the java.lang.Properties
+                class) to <literal>Properties</literal>-objects</entry>
+              </row>
+
+              <row>
+                <entry><literal>StringArrayPropertyEditor</literal></entry>
+
+                <entry>Capable of resolving a comma-delimited list of String
+                to a String-array and vice versa</entry>
+              </row>
+
+              <row>
+                <entry><literal>URLEditor</literal></entry>
+
+                <entry>Capable of resolving a String representation of a URL
+                to an actual <literal>URL</literal>-object</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+
+      <para>Spring uses the
+      <literal>java.beans.PropertyEditorManager</literal> to set the
+      search-path for property editors that might be needed. The search-path
+      also includes <literal>sun.bean.editors</literal>, which includes
+      PropertyEditors for Font, Color and all the primitive types.</para>
+    </sect2>
+
+    <sect2 id="beans-beans-other">
+      <title>Other features worth mentioning</title>
+
+      <para>Besides the features you've seen in the previous sections there a
+      couple of features that might be interesting to you, though not worth an
+      entire section. <itemizedlist spacing="compact">
+          <listitem>
+            <para><emphasis>determining readability and
+            writability</emphasis>: using the <literal>isReadable()</literal>
+            and <literal>isWritable()</literal> methods, you can determine
+            whether or not a property is readable or writable</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis>retrieving PropertyDescriptors</emphasis>: using
+            <literal>getPropertyDescriptor(String)</literal> and
+            <literal>getPropertyDescriptors()</literal> you can retrieve
+            objects of type <literal>java.beans.PropertyDescriptor</literal>,
+            that might come in handy sometimes</para>
+          </listitem>
+        </itemizedlist></para>
+    </sect2>
+  </sect1>
 </chapter>
-
-

@@ -28,186 +28,171 @@
 
     <para>Spring also provides a subinterface of <literal>MailSender</literal>
     for specialized <emphasis>JavaMail</emphasis> features such as MIME
-    messages, namely <literal>org.springframework.mail.javamail.JavaMailSender</literal>
-    It also provides a callback interface for praparation of JavaMail MIME
-    messages, namely <literal>org.springframework.mail.javamail.MimeMessagePreparator</literal></para>
+    messages, namely
+    <literal>org.springframework.mail.javamail.JavaMailSender</literal> It
+    also provides a callback interface for praparation of JavaMail MIME
+    messages, namely
+    <literal>org.springframework.mail.javamail.MimeMessagePreparator</literal></para>
 
-    <para>MailSender: <programlisting>
-public interface MailSender {
-	
-	/**
-	 * Send the given simple mail message.
-	 * @param simpleMessage message to send
-	 * @throws MailException in case of message, authentication, or send errors
-	 */
-	public void send(SimpleMailMessage simpleMessage) throws MailException;
+    <para>MailSender: <programlisting>public interface MailSender {
 
-	/**
-	 * Send the given array of simple mail messages in batch.
-	 * @param simpleMessages messages to send
-	 * @throws MailException in case of message, authentication, or send errors
-	 */
-	public void send(SimpleMailMessage[] simpleMessages) throws MailException;
+    /**
+     * Send the given simple mail message.
+     * @param simpleMessage message to send
+     * @throws MailException in case of message, authentication, or send errors
+     */
+    public void send(SimpleMailMessage simpleMessage) throws MailException;
 
-}
-			</programlisting> JavaMailSender: <programlisting>
-public interface JavaMailSender extends MailSender {
+    /**
+     * Send the given array of simple mail messages in batch.
+     * @param simpleMessages messages to send
+     * @throws MailException in case of message, authentication, or send errors
+     */
+    public void send(SimpleMailMessage[] simpleMessages) throws MailException;
 
-	/**
-	 * Create a new JavaMail MimeMessage for the underlying JavaMail Session
-	 * of this sender. Needs to be called to create MimeMessage instances
-	 * that can be prepared by the client and passed to send(MimeMessage).
-	 * @return the new MimeMessage instance
-	 * @see #send(MimeMessage)
-	 * @see #send(MimeMessage[])
-	 */
-	public MimeMessage createMimeMessage();
+}</programlisting> JavaMailSender: <programlisting>public interface JavaMailSender extends MailSender {
 
-	/**
-	 * Send the given JavaMail MIME message.
-	 * The message needs to have been created with createMimeMessage.
-	 * @param mimeMessage message to send
-	 * @throws MailException in case of message, authentication, or send errors
-	 * @see #createMimeMessage
-	 */
-	public void send(MimeMessage mimeMessage) throws MailException;
+    /**
+     * Create a new JavaMail MimeMessage for the underlying JavaMail Session
+     * of this sender. Needs to be called to create MimeMessage instances
+     * that can be prepared by the client and passed to send(MimeMessage).
+     * @return the new MimeMessage instance
+     * @see #send(MimeMessage)
+     * @see #send(MimeMessage[])
+     */
+    public MimeMessage createMimeMessage();
 
-	/**
-	 * Send the given array of JavaMail MIME messages in batch.
-	 * The messages need to have been created with createMimeMessage.
-	 * @param mimeMessages messages to send
-	 * @throws MailException in case of message, authentication, or send errors
-	 * @see #createMimeMessage
-	 */
-	public void send(MimeMessage[] mimeMessages) throws MailException;
+    /**
+     * Send the given JavaMail MIME message.
+     * The message needs to have been created with createMimeMessage.
+     * @param mimeMessage message to send
+     * @throws MailException in case of message, authentication, or send errors
+     * @see #createMimeMessage
+     */
+    public void send(MimeMessage mimeMessage) throws MailException;
 
-	/**
-	 * Send the JavaMail MIME message prepared by the given MimeMessagePreparator.
-	 * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
-	 * and send(MimeMessage) calls. Takes care of proper exception conversion.
-	 * @param mimeMessagePreparator the preparator to use
-	 * @throws MailException in case of message, authentication, or send errors
-	 */
-	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException;
+    /**
+     * Send the given array of JavaMail MIME messages in batch.
+     * The messages need to have been created with createMimeMessage.
+     * @param mimeMessages messages to send
+     * @throws MailException in case of message, authentication, or send errors
+     * @see #createMimeMessage
+     */
+    public void send(MimeMessage[] mimeMessages) throws MailException;
 
-	/**
-	 * Send the JavaMail MIME messages prepared by the given MimeMessagePreparators.
-	 * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
-	 * and send(MimeMessage[]) calls. Takes care of proper exception conversion.
-	 * @param mimeMessagePreparators the preparator to use
-	 * @throws MailException in case of message, authentication, or send errors
-	 */
-	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException;
+    /**
+     * Send the JavaMail MIME message prepared by the given MimeMessagePreparator.
+     * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
+     * and send(MimeMessage) calls. Takes care of proper exception conversion.
+     * @param mimeMessagePreparator the preparator to use
+     * @throws MailException in case of message, authentication, or send errors
+     */
+    public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException;
 
-}
-			</programlisting> MimeMessagePreparator: <programlisting>
-public interface MimeMessagePreparator {
+    /**
+     * Send the JavaMail MIME messages prepared by the given MimeMessagePreparators.
+     * Alternative way to prepare MimeMessage instances, instead of createMimeMessage
+     * and send(MimeMessage[]) calls. Takes care of proper exception conversion.
+     * @param mimeMessagePreparators the preparator to use
+     * @throws MailException in case of message, authentication, or send errors
+     */
+    public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException;
 
-	/**
-	 * Prepare the given new MimeMessage instance.
-	 * @param mimeMessage the message to prepare
-	 * @throws MessagingException passing any exceptions thrown by MimeMessage
-	 * methods through for automatic conversion to the MailException hierarchy
-	 */
-	void prepare(MimeMessage mimeMessage) throws MessagingException;
+}</programlisting> MimeMessagePreparator: <programlisting>public interface MimeMessagePreparator {
 
-}
-			</programlisting></para>
+    /**
+     * Prepare the given new MimeMessage instance.
+     * @param mimeMessage the message to prepare
+     * @throws MessagingException passing any exceptions thrown by MimeMessage
+     * methods through for automatic conversion to the MailException hierarchy
+     */
+    void prepare(MimeMessage mimeMessage) throws MessagingException;
+
+}</programlisting></para>
   </sect1>
 
   <sect1 id="mail-usage">
     <title>Using Spring mail abstraction</title>
 
-    <para>Let&#39;s assume there is a businness interface called
-    <literal>OrderManager</literal><programlisting>
-public interface OrderManager {
-	
-	void placeOrder(Order order);
-}
-			
-			</programlisting> and there is a use case that says that an email message
+    <para>Let's assume there is a businness interface called
+    <literal>OrderManager</literal><programlisting>public interface OrderManager {
+
+    void placeOrder(Order order);
+}</programlisting> and there is a use case that says that an email message
     with order number would need to be generated and sent to a customer
-    placing that order. So for this purpose we want to use <literal>MailSender</literal>
-    and <literal>SimpleMailMessage</literal></para>
+    placing that order. So for this purpose we want to use
+    <literal>MailSender</literal> and
+    <literal>SimpleMailMessage</literal></para>
 
     <para><emphasis>Please note that as usual, we work with interfaces in the
     business code and let Spring IoC container take care of wiring of all the
     collaborators for us.</emphasis></para>
 
     <para>Here is the implementation of <literal>OrderManager</literal>
-    <programlisting>
-import org.springframework.mail.MailException;
+    <programlisting>import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
 public class OrderManagerImpl implements OrderManager {
 
-	private MailSender mailSender;
-	private SimpleMailMessage message;
+    private MailSender mailSender;
+    private SimpleMailMessage message;
 
-	public void setMailSender(MailSender mailSender) {
-		this.mailSender = mailSender;
-	}
+    public void setMailSender(MailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
-	public void setMessage(SimpleMailMessage message) {
-		this.message = message;
-	}
+    public void setMessage(SimpleMailMessage message) {
+        this.message = message;
+    }
 
-	public void placeOrder(Order order) {
+    public void placeOrder(Order order) {
 
-		//... * Do the businness calculations....
-		//... * Call the collaborators to persist the order
+        //... * Do the businness calculations....
+        //... * Call the collaborators to persist the order
 
-		//Create a threadsafe &#34;sandbox&#34; of the message
-		SimpleMailMessage msg = new SimpleMailMessage(this.message);
-		msg.setTo(order.getCustomer().getEmailAddress());
-		msg.setText(
-			&#34;Dear &#34;
-				+ order.getCustomer().getFirstName()
-				+ order.getCustomer().getLastName()
-				+ &#34;, thank you for placing order. Your order number is &#34;
-				+ order.getOrderNumber());
-		try{
-			mailSender.send(msg);
-		}
-		catch(MailException ex) {
-			//log it and go on
-			System.err.println(ex.getMessage());			
-		}
-	}
-}
-			</programlisting></para>
+        //Create a threadsafe "sandbox" of the message
+        SimpleMailMessage msg = new SimpleMailMessage(this.message);
+        msg.setTo(order.getCustomer().getEmailAddress());
+        msg.setText(
+            "Dear "
+                + order.getCustomer().getFirstName()
+                + order.getCustomer().getLastName()
+                + ", thank you for placing order. Your order number is "
+                + order.getOrderNumber());
+        try{
+            mailSender.send(msg);
+        }
+        catch(MailException ex) {
+            //log it and go on
+            System.err.println(ex.getMessage());            
+        }
+    }
+}</programlisting>Here is what the bean definitions for the code above would
+    look like:</para>
 
-    <para></para>
+    <programlisting>&lt;bean id="mailSender"
+      class="org.springframework.mail.javamail.JavaMailSenderImpl"&gt;
+    &lt;property name="host"&gt;&lt;value&gt;mail.mycompany.com&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
 
-    <para>Here is what the bean definitions for the code above would look
-    like:</para>
+&lt;bean id="mailMessage"
+      class="org.springframework.mail.SimpleMailMessage"&gt;
+    &lt;property name="from"&gt;&lt;value&gt;customerservice@mycompany.com&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="subject"&gt;&lt;value&gt;Your order&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
 
-    <programlisting>&#60;bean id=&#34;mailSender&#34;
-		class=&#34;org.springframework.mail.javamail.JavaMailSenderImpl&#34;&#62;
-		&#60;property name=&#34;host&#34;&#62;&#60;value&#62;mail.mycompany.com&#60;/value&#62;&#60;/property&#62;
-&#60;/bean&#62;
-
-&#60;bean id=&#34;mailMessage&#34;
-		class=&#34;org.springframework.mail.SimpleMailMessage&#34;&#62;
-		&#60;property name=&#34;from&#34;&#62;&#60;value&#62;customerservice@mycompany.com&#60;/value&#62;&#60;/property&#62;
-		&#60;property name=&#34;subject&#34;&#62;&#60;value&#62;Your order&#60;/value&#62;&#60;/property&#62;
-&#60;/bean&#62;
-
-&#60;bean id=&#34;orderManager&#34;
-		class=&#34;com.mycompany.businessapp.support.OrderManagerImpl&#34;&#62;
-		&#60;property name=&#34;mailSender&#34;&#62;&#60;ref bean=&#34;mailSender&#34;/&#62;&#60;/property&#62;
-		&#60;property name=&#34;message&#34;&#62;&#60;ref bean=&#34;mailMessage&#34;/&#62;&#60;/property&#62;
-&#60;/bean&#62;</programlisting>
-
-    <para></para>
+&lt;bean id="orderManager"
+      class="com.mycompany.businessapp.support.OrderManagerImpl"&gt;
+    &lt;property name="mailSender"&gt;&lt;ref bean="mailSender"/&gt;&lt;/property&gt;
+    &lt;property name="message"&gt;&lt;ref bean="mailMessage"/&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
 
     <para>Here is the implementation of <literal>OrderManager</literal> using
     <literal>MimeMessagePreparator</literal> callback interface. Please note
     that the mailSender property is of type <literal>JavaMailSender</literal>
     in this case in order to be able to use JavaMail MimeMessage:
-    <programlisting>
-import javax.mail.Message;
+    <programlisting>import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -218,44 +203,44 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
 public class OrderManagerImpl implements OrderManager {
+    private JavaMailSender mailSender;
+    
+    public void setMailSender(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
-	private JavaMailSender mailSender;
-	
-	public void setMailSender(JavaMailSender mailSender) {
-		this.mailSender = mailSender;
-	}
+    public void placeOrder(final Order order) {
 
-	public void placeOrder(final Order order) {
-
-		//... * Do the businness calculations....
-		//... * Call the collaborators to persist the order
-		
-		
-		MimeMessagePreparator preparator = new MimeMessagePreparator() {
-			public void prepare(MimeMessage mimeMessage) throws MessagingException {
-				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(order.getCustomer().getEmailAddress()));
-				mimeMessage.setFrom(new InternetAddress(&#34;mail@mycompany.com&#34;));
-				mimeMessage.setText(
-					&#34;Dear &#34;
-						+ order.getCustomer().getFirstName()
-						+ order.getCustomer().getLastName()
-						+ &#34;, thank you for placing order. Your order number is &#34;
-						+ order.getOrderNumber());
-			}
-		};
-		try{
-			mailSender.send(preparator);
-		}
-		catch(MailException ex) {
-			//log it and go on
-			System.err.println(ex.getMessage());			
-		}
-	}
-}
-			</programlisting></para>
+        //... * Do the businness calculations....
+        //... * Call the collaborators to persist the order
+        
+        
+        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+            public void prepare(MimeMessage mimeMessage) throws MessagingException {
+                mimeMessage.setRecipient(Message.RecipientType.TO, 
+                        new InternetAddress(order.getCustomer().getEmailAddress()));
+                mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
+                mimeMessage.setText(
+                    "Dear "
+                        + order.getCustomer().getFirstName()
+                        + order.getCustomer().getLastName()
+                        + ", thank you for placing order. Your order number is "
+                        + order.getOrderNumber());
+            }
+        };
+        try{
+            mailSender.send(preparator);
+        }
+        catch(MailException ex) {
+            //log it and go on
+            System.err.println(ex.getMessage());            
+        }
+    }
+}</programlisting></para>
 
     <para>If you want to use JavaMail MimeMessage to the full power, the
-    <literal>MimeMessagePreparator</literal> is available at your fingertips.</para>
+    <literal>MimeMessagePreparator</literal> is available at your
+    fingertips.</para>
 
     <para><emphasis>Please note that the mail code is a crosscutting concern
     and is a perfect candidate for refactoring into a custom SpringAOP advice,
@@ -266,10 +251,11 @@ public class OrderManagerImpl implements OrderManager {
       <title>Pluggable MailSender implementations</title>
 
       <para>Spring comes with two MailSender implementations out of the box -
-      the JavaMail implementation and the implementation on top of Jason Hunter&#39;s
-      <emphasis>MailMessage</emphasis> class that&#39;s included in <ulink
-      url="http://servlets.com/cos">http://servlets.com/cos</ulink>
-      (com.oreilly.servlet). Please refer to JavaDocs for more information.</para>
+      the JavaMail implementation and the implementation on top of Jason
+      Hunter's <emphasis>MailMessage</emphasis> class that's included in
+      <ulink url="http://servlets.com/cos">http://servlets.com/cos</ulink>
+      (com.oreilly.servlet). Please refer to JavaDocs for more
+      information.</para>
     </sect2>
   </sect1>
 </chapter>

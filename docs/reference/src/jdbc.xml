@@ -173,11 +173,11 @@ dataSource.setPassword( ""); </programlisting>
       <para><literal>SQLErrorCodeSQLExceptionTranslator</literal> can be
       extended the following way: <programlisting format="linespecific"
       xml:space="preserve">public class MySQLErrorCodesTransalator extends SQLErrorCodeSQLExceptionTranslator {
-  protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
-    if (sqlex.getErrorCode() == -12345)
-      return new DeadlockLoserDataAccessException(task, sqlex);
-    return null;
-  }
+    protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
+        if (sqlex.getErrorCode() == -12345)
+            return new DeadlockLoserDataAccessException(task, sqlex);
+        return null;
+    }
 }</programlisting>In this example the specific error code '-12345' is
       translated and any other errors are simply left to be translated by the
       default translator implementation. To use this custom translator, it is
@@ -216,17 +216,17 @@ su.update();</programlisting>The custom translator is passed a data source
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAStatement {
-  private JdbcTemplate jt;
-  private DataSource dataSource;
+    private JdbcTemplate jt;
+    private DataSource dataSource;
 
-  public void doExecute() {
-    jt = new JdbcTemplate(dataSource);
-    jt.execute("create table mytable (id integer, name varchar(100))"); 
-  }
+    public void doExecute() {
+        jt = new JdbcTemplate(dataSource);
+        jt.execute("create table mytable (id integer, name varchar(100))"); 
+    }
 
-  public void setDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
-  }
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 }</programlisting></para>
     </sect2>
 
@@ -250,24 +250,24 @@ public class ExecuteAStatement {
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RunAQuery {
-  private JdbcTemplate jt;
-  private DataSource dataSource;
+    private JdbcTemplate jt;
+    private DataSource dataSource;
   
-  public int getCount() {
-    jt = new JdbcTemplate(dataSource);
-    int count = jt.queryForInt("select count(*) from mytable");
-    return count;
-  }
+    public int getCount() {
+        jt = new JdbcTemplate(dataSource);
+        int count = jt.queryForInt("select count(*) from mytable");
+        return count;
+    }
 
-  public String getName() {
-    jt = new JdbcTemplate(dataSource);
-    String name = (String) jt.queryForObject("select name from mytable", java.lang.String.class);
-    return name;
-  }
+    public String getName() {
+        jt = new JdbcTemplate(dataSource);
+        String name = (String) jt.queryForObject("select name from mytable", java.lang.String.class);
+        return name;
+    }
 
-  public void setDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
-  }
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 }</programlisting>
 
       <para>In addition to the singe results query methods there are several
@@ -278,11 +278,11 @@ public class RunAQuery {
       column value for that row. If we add a method to the above example to
       retrieve a list of all the rows, it would look like this:</para>
 
-      <programlisting>  public List getList() {
-    jt = new JdbcTemplate(dataSource);
-    List rows = jt.queryForList("select * from mytable");
-    return rows;
-  }</programlisting>
+      <programlisting>    public List getList() {
+        jt = new JdbcTemplate(dataSource);
+        List rows = jt.queryForList("select * from mytable");
+        return rows;
+    }</programlisting>
 
       <para>The list returned would look something like this:
       <literal>[{name=Bob, id=1}, {name=Mary, id=2}].</literal></para>
@@ -505,16 +505,16 @@ public class ExecuteAnUpdate {
       <para>Let's take a look at the code where this custom query is
       instantiated and executed:</para>
 
-      <programlisting>  public Customer getCustomer(Integer id) {
-    CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
-    Object[] parms = new Object[1];
-    parms[0] = id;
-    List customers = custQry.execute(parms);
-    if (customers.size() &gt; 0)
-      return (Customer) customers.get(0);
-    else
-      return null;
-  }</programlisting>
+      <programlisting>    public Customer getCustomer(Integer id) {
+        CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
+        Object[] parms = new Object[1];
+        parms[0] = id;
+        List customers = custQry.execute(parms);
+        if (customers.size() &gt; 0)
+            return (Customer) customers.get(0);
+        else
+            return null;
+    }</programlisting>
 
       <para>The method in this example retrieves the customer with the id that
       is passed in as the only parameter. After creating an instance of the
@@ -680,11 +680,11 @@ public class TestSP {
       repeatedly to execute the function. Here is an example of retrieving the
       count of rows from a table:</para>
 
-      <para><programlisting>  public int countRows() {
-    SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
-    sf.compile();
-    return sf.run();
-  }</programlisting></para>
+      <para><programlisting>    public int countRows() {
+        SqlFunction sf = new SqlFunction(dataSource, "select count(*) from mytable");
+        sf.compile();
+        return sf.run();
+    }</programlisting></para>
 
       <para></para>
     </sect2>

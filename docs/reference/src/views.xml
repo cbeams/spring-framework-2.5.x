@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.13 2004-03-09 23:03:35 davison Exp $-->
+<!--$Id: views.xml,v 1.14 2004-03-22 01:44:23 trisberg Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -37,10 +37,9 @@
       <literal>ResourceBundleViewResolver</literal>. Both are declared in the
       WebApplicationContext:</para>
 
-      <programlisting>
-# The ResourceBundleViewResolver:
+      <programlisting># The ResourceBundleViewResolver:
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-  &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 # And a sample properties file is uses (views.properties in WEB-INF/classes):
@@ -55,11 +54,10 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       ResourceBundleViewResolver you can mix different types of views using
       only one resolver.</para>
 
-      <programlisting>
-&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-  &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="suffix"&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;
+      <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+    &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="suffix"&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>The InternalResourceBundleViewResolver can be configured for using
@@ -143,22 +141,20 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       url="http://jakarta.apache.org/struts"></ulink>. In Spring this is done
       using the <literal>TilesConfigurer</literal>. Have a look at the
       following piece of code (which you should include in your
-      WebApplicationContext): <programlisting> 
-&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
-   &lt;property name="factoryClass"&gt;
-       &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
-   &lt;/property&gt;
-   &lt;property name="definitions"&gt;
-       &lt;list&gt;
-           &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
-           &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
-           &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
-           &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
-           &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
-       &lt;/list&gt;
-   &lt;/property&gt;
-&lt;/bean&gt;
-              </programlisting></para>
+      WebApplicationContext): <programlisting>&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
+    &lt;property name="factoryClass"&gt;
+        &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property name="definitions"&gt;
+        &lt;list&gt;
+            &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
+            &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
+            &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
+            &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
+            &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
 
       <para>As you can see, there are five files containing definitions, which
       are all located in the WEB-INF/defs directory. At initialization of the
@@ -177,14 +173,12 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
         <para>The InternalResourceViewResolver instantiates the given
         <literal>viewClass</literal> for each view it has to resolve.
-        <programlisting>        
-&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+        <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
     &lt;property name="requestContextAttribute"&gt;&lt;value&gt;requestContext&lt;/value&gt;&lt;/property&gt;
     &lt;property name="viewClass"&gt;
         &lt;value&gt;org.springframework.web.servlet.view.tiles.TilesView&lt;/value&gt;
     &lt;/property&gt;
-&lt;/bean&gt;
-                    </programlisting></para>
+&lt;/bean&gt;</programlisting></para>
       </sect3>
 
       <sect3 id="view-tiles-resource">
@@ -192,22 +186,20 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
         <para>The ResourceBundleViewResolver has to be provided with a
         property file containing viewnames and viewclasses the resolver can
-        use: <programlisting>
-&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
+        use: <programlisting>&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
     &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
-                    </programlisting></para>
+&lt;/bean&gt;</programlisting></para>
 
-        <para><programlisting>
-        welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
-        welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
+        <para><programlisting>    ...
+    welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
+    welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
         
-        vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-        vetsView.url=vetsView (&lt;b&gt;again, this is the name of a definition&lt;/b&gt;)
+    vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
+    vetsView.url=vetsView (&lt;b&gt;again, this is the name of a definition&lt;/b&gt;)
         
-        findOwnersForm.class=org.springframework.web.servlet.view.JstlView
-        findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
-                    </programlisting> As you can see, when using the
+    findOwnersForm.class=org.springframework.web.servlet.view.JstlView
+    findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
+    ...</programlisting> As you can see, when using the
         ResourceBundleViewResolver, you can mix view using different view
         technologies.</para>
       </sect3>
@@ -259,8 +251,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   contexts in XML.  See Spring documentation for more info.
 --&gt;
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
-  &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="location"&gt;&lt;value&gt;/WEB-INF/frontcontroller-views.xml&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="location"&gt;&lt;value&gt;/WEB-INF/frontcontroller-views.xml&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;!-- ===========================================================--&gt;
@@ -276,10 +268,10 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   actual velocity.properties file altogether.
 --&gt;
 &lt;bean 
-  id="velocityConfig" 
-  class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
-  singleton="true"&gt;
-  &lt;property name="configLocation"&gt;&lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;&lt;/property&gt;          
+    id="velocityConfig" 
+    class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
+    singleton="true"&gt;
+    &lt;property name="configLocation"&gt;&lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;&lt;/property&gt;          
 &lt;/bean&gt;</programlisting>
     </sect2>
 
@@ -382,12 +374,12 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
         properties..</para>
 
         <programlisting>&lt;property name="velocityProperties"&gt;
-  &lt;props&gt;
-    &lt;prop key="resource.loader"&gt;file&lt;/prop&gt;
-    &lt;prop key="file.resource.loader.class"&gt;org.apache.velocity.runtime.resource.loader.FileResourceLoader&lt;/prop&gt;
-    &lt;prop key="file.resource.loader.path"&gt;${webapp.root}/WEB-INF/velocity&lt;/prop&gt;
-    &lt;prop key="file.resource.loader.cache"&gt;false&lt;/prop&gt;
-  &lt;/props&gt;
+    &lt;props&gt;
+        &lt;prop key="resource.loader"&gt;file&lt;/prop&gt;
+        &lt;prop key="file.resource.loader.class"&gt;org.apache.velocity.runtime.resource.loader.FileResourceLoader&lt;/prop&gt;
+        &lt;prop key="file.resource.loader.path"&gt;${webapp.root}/WEB-INF/velocity&lt;/prop&gt;
+        &lt;prop key="file.resource.loader.cache"&gt;false&lt;/prop&gt;
+    &lt;/props&gt;
 &lt;/property&gt;</programlisting>
       </sect3>
 
@@ -420,7 +412,7 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
   will normally be overridden in child definitions.
 --&gt;
 &lt;bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView"&gt;
-  &lt;property name="url"&gt;&lt;value&gt;mainTemplate.vm&lt;/value&gt;&lt;/property&gt;        
+    &lt;property name="url"&gt;&lt;value&gt;mainTemplate.vm&lt;/value&gt;&lt;/property&gt;        
 &lt;/bean&gt;
 
 &lt;!--
@@ -429,9 +421,9 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
 --&gt;
 &lt;bean id="welcomeView" parent="parentVelocityView"&gt;
   &lt;property name="attributes"&gt;
-    &lt;props&gt;
-      &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
-    &lt;/props&gt;
+      &lt;props&gt;
+          &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
+      &lt;/props&gt;
   &lt;/property&gt;     
 &lt;/bean&gt;  
 
@@ -439,12 +431,12 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
   - Another view - this one defines a different velocity template.
 --&gt;
 &lt;bean id="secondaryView" parent="parentVelocityView"&gt;
-  &lt;property name="url"&gt;&lt;value&gt;secondaryTemplate.vm&lt;/value&gt;&lt;/property&gt;  
-  &lt;property name="attributes"&gt;
-    &lt;props&gt;
-      &lt;prop key="title"&gt;My Velocity Secondary Page&lt;/prop&gt;
-    &lt;/props&gt;
-  &lt;/property&gt;    
+    &lt;property name="url"&gt;&lt;value&gt;secondaryTemplate.vm&lt;/value&gt;&lt;/property&gt;  
+    &lt;property name="attributes"&gt;
+        &lt;props&gt;
+            &lt;prop key="title"&gt;My Velocity Secondary Page&lt;/prop&gt;
+        &lt;/props&gt;
+    &lt;/property&gt;    
 &lt;/bean&gt;</programlisting>
     </sect2>
 
@@ -463,18 +455,18 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
 
       <programlisting>## $title is set in the view definition file for this view.
 &lt;html&gt;
-  &lt;head&gt;&lt;title&gt;$title&lt;/title&gt;&lt;/head&gt;
-  &lt;body&gt;
-    &lt;h1&gt;This is $title!!&lt;/h1&gt;
+    &lt;head&gt;&lt;title&gt;$title&lt;/title&gt;&lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;This is $title!!&lt;/h1&gt;
 
-    ## model objects are set in the controller and referenced
-    ## via bean properties o method names.  See the Velocity 
-    ## docs for info
+        ## model objects are set in the controller and referenced
+        ## via bean properties o method names.  See the Velocity 
+        ## docs for info
 
-    Model Value: $model.value
-    Model Method Return Value: $model.getReturnVal()
+        Model Value: $model.value
+        Model Method Return Value: $model.getReturnVal()
 
-  &lt;/body&gt;
+    &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
       <para>Now, when your controllers return a ModelAndView with the
@@ -508,12 +500,12 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
         exposed)</para>
 
         <programlisting>&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
-  &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;  
-  &lt;property name="attributes"&gt;
-    &lt;props&gt;
-      &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
-    &lt;/props&gt;
-  &lt;/property&gt;     
+    &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;  
+    &lt;property name="attributes"&gt;
+        &lt;props&gt;
+            &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
+        &lt;/props&gt;
+    &lt;/property&gt;     
 &lt;/bean&gt;</programlisting>
 
         <para>The example above is based on our earlier example and sets the
@@ -544,13 +536,13 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
  *
  *#
 #macro( showerror $errors $field )
-  #if( $errors )
-    #if( $errors.getFieldErrors( $field ))
-      #foreach($err in $errors.getFieldErrors( $field ))
-        &lt;span class="fieldErrorText"&gt;$rc.getMessage($err)&lt;/span&gt;&lt;br /&gt;
-      #end
+    #if( $errors )
+        #if( $errors.getFieldErrors( $field ))
+            #foreach($err in $errors.getFieldErrors( $field ))
+                &lt;span class="fieldErrorText"&gt;$rc.getMessage($err)&lt;/span&gt;&lt;br /&gt;
+            #end
+        #end
     #end
-  #end
 #end      </programlisting>
       </sect3>
 
@@ -566,8 +558,8 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
 &lt;html&gt;
 ...
 &lt;form ...&gt;
-  &lt;input name="query" value="$!commandBean.query"&gt;&lt;br&gt;
-  #showerror($errors "query")
+    &lt;input name="query" value="$!commandBean.query"&gt;&lt;br&gt;
+    #showerror($errors "query")
 &lt;/form&gt;
 ...
 &lt;/html&gt;        </programlisting>
@@ -642,19 +634,19 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
         <para>The controller logic is encapsulated in a subclass of
         AbstractController, with the handler method being defined like so..
         <programlisting>protected ModelAndView handleRequestInternal(
-  HttpServletRequest req,
-  HttpServletResponse resp)
-  throws Exception {
+    HttpServletRequest req,
+    HttpServletResponse resp)
+    throws Exception {
         
-  Map map = new HashMap();
-  List wordList = new ArrayList();
+    Map map = new HashMap();
+    List wordList = new ArrayList();
         
-  wordList.add("hello");
-  wordList.add("world");
+    wordList.add("hello");
+    wordList.add("world");
        
-  map.put("wordList", wordList);
+    map.put("wordList", wordList);
       
-  return new ModelAndView("home", map);
+    return new ModelAndView("home", map);
 } </programlisting></para>
 
         <para>So far we've done nothing that's XSLT specific. The model data
@@ -691,25 +683,25 @@ package xslt;
 
 public class HomePage extends AbstractXsltView {
 
-  protected Node createDomNode( 
-    Map model, String rootName, HttpServletRequest req, HttpServletResponse res
-  ) throws Exception {
+    protected Node createDomNode( 
+        Map model, String rootName, HttpServletRequest req, HttpServletResponse res
+    ) throws Exception {
         
-    org.jdom.Document doc = new org.jdom.Document();
-    Element root = new Element(rootName);
-    doc.setRootElement(root);
+        org.jdom.Document doc = new org.jdom.Document();
+        Element root = new Element(rootName);
+        doc.setRootElement(root);
 
-    List words = (List) model.get("wordList");
-    for (Iterator it = words.iterator(); it.hasNext();) {
-      String nextWord = (String) it.next();
-      Element e = new Element("word");
-      e.setText(nextWord);
-      root.addContent(e);
+        List words = (List) model.get("wordList");
+        for (Iterator it = words.iterator(); it.hasNext();) {
+            String nextWord = (String) it.next();
+            Element e = new Element("word");
+            e.setText(nextWord);
+            root.addContent(e);
+        }
+
+        // convert JDOM doc to a W3C Node and return
+        return new DOMOutputter().output( doc );
     }
-
-    // convert JDOM doc to a W3C Node and return
-    return new DOMOutputter().output( doc );
-  }
 
 }</programlisting></para>
 
@@ -767,21 +759,21 @@ home.root=words
         <literal>WEB-INF/xsl</literal>. <programlisting>&lt;?xml version="1.0"?&gt;
 
 &lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
-  &lt;xsl:output method="text/html" omit-xml-declaration="yes"/&gt;
+    &lt;xsl:output method="text/html" omit-xml-declaration="yes"/&gt;
 
-  &lt;xsl:template match="/"&gt;
-    &lt;html&gt;
-      &lt;head&gt;&lt;title&gt;Hello!&lt;/title&gt;&lt;/head&gt;
-      &lt;body&gt;
+    &lt;xsl:template match="/"&gt;
+        &lt;html&gt;
+            &lt;head&gt;&lt;title&gt;Hello!&lt;/title&gt;&lt;/head&gt;
+            &lt;body&gt;
 
-        &lt;h1&gt;My First Words&lt;/h1&gt;
-        &lt;xsl:for-each select="wordList/word"&gt;
-          &lt;xsl:value-of select="."/&gt;&lt;br /&gt;
-        &lt;/xsl:for-each&gt; 
+                &lt;h1&gt;My First Words&lt;/h1&gt;
+                &lt;xsl:for-each select="wordList/word"&gt;
+                    &lt;xsl:value-of select="."/&gt;&lt;br /&gt;
+                &lt;/xsl:for-each&gt; 
 
-      &lt;/body&gt;
-    &lt;/html&gt;
-  &lt;/xsl:template&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;
+    &lt;/xsl:template&gt;
 
 &lt;/xsl:stylesheet&gt;</programlisting></para>
       </sect3>
@@ -894,34 +886,34 @@ pdf.class=pdf.HomePage</programlisting> <emphasis>If you want to start with a
 
 public class HomePage extends AbstractExcelView {
 
-  protected void buildExcelDocument(
-    Map model,
-    HSSFWorkbook wb,
-    HttpServletRequest req,
-    HttpServletResponse resp)
-    throws Exception {
+    protected void buildExcelDocument(
+        Map model,
+        HSSFWorkbook wb,
+        HttpServletRequest req,
+        HttpServletResponse resp)
+        throws Exception {
     
-    HSSFSheet sheet;
-    HSSFRow sheetRow;
-    HSSFCell cell;
+        HSSFSheet sheet;
+        HSSFRow sheetRow;
+        HSSFCell cell;
 
-    // Go to the first sheet
-    // getSheetAt: only if wb is created from an existing document
-    //sheet = wb.getSheetAt( 0 );
-    sheet = wb.createSheet("Spring");
-    sheet.setDefaultColumnWidth((short)12);
+        // Go to the first sheet
+        // getSheetAt: only if wb is created from an existing document
+        //sheet = wb.getSheetAt( 0 );
+        sheet = wb.createSheet("Spring");
+        sheet.setDefaultColumnWidth((short)12);
 
-    // write a text at A1
-    cell = getCell( sheet, 0, 0 );
-    setText(cell,"Spring-Excel test");
+        // write a text at A1
+        cell = getCell( sheet, 0, 0 );
+        setText(cell,"Spring-Excel test");
 
-    List words = (List ) model.get("wordList");
-    for (int i=0; i &lt; words.size(); i++) {
-      cell = getCell( sheet, 2+i, 0 );
-      setText(cell, (String) words.get(i));
+        List words = (List ) model.get("wordList");
+        for (int i=0; i &lt; words.size(); i++) {
+            cell = getCell( sheet, 2+i, 0 );
+            setText(cell, (String) words.get(i));
 
+        }
     }
-  }
 }</programlisting></para>
 
         <para>If you now amend the controller such that it returns
@@ -944,20 +936,20 @@ public class HomePage extends AbstractExcelView {
 
 public class PDFPage extends AbstractPdfView {
 
-  protected void buildPdfDocument(
-    Map model,
-    Document doc,
-    PdfWriter writer,
-    HttpServletRequest req,
-    HttpServletResponse resp)
-    throws Exception {
+    protected void buildPdfDocument(
+        Map model,
+        Document doc,
+        PdfWriter writer,
+        HttpServletRequest req,
+        HttpServletResponse resp)
+        throws Exception {
         
-    List words = (List) model.get("wordList");
+        List words = (List) model.get("wordList");
         
-    for (int i=0; i&lt;words.size(); i++)
-      doc.add( new Paragraph((String) words.get(i)));
+        for (int i=0; i&lt;words.size(); i++)
+            doc.add( new Paragraph((String) words.get(i)));
     
-  }
+    }
 }</programlisting> Once again, amend the controller to return the
         <literal>pdf</literal> view with a <literal>return new
         ModelAndView("pdf", map);</literal> and reload the URL in your
@@ -1094,83 +1086,80 @@ public class PDFPage extends AbstractPdfView {
         <title>Sample application context</title>
 
         <para>Assume we have the following simple Application Context
-        definition, in xml form: <programlisting>
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
- &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
-       "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
+        definition, in xml form: <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+        "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
  
- &lt;beans&gt;
+&lt;beans&gt;
  
-   &lt;!-- ========================= GENERAL DEFINITIONS ========================= --&gt;
+    &lt;!-- ========================= GENERAL DEFINITIONS ========================= --&gt;
  
-   &lt;!-- ========================= PERSISTENCE DEFINITIONS ========================= --&gt;
+    &lt;!-- ========================= PERSISTENCE DEFINITIONS ========================= --&gt;
  
-   &lt;!-- the DataSource --&gt;
-   &lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-     &lt;property name="jndiName"&gt;&lt;value&gt;java:DefaultDS&lt;/value&gt;&lt;/property&gt;
-     &lt;property name="resourceRef"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
-   &lt;/bean&gt;
+    &lt;!-- the DataSource --&gt;
+    &lt;bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+        &lt;property name="jndiName"&gt;&lt;value&gt;java:DefaultDS&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="resourceRef"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
+    &lt;/bean&gt;
  
-   &lt;!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean --&gt;
-   &lt;bean id="hibSessionFactory" 
-     class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
-     &lt;property name="dataSource"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
-   &lt;/bean&gt;
+    &lt;!-- define a Hibernate Session factory via a Spring LocalSessionFactoryBean --&gt;
+    &lt;bean id="hibSessionFactory" 
+        class="org.springframework.orm.hibernate.LocalSessionFactoryBean"&gt;
+        &lt;property name="dataSource"&gt;&lt;ref bean="dataSource"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
  
-   &lt;!--
-      - Defines a transaction manager for usage in business or data access objects.
-      - No special treatment by the context, just a bean instance available as reference
-      - for business objects that want to handle transactions, e.g. via TransactionTemplate.
+    &lt;!--
+     - Defines a transaction manager for usage in business or data access objects.
+     - No special treatment by the context, just a bean instance available as reference
+     - for business objects that want to handle transactions, e.g. via TransactionTemplate.
      --&gt;
-   &lt;bean id="transactionManager" 
-     class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
-   &lt;/bean&gt;
+    &lt;bean id="transactionManager" 
+        class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
+    &lt;/bean&gt;
  
-   &lt;bean id="mapper" 
-     class="com.whatever.dataaccess.mapper.hibernate.MapperImpl"&gt;
-     &lt;property name="sessionFactory"&gt;&lt;ref bean="hibSessionFactory"/&gt;&lt;/property&gt;
-   &lt;/bean&gt;
+    &lt;bean id="mapper" 
+        class="com.whatever.dataaccess.mapper.hibernate.MapperImpl"&gt;
+        &lt;property name="sessionFactory"&gt;&lt;ref bean="hibSessionFactory"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
    
-   &lt;!-- ========================= BUSINESS DEFINITIONS ========================= --&gt;
+    &lt;!-- ========================= BUSINESS DEFINITIONS ========================= --&gt;
  
-   &lt;!-- AuthenticationService, including tx interceptor --&gt;
-   &lt;bean id="authenticationServiceTarget"
-         class="com.whatever.services.service.user.AuthenticationServiceImpl"&gt;
-     &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
-   &lt;/bean&gt;
-   &lt;bean id="authenticationService" 
-     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-     &lt;property name="target"&gt;&lt;ref bean="authenticationServiceTarget"/&gt;&lt;/property&gt;
-     &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-     &lt;property name="transactionAttributes"&gt;
-       &lt;props&gt;
-         &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-       &lt;/props&gt;
-     &lt;/property&gt;
-   &lt;/bean&gt;  
+    &lt;!-- AuthenticationService, including tx interceptor --&gt;
+    &lt;bean id="authenticationServiceTarget"
+        class="com.whatever.services.service.user.AuthenticationServiceImpl"&gt;
+        &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+    &lt;bean id="authenticationService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+        &lt;property name="target"&gt;&lt;ref bean="authenticationServiceTarget"/&gt;&lt;/property&gt;
+        &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;  
  
-   &lt;!-- UserService, including tx interceptor --&gt;
-   &lt;bean id="userServiceTarget"
-         class="com.whatever.services.service.user.UserServiceImpl"&gt;
-     &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
-   &lt;/bean&gt;
-   &lt;bean id="userService" 
-      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
-     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
-     &lt;property name="target"&gt;&lt;ref bean="userServiceTarget"/&gt;&lt;/property&gt;
-     &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-     &lt;property name="transactionAttributes"&gt;
-       &lt;props&gt;
-         &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
-       &lt;/props&gt;
-     &lt;/property&gt;
-   &lt;/bean&gt;  
+    &lt;!-- UserService, including tx interceptor --&gt;
+    &lt;bean id="userServiceTarget"
+        class="com.whatever.services.service.user.UserServiceImpl"&gt;
+        &lt;property name="mapper"&gt;&lt;ref bean="mapper"/&gt;&lt;/property&gt;
+    &lt;/bean&gt;
+    &lt;bean id="userService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+        &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
+        &lt;property name="target"&gt;&lt;ref bean="userServiceTarget"/&gt;&lt;/property&gt;
+        &lt;property name="proxyInterfacesOnly"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+        &lt;property name="transactionAttributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;  
  
- &lt;/beans&gt;
-
- </programlisting> Inside the Tapestry application, we need to load this
-        application context, and allow Tapestry pages to get the
+ &lt;/beans&gt;</programlisting> Inside the Tapestry application, we need to
+        load this application context, and allow Tapestry pages to get the
         authenticationService and userService beans, which implement the
         AuthenticationService and UserService interfaces, respectively.</para>
       </sect3>
@@ -1184,19 +1173,17 @@ public class PDFPage extends AbstractPdfView {
         where servletContext is the standard <literal>ServletContext</literal>
         from the J2EE Servlet specification. As such, one simple mechanism for
         a page to get an instance of the UserService, for example, would be
-        with code such as: <programlisting>
-   WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
-           getRequestCycle().getRequestContext().getServlet().getServletContext());
-   UserService userService = appContext.getBean("userService");
-   ... some code which uses UserService
-</programlisting> This mechanism does work. It can be made a lot less verbose
-        by encapsulating most of the functionality in a method in the base
-        class for the page or component. However, in some respects it goes
-        against the Inversion of Control approach which Spring encourages,
-        which is being used in other layers of this app, in that ideally you
-        would like the page to not have to ask the context for a specific bean
-        by name, and in fact, the page would ideally not know about the
-        context at all.</para>
+        with code such as: <programlisting>    WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
+        getRequestCycle().getRequestContext().getServlet().getServletContext());
+    UserService userService = appContext.getBean("userService");
+    ... some code which uses UserService</programlisting> This mechanism does
+        work. It can be made a lot less verbose by encapsulating most of the
+        functionality in a method in the base class for the page or component.
+        However, in some respects it goes against the Inversion of Control
+        approach which Spring encourages, which is being used in other layers
+        of this app, in that ideally you would like the page to not have to
+        ask the context for a specific bean by name, and in fact, the page
+        would ideally not know about the context at all.</para>
 
         <para>Luckily, there is a mechanism to allow this. We rely upon the
         fact that Tapestry already has a mechanism to declaratively add
@@ -1218,48 +1205,45 @@ public class PDFPage extends AbstractPdfView {
         page, so we can't use
         <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
         directly. One way is by defining a custom version of the Tapestry
-        IEngine which exposes this for us: <programlisting>
- package com.whatever.web.xportal;
- ...
- import ...
- ...
- public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
+        IEngine which exposes this for us: <programlisting>package com.whatever.web.xportal;
+...
+import ...
+...
+public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
  
-   public static final String APPLICATION_CONTEXT_KEY = "appContext";
+    public static final String APPLICATION_CONTEXT_KEY = "appContext";
  
-   /**
-    * @see org.apache.tapestry.engine.AbstractEngine#setupForRequest(org.apache.tapestry.request.RequestContext)
-    */
-   protected void setupForRequest(RequestContext context) {
-     super.setupForRequest(context);
+    /**
+     * @see org.apache.tapestry.engine.AbstractEngine#setupForRequest(org.apache.tapestry.request.RequestContext)
+     */
+    protected void setupForRequest(RequestContext context) {
+        super.setupForRequest(context);
      
-     // insert ApplicationContext in global, if not there
-     Map global = (Map) getGlobal();
-     ApplicationContext ac = (ApplicationContext) global.get(APPLICATION_CONTEXT_KEY);
-     if (ac == null) {
-       ac = WebApplicationContextUtils.getWebApplicationContext(
-         context.getServlet().getServletContext()
-       );
-       global.put(APPLICATION_CONTEXT_KEY, ac);
-     }
-   }
- }
-</programlisting>This engine class places the Spring Application Context as an
-        attribute called "appContext" in this Tapestry app's 'Global' object.
-        Make sure to register the fact that this special IEngine instance
-        should be used for this Tapestry application, with an entry in the
-        Tapestry application definition file. For example: <programlisting>
- file: xportal.application:
+        // insert ApplicationContext in global, if not there
+        Map global = (Map) getGlobal();
+        ApplicationContext ac = (ApplicationContext) global.get(APPLICATION_CONTEXT_KEY);
+        if (ac == null) {
+            ac = WebApplicationContextUtils.getWebApplicationContext(
+                context.getServlet().getServletContext()
+            );
+            global.put(APPLICATION_CONTEXT_KEY, ac);
+        }
+    }
+}</programlisting>This engine class places the Spring Application Context as
+        an attribute called "appContext" in this Tapestry app's 'Global'
+        object. Make sure to register the fact that this special IEngine
+        instance should be used for this Tapestry application, with an entry
+        in the Tapestry application definition file. For example:
+        <programlisting>file: xportal.application:
  
- &lt;?xml version="1.0" encoding="UTF-8"?&gt;
- &lt;!DOCTYPE application PUBLIC 
-   "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
-   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
- &lt;application
-     name="Whatever xPortal"
-     engine-class="com.whatever.web.xportal.MyEngine"&gt;
- &lt;/application&gt;
-</programlisting></para>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE application PUBLIC 
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+&lt;application
+    name="Whatever xPortal"
+    engine-class="com.whatever.web.xportal.MyEngine"&gt;
+&lt;/application&gt;</programlisting></para>
       </sect3>
 
       <sect3 id="view-tapestry-componentdefs">
@@ -1268,61 +1252,57 @@ public class PDFPage extends AbstractPdfView {
         <para>Now in our page or component definition file (*.page or *.jwc),
         we simply add property-specification elements to grab the beans we
         need out of the ApplicationContext, and create page or component
-        properties for them. For example: <programlisting>
-   &lt;property-specification name="userService"
-                           type="com.whatever.services.service.user.UserService"&gt;
-     global.appContext.getBean("userService")
-   &lt;/property-specification&gt;
-   &lt;property-specification name="authenticationService"
-                           type="com.whatever.services.service.user.AuthenticationService"&gt;
-     global.appContext.getBean("authenticationService")
-   &lt;/property-specification&gt;
-</programlisting> The OGNL expression inside the property-specification
-        specifies the initial value for the property, as a bean obtained from
-        the context. The entire page definition might look like this:
-        <programlisting>
- &lt;?xml version="1.0" encoding="UTF-8"?&gt;
- &lt;!DOCTYPE page-specification PUBLIC 
-   "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
-   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+        properties for them. For example: <programlisting>    &lt;property-specification name="userService"
+                            type="com.whatever.services.service.user.UserService"&gt;
+        global.appContext.getBean("userService")
+    &lt;/property-specification&gt;
+    &lt;property-specification name="authenticationService"
+                            type="com.whatever.services.service.user.AuthenticationService"&gt;
+        global.appContext.getBean("authenticationService")
+    &lt;/property-specification&gt;</programlisting> The OGNL expression
+        inside the property-specification specifies the initial value for the
+        property, as a bean obtained from the context. The entire page
+        definition might look like this: <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE page-specification PUBLIC 
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
      
- &lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
+&lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
  
-   &lt;property-specification name="username" type="java.lang.String"/&gt;
-   &lt;property-specification name="password" type="java.lang.String"/&gt;
-   &lt;property-specification name="error" type="java.lang.String"/&gt;
-   &lt;property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/&gt;
-   &lt;property-specification name="userService"
-                           type="com.whatever.services.service.user.UserService"&gt;
-     global.appContext.getBean("userService")
-   &lt;/property-specification&gt;
-   &lt;property-specification name="authenticationService"
-                           type="com.whatever.services.service.user.AuthenticationService"&gt;
-     global.appContext.getBean("authenticationService")
-   &lt;/property-specification&gt;
+    &lt;property-specification name="username" type="java.lang.String"/&gt;
+    &lt;property-specification name="password" type="java.lang.String"/&gt;
+    &lt;property-specification name="error" type="java.lang.String"/&gt;
+    &lt;property-specification name="callback" type="org.apache.tapestry.callback.ICallback" persistent="yes"/&gt;
+    &lt;property-specification name="userService"
+                            type="com.whatever.services.service.user.UserService"&gt;
+        global.appContext.getBean("userService")
+    &lt;/property-specification&gt;
+    &lt;property-specification name="authenticationService"
+                            type="com.whatever.services.service.user.AuthenticationService"&gt;
+        global.appContext.getBean("authenticationService")
+    &lt;/property-specification&gt;
    
-   &lt;bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/&gt;
+    &lt;bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/&gt;
  
-   &lt;bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page"&gt;
-       &lt;set-property name="required" expression="true"/&gt;
-       &lt;set-property name="clientScriptingEnabled" expression="true"/&gt;
-   &lt;/bean&gt;
+    &lt;bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page"&gt;
+        &lt;set-property name="required" expression="true"/&gt;
+        &lt;set-property name="clientScriptingEnabled" expression="true"/&gt;
+    &lt;/bean&gt;
  
-   &lt;component id="inputUsername" type="ValidField"&gt;
-     &lt;static-binding name="displayName" value="Username"/&gt;
-     &lt;binding name="value" expression="username"/&gt;
-     &lt;binding name="validator" expression="beans.validator"/&gt;
-   &lt;/component&gt;
+    &lt;component id="inputUsername" type="ValidField"&gt;
+        &lt;static-binding name="displayName" value="Username"/&gt;
+        &lt;binding name="value" expression="username"/&gt;
+        &lt;binding name="validator" expression="beans.validator"/&gt;
+    &lt;/component&gt;
    
-   &lt;component id="inputPassword" type="ValidField"&gt;
-     &lt;binding name="value" expression="password"/&gt;
-     &lt;binding name="validator" expression="beans.validator"/&gt;
-     &lt;static-binding name="displayName" value="Password"/&gt;
-     &lt;binding name="hidden" expression="true"/&gt;
-   &lt;/component&gt;
+    &lt;component id="inputPassword" type="ValidField"&gt;
+        &lt;binding name="value" expression="password"/&gt;
+       &lt;binding name="validator" expression="beans.validator"/&gt;
+       &lt;static-binding name="displayName" value="Password"/&gt;
+       &lt;binding name="hidden" expression="true"/&gt;
+    &lt;/component&gt;
  
- &lt;/page-specification&gt;
-</programlisting></para>
+&lt;/page-specification&gt;</programlisting></para>
       </sect3>
 
       <sect3 id="view-tapestry-getters">
@@ -1334,143 +1314,140 @@ public class PDFPage extends AbstractPdfView {
         is actually loaded by Tapestry, it performs runtime code
         instrumentation on the classfile to add the properties which have been
         defined, and hook up the abstract getter methods to the newly created
-        fields. For example: <programlisting>
-   // our UserService implementation; will come from page definition
-   public abstract UserService getUserService();
-   // our AuthenticationService implementation; will come from page definition
-   public abstract AuthenticationService getAuthenticationService();
-</programlisting> For completeness, the entire Java class, for a login page in
-        this example, might look like this: <programlisting>
- package com.whatever.web.xportal.pages;
+        fields. For example: <programlisting>    // our UserService implementation; will come from page definition
+    public abstract UserService getUserService();
+    // our AuthenticationService implementation; will come from page definition
+    public abstract AuthenticationService getAuthenticationService();</programlisting>
+        For completeness, the entire Java class, for a login page in this
+        example, might look like this: <programlisting>package com.whatever.web.xportal.pages;
  
- /**
-  *  Allows the user to login, by providing username and password.
-  *  After succesfully logging in, a cookie is placed on the client browser
-  *  that provides the default username for future logins (the cookie
-  *  persists for a week).
-  */
- public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
+/**
+ *  Allows the user to login, by providing username and password.
+ *  After succesfully logging in, a cookie is placed on the client browser
+ *  that provides the default username for future logins (the cookie
+ *  persists for a week).
+ */
+public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
  
-   /** the key under which the authenticated user object is stored in the visit as */
-   public static final String USER_KEY = "user";
+    /** the key under which the authenticated user object is stored in the visit as */
+    public static final String USER_KEY = "user";
    
-   /**
-    * The name of a cookie to store on the user's machine that will identify
-    * them next time they log in.
-    **/
-   private static final String COOKIE_NAME = Login.class.getName() + ".username";  
-   private final static int ONE_WEEK = 7 * 24 * 60 * 60;
+    /**
+     * The name of a cookie to store on the user's machine that will identify
+     * them next time they log in.
+     **/
+    private static final String COOKIE_NAME = Login.class.getName() + ".username";  
+    private final static int ONE_WEEK = 7 * 24 * 60 * 60;
  
-   // --- attributes
+    // --- attributes
  
-   public abstract String getUsername();
-   public abstract void setUsername(String username);
+    public abstract String getUsername();
+    public abstract void setUsername(String username);
  
-   public abstract String getPassword();
-   public abstract void setPassword(String password);
+    public abstract String getPassword();
+    public abstract void setPassword(String password);
  
-   public abstract ICallback getCallback();
-   public abstract void setCallback(ICallback value);
-   
-   public abstract UserService getUserService();
+    public abstract ICallback getCallback();
+    public abstract void setCallback(ICallback value);
+    
+    public abstract UserService getUserService();
  
-   public abstract AuthenticationService getAuthenticationService();
+    public abstract AuthenticationService getAuthenticationService();
  
-   // --- methods
+    // --- methods
  
-   protected IValidationDelegate getValidationDelegate() {
-     return (IValidationDelegate) getBeans().getBean("delegate");
-   }
+    protected IValidationDelegate getValidationDelegate() {
+        return (IValidationDelegate) getBeans().getBean("delegate");
+    }
  
-   protected void setErrorField(String componentId, String message) {
-     IFormComponent field = (IFormComponent) getComponent(componentId);
-     IValidationDelegate delegate = getValidationDelegate();
-     delegate.setFormComponent(field);
-     delegate.record(new ValidatorException(message));
-   }
+    protected void setErrorField(String componentId, String message) {
+        IFormComponent field = (IFormComponent) getComponent(componentId);
+        IValidationDelegate delegate = getValidationDelegate();
+        delegate.setFormComponent(field);
+        delegate.record(new ValidatorException(message));
+    }
  
-   /**
-    *  Attempts to login. 
-    *
-    *  &lt;p&gt;If the user name is not known, or the password is invalid, then an error
-    *  message is displayed.
-    *
-    **/
-   public void attemptLogin(IRequestCycle cycle) {
+    /**
+     *  Attempts to login. 
+     *
+     *  &lt;p&gt;If the user name is not known, or the password is invalid, then an error
+     *  message is displayed.
+     *
+     **/
+    public void attemptLogin(IRequestCycle cycle) {
      
-     String password = getPassword();
+        String password = getPassword();
  
-     // Do a little extra work to clear out the password.
+        // Do a little extra work to clear out the password.
  
-     setPassword(null);
-     IValidationDelegate delegate = getValidationDelegate();
+        setPassword(null);
+        IValidationDelegate delegate = getValidationDelegate();
  
-     delegate.setFormComponent((IFormComponent) getComponent("inputPassword"));
-     delegate.recordFieldInputValue(null);
+        delegate.setFormComponent((IFormComponent) getComponent("inputPassword"));
+        delegate.recordFieldInputValue(null);
  
-     // An error, from a validation field, may already have occured.
+        // An error, from a validation field, may already have occured.
  
-     if (delegate.getHasErrors())
-       return;
+        if (delegate.getHasErrors())
+            return;
  
-     try {
-       User user = getAuthenticationService().login(getUsername(), getPassword());
-       loginUser(user, cycle);
-     }
-     catch (FailedLoginException ex) {
-       this.setError("Login failed: " + ex.getMessage());
-       return;
-     }
-   }
+        try {
+            User user = getAuthenticationService().login(getUsername(), getPassword());
+           loginUser(user, cycle);
+        }
+        catch (FailedLoginException ex) {
+            this.setError("Login failed: " + ex.getMessage());
+            return;
+        }
+    }
  
-   /**
-    *  Sets up the {@link User} as the logged in user, creates
-    *  a cookie for their username (for subsequent logins),
-    *  and redirects to the appropriate page, or
-    *  a specified page).
-    *
-    **/
-   public void loginUser(User user, IRequestCycle cycle) {
+    /**
+     *  Sets up the {@link User} as the logged in user, creates
+     *  a cookie for their username (for subsequent logins),
+     *  and redirects to the appropriate page, or
+     *  a specified page).
+     *
+     **/
+    public void loginUser(User user, IRequestCycle cycle) {
      
-     String username = user.getUsername();
+        String username = user.getUsername();
  
-     // Get the visit object; this will likely force the
-     // creation of the visit object and an HttpSession.
+        // Get the visit object; this will likely force the
+        // creation of the visit object and an HttpSession.
  
-     Map visit = (Map) getVisit();
-     visit.put(USER_KEY, user);
+        Map visit = (Map) getVisit();
+        visit.put(USER_KEY, user);
  
-     // After logging in, go to the MyLibrary page, unless otherwise
-     // specified.
+        // After logging in, go to the MyLibrary page, unless otherwise
+        // specified.
  
-     ICallback callback = getCallback();
+        ICallback callback = getCallback();
  
-     if (callback == null)
-       cycle.activate("Home");
-     else
-       callback.performCallback(cycle);
+        if (callback == null)
+            cycle.activate("Home");
+        else
+            callback.performCallback(cycle);
  
-     // I've found that failing to set a maximum age and a path means that
-     // the browser (IE 5.0 anyway) quietly drops the cookie.
+        // I've found that failing to set a maximum age and a path means that
+        // the browser (IE 5.0 anyway) quietly drops the cookie.
  
-     IEngine engine = getEngine();
-     Cookie cookie = new Cookie(COOKIE_NAME, username);
-     cookie.setPath(engine.getServletPath());
-     cookie.setMaxAge(ONE_WEEK);
+        IEngine engine = getEngine();
+        Cookie cookie = new Cookie(COOKIE_NAME, username);
+        cookie.setPath(engine.getServletPath());
+        cookie.setMaxAge(ONE_WEEK);
  
-     // Record the user's username in a cookie
+        // Record the user's username in a cookie
  
-     cycle.getRequestContext().addCookie(cookie);
+        cycle.getRequestContext().addCookie(cookie);
  
-     engine.forgetPage(getPageName());
-   }
+        engine.forgetPage(getPageName());
+    }
    
-   public void pageBeginRender(PageEvent event) {
-     if (getUsername() == null)
-       setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
-   }
- }
-</programlisting></para>
+    public void pageBeginRender(PageEvent event) {
+        if (getUsername() == null)
+            setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
+    }
+}</programlisting></para>
       </sect3>
     </sect2>
 

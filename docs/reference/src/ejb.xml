@@ -76,9 +76,9 @@
       EJB-specific business methods interface. Let’s call this business
       methods interface MyComponent.</para>
 
-      <programlisting><![CDATA[public interface MyComponent {
-   ...
-}]]></programlisting>
+      <programlisting>public interface MyComponent {
+    ...
+}</programlisting>
 
       <para>(One of the main reasons to the Business Methods Interface pattern
       is to ensure that synchronization between method signatures in local
@@ -93,11 +93,11 @@
       will save the reference as an instance variable in the
       controller:</para>
 
-      <programlisting><![CDATA[private MyComponent myComponent;
+      <programlisting>private MyComponent myComponent;
 
 public void setMyComponent(MyComponent myComponent) {
-  this.myComponent = myComponent;
-}]]></programlisting>
+    this.myComponent = myComponent;
+}</programlisting>
 
       <para>We can subsequently use this instance variable in any business
       method in the controller. Now assuming we are obtaining our controller
@@ -108,16 +108,15 @@ public void setMyComponent(MyComponent myComponent) {
       the <literal>myComponent</literal> property of the controller is done
       with a configuration entry such as:</para>
 
-      <programlisting><![CDATA[&lt;bean id="myComponent"
-   class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean"&gt;
-
-  &lt;property name="jndiName"&gt;&lt;value&gt;myComponent&lt;/value&gt;&lt;/property&gt;
-  &lt;property name="businessInterface"&gt;&lt;value&gt;com.mycom.MyComponent&lt;/value&gt;&lt;/property&gt;
+      <programlisting>&lt;bean id="myComponent"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean"&gt;
+    &lt;property name="jndiName"&gt;&lt;value&gt;myComponent&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="businessInterface"&gt;&lt;value&gt;com.mycom.MyComponent&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="myController" class = "com.mycom.myController"&gt;
-  &lt;property name="myComponent"&gt;&lt;ref bean="myComponent"/&gt;&lt;/property&gt;
-&lt;/bean&gt;]]></programlisting>
+    &lt;property name="myComponent"&gt;&lt;ref bean="myComponent"/&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting>
 
       <para>There’s a lot of magic happening behind the scenes, courtesy of
       the Spring AOP framework, although you aren’t forced to work with AOP
@@ -145,7 +144,7 @@ public void setMyComponent(MyComponent myComponent) {
       invocation of the target EJB) is minimal, and undetectable in typical
       use. Remember that we don’t want to make fine-grained calls to EJBs
       anyway, as there’s a cost associated with the EJB infrastructure in the
-      application server. </para>
+      application server.</para>
 
       <para>There is one caveat wIth regards the JNDI lookup. In a bean
       container, this class is normally best used as a singleton (there simply
@@ -185,11 +184,11 @@ public void setMyComponent(MyComponent myComponent) {
       typically has to be modified to add handling for the remote exceptions,
       and client code written for remote EJBs which needs to be moved to local
       EJBs, can either stay the same but do a lot of unnecessary handling of
-      remote excep<programlisting><![CDATA[private MyComponent myComponent;
+      remote excep<programlisting>private MyComponent myComponent;
 
 public void setMyComponent(MyComponent myComponent) {
-  this.myComponent = myComponent;
-}]]></programlisting>tions, or needs to be modified to remove that code. With the
+    this.myComponent = myComponent;
+}</programlisting>tions, or needs to be modified to remove that code. With the
       Spring remote EJB proxy, you can instead not declare any thrown
       <literal>RemoteException</literal> in your Business Method Interface and
       implementing EJB code, have a remote interface which is identical except
@@ -204,7 +203,7 @@ public void setMyComponent(MyComponent myComponent) {
       switched at will between a local EJB or remote EJB (or even plain Java
       object) implementation, without the client code knowing or caring. Of
       course, this is optional; there is nothing stopping you from declaring
-      <literal>RemoteExceptions</literal> in your business interface. </para>
+      <literal>RemoteExceptions</literal> in your business interface.</para>
     </sect2>
   </sect1>
 
@@ -221,46 +220,46 @@ public void setMyComponent(MyComponent myComponent) {
     <literal>AbstractStatelessSessionBean</literal>,
     <literal>AbstractStatefulSessionBean</literal>, and
     <literal>AbstractMessageDrivenBean</literal>/<literal>AbstractJmsMessageDrivenBean</literal>,
-    respectively. </para>
+    respectively.</para>
 
     <para>Consider an example Stateless Session bean which actually delgates
     the implementation to a plain java service object. We have the business
     interface:</para>
 
-    <programlisting><![CDATA[public interface MyComponent {
-  public void myMethod(...);
-   ...
-}]]></programlisting>
-
-    <para>We have the plain java implementation object:<programlisting><![CDATA[public class MyComponentImpl implements MyComponent {
-  public String myMethod(...) {
+    <programlisting>public interface MyComponent {
+    public void myMethod(...);
     ...
-  }
-   ...
-}]]></programlisting></para>
+}</programlisting>
+
+    <para>We have the plain java implementation object:<programlisting>public class MyComponentImpl implements MyComponent {
+    public String myMethod(...) {
+        ...
+    }
+    ...
+}</programlisting></para>
 
     <para>And finally the Stateless Session Bean itself:</para>
 
-    <programlisting><![CDATA[public class MyComponentEJB implements extends AbstractStatelessSessionBean
+    <programlisting>public class MyComponentEJB implements extends AbstractStatelessSessionBean
         implements MyComponent {
 
-  MyComponent _myComp;
+    MyComponent _myComp;
 
-  /**
-   * Obtain our POJO service object from the BeanFactory/ApplicationContext
-   * @see org.springframework.ejb.support.AbstractStatelessSessionBean#onEjbCreate()
-   */
-  protected void onEjbCreate() throws CreateException {
-    _myComp = (MyComponent) getBeanFactory().getBean(
-        ServicesConstants.CONTEXT_MYCOMP_ID);
-  }
+    /**
+     * Obtain our POJO service object from the BeanFactory/ApplicationContext
+     * @see org.springframework.ejb.support.AbstractStatelessSessionBean#onEjbCreate()
+     */
+    protected void onEjbCreate() throws CreateException {
+        _myComp = (MyComponent) getBeanFactory().getBean(
+            ServicesConstants.CONTEXT_MYCOMP_ID);
+    }
 
-  // for business method, delegate to POJO service impl.
-  public String myMethod(...) {
-    return _myComp.myMethod(...);
-  }
-   ...
-}]]></programlisting>
+    // for business method, delegate to POJO service impl.
+    public String myMethod(...) {
+        return _myComp.myMethod(...);
+    }
+    ...
+}</programlisting>
 
     <para>The Spring EJB support base classes will by default create and load
     a BeanFactory (or in this case, its ApplicationContext subclass) as part
@@ -304,16 +303,16 @@ public void setMyComponent(MyComponent myComponent) {
     used by multiple EJBs or other clients. Doing this is relatively simple,
     by adding code similar to this to the EJB:</para>
 
-    <programlisting><![CDATA[  /**
-   * Override default BeanFactoryLocator implementation
-   * 
-   * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
-   */
-  public void setSessionContext(SessionContext sessionContext) {
-    super.setSessionContext(sessionContext);
-    setBeanFactoryLocator(ContextSingletonBeanFactoryLocator.getInstance());
-    setBeanFactoryLocatorKey(ServicesConstants.PRIMARY_CONTEXT_ID);
-  }]]></programlisting>
+    <programlisting>   /**
+    * Override default BeanFactoryLocator implementation
+    * 
+    * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
+    */
+   public void setSessionContext(SessionContext sessionContext) {
+       super.setSessionContext(sessionContext);
+       setBeanFactoryLocator(ContextSingletonBeanFactoryLocator.getInstance());
+       setBeanFactoryLocatorKey(ServicesConstants.PRIMARY_CONTEXT_ID);
+   }</programlisting>
 
     <para>Please see the respective JavaDocs for
     <literal>BeanFactoryLocator</literal> and
