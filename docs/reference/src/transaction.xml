@@ -340,61 +340,66 @@
     <para>The second approach is similar to using the JTA
     <literal>UserTransaction</literal> API (although exception handling is
     less cumbersome).</para>
-    
+
     <sect2>
-    	<title>Using the <literal>TransactionTemplate</literal></title>
-    <para>The <literal>TransactionTemplate</literal> adopts the same approach
-    as other Spring <emphasis>templates</emphasis> such as
-    <literal>JdbcTemplate</literal> and <literal>HibernateTemplate</literal>.
-    It uses a callback approach, to free application code from the working of
-    acquiring and releasing resources. (No more try/catch/finally.) Like other
-    templates, a <literal>TransactionTemplate</literal> is threadsafe.</para>
+      <title>Using the <literal>TransactionTemplate</literal></title>
 
-    <para>Application code that must execute in a transaction context looks
-    like this. Note that the <literal>TransactionCallback</literal> can be
-    used to return a value:</para>
+      <para>The <literal>TransactionTemplate</literal> adopts the same
+      approach as other Spring <emphasis>templates</emphasis> such as
+      <literal>JdbcTemplate</literal> and
+      <literal>HibernateTemplate</literal>. It uses a callback approach, to
+      free application code from the working of acquiring and releasing
+      resources. (No more try/catch/finally.) Like other templates, a
+      <literal>TransactionTemplate</literal> is threadsafe.</para>
 
-    <para><programlisting>Object result = tt.execute(new TransactionCallback() {
+      <para>Application code that must execute in a transaction context looks
+      like this. Note that the <literal>TransactionCallback</literal> can be
+      used to return a value:</para>
+
+      <para><programlisting>Object result = tt.execute(new TransactionCallback() {
     public Object doInTransaction(TransactionStatus status) {
         updateOperation1();
         return resultOfUpdateOperation2();
     }
 });</programlisting></para>
 
-    <para>If there's no return value, use a
-    <literal>TransactionCallbackWithoutResult</literal> like this:</para>
+      <para>If there's no return value, use a
+      <literal>TransactionCallbackWithoutResult</literal> like this:</para>
 
-    <para><programlisting>tt.execute(new TransactionCallbackWithoutResult() {
+      <para><programlisting>tt.execute(new TransactionCallbackWithoutResult() {
     protected void doInTransactionWithoutResult(TransactionStatus status) {
         updateOperation1();
         updateOperation2();
     }
 });</programlisting></para>
 
-    <para>Code within the callback can roll the transaction back by calling
-    the <literal>setRollbackOnly()</literal> method on the
-    <literal>TransactionStatus</literal> object.</para>
+      <para>Code within the callback can roll the transaction back by calling
+      the <literal>setRollbackOnly()</literal> method on the
+      <literal>TransactionStatus</literal> object.</para>
 
-    <para>Application classes wishing to use the
-    <literal>TransactionTemplate</literal> must have access to a
-    PlatformTransactionManager: usually exposed as a JavaBean property or as a
-    constructor argument.</para>
+      <para>Application classes wishing to use the
+      <literal>TransactionTemplate</literal> must have access to a
+      PlatformTransactionManager: usually exposed as a JavaBean property or as
+      a constructor argument.</para>
 
-    <para>It's easy to unit test such classes with a mock or stub
-    <literal>PlatformTransactionManager</literal>. There's no JNDI lookup or
-    static magic here: it's a simple interface. As usual, you can use Spring
-    to simplify your unit testing.</para>
-  </sect2>
-  <sect2>
-  	<title>Using the <literal>PlatformTransactionManager</literal></title>
-  	<para>
-  	  You can also use the <literal>org.springframework.transaction.PlatformTransactionManager</literal>
-  	  directly to manage your transaction. Simply pass the implementation of the PlatformTransactionManager
-  	  you're using to your bean via a bean reference. Then, using the <literal>TransactionDefinition</literal>
-  	  and <literal>TransactionStatus</literal> objects you can initiate transactions, rollback and commit.
-  	</para>
-  	
-    <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition()
+      <para>It's easy to unit test such classes with a mock or stub
+      <literal>PlatformTransactionManager</literal>. There's no JNDI lookup or
+      static magic here: it's a simple interface. As usual, you can use Spring
+      to simplify your unit testing.</para>
+    </sect2>
+
+    <sect2>
+      <title>Using the <literal>PlatformTransactionManager</literal></title>
+
+      <para>You can also use the
+      <literal>org.springframework.transaction.PlatformTransactionManager</literal>
+      directly to manage your transaction. Simply pass the implementation of
+      the PlatformTransactionManager you're using to your bean via a bean
+      reference. Then, using the <literal>TransactionDefinition</literal> and
+      <literal>TransactionStatus</literal> objects you can initiate
+      transactions, rollback and commit.</para>
+
+      <para><programlisting>DefaultTransactionDefinition def = new DefaultTransactionDefinition()
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 TransactionStatus status = transactionManager.getTransactionDefinition(def);
@@ -406,8 +411,7 @@ try {
     throw ex;
 }
 transactionManager.commit(status);</programlisting></para>
-  </sect2>
-  	  
+    </sect2>
   </sect1>
 
   <sect1>
@@ -495,9 +499,16 @@ transactionManager.commit(status);</programlisting></para>
     When we define the TransactionProxyFactoryBean, we must supply a reference
     to the relevant PlatformTransactionManager, and <emphasis
     role="bold">transaction attributes</emphasis>. Transaction attributes
-    contain the transaction definitions, discussed above.</para>
+    contain the transaction definitions, discussed above. Consider the
+    following sample:</para>
 
-    <para><programlisting>&lt;bean id="petStore" 
+    <para><programlisting>&lt;!-- this example is in verbose form, see note later about concise
+     for multiple proxies! --&gt;
+&lt;!-- the target bean to wrap transactionally --&gt;
+&lt;bean id="petStoreTarget"&gt;
+  ...
+&lt;/bean&gt;
+&lt;bean id="petStore"
     class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager"&gt;&lt;ref bean="transactionManager"/&gt;&lt;/property&gt;
     &lt;property name="target"&gt;&lt;ref bean="petStoreTarget"/&gt;&lt;/property&gt;
@@ -558,6 +569,14 @@ transactionManager.commit(status);</programlisting></para>
     <para>Please see the chapter on AOP for more information and
     examples.</para>
 
+    <para><emphasis>Note</emphasis>: Using TransactionProxyFactoryBean
+    definitions in the form above can seem overly verbose when many almost
+    identical transaction proxies need to be created. You will almost always
+    want to take advantage of parent and child bean definitions, along with
+    inner bean definitions, to significantly reduce the verbosity of your
+    transaction proxy definitions, as described in <xref
+    linkend="aop-concise-proxy" />.</para>
+
     <remark>You don't need to be an AOP expert--or indeed, to know much at all
     about AOP--to use Spring's declarative transaction management effectively.
     However, if you do want to become a "power user" of Spring AOP, you will
@@ -571,12 +590,14 @@ transactionManager.commit(status);</programlisting></para>
 
       <para><classname>TransactionProxyFactoryBean</classname> is very useful,
       and gives you full control when wrapping objects with a transactional
-      proxy. In the case that you need to wrap a number of beans in an
+      proxy. Used with parent/child bean definitions and inner beans holding
+      the target, it is generally the best choice for transactional wrapping.
+      In the case that you need to wrap a number of beans in a completely
       identical fashion (for example, a boilerplate, 'make all methods
       transactional', using a <classname>BeanFactoryPostProcessor</classname>
       called <classname>BeanNameAutoProxyCreator</classname> can offer an
-      alternative approach which can end up being significantly less verbose
-      for this simplified use case.</para>
+      alternative approach which can end up being even less verbose for this
+      simplified use case.</para>
 
       <para>To recap, once the ApplicationContext has read its initialization
       information, it instantiates any beans within it which implement the
@@ -659,8 +680,9 @@ transactionManager.commit(status);</programlisting></para>
       <para>There is one thing to keep in mind, with regards to bean naming,
       when switching back and forth between the use of
       <classname>TransactionProxyFactoryBean</classname>, and
-      <classname>BeanNameAutoProxyCreator</classname>. For the former, you
-      normally give the target bean you want to wrap an id similar in form to
+      <classname>BeanNameAutoProxyCreator</classname>. For the former, if the
+      target bean is not defined as an inner bean, you normally give the
+      target bean you want to wrap an id similar in form to
       <emphasis>myServiceTarget</emphasis>, and then give the proxy object an
       id of <emphasis>myService</emphasis>; then all users of the wrapped
       object simply refer to the proxy, i.e. <emphasis>myService</emphasis>.
@@ -673,7 +695,9 @@ transactionManager.commit(status);</programlisting></para>
       object and create the proxy, it causes the proxy to be inserted into the
       Application context under the name of the original bean. From that point
       on, only the proxy (the wrapped object) is available from the
-      ApplicationContext.</para>
+      ApplicationContext. When using TransactionProxyFactoryBean with the
+      target specified as an inner bean, this naming issue is not a concern,
+      since the inner bean is not normally given a name.</para>
     </sect2>
   </sect1>
 

@@ -1252,7 +1252,7 @@
       shipped with Spring shows the use of the
       TransactionProxyFactoryBean.</para>
 
-      <para>TThe <literal>TransactionProxyFactoryBean</literal> is a subclass
+      <para>The <literal>TransactionProxyFactoryBean</literal> is a subclass
       of <literal>ProxyConfig</literal>, so basic configuration is shared with
       <literal>ProxyFactoryBean</literal>. (See list of
       <literal>ProxyConfig</literal> properties above.)</para>
@@ -1358,6 +1358,65 @@
       <para>See the chapter on Spring EJB services in this manual for further
       information.</para>
     </sect2>
+  </sect1>
+
+  <sect1 id="aop-concise-proxy">
+    <title>Concise proxy definitions</title>
+
+    <para>Especially when defining transactional proxies, you may end up with
+    many similar proxy definitions. The use of parent and child bean
+    definitions, along with inner bean definitions, can result in much cleaner
+    and more concise proxy definitions.</para>
+
+    <para>First a parent, <emphasis>template</emphasis>, bean definition is
+    created for the proxy:</para>
+
+    <para><programlisting>&lt;bean id="txProxyTemplate" lazy-init="true"
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager"&gt;&lt;ref local="transactionManager"/&gt;&lt;/ref&gt;&lt;/property&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>This will never be instantiated itself, so may actually be
+    incomplete. Then each proxy which needs to be created is just a child bean
+    definition, which to wraps the target of the proxy as an inner bean
+    definition, since the target will never be used on its own
+    anyways.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
+    &lt;property name="target"&gt;
+      &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>It is of course possible to override properties from the parent
+    template, such as in this case, the transaction propagation
+    settings:<programlisting>&lt;bean id="mySpecialService" parent="txProxyTemplate"&gt;
+    &lt;property name="target"&gt;
+      &lt;bean class="org.springframework.samples.MySpecialServiceImpl"&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="get*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+        &lt;prop key="find*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+        &lt;prop key="load*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+        &lt;prop key="store*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para><emphasis>Note</emphasis>: the parent definition has the lazy-init
+    attribute set to true; this is so that Spring does not try to
+    pre-instantiate it in the context as its own bean. Spring’s
+    XMLApplicationConext by default pre-instantiates all singleton beans. The
+    exception to this is if the bean is marked as lazy-init, or there is no
+    class specified for the bean; the latter makes Spring consider the
+    definition a purely abstract one, not able to be instantiated
+    itself.</para>
   </sect1>
 
   <sect1 id="aop-prog">
