@@ -33,8 +33,8 @@ import org.springframework.context.ApplicationListener;
  */
 public class ConsoleListener implements ApplicationListener {
 	
-	public void onApplicationEvent(ApplicationEvent e) {
-		System.out.println(e.toString());
+	public void onApplicationEvent(ApplicationEvent event) {
+		System.out.println(event.toString());
 	}
 
 }

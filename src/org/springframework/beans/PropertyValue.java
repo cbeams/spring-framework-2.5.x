@@ -28,18 +28,20 @@ package org.springframework.beans;
  *
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: PropertyValue.java,v 1.3 2004-03-18 02:46:12 trisberg Exp $
+ * @version $Id: PropertyValue.java,v 1.4 2004-04-08 16:24:12 jhoeller Exp $
+ * @see PropertyValues
+ * @see BeanWrapper
  */
 public class PropertyValue {
 
 	/** Property name */
-	private String name;
+	private final String name;
 
 	/** Value of the property */
-	private Object value;
+	private final Object value;
 
 	/**
-	 * Creates new PropertyValue.
+	 * Create new PropertyValue.
 	 * @param name name of the property
 	 * @param value value of the property (possibly before type conversion)
 	 */
@@ -53,7 +55,6 @@ public class PropertyValue {
 
 	/**
 	 * Return the name of the property.
-	 * @return the name of the property
 	 */
 	public String getName() {
 		return name;
@@ -64,14 +65,13 @@ public class PropertyValue {
 	 * <p>Note that type conversion will <i>not</i> have occurred here.
 	 * It is the responsibility of the BeanWrapper implementation to
 	 * perform type conversion.
-	 * @return the value of the property
 	 */
 	public Object getValue() {
 		return value;
 	}
 
 	public String toString() {
-		return "PropertyValue: name='" + name + "'; value=[" + value + "]";
+		return "PropertyValue: name='" + this.name + "'; value=[" + this.value + "]";
 	}
 
 	public boolean equals(Object other) {

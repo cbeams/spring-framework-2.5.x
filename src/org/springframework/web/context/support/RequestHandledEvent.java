@@ -19,9 +19,12 @@ package org.springframework.web.context.support;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event raised when a request is handled by our web framework.
+ * Event raised when a request is handled within a WebApplicationContext.
+ * Supported by Spring's own FrameworkServlet, but can also be raised
+ * by any other web component.
  * @author Rod Johnson
  * @since January 17, 2001
+ * @see org.springframework.web.servlet.FrameworkServlet
  */
 public class RequestHandledEvent extends ApplicationEvent {
 
@@ -37,19 +40,22 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/** Name of the servlet that handled this request is available */
 	private String servletName;
 
+	/** Cause of failure, if any */
 	private Throwable failureCause;
 
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ip, String method, String servletName) {
+	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
+	                           String method, String servletName) {
 		super(source);
 		this.url = url;
 		this.timeMillis = timeMillis;
-		this.ipAddress = ip;
+		this.ipAddress = ipAddress;
 		this.method = method;
 		this.servletName = servletName;
 	}
 
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ip, String method, String servletName, Throwable ex) {
-		this(source, url, timeMillis, ip, method, servletName);
+	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
+	                           String method, String servletName, Throwable ex) {
+		this(source, url, timeMillis, ipAddress, method, servletName);
 		this.failureCause = ex;
 	}
 
@@ -82,9 +88,17 @@ public class RequestHandledEvent extends ApplicationEvent {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("RequestHandledEvent: url=[" + getURL() + "] time=" + getTimeMillis() + "ms");
-		sb.append(" client=" + getIpAddress() + " method='" + getMethod() + "' servlet='" + getServletName() + "'");
-		sb.append(" status=" + (sb.append(!wasFailure() ? "OK" : "failed: " + getFailureCause())));
+		StringBuffer sb = new StringBuffer("RequestHandledEvent: url=[");
+		sb.append(getURL()).append("] time=").append(getTimeMillis()).append("ms");
+		sb.append(" client=").append(getIpAddress()).append(" method='").append(getMethod());
+		sb.append("' servlet='").append(getServletName()).append("'");
+		sb.append(" status=");
+		if (!wasFailure()) {
+			sb.append("OK");
+		}
+		else {
+			sb.append("failed: ").append(getFailureCause());
+		}
 		return sb.toString();
 	}
 

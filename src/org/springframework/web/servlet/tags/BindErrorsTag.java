@@ -28,6 +28,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see BindTag
+ * @see org.springframework.validation.Errors
  */
 public class BindErrorsTag extends RequestContextAwareTag {
 
@@ -38,7 +39,7 @@ public class BindErrorsTag extends RequestContextAwareTag {
 	/**
 	 * Set the name of the bean that this tag should check.
 	 */
-	public void setName(String name) throws JspException {
+	public void setName(String name) {
 		this.name = name;
 	}
 
