@@ -63,8 +63,14 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 			return false;
 		}
 		PointcutAdvisor otherAdvisor = (PointcutAdvisor) other;
-		return (ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()) &&
-				ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut()));
+		return (ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut()) &&
+				ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()));
+	}
+
+	public int hashCode() {
+		int hashCode = (getPointcut() == null ? 0 : getPointcut().hashCode());
+		hashCode = 29 * hashCode + (getAdvice() == null ? 0 : getAdvice().hashCode());
+		return hashCode;
 	}
 
 	public String toString() {
