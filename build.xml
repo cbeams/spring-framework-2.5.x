@@ -1390,7 +1390,7 @@
 		</zip>
 	</target>
 
-    <target name="webflow.release" depends="webflow.jar,webflow.support.jar,webflow.javadoc,webflow.srczip" description="Release webflow">
+    <target name="webflow.release" depends="build,webflow.jar,webflow.support.jar,webflow.javadoc,webflow.srczip" description="Release webflow">
         <mkdir dir="${target.release.dir}"/>
 		<delete file="${target.release.dir}/${webflow.release.zip}"/>
 
