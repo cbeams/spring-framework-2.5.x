@@ -42,7 +42,7 @@ public class StopWatch {
 	 * Handy when we have output from multiple stop watches
 	 * and need to distinguish between them in log or console output.
 	 */
-	private String id = "";
+	private final String id;
 
 	private boolean keepTaskList = true;
 
@@ -67,17 +67,18 @@ public class StopWatch {
 
 
 	/**
-	 * Construct a new stop watch.
-	 * Does not start any task.
+	 * Construct a new stop watch. Does not start any task.
 	 */
 	public StopWatch() {
+		this.id = "";
 	}
 
 	/**
 	 * Construct a new stop watch with the given id.
 	 * Does not start any task.
 	 * @param id identifier for this stop watch.
-	 * Handy when we have output from multiple stop watches and need to distinguish between them.
+	 * Handy when we have output from multiple stop watches
+	 * and need to distinguish between them.
 	 */
 	public StopWatch(String id) {
 		this.id = id;
@@ -87,7 +88,6 @@ public class StopWatch {
 	 * Determine whether the TaskInfo array is built over time. Set this to
 	 * false when using a stopwatch for millions of intervals, or the task
 	 * info structure will consume excessive memory. Default is true.
-	 * @param keepTaskList
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
 		this.keepTaskList = keepTaskList;
@@ -102,9 +102,10 @@ public class StopWatch {
 
 
 	/**
-	 * Start a named task. The results are undefined if stop() or timing
-	 * methods are called without invoking this method.
+	 * Start a named task. The results are undefined if <code>stop</code>
+	 * or timing methods are called without invoking this method.
 	 * @param taskName the name of the task to start
+	 * @see #stop
 	 */
 	public void start(String taskName) throws IllegalStateException {
 		if (this.running) {
@@ -116,8 +117,10 @@ public class StopWatch {
 	}
 
 	/**
-	 * Stop the current task. The results are undefined if timing methods are
-	 * called without invoking at least one pair start()/stop() methods.
+	 * Stop the current task. The results are undefined if timing
+	 * methods are called without invoking at least one pair
+	 * <code>start</code>/<code>stop</code> methods.
+	 * @see #start
 	 */
 	public void stop() throws IllegalStateException {
 		if (!this.running) {

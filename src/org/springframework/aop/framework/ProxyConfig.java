@@ -173,21 +173,20 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * @return whether proxies created by this configuration
-	 * should be prevented from being cast to Advised
-	 */
-	public boolean getOpaque() {
-		return opaque;
-	}
-	
-	/**
-	 * @param opaque Set whether proxies created by this configuration
-	 * should be prevented from being cast to Advised to
-	 * query proxy status. Default is false, meaning that
-	 * any AOP proxy can be cast to Advised.
+	 * Set whether proxies created by this configuration should be prevented
+	 * from being cast to Advised to query proxy status. Default is false,
+	 * meaning that any AOP proxy can be cast to Advised.
 	 */
 	public void setOpaque(boolean opaque) {
 		this.opaque = opaque;
+	}
+
+	/**
+	 * Return whether proxies created by this configuration should be
+	 * prevented from being cast to Advised.
+	 */
+	public boolean getOpaque() {
+		return opaque;
 	}
 
 	/**
