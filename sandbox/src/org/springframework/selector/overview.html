@@ -1,0 +1,39 @@
+<body>
+This package contains an extremely efficient and complete implementation of JMS selectors based on the JMS Specifications 1.1. 
+
+It uses a <tt>JavaCC</tt> generated parser to parse the selector string. An in-memory representation of the selector is built 
+during the parse. Once a selector has been parsed, its in-memory representation can be evaluated with minimal overhead. As a 
+result, selector evaluations are extremely efficient at run-time. As a comparison, this implementation is roughly 4 times 
+faster than implementation found in JBOSS.<p>
+
+In order to use this package do the following:<p>
+
+<table border cellpadding=5>
+     <caption align=top>
+     Development Steps
+     </caption>
+     <tr>
+     <th>1</th>
+     <td>Create an instance of <tt>Selector</tt> by using one of its <tt>static</tt> factory methods.</td>
+     </tr>
+     <tr>
+        <th>2</th>
+        <td>Get the list of identifiers encountered during the parse by calling <tt>getIdentifiers()</tt> on the
+             <tt>Selector</tt> instance.</td>
+      </tr>
+      <tr>
+        <th>3</th>
+        <td>For each <tt>Object</tt> that you want to evaluate with the selector create a <tt>Map</tt> and populate it
+         with the identifier names and values. Or, create an instance of <tt>IValueProvider</tt>.</td>
+     </tr>
+      <tr>
+        <th>4</th>
+        <td>Call <tt>eval()</tt> on the <tt>Selector</tt> instance to evaluate the selector. You can invoke either the 
+	      <tt>Map</tt> or the <tt>IValueProvider</tt> version of the <tt>eval()</tt> method. Note, if you use the
+		<tt>IValueProvider</tt> version of <tt>eval()</tt> then callbacks on the <tt>IValueProvider</tt> instance 
+		will be invoked to get values of identifiers during evaluation.</td>
+     </tr>
+</table>
+</body>
+
+

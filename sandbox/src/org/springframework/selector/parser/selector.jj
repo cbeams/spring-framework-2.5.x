@@ -1,0 +1,525 @@
+
+options 
+{
+   LOOKAHEAD=3;
+/*
+   DEBUG_PARSER=true;
+   DEBUG_LOOKAHEAD=true;
+   DEBUG_TOKEN_MANAGER=true;
+*/
+}
+
+PARSER_BEGIN(SelectorParser)
+   
+package com.codestreet.selector.parser;
+
+import java.io.StringReader;
+
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+
+public class SelectorParser 
+{
+   private Map identifierMap = new java.util.HashMap();
+
+   /**
+    * Parse the specified selector.
+    * @param selector Selector.
+    * @param trace Flag to enable/disable tracing.
+    * @return Returns the parse state. The parse state consists of the root
+    * of the parse tree and the identifiers encountered during the parse.
+    */
+   public static SelectorParseState doParse(String selector, boolean trace) throws InvalidSelectorException
+   {
+      try
+      {
+          if (selector == null)
+            throw new NullPointerException("NULL selector");
+          else if (selector.trim().length() == 0)
+              throw new IllegalArgumentException("Empty selector");
+
+          return new SelectorParser().parse(selector, trace);
+      }
+      catch (ParseException ex)
+      {
+          throw new InvalidSelectorException(ex);
+      }
+   }
+
+   private SelectorParser()
+   {
+      this(new StringReader(""));
+   }
+
+   private SelectorParseState parse(String selector) throws ParseException
+   {
+      return parse(selector, false);
+   }
+   
+   private SelectorParseState parse(String selector, boolean trace) throws ParseException
+   {
+      StringReader sr = new StringReader(selector);
+      ReInit(sr);
+
+      if (trace)
+      {
+         this.enable_tracing();
+      }
+      else
+      {
+         this.disable_tracing();
+      }
+
+      return new SelectorParseState(this.expression(), identifierMap);
+   }
+
+   private String stripQuotes(String image)
+   {
+      return image.substring(1, image.length() - 1);
+   }
+
+   public static class SelectorParseState
+   {
+       public SelectorParseState(IExpression root, Map identifiers)
+       {
+           root_ = root;
+           identifiers_ = identifiers;
+       }
+
+       public IExpression getRoot()
+       {
+           return root_;
+       }
+
+       public Map getIdentifiers()
+       {
+           return identifiers_;
+       }
+
+       private final  IExpression root_;
+       private final  Map identifiers_;
+   }
+}
+
+PARSER_END(SelectorParser)
+
+/* IGNORE WHITESPACE */
+   
+SKIP :
+{
+    " "
+  | "\t"
+  | "\n"
+  | "\r"
+}
+
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN [IGNORE_CASE]:
+{
+    < TK_TRUE:      "TRUE" >
+  | < TK_FALSE:     "FALSE" >
+  | < TK_NULL:      "NULL" >
+  | < TK_OR:        "OR" >
+  | < TK_AND:       "AND" >
+  | < TK_NOT:       "NOT" >
+  | < TK_BETWEEN:   "BETWEEN" >
+  | < TK_LIKE:      "LIKE" >
+  | < TK_IN:        "IN" >
+  | < TK_IS:        "IS" >
+  | < TK_ESCAPE:    "ESCAPE" >  
+}
+
+/* Relational and arithmetic operators */
+
+TOKEN :
+{
+    < TK_MINUS: "-" >
+  | < TK_PLUS:  "+" >
+  | < TK_MULT:  "*" >
+  | < TK_DIV:   "/" >
+  | < TK_EQ:    "=" >
+  | < TK_NE:    "<>" >
+  | < TK_GT:    ">" >
+  | < TK_GE:    ">=" >
+  | < TK_LT:    "<" >
+  | < TK_LE:    "<=" >
+  | < TK_LPAREN:    "(" >
+  | < TK_RPAREN:    ")" >
+  | < TK_SEMICOLON: ";" >
+  | < TK_COMMA:     "," >
+}
+
+/* Literals */
+
+TOKEN :
+{
+  < TK_LONG: ( ["0" - "9"] )+ >
+  | 
+  < TK_DOUBLE: <TK_FLOAT>
+	    | 
+            <TK_FLOAT> ( ["e","E"] ([ "-","+"])? <TK_LONG> )?
+    >
+  | < #TK_FLOAT: 
+            <TK_LONG> ( "." (<TK_LONG>)? )
+	    | 
+            "." <TK_LONG>
+    >
+  | < TK_STRING:
+      "'"
+      (   (~["'","\n","\r"])
+        | ("''")
+      )*
+      "'"
+    >
+}
+
+/* Function names */
+
+TOKEN : 
+{
+  < TK_IDENTIFIER: (<TK_LETTER>|"."<TK_LETTER>) (<TK_LETTER>|<TK_DIGIT>|"."|"::"|"/")* >
+|
+  < #TK_LETTER: [ "_","$", "a"-"z", "A"-"Z" ]
+  >
+|
+  < #TK_DIGIT: ["0" - "9"]
+  >
+}
+
+/** Start of the grammar */
+
+IExpression expression() :
+{
+   IExpression exp1 = null;
+}
+{
+   exp1 = logicExpression() <EOF>
+   {
+	return exp1;
+   }
+}
+
+IExpression logicExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+}
+{
+   exp1=notExpression()
+   (
+      <TK_AND> exp2=notExpression()
+      {
+         exp1 = new ConditionalOp(ConditionalOpImpl.AND, exp1, exp2);
+      }
+      | 
+      <TK_OR> exp2=notExpression()
+      {
+         exp1 = new ConditionalOp(ConditionalOpImpl.OR, exp1, exp2);
+      }
+   )*
+   { return exp1; }
+}
+
+IExpression notExpression() :
+{
+   IExpression exp1 = null;
+}
+{
+  exp1=relationalExpression()
+  { 
+     return exp1; 
+  }
+  | 
+  <TK_NOT> exp1=relationalExpression()
+  {
+     exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, exp1);
+  }
+  { 
+    return exp1; 
+  }
+}
+
+IExpression relationalExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+}
+{
+  exp1=orEqualExpression()
+  (
+      <TK_LT> exp2=orEqualExpression()
+      {
+         exp1 = new ArithCompareOp(ArithCompareOpImpl.LT, exp1, exp2);
+      }
+      | 
+      <TK_GT> exp2=orEqualExpression()
+      {
+         exp1 = new ArithCompareOp(ArithCompareOpImpl.GT, exp1, exp2);
+      }
+  )*
+   { return exp1; }
+}
+
+IExpression orEqualExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+}
+{
+  exp1=equalExpression()
+  (
+    ( <TK_LE> exp2=equalExpression()
+      {
+         exp1 = new ArithCompareOp(ArithCompareOpImpl.LE, exp1, exp2);
+      }
+    )
+    |
+    ( <TK_GE> exp2=equalExpression()
+      {
+         exp1 = new ArithCompareOp(ArithCompareOpImpl.GE, exp1, exp2);
+      }
+    )
+   )*
+   { return exp1; }
+}
+
+
+IExpression equalExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+   IExpression exp3 = null;
+   Set set = null;
+}
+{
+   exp1=additiveExpression()
+   (  
+      <TK_NE> exp2=additiveExpression()
+      {
+         if (exp1 instanceof IExpressionNumeric || exp2 instanceof IExpressionNumeric)
+         	exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, new ArithCompareOp(ArithCompareOpImpl.EQ, exp1, exp2));
+         else if (exp1 instanceof IExpressionBool || exp2 instanceof IExpressionBool)
+         	exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, new OpBoolEQ(exp1, exp2));
+         else if (exp1 instanceof IExpressionString || exp2 instanceof IExpressionString)
+         	exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, new OpStringEQ(exp1, exp2));
+         else
+         {
+         	if (exp1 instanceof Identifier && exp2 instanceof Identifier)
+				throw new ParseException("Syntax error: LHS (" + exp1.toString() + ") and RHS (" + exp2.toString() + ") cannot both be identifiers");
+		 	else
+				throw new ParseException("Syntax error: " + exp1.toString() + " <> " + exp2.toString());		 	
+		 }
+      }
+      | 
+      <TK_EQ> exp2=additiveExpression()
+      {
+         if (exp1 instanceof IExpressionNumeric || exp2 instanceof IExpressionNumeric)
+         	exp1 = new ArithCompareOp(ArithCompareOpImpl.EQ, exp1, exp2);
+         else if (exp1 instanceof IExpressionBool || exp2 instanceof IExpressionBool)
+         	exp1 = new OpBoolEQ(exp1, exp2);
+         else if (exp1 instanceof IExpressionString || exp2 instanceof IExpressionString)
+         	exp1 = new OpStringEQ(exp1, exp2);
+         else
+         {
+         	if (exp1 instanceof Identifier && exp2 instanceof Identifier)
+				throw new ParseException("Syntax error: LHS (" + exp1.toString() + ") and RHS (" + exp2.toString() + ") cannot both be identifiers");
+		 	else
+				throw new ParseException("Syntax error: " + exp1.toString() + " = " + exp2.toString());		 	
+		 }
+      }
+      | 
+      <TK_IS> exp1=nullExp(exp1)
+      | 
+      <TK_BETWEEN> exp2=additiveExpression() <TK_AND> exp3=additiveExpression()
+      {
+         exp1 = new OpBETWEEN(exp1, exp2, exp3);
+      }
+      | 
+      <TK_IS> exp1=nullExp(exp1)
+      | 
+      <TK_NOT> <TK_BETWEEN> exp2=additiveExpression() <TK_AND> exp3=additiveExpression()
+      {
+         exp1 = new OpBETWEEN(exp1, exp2, exp3);
+         exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, exp1);
+      }
+      | 
+      <TK_LIKE> exp1=likeExp(exp1)
+      | 
+      <TK_NOT> <TK_LIKE> exp1=likeExp(exp1)
+      {
+         exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, exp1);
+      }
+      | 
+      <TK_IN> <TK_LPAREN> { set = new HashSet(); } stringList(set) <TK_RPAREN>
+      {
+         exp1 = new OpIN(exp1, set);
+      }
+      | 
+      <TK_NOT> <TK_IN> <TK_LPAREN> { set = new HashSet(); } stringList(set) <TK_RPAREN>
+      {
+         exp1 = new ConditionalOp(ConditionalOpImpl.NOT, null, new OpIN(exp1, set));
+      }
+   )*
+   { return exp1; }
+}
+
+
+IExpression additiveExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+}
+{
+  exp1=multiplicativeExpression()
+  (
+    ( <TK_PLUS> exp2=multiplicativeExpression()
+      {
+         exp1 = new ArithOp(ArithOpImpl.PLUS, exp1, exp2);
+      }
+    )
+    |
+    ( <TK_MINUS> exp2=multiplicativeExpression()
+      {
+         exp1 = new ArithOp(ArithOpImpl.MINUS, exp1, exp2);
+      }
+    )
+  )*
+  { return exp1; }
+}
+
+IExpression multiplicativeExpression() :
+{
+   IExpression exp1 = null;
+   IExpression exp2 = null;
+}
+{
+   exp1=unaryExpression()
+   (
+      ( <TK_MULT> exp2=unaryExpression()
+         {
+            exp1 = new ArithOp(ArithOpImpl.MULT, exp1, exp2);
+         }
+       )
+   |
+      ( <TK_DIV> exp2=unaryExpression()
+         {
+            exp1 = new ArithOp(ArithOpImpl.DIV, exp1, exp2);
+         }
+      )
+   )*
+   { return exp1; }
+}
+
+IExpression unaryExpression() :
+{
+   IExpression exp1 = null;
+}
+{
+   <TK_PLUS> exp1=unaryExpression()
+   { return exp1; }
+   | 
+   <TK_MINUS> exp1=unaryExpression()
+   { return new ArithOp(ArithOpImpl.NEG, null, exp1); }
+   |
+   exp1=unaryExpressionNotPlusMinus()
+   { return exp1; }
+}
+
+
+IExpression unaryExpressionNotPlusMinus() :
+{
+   Token t = null;
+   IExpression exp = null;
+}
+{
+   t=<TK_IDENTIFIER>
+      {
+         Identifier id = (Identifier)identifierMap.get(t.image);
+	 if( id == null ) 
+         {
+            id = Identifier.valueOf(t.image);
+            identifierMap.put(t.image, id);
+	 }
+         return id;
+      }
+   | 
+   t=<TK_STRING>  
+   { 
+      return LiteralString.valueOf(stripQuotes(t.image)); 
+   }
+   | 
+   t=<TK_DOUBLE>  
+   { 
+      return LiteralDouble.valueOf(t.image); 
+   }
+   | 
+   t=<TK_LONG>    
+   { 
+      return LiteralLong.valueOf(t.image); 
+   }
+   | 
+   t=<TK_TRUE> 
+   { 
+      return LiteralBool.valueOf(t.image); 
+   }
+   | 
+   t=<TK_FALSE> 
+   { 
+      return LiteralBool.valueOf(t.image); 
+   }
+   | 
+   <TK_LPAREN> exp=logicExpression() <TK_RPAREN>
+   { 
+      return exp; 
+   }
+}
+
+IExpression nullExp(IExpression exp1) :
+{
+   Token not = null;
+}
+{
+   [ not=<TK_NOT> ] <TK_NULL>
+   {
+      if (not == null)
+        return new OpNULL(exp1);
+      else
+        return new ConditionalOp(ConditionalOpImpl.NOT, null, new OpNULL(exp1));
+   }
+}
+
+IExpression likeExp(IExpression exp1) :
+{
+   IExpression exp2 = null;
+   IExpression exp3 = null;
+   Token esc = null;
+}
+{
+   exp2=additiveExpression()
+   [ esc=<TK_ESCAPE> exp3=additiveExpression() ]
+      {
+         if( esc == null )
+            return new OpLIKE(exp1, exp2, null);
+         else
+            return new OpLIKE(exp1, exp2, exp3);
+      }
+}
+
+void stringList(Set set):
+{}
+{
+    stringToken(set) ( <TK_COMMA> stringToken(set))*
+}
+
+void stringToken(Set set) :
+{
+   Token t = null;
+}
+{
+   [ t=<TK_STRING> ]
+      { if( t != null ) set.add(stripQuotes(t.image)); }
+}
+
