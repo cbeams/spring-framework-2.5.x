@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -29,6 +30,9 @@ import java.lang.reflect.Modifier;
  */
 public abstract class ClassUtils {
 
+	/** Suffix for array class names */
+	public static final String ARRAY_SUFFIX = "[]";
+
 	/** All primitive classes */
 	private static Class[] PRIMITIVE_CLASSES = {boolean.class, byte.class, char.class, short.class,
 	                                            int.class, long.class, float.class, double.class};
@@ -41,9 +45,13 @@ public abstract class ClassUtils {
 
 
 	/**
-	 * Replacement for Class.forName() that also returns Class instances for primitives.
+	 * Replacement for <code>Class.forName()</code> that also returns Class instances
+	 * for primitives (like "int") and array class names (like "String[]").
+	 * <p>Always uses the thread context class loader.
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
+	 * @see java.lang.Class#forName
+	 * @see java.lang.Thread#getContextClassLoader
 	 */
 	public static Class forName(String name) throws ClassNotFoundException{
 		// Most class names will be quite long, considering that they
@@ -57,7 +65,13 @@ public abstract class ClassUtils {
 				}
 			}
 		}
-		return Class.forName(name);
+		if (name.endsWith(ARRAY_SUFFIX)) {
+			// special handling for array class names
+			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
+			Class elementClass = Class.forName(elementClassName, true, Thread.currentThread().getContextClassLoader());
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+		return Class.forName(name, true, Thread.currentThread().getContextClassLoader());
 	}
 
 	/**

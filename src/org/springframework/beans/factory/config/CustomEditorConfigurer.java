@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 
 /**
  * BeanFactoryPostProcessor implementation that allows for convenient
@@ -39,7 +40,7 @@ import org.springframework.core.Ordered;
  *         &lt;bean class="mypackage.MyCustomDateEditor"/&gt;
  *       &lt;/entry&gt;
  *       &lt;entry key="mypackage.MyObject"&gt;
- *         &lt;bean id="myEditor" class="mypackage.MObjectEditor"&gt;
+ *         &lt;bean id="myEditor" class="mypackage.MyObjectEditor"&gt;
  *           &lt;property name="myParam"&gt;&lt;value&gt;myValue&lt;/value&gt;&lt;/property&gt;
  *         &lt;/bean&gt;
  *       &lt;/entry&gt;
@@ -47,9 +48,13 @@ import org.springframework.core.Ordered;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
+ * <p>Also supports "java.lang.String[]"-style array class names.
+ * Delegates to ClassUtils for actual class name resolution.
+ *
  * @author Juergen Hoeller
  * @since 27.02.2004
  * @see ConfigurableBeanFactory#registerCustomEditor
+ * @see org.springframework.util.ClassUtils#forName
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 
@@ -85,21 +90,21 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 				else if (key instanceof String) {
 					String className = (String) key;
 					try {
-						requiredType = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						requiredType = ClassUtils.forName(className);
 					}
 					catch (ClassNotFoundException ex) {
-						throw new BeanInitializationException("Could not load required type [" + className +
-						                                      "] for custom editor", ex);
+						throw new BeanInitializationException(
+								"Could not load required type [" + className + "] for custom editor", ex);
 					}
 				}
 				else {
-					throw new BeanInitializationException("Invalid key [" + key + "] for custom editor - " +
-					                                      "needs to be Class or String");
+					throw new BeanInitializationException(
+							"Invalid key [" + key + "] for custom editor - needs to be Class or String");
 				}
 				Object value = this.customEditors.get(key);
 				if (!(value instanceof PropertyEditor)) {
-					throw new BeanInitializationException("Mapped value for custom editor is not of type " +
-					                                      "java.beans.PropertyEditor");
+					throw new BeanInitializationException("Mapped value [" + value + "] for custom editor key [" +
+							key + "] is not of required type [" + PropertyEditor.class.getName() + "]");
 				}
 				beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
 			}
