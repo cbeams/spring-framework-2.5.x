@@ -180,8 +180,9 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 		}
 	}
 
+
 	/**
-	 * Create a transaction if necessary
+	 * Create a transaction if necessary.
 	 * @param method method about to execute
 	 * @param targetClass class the method is on
 	 * @return a TransactionInfo object, whether or not a transaction was created.
@@ -189,44 +190,56 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	 * was a transaction created.
 	 */
 	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
-		// If the transaction attribute is null, the method is non-transactional
-		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(method, targetClass);
-		TransactionInfo txInfo = new TransactionInfo(transAtt, method);
-		if (transAtt != null) {
+		// If the transaction attribute is null, the method is non-transactional.
+		final TransactionAttribute sourceAttr =
+				this.transactionAttributeSource.getTransactionAttribute(method, targetClass);
+		TransactionAttribute txAttr = sourceAttr;
+
+		// If no name specified, apply method identification as transaction name.
+		if (txAttr != null && txAttr.getName() == null) {
+			final String name = methodIdentification(method);
+			txAttr = new DelegatingTransactionAttribute(sourceAttr) {
+				public String getName() {
+					return name;
+				}
+			};
+		}
+
+		TransactionInfo txInfo = new TransactionInfo(txAttr, method);
+		if (txAttr != null) {
 			// We need a transaction for this method
 			if (logger.isDebugEnabled()) {
 				logger.debug("Getting transaction for " + txInfo.joinpointIdentification());
 			}
 
 			// The transaction manager will flag an error if an incompatible tx already exists
-			txInfo.newTransactionStatus(this.transactionManager.getTransaction(transAtt));
+			txInfo.newTransactionStatus(this.transactionManager.getTransaction(txAttr));
 		}
 		else {
 			// The TransactionInfo.hasTransaction() method will return
 			// false. We created it only to preserve the integrity of
 			// the ThreadLocal stack maintained in this class.
 			if (logger.isDebugEnabled())
-				logger.debug("Don't need to create transaction for " + methodIdentification(method) +
-						": this method isn't transactional");
+				logger.debug("Don't need to create transaction for [" + methodIdentification(method) +
+						"]: this method isn't transactional");
 		}
 
-		// We always bind the TransactionInfo to the thread, even if
-		// we didn't create a new transaction here.
-		// This guarantees that the TransactionInfo stack will be
-		// managed correctly even if no transaction was created by
-		// this aspect.
+		// We always bind the TransactionInfo to the thread, even if we didn't create
+		// a new transaction here. This guarantees that the TransactionInfo stack
+		// will be managed correctly even if no transaction was created by this aspect.
 		txInfo.bindToThread();
 		return txInfo;
 	}
 
 	/**
 	 * Convenience method to return a String representation of this Method
-	 * for use in logging.
-	 * @param method method we're interested in
+	 * for use in logging. Can be overridden in subclasses to provide a
+	 * different identifier for the given method.
+	 * @param method the method we're interested in
 	 * @return log message identifying this method
 	 */
 	protected String methodIdentification(Method method) {
-		return "method '" + method.getName() + "' in class [" + method.getDeclaringClass().getName() + "]";
+		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
 	/**
@@ -327,7 +340,7 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 
 		private TransactionInfo oldTransactionInfo;
 
-		private TransactionInfo(TransactionAttribute transactionAttribute, Method method) {
+		public TransactionInfo(TransactionAttribute transactionAttribute, Method method) {
 			this.transactionAttribute = transactionAttribute;
 			this.method = method;
 		}
