@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support.nativejdbc;
 
@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.springframework.jdbc.datasource.ConnectionProxy;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * Abstract adapter class for the NativeJdbcExtractor interface,
@@ -45,6 +45,7 @@ import org.springframework.jdbc.datasource.ConnectionProxy;
  * @since 1.1
  * @see #getNativeConnection
  * @see #getNativeConnectionFromStatement
+ * @see org.springframework.jdbc.datasource.ConnectionProxy
  */
 public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor {
 
@@ -72,19 +73,17 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Check for a ConnectionProxy chain, then delegate to doGetNativeConnection.
 	 * <p>ConnectionProxy is used by Spring's TransactionAwareDataSourceProxy
-	 * and SingleConnectionDataSource. The target connection behind it is typically
-	 * one from a local connection pool, to be unwrapped by the doGetNativeConnection
-	 * implementation of a concrete subclass.
+	 * and LazyConnectionDataSourceProxy. The target connection behind it is
+	 * typically one from a local connection pool, to be unwrapped by the
+	 * doGetNativeConnection implementation of a concrete subclass.
 	 * @see #doGetNativeConnection
 	 * @see org.springframework.jdbc.datasource.ConnectionProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getTargetConnection
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
-	 * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
-		Connection conToUse = con;
-		while (conToUse instanceof ConnectionProxy) {
-			conToUse = ((ConnectionProxy) conToUse).getTargetConnection();
-		}
+		Connection conToUse = DataSourceUtils.getTargetConnection(con);
 		return doGetNativeConnection(conToUse);
 	}
 
