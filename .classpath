@@ -10,10 +10,8 @@
     <classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/log4j/commons-logging.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/hibernate/commons-lang.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/hibernate/dom4j.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/hibernate/commons-collections.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/burlap-2.1.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/hessian-2.1.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/jdo/jdo1_0.jar"/>
@@ -36,8 +34,12 @@
     <classpathentry kind="src" path="load"/>
     <classpathentry kind="src" path="sandbox"/>
     <classpathentry kind="src" path="samples/countries/src"/>
-    <classpathentry kind="lib" path="lib/tiles/commons-beanutils-1.6.jar"/>
-    <classpathentry kind="lib" path="lib/tiles/commons-digester-1.5.jar"/>
+    <classpathentry kind="src" path="samples/petclinic/src"/>
     <classpathentry kind="lib" path="lib/tiles/struts-1.1.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-digester.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-lang.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
