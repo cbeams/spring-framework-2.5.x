@@ -31,8 +31,9 @@ import org.springframework.util.ToStringCreator;
  * successfully. A "finish" event might signal a sub flow ended normally.
  * <p>
  * Why is this class abstract and not an interface? A specific design choice. An
- * event does not define any kind of contract or role per-say, it is expected
- * that specializations of this base class be "Events" and nothing else.
+ * event does not define a generic contract or role, it is expected that
+ * specializations of this base class be "Events" and not part of some other
+ * inheritence hierarchy.
  * @author Keith Donald
  */
 public abstract class Event implements AttributeAccessor {
@@ -48,7 +49,7 @@ public abstract class Event implements AttributeAccessor {
 	 * @return the timestamp
 	 */
 	public abstract long getTimestamp();
-	
+
 	/**
 	 * Returns the state in which this event occured (optional).
 	 * @return The state id

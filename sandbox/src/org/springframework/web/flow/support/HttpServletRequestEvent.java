@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow.support;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,11 @@ import org.springframework.web.flow.Event;
  */
 public class HttpServletRequestEvent extends Event {
 
+	/**
+	 * The event timestamp.
+	 */
+	private long timestamp = new Date().getTime();
+	
 	/**
 	 * The wrapped http servlet request.
 	 */
@@ -52,6 +58,10 @@ public class HttpServletRequestEvent extends Event {
 
 	public String getId() {
 		return request.getParameter("eventId");
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
 	}
 
 	public String getStateId() {

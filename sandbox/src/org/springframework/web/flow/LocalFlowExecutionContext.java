@@ -72,7 +72,7 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	public void setEvent(Event event) {
 		this.event = event;
-		this.flowExecutionStack.setEventId(event.getId());
+		this.flowExecutionStack.setEvent(event);
 		fireEventSignaled(event);
 	}
 

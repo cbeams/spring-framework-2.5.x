@@ -108,13 +108,11 @@ public class HttpServletFlowExecutionManager {
 	 * @param flowId id of the default flow for which executions will be managed
 	 * @param flowLocator the flow locator to use for flow lookup
 	 */
-	public HttpServletFlowExecutionManager(String flowId, FlowLocator flowLocator,
-			FlowExecutionListener[] flowExecutionListeners) {
+	public HttpServletFlowExecutionManager(String flowId, FlowLocator flowLocator) {
 		if (StringUtils.hasText(flowId)) {
 			this.flow = flowLocator.getFlow(flowId);
 		}
 		this.flowLocator = flowLocator;
-		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
 	/**
@@ -150,11 +148,19 @@ public class HttpServletFlowExecutionManager {
 	 * @throws Exception in case of errors
 	 */
 	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return handleRequest(request, response, null);
+	}
+
+	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response,
+			FlowExecutionListener executionListener) throws Exception {
 		FlowExecution flowExecution;
 		ViewDescriptor modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(request));
+			if (executionListener != null) {
+				flowExecution.getListenerList().add(executionListener);
+			}
 			modelAndView = flowExecution.start(new HttpServletRequestEvent(request));
 			saveInHttpSession(flowExecution, request);
 		}
@@ -167,6 +173,10 @@ public class HttpServletFlowExecutionManager {
 			// out)
 			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
 
+			if (executionListener != null) {
+				flowExecution.getListenerList().add(executionListener);
+			}
+
 			// signal the event within the current state
 			modelAndView = flowExecution.signalEvent(new HttpServletRequestEvent(request));
 		}
@@ -176,6 +186,9 @@ public class HttpServletFlowExecutionManager {
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + modelAndView);
+		}
+		if (executionListener != null) {
+			flowExecution.getListenerList().remove(executionListener);
 		}
 		return modelAndView;
 	}

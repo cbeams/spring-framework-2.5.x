@@ -32,6 +32,11 @@ import org.springframework.util.ToStringCreator;
  * the processing that should occur when this state is entered, acting on its
  * configuration information. The ability to plugin custom state types that
  * execute different behaivior polymorphically is the classic GoF State pattern.
+ * <p>
+ * Why is this class abstract and not an interface? A specific design choice. An
+ * state does not define a generic contract or role, it is expected that
+ * specializations of this base class be "States" and not part of some other
+ * inheritence hierarchy.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -127,8 +132,8 @@ public abstract class State {
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param context The session execution stack, tracking the current
-	 *        active flow session
+	 * @param context The session execution stack, tracking the current active
+	 *        flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to

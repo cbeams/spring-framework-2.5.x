@@ -60,12 +60,18 @@ import org.springframework.web.util.WebUtils;
  * Flow-action that fronts a single top-level flow:
  * 
  * <pre>
- *              &lt;action path=&quot;/userRegistration&quot;
- *                  type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *                  name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *                  className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *                      &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *              &lt;/action&gt;
+ * 
+ *  
+ *   
+ *                 &lt;action path=&quot;/userRegistration&quot;
+ *                     type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *                     name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *                     className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *                         &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *                 &lt;/action&gt;
+ *    
+ *   
+ *  
  * </pre>
  * 
  * This example associates the logical request URL
@@ -131,6 +137,14 @@ public class FlowAction extends TemplateAction {
 		return ((FlowActionMapping)mapping).getFlowId();
 	}
 
+	/**
+	 * Creates a flow execution listener that takes a spring Errors instance
+	 * supporting POJO-based data binding in request scope under a well-defined
+	 * name and adapts it to the Struts Action form model.
+	 * @param request The request
+	 * @param form the action form
+	 * @return the adapter
+	 */
 	protected FlowExecutionListener createActionFormAdapter(final HttpServletRequest request, final ActionForm form) {
 		return new FlowExecutionListenerAdapter() {
 			public void requestProcessed(FlowExecutionContext context, Event triggeringEvent) {

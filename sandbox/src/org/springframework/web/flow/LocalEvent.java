@@ -16,6 +16,7 @@
 package org.springframework.web.flow;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,11 @@ public class LocalEvent extends Event {
 	 * The event identifier.
 	 */
 	private String id;
+
+	/**
+	 * The event timestamp
+	 */
+	private long timestamp = new Date().getTime();
 
 	/**
 	 * The state in which this event was signaled (optional)
@@ -103,6 +109,10 @@ public class LocalEvent extends Event {
 		return id;
 	}
 
+	public long getTimestamp() {
+		return timestamp;
+	}
+	
 	public String getStateId() {
 		return stateId;
 	}

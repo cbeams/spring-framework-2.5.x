@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionMBean;
 
 /**
@@ -39,20 +38,24 @@ import org.springframework.web.flow.FlowExecutionMBean;
  * <p>
  * This filter can be configured in the <tt>web.xml</tt> deployment descriptor
  * of your web application. Here's an example:
+ * 
  * <pre>
- * &lt;!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- * 	"http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
- * &lt;web-app&gt;
- * 	&lt;filter&gt;
- * 		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
- * 		&lt;filter-class&gt;org.springframework.web.flow.support.FlowExecutionCleanupFilter&lt;/filter-class&gt;
- * 	&lt;/filter&gt;
- * 	&lt;filter-mapping&gt;
- * 		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
- * 		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
- * 	&lt;/filter-mapping&gt;
- * 	...
+ * 
+ *  &lt;!DOCTYPE web-app PUBLIC &quot;-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN&quot;
+ *  	&quot;http://java.sun.com/dtd/web-app_2_3.dtd&quot;&gt;
+ *  &lt;web-app&gt;
+ *  	&lt;filter&gt;
+ *  		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
+ *  		&lt;filter-class&gt;org.springframework.web.flow.support.FlowExecutionCleanupFilter&lt;/filter-class&gt;
+ *  	&lt;/filter&gt;
+ *  	&lt;filter-mapping&gt;
+ *  		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
+ *  		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+ *  	&lt;/filter-mapping&gt;
+ *  	...
+ *  
  * </pre>
+ * 
  * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
@@ -79,11 +82,12 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	 */
 	public static final int DEFAULT_TIMEOUT = 10;
 
-	// in minutes
+	// note: timeout is in minutes
 	private int timeout = DEFAULT_TIMEOUT;
 
 	/**
 	 * Get the flow timout (expiry), expressed in minutes.
+	 * @return the timeout
 	 */
 	public int getTimeout() {
 		return timeout;
@@ -91,6 +95,7 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set the flow timout (expiry), expressed in minutes.
+	 * @param timeout the timeout
 	 */
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
@@ -103,17 +108,17 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * <p>
 	 * Remove expired flow executions from the HTTP session associated with
 	 * given request.
+	 * @param request the request
 	 */
 	protected void doCleanup(HttpServletRequest request) {
-		//get the session if there is one
+		// get the session if there is one
 		HttpSession session = request.getSession(false);
 		if (session == null) {
 			return;
 		}
-		//execute the cleanup process
+		// execute the cleanup process
 		Set namesToBeDeleted = new HashSet();
 		Enumeration names = session.getAttributeNames();
 		while (names.hasMoreElements()) {
@@ -142,7 +147,6 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	 * <p>
 	 * Subclasses can override this method if they want to change the expiry
 	 * logic, e.g. to keep flow executions alive in certain situations.
-	 * 
 	 * @param request current HTTP request
 	 * @param flowExecution the web flow execution that needs to be checked for
 	 *        expiry
