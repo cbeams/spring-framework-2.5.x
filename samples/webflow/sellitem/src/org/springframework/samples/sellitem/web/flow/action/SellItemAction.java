@@ -28,8 +28,8 @@ public class SellItemAction extends FormAction {
 		setFormObjectScope(ScopeType.FLOW);
 	}
 
-	protected boolean suppressValidation(RequestContext context) {
-		return !getActionStateAction(context).containsProperty(VALIDATOR_METHOD_PROPERTY);
+	protected boolean shouldValidate(RequestContext context) {
+		return getActionStateAction(context).containsProperty(VALIDATOR_METHOD_PROPERTY);
 	}
 
 	public Event isShipping(RequestContext context) throws Exception {
