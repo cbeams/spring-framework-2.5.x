@@ -334,8 +334,8 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	}
 
 	/**
-	 * Return the identity query for the particular database,
-	 * i.e. a query that can be used to retrieve the id of a row
+	 * Return the identity query for the particular database:
+	 * a query that can be used to retrieve the id of a row
 	 * that has just been inserted.
 	 * @return the identity query
 	 */
