@@ -333,8 +333,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * Delegate GET requests to servletWrapper respectively doService.
+	 * Delegate GET requests to serviceWrapper/doService.
+	 * <p>Will also be invoked by HttpServlet's default implementation of doHead,
+	 * with a NoBodyResponse that just captures the content length.
 	 * @see #doService
+	 * @see #doHead
 	 */
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
@@ -342,7 +345,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate POST requests to servletWrapper respectively doService.
+	 * Delegate POST requests to serviceWrapper/doService.
 	 * @see #doService
 	 */
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -351,7 +354,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate PUT requests to servletWrapper respectively doService.
+	 * Delegate PUT requests to serviceWrapper/doService.
 	 * @see #doService
 	 */
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
@@ -360,19 +363,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate DELETE requests to servletWrapper respectively doService.
+	 * Delegate DELETE requests to serviceWrapper/doService.
 	 * @see #doService
 	 */
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-		serviceWrapper(request, response);
-	}
-
-	/**
-	 * Delegate HEAD requests to servletWrapper respectively doService.
-	 * @see #doService
-	 */
-	protected final void doHead(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 		serviceWrapper(request, response);
 	}
