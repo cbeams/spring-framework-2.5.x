@@ -86,7 +86,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~265 KB)
+* "spring-core" (~270 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -94,7 +94,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (CGLIB, Commons Attributes)
 
-* "spring-dao" (~245 KB)
+* "spring-dao" (~250 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
@@ -122,7 +122,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.0 support
 - Dependencies: spring-dao, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1550 KB)
+* "spring" (~1560 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

@@ -23,6 +23,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * added InstantiationAwareBeanPostProcessor extension of BeanPostProcessor interface, intercepting before instantiation
 * PropertyOverrideConfigurer does not log invalid keys at WARN level in case of "ignoreInvalidKeys" (only at DEBUG)
+* added BeanReferenceFactoryBean, allowing for exposure of a target bean under a different name (effectively an alias)
 * XmlBeanDefinitionReader offers an "errorHandler" property and uses the factored-out SimpleSaxErrorHandler as default
 
 Package org.springframework.core
@@ -35,6 +36,8 @@ Package org.springframework.jdbc
 
 Package org.springframework.jmx
 * added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
+* added Commons Attributes annotations for MBean export, plus corresponding AttributesJmxAttributeSource
+* added JDK 1.5+ annotations for MBean export, plus corresponding AnnotationJmxAttributeSource
 
 Package org.springframework.orm
 * added "orm.hibernate3" support package for Hibernate3, mirroring the Hibernate 2.1 support in "orm.hibernate"
@@ -43,8 +46,10 @@ Package org.springframework.orm
 
 Package org.springframework.samples
 * migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
+* added new JPetStore version based on Spring's JDK 1.5+ Transactional annotation (in "samples/jpetstore/annotation")
 
 Package org.springframework.transaction
+* added JDK 1.5+ "Transactional" annotation, plus corresponding AnnotationTransactionAttributeSource
 * added "getName" method to TransactionDefinition interface, allowing to specify a symbolic name for a transaction
 * TransactionInterceptor exposes fully qualified class name + "." + method name as transaction name (by default)
 * added thread-bound "currentTransactionReadOnly" flag to TransactionSynchronizationManager
