@@ -114,6 +114,27 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Does the given class or/and its superclasses at least have one or more
+	 * methods (with any argument types)? Includes non-public methods.
+	 * @param clazz the clazz to check
+	 * @param methodName the name of the method
+	 * @return whether there is at least one method with the given name
+	 */
+	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
+		do {
+			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+				Method method = clazz.getDeclaredMethods()[i];
+				if (methodName.equals(method.getName())) {
+					return true;
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+		while (clazz != null);
+		return false;
+	}
+
+	/**
 	 * Return a static method of a class.
 	 * @param methodName the static method name
 	 * @param clazz the class which defines the method

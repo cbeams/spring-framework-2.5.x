@@ -19,11 +19,11 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.util.ClassUtils;
 
 /**
  * Common base class for bean definitions, factoring out common
@@ -471,25 +471,31 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 
 		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
-			throw new  BeanDefinitionValidationException("Cannot combine static factory method with method overrides: " +
-			                                             "the static factory method must create the instance");
+			throw new  BeanDefinitionValidationException(
+			    "Cannot combine static factory method with method overrides: " +
+			    "the static factory method must create the instance");
 		}
 		
 		if (hasBeanClass()) {
 			// Check that lookup methods exists
-			Class beanClass = getBeanClass();
 			for (Iterator itr = getMethodOverrides().getOverrides().iterator(); itr.hasNext(); ) {
 				MethodOverride mo = (MethodOverride) itr.next();
-				validateMethodOverride(mo, beanClass);
+				validateMethodOverride(mo);
 			}
 		}
 	}
-	
-	private void validateMethodOverride(MethodOverride mo, Class beanClass) throws BeanDefinitionValidationException {
-		if (!BeanUtils.isAtLeastOneMethodWithName(mo.getMethodName(), beanClass)) {
-			throw new BeanDefinitionValidationException("No method with name '" + mo.getMethodName() +
-			                                            "' on class " + beanClass.getName() +
-			                                            " specified in lookup override");
+
+	/**
+	 * Validate the given method override.
+	 * Checks for existence of a method with the specified name.
+	 * @param mo the MethodOverride object to validate
+	 * @throws BeanDefinitionValidationException in case of validation failure
+	 */
+	protected void validateMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
+		if (!ClassUtils.hasAtLeastOneMethodWithName(getBeanClass(), mo.getMethodName())) {
+			throw new BeanDefinitionValidationException(
+			    "Invalid method override: no method with name '" + mo.getMethodName() +
+			    "' on class [" + getBeanClassName() + "]");
 		}
 	}
 

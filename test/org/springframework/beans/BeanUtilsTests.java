@@ -91,13 +91,5 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Age still empty", tb2.getAge() == 0);
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
-	
-	public void testCountOverloadedMethods() {
-		assertFalse(BeanUtils.isAtLeastOneMethodWithName("foobar", TestBean.class));
-		// No args
-		assertTrue(BeanUtils.isAtLeastOneMethodWithName("hashCode", TestBean.class));
-		// Matches although it takes an arg
-		assertTrue(BeanUtils.isAtLeastOneMethodWithName("setAge", TestBean.class));
-	}
 
 }
