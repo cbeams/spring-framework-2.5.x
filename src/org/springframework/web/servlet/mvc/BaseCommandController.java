@@ -316,6 +316,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
+	 * <p>Default implementation is empty.
 	 * @param request current request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
@@ -330,6 +331,25 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
+	 * <p>Default implementation delegates to onBind(request, command).
+	 * @param request current HTTP request
+	 * @param command command object to perform further binding on
+	 * @param errors validation errors holder, allowing for additional
+	 * custom registration of binding errors
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #bindAndValidate
+	 * @see #onBind(HttpServletRequest, Object)
+	 */
+	protected void onBind(HttpServletRequest request, Object command, BindException errors)
+			throws Exception {
+		onBind(request, command);
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding.
+	 * Called by the default implementation of the onBind version with
+	 * all parameters, after standard binding but before validation.
+	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
@@ -343,6 +363,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Callback for custom post-processing in terms of binding and validation.
 	 * Called on each submit, after standard binding and validation,
 	 * but before error evaluation.
+	 * <p>Default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command command object, still allowing for further binding
 	 * @param errors validation errors holder, allowing for additional
