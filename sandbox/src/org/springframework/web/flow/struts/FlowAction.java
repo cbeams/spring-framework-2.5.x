@@ -202,8 +202,8 @@ public class FlowAction extends TemplateAction {
 				}
 				if (form instanceof BindingActionForm) {
 					BindingActionForm bindingForm = (BindingActionForm)form;
-					bindingForm.setErrors((Errors)sessionExecution
-							.getAttribute(AbstractActionBean.LOCAL_FORM_OBJECT_ERRORS_NAME));
+					bindingForm.setErrors((Errors)sessionExecution.getAttribute(
+							AbstractActionBean.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
 					bindingForm.setHttpServletRequest(request);
 					bindingForm.setModel(sessionExecution);
 				}
