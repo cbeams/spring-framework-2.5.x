@@ -62,10 +62,9 @@ public class StateTests extends TestCase {
 
 	public void testActionStateActionChainNoMatchingTransition() {
 		Flow flow = new Flow("myFlow");
-		new ActionState(flow, "actionState", new Action[] {
-				new ExecutionCounterAction("not mapped result"), new ExecutionCounterAction(null),
-				new ExecutionCounterAction(""), new ExecutionCounterAction("yet another not mapped result") },
-				new Transition("success", "finish"));
+		new ActionState(flow, "actionState", new Action[] { new ExecutionCounterAction("not mapped result"),
+				new ExecutionCounterAction(null), new ExecutionCounterAction(""),
+				new ExecutionCounterAction("yet another not mapped result") }, new Transition("success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		try {
@@ -77,24 +76,24 @@ public class StateTests extends TestCase {
 		}
 	}
 
-	/*
 	public void testActionStateActionChainNamedActions() {
 		Flow flow = new Flow("myFlow");
-		ActionState state = new ActionState(flow, "actionState", new String[] { null, null, "action3", "action4" },
-				new Action[] { new ExecutionCounterAction("not mapped result"), new ExecutionCounterAction(null),
-						new ExecutionCounterAction(""), new ExecutionCounterAction("success") }, new Transition(
-						"action4.success", "finish"));
+		ActionStateAction[] stateActions = new ActionStateAction[4];
+		stateActions[0] = new ActionStateAction(new ExecutionCounterAction("not mapped result"));
+		stateActions[1] = new ActionStateAction(new ExecutionCounterAction(null));
+		stateActions[2] = new ActionStateAction(new ExecutionCounterAction(""), "action3");
+		stateActions[3] = new ActionStateAction(new ExecutionCounterAction("success"), "action4");
+		ActionState state = new ActionState(flow, "actionState", stateActions, new Transition("action4.success", "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("action4.success", flowExecution.getLastEventId());
 		Action[] actions = state.getActions();
-		for (int i = 0; i < actions.length; i++) {
+		for (int i = 0; i < stateActions.length; i++) {
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
 		}
 	}
-	*/
 
 	public void testViewState() {
 		Flow flow = new Flow("myFlow");
@@ -122,8 +121,7 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowState() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
-				"submit", "finish"));
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition("submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
 		new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
@@ -140,12 +138,10 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowStateModelMapping() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
-				"submit", "finish"));
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition("submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(
-				"finish", "finish"));
+		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition("finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecutionStack flowExecution = (FlowExecutionStack)flow.createExecution();
 		Map input = new HashMap();
@@ -154,7 +150,8 @@ public class StateTests extends TestCase {
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getFlowScope().getAttribute("childInputAttribute"));
+		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getFlowScope().getAttribute(
+				"childInputAttribute"));
 		view = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
 		assertTrue(!flowExecution.isActive());
