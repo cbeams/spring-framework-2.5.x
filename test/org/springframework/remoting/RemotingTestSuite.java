@@ -2,6 +2,7 @@ package org.springframework.remoting;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.StubNotFoundException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,7 +15,9 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
+import org.springframework.remoting.rmi.RmiClientInterceptor;
 import org.springframework.remoting.rmi.RmiProxyFactoryBean;
+import org.springframework.remoting.rmi.RmiServiceExporter;
 
 /**
  * @author Juergen Hoeller
@@ -135,6 +138,48 @@ public class RemotingTestSuite extends TestCase {
 		}
 		catch (RemoteAccessException ex) {
 			// expected
+		}
+	}
+	
+	public void testRmiClientInterceptorRequiresUrl() throws Exception{
+		RmiClientInterceptor client = new RmiClientInterceptor();
+		client.setServiceInterface(IRemoteBean.class);
+
+		try {
+			client.afterPropertiesSet();
+			fail("url isn't set, expected IllegalArgumentException");
+		} 
+		catch(IllegalArgumentException e){
+			//expected
+		}
+	}
+	
+	public void testBogusRmiServiceExporter() throws Exception{
+		RmiServiceExporter exporter = new RmiServiceExporter();
+		exporter.setServiceName("bogusService");
+		exporter.setServicePort(9999);
+		exporter.setRegistryPort(8888);
+		RemoteBean testBean = new RemoteBean();
+		exporter.setServiceInterface(IRemoteBean.class);
+		exporter.setService(testBean);
+
+		try {
+			exporter.afterPropertiesSet();
+			fail("calling an unregistered service, should have thrown StubNotFoundException");
+		} 
+		catch(StubNotFoundException e){
+			//expected
+		}
+
+		//test the "service has no name" case
+		exporter.setServiceName(null);
+
+		try {
+			exporter.afterPropertiesSet();
+			fail("did not provide a name for the service, should have thrown IllegalArgumentException");
+		} 
+		catch(IllegalArgumentException illegalArg){
+			//expected
 		}
 	}
 
