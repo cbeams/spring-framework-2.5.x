@@ -48,11 +48,10 @@
 			</fileset>
 		</copy>
 
-		<available file="${conf.dir}" property="conf.exists" />
-
-		<antcall target="build.conf" />
-
 		<copy todir="${target.webclasses.dir}" file="${devtools.templates.dir}/conf/log4j.properties" filtering="on" failonerror="false" />
+
+		<available file="${conf.dir}" property="conf.exists" />
+		<antcall target="build.conf" />
 
 		<antcall target="build.webapp.libs" />
 	</target>
