@@ -31,7 +31,7 @@
 			<include name="commons-collections.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/xdoclet">
-			<include name="xjavadoc-1.0.jar"/>
+			<include name="xjavadoc-1.1.jar"/>
 		</fileset>
 
 	</path>
