@@ -4,6 +4,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditor;
 import java.util.Locale;
 import java.util.Properties;
+import java.io.File;
 
 import junit.framework.TestCase;
 
@@ -14,7 +15,7 @@ import org.springframework.beans.TestBean;
  * and other property editors.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PropertyEditorTestSuite.java,v 1.1.1.1 2003-08-14 16:21:07 trisberg Exp $
+ * @version $Id: PropertyEditorTestSuite.java,v 1.2 2003-12-10 09:10:31 jhoeller Exp $
  */
 public class PropertyEditorTestSuite extends TestCase {
 
@@ -137,6 +138,13 @@ public class PropertyEditorTestSuite extends TestCase {
 		classEditor.setAsText("org.springframework.beans.TestBean");
 		assertEquals(TestBean.class, classEditor.getValue());
 		assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
+	}
+
+	public void testFileEditor() {
+		PropertyEditor fileEditor = new FileEditor();
+		fileEditor.setAsText("C:/test/myfile.txt");
+		assertEquals(new File("C:/test/myfile.txt"), fileEditor.getValue());
+		assertEquals((new File("C:/test/myfile.txt")).getAbsolutePath(), fileEditor.getAsText());
 	}
 
 	public void testLocaleEditor() {
