@@ -202,6 +202,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public static final String SET = "set";
 
 	/**
+	 * The <code>PUT</code> action state/event identifier.
+	 */
+	public static final String PUT = "put";
+
+	/**
 	 * The <code>LOAD</code> event identifier.
 	 */
 	public static final String LOAD = "load";
@@ -813,7 +818,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param sessionExecutionStack
 	 * @param request
 	 */
-	protected void fireEndEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
+	protected void fireEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
 			final HttpServletRequest request) {
 		this.flowLifecycleListeners.forEach(new Block() {
 			protected void handle(Object o) {
