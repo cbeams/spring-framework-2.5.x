@@ -96,6 +96,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		}
+		//DK - is this check really necessary?
+		//should this 'config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE' be enough?
 		if (config.getTargetSource().getTargetClass() == null) {
 			throw new AopConfigException("Either an interface or a target is required for proxy creation");
 		}
