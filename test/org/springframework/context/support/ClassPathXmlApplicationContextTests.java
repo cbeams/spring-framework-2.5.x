@@ -22,27 +22,28 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.aop.support.AopUtils;
 
 /**
  * @author Juergen Hoeller
  */
-public class ClassPathXmlApplicationContextTestSuite extends TestCase {
+public class ClassPathXmlApplicationContextTests extends TestCase {
 
 	public void testMultipleConfigLocations() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
-				new String[] {"/org/springframework/context/support/contextB.xml",
-											"/org/springframework/context/support/contextC.xml",
-											"/org/springframework/context/support/contextA.xml"});
+				new String[] {
+					"/org/springframework/context/support/contextB.xml",
+					"/org/springframework/context/support/contextC.xml",
+					"/org/springframework/context/support/contextA.xml"});
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
@@ -54,6 +55,13 @@ public class ClassPathXmlApplicationContextTestSuite extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+	}
+
+	public void testMessageSourceAware() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/context*.xml");
+		Service service = (Service) ctx.getBean("service");
+		assertEquals(ctx, service.getMessageSource());
 	}
 
 	public void testChildWithProxy() throws Exception {
@@ -79,7 +87,7 @@ public class ClassPathXmlApplicationContextTestSuite extends TestCase {
 		    new ClassPathXmlApplicationContext("/org/springframework/beans/factory/xml/resource.xml") {
 			public Resource getResource(String location) {
 				if ("classpath:org/springframework/beans/factory/xml/test.properties".equals(location)) {
-					return new ClassPathResource("test.properties", ClassPathXmlApplicationContextTestSuite.class);
+					return new ClassPathResource("test.properties", ClassPathXmlApplicationContextTests.class);
 				}
 				return super.getResource(location);
 			}

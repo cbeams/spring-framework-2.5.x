@@ -16,6 +16,22 @@
 
 package org.springframework.context.support;
 
-public class Service {
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
+
+/**
+ * @author Alef Arendsen
+ */
+public class Service implements MessageSourceAware {
+
+	private MessageSource messageSource;
+
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+
+	public MessageSource getMessageSource() {
+		return messageSource;
+	}
 
 }
