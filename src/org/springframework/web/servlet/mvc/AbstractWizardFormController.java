@@ -157,14 +157,18 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Callback for custom post-processing in terms of binding and validation.
-	 * Called on each submit, after standard binding and validation,
-	 * and before error evaluation.
+	 * Called on each submit, after standard binding but before page-specific
+	 * validation of this wizard form controller.
+	 * <p>Note: AbstractWizardFormController does not perform standand
+	 * validation on binding but rather applies page-specific validation
+	 * on processing the form submission.
 	 * @param request current HTTP request
 	 * @param command bound command
 	 * @param errors Errors instance for additional custom validation
 	 * @param page current wizard page
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
+	 * @see #processFormSubmission
 	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page)

@@ -69,12 +69,15 @@ public class ParameterizableViewController extends AbstractController {
 	private String viewName;
 	
 	/**
-	 * Set the view name to return.
+	 * Set the name of the view to delegate to.
 	 */
 	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 	
+	/**
+	 * Return the name of the view to delegate to.
+	 */
 	public String getViewName() {
 		return viewName;
 	}
@@ -84,8 +87,8 @@ public class ParameterizableViewController extends AbstractController {
 	}
 
 	protected void initApplicationContext() {
-		if (viewName == null) {
-			throw new IllegalArgumentException("viewName must be set in " + getClass().getName());
+		if (this.viewName == null) {
+			throw new IllegalArgumentException("viewName is required");
 		}
 	}
 
