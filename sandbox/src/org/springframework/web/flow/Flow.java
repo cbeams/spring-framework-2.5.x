@@ -139,14 +139,6 @@ import org.springframework.util.closure.support.Block;
  */
 public class Flow implements FlowEventProcessor, Serializable {
 
-	private static final long serialVersionUID = 3258695403305513015L;
-
-	public static final String FLOW_SESSION_ID_PARAMETER_NAME = "_flowId";
-
-	public static final String EVENT_ID_PARAMETER_NAME = "_eventId";
-
-	public static final String CURRENT_STATE_PARAMETER_NAME = "_currentStateId";
-
 	/**
 	 * The <code>ADD</code> action state/event identifier.
 	 */
@@ -291,6 +283,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
+
+	private static final long serialVersionUID = 3258695403305513015L;
+
+	protected static final String DOT_SEPARATOR = ".";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -487,17 +483,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlowStateId
-	 * @param transition
-	 * @return
-	 */
-	public boolean addSubFlowState(String id, Transition[] transitions) {
-		return add(new SubFlowState(id, id, transitions));
-	}
-
-	/**
-	 * @param subFlowStateId
-	 * @param transition
+	 * @param id
+	 * @param subFlow
+	 * @param transitions
 	 * @return
 	 */
 	public boolean addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
@@ -506,13 +494,16 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param id
+	 * @param subFlowId
 	 * @param attributesMapperId
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, String attributesMapperId, String subFlowDefaultFinishStateId) {
-		return addSubFlowState(id, attributesMapperId, new Transition[] { onBack(subFlowDefaultFinishStateId),
-				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
+	public boolean addSubFlowState(String id, String subFlowId, String attributesMapperId,
+			String subFlowDefaultFinishStateId) {
+		return addSubFlowState(id, subFlowId, attributesMapperId, new Transition[] {
+				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
+				onFinish(subFlowDefaultFinishStateId) });
 	}
 
 	/**
@@ -529,13 +520,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param subFlowStateId
+	 * @param id
+	 * @param subFlowId
 	 * @param attributesMapperId
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlowState(String id, String attributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(id, id, attributesMapperId, transitions));
+	public boolean addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
+		return add(new SubFlowState(id, subFlowId, attributesMapperId, transitions));
 	}
 
 	/**
@@ -2034,6 +2026,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return buildStateId(bindAndValidateStateIdPrefix, BIND_AND_VALIDATE);
 	}
 
+	/**
+	 * @param bindActionStateIdPrefix
+	 * @return
+	 */
 	public String bind(String bindActionStateIdPrefix) {
 		return buildStateId(bindActionStateIdPrefix, BIND);
 	}
@@ -2055,12 +2051,20 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param editStateIdPrefix
+	 * @return
+	 */
+	public String edit(String editStateIdPrefix) {
+		return buildStateId(editStateIdPrefix, EDIT);
+	}
+
+	/**
 	 * @param stateIdPrefix
 	 * @param stateIdSuffix
 	 * @return
 	 */
 	protected String buildStateId(String stateIdPrefix, String stateIdSuffix) {
-		return stateIdPrefix + "." + stateIdSuffix;
+		return stateIdPrefix + DOT_SEPARATOR + stateIdSuffix;
 	}
 
 	/**
@@ -2069,7 +2073,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String attributesMapper(String attributesMapperBeanNamePrefix) {
 		if (!attributesMapperBeanNamePrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
-			return attributesMapperBeanNamePrefix + "." + ATTRIBUTES_MAPPER_ID_SUFFIX;
+			return attributesMapperBeanNamePrefix + DOT_SEPARATOR + ATTRIBUTES_MAPPER_ID_SUFFIX;
 		}
 		else {
 			return attributesMapperBeanNamePrefix;

@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * @author Keith Donald
@@ -32,8 +33,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 public class FlowTests extends TestCase {
 
 	private static String PERSON_DETAILS = "personDetails";
-
-	private static String PET_DETAILS = "petDetails";
 
 	public void testCreateFlowWithListener() {
 		testCreateFlow(true);
@@ -47,17 +46,17 @@ public class FlowTests extends TestCase {
 	private void testCreateFlow(boolean listen) {
 		final String flowId = "testFlow";
 
-		String getStateId = "personDetails.get";
-		String viewStateId = "personDetails.view";
-		String submitStateId = "personDetails.bindAndValidate";
+		HttpServletRequest request = new MockHttpServletRequest();
+		HttpServletResponse response = new MockHttpServletResponse();
 
-		String submitEventId = "submit";
-		String finishEventId = "finish";
+		HttpServletRequest request2 = new MockHttpServletRequest();
 
-		HttpServletRequest req1 = new MockHttpServletRequest();
-		HttpServletRequest req2 = new MockHttpServletRequest();
+		TestFlowDependencyLookup flow = new TestFlowDependencyLookup(flowId);
+		
+		String getStateId = flow.get(PERSON_DETAILS);
+		String viewStateId = flow.view(PERSON_DETAILS);
+		String submitStateId = flow.bindAndValidate(PERSON_DETAILS);
 
-		TestFlow flow = new TestFlow(flowId);
 		MockControl flowDaoMc = MockControl.createControl(FlowDao.class);
 		FlowDao dao = (FlowDao)flowDaoMc.getMock();
 		dao.getActionBean("personDetails.get");
@@ -67,54 +66,56 @@ public class FlowTests extends TestCase {
 		flowDaoMc.replay();
 		flow.setFlowDao(dao);
 
-		FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
+	}
 
-		MockControl flowListenerMc = MockControl.createControl(FlowSessionExecutionListener.class);
-		FlowSessionExecutionListener mockListener = (FlowSessionExecutionListener)flowListenerMc.getMock();
+	private class TestFlowDependencyLookup extends Flow {
 
-		mockListener.started(fes);
-		flowListenerMc.setVoidCallable();
-
-		mockListener.stateTransitioned(fes, null, flow.getRequiredState(getStateId));
-		flowListenerMc.setVoidCallable();
-
-		mockListener.stateTransitioned(fes, flow.getRequiredState(getStateId), flow.getRequiredState(viewStateId));
-		flowListenerMc.setVoidCallable();
-
-		mockListener.stateTransitioned(fes, flow.getRequiredState(viewStateId), flow.getRequiredState(submitStateId));
-		flowListenerMc.setVoidCallable();
-
-		flowListenerMc.replay();
-
-		if (listen) {
-			flow.setFlowSessionExecutionListener(mockListener);
+		public TestFlowDependencyLookup(String id) {
+			super(id);
+			initFlow();
 		}
 
-		assertEquals(1, flow.getViewStateCount());
+		protected void initFlow() {
+			add(createGetState(PERSON_DETAILS));
+			add(createViewState(PERSON_DETAILS));
+			add(createBindAndValidateState(PERSON_DETAILS));
+			add(createFinishEndState());
+		}
+	};
 
-		FlowSessionExecutionStartResult result = flow.start(req1, null, null);
-		ViewDescriptor vdesc = result.getStartingView();
-		fes = (FlowSessionExecutionStack)result.getFlowSessionExecutionInfo();
+	private class TestMasterFlowDependencyLookup extends Flow {
+		private String PERSONS_LIST = "persons";
 
-		assertEquals(viewStateId, vdesc.getViewName());
-		assertEquals(0, vdesc.getModel().size());
+		public TestMasterFlowDependencyLookup() {
+			super("test.masterFlow");
+		}
 
-		// ignoring now b/c this is failing on the above flowEnded() call that
-		// is currently untestable (that is indeed working correctly)
-		vdesc = flow.execute(submitEventId, viewStateId, fes, req2, null);
-		assertEquals(viewStateId, vdesc.getViewName());
-		assertEquals(0, vdesc.getModel().size());
-
-		flowDaoMc.verify();
-
-		if (listen) {
-			flowListenerMc.verify();
+		protected void initFlow() {
+			add(createGetState(PERSONS_LIST));
+			add(createViewState(PERSONS_LIST, onSubmit(edit(PERSON_DETAILS))));
+			addSubFlowState(edit(PERSON_DETAILS), edit(PERSON_DETAILS), null, get(PERSONS_LIST));
+			add(createFinishEndState());
 		}
 	}
 
-	private class TestFlow extends Flow {
+	private class TestFlowTypeSafeDependencyLookup extends Flow {
 
-		public TestFlow(String id) {
+		public TestFlowTypeSafeDependencyLookup(String id) {
+			super(id);
+			initFlow();
+		}
+
+		protected void initFlow() {
+			add(createGetState(PERSON_DETAILS));
+			add(createViewState(PERSON_DETAILS));
+			add(createBindAndValidateState(PERSON_DETAILS));
+			add(createFinishEndState("viewPersonDetails"));
+		}
+	};
+
+	private class TestFlowTypeSafeDependencyInjection extends Flow {
+
+		public TestFlowTypeSafeDependencyInjection(String id) {
 			super(id);
 			initFlow();
 
@@ -124,7 +125,7 @@ public class FlowTests extends TestCase {
 			add(createGetState(PERSON_DETAILS));
 			add(createViewState(PERSON_DETAILS));
 			add(createBindAndValidateState(PERSON_DETAILS));
-			add(createFinishEndState("viewPersonDetails"));
+			add(createFinishEndState());
 		}
 	};
 
