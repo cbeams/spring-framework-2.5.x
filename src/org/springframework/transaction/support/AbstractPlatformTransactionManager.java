@@ -22,14 +22,13 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * <li>applies the appropriate propagation behavior;
  * <li>determines programmatic rollback on commit;
  * <li>applies the appropriate modification on rollback
- * (actual rollback or setting rollback only);
+ * (actual rollback or setting rollback-only);
  * <li>triggers registered synchronization callbacks
  * (if transactionSynchronization is active).
  * </ul>
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @see #setTransactionSynchronization
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
@@ -42,11 +41,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Set if this transaction manager should activate the thread-bound
 	 * transaction synchronization support. The default can very between
-	 * transaction manager implementations, this class specifies false.
+	 * transaction manager implementations; this class specifies false.
 	 * <p>Note that transaction synchronization isn't supported for
 	 * multiple concurrent transactions by different transaction managers.
 	 * Only one transaction manager is allowed to activate it at any time.
 	 * @see TransactionSynchronizationManager
+	 * @see TransactionSynchronization
 	 */
 	public void setTransactionSynchronization(boolean transactionSynchronization) {
 		this.transactionSynchronization = transactionSynchronization;
@@ -127,7 +127,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #rollback
 	 */
 	public void commit(TransactionStatus status) throws TransactionException {
-		if (status.isRollbackOnly() || isRollbackOnly(status.getTransaction())) {
+		if (status.isRollbackOnly() ||
+		    (status.getTransaction() != null && isRollbackOnly(status.getTransaction()))) {
 			logger.debug("Transactional code has requested rollback");
 			rollback(status);
 		}
@@ -255,7 +256,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * not available (e.g. no JTA UserTransaction retrievable from JNDI)
 	 * @throws TransactionException in case of lookup or system errors
 	 */
-	protected abstract Object doGetTransaction() throws CannotCreateTransactionException, TransactionException;
+	protected abstract Object doGetTransaction() throws TransactionException;
 
 	/**
 	 * Check if the given transaction object indicates an existing,
@@ -269,7 +270,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Begin a new transaction with the given transaction definition.
 	 * Does not have to care about applying the propagation behavior,
-	 * as this has already been cared about by the abstract manager.
+	 * as this has already been handled by this abstract manager.
 	 * @param transaction transaction object returned by doGetTransaction()
 	 * @param definition TransactionDefinition instance, describing
 	 * propagation behavior, isolation level, timeout etc.
