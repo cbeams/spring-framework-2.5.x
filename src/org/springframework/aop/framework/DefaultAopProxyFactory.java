@@ -56,11 +56,11 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 		try {
 			Class.forName(CGLIB_ENHANCER_CLASS_NAME);
 			cglibAvailable = true;
-			logger.info("CGLIB2 available - proxyTargetClass feature enabled");
+			logger.info("CGLIB2 available: proxyTargetClass feature enabled");
 		}
 		catch (ClassNotFoundException ex) {
 			cglibAvailable = false;
-			logger.info("CGLIB2 not available - proxyTargetClass feature disabled");
+			logger.info("CGLIB2 not available: proxyTargetClass feature disabled");
 		}
 	}
 

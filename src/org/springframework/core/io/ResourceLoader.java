@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.core.io;
 
@@ -38,7 +38,7 @@ package org.springframework.core.io;
  */
 public interface ResourceLoader {
 
-	/** Pseudo URL prefix for loading from the class path */
+	/** Pseudo URL prefix for loading from the class path: "classpath:" */
 	String CLASSPATH_URL_PREFIX = "classpath:";
 
 	/**
