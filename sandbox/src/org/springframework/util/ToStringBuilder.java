@@ -15,6 +15,11 @@
  */
 package org.springframework.util;
 
+import java.beans.PropertyDescriptor;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+
 /**
  * Helper class for building pretty-printing toString methods (according to
  * Spring style conventions of course.)
@@ -27,7 +32,21 @@ public class ToStringBuilder {
     private ToStringStyler styler;
     private Object object;
     private boolean field;
-    
+
+    public static final String propertiesToString(Object bean) {
+        ToStringBuilder builder = new ToStringBuilder(bean);
+        BeanWrapper wrapper = new BeanWrapperImpl(bean);
+        PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();
+        for (int i = 0; i < properties.length; i++) {
+            PropertyDescriptor property = properties[i];
+            if (property.getReadMethod() != null) {
+                builder.append(property.getDisplayName(), wrapper
+                        .getPropertyValue(property.getName()));
+            }
+        }
+        return builder.toString();
+    }
+
     /**
      * Creates a ToStringBuilder for this object.
      * 
@@ -165,7 +184,7 @@ public class ToStringBuilder {
             field = true;
         }
     }
-    
+
     /**
      * Return the string built by this builder.
      * 
