@@ -19,7 +19,7 @@ import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
-import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
@@ -63,7 +63,9 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addViewState(new Transition[] { onBackFinish(), onSelect(setColleagueId) });
 
 		// set the selected colleague (chosen from the person's colleague list)
-		Action setAction = new EventParameterMapperAction(new Mapping("id", colleagueId, getConversionExecutor(Long.class)));
+		EventParameterMapperAction setAction =
+			new EventParameterMapperAction(new Mapping("id", colleagueId, getConversionExecutor(Long.class)));
+		setAction.setTargetScope(ScopeType.FLOW);
 		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
 
 		// spawn subflow to view selected colleague details
