@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<!--
+
+  Spring - Velocity configuration example
+  
+  $Id: velocity.html,v 1.1 2003-10-22 16:59:30 jhoeller Exp $
+  
+-->
+<html>
+    <head>
+        <title>Spring - Velocity configuration example</title>
+        <style type="text/css">
+        <!--
+            * {
+                font-family: verdana,arial,sans-serif;
+            }
+            body {
+                font-size: 0.8em;
+            }
+            h1 { font-size: 165%; }
+            h2 { font-size: 130%; }
+            h3 { font-size: 100%; }   
+            h4,h5,h6 { font-size: 80%; }   
+            p,div,td,th {
+                font-size: 100%;
+            }
+            code,pre {
+                font-family: "courier new","andale mono",courier,monospace;
+                font-size: 85%;
+            }
+            .code {
+                border: 1px solid #cccccc;
+                background-color: f9fff9;
+                padding: 5px;
+            }
+            .comment {
+                font-family: "courier new","andale mono",courier,monospace;
+                color: #a0a0a0;
+            }
+        -->
+        </style>
+    </head>
+    
+    <body>           
+        
+        <h1>Spring - Velocity configuration example</h1>
+        <p>Darren Davison, Oct. 2003</p>
+        
+        <p>
+            This is a short document showing how to configure a Spring MVC application for use with
+            <a href="http://jakarta.apache.org/velocity">Velocity</a> view technology.  Spring 
+            integrates many view technologies, of which Velocity is one.  This is not a tutorial
+            on Spring MVC, or Velocity for which other resources are readily available.  The example
+            configuration was tested using velocity-1.3.1 and spring-full-1.0M1
+        </p>
+        
+        <h2>Dependencies</h2>
+        <p>
+            There is one dependency that your web application will need to satisfy before
+            working with Velocity, namely that <code>velocity-1.x.x.jar</code> needs to be available.  
+            Typically this is included in the WEB-INF/lib folder where it is guaranteed to be found
+            by a J2EE server and added to the classpath for your application.   It is of course 
+            assumed that you already have the <code>spring-full.jar</code> (or equivalent) in your
+            WEB-INF/lib folder too!  The latest stable velocity jar is normally supplied as part
+            of the Spring framework and can be copied from there.
+        </p>
+        
+        <h2>Configuration</h2>
+        <p>
+            A few files are considered for correct configuration of the Velocity environment:
+        </p>
+        
+        <h3>Dispatcher servlet context</h3>
+        <p>
+            The configuration file for your Spring dispatcher servlet (usually 
+            <code>WEB-INF/[servletname]-servlet.xml</code>) should already contain a bean
+            definition for the view resolver.  We'll also add a bean here to configure the
+            Velocity environment.  I've chosen to call my dispatcher 'frontcontroller' so my config
+            file names reflect this.
+        </p>
+        
+        <p>
+            The following code examples show the various configuration files with appropriate 
+            comments.
+        </p>
+        
+        <h4>Partial WEB-INF/frontcontroller-servlet.xml</h4>
+        <pre class="code">
+        <span class="comment">
+&lt;!-- ===========================================================--&gt;
+&lt;!-- View resolver. Required by web framework.                  --&gt;
+&lt;!-- ===========================================================--&gt;
+&lt;!--
+    View resolvers can be configured with ResourceBundles or XML files.  If you need
+    different view resolving based on Locale, you have to use the resource bundle resolver, 
+    otherwise it makes no difference.  I simply prefer to keep the Spring configs and 
+    contexts in XML.  See Spring documentation for more info.
+--&gt;</span>
+&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
+    &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="location"&gt;&lt;value&gt;/WEB-INF/frontcontroller-views.xml&lt;/value&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+
+
+<span class="comment">
+&lt;!-- ===========================================================--&gt;
+&lt;!-- Velocity configurer.                                       --&gt;
+&lt;!-- ===========================================================--&gt;
+&lt;!--
+    The next bean sets up the Velocity environment for us based on a properties file, the 
+    location of which is supplied here and set on the bean in the normal way.  My example shows
+    that the bean will expect to find our velocity.properties file in the root of the 
+    WEB-INF folder.  In fact, since this is the default location, it's not necessary for me
+    to supply it here.  Another possibility would be to specify all of the velocity
+    properties here in a property set called "velocityProperties" and dispense with the
+    actual velocity.properties file altogether.
+--&gt;</span>
+&lt;bean 
+    id="velocityConfig" 
+    class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
+    singleton="true"&gt;
+    &lt;property name="configLocation"&gt;&lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;&lt;/property&gt;          
+&lt;/bean&gt;
+        </pre>
+        
+        
+        <h3>Velocity.properties</h3>
+        <p>
+            This file contains the values that are passed to the Velocity runtime in order to
+            configure velocity itself.  Only a few properties are actually required, but many more
+            optional properties are available - see the Velocity docs for more information.  Here,
+            I'm just demonstrating the bare minimum to get Velocity up and running in your Spring
+            MVC application.
+        </p>
+        <p>
+            The main property values concern the location of the Velocity templates themselves.
+            Velocity templates can be loaded from the classpath or the file system and there are pros
+            and cons for both.  Loading from the classpath is entirely portable and will work on all
+            target servers, but you may find that the templates clutter your java packages (unless you
+            create a new source tree for them).  A further downside of classpath storage is that during
+            development, changing anything in the source tree often causes a refresh of the resource in
+            the WEB-INF/classes tree and this in turn may cause your development server to restart the 
+            application (hot-deploying of code).  This can be irritating.  Once most of the development
+            is complete though, you could store the templates in a jar file which would make them
+            available to the application if this were placed in WEB-INF/lib.
+        </p>
+        <p>
+            This example stores velocity templates on the file system somewhere under WEB-INF so
+            that they are not directly available to the client browsers, but don't cause an application
+            restart in development every time I change one.  The downside is that the target server
+            may not be able to resolve the path to these files correctly, particularly if the
+            target server doesn't explode WAR modules on the file system.  The file method works
+            fine for Tomcat 4.1.x, WebSphere 4.x and WebSphere 5.x.  Your mileage may vary.
+        </p>
+        
+        <h4>WEB-INF/velocity.properties example</h4>
+        <pre class="code">
+        <span class="comment">
+#
+# velocity.properties - example configuration
+#
+
+
+# uncomment the next two lines to load templates from the 
+# classpath (WEB-INF/classes)
+#resource.loader=class
+#class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+
+# comment the next two lines to stop loading templates from the
+# file system</span>
+resource.loader=file
+file.resource.loader.class=org.apache.velocity.runtime.resource.loader.FileResourceLoader
+
+<span class="comment">
+# additional config for file system loader only.. tell Velocity where the root
+# directory is for template loading.  You can define multiple root directories
+# if you wish, I just use the one here.  See the text below for a note about
+# the ${webapp.root}</span>
+file.resource.loader.path=${webapp.root}/WEB-INF/velocity
+
+<span class="comment">
+# caching should be 'true' in production systems, 'false' is a development
+# setting only.  Change to 'class.resource.loader.cache=false' for classpath
+# loading</span>
+file.resource.loader.cache=false
+<span class="comment">
+# override default logging to direct velocity messages
+# to our application log for example.  Assumes you have 
+# defined a log4j.properties file</span>
+runtime.log.logsystem.log4j.category=com.mycompany.myapplication 
+
+        </pre>
+        
+        <p>
+            The file resource loader configuration above uses a marker to denote the root of
+            the web application on the file system ${webapp.root}.  This marker will be
+            translated into the actual OS-specific path by the Spring code prior to supplying
+            the properties to Velocity.  This is what makes the file resource loader non-portable 
+            in some servers.  The actual name of the marker itself can be changed if you consider it 
+            important by defining a different "appRootMarker" for VelocityConfigurer.  See the Spring
+            documentation for details on how to do this.
+        </p>
+        
+        
+        <h3>View configuration</h3>
+        <p>
+            The last step in configuration is to define some views that will be rendered with
+            velocity templates.  Views are always defined in a consistent manner in Spring
+            context files.  As noted earlier, this example uses an XML file to define view
+            beans, but a properties file (ResourceBundle) can also be used.  The name of the
+            view definition file was defined earlier in our ViewResolver bean - part of the 
+            <code>WEB-INF/frontcontroller-servlet.xml</code> file.
+        </p>
+        
+        <h4>partial WEB-INF/frontcontroller-views.xml</h4>
+        <pre class="code">
+        <span class="comment">
+&lt;!--
+  Views can be hierarchical, here's an example of a parent view that 
+  simply defines the class to use and sets a default template which
+  will normally be overridden in child definitions.
+--&gt;</span>
+&lt;bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView"&gt;
+    &lt;property name="templateName"&gt;&lt;value&gt;mainTemplate.vm&lt;/value&gt;&lt;/property&gt;        
+&lt;/bean&gt;
+
+<span class="comment">&lt;!--
+  - The main view for the home page.  Since we don't set a template name, the value
+  from the parent is used.
+--&gt;</span>
+&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
+    &lt;property name="attributes"&gt;
+        &lt;props&gt;
+            &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
+        &lt;/props&gt;
+    &lt;/property&gt;     
+&lt;/bean&gt;  
+
+<span class="comment">&lt;!--
+  - Another view - this one defines a different velocity template.
+--&gt;</span>
+&lt;bean id="secondaryView" parent="parentVelocityView"&gt;
+    &lt;property name="templateName"&gt;&lt;value&gt;secondaryTemplate.vm&lt;/value&gt;&lt;/property&gt;  
+    &lt;property name="attributes"&gt;
+            &lt;props&gt;
+                &lt;prop key="title"&gt;My Velocity Secondary Page&lt;/prop&gt;
+            &lt;/props&gt;
+    &lt;/property&gt;    
+&lt;/bean&gt;   
+        </pre>
+        
+        
+        <h3>Create velocity templates and test</h3>
+        <p>
+            Finally, you simply need to create the actual velocity templates.  We have defined views
+            that reference two templates, <code>mainTemplate.vm</code> and <code>secondaryTemplate.vm</code>
+            Both of these files will live in WEB-INF/velocity/ as noted in the velocity.properties file
+            above.  If you chose a classpath loader in velocity.properties, these files would live
+            in the default package (WEB-INF/classes), or in a jar file under WEB-INF/lib.
+        </p>
+        
+        <p>
+            Here's what our 'secondaryView' might look like (simplified HTML)
+        </p>
+        
+        <h4>WEB-INF/velocity/secondaryTemplate.vm</h4>
+        <pre class="code">
+        <span class="comment">
+## $title is set in the view definition file for this view.</span>
+&lt;html&gt;
+    &lt;head&gt;&lt;title&gt;$title&lt;/title&gt;&lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;This is $title!!&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+        
+        <p>
+            Now, when your controllers return a <code>ModelAndView</code> with the "secondaryView" set as the
+            view to render, Velocity should kick in with the above page.
+        </p>
+        
+        
+        <h2>Summary</h2>
+        <p>
+            To summarize, this is the tree structure of files discussed in the example above.  Only a 
+            partial tree is shown, some required directories are not highlighted here.  Incorrect
+            file locations are probably the major reason for velocity views not working, with incorrect
+            properties in the view definitions a close second.
+        </p>
+        
+        <pre class="code">
+ProjectRoot
+    |
+    +- WebContent
+        |
+        +- WEB-INF
+              |
+              +- lib
+              |    |
+              |    +- velocity-1.3.1.jar
+              |    +- spring-full-1.0M1.jar
+              |
+              +- velocity
+              |    |
+              |    +- mainTemplate.vm
+              |    +- secondaryTemplate.vm
+              |
+              +- frontcontroller-servlet.xml
+              +- frontcontroller-views.xml
+              +- velocity.properties
+          </pre>
+          
+    </body>
+</html>
