@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.datasource;
 
@@ -22,10 +22,11 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 
 /**
  * Connection holder, wrapping a JDBC Connection.
- * Features rollback-only support for nested JDBC transactions.
- *
- * <p>DataSourceTransactionManager binds instances of this class
+ * DataSourceTransactionManager binds instances of this class
  * to the thread, for a given DataSource.
+ *
+ * <p>Inherits rollback-only support for nested JDBC transactions
+ * and reference count functionality from the base class.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *

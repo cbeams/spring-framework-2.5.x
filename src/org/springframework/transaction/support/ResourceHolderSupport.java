@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.support;
 
@@ -26,6 +26,7 @@ import java.util.Date;
  * to determine transactional timeouts.
  *
  * @author Juergen Hoeller
+ * @since 02.02.2004
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager#doBegin
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  */
@@ -36,6 +37,8 @@ public abstract class ResourceHolderSupport {
 	private boolean rollbackOnly;
 
 	private Date deadline;
+
+	private int referenceCount = 0;
 
 
 	/**
@@ -120,12 +123,36 @@ public abstract class ResourceHolderSupport {
 	}
 
 	/**
+	 * Increase the reference count by one because the holder has been requested
+	 * (i.e. someone requested the resource held by it).
+	 */
+	public void requested() {
+		this.referenceCount++;
+	}
+
+	/**
+	 * Decrease the reference count by one because the holder has been released
+	 * (i.e. someone released the resource held by it).
+	 */
+	public void released() {
+		this.referenceCount--;
+	}
+
+	/**
+	 * Return whether there are still open references to this holder.
+	 */
+	public boolean isOpen() {
+		return (this.referenceCount > 0);
+	}
+
+	/**
 	 * Clear the transaction state of this resource holder.
 	 */
 	public void clear() {
 		this.synchronizedWithTransaction = false;
 		this.rollbackOnly = false;
 		this.deadline = null;
+		this.referenceCount = 0;
 	}
 
 }

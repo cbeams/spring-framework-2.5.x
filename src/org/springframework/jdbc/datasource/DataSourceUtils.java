@@ -57,7 +57,14 @@ import org.springframework.util.Assert;
  */
 public abstract class DataSourceUtils {
 
+	/**
+	 * Order value for TransactionSynchronization objects that clean up
+	 * JDBC Connections.
+	 */
+	public static final int CONNECTION_SYNCHRONIZATION_ORDER = 1000;
+
 	private static final Log logger = LogFactory.getLog(DataSourceUtils.class);
+
 
 	/**
 	 * Look up the specified DataSource in JNDI, assuming that the lookup
@@ -175,6 +182,7 @@ public abstract class DataSourceUtils {
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (conHolder != null) {
+			conHolder.requested();
 			return conHolder.getConnection();
 		}
 
@@ -187,7 +195,9 @@ public abstract class DataSourceUtils {
 			conHolder = new ConnectionHolder(con);
 			TransactionSynchronizationManager.bindResource(dataSource, conHolder);
 			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, dataSource));
+			conHolder.requested();
 		}
+
 		return con;
 	}
 
@@ -314,6 +324,7 @@ public abstract class DataSourceUtils {
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (conHolder != null && con == conHolder.getConnection()) {
 			// It's the transactional Connection: Don't close it.
+			conHolder.released();
 			return;
 		}
 		
@@ -341,6 +352,10 @@ public abstract class DataSourceUtils {
 			this.dataSource = dataSource;
 		}
 
+		public int getOrder() {
+			return CONNECTION_SYNCHRONIZATION_ORDER;
+		}
+
 		public void suspend() {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
@@ -350,8 +365,25 @@ public abstract class DataSourceUtils {
 		}
 
 		public void beforeCompletion() {
-			TransactionSynchronizationManager.unbindResource(this.dataSource);
-			closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.dataSource);
+			// Release Connection early if the holder is not open anymore
+			// (i.e. not used by another resource like a Hibernate Session
+			// that has its own cleanup via transaction synchronization),
+			// to avoid issues with strict JTA implementations that expect
+			// the close call before transaction completion.
+			if (!this.connectionHolder.isOpen()) {
+				TransactionSynchronizationManager.unbindResource(this.dataSource);
+				closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.dataSource);
+			}
+		}
+
+		public void afterCompletion(int status) {
+			// If we haven't closed the Connection in beforeCompletion,
+			// close it now. The holder might have been used for other
+			// cleanup in the meantime, for example by a Hibernate Session.
+			if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
+				TransactionSynchronizationManager.unbindResource(this.dataSource);
+				closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.dataSource);
+			}
 		}
 	}
 
