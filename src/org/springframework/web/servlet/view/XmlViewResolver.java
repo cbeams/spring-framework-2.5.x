@@ -6,6 +6,7 @@
 package org.springframework.web.servlet.view;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 
 import javax.servlet.ServletException;
@@ -99,7 +100,8 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 			return this.cachedFactory;
 		}
 
-		BeanFactory xbf = new XmlBeanFactory(getApplicationContext().getResourceAsStream(this.location));
+		InputStream is = getApplicationContext().getResourceAsStream(this.location);
+		BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext());
 		if (isCache()) {
 			this.cachedFactory = xbf;
 		}

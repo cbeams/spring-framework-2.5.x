@@ -120,9 +120,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 		}
 
 		ResourceBundle bundle = ResourceBundle.getBundle(this.basename, locale, Thread.currentThread().getContextClassLoader());
-		ListableBeanFactoryImpl lbf = new ListableBeanFactoryImpl();
+		ListableBeanFactoryImpl lbf = new ListableBeanFactoryImpl(getApplicationContext());
 		lbf.setDefaultParentBean(this.defaultParentView);
-		lbf.registerBeanDefinitions(bundle, null);
+		lbf.registerBeanDefinitions(bundle);
 		if (isCache()) {
 			this.cachedFactories.put(locale, lbf);
 		}
