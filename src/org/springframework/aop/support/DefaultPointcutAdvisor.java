@@ -21,32 +21,25 @@ import java.io.Serializable;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.core.Ordered;
 
 /**
  * Convenient pointcut-driven advisor implementation.
  *
  * <p>This is the most commonly used Advisor implementation. It can be
  * used with any pointcut and advice type, except for introductions.
- * There is normally no need to subclass this class, or to
- * implement custom Advisors.
+ * There is normally no need to subclass this class, or to implement
+ * custom Advisors.
  *
  * @author Rod Johnson
  */
-public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
-
-	private int order = Integer.MAX_VALUE;
+public class DefaultPointcutAdvisor extends AbstractPointcutAdvisor implements Serializable {
 
 	private Pointcut pointcut = Pointcut.TRUE;
-	
-	private Advice advice;
-	
+
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
-	 * Advice must be set before use using
-	 * setter methods. Pointcut will normally be set
-	 * also, but defaults to true.
+	 * Advice must be set before use using setter methods.
+	 * Pointcut will normally be set also, but defaults to true.
 	 */
 	public DefaultPointcutAdvisor() {
 	}
@@ -54,7 +47,7 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 	/**
 	 * Create a DefaultPointcutAdvisor that matches all methods.
 	 * Pointcut.TRUE will be used as pointcut.
-	 * @param advice advice to use
+	 * @param advice the advice to use
 	 */
 	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
@@ -68,15 +61,7 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 	 */
 	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
-		this.advice = advice;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	public int getOrder() {
-		return order;
+		setAdvice(advice);
 	}
 
 	public void setPointcut(Pointcut pointcut) {
@@ -85,30 +70,6 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 
 	public Pointcut getPointcut() {
 		return pointcut;
-	}
-
-	public void setAdvice(Advice advice) {
-		this.advice = advice;
-	}
-
-	public Advice getAdvice() {
-		return advice;
-	}
-
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
-	}
-
-	public boolean equals(Object o) {
-		if (!(o instanceof DefaultPointcutAdvisor)) {
-			return false;
-		}
-		DefaultPointcutAdvisor other = (DefaultPointcutAdvisor) o;
-		return other.advice.equals(this.advice) && other.pointcut.equals(this.pointcut);
-	}
-	
-	public String toString() {
-		return "DefaultPointcutAdvisor: pointcut [" + this.pointcut + "], advice [" + this.advice + "]";
 	}
 
 }
