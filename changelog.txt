@@ -6,28 +6,51 @@ http://www.springframework.org
 Changes in version 1.1 final (31.8.2004)
 ----------------------------------------
 
+Package org.springframework.aop
+* ProxyFactoryBean returns full target class as object type in case of a singleton
+* reworked AbstractPrototypeBasedTargetSource's target class check to look for bean class on BeanDefinition first
+* deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favour of "getNrOfObjects"/"getNrOfHits" etc
+
 Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
 * refined BeanWrapperImpl's "findCustomEditor" to consider editors registered for all path variations without index/key
+* added "getBeanClass" method to BeanDefinition interface, available via ConfigurableBeanFactory
+
+Package org.springframework.ejb
+* reworked AbstractSlsbInvokerInterceptor's "cacheHome" feature to not hold a proxy as instance variable if not caching
+* added "lookupHomeOnStartup" flag to AbstractSlsbInvokerInterceptor, to be turned off for lazy fetching of home object
+* added "refreshHomeOnConnectFailure" to AbstractRemoteSlsbInvokerInterceptor, for automatic retry if connect failed
+* changed AbstractRemoteSlsbInvokerInterceptor's abstract method to "doInvoke" (warning: not backwards-compatible!)
+* factored out "getSessionBeanInstance" and "releaseSessionBeanInstance" methods in SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
 * added support for WebSphere 4 to WebSphereNativeJdbcExtractor, auto-detecting WebSphere 5 and 4 now
 
-Package org.springframework.orm
-* fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
-
 Package org.springframework.jms
 * reworked DynamicDestinationResolver to work with both JMS 1.1 and JMS 1.0.2
 * reworked JndiDestinationResolver to delegate for dynamic destinations, by default to a DynamicDestinationResolver
+* added "cache" flag to JndiDestinationResolver, to allow for turning off the caching of Destination objects from JNDI
 * added support for ObjectMessage to SimpleMessageConverter, converting between Serializable objects and ObjectMessages
 
 Package org.springframework.jndi
 * added "rebind" operation to JndiTemplate, analogous to the existing "lookup", "bind" and "unbind" operations
 * factored out JndiAccessor base class from JndiLocatorSupport, holding "jndiTemplate" and "jndiEnvironment" properties
+* deprecated AbstractJndiLocator base class in favor of new JndiObjectLocator base class with explicit "lookup" method
+* added JndiObjectTargetSource which performs a fresh JNDI lookup for each call, allowing for hot redeployment in JNDI
+
+Package org.springframework.orm
+* fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
+
+Package org.springframework.mail
+* MimeMessageHelper creates "multipart/related" now, to make mails with inline images compatible with Outlook Express
+* added "validateAddresses" property to MimeMessageHelper (off by default), delegating to JavaMail 1.3's "validate"
 
 Package org.springframework.remoting
+* added RemoteConnectFailureException and RemoteLookupFailureException as specialized RemoteAccessException subclasses
 * changed RemoteInvocationResult's exception holder to Throwable, to also transport errors thrown during reflection
+* added "cacheRmiProxy" flag to RmiClientInterceptor, to be turned off for creating the RMI proxy on each invocation
 * factored out RMI invocation logic into RmiClientInterceptorUtils, handling both RMI and non-RMI service interfaces
+* added "lookupRmiProxyOnStartup", "cacheRmiProxy" and "refreshRmiProxyOnConnectFailure" flags to RmiClientInterceptor
 * added JndiRmiServiceExporter, for exposing PortableRemoteObject RMI services to JNDI (e.g. RMI-IIOP resp. CORBA)
 * added JndiRmiClientInterceptor and JndiRmiProxyFactoryBean, for fetching PortableRemoteObject RMI services from JNDI
 
@@ -35,6 +58,8 @@ Package org.springframework.validation
 * fixed BindException to apply "getAsText" of a custom PropertyEditor even in case of a null value
 
 Package org.springframework.web
+* added special parsing of original filenames to CommonsMultipartFile, detecting both Unix- and Windows-style paths
+* reworked AbstractPathMapHandlerMapping's "getClassesWithPathMapAttributes" to return a Class array rather than names
 * added "buildPdfMetadata" callback to AbstractPdfView, for adding meta fields like author to the iText PDF Document
 
 
