@@ -5,7 +5,7 @@ import java.lang.reflect.AccessibleObject;
 
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.Advisor;
+import org.springframework.aop.*;
 
 import org.codehaus.aspectwerkz.proxy.Proxy;
 import org.codehaus.aspectwerkz.intercept.Advisable;
@@ -15,11 +15,15 @@ import org.codehaus.aspectwerkz.joinpoint.MethodRtti;
 import org.codehaus.aspectwerkz.joinpoint.impl.MethodRttiImpl;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Rob Harrop
  */
 public class AspectWerkzAopProxy implements AopProxy{
+
+    private static final Log log = LogFactory.getLog(AspectWerkzAopProxy.class);
 
     private AdvisedSupport advised;
 
@@ -36,19 +40,40 @@ public class AspectWerkzAopProxy implements AopProxy{
 		Advisable advisable = (Advisable) proxy;
 		Advisor[] advisors = advised.getAdvisors();
 
+        Class targetClass = advised.getTargetSource().getTargetClass();
+
 		// todo: need to support pointcuts somehow
 		// todo: need transparent support for expression-based pointcuts
-		String expr = "execution(* *..*.*(..))";
+		String catchAll   = "execution(* " + targetClass.getName() + ".*(..))"; // could be made more specific
 
 		for (int x = 0; x < advisors.length; x++) {
 			Advisor advisor = advisors[x];
-			advisable.aw_addAdvice(expr, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
-		}
-		advisable.aw_addAdvice(expr, new TargetRoutingInterceptor());
+
+            processAdvisor(advisor, targetClass, advisable, catchAll);
+        }
+		advisable.aw_addAdvice(catchAll, new TargetRoutingInterceptor());
 		return proxy;
 	}
 
-	public class MethodInterceptorAdapter implements AroundAdvice {
+    private void processAdvisor(Advisor advisor, Class targetClass, Advisable advisable, String catchAll) {
+        if(advisor instanceof PointcutAdvisor) {
+            Pointcut p = ((PointcutAdvisor)advisor).getPointcut();
+
+            if(p.getClassFilter().matches(targetClass) && p.getMethodMatcher() == MethodMatcher.TRUE) {
+                log.info("Matches this class and all methods - using catch all expression");
+                advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
+            } else if(p instanceof ExpressionBasedPointcut) {
+                log.info("Expression based pointcut - using expression");
+            } else {
+                throw new UnsupportedOperationException("foo");
+            }
+        } else {
+            log.info("No pointcut - using catch all expression");
+            advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
+        }
+    }
+
+    public class MethodInterceptorAdapter implements AroundAdvice {
 
 		private MethodInterceptor interceptor;
 
