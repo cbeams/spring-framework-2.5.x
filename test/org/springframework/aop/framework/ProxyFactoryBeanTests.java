@@ -54,7 +54,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.28 2004-06-18 10:56:54 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.29 2004-06-19 14:33:28 aarendsen Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -67,6 +67,15 @@ public class ProxyFactoryBeanTests extends TestCase {
 	public void testIsDynamicProxy() {
 		ITestBean test1 = (ITestBean) factory.getBean("test1");
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
+	}
+	
+	public void testDoubleTargetSource() {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryDoubleTargetSourceTests.xml", getClass()));
+		ITestBean tb = (ITestBean) bf.getBean("doubleTarget");
+		assertEquals("Adam", tb.getName());
+		
+		tb = (ITestBean)bf.getBean("arbitraryTarget");
+		assertEquals("Adam", tb.getName());
 	}
 	
 	public void testGetObjectTypeWithDirectTarget() {
@@ -91,6 +100,8 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
 		assertEquals("Has correct object type", TestBean.class, pfb.getObjectType());
 	}
+	
+	
 	
 	public void testGetObjectTypeWithNoTargetOrTargetSource() {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml", getClass()));
