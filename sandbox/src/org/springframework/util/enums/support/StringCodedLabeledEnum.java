@@ -19,7 +19,7 @@ package org.springframework.util.enums.support;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of CodedEnum which uses a String as the code type.
+ * Implementation of LabeledEnum which uses a String as the code type.
  * <p>
  * Should almsot always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type based

@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.enums.LabeledEnum;
 
 /**
- * Abstract base superclass for CodedEnum implementations.
+ * Abstract base superclass for LabeledEnum implementations.
  * @author Keith Donald
  */
 public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceResolvable, Serializable {

@@ -25,31 +25,31 @@ import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.support.Block;
-import org.springframework.util.enums.Enum;
-import org.springframework.util.enums.support.AbstractEnumResolver;
+import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.support.AbstractLabeledEnumResolver;
 
 /**
  * A enum resolver that loads enums using the <code>Hibernate</code> data access apis.
  * @author Keith Donald
  */
-public class HibernateEnumResolver extends AbstractEnumResolver {
+public class HibernateLabeledEnumResolver extends AbstractLabeledEnumResolver {
 
 	private HibernateTemplate hibernateTemplate;
 
-	public HibernateEnumResolver(HibernateTemplate template) {
+	public HibernateLabeledEnumResolver(HibernateTemplate template) {
 		super(false);
 		Assert.notNull(template, "The hibernate template is required");
 		this.hibernateTemplate = template;
 	}
 
-	public Enum getEnum(String type, Comparable code, Locale locale) {
+	public LabeledEnum getEnum(String type, Comparable code, Locale locale) {
 		try {
 			Class clazz = ClassUtils.forName(type);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading coded enum persistent implementation class '" + clazz.getName() + "' with id '"
 						+ code + "'");
 			}
-			return (Enum)hibernateTemplate.load(clazz, (Serializable)code);
+			return (LabeledEnum)hibernateTemplate.load(clazz, (Serializable)code);
 		}
 		catch (ClassNotFoundException e) {
 			IllegalArgumentException iae = new IllegalArgumentException(
@@ -85,7 +85,7 @@ public class HibernateEnumResolver extends AbstractEnumResolver {
 		final Map map = new HashMap(all.size());
 		new Block() {
 			protected void handle(Object o) {
-				Enum ce = (Enum)o;
+				LabeledEnum ce = (LabeledEnum)o;
 				map.put(ce.getCode(), ce);
 			}
 		}.forEach(all);

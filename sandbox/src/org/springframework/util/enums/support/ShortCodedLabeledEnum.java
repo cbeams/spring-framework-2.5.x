@@ -18,9 +18,9 @@ package org.springframework.util.enums.support;
 /**
  * Implementation of LabeledEnum which uses Short as the code type.
  * <p>
- * Should almsot always be subclassed, but for some simple situations it may be
+ * Should almost always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type based
- * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.
+ * functionality like LabeledEnumResolver.getEnumsAsCollection() in this case.
  * @author Keith Donald
  */
 public class ShortCodedLabeledEnum extends AbstractLabeledEnum {

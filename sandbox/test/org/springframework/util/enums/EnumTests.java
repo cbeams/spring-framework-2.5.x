@@ -18,9 +18,9 @@ package org.springframework.util.enums;
 
 import junit.framework.TestCase;
 
-import org.springframework.util.enums.Enum;
-import org.springframework.util.enums.support.ShortEnum;
-import org.springframework.util.enums.support.StaticEnumResolver;
+import org.springframework.util.enums.LabeledEnum;
+import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
  * @author Rod Johnson
@@ -28,14 +28,14 @@ import org.springframework.util.enums.support.StaticEnumResolver;
 public class EnumTests extends TestCase {
 
 	public void testForCodeFound() {
-		Dog golden = (Dog) StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
-		Dog borderCollie = (Dog) StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 13));
+		Dog golden = (Dog) StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
+		Dog borderCollie = (Dog) StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
 	public void testDoesNotMatchWrongClass() {
-		Enum none = StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 1));
+		LabeledEnum none = StaticLabeledEnumResolver.instance().getEnum(Dog.class, new Short((short) 1));
 		assertEquals(null, none);
 	}
 
@@ -45,7 +45,7 @@ public class EnumTests extends TestCase {
 	}
 
 
-	public static class Other extends ShortEnum {
+	public static class Other extends ShortCodedLabeledEnum {
 
 		public static Other THING1 = new Other(1, "Thing1");
 
@@ -57,7 +57,7 @@ public class EnumTests extends TestCase {
 	}
 
 
-	public static class Dog extends ShortEnum {
+	public static class Dog extends ShortCodedLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 			// this shouldn't be neccessary
