@@ -10,6 +10,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -17,19 +18,17 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
 /**
- * Interceptor providing declarative transaction management using
- * the common Spring transaction infrastructure.
- * TransactionInterceptors are threadsafe.
+ * Interceptor providing declarative transaction management using the common
+ * Spring transaction infrastructure. TransactionInterceptors are thread-safe.
  *
- * <p>Uses the <b>Strategy</b> design pattern. Implementations of
- * the PlatformTransactionManager interface will associate an
- * object with a transaction.
+ * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
+ * implementation will perform the actual transaction management.
  *
  * <p>This class could set JTA as default transaction manager as that
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.1.1.1 2003-08-14 16:20:41 trisberg Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.2 2003-10-31 17:07:06 jhoeller Exp $
  * @author Rod Johnson
  */
 public class TransactionInterceptor implements MethodInterceptor, InitializingBean {
@@ -128,7 +127,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		// Create transaction if necessary
 		if (transAtt != null) {
 			// We need a transaction for this method
-			logger.info("Creating transaction for method '" + invocation.getMethod().getName() + "'");
+			logger.debug("Creating transaction for method '" + invocation.getMethod().getName() + "'");
 			
 			// The transaction manager will flag an error if an incompatible tx already exists
 			status = this.transactionManager.getTransaction(transAtt);
@@ -139,10 +138,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		else {
 			// It isn't a transactional method
 			if (logger.isDebugEnabled())
-				logger.debug(
-				"Don't need to create transaction for method '"
-					+ invocation.getMethod().getName()
-					+ "': this method isn't transactional");
+				logger.debug("Don't need to create transaction for method '" + invocation.getMethod().getName() +
+				             "': this method isn't transactional");
 		}
 
 		// Invoke the next interceptor in the chain.
@@ -164,7 +161,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			}
 		}
 		if (status != null) {
-			logger.info("Committing transaction on method '" + invocation.getMethod().getName() + "'");
+			logger.debug("Committing transaction on method '" + invocation.getMethod().getName() + "'");
 			this.transactionManager.commit(status);
 		}
 		return retVal;
@@ -191,12 +188,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		}
 		else {
 			if (logger.isDebugEnabled())
-				logger.debug(
-				"Method '"
-					+ invocation.getMethod().getName()
-					+ "' threw throwable {"
-					+ ex.getMessage()
-					+ "} but this does not force transaction rollback");
+				logger.debug("Method '"	+ invocation.getMethod().getName()+ "' threw throwable {"	+
+				             ex.getMessage()	+ "} but this does not force transaction rollback");
 			// Will still roll back if rollbackOnly is true
 			this.transactionManager.commit(status);
 		}
