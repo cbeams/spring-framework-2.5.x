@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Flow;
@@ -43,7 +44,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class HttpFlowExecutionManager {
 
-	private Log logger;
+	private static final Log logger = LogFactory.getLog(HttpFlowExecutionManager.class);
 
 	private Flow flow;
 
@@ -51,12 +52,32 @@ public class HttpFlowExecutionManager {
 
 	private Collection flowExecutionListeners;
 
-	public HttpFlowExecutionManager(Log logger, Flow flow, FlowServiceLocator serviceLocator,
-			Collection flowExecutionListeners) {
-		Assert.notNull(logger, "The logger is required");
-		this.logger = logger;
+	public HttpFlowExecutionManager(Flow flow) {
 		this.flow = flow;
-		this.flowServiceLocator = serviceLocator;
+	}
+
+	public HttpFlowExecutionManager(Flow flow, Collection flowExecutionListeners) {
+		this.flow = flow;
+		this.flowExecutionListeners = flowExecutionListeners;
+	}
+
+	public HttpFlowExecutionManager(FlowServiceLocator flowServiceLocator) {
+		this.flowServiceLocator = flowServiceLocator;
+	}
+
+	public HttpFlowExecutionManager(FlowServiceLocator flowServiceLocator, Collection flowExecutionListeners) {
+		this.flowServiceLocator = flowServiceLocator;
+		this.flowExecutionListeners = flowExecutionListeners;
+	}
+
+	public HttpFlowExecutionManager(Flow flow, FlowServiceLocator flowServiceLocator) {
+		this.flow = flow;
+		this.flowServiceLocator = flowServiceLocator;
+	}
+
+	public HttpFlowExecutionManager(Flow flow, FlowServiceLocator flowServiceLocator, Collection flowExecutionListeners) {
+		this.flow = flow;
+		this.flowServiceLocator = flowServiceLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
@@ -171,6 +192,7 @@ public class HttpFlowExecutionManager {
 	 * Obtain a flow to use from given request.
 	 */
 	protected Flow getFlow(HttpServletRequest request) {
+		Assert.notNull("The flow service locator is required to lookup flows to execute by id");
 		return flowServiceLocator.getFlow(getRequestParameter(request, getFlowIdParameterName(),
 				getParameterValueDelimiter()));
 	}

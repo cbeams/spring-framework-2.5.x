@@ -86,9 +86,9 @@ public class FlowAction extends TemplateAction {
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		synchronized (this) {
-			if (executionManager == null) {
-				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping),
-						new BeanFactoryFlowServiceLocator(getWebApplicationContext()), null);
+			if (this.executionManager == null) {
+				this.executionManager = new HttpFlowExecutionManager(getFlow(mapping),
+						new BeanFactoryFlowServiceLocator(getWebApplicationContext()));
 			}
 		}
 		if (form instanceof BindingActionForm) {
@@ -99,7 +99,8 @@ public class FlowAction extends TemplateAction {
 			// attribute so it'll be accessible to binding flow action beans
 			request.setAttribute(getActionFormAttributeName(), form);
 		}
-		ModelAndView modelAndView = executionManager.handleRequest(request, response, getFlowExecutionInput(request));
+		ModelAndView modelAndView = this.executionManager.handleRequest(request, response,
+				getFlowExecutionInput(request));
 		// this is not very clean
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
 		if (flowExecution.isActive()) {

@@ -39,11 +39,11 @@ import org.springframework.web.servlet.mvc.AbstractController;
  */
 public class FlowController extends AbstractController implements InitializingBean {
 
-	private HttpFlowExecutionManager manager;
-
 	private Flow flow;
 
-	private Collection flowExecutionListeners = new ArrayList(3);
+	private Collection flowExecutionListeners;
+
+	private HttpFlowExecutionManager manager;
 
 	/**
 	 * Set the top level fow started by this controller. This is optional. When
@@ -59,7 +59,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * lifecycle events.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.clear();
+		this.flowExecutionListeners = new ArrayList(1);
 		this.flowExecutionListeners.add(listener);
 	}
 
@@ -68,13 +68,12 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * execution lifecycle events.
 	 */
 	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
-		this.flowExecutionListeners.clear();
-		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
+		this.flowExecutionListeners = Arrays.asList(listeners);
 	}
 
 	public void afterPropertiesSet() throws Exception {
 		//instantiate the flow execution manager
-		this.manager = new HttpFlowExecutionManager(logger, flow, new BeanFactoryFlowServiceLocator(
+		this.manager = new HttpFlowExecutionManager(this.flow, new BeanFactoryFlowServiceLocator(
 				getApplicationContext()), flowExecutionListeners);
 	}
 
@@ -89,7 +88,6 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * manager.
 	 * <p>
 	 * Default implementation returns null. Subclasses can override if needed.
-	 * 
 	 * @param request current HTTP request
 	 * @return a Map with reference data entries, or null if none
 	 */
