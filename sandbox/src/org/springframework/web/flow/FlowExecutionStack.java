@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -412,14 +413,27 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	//methods implementing AttributesAccessor
 
 	/**
-	 * @return Map of all model attributes in the active flow session
+	 * Returns the data model for this flow execution, suitable for exporting to
+	 * web views.
+	 * @return Map of model attributes for this flow execution.
 	 */
-	public Map getAttributes() {
-		return getActiveFlowSession().getAttributes();
+	public Map getModel() {
+		Map model = new HashMap(getActiveFlowSession().getAttributes());
+		model.put(getFlowExecutionAttributeName(), this);
+		return model;
+	}
+
+	/**
+	 * Returns the name of the flow execution attribute, a index to lookup this
+	 * flow execution.
+	 * @return This flow execution's name
+	 */
+	protected Object getFlowExecutionAttributeName() {
+		return ATTRIBUTE_NAME;
 	}
 
 	public Object getAttribute(String attributeName) {
-		if (attributeName.equals(ATTRIBUTE_NAME)) {
+		if (attributeName.equals(getFlowExecutionAttributeName())) {
 			return this;
 		}
 		else {
@@ -428,7 +442,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		if (attributeName.equals(ATTRIBUTE_NAME)) {
+		if (attributeName.equals(getFlowExecutionAttributeName())) {
 			Assert.isInstanceOf(requiredType, this);
 			return this;
 		}
@@ -438,7 +452,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
-		if (attributeName.equals(ATTRIBUTE_NAME)) {
+		if (attributeName.equals(getFlowExecutionAttributeName())) {
 			return this;
 		}
 		else {
@@ -447,7 +461,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		if (attributeName.equals(ATTRIBUTE_NAME)) {
+		if (attributeName.equals(getFlowExecutionAttributeName())) {
 			Assert.isInstanceOf(requiredType, this);
 			return this;
 		}
@@ -499,8 +513,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	//methods implementing MutableAttributesAccessor
 
 	public void setAttribute(String attributeName, Object attributeValue) {
-		if (ATTRIBUTE_NAME.equals(attributeName)) {
-			throw new IllegalArgumentException("Attribute name '" + ATTRIBUTE_NAME
+		if (ATTRIBUTE_NAME.equals(getFlowExecutionAttributeName())) {
+			throw new IllegalArgumentException("Attribute name '" + getFlowExecutionAttributeName()
 					+ "' is reserved for internal use only");
 		}
 		getActiveFlowSession().setAttribute(attributeName, attributeValue);

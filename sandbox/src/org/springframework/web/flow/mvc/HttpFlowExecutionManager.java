@@ -60,24 +60,16 @@ public class HttpFlowExecutionManager {
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	protected String getCurrentStateIdAttributeName() {
-		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
-	}
-
-	protected String getCurrentStateIdParameterName() {
-		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
-	}
-
-	protected String getFlowExecutionIdAttributeName() {
-		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
+	protected String getFlowIdParameterName() {
+		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
 	protected String getFlowExecutionIdParameterName() {
 		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
 
-	protected String getFlowExecutionAttributeName() {
-		return FlowExecution.ATTRIBUTE_NAME;
+	protected String getCurrentStateIdParameterName() {
+		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
 	private String getEventIdRequestAttributeName() {
@@ -90,10 +82,6 @@ public class HttpFlowExecutionManager {
 
 	protected String getNotSetEventIdParameterMarker() {
 		return FlowConstants.NOT_SET_EVENT_ID;
-	}
-
-	protected String getFlowIdParameterName() {
-		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
 	protected String getParameterValueDelimiter() {

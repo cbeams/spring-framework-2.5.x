@@ -38,24 +38,6 @@ public abstract class FlowConstants {
 	public static final String DOT_SEPARATOR = ".";
 
 	// controller constants
-	
-	/**
-	 * The current state of the flow execution will be exposed to the
-	 * view in a model attribute with this name ("currentStateId"). 
-	 */
-	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
-
-	/**
-	 * Clients can send the current state to a controller in a request
-	 * parameter with this name ("_currentStateId").
-	 */
-	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
-
-	/**
-	 * The id of the flow execution will be exposed to the
-	 * view in a model attribute with this name ("flowExecutionId"). 
-	 */
-	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
 
 	/**
 	 * Clients can send the flow execution id to a controller in a request
@@ -64,17 +46,23 @@ public abstract class FlowConstants {
 	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
 
 	/**
-	 * The event to executed can be sent to a controller using a request
-	 * attribute with this name ("_mapped_eventId"). Use this when you
-	 * can't use the EVENT_ID_PARAMETER to pass in the event.
+	 * Clients can send the current state to a controller in a request
+	 * parameter with this name ("_currentStateId").
 	 */
-	public static final String EVENT_ID_REQUEST_ATTRIBUTE = "_mapped_eventId";
+	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
 
 	/**
 	 * Clients can send the event to be executed to a controller in a request
 	 * parameter with this name ("_eventId").
 	 */
 	public static final String EVENT_ID_PARAMETER = "_eventId";
+
+	/**
+	 * The event to executed can be sent to a controller using a request
+	 * attribute with this name ("_mapped_eventId"). Use this when you
+	 * can't use the EVENT_ID_PARAMETER to pass in the event.
+	 */
+	public static final String EVENT_ID_REQUEST_ATTRIBUTE = "_mapped_eventId";
 
 	/**
 	 * Event id value indicating that the event has not been set ("@NOT_SET@").
