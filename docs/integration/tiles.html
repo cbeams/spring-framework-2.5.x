@@ -1,0 +1,90 @@
+<h1>Using Tiles together with Spring</h1>
+<h5>Author: Alef Arendsen (<a href="mailto:alef@jteam.nl">alef@jteam.nl</a>)<br>
+Remarks: small example application will be provided</h5>
+
+<h2>Introduction</h2>
+<p>
+	It is possible to integrate Tiles - just as any other view technology - in webapplications
+	using Spring. The following describes in a broad way how to do this.
+</p>
+
+<h2>Dependendencies</h2>
+<p>
+	to be able to use Tiles you have to have a couple of additional dependencies including in your
+	project. The following is the list of dependencies you need.
+	<ul>
+		<li>struts version 1.1</li>
+		<li>commons-beanutils</li>
+		<li>commons-digester</li>
+		<li>commons-logging</li>
+		<li>commons-lang</li>
+	</ul>
+	The dependencies are all available in the Struts distribution at the <a href="http://jakarta.apache.org/struts">Struts site</a>
+</p>
+
+<h2>How to integrate</h2>
+<p>
+	To be able to use Tiles, you have to configure it using files containing definitions (for basic information on definitions and
+	other Tiles concepts, please have a look at the <a href="http://jakarta.apache.org/struts">Struts site</a>. In Spring this is
+	done using the <code>TilesConfigurer</code>. Have a look at the following piece of code (which you should include in your WebApplicationContext):
+ <pre>
+  &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
+       &lt;property name="factoryClass"&gt;
+           &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
+       &lt;/property&gt;
+       &lt;property name="definitions"&gt;
+           &lt;list&gt;
+               &lt;value&gt;/WEB-INF/defs/general.xml&lt;/value&gt;
+               &lt;value&gt;/WEB-INF/defs/widgets.xml&lt;/value&gt;
+               &lt;value&gt;/WEB-INF/defs/administrator.xml&lt;/value&gt;
+               &lt;value&gt;/WEB-INF/defs/customer.xml&lt;/value&gt;
+               &lt;value&gt;/WEB-INF/defs/templates.xml&lt;/value&gt;
+           &lt;/list&gt;
+       &lt;/property&gt;
+  &lt;/bean&gt;
+ </pre>
+ 	As you can, there are five files containing definitions, which are all located in the WEB-INF/defs directory. At initialization of the
+ 	WebApplicationContext, the files will be loaded and the definitionsfactory defined by the <code>factoryClass</code>-property is
+ 	initialized. After that has been done, the tiles includes in the definition files can be used as views within your Spring webapplication.
+ 	To be able to use the views you have to have a <code>ViewResolver</code> just as with any other view technology used with Spring. Below
+ 	you can find two possibilities, the <code>InternalResourceViewResolver</code> and the <code>ResourceBundleViewResolver</code>.<br><br>
+</p>
+
+<h3>InternalResourceViewResolver</h3>
+<p>
+The InternalResourceViewResolver instantiates the given <code>viewClass</code> for each view it has to resolve.
+
+<pre>
+  &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+         &lt;property name="requestContextAttribute"&gt;&lt;value&gt;requestContext&lt;/value&gt;&lt;/property&gt;
+         &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.tiles.TilesView&lt;/value&gt;&lt;/property&gt;
+  &lt;/bean&gt;
+</pre>
+</p>
+
+<h3>ResourceBundleViewResolver</h3>
+<p>
+	The ResourceBundleViewResolver has to be provided with a property file containing viewnames and viewclasses the resolver can use:
+
+<pre>
+  &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
+         &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
+  &lt;/bean&gt;
+</pre>
+
+<pre>
+  <b>views.properties</b>
+  welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
+  welcomeView.url=welcome (<b>this is the name of a definition</b>)
+
+  vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
+  vetsView.url=vetsView (<b>again, tthis is the name of a definition</b>)
+
+  findOwnersForm.class=org.springframework.web.servlet.view.JstlView
+  findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
+</pre>
+
+	As you can see, when using the ResourceBundleViewResolver, you can mix view using different view technologies.
+
+
+</p>
