@@ -32,17 +32,17 @@ public class Styler {
 
 	private static Styler INSTANCE;
 	static {
-		INSTANCE = new Styler(new SpringStylerStrategy());
+		INSTANCE = new Styler(new SpringStylingStrategy());
 	}
 
-	private StylerStrategy stylerStrategy;
+	private StylingStrategy stylerStrategy;
 
 	/**
 	 * Construct a styler using the configured conversion executor to style string
 	 * values from object form.
 	 * @param toStringExecutor
 	 */
-	public Styler(StylerStrategy stylerStrategy) {
+	public Styler(StylingStrategy stylerStrategy) {
 		this.stylerStrategy = stylerStrategy;
 	}
 
@@ -90,7 +90,7 @@ public class Styler {
 	 * object uses pluggable.
 	 * @author Keith Donald
 	 */
-	public interface StylerStrategy {
+	public interface StylingStrategy {
 		public String style(Object value);
 	}
 
@@ -99,7 +99,7 @@ public class Styler {
 	 * toString styling conventions.
 	 * @author Keith Donald
 	 */
-	public static class SpringStylerStrategy implements StylerStrategy, Visitor {
+	public static class SpringStylingStrategy implements StylingStrategy, Visitor {
 
 		private static final String EMPTY = "[empty]";
 
