@@ -8,7 +8,7 @@
 ::    application    - the sample app to build and test
 ::    server         - the target server to deploy upon
 ::
-:: $Id: autobuild.bat,v 1.3 2004-01-08 01:32:06 davison Exp $
+:: $Id: autobuild.bat,v 1.4 2004-01-19 20:19:17 davison Exp $
 ::
 :: ---------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ set USAGE="Usage: %0 [-u] sample-app target-server"
     if (%SERVER%) == () goto usage
     if (%APP%) == () goto usage
     if not exist %SERVER%-build.xml goto noserver
-    if not exist ..\..\samples\%APP%\.autobuilds goto noapp
+    if not exist ..\apps\%APP% goto noapp
     
 ::  ensure environment exists for 1st use
     ant -q setup
