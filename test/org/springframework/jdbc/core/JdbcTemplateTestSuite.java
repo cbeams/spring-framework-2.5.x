@@ -28,7 +28,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.4 2003-08-26 17:30:42 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.5 2003-09-19 10:56:23 johnsonr Exp $
  */
 public class JdbcTemplateTestSuite extends TestCase {
 
@@ -73,7 +73,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 				this.id = id;
 			}
 			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-				System.out.println("Connection is " + conn);
+				//System.out.println("Connection is " + conn);
 				PreparedStatement ps = conn.prepareStatement(sql);
 				ps.setInt(1, id);
 				return ps;
@@ -82,15 +82,15 @@ public class JdbcTemplateTestSuite extends TestCase {
 
 		int idParam = 11111;
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 
 		Dispatcher d = new Dispatcher(idParam);
 		MockConnection con = MockConnectionFactory.updateWithPreparedStatement(sql, new Object[] { new Integer(idParam) }, 1, true);
 
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		
@@ -129,11 +129,11 @@ public class JdbcTemplateTestSuite extends TestCase {
 		MockConnection con = MockConnectionFactory.updateWithPreparedStatement(sql, new Object[] { new Integer(iParam) }, 1, true, sex, null);
 		con.setExpectedCloseCalls(2);
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 				
 		Dispatcher d = new Dispatcher(iParam);
 		JdbcTemplate template = new JdbcTemplate(ds);
@@ -168,7 +168,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		StringHandler sh = new StringHandler();
 		
 		String sql  = "SELECT FORENAME FROM CUSTMR";
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 
 		String[][] results = {
@@ -181,8 +181,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		con.setExpectedCloseCalls(2);
 		
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		template.query(sql, sh);
@@ -223,11 +223,11 @@ public class JdbcTemplateTestSuite extends TestCase {
 		final MockConnection con = MockConnectionFactory.preparedStatement(sql, new Integer[] { new Integer(1) }, results, true);
 		con.setExpectedCloseCalls(2);
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		
@@ -372,7 +372,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		final RuntimeException rex = new RuntimeException("What I want to see");
 		final String sql = "SELECT ID FROM CUSTMR";
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		
 		Object[][] results = new Object[][] {
@@ -381,8 +381,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		};
 		Connection con = MockConnectionFactory.statement(sql, results, true, null, null);
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		try {
@@ -407,7 +407,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testSqlUpdateEncountersSqlException() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		
 		// It's because Integers aren't canonical
@@ -416,8 +416,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		con.setExpectedCloseCalls(2);
 		
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		
@@ -436,7 +436,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testSqlUpdate() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		int rowsAffected = 33;
 		
@@ -445,8 +445,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		con.setExpectedCloseCalls(2);
 		
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		
@@ -460,7 +460,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testSqlUpdateWithThreadConnection() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		int rowsAffected = 33;
 
@@ -469,8 +469,8 @@ public class JdbcTemplateTestSuite extends TestCase {
 		con.setExpectedCloseCalls(2);
 
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 
 		JdbcTemplate template = new JdbcTemplate(ds);
 
@@ -543,13 +543,13 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testBatchUpdateFails() throws Exception {
 			final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 	
-			MockControl dsControl = EasyMock.controlFor(DataSource.class);
+			MockControl dsControl = MockControl.createControl(DataSource.class);
 			DataSource ds = (DataSource) dsControl.getMock();
 			final int [] ids = new int[] { 100, 200 };
 			
 			SQLException sex = new SQLException();
 		
-			MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
+			MockControl psControl = MockControl.createControl(PreparedStatement.class);
 			PreparedStatement mockPs = (PreparedStatement) psControl.getMock();
 			mockPs.setInt(1, ids[0]);
 			psControl.setVoidCallable(1);
@@ -571,7 +571,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 			con.setExpectedCloseCalls(2);
 	
 			ds.getConnection();
-			dsControl.setReturnValue(con);
+			dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
 			dsControl.activate();
 		
 			BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
@@ -780,11 +780,11 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testPreparedStatementSetterFails() throws Exception {
 		final String sql = "UPDATE FOO SET NAME=? WHERE ID = 1";
 		final String name = "Gary";
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 
 		SQLException sex = new SQLException();
-		MockControl psControl = EasyMock.controlFor(PreparedStatement.class);
+		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockPs = (PreparedStatement) psControl.getMock();
 		mockPs.setString(1, name);
 		psControl.setVoidCallable(1);
@@ -794,14 +794,14 @@ public class JdbcTemplateTestSuite extends TestCase {
 		// Insist on trying to close PreparedStatement
 		mockPs.close();
 		psControl.setVoidCallable(1);
-		psControl.activate();
+		psControl.replay();
 	
 		MockConnection con = MockConnectionFactory.update(sql, mockPs);
 		con.setExpectedCloseCalls(2);
 
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		PreparedStatementSetter pss = new PreparedStatementSetter() {
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setString(1, name);
@@ -861,14 +861,14 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testFatalWarning() throws Exception {
 		String sql = "SELECT forename from custmr";
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		SQLWarning warnings = new SQLWarning("My warning");
 		MockConnection con = MockConnectionFactory.statement(sql, new Object[0][0], true, null, warnings);
 		
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate t = new JdbcTemplate(ds);
 		
@@ -894,15 +894,15 @@ public class JdbcTemplateTestSuite extends TestCase {
 	public void testIgnoredWarning() throws Exception {
 		// REFACTOR FROM ABOVE?
 		String sql = "SELECT forename from custmr";
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 			DataSource ds = (DataSource) dsControl.getMock();
 			
 		SQLWarning warnings = new SQLWarning("My warning");
 		MockConnection con = MockConnectionFactory.statement(sql, new Object[0][0], true, null, warnings);
 		
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		// Too long: truncation
 		JdbcTemplate t = new JdbcTemplate(ds);
@@ -924,7 +924,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		final SQLException sex = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 		
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		
 		Object[][] results = new Object[][] {
@@ -932,18 +932,18 @@ public class JdbcTemplateTestSuite extends TestCase {
 			{ new Integer(2) }
 		};
 		Connection con = MockConnectionFactory.statement(sql, results, true, null, null);
-		MockControl dbmdControl = EasyMock.controlFor(DatabaseMetaData.class);
+		MockControl dbmdControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData dbmd = (DatabaseMetaData) dbmdControl.getMock();
 
 		dbmd.getDatabaseProductName();
 		dbmdControl.setReturnValue("MySQL");
-		dbmdControl.activate();
+		dbmdControl.replay();
 
 		((MockConnection) con).setupMetaData(dbmd);
 
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcTemplate template = new JdbcTemplate(ds);
 		try {

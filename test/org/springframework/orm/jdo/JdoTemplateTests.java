@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.orm.jdo;
 
 import java.util.ArrayList;
@@ -12,12 +17,12 @@ import javax.jdo.Transaction;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
+ * @version $Id: JdoTemplateTests.java,v 1.2 2003-09-19 10:56:23 johnsonr Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -38,12 +43,12 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testTemplateExecuteWithNotAllowCreateAndThreadBound() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		pmfControl.activate();
-		pmControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		jt.setAllowCreate(false);
@@ -62,16 +67,16 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testTemplateExecuteWithNewPersistenceManager() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
-		pmfControl.activate();
-		pmControl.activate();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		final List l = new ArrayList();
@@ -128,11 +133,11 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	private JdoTemplate createTemplate() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
@@ -141,10 +146,10 @@ public class JdoTemplateTests extends TestCase {
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 		return new JdoTemplate(pmf);
 	}
 

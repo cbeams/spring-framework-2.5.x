@@ -12,7 +12,6 @@ import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 
 /**
@@ -21,16 +20,16 @@ import org.easymock.MockControl;
 public class JdoInterceptorTests extends TestCase {
 
 	public void testInterceptor() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
-		pmfControl.activate();
-		pmControl.activate();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
 
 		JdoInterceptor interceptor = new JdoInterceptor();
 		interceptor.setPersistenceManagerFactory(pmf);
@@ -46,12 +45,12 @@ public class JdoInterceptorTests extends TestCase {
 	}
 
 	public void testInterceptorWithPrebound() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		pmfControl.activate();
-		pmControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
 
 		PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(pmf, new PersistenceManagerHolder(pm));
 		JdoInterceptor interceptor = new JdoInterceptor();

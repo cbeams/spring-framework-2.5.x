@@ -27,7 +27,7 @@ public class JdbcBeanFactoryTests extends TestCase {
 	
 	public void testValid() throws Exception {
 		String sql = "SELECT NAME AS NAME, PROPERTY AS PROPERTY, VALUE AS VALUE FROM T";
-		MockControl dsControl = EasyMock.controlFor(DataSource.class);
+		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 
 		String[][] results = {
@@ -39,8 +39,9 @@ public class JdbcBeanFactoryTests extends TestCase {
 		con.setExpectedCloseCalls(2);
 
 		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.activate();
+		// JdbcTemplate may ask for connection twice, for metadata
+		dsControl.setReturnValue(con, MockControl.ONE_OR_MORE);
+		dsControl.replay();
 		
 		JdbcBeanFactory bf = new JdbcBeanFactory(ds, sql);
 		assertTrue(bf.getBeanDefinitionCount() == 1);

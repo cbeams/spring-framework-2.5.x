@@ -9,7 +9,6 @@ import javax.jdo.Transaction;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -27,27 +26,27 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class JdoTransactionManagerTests extends TestCase {
 
 	public void testTransactionCommit() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -82,27 +81,27 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionRollback() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		tx.rollback();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -135,27 +134,27 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionRollbackOnly() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		tx.rollback();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -187,25 +186,25 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testNestedTransactionCommit() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		final MockControl txControl = EasyMock.controlFor(Transaction.class);
+		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 4);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -220,7 +219,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.setReturnValue(true, 1);
 					tx.commit();
 					txControl.setVoidCallable(1);
-					txControl.activate();
+					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
@@ -246,25 +245,25 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testNestedTransactionRollback() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		final MockControl txControl = EasyMock.controlFor(Transaction.class);
+		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 4);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -276,7 +275,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.setReturnValue(true, 1);
 					tx.rollback();
 					txControl.setVoidCallable(1);
-					txControl.activate();
+					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
@@ -301,25 +300,25 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testNestedTransactionRollbackOnly() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		final MockControl txControl = EasyMock.controlFor(Transaction.class);
+		final MockControl txControl = MockControl.createControl(Transaction.class);
 		final Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 4);
 		pm.close();
-		pmControl.setReturnValue(null, 1);
+		pmControl.setVoidCallable(1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -334,7 +333,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.setReturnValue(true, 1);
 					tx.rollback();
 					txControl.setVoidCallable(1);
-					txControl.activate();
+					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
@@ -361,11 +360,11 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testInvalidIsolation() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
@@ -373,9 +372,9 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setReturnValue(tx, 1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -397,11 +396,11 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testInvalidTimeout() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
@@ -409,9 +408,9 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setReturnValue(tx, 1);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -433,11 +432,11 @@ public class JdoTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionCommitWithPrebound() {
-		MockControl pmfControl = EasyMock.controlFor(PersistenceManagerFactory.class);
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = EasyMock.controlFor(PersistenceManager.class);
+		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		MockControl txControl = EasyMock.controlFor(Transaction.class);
+		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
@@ -447,9 +446,9 @@ public class JdoTransactionManagerTests extends TestCase {
 		txControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
-		pmfControl.activate();
-		pmControl.activate();
-		txControl.activate();
+		pmfControl.replay();
+		pmControl.replay();
+		txControl.replay();
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
