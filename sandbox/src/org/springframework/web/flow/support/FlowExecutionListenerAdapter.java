@@ -15,19 +15,17 @@
  */
 package org.springframework.web.flow.support;
 
-import org.springframework.web.flow.State;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
-import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.State;
 
 /**
  * An abstract adapter class for listeners (observers) of flow execution
  * lifecycle events. The methods in this class are empty. This class exists as
  * convenience for creating listener objects; subclass it and override what you
  * need.
- * 
  * @author Erwin Vervaet
  * @author Keith Donald
  */

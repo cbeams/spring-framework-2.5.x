@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow.mvc;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,17 +58,28 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * execution lifecycle events.</td>
  * </tr>
  * </table>
- * 
- * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  * @author Erwin Vervaet
  * @author Keith Donald
+ * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  */
 public class FlowController extends AbstractController implements InitializingBean {
 
+	/**
+	 * The flow managed by this controller, may be null if the views will
+	 * parameterize this controller with the id of the flow to manage.
+	 */
 	private Flow flow;
 
+	/**
+	 * The list of flow execution listeners to attach to flow executions managed
+	 * by this controller.
+	 */
 	private FlowExecutionListener[] flowExecutionListeners;
 
+	/**
+	 * A helper for managed http servlet request-based flow executions in the
+	 * http session.
+	 */
 	private HttpServletFlowExecutionManager manager;
 
 	/**
@@ -109,23 +118,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 */
 	protected HttpServletFlowExecutionManager createHttpFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners) {
-			protected Map getFlowExecutionInput(HttpServletRequest request) {
-				return FlowController.this.getFlowExecutionInput(request);
-			}
-		};
-	}
-
-	/**
-	 * Create a map of input attributes for new flow executions started by the
-	 * execution manager.
-	 * <p>
-	 * Default implementation returns null. Subclasses can override if needed.
-	 * @param request current HTTP request
-	 * @return a Map with input data entries, or null if none
-	 */
-	protected Map getFlowExecutionInput(HttpServletRequest request) {
-		return null;
+		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)

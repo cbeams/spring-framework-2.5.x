@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.flow.support.AttributeSetterSupport;
+import org.springframework.binding.support.AttributeSetterSupport;
 
 public class Scope extends AttributeSetterSupport implements Serializable {
 

@@ -18,13 +18,15 @@ package org.springframework.web.flow.struts;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * A flow action mapping object that allows FlowActions to be configured with a flowId
- * via a Struts <code>&lt;set-property/&gt;</code> definition.
- * 
+ * A flow action mapping object that allows FlowActions to be configured with a
+ * flowId via a Struts <code>&lt;set-property/&gt;</code> definition.
  * @author Keith Donald
  */
 public class FlowActionMapping extends ActionMapping {
-	
+
+	/**
+	 * Thre id of the flow whose executions the flow action should manage.
+	 */
 	private String flowId;
 
 	/**

@@ -22,19 +22,34 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 
+/**
+ * An event that orginated from an incoming http servlet request.
+ * @author Keith Donald
+ */
 public class HttpServletRequestEvent extends Event {
 
+	/**
+	 * The wrapped http servlet request.
+	 */
 	private HttpServletRequest request;
 
+	/**
+	 * Construct a event for the specified servlet request.
+	 * @param request the request
+	 */
 	public HttpServletRequestEvent(HttpServletRequest request) {
 		Assert.notNull(request);
 		this.request = request;
 	}
 
+	/**
+	 * Return the underlying http servlet request.
+	 * @return the request.
+	 */
 	public HttpServletRequest getRequest() {
 		return request;
 	}
-	
+
 	public String getId() {
 		return request.getParameter("eventId");
 	}
