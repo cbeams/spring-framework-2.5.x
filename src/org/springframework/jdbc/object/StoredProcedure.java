@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.8 2004-01-02 22:01:31 jhoeller Exp $
+ * @version $Id: StoredProcedure.java,v 1.9 2004-02-20 12:04:48 trisberg Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -88,7 +88,7 @@ public abstract class StoredProcedure extends SqlCall {
 	public Map execute(final Map inParams) throws InvalidDataAccessApiUsageException {
 		validateParameters(inParams.values().toArray());
 		logger.debug("Executing call: " + getCallString());
-		Map retValues = getJdbcTemplate().execute(newCallableStatementCreator(inParams), this.getDeclaredParameters());
+		Map retValues = getJdbcTemplate().call(newCallableStatementCreator(inParams), this.getDeclaredParameters());
 		return retValues;
 	}
 
@@ -110,7 +110,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 */
 	public Map execute(final ParameterMapper inParamMapper) throws InvalidDataAccessApiUsageException {
 		logger.debug("Executing call using ParameterMapper: " + getCallString());
-		Map retValues = getJdbcTemplate().execute(newCallableStatementCreator(inParamMapper), this.getDeclaredParameters());
+		Map retValues = getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), this.getDeclaredParameters());
 		return retValues;
 	}
 

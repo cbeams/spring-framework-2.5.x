@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.11 2003-12-05 17:03:16 jhoeller Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.12 2004-02-20 12:04:48 trisberg Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -189,9 +189,9 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 
 		class TestJdbcTemplate extends JdbcTemplate {
 			int calls;
-			public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+			public Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
 				calls++;
-				return super.execute(csc, declaredParameters);
+				return super.call(csc, declaredParameters);
 			}
 
 		}

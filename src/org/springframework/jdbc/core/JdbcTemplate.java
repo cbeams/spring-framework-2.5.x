@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.25 2004-02-17 18:56:47 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.26 2004-02-20 12:04:48 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -374,6 +374,45 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	//-------------------------------------------------------------------------
+	// Execute methods
+	//-------------------------------------------------------------------------
+
+	public void execute(final String sql) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Running SQL execute [" + sql + "]");
+		}
+		Connection con = DataSourceUtils.getConnection(getDataSource());
+		Statement stmt = null;
+		int index = 0;
+		try {
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			stmt = con.createStatement();
+			stmt.execute(sql);
+			if (logger.isDebugEnabled()) {
+				logger.debug("SQL execute [" + sql + "]");
+			}
+			stmt.close();
+
+			// Don't worry about warnings, as we're more likely to get exception on updates
+			// (for example on data truncation)
+		}
+		catch (SQLException ex) {
+			JdbcUtils.closeStatement(stmt);
+			throw getExceptionTranslator().translate(
+			    "processing execute",
+			    sql, ex);
+		}
+		finally {
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		}
+	}
+
+	
+	//-------------------------------------------------------------------------
 	// Update methods
 	//-------------------------------------------------------------------------
 
@@ -457,7 +496,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public void setValues(PreparedStatement ps) throws SQLException {
 				if (args != null) {
 					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i, args[i], argTypes[i]);
+						ps.setObject(i+1, args[i], argTypes[i]);
 					}
 				}
 			}
@@ -469,7 +508,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public void setValues(PreparedStatement ps) throws SQLException {
 				if (args != null) {
 					for (int i = 0; i < args.length; i++) {
-						ps.setObject(i, args[i]);
+						ps.setObject(i+1, args[i]);
 					}
 				}
 			}
@@ -516,7 +555,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	// Methods dealing with callable statements
 	//-------------------------------------------------------------------------
 
-	public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+	public Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
 		try {

@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.93 2004-02-19 16:24:11 jhoeller Exp $
+$Id: changelog.txt,v 1.94 2004-02-20 12:04:49 trisberg Exp $
 
 
 Changes in version 1.0 (01.03.2003)
@@ -34,6 +34,8 @@ Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
 
 Package org.springframework.jdbc
+* added "execute(String sql) method to support static sql and ddl statements
+* renamed method "execute(CallableStatementCreator csc, List declaredParameters)" to call 
 * added support for new SQL error code categories: DataRetrieval/OptimisticLocking/DataAccessResourceFailureException
 * added overloaded query methods to JdbcTemplate, allowing to pass in prepared statement arguments as Object array
 * added queryForList/queryForObject/queryForInt methods to JdbcTemplate class and JdbcOperations interface

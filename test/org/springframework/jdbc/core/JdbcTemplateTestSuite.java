@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.14 2004-02-17 17:21:58 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.15 2004-02-20 12:04:40 trisberg Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -1263,7 +1263,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			}
 		});
 
-		template.execute(new CallableStatementCreator() {
+		template.call(new CallableStatementCreator() {
 			public CallableStatement createCallableStatement(Connection con) throws SQLException {
 				return mockCallableStatement;
 			}
@@ -1410,7 +1410,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
-			template.execute(new CallableStatementCreator() {
+			template.call(new CallableStatementCreator() {
 				public CallableStatement createCallableStatement(Connection conn)
 					throws SQLException {
 					return conn.prepareCall("my query");

@@ -20,7 +20,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.2 2004-02-17 17:21:25 jhoeller Exp $
+ * @version $Id: JdbcOperations.java,v 1.3 2004-02-20 12:04:48 trisberg Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -192,6 +192,18 @@ public interface JdbcOperations {
 	 */
 	int queryForInt(String sql, final Object[] args) throws DataAccessException;
 
+	
+	//-------------------------------------------------------------------------
+	// Execute methods
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Issue a single SQL execute.
+	 * @param sql static SQL to execute
+	 * @throws DataAccessException if there is any problem.
+	 */
+	void execute(final String sql) throws DataAccessException;
+
 
 	//-------------------------------------------------------------------------
 	// Update methods
@@ -281,6 +293,6 @@ public interface JdbcOperations {
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException;
+	Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException;
 	
 }
