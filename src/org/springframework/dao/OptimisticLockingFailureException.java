@@ -23,10 +23,19 @@ package org.springframework.dao;
  */
 public class OptimisticLockingFailureException extends ConcurrencyFailureException {
 
+	/**
+	 * Constructor for OptimisticLockingFailureException.
+	 * @param msg message
+	 */
 	public OptimisticLockingFailureException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Constructor for OptimisticLockingFailureException.
+	 * @param msg message
+	 * @param ex root cause
+	 */
 	public OptimisticLockingFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
