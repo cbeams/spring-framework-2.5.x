@@ -37,7 +37,7 @@ public class GreaterThanEqualTo extends ComparingBinaryPredicate implements
         super(comparator);
     }
 
-    public boolean testCompareResult(int result) {
+    protected boolean testCompareResult(int result) {
         return result >= 0;
     }
 
