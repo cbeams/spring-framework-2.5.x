@@ -56,22 +56,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the BeanWrapper interface that should be sufficient
- * for all normal uses. Caches introspection results for efficiency.
+ * for all typical use cases. Caches introspection results for efficiency.
  *
  * <p>Note: This class never tries to load a class by name, as this can pose
  * class loading problems in J2EE applications with multiple deployment modules.
  * The caller is responsible for loading a target class.
  *
- * <p>Note: Auto-registers all default property editors (not the custom ones)
- * in the org.springframework.beans.propertyeditors package.
- * Applications can either use a standard PropertyEditorManager to register a
- * custom editor before using a BeanWrapperImpl instance, or call the instance's
- * registerCustomEditor method to register an editor for the particular instance.
+ * <p>Note: Auto-registers default property editors from the
+ * org.springframework.beans.propertyeditors package, which apply in addition
+ * to the JDK's standard PropertyEditors. Applications can call BeanWrapper's
+ * <code>registerCustomEditor</code> method to register an editor for the
+ * particular instance (i.e. they're not shared across the application).
  *
- * <p>BeanWrapperImpl will convert List and array values to the corresponding
- * target arrays, if necessary. Custom property editors that deal with Lists or
- * arrays can be written against a comma delimited String as String arrays are
- * converted in such a format if the array itself is not assignable.
+ * <p>BeanWrapperImpl will convert collection and array values to the
+ * corresponding target collections or arrays, if necessary. Custom property
+ * editors that deal with Lists or arrays can be written against a
+ * comma-delimited String as String arrays are converted in such a format
+ * if the array itself is not assignable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -79,12 +80,16 @@ import org.springframework.util.StringUtils;
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
+ * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
  * @see org.springframework.beans.propertyeditors.ClassEditor
  * @see org.springframework.beans.propertyeditors.FileEditor
+ * @see org.springframework.beans.propertyeditors.InputStreamEditor
  * @see org.springframework.beans.propertyeditors.LocaleEditor
  * @see org.springframework.beans.propertyeditors.PropertiesEditor
  * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
  * @see org.springframework.beans.propertyeditors.URLEditor
+ * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
+ * @see org.springframework.beans.propertyeditors.CustomNumberEditor
  */
 public class BeanWrapperImpl implements BeanWrapper {
 
@@ -109,8 +114,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private Map customEditors;
 
 	/**
-	 * Cached introspections results for this object, to prevent encountering the cost
-	 * of JavaBeans introspection every time.
+	 * Cached introspections results for this object, to prevent encountering
+	 * the cost of JavaBeans introspection every time.
 	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
@@ -925,7 +930,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		else {
 			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
-																				 "No property '" + propertyName + "' found");
+			    "No property '" + propertyName + "' found");
 		}
 	}
 
