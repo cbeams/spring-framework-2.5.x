@@ -17,14 +17,13 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
 
 /**
  * A context for a currently executing flow.
  * @author Keith Donald
  */
-public interface FlowExecutionContext extends AttributeAccessor {
+public interface FlowExecutionContext {
 
 	/**
 	 * Returns this flow execution's root flow definition.
@@ -40,17 +39,10 @@ public interface FlowExecutionContext extends AttributeAccessor {
 	public Flow getActiveFlow() throws IllegalStateException;
 
 	/**
-	 * Returns the last event signaled within this flow context. The event may
-	 * or may not have caused a state transition to happen.
-	 * @return The last signaled event
-	 */
-	public Event getEvent();
-
-	/**
 	 * Returns a mutable list of listeners attached to this flow execution.
 	 * @return The flow execution listener list
 	 */
-	public FlowExecutionListenerList getListenerList();
+	public FlowExecutionListenerList getFlowExecutionListenerList();
 
 	/**
 	 * Is the flow execution managed in this context active?
@@ -59,138 +51,30 @@ public interface FlowExecutionContext extends AttributeAccessor {
 	public boolean isFlowExecutionActive();
 
 	/**
-	 * Is given request participating in the active transaction of the model?
-	 * @param request the current HTTP request
-	 * @param reset indicates whether or not the transaction should end after
-	 *        checking it
-	 * @return True when the request is participating in the active transaction
-	 *         of the model, false otherwise
+	 * Returns the last event signaled within this flow execution context. The
+	 * event may or may not have caused a state transition to happen.
+	 * @return The last signaled event
 	 */
-	public boolean inTransaction(boolean reset);
+	public Event getEvent();
 
 	/**
-	 * Assert that given request is participating in the active transaction of
-	 * the model.
-	 * @param request the current HTTP request
-	 * @param reset indicates whether or not the transaction should end after
-	 *        checking it
-	 * @throws IllegalStateException The request is not participating in the
-	 *         active transaction of the model or there is no transaction active
-	 *         in the model
+	 * Returns a mutable accessor for accessing and/or setting attributes in
+	 * request scope.
+	 * @return the attribute setter
 	 */
-	public void assertInTransaction(boolean reset) throws IllegalStateException;
+	public Scope requestScope();
 
 	/**
-	 * Start a new transaction on this context.
+	 * Returns a mutable accessor for accessing and/or setting attributes in
+	 * flow scope.
+	 * @return the attribute setter
 	 */
-	public void beginTransaction();
-
-	/**
-	 * End the active transaction on this context.
-	 */
-	public void endTransaction();
+	public Scope flowScope();
 
 	/**
 	 * @return
 	 */
-	public AttributeSetter getRequestAttributeAccessor();
-
-	/**
-	 * @param attributeName
-	 * @return
-	 */
-	public Object getRequestAttribute(String attributeName);
-
-	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getRequestAttribute(String attributeName, Class requiredType) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getRequiredRequestAttribute(String attributeName) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getRequiredRequestAttribute(String attributeName, Class requiredType) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @param attributeValue
-	 */
-	public void setRequestAttribute(String attributeName, Object attributeValue);
-
-	/**
-	 * @param attributes
-	 */
-	public void setRequestAttributes(Map attributes);
-
-	/**
-	 * @param attributeName
-	 * @return
-	 */
-	public Object removeRequestAttribute(String attributeName);
-
-	/**
-	 * @return
-	 */
-	public AttributeSetter getFlowAttributeAccessor();
-
-	/**
-	 * @param attributeName
-	 * @return
-	 */
-	public Object getFlowAttribute(String attributeName);
-
-	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getFlowAttribute(String attributeName, Class requiredType) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getRequiredFlowAttribute(String attributeName) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @param requiredType
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public Object getRequiredFlowAttribute(String attributeName, Class requiredType) throws IllegalStateException;
-
-	/**
-	 * @param attributeName
-	 * @param attributeValue
-	 */
-	public void setFlowAttribute(String attributeName, Object attributeValue);
-
-	/**
-	 * @param attributes
-	 */
-	public void setFlowAttributes(Map attributes);
-
-	/**
-	 * @param attributeName
-	 * @return
-	 */
-	public Object removeFlowAttribute(String attributeName);
+	public TransactionSynchronizer getTransactionSynchronizer();
 
 	/**
 	 * Returns the data model for this flow model, suitable for exposing to web

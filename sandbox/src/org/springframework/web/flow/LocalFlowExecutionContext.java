@@ -19,11 +19,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeSetter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.closure.support.Block;
-import org.springframework.web.flow.support.FlowUtils;
-import org.springframework.web.flow.support.MapAttributeSetterAdapter;
+import org.springframework.web.flow.support.RandomGuid;
 
 public class LocalFlowExecutionContext implements StateContext {
 	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
@@ -32,7 +31,9 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	private FlowExecutionStack flowExecutionStack;
 
-	private MapAttributeSetterAdapter requestAttributes = new MapAttributeSetterAdapter();
+	private Scope requestAttributes = new Scope();
+
+	private TransactionSynchronizer transactionSynchronizer = new LocalTransactionSynchronizer();
 
 	public LocalFlowExecutionContext(Event event, FlowExecutionStack executionStack) {
 		this.event = event;
@@ -43,7 +44,7 @@ public class LocalFlowExecutionContext implements StateContext {
 		return this.flowExecutionStack.getActiveFlow();
 	}
 
-	public FlowExecutionListenerList getListenerList() {
+	public FlowExecutionListenerList getFlowExecutionListenerList() {
 		return this.flowExecutionStack.getListenerList();
 	}
 
@@ -61,30 +62,6 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	public Event getEvent() {
 		return event;
-	}
-
-	public boolean containsAttribute(String attributeName) {
-		boolean containsAttribute = getActiveFlowSession().containsAttribute(attributeName);
-		if (!containsAttribute) {
-			if (this.requestAttributes != null) {
-				containsAttribute = this.requestAttributes.containsAttribute(attributeName);
-			}
-		}
-		return containsAttribute;
-	}
-
-	public Object getAttribute(String attributeName) {
-		if (getActiveFlowSession().containsAttribute(attributeName)) {
-			return getActiveFlowSession().getAttribute(attributeName);
-		}
-		else {
-			if (this.requestAttributes != null) {
-				return this.requestAttributes.getAttribute(attributeName);
-			}
-			else {
-				return null;
-			}
-		}
 	}
 
 	public void setCurrentState(State state) {
@@ -126,104 +103,18 @@ public class LocalFlowExecutionContext implements StateContext {
 		return endedSession;
 	}
 
-	public boolean inTransaction(boolean clear) {
-		return FlowUtils.isEventTokenValid(this, getTransactionTokenAttributeName(),
-				getTransactionTokenParameterName(), clear);
-	}
-
-	public void assertInTransaction(boolean clear) throws IllegalStateException {
-		Assert.state(FlowUtils.isEventTokenValid(this, getTransactionTokenAttributeName(),
-				getTransactionTokenParameterName(), clear),
-				"The request is not running in the context of an application transaction");
-	}
-
-	/**
-	 * Get the name for the transaction token attribute. Defaults to "txToken".
-	 */
-	protected String getTransactionTokenAttributeName() {
-		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
-	}
-
-	/**
-	 * Get the name for the transaction token parameter in requests. Defaults to
-	 * "_txToken".
-	 */
-	protected String getTransactionTokenParameterName() {
-		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
-	}
-
-	public void beginTransaction() {
-		FlowUtils.setToken(this, getTransactionTokenAttributeName());
-	}
-
-	public void endTransaction() {
-		FlowUtils.clearToken(this, getTransactionTokenAttributeName());
-	}
-
-	public AttributeSetter getRequestAttributeAccessor() {
+	public Scope requestScope() {
 		return this.requestAttributes;
 	}
 
-	public Object getRequestAttribute(String attributeName) {
-		return this.requestAttributes.getAttribute(attributeName);
+	public Scope flowScope() {
+		return getActiveFlowSession().flowScope();
 	}
 
-	public Object getRequestAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return this.requestAttributes.getAttribute(attributeName, requiredType);
+	public TransactionSynchronizer getTransactionSynchronizer() {
+		return this.transactionSynchronizer;
 	}
-
-	public Object getRequiredRequestAttribute(String attributeName) throws IllegalStateException {
-		return this.requestAttributes.getRequiredAttribute(attributeName);
-	}
-
-	public Object getRequiredRequestAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return this.requestAttributes.getRequiredAttribute(attributeName, requiredType);
-	}
-
-	public void setRequestAttribute(String attributeName, Object attributeValue) {
-		this.requestAttributes.setAttribute(attributeName, attributeValue);
-	}
-
-	public void setRequestAttributes(Map attributes) {
-		this.requestAttributes.setAttributes(attributes);
-	}
-
-	public Object removeRequestAttribute(String attributeName) {
-		return this.requestAttributes.removeAttribute(attributeName);
-	}
-
-	public AttributeSetter getFlowAttributeAccessor() {
-		return getActiveFlowSession();
-	}
-
-	public Object getFlowAttribute(String attributeName) {
-		return getActiveFlowSession().getAttribute(attributeName);
-	}
-
-	public Object getFlowAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return getActiveFlowSession().getAttribute(attributeName, requiredType);
-	}
-
-	public Object getRequiredFlowAttribute(String attributeName) throws IllegalStateException {
-		return getActiveFlowSession().getRequiredAttribute(attributeName);
-	}
-
-	public Object getRequiredFlowAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return getActiveFlowSession().getRequiredAttribute(attributeName, requiredType);
-	}
-
-	public void setFlowAttribute(String attributeName, Object attributeValue) {
-		getActiveFlowSession().setAttribute(attributeName, attributeValue);
-	}
-
-	public void setFlowAttributes(Map attributes) {
-		getActiveFlowSession().setAttributes(attributes);
-	}
-
-	public Object removeFlowAttribute(String attributeName) {
-		return getActiveFlowSession().removeAttribute(attributeName);
-	}
-
+	
 	public Map getModel() {
 		Map model = this.flowExecutionStack.getModel();
 		model.putAll(requestAttributes.getAttributeMap());
@@ -237,10 +128,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getListenerList().size()
+			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).started(LocalFlowExecutionContext.this);
 			}
@@ -253,9 +144,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireRequestSubmitted(final Event event) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getListenerList().size() + " listener(s)");
+			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestSubmitted(LocalFlowExecutionContext.this, event);
 			}
@@ -268,9 +160,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireRequestProcessed(final Event event) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getListenerList().size() + " listener(s)");
+			logger.debug("Publishing request processed event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestProcessed(LocalFlowExecutionContext.this, event);
 			}
@@ -283,9 +176,11 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireEventSignaled(final Event event) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + getListenerList().size() + " listener(s)");
+			logger
+					.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
+							+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).eventSignaled(LocalFlowExecutionContext.this, event);
 			}
@@ -298,9 +193,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireStateTransitioned(final State previousState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state transitioned event to " + getListenerList().size() + " listener(s)");
+			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).stateTransitioned(LocalFlowExecutionContext.this, previousState,
 						getCurrentState());
@@ -314,10 +210,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session execution started event to " + getListenerList().size()
-					+ " listener(s)");
+			logger.debug("Publishing sub flow session execution started event to "
+					+ getFlowExecutionListenerList().size() + " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).subFlowSpawned(LocalFlowExecutionContext.this);
 			}
@@ -330,9 +226,10 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session ended event to " + getListenerList().size() + " listener(s)");
+			logger.debug("Publishing sub flow session ended event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).subFlowEnded(LocalFlowExecutionContext.this, endedSession);
 			}
@@ -344,13 +241,124 @@ public class LocalFlowExecutionContext implements StateContext {
 	 */
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution ended event to " + getListenerList().size()
+			logger.debug("Publishing flow session execution ended event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
-		getListenerList().iteratorTemplate().run(new Block() {
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).ended(LocalFlowExecutionContext.this, endingRootFlowSession);
 			}
 		});
+	}
+
+	private class LocalTransactionSynchronizer implements TransactionSynchronizer {
+		public boolean inTransaction(boolean clear) {
+			return isEventTokenValid(getTransactionTokenAttributeName(), getTransactionTokenParameterName(), clear);
+		}
+
+		public void assertInTransaction(boolean clear) throws IllegalStateException {
+			Assert.state(isEventTokenValid(getTransactionTokenAttributeName(), getTransactionTokenParameterName(),
+					clear), "The request is not running in the context of an application transaction");
+		}
+
+		public void beginTransaction() {
+			setToken(getTransactionTokenAttributeName());
+		}
+
+		public void endTransaction() {
+			clearToken(getTransactionTokenAttributeName());
+		}
+
+		/**
+		 * Get the name for the transaction token attribute. Defaults to
+		 * "txToken".
+		 */
+		protected String getTransactionTokenAttributeName() {
+			return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
+		}
+
+		/**
+		 * Get the name for the transaction token parameter in requests.
+		 * Defaults to "_txToken".
+		 */
+		protected String getTransactionTokenParameterName() {
+			return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
+		}
+
+		/**
+		 * Save a new transaction token in given model.
+		 * @param model the model where the generated token should be saved
+		 * @param tokenName the key used to save the token in the model
+		 */
+		public void setToken(String tokenName) {
+			String txToken = new RandomGuid().toString();
+			flowScope().setAttribute(tokenName, txToken);
+		}
+
+		/**
+		 * Reset the saved transaction token in given model. This indicates that
+		 * transactional token checking will not be needed on the next request
+		 * that is submitted.
+		 * @param model the model where the generated token should be saved
+		 * @param tokenName the key used to save the token in the model
+		 */
+		public void clearToken(String tokenName) {
+			flowScope().removeAttribute(tokenName);
+		}
+
+		/**
+		 * Return <code>true</code> if there is a transaction token stored in
+		 * given model, and the value submitted as a request parameter matches
+		 * it. Returns <code>false</code> when
+		 * <ul>
+		 * <li>there is no transaction token saved in the model</li>
+		 * <li>there is no transaction token included as a request parameter</li>
+		 * <li>the included transaction token value does not match the
+		 * transaction token in the model</li>
+		 * </ul>
+		 * @param model the model where the token is stored
+		 * @param tokenName the key used to save the token in the model
+		 * @param request current HTTP request
+		 * @param requestParameterName name of the request parameter holding the
+		 *        token
+		 * @param clear indicates whether or not the token should be reset after
+		 *        checking it
+		 * @return true when the token is valid, false otherwise
+		 */
+		public boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
+			String tokenValue = (String)getEvent().getParameter(tokenParameterName);
+			return isTokenValid(tokenName, tokenValue, clear);
+		}
+
+		/**
+		 * Return <code>true</code> if there is a transaction token stored in
+		 * given model and the given value matches it. Returns
+		 * <code>false</code> when
+		 * <ul>
+		 * <li>there is no transaction token saved in the model</li>
+		 * <li>given token value is empty</li>
+		 * <li>the given transaction token value does not match the transaction
+		 * token in the model</li>
+		 * </ul>
+		 * @param model the model where the token is stored
+		 * @param tokenName the key used to save the token in the model
+		 * @param tokenValue the token value to check
+		 * @param clear indicates whether or not the token should be reset after
+		 *        checking it
+		 * @return true when the token is valid, false otherwise
+		 */
+		private boolean isTokenValid(String tokenName, String tokenValue, boolean clear) {
+			if (!StringUtils.hasText(tokenValue)) {
+				return false;
+			}
+			String txToken = (String)flowScope().getAttribute(tokenName);
+			if (!StringUtils.hasText(txToken)) {
+				return false;
+			}
+			if (clear) {
+				clearToken(tokenName);
+			}
+			return txToken.equals(tokenValue);
+		}
 	}
 }

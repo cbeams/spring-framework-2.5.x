@@ -110,7 +110,8 @@ public class EndState extends State {
 			}
 			Assert.isInstanceOf(FlowAttributeMapper.class, context.getCurrentState());
 			FlowAttributeMapper resumingState = (FlowAttributeMapper)context.getCurrentState();
-			resumingState.mapSubFlowOutputAttributes(endingFlowSession, context.getActiveFlowSession());
+			resumingState.mapSubFlowOutputAttributes(endingFlowSession.flowScope(), context.getActiveFlowSession()
+					.flowScope());
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
@@ -135,7 +136,7 @@ public class EndState extends State {
 			}
 		}
 	}
-	
+
 	protected Event createSubFlowResultEvent() {
 		return new LocalEvent(getId());
 	}

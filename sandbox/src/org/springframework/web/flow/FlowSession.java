@@ -19,15 +19,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.flow.support.AttributeSetterSupport;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a
@@ -50,7 +47,7 @@ import org.springframework.web.flow.support.AttributeSetterSupport;
  * @see org.springframework.web.flow.FlowExecution
  * @see org.springframework.web.flow.FlowExecutionStack
  */
-public class FlowSession extends AttributeSetterSupport implements Serializable {
+public class FlowSession implements Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
@@ -74,7 +71,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	/**
 	 * The session data model ("flow scope").
 	 */
-	private Map attributes = new HashMap();
+	private Scope attributes = new Scope();
 
 	/**
 	 * Set only on deserialization so this object can be fully reconstructed.
@@ -103,15 +100,8 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 		Assert.notNull(flow, "The flow is required");
 		this.flow = flow;
 		if (input != null) {
-			setAttributes(input);
+			this.attributes.setAttributes(input);
 		}
-	}
-
-	/**
-	 * Returns the id of the flow associated with this flow session.
-	 */
-	public String getFlowId() {
-		return getFlow().getId();
 	}
 
 	/**
@@ -138,14 +128,6 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	}
 
 	/**
-	 * Returns the id of the state that is currently active in this flow
-	 * session.
-	 */
-	public String getCurrentStateId() {
-		return currentState.getId();
-	}
-
-	/**
 	 * Returns the state that is currently active in this flow session
 	 */
 	public State getCurrentState() {
@@ -167,72 +149,22 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting current state of this '" + getFlowId() + "' flow session to '" + newState + "'");
+			logger
+					.debug("Setting current state of this '" + getFlow().getId() + "' flow session to '" + newState
+							+ "'");
 		}
 		this.currentState = newState;
 	}
 
+	public Scope flowScope() {
+		return this.attributes;
+	}
+	
 	public Map getModel() {
-		return attributes;
+		return this.attributes.getAttributeMap();
 	}
-
-	public Map getAttributeMap() {
-		return attributes;
-	}
-
-	public Object getAttribute(String attributeName) {
-		return attributes.get(attributeName);
-	}
-
-	public boolean containsAttribute(String attributeName) {
-		return attributes.containsKey(attributeName);
-	}
-
-	public boolean containsAttribute(String attributeName, Class requiredType) {
-		try {
-			getRequiredAttribute(attributeName, requiredType);
-			return true;
-		}
-		catch (IllegalStateException e) {
-			return false;
-		}
-	}
-
-	// methods implementing MutableFlowModel
-
-	public void setAttribute(String attributeName, Object attributeValue) {
-		if (attributeValue != null) {
-			Assert.isInstanceOf(Serializable.class, attributeValue, "Attempt to set FlowSession attribute '"
-					+ attributeName + "' failed: ");
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue
-					+ "'");
-		}
-		this.attributes.put(attributeName, attributeValue);
-	}
-
-	public void setAttributes(Map attributes) {
-		if (attributes == null) {
-			return;
-		}
-		Iterator it = attributes.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry e = (Map.Entry)it.next();
-			Assert.isInstanceOf(String.class, e.getKey());
-			setAttribute((String)e.getKey(), e.getValue());
-		}
-	}
-
-	public Object removeAttribute(String attributeName) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
-		}
-		return this.attributes.remove(attributeName);
-	}
-
+	
 	// custom serialization
-
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.flow.getId());
 		out.writeObject(this.currentState.getId());
@@ -244,7 +176,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 		this.flowId = (String)in.readObject();
 		this.currentStateId = (String)in.readObject();
 		this.status = (FlowSessionStatus)in.readObject();
-		this.attributes = (Map)in.readObject();
+		this.attributes = (Scope)in.readObject();
 	}
 
 	/**
@@ -253,8 +185,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	 */
 	protected void rehydrate(FlowLocator flowLocator) {
 		// implementation note: we cannot integrate this code into the
-		// readObject()
-		// method since we need the flow locator!
+		// readObject() method since we need the flow locator!
 		Assert.state(this.flow == null, "The flow is already set - already restored");
 		Assert.state(this.currentState == null, "The current state is already set - already restored");
 		Assert

@@ -138,7 +138,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + getFlow() + "'");
 		}
-		return context.spawn(getSubFlow(), createSubFlowInputAttributes(context.getFlowAttributeAccessor()));
+		return context.spawn(getSubFlow(), createSubFlowInputAttributes(context.flowScope()));
 	}
 
 	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {

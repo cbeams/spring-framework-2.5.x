@@ -127,7 +127,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	public long getUptime() {
 		return new Date().getTime() - this.creationTimestamp;
 	}
-	
+
 	public String getCaption() {
 		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
 	}
@@ -155,7 +155,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getActiveFlowId() {
-		return getActiveFlowSession().getFlowId();
+		return getActiveFlowSession().getFlow().getId();
 	}
 
 	public String getQualifiedActiveFlowId() {
@@ -164,7 +164,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		StringBuffer qualifiedName = new StringBuffer(128);
 		while (it.hasNext()) {
 			FlowSession session = (FlowSession)it.next();
-			qualifiedName.append(session.getFlowId());
+			qualifiedName.append(session.getFlow().getId());
 			if (it.hasNext()) {
 				qualifiedName.append('.');
 			}
@@ -181,7 +181,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 			List stack = new ArrayList(executingFlowSessions.size());
 			while (it.hasNext()) {
 				FlowSession session = (FlowSession)it.next();
-				stack.add(session.getFlowId());
+				stack.add(session.getFlow().getId());
 			}
 			return (String[])stack.toArray(new String[0]);
 		}
@@ -196,7 +196,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getCurrentStateId() {
-		return getActiveFlowSession().getCurrentStateId();
+		return getActiveFlowSession().getCurrentState().getId();
 	}
 
 	public String getEventId() {
@@ -229,8 +229,8 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	public boolean sessionExists(String flowId) {
 		Iterator it = executingFlowSessions.iterator();
 		while (it.hasNext()) {
-			FlowSession fs = (FlowSession)it.next();
-			if (fs.getFlowId().equals(flowId)) {
+			FlowSession session = (FlowSession)it.next();
+			if (session.getFlow().getId().equals(flowId)) {
 				return true;
 			}
 		}
@@ -240,9 +240,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	public short getStatus(String flowId) throws IllegalArgumentException {
 		Iterator it = executingFlowSessions.iterator();
 		while (it.hasNext()) {
-			FlowSession fs = (FlowSession)it.next();
-			if (fs.getFlowId().equals(flowId)) {
-				return fs.getStatus().getShortCode();
+			FlowSession session = (FlowSession)it.next();
+			if (session.getFlow().getId().equals(flowId)) {
+				return session.getStatus().getShortCode();
 			}
 		}
 		throw new IllegalArgumentException("No such session for flow '" + flowId + "'");
