@@ -19,6 +19,7 @@ import org.springframework.web.util.HtmlUtils;
 /**
  * Context holder for request-specific state, like current web application
  * context, current locale, current theme, and potential binding errors.
+ * Provides easy access to localized messages and Errors instances.
  *
  * <p>Suitable for exposition to views, and usage within <jsp:useBean>,
  * JSP scriptlets, JSTL EL, Velocity templates, etc. Necessary for views
@@ -93,20 +94,6 @@ public class RequestContext {
 	}
 
 	/**
-	 * (De)activate default HTML escaping for messages and errors.
-	 */
-	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
-		this.defaultHtmlEscape = defaultHtmlEscape;
-	}
-
-	/**
-	 * Default HTML escaping?
-	 */
-	public boolean isDefaultHtmlEscape() {
-		return defaultHtmlEscape;
-	}
-
-	/**
 	 * Return the current locale.
 	 */
 	public Locale getLocale() {
@@ -121,9 +108,58 @@ public class RequestContext {
 	}
 
 	/**
+	 * (De)activate default HTML escaping for messages and errors.
+	 */
+	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
+		this.defaultHtmlEscape = defaultHtmlEscape;
+	}
+
+	/**
+	 * Default HTML escaping?
+	 */
+	public boolean isDefaultHtmlEscape() {
+		return defaultHtmlEscape;
+	}
+
+	/**
+	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * @param code code of the message
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getMessage(String code, String defaultMessage) {
+		return getMessage(code, null, defaultMessage, this.defaultHtmlEscape);
+	}
+
+	/**
+	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * @param code code of the message
+	 * @param args arguments for the message, or null if none
+	 * @param defaultMessage String to return if the lookup fails
+	 * @return the message
+	 */
+	public String getMessage(String code, Object[] args, String defaultMessage) {
+		return getMessage(code, args, defaultMessage, this.defaultHtmlEscape);
+	}
+
+	/**
+	 * Retrieve the message for the given code.
+	 * @param code code of the message
+	 * @param args arguments for the message, or null if none
+	 * @param defaultMessage String to return if the lookup fails
+	 * @param htmlEscape HTML escape the message?
+	 * @return the message
+	 */
+	public String getMessage(String code, Object[] args, String defaultMessage, boolean htmlEscape) {
+		String msg = this.webApplicationContext.getMessage(code, args, defaultMessage, this.locale);
+		return (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);
+	}
+
+	/**
 	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
 	 * @param code code of the message
 	 * @return the message
+	 * @throws NoSuchMessageException if not found
 	 */
 	public String getMessage(String code) throws NoSuchMessageException {
 		return getMessage(code, null, this.defaultHtmlEscape);
@@ -134,6 +170,7 @@ public class RequestContext {
 	 * @param code code of the message
 	 * @param args arguments for the message, or null if none
 	 * @return the message
+	 * @throws NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
 		return getMessage(code, args, this.defaultHtmlEscape);
@@ -145,6 +182,7 @@ public class RequestContext {
 	 * @param args arguments for the message, or null if none
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
+	 * @throws NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.webApplicationContext.getMessage(code, args, this.locale);
@@ -156,6 +194,7 @@ public class RequestContext {
 	 * using the defaultHtmlEscape setting.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
+	 * @throws NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
 		return getMessage(resolvable, this.defaultHtmlEscape);
@@ -166,6 +205,7 @@ public class RequestContext {
 	 * @param resolvable the MessageSourceResolvable
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
+	 * @throws NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable, boolean htmlEscape) throws NoSuchMessageException {
 		String msg = this.webApplicationContext.getMessage(resolvable, this.locale);

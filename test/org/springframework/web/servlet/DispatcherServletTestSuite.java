@@ -86,18 +86,21 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
 			assertTrue("Correct locale", Locale.CANADA.equals(RequestContextUtils.getLocale(request)));
 			assertTrue("Correct theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null)));
+			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 
 			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null)));
+			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
+			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", "default")));
+			assertTrue("Correct message", "default".equals(rc.getMessage("testa", "default")));
+			assertTrue("Correct message", "default &amp;".equals(rc.getMessage("testa", null, "default &", true)));
 		}
 		catch (ServletException ex) {
 			fail("Should not have thrown ServletException: " + ex.getMessage());
@@ -148,7 +151,7 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors));
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null)));
+			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
@@ -160,7 +163,7 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME) instanceof EscapedErrors);
 			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, false) instanceof EscapedErrors));
 			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_BEAN_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null)));
+			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test")));
 			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
 			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable)));
