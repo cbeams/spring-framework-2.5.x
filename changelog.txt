@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.190 2004-07-25 11:58:33 johnsonr Exp $
+$Id: changelog.txt,v 1.191 2004-07-26 09:24:36 jhoeller Exp $
 
 
-Changes in version 1.1 RC1 (26.7.2004)
+Changes in version 1.1 RC1 (28.7.2004)
 --------------------------------------
 
 Package org.springframework.aop
@@ -43,6 +43,7 @@ Package org.springframework.context
 * reworked ApplicationEventMulticaster to have a "multicastEvent" method rather than derive from ApplicationListener
 * renamed ApplicationEventMulticasterImpl to SimpleApplicationEventMulticaster, indicating alternative implementations
 * AbstractApplicationContext auto-detects an "applicationEventMulticaster" bean, using it instead of the default
+* added overloaded constructors with refresh flag to ClassPathXmlApplicationContext and FileSystemXmlApplicationContext
 
 Package org.springframework.core
 * fixed UrlResource to correctly return the underlying URL on "getURL"
@@ -64,6 +65,7 @@ Package org.springframework.jdbc
 * allow for defining custom translations using CustomSQLErrorCodesTranslation defined in the sql-error-codes.xml file
 * removed CannotCloseJdbcConnectionException, as it is not used anymore
 * DataSourceUtils' "closeConnectionIfNecessary" logs error on SQLException rather than rethrowing an exception
+* added TransactionAwareDataSourceProxy to allow for participating in Spring transactions with plain JDBC API code
 * DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
 * DataSourceTransactionManager manages nested transactions via JDBC 3.0 Savepoints
 * DataSourceTransactionObject implements SavepointManager to allow for savepoint management via TransactionStatus
@@ -80,6 +82,7 @@ Package org.springframework.jdbc
 * added WebSphereNativeJdbcExtractor, using WSJdbcUtil's "getNativeConnection" method (tested with WLS 5.1.0)
 
 Package org.springframework.mail
+* added MailPreparationException, to be thrown by user code e.g. when a template cannot be rendered for mail text
 * added "replyTo" and "sentDate" bean properties to SimpleMailMessage, understood by JavaMailSenderImpl
 * added "setReplyTo" and "setSentDate" methods to MimeMessageHelper, analogous to SimpleMailMessage
 * added accessors for "session", "protocol", "host", "port", "username", "password" to JavaMailSenderImpl
@@ -92,6 +95,7 @@ Package org.springframework.orm
 * HibernateTransactionManager and JdoTransactionManager allow to manage nested transactions via JDBC 3.0 Savepoints
 * SessionFactoryUtils and PersistenceManagerFactoryUtils log error on cleanup failure rather than rethrowing it
 * added "contains", "clear", "delete", "iterate" to HibernateOperations/HibernateTemplate, analogous to Session
+* added further overloaded "find" versions to HibernateTemplate, for direct HQL with named parameters
 * added "cacheQueries" property to HibernateTemplate, for marking all executed queries as cacheable
 * added protected "checkWriteOperationAllowed" method to HibernateTemplate, checking whether FlushMode is not NEVER
 * apply "checkWriteOperationAllowed" before all save/update/delete operations in HibernateTemplate
@@ -119,6 +123,7 @@ Package org.springframework.scheduling
 * added "jobSchedulingDataLocation" property to SchedulerFactoryBean, supporting Quartz 1.3's job definition XML files
 * added "dataSource" property to SchedulerFactoryBean, for using a Spring-managed DataSource as Quartz job store
 * added "overwriteExistingJobs" property to SchedulerFactoryBean, to control overwriting of persistent jobs
+* added "autoStartup" property to SchedulerFactoryBean, to allow for manual startup of the scheduler
 * added "concurrent" property to MethodInvokingJobDetailFactoryBean, to support stateful jobs if needed
 
 Package org.springframework.transaction
@@ -146,10 +151,21 @@ Package org.springframework.web
 * removed unused (and misleading) "makeThemeNameAvailable" method from AbstractThemeResolver
 * added "suppressValidation" callback to BaseCommandController, for suppressing validation for certain requests
 * added "isFormChangeRequest" callback to SimpleFormController, to enforce suppressing validation and showing form
+* added "getPages" method to AbstractWizardFormController, for accessing the view names in subclasses
+* made BindStatus class more generic, moving it to support package, keeping a deprecated subclass in tags package
+* added "createBindStatus" methods to RequestContext, available for JSP scriptlets and template macros
 * added "getAttributesMap" method to AbstractView, to allow for "attributesMap[key]" overrides in child view definitions
+* added "removeFromCache" method to AbstractCachingViewResolver to make removal of cached views possible at runtime
+* added "exposeBindMacroHelpers" property to AbstractTemplateView, exposing a special RequestContext instance
+* added AbstractTemplateViewResolver for convenient setting of AbstractTemplateView's properties for all views
+* added FreeMarkerViewResolver as convenience subclass of AbstractTemplateViewResolver
+* added initial bind macro library for Velocity ("spring.vm"), automatically registered by VelocityConfigurer
+* added initial bind macro library for FreeMarker ("spring.ftl"), automatically registered by FreeMarkerConfigurer
+* reworked AbstractExcelView to be able to load a document from any Spring resource location
+* adapted AbstractExcelView's localization to conform to ResourceBundle conventions ("_en_US" rather than "_enUS")
 * added overloaded "getParameters(request)" method to AbstractXsltView, delegating to "getParameters()" by default
 * reworked AbstractXsltView's "doTransform" method into 2 methods to allow for specifying a custom transform result
-* added "removeFromCache" method to AbstractCachingViewResolver to make removal of cached views possible at runtime
+* reworked ContextLoaderPlugIn and DelegationActionProxy/RequestProcessor to support a context per Struts module
 
 
 Changes in version 1.0.2 (3.6.2004)
