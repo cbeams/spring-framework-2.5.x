@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ErrorCodedPropertyVetoException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyVetoExceptionsException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
@@ -27,7 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.3 2003-10-10 13:59:54 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.4 2003-10-16 19:02:41 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -315,7 +316,15 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		Object rod = getBeanFactory().getBean("rod");
 		Object aliasRod = getBeanFactory().getBean(alias);
 		assertTrue(rod == aliasRod);
-		
+
+		try {
+			((AbstractBeanFactory) getBeanFactory()).registerAlias("father", alias);
+			fail("Should have thrown FatalBeanException");
+		}
+		catch (FatalBeanException ex) {
+			// expected
+		}
+
 		// Check prototype support
 		// TODO
 	}
