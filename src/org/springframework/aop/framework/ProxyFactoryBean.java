@@ -28,12 +28,14 @@ import org.springframework.core.OrderComparator;
 /**
  * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
  *
- * <p>Interceptors are identified by a list of bean names in the current bean factory.
- * These beans should be of type Interceptor or MethodPointcut. The last entry in
+ * <p>Interceptors and Advisors are identified by a list of bean names in the current bean factory.
+ * These beans should be of type Interceptor or an Advisor subtype
+ * (presently InterceptionAroundAdvisor or InterceptionIntroductionAdvisor). 
+ * The last entry in
  * the list can be the name of any bean in the factory. If it's neither an Interceptor
  * or a MethodPointcut, a new InvokerInterceptor is added to wrap it.
  *
- * <p>Global interceptors can be added at the factory level. The specified ones are
+ * <p>Global interceptors and advisors can be added at the factory level. The specified ones are
  * expanded in an interceptor list where an "xxx*" entry is included in the list,
  * matching the given prefix with the bean names (e.g. "global*" would match both
  * "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
@@ -45,7 +47,7 @@ import org.springframework.core.OrderComparator;
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
  *
- * <p>It's possible to cast a proxy obtained from this factory to ProxyConfig,
+ * <p>It's possible to cast a proxy obtained from this factory to Adviser,
  * or to obtain the ProxyFactoryBean reference and programmatically
  * manipulate it. This won't work for existing prototype references, which are independent. However,
  * it will work for prototypes subsequently obtained from the factory. Changes to interception
@@ -57,9 +59,12 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.10 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.11 2003-11-15 20:09:36 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
+ * @see org.aopalliance.intercept.MethodInterceptor
+ * @see org.springframework.aop.InterceptionAroundAdvisor
+ * @see org.springframework.aop.InterceptionIntroductionAdvisor
  */
 public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, BeanFactoryAware {
 
@@ -117,19 +122,19 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		logger.debug("Set BeanFactory. Will configure interceptor beans...");
-		createInterceptorChain();
+		createAdvisorChain();
 		logger.info("ProxyFactoryBean config: " + this);
 	}
 
 
 	/**
-	 * Create the interceptor chain. The interceptors that
+	 * Create the advisor (interceptor) chain. The advisors that
 	 * are sourced from a BeanFactory will be refreshed each time
 	 * a new prototype instance is added. Interceptors
 	 * added programmatically through the factory API are
 	 * unaffected by such changes.
 	 */
-	private void createInterceptorChain() throws AopConfigException, BeansException {
+	private void createAdvisorChain() throws AopConfigException, BeansException {
 		if (this.interceptorNames == null || this.interceptorNames.length == 0) {
 			throw new AopConfigException("Interceptor names are required");
 		}
@@ -145,10 +150,10 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 
 			if (name.endsWith(GLOBAL_SUFFIX)) {
 				if (!(this.beanFactory instanceof ListableBeanFactory)) {
-					throw new AopConfigException("Can only use global pointcuts or interceptors with a ListableBeanFactory");
+					throw new AopConfigException("Can only use global advisors or interceptors with a ListableBeanFactory");
 				}
 				else {
-					addGlobalAdvice((ListableBeanFactory) this.beanFactory,
+					addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
 					                                  name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				}
 			}
@@ -167,7 +172,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * returned, to return distinct instances of prototype interfaces
 	 * and pointcuts.
 	 */
-	private void refreshInterceptorChain() {
+	private void refreshAdvisorChain() {
 		Advisor[] advisors = getAdvisors();
 		for (int i = 0; i < advisors.length; i++) {
 			String beanName = (String) this.sourceMap.get(advisors[i]);
@@ -176,17 +181,17 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 
 				Object bean = this.beanFactory.getBean(beanName);
 
-				Advisor refreshedAdvice = objectToAdvice(bean);
+				Advisor refreshedAdvisor = objectToAdvisor(bean);
 				// What about aspect interfaces!? we're only updating
-				replaceAdvice(advisors[i], refreshedAdvice);
+				replaceAdvice(advisors[i], refreshedAdvisor);
 				// Keep name mapping up to date
-				sourceMap.put(refreshedAdvice, beanName);
+				sourceMap.put(refreshedAdvisor, beanName);
 			}
 			else {
 				// We can't throw an exception here, as the user may have added additional
 				// pointcuts programmatically we don't know about
-				logger.info("Cannot find bean name for MethodPointcut [" + advisors[i] + 
-					"] when refreshing interceptor chain");
+				logger.info("Cannot find bean name for Advisor [" + advisors[i] + 
+					"] when refreshing advisor chain");
 			}
 		}
 	}
@@ -194,13 +199,13 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	/**
 	 * Add all global interceptors and pointcuts.
 	 */
-	private void addGlobalAdvice(ListableBeanFactory beanFactory, String prefix) {
-		String[] globalPointcutNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Advisor.class);
+	private void addGlobalAdvisor(ListableBeanFactory beanFactory, String prefix) {
+		String[] globalAdvisorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Advisor.class);
 		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Interceptor.class);
-		List beans = new ArrayList(globalPointcutNames.length + globalInterceptorNames.length);
+		List beans = new ArrayList(globalAdvisorNames.length + globalInterceptorNames.length);
 		Map names = new HashMap();
-		for (int i = 0; i < globalPointcutNames.length; i++) {
-			String name = globalPointcutNames[i];
+		for (int i = 0; i < globalAdvisorNames.length; i++) {
+			String name = globalAdvisorNames[i];
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);
 			names.put(bean, name);
@@ -230,38 +235,35 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 	 * bean factory.
 	 */
 	private void addAdvisor(Object next, String name) {
-		logger.debug("Adding pointcut or interceptor [" + next + "] with name [" + name + "]");
+		logger.debug("Adding advisor or interceptor [" + next + "] with name [" + name + "]");
 		// We need to add a method pointcut so that our source reference matches
 		// what we find from superclass interceptors
-		Advisor advice = null;
-		advice = objectToAdvice(next);
-
-		addAdvisor(advice);
+		Advisor advisor = objectToAdvisor(next);
+		addAdvisor(advisor);
 		// Record the pointcut as descended from the given bean name.
 		// This allows us to refresh the interceptor list, which we'll need to
 		// do if we have to create a new prototype instance. Otherwise the new
 		// prototype instance wouldn't be truly independent, because it might reference
 		// the original instances of prototype interceptors.
-		this.sourceMap.put(advice, name);
+		this.sourceMap.put(advisor, name);
 	}
 
-	private Advisor objectToAdvice(Object next) {
-		Advisor advice;
+	private Advisor objectToAdvisor(Object next) {
+		Advisor advisor;
 		if (next instanceof Advisor) {
-			advice = (Advisor) next;
+			advisor = (Advisor) next;
 		}
 		else if (next instanceof MethodInterceptor) {
-			advice = new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
+			advisor = new DefaultInterceptionAroundAdvisor((MethodInterceptor) next);
 		}
 		else {
 			// It's not a pointcut or interceptor.
 			// It's a bean that needs an invoker around it.
-			// TODO how do these get refreshed
 			InvokerInterceptor ii = new InvokerInterceptor(next);
-			advice = new DefaultInterceptionAroundAdvisor(ii);
+			advisor = new DefaultInterceptionAroundAdvisor(ii);
 			//throw new AopConfigException("Illegal type: bean '" + name + "' must be of type MethodPointcut or Interceptor");
 		}
-		return advice;
+		return advisor;
 	}
 
 	/**
@@ -288,7 +290,7 @@ public class ProxyFactoryBean extends AdvisedSupport implements FactoryBean, Bea
 			proxy = createAopProxy();
 		}
 		else {
-			refreshInterceptorChain();
+			refreshAdvisorChain();
 			// In the case of a prototype, we need to give the proxy
 			// an independent instance of the configuration
 			if (logger.isDebugEnabled())
