@@ -151,8 +151,6 @@
 		</classpath>
 	</taskdef>
 
-	<target name="tomcat.refresh" depends="refresh.war,tomcat.start" />
-
 	<target name="tomcat.deploy" depends="dist,deploy.common.libs,deploy.shared.libs" description="Install application to tomcat">
 		<deploy url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" war="${project.war}" />
 	</target>
@@ -170,6 +168,8 @@
 	<target name="tomcat.server.start">
 		<exec dir="${tomcat.dir}/bin" executable="startup.bat" spawn="true" vmlauncher="false" />
 	</target>
+
+	<target name="tomcat.server.refresh" depends="refresh.war,tomcat.server.start" description="Copy in a updated war and start the tomcat server"/>
 
 	<target name="tomcat.start" description="Start web application in tomcat">
 		<start url="${tomcat.manager.url}" username="${tomcat.username}" password="${tomcat.password}" path="/${project.name}" />
