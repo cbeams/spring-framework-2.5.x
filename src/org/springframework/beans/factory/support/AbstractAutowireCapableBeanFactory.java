@@ -255,7 +255,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 					else {
 						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
-							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j]);
+							throw new UnsatisfiedDependencyException(beanName, j, argTypes[j],
+						 			"Did you specify the correct bean references as generic constructor arguments?");
 						}
 						Map matchingBeans = findMatchingBeans(argTypes[j]);
 						if (matchingBeans == null || matchingBeans.size() != 1) {
@@ -276,9 +277,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			catch (BeansException ex) {
-				logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
-						"': could not satisfy dependencies. Detail: " + ex.getMessage());
-
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
+							"': could not satisfy dependencies. Detail: " + ex.getMessage());
+				}
 				if (i == constructors.length - 1 && constructorToUse == null) {
 					// all constructors tried
 					throw ex;
@@ -455,7 +457,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
 					(!isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 				if (unsatisfied) {
-					throw new UnsatisfiedDependencyException(beanName, pds[i].getName());
+					throw new UnsatisfiedDependencyException(beanName, pds[i].getName(), null);
 				}
 			}
 		}
