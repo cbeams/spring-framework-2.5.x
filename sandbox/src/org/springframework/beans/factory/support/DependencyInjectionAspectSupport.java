@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,6 +61,9 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 	
 	private AutowireCapableBeanFactory aabf;
 	
+	/**
+	 * Map of Class to prototype name
+	 */
 	private Map managedClassToPrototypeMap = new HashMap();
 	
 	private int defaultAutowireMode = 0;
@@ -110,10 +114,18 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 		return this.beanFactory;
 	}
 
+	/**
+	 * Set the Classes or class names that will be autowired by type
+	 * @param autowireByTypeClasses list of Class or String classname
+	 */
 	public void setAutowireByTypeClasses(List autowireByTypeClasses) {
-		this.autowireByTypeClasses = autowireByTypeClasses;
+		this.autowireByTypeClasses = convertListFromStringsToClassesIfNecessary(autowireByTypeClasses);
 	}
 	
+	/**
+	 * Return classes autowired by type
+	 * @return list of Class
+	 */
 	public List getAutowireByTypeClasses() {
 		return autowireByTypeClasses;
 	}
@@ -123,10 +135,19 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 	}
 	
 	
+	/**
+	 * Set the Classes or class names that will be autowired by name
+	 * @param autowireByNameClasses list of Class or String classname
+	 */
 	public void setAutowireByNameClasses(List autowireByNameClasses) {
-		this.autowireByNameClasses = autowireByNameClasses;
+		this.autowireByNameClasses = convertListFromStringsToClassesIfNecessary(autowireByNameClasses);
 	}
 	
+	
+	/**
+	 * Return classes autowired by name
+	 * @return list of Class
+	 */
 	public List getAutowireByNameClasses() {
 		return autowireByNameClasses;
 	}
@@ -135,19 +156,53 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 	public void addAutowireByNameClass(Class clazz) {
 		this.autowireByNameClasses.add(clazz);
 	}
-
-	public void setManagedClassNamesToPrototypeNames(Properties persistentClassBeanNames) {
-		ClassEditor ce = new ClassEditor();
 	
+	
+	/**
+	 * Property key is class FQN, value is prototype name to use to obtain a new instance
+	 * @param persistentClassBeanNames
+	 */
+	public void setManagedClassNamesToPrototypeNames(Properties persistentClassBeanNames) {			
 		for (Iterator i = persistentClassBeanNames.keySet().iterator(); i.hasNext();) {
 			String className = (String) i.next();
-			String beanName = persistentClassBeanNames.getProperty(className);
-			ce.setAsText(className);
-			Class clazz = (Class) ce.getValue();
-			addManagedClassToPrototypeMapping(clazz, beanName);
+			String beanName = persistentClassBeanNames.getProperty(className);			
+			addManagedClassToPrototypeMapping(classNameStringToClass(className), beanName);
 		}
 	}
 	
+	/**
+	 * Utility method to convert a collection from a list of String class name to a list of Classes
+	 * @param l list which may contain Class or String
+	 * @return list of resolved Class instances
+	 */
+	private List convertListFromStringsToClassesIfNecessary(List l) {
+	    List classes = new ArrayList(l.size());
+		for (Iterator itr = l.iterator(); itr.hasNext();) {
+            Object next = itr.next();
+            if (next instanceof String) {
+                next = classNameStringToClass((String) next);
+            }
+            classes.add(next);
+        }
+		return classes;
+	}
+
+	
+	/**
+	 * Resolve this FQN
+	 * @param className name of the class to resolve
+	 * @return the Class
+	 */
+	private Class classNameStringToClass(String className) {
+	    ClassEditor ce = new ClassEditor();
+	    ce.setAsText(className);
+		return (Class) ce.getValue();
+	}
+	
+	/**
+	 * Return a Map of managed classes to prototype names
+	 * @return Map with key being FQN and value prototype bean name to use for that class
+	 */
 	public Map getManagedClassToPrototypeNames() {
 		return this.managedClassToPrototypeMap;
 	}
@@ -169,14 +224,17 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 		validateProperties();
 	}
 	
+	/**
+	 * Subclasses should implement this to validate their configuration	 
+	 */
 	protected abstract void validateProperties();
 
 	protected void validateConfiguration() {
 		if (managedClassToPrototypeMap.isEmpty() && autowireByTypeClasses.isEmpty() && autowireByNameClasses.isEmpty() && defaultAutowireMode == 0) {
-			throw new IllegalArgumentException("Must set persistent class information");
+			throw new IllegalArgumentException("Must set persistent class information: no managed classes configured and no autowiring configuration or defaults");
 		}
 		
-		if ((defaultAutowireMode !=0 || !autowireByTypeClasses.isEmpty() || !autowireByNameClasses.isEmpty()) && aabf == null) {
+		if ((defaultAutowireMode != 0 || !autowireByTypeClasses.isEmpty() || !autowireByNameClasses.isEmpty()) && aabf == null) {
 			throw new IllegalArgumentException("Autowiring supported only when running in an AutowireCapableBeanFactory");
 		}
 		
@@ -244,16 +302,11 @@ public abstract class DependencyInjectionAspectSupport implements InitializingBe
 		}
 	}
 	
-	// TODO newObject(Class c): returns a new object unless configured
-	// Could be on an interface
-	// Inject that interface into classes needed it to instantiate
-	// or lookup method? protected Whatever newWhatever(): finds DIAS (how?) and calls newObject() on it
-	
+
 	protected class NoAutowiringConfigurationForClassException extends Exception {
 		public NoAutowiringConfigurationForClassException(Class clazz) {
 			super(clazz + " cannot be autowired");
 		}
 	}
 
-	
 }

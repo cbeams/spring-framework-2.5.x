@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Collections;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -80,9 +81,29 @@ public class DependencyInjectionAspectSupportTests extends TestCase {
 		}
 	}
 	
-	public void testAutowireClassByType() throws Exception {
+	public void testAutowireClassByTypeAddClass() throws Exception {
+	    testAutowireClassByType(0);		
+	}
+	
+	public void testAutowireClassByTypeSetClassList() throws Exception {
+	    testAutowireClassByType(1);		
+	}
+	
+	public void testAutowireClassByTypeSetStringList() throws Exception {
+	    testAutowireClassByType(2);		
+	}
+	
+	private void testAutowireClassByType(int howConfigure) throws Exception {
 		DependencyInjectionAspectSupport dias = new DummyDependencyInjectionAspect();
-		dias.addAutowireByTypeClass(TestBean.class);
+		switch (howConfigure) {
+			case 0 :dias.addAutowireByTypeClass(TestBean.class);
+					break;
+			  case 1:dias.setAutowireByTypeClasses(Collections.singletonList(TestBean.class));
+					break;
+			  case 2 :dias.setAutowireByTypeClasses(Collections.singletonList(TestBean.class.getName()));
+					break;
+			default : fail("Unknown case");
+		}
 		DefaultListableBeanFactory bf = beanFactoryWithTestBeanSingleton();
 		dias.setBeanFactory(bf);
 		dias.afterPropertiesSet();
