@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.tags;
 
@@ -32,7 +32,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * The RequestContext instance provides easy access to current
  * state like WebApplicationContext, Locale, Theme, etc.
  *
- * <p>Note: Only intended for DispatcherServlet requests!
+ * <p>Mainly intended for DispatcherServlet requests;
+ * will use fallbacks when used outside DispatcherServlet.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,9 +52,11 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 
 
 	/**
-	 * Create and set the current RequestContext.
-	 * Delegates to doStartTagInternal for actual work.
+	 * Create and expose the current RequestContext.
+	 * Delegates to <code>doStartTagInternal</code> for actual work.
 	 * @see #doStartTagInternal
+	 * @see #REQUEST_CONTEXT_PAGE_ATTRIBUTE
+	 * @see org.springframework.web.servlet.support.JspAwareRequestContext
 	 */
 	public final int doStartTag() throws JspException {
 		this.requestContext = (RequestContext) this.pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
@@ -65,15 +68,15 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 			return doStartTagInternal();
 		}
 		catch (JspException ex) {
-			logger.error("Exception in RequestContextAwareTag", ex);
+			logger.error(ex.getMessage(), ex);
 			throw ex;
 		}
 		catch (RuntimeException ex) {
-			logger.error("Exception in RequestContextAwareTag", ex);
+			logger.error(ex.getMessage(), ex);
 			throw ex;
 		}
 		catch (Exception ex) {
-			logger.error("Exception in RequestContextAwareTag", ex);
+			logger.error(ex.getMessage(), ex);
 			throw new JspTagException(ex.getMessage());
 		}
 	}
