@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.1 2003-12-19 01:44:36 davison Exp $
+ * @version $Id: readme.txt,v 1.2 2003-12-20 01:47:33 davison Exp $
  */
 
 
@@ -15,12 +15,13 @@ Overview
 The autobuilds root is a collection of code, scripts and config files.
 Together, they automate builds of the Spring codebase and of the sample Spring
 applications, which can then be deployed onto application servers.  The
-application servers (which can be downloaded from the internet if required)
-are correctly configured after extraction to the target directory.
+application servers (which can be downloaded from a network location via http
+if needed) are correctly configured after extraction to the target directory.
 
-Once the deployed applicatins are running on the application server, automated
-tests are conducted on them before the servers are shutdown and removed.
-Results of the whole process are logged and date-stamped for future reference.
+Once the deployed applications are running on the application server,
+automated tests are conducted on them before the servers are shutdown and
+removed.  Results of the whole process are logged and date-stamped for future
+reference.
 
 Ad-hoc builds/tests can be run to verify locally uncommitted code in the main
 tree doesn't break the existing sample applications before committing it, or
@@ -270,6 +271,7 @@ Items near the top are likely to be imminent.
 
  - jboss3 / resin3 / wls8 server builds added
  - httpunit tests for countries / jpetstore / tiles-example completed
+ - make anonymous cvs work
  - http downloads implemented
  - skip tests if class not available
  - email options for build logs;
