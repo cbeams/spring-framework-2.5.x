@@ -20,7 +20,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Juergen Hoeller
  * @see #setConfigLocation
  * @see #setVelocityProperties
- * @see #setAppRootMarker
+ * @see #setResourceLoaderPath
  * @see CommonsLoggingLogSystem
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  */

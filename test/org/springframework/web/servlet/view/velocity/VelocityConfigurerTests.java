@@ -28,7 +28,7 @@ public class VelocityConfigurerTests extends TestCase {
 		Properties props = new Properties();
 		props.setProperty("myprop", "${app.root}/mydir");
 		vefb.setVelocityProperties(props);
-		vefb.setAppRootMarker("${app.root}");
+		vefb.setResourceLoaderPath("${app.root}");
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
 		VelocityEngine ve = (VelocityEngine) vefb.getObject();
 		assertEquals("${app.root}/mydir", ve.getProperty("myprop"));
@@ -38,9 +38,8 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setConfigLocation("myprops.properties");
 		Properties props = new Properties();
-		props.setProperty("myprop", "${app.root}/mydir");
+		props.setProperty("myprop", "/mydir");
 		vefb.setVelocityProperties(props);
-		vefb.setAppRootMarker("${app.root}");
 		try {
 			vefb.getObject();
 			fail("Should have thrown VelocityInitializationException");
@@ -59,14 +58,11 @@ public class VelocityConfigurerTests extends TestCase {
 		acControl.replay();
 
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		Properties props = new Properties();
-		props.setProperty("myprop", "${app.root}/mydir");
-		vefb.setVelocityProperties(props);
-		vefb.setAppRootMarker("${app.root}");
+		vefb.setResourceLoaderPath("/mydir");
 		vefb.setApplicationContext(ac);
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
 		VelocityEngine ve = (VelocityEngine) vefb.getObject();
-		assertEquals(resourceBase.getAbsolutePath() + "/mydir", ve.getProperty("myprop"));
+		assertEquals(new File(resourceBase, "/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 
 		acControl.verify();
 	}
@@ -80,14 +76,11 @@ public class VelocityConfigurerTests extends TestCase {
 		acControl.replay();
 
 		VelocityConfigurer vc = new VelocityConfigurer();
-		Properties props = new Properties();
-		props.setProperty("myprop", "${app.root}/mydir");
-		vc.setVelocityProperties(props);
-		vc.setAppRootMarker("${app.root}");
+		vc.setResourceLoaderPath("/mydir");
 		vc.setApplicationContext(ac);
 		assertTrue(vc.getVelocityEngine() instanceof VelocityEngine);
 		VelocityEngine ve = vc.getVelocityEngine();
-		assertEquals(resourceBase.getAbsolutePath() + "/mydir", ve.getProperty("myprop"));
+		assertEquals(new File(resourceBase, "/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 
 		acControl.verify();
 	}
@@ -138,8 +131,6 @@ public class VelocityConfigurerTests extends TestCase {
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getResourceAsStream(configLocation);
 		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
-		wac.getResourceBase();
-		wmc.setReturnValue(null);
 		wmc.replay();
 		vc.setApplicationContext(wac);
 
@@ -183,8 +174,6 @@ public class VelocityConfigurerTests extends TestCase {
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getResourceAsStream(configLocation);
 		wmc.setReturnValue(new StringBufferInputStream("foo=bar"));
-		wac.getResourceBase();
-		wmc.setReturnValue(null);
 		wmc.replay();
 		try {
 			vc.setApplicationContext(wac);
