@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,33 +48,39 @@ import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
-
 
 /**
- * Partial implementation of ApplicationContext. Doesn't mandate the
- * type of storage used for configuration, but implements common functionality.
+ * Partial implementation of ApplicationContext. Doesn't mandate the type
+ * of storage used for configuration, but implements common functionality.
+ * Uses the Template Method design pattern, requiring concrete subclasses
+ * to implement abstract methods.
  *
- * <p>This class uses the Template Method design pattern, requiring
- * concrete subclasses to implement protected abstract methods.
+ * <p>In contrast to a plain bean factory, an ApplicationContext is supposed
+ * to detect special beans defined in its bean factory: Therefore, this class
+ * automatically registers BeanFactoryPostProcessors, BeanPostProcessors
+ * and ApplicationListeners that are defined as beans in the context.
  *
- * <p>A message source may be supplied as a bean in the default bean factory,
- * with the name "messageSource". Else, message resolution is delegated to the
+ * <p>A MessageSource may be also supplied as a bean in the context, with
+ * the name "messageSource". Else, message resolution is delegated to the
  * parent context.
+ *
+ * <p>Implements resource loading through extending DefaultResourceLoader.
+ * Therefore, treats resource paths as class path resources. Only supports
+ * full classpath resource names that include the package path, like
+ * "mypackage/myresource.dat".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
  */
-public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
+public abstract class AbstractApplicationContext extends DefaultResourceLoader
+		implements ConfigurableApplicationContext {
 
 	/**
 	 * Name of the MessageSource bean in the factory.
@@ -105,12 +109,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	/** MessageSource helper we delegate our implementation of this interface to */
 	private MessageSource messageSource;
 
-	/**
-	 * Helper class used in event publishing.
-	 * TODO: This could be parameterized as a JavaBean (with a distinguished name
-	 * specified), enabling a different thread usage policy for event publication.
-	 */
-	private ApplicationEventMulticaster eventMulticaster = new ApplicationEventMulticasterImpl();
+	/** Helper class used in event publishing */
+	private final ApplicationEventMulticaster eventMulticaster = new ApplicationEventMulticasterImpl();
 
 
 	//---------------------------------------------------------------------
@@ -185,48 +185,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		if (this.parent != null) {
 			parent.publishEvent(event);
 		}
-	}
-
-	/**
-	 * This implementation supports fully qualified URLs, including the "classpath:"
-	 * pseudo-URL, and context-specific file paths via getResourceByPath.
-	 * Throws a FileNotFoundException if getResourceByPath returns null.
-	 * @see #getResourceByPath
-	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
-	 */
-	public Resource getResource(String location) {
-		if (location.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
-			return new ClassPathResource(location.substring(ResourceLoader.CLASSPATH_URL_PREFIX.length()));
-		}
-		try {
-			// try URL
-			URL url = new URL(location);
-			return new UrlResource(url);
-		}
-		catch (MalformedURLException ex) {
-			// no URL -> try context-specific path
-			return getResourceByPath(location);
-		}
-	}
-
-	/**
-	 * Return a Resource handle for the resource at the given file path.
-	 * <p>Default implementation supports file system paths relative to
-	 * the application's working directory. This should be appropriate for
-	 * standalone implementations but can be overridden, e.g. for
-	 * implementations targeted at a Servlet container.
-	 * <p>Note: Even if a given path starts with a slash, it will get
-	 * interpreted as relative to the application's working directory.
-	 * This is consisted with the semantics in a Servlet container.
-	 * @param path path to the resource
-	 * @return Resource handle
-	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
-	 */
-	protected Resource getResourceByPath(String path) {
-		if (path != null && path.startsWith("/")) {
-			path = path.substring(1);
-		}
-		return new FileSystemResource(path);
 	}
 
 
@@ -333,7 +291,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
-	 * Initialize the message source.
+	 * Initialize the MessageSource.
 	 * Use parent's if none defined in this context.
 	 */
 	private void initMessageSource() throws BeansException {
@@ -357,6 +315,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * Template method which can be overridden to add context-specific refresh work.
 	 * Called on initialization of special beans, before instantiation of singletons.
 	 * @throws BeansException in case of errors during refresh
+	 * @see #refresh
 	 */
 	protected void onRefresh() throws BeansException {
 		// for subclasses: do nothing by default
@@ -378,7 +337,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
-	 * Add a listener. Any beans that are listeners are automatically added.
+	 * Subclasses can invoke this method to register a listener.
+	 * Any beans in the context that are listeners are automatically added.
+	 * @param listener the listener to register
 	 */
 	protected void addListener(ApplicationListener listener) {
 		this.eventMulticaster.addApplicationListener(listener);
@@ -475,17 +436,20 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 
-	/** Show information about this context */
+	/**
+	 * Return information about this context.
+	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer("ApplicationContext: displayName=[" + this.displayName + "]; ");
-		sb.append("class=[" + getClass().getName() + "]; ");
-		sb.append("beanFactory=[" + getBeanFactory() + "]; ");
-		sb.append("messageSource=[" + this.messageSource + "]; ");
-		sb.append("startup date=[" + new Date(this.startupTime) + "]; ");
-		if (this.parent == null)
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		sb.append(": ");
+		sb.append("displayName=[").append(this.displayName).append("]; ");
+		sb.append("startup date=[").append(new Date(this.startupTime)).append("]; ");
+		if (this.parent == null) {
 			sb.append("root of ApplicationContext hierarchy");
-		else
-			sb.append("parent=[" + this.parent + "]");
+		}
+		else {
+			sb.append("parent=[").append(this.parent).append(']');
+		}
 		return sb.toString();
 	}
 

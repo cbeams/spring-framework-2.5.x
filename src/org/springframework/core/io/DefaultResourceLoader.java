@@ -30,6 +30,8 @@ import java.net.URL;
  * @since 10.03.2004
  * @see #CLASSPATH_URL_PREFIX
  * @see ResourceEditor
+ * @see UrlResource
+ * @see ClassPathResource
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
@@ -44,10 +46,25 @@ public class DefaultResourceLoader implements ResourceLoader {
 				return new UrlResource(url);
 			}
 			catch (MalformedURLException ex) {
-				// no URL -> try class path
-				return new ClassPathResource(location);
+				// no URL -> resolve resource path
+				return getResourceByPath(location);
 			}
 		}
+	}
+
+	/**
+	 * Return a Resource handle for the resource at the given path.
+	 * <p>Default implementation supports class path locations. This should
+	 * be appropriate for standalone implementations but can be overridden,
+	 * e.g. for implementations targeted at a Servlet container.
+	 * @param path path to the resource
+	 * @return Resource handle
+	 * @see ClassPathResource
+	 * @see org.springframework.context.support.FileSystemXmlApplicationContext#getResourceByPath
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
+	 */
+	protected Resource getResourceByPath(String path) {
+		return new ClassPathResource(path);
 	}
 
 }
