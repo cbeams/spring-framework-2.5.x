@@ -11,7 +11,7 @@ import java.sql.Statement;
  * Simple implementation of the NativeJdbcExtractor interface.
  * Assumes a pool that just wraps Connections but not Statements/ResultSets:
  * In this case, the underlying native Connection can be retrieved by simply
- * opening a Statement and invoking Statement.getConnection. All other JDBC
+ * opening a Statement and invoking Statement.getConnection(). All other JDBC
  * objects will be returned as passed in.
  *
  * <p>Known to work with Resin 2.1 and C3P0, but should work with any pool
@@ -25,24 +25,53 @@ public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 
 	private boolean nativeConnectionNecessaryForNativeStatements = false;
 
+	private boolean nativeConnectionNecessaryForNativePreparedStatements = false;
+
+	private boolean nativeConnectionNecessaryForNativeCallableStatements = false;
+
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native Statements and ResultSets. Default is false.
-	 * <p>This makes sense if you need to work with native Statements/ResultSets
-	 * from a pool that does not allow to extract the native JDBC objects from
-	 * its wrappers but returns the native Connection on Statement.getConnection,
-	 * like C3P0.
+	 * receive native Statements. Default is false.
+	 * <p>This makes sense if you need to work with native Statements/ResultSets from
+	 * a pool that does not allow to extract the native JDBC objects from its wrappers
+	 * but returns the native Connection on Statement.getConnection, like C3P0.
 	 */
 	public void setNativeConnectionNecessaryForNativeStatements(boolean nativeConnectionNecessary) {
 		this.nativeConnectionNecessaryForNativeStatements = nativeConnectionNecessary;
 	}
 
-	/**
-	 * Return whether it is necessary to work on the native Connection to
-	 * receive native Statements and ResultSets.
-	 */
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return nativeConnectionNecessaryForNativeStatements;
+	}
+
+	/**
+	 * Set whether it is necessary to work on the native Connection to
+	 * receive native PreparedStatements. Default is false.
+	 * <p>This makes sense if you need to work with native Statements/ResultSets from
+	 * a pool that does not allow to extract the native JDBC objects from its wrappers
+	 * but returns the native Connection on Statement.getConnection, like C3P0.
+	 */
+	public void setNativeConnectionNecessaryForNativePreparedStatements(boolean nativeConnectionNecessary) {
+		this.nativeConnectionNecessaryForNativePreparedStatements = nativeConnectionNecessary;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
+		return nativeConnectionNecessaryForNativePreparedStatements;
+	}
+
+	/**
+	 * Set whether it is necessary to work on the native Connection to
+	 * receive native CallableStatements. Default is false.
+	 * <p>This makes sense if you need to work with native Statements/ResultSets from
+	 * a pool that does not allow to extract the native JDBC objects from its wrappers
+	 * but returns the native Connection on Statement.getConnection, like C3P0.
+	 */
+	public void setNativeConnectionNecessaryForNativeCallableStatements(boolean nativeConnectionNecessary) {
+		this.nativeConnectionNecessaryForNativeCallableStatements = nativeConnectionNecessary;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
+		return nativeConnectionNecessaryForNativeCallableStatements;
 	}
 
 	public Connection getNativeConnection(Connection con) throws SQLException {

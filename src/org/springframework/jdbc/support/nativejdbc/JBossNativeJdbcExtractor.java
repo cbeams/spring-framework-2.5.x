@@ -18,9 +18,9 @@ import org.jboss.resource.adapter.jdbc.WrappedStatement;
  * etc to application code instead of JBoss' wrapper implementations.
  * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
  *
- * <p>This NativeJdbcExtractor can be set just to allow working with a JBoss
- * connection pool: If a given object is not a JBoss wrapper, it will be
- * returned as-is.
+ * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
+ * a JBoss connection pool: If a given object is not a JBoss wrapper,
+ * it will be returned as-is.
  *
  * @author Juergen Hoeller
  * @since 03.01.2004
@@ -29,6 +29,14 @@ import org.jboss.resource.adapter.jdbc.WrappedStatement;
 public class JBossNativeJdbcExtractor implements NativeJdbcExtractor {
 
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
+		return false;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
+		return false;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;
 	}
 

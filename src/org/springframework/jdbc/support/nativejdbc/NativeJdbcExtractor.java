@@ -31,14 +31,36 @@ public interface NativeJdbcExtractor {
 
 	/**
 	 * Return whether it is necessary to work on the native Connection to
-	 * receive native Statements and ResultSets.
+	 * receive native Statements.
 	 * <p>This should be true if the connection pool does not allow to extract
-	 * the native JDBC objects from its Statement/ResultSet wrappers but
+	 * the native JDBC objects from its Statement wrapper but supports a way
+	 * to retrieve the native JDBC Connection. This way, applications can
+	 * still receive native Statements and ResultSet via working on the
+	 * native JDBC Connection.
+	 */
+	boolean isNativeConnectionNecessaryForNativeStatements();
+
+	/**
+	 * Return whether it is necessary to work on the native Connection to
+	 * receive native PreparedStatements.
+	 * <p>This should be true if the connection pool does not allow to extract
+	 * the native JDBC objects from its PreparedStatement wrappers but
 	 * supports a way to retrieve the native JDBC Connection. This way,
 	 * applications can still receive native Statements and ResultSet via
 	 * working on the native JDBC Connection.
 	 */
-	boolean isNativeConnectionNecessaryForNativeStatements();
+	boolean isNativeConnectionNecessaryForNativePreparedStatements();
+
+	/**
+	 * Return whether it is necessary to work on the native Connection to
+	 * receive native CallableStatements.
+	 * <p>This should be true if the connection pool does not allow to extract
+	 * the native JDBC objects from its CallableStatement wrappers but
+	 * supports a way to retrieve the native JDBC Connection. This way,
+	 * applications can still receive native Statements and ResultSet via
+	 * working on the native JDBC Connection.
+	 */
+	boolean isNativeConnectionNecessaryForNativeCallableStatements();
 
 	/**
 	 * Retrieve the underlying native JDBC Connection for the given Connection.

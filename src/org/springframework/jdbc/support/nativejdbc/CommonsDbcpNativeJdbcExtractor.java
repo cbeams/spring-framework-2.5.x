@@ -19,9 +19,9 @@ import org.apache.commons.dbcp.DelegatingStatement;
  * ResultSet etc to application code instead of DBCP's wrapper implementations.
  * The returned JDBC classes can then safely be cast, e.g. to OracleResultSet.
  *
- * <p>This NativeJdbcExtractor can be set just to allow working with a Commons
- * DBCP DataSource: If a given object is not a Commons DBCP wrapper, it will
- * be returned as-is.
+ * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with a
+ * Commons DBCP DataSource: If a given object is not a Commons DBCP wrapper,
+ * it will be returned as-is.
  *
  * <p>Note: Before Commons DBCP 1.1, DelegatingCallableStatement and
  * DelegatingResultSet have not offered any means to access underlying delegates.
@@ -37,6 +37,14 @@ import org.apache.commons.dbcp.DelegatingStatement;
 public class CommonsDbcpNativeJdbcExtractor implements NativeJdbcExtractor {
 
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
+		return false;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
+		return false;
+	}
+
+	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;
 	}
 
