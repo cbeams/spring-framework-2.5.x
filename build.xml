@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.56 2004-05-15 21:44:00 aarendsen Exp $
+    $Id: build.xml,v 1.57 2004-05-15 21:56:54 aarendsen Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -874,5 +874,12 @@
 		</jar>
 
 	</target>
+	
+	
+	<!--
+		Convenience targets, needed for the automated build process. Convenience targets are
+		made up of the individual targets called, separated by an underscore
+	-->
+	<target name="clean_alljars" depends="clean, alljars"/>
 
 </project>
