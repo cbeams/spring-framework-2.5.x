@@ -46,6 +46,7 @@ import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
@@ -53,7 +54,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.35 2004-07-23 18:11:01 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.36 2004-07-24 09:46:45 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -266,6 +267,13 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		public void setName(String name) {
 			this.name = name;
 		}
+		
+		public boolean equals(Object other) {
+			if (!(other instanceof SerializablePerson))
+				return false;
+			SerializablePerson p = (SerializablePerson) other;
+			return p.age == age && ObjectUtils.nullSafeEquals(name, p.name);
+		}
 	}
 	
 	public static class SerializableNopInterceptor extends NopInterceptor implements Serializable {
@@ -297,6 +305,9 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		Advised a2 = (Advised) p2;
 		// Check we can manipulate state of p2
 		assertEquals(a1.getAdvisors().length, a2.getAdvisors().length);
+		
+		// This should work as SerializablePerson is equal
+		assertEquals("Proxies should be equal, even after one was serialized", p, p2);
 		
 		// Check we can add a new advisor to the target
 		NopInterceptor ni = new NopInterceptor();

@@ -16,12 +16,13 @@
 
 package org.springframework.aop;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
  * Canonical Pointcut instance that always matches.
  * @author Rod Johnson
- * @version $Id: TruePointcut.java,v 1.1 2004-07-23 18:11:49 johnsonr Exp $
+ * @version $Id: TruePointcut.java,v 1.2 2004-07-24 09:46:45 johnsonr Exp $
  */
 class TruePointcut implements Pointcut, Serializable {
 	
@@ -39,6 +40,16 @@ class TruePointcut implements Pointcut, Serializable {
 
 	public MethodMatcher getMethodMatcher() {
 		return MethodMatcher.TRUE;
+	}
+	
+	/**
+	 * Required to support serialization.
+	 * Replaces with canonical instance on deserialization,
+	 * protecting Singleton pattern. 
+	 * Alternative to overriding equals().
+	 */
+	private Object readResolve() throws ObjectStreamException {
+		return INSTANCE;
 	}
 
 	public String toString() {
