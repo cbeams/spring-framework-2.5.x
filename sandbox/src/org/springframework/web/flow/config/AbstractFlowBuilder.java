@@ -578,8 +578,32 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *         qualificaion
 	 */
 	protected ViewState addViewState() throws IllegalArgumentException {
-		return addViewState(getFlow().getId(), new Transition[] { onBackEnd(), onCancelEnd(),
-				onSubmitBindAndValidate(getFlow().getId()) });
+		return addViewState(getFlow().getId());
+	}
+
+	/**
+	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered. This method
+	 * is intended as a convenience when there is only one logical view state
+	 * for the flow, and the <code>flow.id</code> can be used as the
+	 * qualifying stateIdPrefix.
+	 * <p>
+	 * By default, the view state will be configured with a logical
+	 * <code>viewName</code> equal to its qualified state ID. The qualified
+	 * state ID is built by appending the VIEW action constant to the provided
+	 * ${flow.id} argument. This means, for example, a provided
+	 * <code>${flow.id}</code> of "customerDetails" would result in a
+	 * qualified stateId of "customerDetails.view" and a <code>viewName</code>
+	 * also of "customerDetails.view". This view name will be mapped to a
+	 * physical view resource to render a response when the view state is
+	 * entered during a flow execution.
+	 * @param the supported set of transitions out of this view state
+	 * @return The view state
+	 * @throws IllegalArgumentException the stateId was not unique after
+	 *         qualificaion
+	 */
+	protected ViewState addViewState(Transition[] transitions) throws IllegalArgumentException {
+		return addViewState(getFlow().getId(), transitions);
 	}
 
 	/**
@@ -3215,6 +3239,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Creates a transition stating:
 	 * <ul>
 	 * <li>on an occurence of the '<code>finish</code>' event, transition
+	 * to the action state with the id <code>${flow.id}.get</code>.
+	 * </ul>
+	 * @return The transition (e.g finish->customer.get)
+	 */
+	protected Transition onFinishGet() {
+		return onFinishGet(getFlow().getId());
+	}
+	
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>finish</code>' event, transition
 	 * to the action state with the id <code>${stateIdPrefix}.get</code>.
 	 * </ul>
 	 * @param stateIdPrefix The state id qualifier (e.g customer)
@@ -3222,6 +3258,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition onFinishGet(String stateIdPrefix) {
 		return onFinish(get(stateIdPrefix));
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>finish</code>' event, transition
+	 * to the action state with the id <code>${flow.id}.setup</code>.
+	 * </ul>
+	 * @return The transition (e.g finish->customer.get)
+	 */
+	protected Transition onFinishSetup() {
+		return onFinishSetup(getFlow().getId());
 	}
 
 	/**

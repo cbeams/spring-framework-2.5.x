@@ -38,18 +38,20 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	public void buildStates() throws FlowBuilderException {
 		// get the person given a userid as input
-		addGetState(PERSON_DETAIL, executeAction(GetPersonAction.class));
+		addGetState(executeAction(GetPersonAction.class));
 
+		String collegueId = "collegueId";
+		String setCollegueId = qualify(set(collegueId));
 		// view the person
-		String setCollegueId = qualify(set("collegueId"));
-		addViewState(PERSON_DETAIL, new Transition[] { onBackFinish(), onSelect(setCollegueId) });
+		addViewState(new Transition[] { onBackFinish(), onSelect(setCollegueId) });
 
+		String collegueDetail = "collegueDetail";
 		// set the selected collegue (chosen from the person's collegue list)
-		addActionState(setCollegueId, onSuccess("collegue.Detail"));
+		addActionState(setCollegueId, onSuccess(collegueDetail));
 
 		// spawn subflow to view selected collegue details
-		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
-				new Transition[] { onFinishGet(PERSON_DETAIL), onErrorEnd() });
+		addSubFlowState(collegueDetail, PersonDetailFlowBuilder.class, useModelMapper(collegueId), new Transition[] {
+				onFinishGet(), onErrorEnd() });
 
 		// end
 		addFinishEndState();
