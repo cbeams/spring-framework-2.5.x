@@ -130,7 +130,7 @@ public class EventParameterMapperAction extends AbstractAction {
 
 	protected Event doExecuteAction(RequestContext context) throws Exception {
 		if (eventParameterMapper != null) {
-			Scope scope = targetScope == ScopeType.REQUEST ? context.getRequestScope() : context.getFlowScope();
+			Scope scope = (targetScope == ScopeType.REQUEST ? context.getRequestScope() : context.getFlowScope());
 			this.eventParameterMapper.map(context.getLastEvent(), scope);
 		}
 		return success();
