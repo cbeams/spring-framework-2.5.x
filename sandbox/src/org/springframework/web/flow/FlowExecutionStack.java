@@ -215,16 +215,16 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * monitor the activity of this execution to detect idle status.
 	 * @param eventId The last event id to set
 	 */
-	public void setEventId(String eventId) {
-		Assert.notNull(eventId, "The eventId is required");
-		this.eventId = eventId;
-		this.eventTimestamp = System.currentTimeMillis();
+	public void setEvent(Event event) {
+		Assert.notNull(event, "The event is required");
+		this.eventId = event.getId();
+		this.eventTimestamp = event.getTimestamp();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + eventId + "' within state '" + getCurrentStateId() + "' for flow '"
+			logger.debug("Event '" + event + "' within state '" + getCurrentStateId() + "' for flow '"
 					+ getActiveFlowId() + "' signaled");
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Set last event id to '" + eventId + "' and updated timestamp to " + this.eventTimestamp);
+			logger.debug("Set last event id to '" + this.eventId + "' and updated timestamp to " + this.eventTimestamp);
 		}
 	}
 
@@ -277,11 +277,14 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 
 	public ViewDescriptor start(Event event) {
 		Assert.state(!isActive(), "This flow execution is already started");
-		this.eventTimestamp = System.currentTimeMillis();
+		this.eventTimestamp = event.getTimestamp();
 		activateFlowSession(this.rootFlow, event.getParameters());
 		LocalFlowExecutionContext context = new LocalFlowExecutionContext(event, this);
+		context.fireRequestSubmitted(event);
 		context.fireStarted();
-		return this.rootFlow.getStartState().enter(context);
+		ViewDescriptor view = this.rootFlow.getStartState().enter(context);
+		context.fireRequestProcessed(event);
+		return view;
 	}
 
 	/*

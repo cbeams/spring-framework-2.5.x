@@ -44,6 +44,12 @@ public abstract class Event implements AttributeAccessor {
 	public abstract String getId();
 
 	/**
+	 * The time in which the event occured
+	 * @return the timestamp
+	 */
+	public abstract long getTimestamp();
+	
+	/**
 	 * Returns the state in which this event occured (optional).
 	 * @return The state id
 	 */

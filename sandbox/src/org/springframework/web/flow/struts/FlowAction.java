@@ -43,10 +43,10 @@ import org.springframework.web.util.WebUtils;
  * executions by parameterization with the appropriate <code>flowId</code> in
  * views that start new flow executions.
  * <p>
- * Requests are managed by and delegated to a {@link HttpServletFlowExecutionManager},
- * allowing reuse of common front flow controller logic in other environments.
- * Consult the JavaDoc of that class for more information on how requests are
- * processed.
+ * Requests are managed by and delegated to a
+ * {@link HttpServletFlowExecutionManager}, allowing reuse of common front flow
+ * controller logic in other environments. Consult the JavaDoc of that class for
+ * more information on how requests are processed.
  * <p>
  * This class also is aware of the <code>BindingActionForm</code> adapter,
  * which adapts Spring's data binding infrastructure (based on POJO binding, a
@@ -60,12 +60,12 @@ import org.springframework.web.util.WebUtils;
  * Flow-action that fronts a single top-level flow:
  * 
  * <pre>
- *           &lt;action path=&quot;/userRegistration&quot;
- *               type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *               name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *               className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *                   &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *           &lt;/action&gt;
+ *              &lt;action path=&quot;/userRegistration&quot;
+ *                  type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *                  name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *                  className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *                      &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *              &lt;/action&gt;
  * </pre>
  * 
  * This example associates the logical request URL
@@ -115,9 +115,10 @@ public class FlowAction extends TemplateAction {
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		HttpServletFlowExecutionManager executionManager = new HttpServletFlowExecutionManager(getFlowId(mapping), locator,
-				new FlowExecutionListener[] { createActionFormAdapter(request, form) });
-		ViewDescriptor viewDescriptor = executionManager.handleRequest(request, response);
+		HttpServletFlowExecutionManager flowExecutionManager = new HttpServletFlowExecutionManager(getFlowId(mapping),
+				locator);
+		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
+		ViewDescriptor viewDescriptor = flowExecutionManager.handleRequest(request, response, actionFormAdapter);
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
 	}
 
