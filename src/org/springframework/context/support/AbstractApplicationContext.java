@@ -426,7 +426,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private void refreshListeners() throws BeansException {
 		logger.info("Refreshing listeners");
-		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
+		Collection listeners = getBeansOfType(ApplicationListener.class, false, false).values();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found " + listeners.size() + " listeners in bean factory");
 		}
