@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.188 2004-07-24 10:27:00 johnsonr Exp $
+$Id: changelog.txt,v 1.189 2004-07-24 19:09:39 johnsonr Exp $
 
 
 Changes in version 1.1 RC1 (26.7.2004)
@@ -8,7 +8,7 @@ Changes in version 1.1 RC1 (26.7.2004)
 
 Package org.springframework.aop
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
-* AOP proxies using J2SE dynamic proxies now Serializable if all Advisors and the TargetSource are Serializable
+* AOP proxies now Serializable if all Advisors and the TargetSource are Serializable
 * added invocableClone() method to ReflectiveMethodInvocation to allow proceed to be called more than once
 
 Package org.springframework.beans
