@@ -47,10 +47,10 @@ import org.springframework.util.Styler;
  * the action is not named, a transition for the base <code>success</code>
  * event will be searched, and if found, executed.
  * <p>
- * By default, the 'executeMethodProperty' used by the <code>MultiAction</code>
- * implementation to dispatch calls on a target action instance to a particular
- * handler method. In this case the value of the name property will map to the
- * method name on the target action instance.
+ * By default, the 'executeMethodProperty' is used by the
+ * <code>MultiAction</code> implementation to dispatch calls on a target
+ * action instance to a particular handler method. In this case the value of the
+ * name property will map to the method name on the target action instance.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
