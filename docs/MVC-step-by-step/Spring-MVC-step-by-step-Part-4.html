@@ -1,12 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
 	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Win32)">
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGEDBY" CONTENT="Thomas Risberg">
-	<META NAME="CHANGED" CONTENT="20031015;33802">
+	<META NAME="CHANGED" CONTENT="20031121;22422900">
 	<STYLE>
 	<!--
 		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
@@ -44,18 +43,18 @@ changes to a database.</P>
 	you started this project based on the 'spring-framework-0.9'
 	release, then there are a few changes you will have to make. Since
 	the 'spring-framework-1.0-m1' release, we have changed the package
-	names and the name of the the TLD.  These instructions assume that
-	you now are using the latest 'spring-framework-1.0-m2' release.</I></P>
+	names and the name of the the TLD. These instructions assume that
+	you now are using the latest 'spring-framework-1.0-m3' release.</I></P>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in"><I>We need to replace Spring's
 		distribution jar file - copy
-		</I>spring-framework-1.0-m2/dist/spring.jar <I>to replace
+		</I>spring-framework-1.0-m3/dist/spring.jar <I>to replace
 		</I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
 	</UL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in"><I>We also need to replace the
 		TLD file - copy
-		</I>spring-framework-1.0-m2/samples/petclinic/war/WEB-INF/spring.tld
+		</I>spring-framework-1.0-m3/samples/petclinic/war/WEB-INF/spring.tld
 		<I>to replace </I>springapp/war/WEB-INF/i21.tld.</P>
 	</UL>
 	<UL>
@@ -98,7 +97,7 @@ planning on using HSQL, which is a good open source database written
 in Java. This database is distributed with Spring's Petclinic sample
 application, so we can just copy the jar file to the web apps lib
 directory. Copy
-spring-framework-1.0-m2/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
+spring-framework-1.0-m3/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
 to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a
 standalone mode to begin with. That way we don't have to worry about
 starting up a separate database server every time we use it. The URL
