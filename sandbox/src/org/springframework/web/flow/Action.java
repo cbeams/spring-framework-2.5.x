@@ -38,7 +38,8 @@ package org.springframework.web.flow;
  * only with local data or internal, thread-safe services.
  * <p>
  * Instances of this class are often referred to as the "target action" when
- * talking about its association with a <code>ActionStateAction</code>.
+ * talking about its relationship with an <code>ActionState</code>, through
+ * the <code>ActionStateAction</code> associative object.
  * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ActionStateAction
@@ -52,9 +53,9 @@ public interface Action {
 	 * Execute this action. Action execution will occur in the context of an
 	 * request associated with an active flow execution.
 	 * <p>
-	 * More specifically, Action execution is triggered in production when an
-	 * <code>ActionState</code> is entered as part of an ongoing
-	 * <code>FlowExecution</code> for a specific <code>Flow</code>
+	 * More specifically, Action execution is triggered in a production
+	 * environment when an <code>ActionState</code> is entered as part of an
+	 * ongoing <code>FlowExecution</code> for a specific <code>Flow</code>
 	 * definition. The result of Action execution, a logical outcome event, is
 	 * used as grounds for a transition in the calling action state.
 	 * <p>
@@ -72,13 +73,14 @@ public interface Action {
 	 * convenient access by the views when a <code>ViewState</code> is
 	 * entered.
 	 * <p>
-	 * Note: The flow scope should NOT be used as a general purpose cache, but
-	 * rather as a context for data needed locally by the flows this action
-	 * participates in. For example, it would be inappropriate to stuff large
-	 * collections of objects (like those returned to support a search results
-	 * view) into flow scope. Instead, put such result collections in request
-	 * scope, and ensure you execute this action again each time you wish to
-	 * view those results. 2nd level caches are much better cache solutions.
+	 * Note: The flow <code>Scope</code> should NOT be used as a general
+	 * purpose cache, but rather as a context for data needed locally by the
+	 * flows this action participates in. For example, it would be inappropriate
+	 * to stuff large collections of objects (like those returned to support a
+	 * search results view) into flow scope. Instead, put such result
+	 * collections in request scope, and ensure you execute this action again
+	 * each time you wish to view those results. 2nd level caches are much
+	 * better cache solutions.
 	 * <p>
 	 * Note: as flow scoped attributes are typically managed in the HTTP
 	 * session, they must be <code>Serializable</code>.
@@ -87,9 +89,11 @@ public interface Action {
 	 * @return a logical result outcome, used as grounds for a transition in the
 	 *         current, calling action state (e.g. "success", or "error")
 	 * @throws Exception an <b>unrecoverable</b> exception occured, either
-	 *         checked or unchecked; note: any recoverable exceptions should be
-	 *         caught and an appropriate result outcome returned
+	 *         checked or unchecked; note, any <i>recoverable</i> exceptions should be
+	 *         caught within this method and an appropriate result outcome
+	 *         returned instead
 	 * @see org.springframework.web.flow.ViewState
+	 * @see org.springframework.web.flow.Scope
 	 */
 	public Event execute(RequestContext context) throws Exception;
 }
