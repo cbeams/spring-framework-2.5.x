@@ -50,6 +50,7 @@
 			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
 		</property>
 		<property name="serviceName"><value>order</value></property>
+		<property name="registryPort"><value>1099</value></property>
 	</bean>
 	-->
 
