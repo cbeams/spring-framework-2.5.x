@@ -17,7 +17,7 @@
 package org.springframework.remoting.jaxrpc;
 
 import java.rmi.Remote;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.xml.namespace.QName;
@@ -34,11 +34,12 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 /**
  * Interceptor for accessing a specific port of a JAX-RPC service.
  * Uses either LocalJaxRpcServiceFactory's facilities underneath,
- * or takes an explicit reference to an existing JAX-RPC Service instance,
- * for example looked up via JndiObjectFactoryBean.
+ * or takes an explicit reference to an existing JAX-RPC Service instance
+ * (for example looked up via JndiObjectFactoryBean).
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the
  * "username", "password", "endpointAddress" and "maintainSession" properties.
+ * For typical usage, it is not necessary to specify those, though.
  *
  * <p>This invoker is typically used with an RMI service interface. Alternatively,
  * this invoker can also proxy a JAX-RPC service with a matching non-RMI business
@@ -54,6 +55,9 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  *
  * @author Juergen Hoeller
  * @since 15.12.2003
+ * @see #setPortName
+ * @see #setServiceInterface
+ * @see #setPortInterface
  * @see javax.xml.rpc.Service#getPort
  * @see javax.xml.rpc.Stub
  * @see org.springframework.remoting.RemoteAccessException
@@ -88,7 +92,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Set a reference to an existing JAX-RPC Service instance,
 	 * for example looked up via JndiObjectFactoryBean.
-	 * If not set, LocalJaxRpcServiceFactory's properties have to be set.
+	 * If not set, LocalJaxRpcServiceFactory's properties have to be specified.
+	 * @see #setServiceFactoryClass
+	 * @see #setWsdlDocumentUrl
+	 * @see #setNamespaceUri
+	 * @see #setServiceName
 	 * @see org.springframework.jndi.JndiObjectFactoryBean
 	 */
 	public void setJaxRpcService(Service jaxRpcService) {
@@ -117,34 +125,62 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		return portName;
 	}
 
+	/**
+	 * Set the username to specify on the stub.
+	 * @see javax.xml.rpc.Stub#USERNAME_PROPERTY
+	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
+	/**
+	 * Return the username to specify on the stub.
+	 */
 	public String getUsername() {
 		return username;
 	}
 
+	/**
+	 * Set the password to specify on the stub.
+	 * @see javax.xml.rpc.Stub#PASSWORD_PROPERTY
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * Return the password to specify on the stub.
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * Set the endpoint address to specify on the stub.
+	 * @see javax.xml.rpc.Stub#ENDPOINT_ADDRESS_PROPERTY
+	 */
 	public void setEndpointAddress(String endpointAddress) {
 		this.endpointAddress = endpointAddress;
 	}
 
+	/**
+	 * Return the endpoint address to specify on the stub.
+	 */
 	public String getEndpointAddress() {
 		return endpointAddress;
 	}
 
+	/**
+	 * Set the maintain session flag to specify on the stub.
+	 * @see javax.xml.rpc.Stub#SESSION_MAINTAIN_PROPERTY
+	 */
 	public void setMaintainSession(boolean maintainSession) {
 		this.maintainSession = maintainSession;
 	}
 
+	/**
+	 * Return the maintain session flag to specify on the stub.
+	 */
 	public boolean isMaintainSession() {
 		return maintainSession;
 	}
@@ -168,7 +204,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Set the interface of the service that this factory should create a proxy for.
 	 * Can be different from the JAX-RPC port interface, if using a non-RMI business
 	 * interface for exposed proxies.
-	 * <p>The interface must be suitable for a JAX-RPC port, it "portInterface"
+	 * <p>The interface must be suitable for a JAX-RPC port, if "portInterface"
 	 * is not set. Else, it must match the methods in the port interface but can
 	 * be a non-RMI business interface.
 	 * @see #setPortInterface
@@ -191,8 +227,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Set the JAX-RPC port interface to use. Only needs to be set if the exposed
 	 * service interface is different from the port interface, i.e. when using
 	 * a non-RMI business interface as service interface for exposed proxies.
-	 * <p>The interface must be suitable for a JAX-RPC port.
+	 * <p>The interface must be suitable for a JAX-RPC port, i.e. it must be an
+	 * RMI service interface (that extends <code>java.rmi.Remote</code>).
 	 * @see #setServiceInterface
+	 * @see java.rmi.Remote
 	 */
 	public void setPortInterface(Class portInterface) {
 		if (portInterface != null &&
@@ -232,8 +270,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 		if (this.serviceInterface != null) {
 			boolean isImpl = this.serviceInterface.isInstance(remoteObj);
-			logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC object [" +
-									this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+			if (logger.isInfoEnabled()) {
+				logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC object [" +
+						this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+			}
+		}
+
+		if (!(remoteObj instanceof Stub)) {
+			throw new ServiceException("Returned port stub [" + remoteObj + "] does not implement javax.xml.rpc.Stub");
 		}
 
 		// apply properties to stub
@@ -251,8 +295,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, new Boolean(this.maintainSession));
 		}
 		if (this.customProperties != null) {
-			for (Iterator it = this.customProperties.keySet().iterator(); it.hasNext();) {
-				String key = (String) it.next();
+			Enumeration en = this.customProperties.propertyNames();
+			while (en.hasMoreElements()) {
+				String key = (String) en.nextElement();
 				stub._setProperty(key, this.customProperties.getProperty(key));
 			}
 		}
@@ -264,7 +309,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Post-process the given JAX-RPC Service. Called by afterPropertiesSet.
 	 * Useful for example to register custom type mappings.
+	 * <p>Just applied when creating a JAX-RPC Service instance locally,
+	 * i.e. not applied when an existing Service reference is passed in.
 	 * @param service the current JAX-RPC Service
+	 * @see #afterPropertiesSet
+	 * @see #setJaxRpcService
 	 * @see javax.xml.rpc.Service#getTypeMappingRegistry
 	 */
 	protected void postProcessJaxRpcService(Service service) {
@@ -273,12 +322,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Post-process the given JAX-RPC port stub. Called by afterPropertiesSet.
 	 * @param portStub the current JAX-RPC port stub
+	 * @see #afterPropertiesSet
 	 */
 	protected void postProcessPortStub(Stub portStub) {
 	}
 
 	/**
-	 * Return the underlying JAX-RPC port stub that this interceptor delegates to.
+	 * Return the underlying JAX-RPC port stub that this interceptor delegates to
+	 * for each method invocation on the proxy.
 	 */
 	protected Remote getPortStub() {
 		return portStub;
