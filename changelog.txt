@@ -9,24 +9,34 @@ Changes in version 1.1 final (16.8.2004)
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
 * fixed "getBeansOfType" check (as used by autowiring) and "isSingleton" for parent bean definitions without class
+* factory methods no longer only static: an instance method can be called on a bean named by the factory-bean attribute
 * removed "getMethodOverrides" method from BeanDefinition interface, to avoid cyclic package dependencies
 * moved BeanDefinitionHolder class from factory.support to factory.config, to avoid cyclic package dependencies
 * CustomEditorConfigurer and ClassEditor delegate to same ClassUtils.forName method, understanding array class names
 * added FieldRetrievingFactoryBean, for retrieving static fields (and also non-static field values of target objects)
-* factory methods no longer only static: an instance method can be called on a bean named by the factory-bean attribute
+* introduced BeanDefinitionReader interface, implemented by AbstractBeanDefinitionReader and subclasses
+* reworked XmlBeanDefinitionParser SPI (warning: not backwards-compatible!) to receive a bean definition reader
+
+Package org.springframework.jdbc
+* added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
 
 Package org.springframework.jms
+* fixed JmsTemplate's "doReceive" implementation to not try to acknowledge message if null returned after timeout
 * fixed JmsTemplate102's "doSend" implementation to properly work with a JMS 1.0.2 API jar in the classpath
 
 Package org.springframework.orm
 * renamed HibernateOperations/HibernateTemplate's "find" methods for named parameters to "findByNamedParam"
 * deprecated Hibernate "findByNamedQuery" methods for named parameters in favor of "findByNamedQueryAndNamedParam"
+* added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 
 Package org.springframework.validation
 * added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
 
 Package org.springframework.web
+* WebContentGenerator throws RequestMethodNotSupportedException / SessionRequiredException rather than ServletException
+* MultiActionController logs NoSuchRequestHandlingMethodException and sends HTTP code 404, rather than rethrowing it
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
+* introduced JSF support in the form of a DelegatingVariableResolver that can resolve variable names as Spring beans
 
 
 Changes in version 1.1 RC1 (28.7.2004)
