@@ -205,7 +205,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	protected UserTransaction lookupUserTransaction(String userTransactionName)
 			throws CannotCreateTransactionException {
 		try {
-			UserTransaction ut = (UserTransaction) this.jndiTemplate.lookup(userTransactionName);
+			Object jndiObj = this.jndiTemplate.lookup(userTransactionName);
+			if (!(jndiObj instanceof UserTransaction)) {
+				throw new CannotCreateTransactionException("Object [" + jndiObj + "] available at JNDI location [" +
+				                                           userTransactionName + "] does not implement " +
+				                                           "javax.transaction.UserTransaction");
+			}
+			UserTransaction ut = (UserTransaction) jndiObj;
 			if (logger.isInfoEnabled()) {
 				logger.info("Using JTA UserTransaction [" + ut + "] from JNDI location [" +
 				            userTransactionName + "]");
@@ -231,7 +237,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	protected TransactionManager lookupTransactionManager(String transactionManagerName)
 			throws CannotCreateTransactionException {
 		try {
-			TransactionManager tm = (TransactionManager) this.jndiTemplate.lookup(transactionManagerName);
+			Object jndiObj = this.jndiTemplate.lookup(transactionManagerName);
+			if (!(jndiObj instanceof TransactionManager)) {
+				throw new CannotCreateTransactionException("Object [" + jndiObj + "] available at JNDI location [" +
+				                                           transactionManagerName + "] does not implement " +
+				                                           "javax.transaction.TransactionManager");
+			}
+			TransactionManager tm = (TransactionManager) jndiObj;
 			if (logger.isInfoEnabled()) {
 				logger.info("Using JTA TransactionManager [" + tm + "] from JNDI location [" +
 				            transactionManagerName + "]");
