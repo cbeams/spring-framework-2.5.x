@@ -25,7 +25,7 @@ import org.springframework.beans.PropertyValues;
  * BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.3 2003-09-06 11:21:38 johnsonr Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.4 2003-10-21 13:37:07 jhoeller Exp $
  */
 public abstract class AbstractBeanDefinition {
 	
@@ -80,7 +80,51 @@ public abstract class AbstractBeanDefinition {
 	public final boolean isSingleton() {
 		return singleton;
 	}
-	
+
+	/**
+	 * Set the dependency check code.
+	 * @param dependencyCheck the code to set.
+	 * Must be one of the four constants defined in this class.
+	 * @see #DEPENDENCY_CHECK_NONE
+	 * @see #DEPENDENCY_CHECK_OBJECTS
+	 * @see #DEPENDENCY_CHECK_SIMPLE
+	 * @see #DEPENDENCY_CHECK_ALL
+	 */
+	public void setDependencyCheck(int dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
+	}
+
+	/**
+	 * @return the dependency check code
+	 */
+	protected int getDependencyCheck() {
+		return dependencyCheck;
+	}
+
+	/**
+	 * Set the autowire code. This determines whether any automagical
+	 * detection and setting of bean references will happen. Default
+	 * is AUTOWIRE_NO constant, which means there's no autowire.
+	 * @param autowire the autowire to set.
+	 * Must be one of the three constants defined in this class.
+	 * @see #AUTOWIRE_NO
+	 * @see #AUTOWIRE_BY_NAME
+	 * @see #AUTOWIRE_BY_TYPE
+	 */
+	public void setAutowire(int autowire) {
+		this.autowire = autowire;
+	}
+
+	/**
+	 * @return the autowire code
+	 */
+	protected int getAutowire() {
+		return this.autowire;
+	}
+
+	public void setPropertyValues(PropertyValues pvs) {
+		this.pvs = pvs;
+	}
 
 	/**
 	 * Return the PropertyValues to be applied to a new instance
@@ -90,10 +134,6 @@ public abstract class AbstractBeanDefinition {
 	 */
 	public PropertyValues getPropertyValues() {
 		return pvs;
-	}
-	
-	public void setPropertyValues(PropertyValues pvs) {
-		this.pvs = pvs;
 	}
 	
 	/**
@@ -107,49 +147,12 @@ public abstract class AbstractBeanDefinition {
 		setPropertyValues(pvs);
 	}
 
-	/**
-	 * @see Object#equals(Object)
-	 */
 	public boolean equals(Object other) {
 		if (!(other instanceof AbstractBeanDefinition))
 			return false;
 		AbstractBeanDefinition obd = (AbstractBeanDefinition) other;
 		return this.singleton = obd.singleton &&
 			this.pvs.changesSince(obd.pvs).getPropertyValues().length == 0;
-	}
-
-	/**
-	 * @return int
-	 */
-	protected int getDependencyCheck() {
-		return dependencyCheck;
-	}
-
-	/**
-	 * Sets the dependencyCheck.
-	 * @param dependencyCheck The dependencyCheck to set
-	 */
-	public void setDependencyCheck(int dependencyCheck) {
-		this.dependencyCheck = dependencyCheck;
-	}
-
-	/**
-	 * @return the autowire code
-	 */
-	protected int getAutowire() {
-		return this.autowire;
-	}
-
-	/**
-	 * Sets the autowire code. This determines whether any
-	 * automagical detection and setting of bean references
-	 * will happen. Default is AUTOWIRE_NO constant, which
-	 * means there's no autowire.
-	 * @param autowire The autowire to set.
-	 * Must be one of the three constants defined in this class
-	 */
-	public void setAutowire(int autowire) {
-		this.autowire = autowire;
 	}
 
 }
