@@ -17,8 +17,8 @@ public class SingletonTest extends AbstractBeansTest {
 	/**
 	 * @see org.springframework.load.AbstractTest#runPass(int)
 	 */
-	protected void runPass(int i) throws TestFailedException, AbortTestException, Exception {
-		TestBean prototype = (TestBean) bf.getBean("testSingleton");
+	protected void runPass(int i, int j) throws TestFailedException, AbortTestException, Exception {
+		TestBean prototype = (TestBean) beanFactory.getBean("testSingleton");
 	}
 
 

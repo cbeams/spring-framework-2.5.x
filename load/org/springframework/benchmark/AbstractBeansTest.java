@@ -6,24 +6,40 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.load.AbortTestException;
 import org.springframework.load.AbstractTest;
+import org.springframework.load.TestFailedException;
 
 /**
+ * Test against a shared factory
  * @author Rod Johnson
  */
 public abstract class AbstractBeansTest extends AbstractTest {
 	
-	// TODO simple bean factory, with TestBean
+
+	protected BeanFactory beanFactory;
 	
-	protected final BeanFactory bf;
+	protected int gets = 1;
 	
-	// prototype, singleton
-	
-	// Logging should be off
-	
-	public AbstractBeansTest() throws BeansException {
-		String location = "/org/springframework/benchmark/beans.xml";
-		this.bf = new XmlBeanFactory(new ClassPathResource(location, getClass()));
+	/**
+	 * The shared fixture is a bean factory.
+	 * All test threads will run against it.
+	 * @see org.springframework.load.ConfigurableTest#setFixture(java.lang.Object)
+	 */
+	public void setFixture(Object o) {
+		this.beanFactory = (BeanFactory) o;
 	}
+	
+	public void setGets(int gets) {
+		this.gets = gets;
+	}
+	
+	protected final void runPass(int i) throws TestFailedException, AbortTestException, Exception {
+		for (int j = 0; j < gets; j++) {
+			runPass(i, j);
+		}		
+	}
+	
+	protected abstract void runPass(int i, int j) throws TestFailedException, AbortTestException, Exception;
 
 }
