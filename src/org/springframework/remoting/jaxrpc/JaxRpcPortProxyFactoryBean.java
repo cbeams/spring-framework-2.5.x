@@ -3,6 +3,7 @@ package org.springframework.remoting.jaxrpc;
 import javax.xml.rpc.ServiceException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
  * FactoryBean for a specific port of a JAX-RPC service.
@@ -20,7 +21,7 @@ import org.springframework.aop.framework.ProxyFactory;
  * @see #setPortInterface
  * @see LocalJaxRpcServiceFactoryBean
  */
-public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor {
+public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor implements FactoryBean {
 
 	private Object serviceProxy;
 
