@@ -17,25 +17,45 @@
 package org.springframework.aop.framework;
 
 /**
- * Simple implementation of AopProxyFactory
+ * Simple implementation of AopProxyFactory,
+ * either creating a CGLIB proxy or a JDK dynamic proxy.
+ *
+ * <p>Creates a CGLIB proxy if one the following is true:
+ * <ul>
+ * <li>the "optimize" flag is set
+ * <li>the "proxyTargetClass" flag is set
+ * <li>no interfaces have been specified
+ * </ul>
+ *
+ * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
+ * respectively one or more interfaces to use a JDK dynamic proxy.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @since 12.03.2004
+ * @see Cglib2AopProxy
+ * @see JdkDynamicAopProxy
+ * @see AdvisedSupport#getOptimize
+ * @see AdvisedSupport#getProxyTargetClass
+ * @see AdvisedSupport#getProxiedInterfaces 
  */
 public class DefaultAopProxyFactory implements AopProxyFactory {
 
-	/**
-	 * @see org.springframework.aop.framework.AopProxyFactory#createAopProxy(org.springframework.aop.framework.AdvisedSupport)
-	 */
 	public AopProxy createAopProxy(AdvisedSupport advisedSupport) throws AopConfigException {
-		boolean useCglib = advisedSupport.getOptimize() || advisedSupport.getProxyTargetClass() || advisedSupport.getProxiedInterfaces().length == 0;
+		boolean useCglib =
+		    advisedSupport.getOptimize() ||
+		    advisedSupport.getProxyTargetClass() ||
+		    advisedSupport.getProxiedInterfaces().length == 0;
+
 		if (useCglib) {
 			return CglibProxyFactory.createCglibProxy(advisedSupport);
 		}
 		else {
-			// Depends on whether we have expose proxy or frozen or static ts
 			return new JdkDynamicAopProxy(advisedSupport);
 		}
 	}
-	
+
+
 	/**
 	 * Inner class to just introduce a CGLIB dependency
 	 * when actually creating a CGLIB proxy.

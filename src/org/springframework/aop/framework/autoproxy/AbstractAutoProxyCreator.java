@@ -198,7 +198,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// Check for special cases. We don't want to try to autoproxy a part of the autoproxying
 		// infrastructure, lest we get a stack overflow.
 		if (isInfrastructureClass(bean, beanName) || shouldSkip(bean, beanName)) {
-			logger.debug("Did not attempt to autoproxy infrastructure class [" + bean.getClass().getName() + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Did not attempt to autoproxy infrastructure class [" + bean.getClass().getName() + "]");
+			}
 			return bean;
 		}
 
@@ -233,8 +235,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			if (logger.isInfoEnabled()) {
 				int nrOfCommonInterceptors = commonInterceptors != null ? commonInterceptors.length : 0;
 				int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
-				logger.info("Creating implicit proxy for bean '" +  beanName + "' with " + nrOfCommonInterceptors +
-										" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
+				logger.info(
+				    "Creating implicit proxy for bean '" +  beanName + "' with " + nrOfCommonInterceptors +
+				    " common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 			}
 
 			ProxyFactory proxyFactory = new ProxyFactory();
@@ -317,15 +320,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// we can't create fancy target sources for singletons
 		if (this.owningBeanFactory != null && this.owningBeanFactory.containsBean(beanName) &&
 				!this.owningBeanFactory.isSingleton(beanName)) {
-			logger.info("Checking for custom TargetSource for bean with beanName '" + beanName + "'");
+			if (logger.isInfoEnabled()) {
+				logger.info("Checking for custom TargetSource for bean with beanName '" + beanName + "'");
+			}
 			for (int i = 0; i < this.customTargetSourceCreators.size(); i++) {
 				TargetSourceCreator tsc = (TargetSourceCreator) this.customTargetSourceCreators.get(i);
 				TargetSource ts = tsc.getTargetSource(bean, beanName, this.owningBeanFactory);
 				if (ts != null) {
 					// found a match
 					if (logger.isInfoEnabled()) {
-						logger.info("TargetSourceCreator [" + tsc + " found custom TargetSource for bean with beanName '" +
-												beanName + "'");
+						logger.info("TargetSourceCreator [" + tsc +
+						    " found custom TargetSource for bean with beanName '" + beanName + "'");
 					}
 					return ts;
 				}

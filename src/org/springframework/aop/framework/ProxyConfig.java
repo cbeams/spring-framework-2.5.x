@@ -45,29 +45,28 @@ public class ProxyConfig implements Serializable {
 	 */
 	
 	/**
-	 * Transient to optimize serialization:
-	 * AdvisedSupport resets it.
+	 * Transient to optimize serialization: AdvisedSupport resets it.
 	 */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
-	private boolean proxyTargetClass;
+	private boolean proxyTargetClass = false;
 	
-	private boolean optimize;
+	private boolean optimize = false;
 	
-	private boolean opaque;
+	private boolean opaque = false;
 
 	/**
 	 * Should proxies obtained from this configuration expose
 	 * the AOP proxy for the AopContext class to retrieve for targets?
 	 * The default is false, as enabling this property may impair performance.
 	 */
-	protected boolean exposeProxy;
+	protected boolean exposeProxy = false;
 
 	/**
 	 * Is this config frozen: that is, should it be impossible
 	 * to change advice. Default is not frozen.
 	 */
-	private boolean frozen;
+	private boolean frozen = false;
 	
 	/** Factory used to create AopProxy instances */
 	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
@@ -89,8 +88,8 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Set whether proxies should perform agressive optimizations.
-	 * The exact meaning of "agressive optimizations" will differ
+	 * Set whether proxies should perform aggressive optimizations.
+	 * The exact meaning of "aggressive optimizations" will differ
 	 * between proxies, but there is usually some tradeoff. 
 	 * <p>For example, optimization will usually mean that advice changes won't
 	 * take effect after a proxy has been created. For this reason, optimization
@@ -105,7 +104,7 @@ public class ProxyConfig implements Serializable {
 	 * a good setting for performance-critical proxies. However, enabling this
 	 * will mean that advice cannot be changed after a proxy has been obtained
 	 * from this factory.
-	 * @param optimize whether to enable agressive optimizations. 
+	 * @param optimize whether to enable aggressive optimizations.
 	 * Default is false.
 	 */
 	public void setOptimize(boolean optimize) {
@@ -113,7 +112,7 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether proxies should perform agressive optimizations.
+	 * Return whether proxies should perform aggressive optimizations.
 	 */
 	public boolean getOptimize() {
 		return this.optimize;
