@@ -140,18 +140,18 @@ public class MBeanClientInterceptorTests extends TestCase {
 
 	private static class ProxyTestAssembler extends AbstractReflectionBasedModelMBeanInfoAssembler {
 
-		protected boolean includeReadAttribute(Method method) {
+		protected boolean includeReadAttribute(Method method, String beanKey) {
 			return true;
 		}
 
-		protected boolean includeWriteAttribute(Method method) {
+		protected boolean includeWriteAttribute(Method method, String beanKey) {
 			if ("setAge".equals(method.getName())) {
 				return false;
 			}
 			return true;
 		}
 
-		protected boolean includeOperation(Method method) {
+		protected boolean includeOperation(Method method, String beanKey) {
 			if ("dontExposeMe".equals(method.getName())) {
 				return false;
 			}

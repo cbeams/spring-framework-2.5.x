@@ -22,7 +22,7 @@ package org.springframework.jmx.metadata;
 public class AbstractJmxAttribute {
 
 	private String description = "";
-	private int currencyTimeLimit;
+	private int currencyTimeLimit = -1;
 
 	public void setDescription(String description) {
 		this.description = description;

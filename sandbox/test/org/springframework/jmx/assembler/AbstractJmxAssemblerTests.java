@@ -112,6 +112,19 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
+	public void testGetAttribute() throws Exception {
+		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
+		getBean().setName("John Smith");
+		Object val = server.getAttribute(objectName, "name");
+		assertEquals("Incorrect result", "John Smith", val);
+	}
+
+	public void testOperationInvocation() throws Exception{
+		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
+		Object result = server.invoke(objectName, "add", new Object[]{new Integer(20), new Integer(30)}, new String[]{"int", "int"});
+    assertEquals("Incorrect result", new Integer(50), result);
+	}
+
 	public void testAttributeInfoHasDescriptors() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 

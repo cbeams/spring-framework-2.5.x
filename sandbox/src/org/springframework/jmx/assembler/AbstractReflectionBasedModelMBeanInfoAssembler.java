@@ -47,9 +47,9 @@ import org.springframework.beans.BeanUtils;
  * </p>
  *
  * @author Rob Harrop
- * @see #includeOperation(java.lang.reflect.Method)
- * @see #includeReadAttribute(java.lang.reflect.Method)
- * @see #includeWriteAttribute(java.lang.reflect.Method)
+ * @see #includeOperation(java.lang.reflect.Method, String)
+ * @see #includeReadAttribute(java.lang.reflect.Method, String)
+ * @see #includeWriteAttribute(java.lang.reflect.Method, String)
  * @see #populateAttributeDescriptor(javax.management.Descriptor, java.lang.reflect.Method, java.lang.reflect.Method)
  * @see #populateOperationDescriptor(javax.management.Descriptor, java.lang.reflect.Method)
  */
@@ -109,13 +109,13 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 				continue;
 			}
 
-			if (getter != null && !includeReadAttribute(getter)) {
+			if (getter != null && !includeReadAttribute(getter, beanKey)) {
 				getter = null;
 			}
 
 			Method setter = props[i].getWriteMethod();
 
-			if (setter != null && !includeWriteAttribute(setter)) {
+			if (setter != null && !includeWriteAttribute(setter, beanKey)) {
 				setter = null;
 			}
 
@@ -171,8 +171,8 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 			if (pd != null) {
-				if ((method.equals(pd.getReadMethod()) && includeReadAttribute(method))
-						|| (method.equals(pd.getWriteMethod()) && includeWriteAttribute(method))) {
+				if ((method.equals(pd.getReadMethod()) && includeReadAttribute(method, beanKey))
+						|| (method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, ""))) {
 					// Attributes need to have their methods exposed as
 					// operations to the JMX server as well.
 					info = new ModelMBeanOperationInfo(getOperationDescription(method), method);
@@ -187,7 +187,7 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 					info.setDescriptor(desc);
 				}
 			}
-			else if (includeOperation(method)) {
+			else if (includeOperation(method, beanKey)) {
 				info = new ModelMBeanOperationInfo(getOperationDescription(method), method);
 				Descriptor desc = info.getDescriptor();
 				desc.setField(ROLE, OPERATION);
@@ -217,21 +217,21 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 		return new ModelMBeanNotificationInfo[]{};
 	}
 
-	/**
+/**
 	 * Allows subclasses to vote on the inclusion of a particular attribute accessor.
 	 * @param method the accessor <code>Method</code>.
 	 * @return <code>true</code> if the accessor should be included in the management interface,
 	 * otherwise <code>false<code>.
 	 */
-	protected abstract boolean includeReadAttribute(Method method);
+	protected abstract boolean includeReadAttribute(Method method, String beanKey);
 
-	/**
+  /**
 	 * Allows subclasses to vote on the inclusion of a particular attribute mutator.
 	 * @param method the mutator <code>Method</code>.
 	 * @return <code>true</code> if the mutator should be included in the management interface,
 	 * otherwise <code>false<code>.
 	 */
-	protected abstract boolean includeWriteAttribute(Method method);
+	protected abstract boolean includeWriteAttribute(Method method, String beanKey);
 
 	/**
 	 * Allows subclasses to vote on the inclusion of a particular operation.
@@ -239,7 +239,7 @@ public abstract class AbstractReflectionBasedModelMBeanInfoAssembler
 	 * @return <code>true</code> if the operation should be included in the management interface,
 	 * otherwise <code>false<code>.
 	 */
-	protected abstract boolean includeOperation(Method method);
+	protected abstract boolean includeOperation(Method method, String beanKey);
 
 	/**
 	 * Gets the description for a particular operation.

@@ -3,6 +3,7 @@ package org.springframework.jmx.assembler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
 
@@ -12,31 +13,45 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class InterfaceBasedModelMBeanInfoAssembler extends ReflectiveModelMBeanInfoAssembler implements InitializingBean {
 
+    private Map mappedManagedInterfaces;
+
 	private Class[] managedInterfaces;
 
 	public void setManagedInterfaces(Class[] managedInterfaces) {
 		this.managedInterfaces = managedInterfaces;
 	}
 
-	protected boolean includeReadAttribute(Method method) {
-		return isPublicInInterface(method);
+    public void setMappedManagedInterfaces(Map mappedManagedInterfaces) {
+        this.mappedManagedInterfaces = mappedManagedInterfaces;
+    }
+
+	protected boolean includeReadAttribute(Method method, String beanKey) {
+		return isPublicInInterface(method, beanKey);
 	}
 
-	protected boolean includeWriteAttribute(Method method) {
-		return isPublicInInterface(method);
+	protected boolean includeWriteAttribute(Method method, String beanKey) {
+		return isPublicInInterface(method, beanKey);
 	}
 
-	protected boolean includeOperation(Method method) {
-		return isPublicInInterface(method);
+	protected boolean includeOperation(Method method, String beanKey) {
+		return isPublicInInterface(method, beanKey);
 	}
 
 
-	private boolean isPublicInInterface(Method method) {
-		return isDeclaredInInterface(method) && isPublic(method);
+	private boolean isPublicInInterface(Method method, String beanKey) {
+		return isDeclaredInInterface(method, beanKey) && isPublic(method);
 	}
 
-	private boolean isDeclaredInInterface(Method method) {
-		Class[] ifaces = managedInterfaces;
+	private boolean isDeclaredInInterface(Method method, String beanKey) {
+
+        Class[] ifaces = null;
+        if(mappedManagedInterfaces != null) {
+            ifaces = (Class[])mappedManagedInterfaces.get(beanKey);
+        }
+
+        if(ifaces == null) {
+		    ifaces = managedInterfaces;
+        }
 
 		if (ifaces == null || ifaces.length == 0) {
 			ifaces = method.getDeclaringClass().getInterfaces();

@@ -65,15 +65,15 @@ public class MetadataModelMBeanInfoAssembler extends
 		this.attributeSource = attributeSource;
 	}
 
-	protected boolean includeReadAttribute(Method method) {
+	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
 
-	protected boolean includeWriteAttribute(Method method) {
+	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return hasManagedAttribute(method);
 	}
 
-	protected boolean includeOperation(Method method) {
+	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
 			return hasManagedAttribute(method);

@@ -45,21 +45,21 @@ public class ReflectiveModelMBeanInfoAssembler extends AbstractReflectionBasedMo
 	/**
 	 * Always returns <code>true</code>.
 	 */
-	protected boolean includeReadAttribute(Method method) {
+	protected boolean includeReadAttribute(Method method, String beanKey) {
 		return true;
 	}
 
 	/**
 	 * Always returns <code>true</code>.
 	 */
-	protected boolean includeWriteAttribute(Method method) {
+	protected boolean includeWriteAttribute(Method method, String beanKey) {
 		return true;
 	}
 
-	/**
+  /**
 	 * Always returns <code>true</code>.
 	 */
-	protected boolean includeOperation(Method method) {
+	protected boolean includeOperation(Method method, String beanKey) {
 		return true;
 	}
 
