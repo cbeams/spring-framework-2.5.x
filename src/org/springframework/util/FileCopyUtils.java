@@ -48,7 +48,7 @@ public abstract class FileCopyUtils {
 
 	private static final Log logger = LogFactory.getLog(FileCopyUtils.class);
 
-	public static final int BLOCK_SIZE = 4096;
+	public static final int BUFFER_SIZE = 4096;
 
 
 	//---------------------------------------------------------------------
@@ -101,7 +101,7 @@ public abstract class FileCopyUtils {
 	 */
 	public static void copy(InputStream in, OutputStream out) throws IOException {
 		try {
-			byte[] buffer = new byte[BLOCK_SIZE];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			int nrOfBytes = -1;
 			while ((nrOfBytes = in.read(buffer)) != -1) {
 				out.write(buffer, 0, nrOfBytes);
@@ -160,7 +160,7 @@ public abstract class FileCopyUtils {
 	 */
 	public static void copy(Reader in, Writer out) throws IOException {
 		try {
-			char[] buffer = new char[BLOCK_SIZE];
+			char[] buffer = new char[BUFFER_SIZE];
 			int nrOfBytes = -1;
 			while ((nrOfBytes = in.read(buffer)) != -1) {
 				out.write(buffer, 0, nrOfBytes);

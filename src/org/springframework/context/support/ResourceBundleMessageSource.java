@@ -98,8 +98,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 */
 	protected MessageFormat resolve(String basename, String code, Locale locale) {
 		try {
-			ResourceBundle bundle = ResourceBundle.getBundle(basename, locale,
-			                                                 Thread.currentThread().getContextClassLoader());
+			ResourceBundle bundle = ResourceBundle.getBundle(
+					basename, locale, Thread.currentThread().getContextClassLoader());
 			try {
 				return getMessageFormat(bundle, code, locale);
 			}

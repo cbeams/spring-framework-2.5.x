@@ -67,8 +67,8 @@ public class UrlResource extends AbstractResource {
 			return new File(URLDecoder.decode(this.url.getFile()));
 		}
 		else {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path - " +
-																			"no 'file:' protocol");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to absolute file path - no 'file:' protocol");
 		}
 	}
 
