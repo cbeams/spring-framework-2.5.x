@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.VariableResolver;
 
 /**
  * Mock implementation of the JSP PageContext interface.
@@ -43,7 +45,7 @@ import javax.servlet.jsp.PageContext;
  * a JspWriter, request dispatching, and handlePageException calls.
  *
  * @author Juergen Hoeller
- * @since 30.04.2004
+ * @since 1.0.2
  */
 public class MockPageContext extends PageContext {
 
@@ -253,6 +255,14 @@ public class MockPageContext extends PageContext {
 		throw new UnsupportedOperationException("getOut");
 	}
 
+	public ExpressionEvaluator getExpressionEvaluator() {
+		throw new UnsupportedOperationException("getExpressionEvaluator");
+	}
+
+	public VariableResolver getVariableResolver() {
+		throw new UnsupportedOperationException("getVariableResolver");
+	}
+
 	public HttpSession getSession() {
 		return this.request.getSession();
 	}
@@ -289,11 +299,15 @@ public class MockPageContext extends PageContext {
 		throw new UnsupportedOperationException("include");
 	}
 
+	public void include(String url, boolean flush) throws ServletException, IOException {
+		throw new UnsupportedOperationException("include");
+	}
+
 	public void handlePageException(Exception ex) throws ServletException, IOException {
 		throw new UnsupportedOperationException("handlePageException");
 	}
 
-	public void handlePageException(Throwable throwable) throws ServletException, IOException {
+	public void handlePageException(Throwable ex) throws ServletException, IOException {
 		throw new UnsupportedOperationException("handlePageException");
 	}
 

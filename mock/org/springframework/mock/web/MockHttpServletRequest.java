@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mock.web;
 
@@ -58,10 +58,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest, Serializable {
 
 	public static final String DEFAULT_PROTOCOL = "http";
+
+	public static final String DEFAULT_SERVER_ADDR = "127.0.0.1";
 
 	public static final String DEFAULT_SERVER_NAME = "localhost";
 
@@ -104,6 +107,14 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	private boolean secure = false;
 
 	private final ServletContext servletContext;
+
+	private int remotePort = DEFAULT_SERVER_PORT;
+
+	private String localName = DEFAULT_SERVER_NAME;
+
+	private String localAddr = DEFAULT_SERVER_ADDR;
+
+	private int localPort = DEFAULT_SERVER_PORT;
 
 
 	//---------------------------------------------------------------------
@@ -382,6 +393,38 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	public String getRealPath(String path) {
 		return this.servletContext.getRealPath(path);
+	}
+
+	public void setRemotePort(int remotePort) {
+		this.remotePort = remotePort;
+	}
+
+	public int getRemotePort() {
+		return remotePort;
+	}
+
+	public void setLocalName(String localName) {
+		this.localName = localName;
+	}
+
+	public String getLocalName() {
+		return localName;
+	}
+
+	public void setLocalAddr(String localAddr) {
+		this.localAddr = localAddr;
+	}
+
+	public String getLocalAddr() {
+		return localAddr;
+	}
+
+	public void setLocalPort(int localPort) {
+		this.localPort = localPort;
+	}
+
+	public int getLocalPort() {
+		return localPort;
 	}
 
 
