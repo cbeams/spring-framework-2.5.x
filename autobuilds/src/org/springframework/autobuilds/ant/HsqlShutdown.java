@@ -24,13 +24,11 @@ import org.apache.tools.ant.Task;
  */
 public class HsqlShutdown extends Task {
 
-	private static final String HSQL_JDBC = "jdbc:hsqldb:hsql://";
 	
 	// task attribs & defaults
+	private String url = "jdbc:hsqldb:hsql://localhost:9001";
 	private String user = "sa";
 	private String password = "";
-	private String host;
-	private int port = -1;	
 	private boolean compact = false; 
 	 
 	
@@ -44,7 +42,7 @@ public class HsqlShutdown extends Task {
 		Statement stmt = null;
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            con = DriverManager.getConnection(HSQL_JDBC + host + ":" + port, user, password);
+            con = DriverManager.getConnection(url, user, password);
             stmt = con.createStatement();
             stmt.execute("SHUTDOWN" + (compact ? " COMPACT" : ""));
             
@@ -81,22 +79,8 @@ public class HsqlShutdown extends Task {
     /**
      * @param string
      */
-    public void setHost(String string) {
-        host = string;
-    }
-
-    /**
-     * @param string
-     */
     public void setPassword(String string) {
         password = string;
-    }
-
-    /**
-     * @param i
-     */
-    public void setPort(int i) {
-        port = i;
     }
 
     /**
@@ -104,6 +88,13 @@ public class HsqlShutdown extends Task {
      */
     public void setUser(String string) {
         user = string;
+    }
+
+    /**
+     * @param string
+     */
+    public void setUrl(String string) {
+        url = string;
     }
 
 }
