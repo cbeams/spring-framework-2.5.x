@@ -79,11 +79,11 @@
 	</servlet>
 
 	<!--
-		- Dispatcher servlet definition for HTTP remoting via the Caucho protocols,
-		- i.e. Hessian and Burlap (see caucho-servlet.xml for the controllers).
+		- Dispatcher servlet definition for HTTP remoting via Hessian, Burlap, and
+		- Spring's HTTP invoker (see remoting-servlet.xml for the controllers).
 		-->
 	<servlet>
-		<servlet-name>caucho</servlet-name>
+		<servlet-name>remoting</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>4</load-on-startup>
 	</servlet>
@@ -115,12 +115,12 @@
 	</servlet-mapping>
 
 	<!--
-		- Dispatcher servlet mapping for HTTP remoting via the Caucho protocols,
-		- i.e. Hessian and Burlap (see caucho-servlet.xml for the controllers).
+		- Dispatcher servlet mapping for HTTP remoting via Hessian, Burlap, and
+		- Spring's HTTP invoker (see remoting-servlet.xml for the controllers).
 		-->
 	<servlet-mapping>
-		<servlet-name>caucho</servlet-name>
-		<url-pattern>/caucho/*</url-pattern>
+		<servlet-name>remoting</servlet-name>
+		<url-pattern>/remoting/*</url-pattern>
 	</servlet-mapping>
 
 	<!--

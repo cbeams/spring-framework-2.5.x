@@ -19,7 +19,7 @@
 			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
 		</property>
 		<property name="serviceUrl">
-			<value>http://${serverName}:${httpPort}${contextPath}/caucho/OrderService-hessian</value>
+			<value>http://${serverName}:${httpPort}${contextPath}/remoting/OrderService-hessian</value>
 		</property>
 	</bean>
 
@@ -30,7 +30,18 @@
 			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
 		</property>
 		<property name="serviceUrl">
-			<value>http://${serverName}:${httpPort}${contextPath}/caucho/OrderService-burlap</value>
+			<value>http://${serverName}:${httpPort}${contextPath}/remoting/OrderService-burlap</value>
+		</property>
+	</bean>
+
+	<!-- Proxy for the HTTP-invoker-exported OrderService -->
+	<!-- Spring's HTTP invoker uses Java serialization via HTTP  -->
+	<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+		<property name="serviceUrl">
+			<value>http://${serverName}:${httpPort}${contextPath}/remoting/OrderService-httpinvoker</value>
 		</property>
 	</bean>
 
