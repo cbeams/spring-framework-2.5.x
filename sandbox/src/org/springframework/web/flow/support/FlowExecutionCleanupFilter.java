@@ -152,6 +152,6 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	 *        expiry
 	 */
 	protected boolean hasExpired(HttpServletRequest request, FlowExecutionMBean flowExecution) {
-		return (System.currentTimeMillis() - flowExecution.getEventTimestamp()) > (getTimeout() * 60000);
+		return (System.currentTimeMillis() - flowExecution.getLastEventTimestamp()) > (getTimeout() * 60000);
 	}
 }

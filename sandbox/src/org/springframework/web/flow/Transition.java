@@ -155,7 +155,7 @@ public class Transition {
 			// because we need the eventId
 			return new AbstractConstraint() {
 				public boolean test(Object argument) {
-					return ((FlowExecutionContext)argument).getEvent().getId().equals(eventId);
+					return ((FlowExecutionContext)argument).getLastEvent().getId().equals(eventId);
 				}
 
 				public String toString() {

@@ -74,14 +74,14 @@ public interface FlowExecutionContext {
 	 * request scope.
 	 * @return the attribute setter
 	 */
-	public Scope requestScope();
+	public Scope getRequestScope();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
 	 * flow scope.
 	 * @return the attribute setter
 	 */
-	public Scope flowScope();
+	public Scope getFlowScope();
 
 	/**
 	 * Returns a synchronizer for demaracting application transactions within
@@ -91,7 +91,7 @@ public interface FlowExecutionContext {
 	public TransactionSynchronizer getTransactionSynchronizer();
 
 	/**
-	 * Returns the data model for this flow model, suitable for exposing to web
+	 * Returns the data model for this context, suitable for exposing to web
 	 * views.
 	 * @return Map of model attributes for this flow model.
 	 */

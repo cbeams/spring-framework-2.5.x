@@ -110,11 +110,11 @@ public class LocalFlowExecutionContext implements StateContext {
 		return endedSession;
 	}
 
-	public Scope requestScope() {
+	public Scope getRequestScope() {
 		return this.requestAttributes;
 	}
 
-	public Scope flowScope() {
+	public Scope getFlowScope() {
 		return getActiveFlowSession().flowScope();
 	}
 
@@ -300,7 +300,7 @@ public class LocalFlowExecutionContext implements StateContext {
 		 */
 		public void setToken(String tokenName) {
 			String txToken = new RandomGuid().toString();
-			flowScope().setAttribute(tokenName, txToken);
+			getFlowScope().setAttribute(tokenName, txToken);
 		}
 
 		/**
@@ -311,7 +311,7 @@ public class LocalFlowExecutionContext implements StateContext {
 		 * @param tokenName the key used to save the token in the model
 		 */
 		public void clearToken(String tokenName) {
-			flowScope().removeAttribute(tokenName);
+			getFlowScope().removeAttribute(tokenName);
 		}
 
 		/**
@@ -360,7 +360,7 @@ public class LocalFlowExecutionContext implements StateContext {
 			if (!StringUtils.hasText(tokenValue)) {
 				return false;
 			}
-			String txToken = (String)flowScope().getAttribute(tokenName);
+			String txToken = (String)getFlowScope().getAttribute(tokenName);
 			if (!StringUtils.hasText(txToken)) {
 				return false;
 			}

@@ -30,10 +30,10 @@ public class GetPersonAction extends AbstractAction {
 	}
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
-		Long id = (Long)context.flowScope().getRequiredAttribute("id", Long.class);
+		Long id = (Long)context.getFlowScope().getRequiredAttribute("id", Long.class);
 		Person person = phoneBook.getPerson(id);
 		if (person != null) {
-			context.requestScope().setAttribute("person", person);
+			context.getRequestScope().setAttribute("person", person);
 			return success();
 		}
 		else {

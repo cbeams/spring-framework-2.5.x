@@ -77,7 +77,7 @@ public class SetAction extends AbstractAction {
 
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		if (eventParameterMapper != null) {
-			this.eventParameterMapper.map(context.getEvent(), context.flowScope());
+			this.eventParameterMapper.map(context.getLastEvent(), context.getFlowScope());
 		}
 		return success();
 	}

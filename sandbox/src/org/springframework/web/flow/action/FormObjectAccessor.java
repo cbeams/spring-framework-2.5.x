@@ -84,7 +84,7 @@ public class FormObjectAccessor {
 	 *         context
 	 */
 	public Errors getFormErrors() throws IllegalStateException {
-		return (Errors)this.context.requestScope()
+		return (Errors)this.context.getRequestScope()
 				.getRequiredAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE_NAME, Errors.class);
 	}
 
@@ -97,7 +97,7 @@ public class FormObjectAccessor {
 	 *         context
 	 */
 	public Object getFormObject(String formObjectName) throws IllegalStateException {
-		return this.context.requestScope().getRequiredAttribute(formObjectName);
+		return this.context.getRequestScope().getRequiredAttribute(formObjectName);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class FormObjectAccessor {
 	 *         context or is not of the required type
 	 */
 	public Object getFormObject(String formObjectName, Class formObjectClass) throws IllegalStateException {
-		return this.context.requestScope().getRequiredAttribute(formObjectName, formObjectClass);
+		return this.context.getRequestScope().getRequiredAttribute(formObjectName, formObjectClass);
 	}
 
 	/**
@@ -125,7 +125,7 @@ public class FormObjectAccessor {
 	 *         context
 	 */
 	public Errors getFormErrors(String formObjectErrorsName) throws IllegalStateException {
-		return (Errors)this.context.requestScope().getRequiredAttribute(
+		return (Errors)this.context.getRequestScope().getRequiredAttribute(
 				BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
 	}
 
@@ -157,12 +157,12 @@ public class FormObjectAccessor {
 	 */
 	public void exposeBindExceptionErrors(BindException errors, ScopeType scope) {
 		if (scope == ScopeType.FLOW) {
-			this.context.flowScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+			this.context.getFlowScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
 		}
 		else {
-			this.context.requestScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+			this.context.getRequestScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
 		}
-		this.context.requestScope().setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE_NAME, errors);
-		this.context.requestScope().setAttributes(errors.getModel());
+		this.context.getRequestScope().setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE_NAME, errors);
+		this.context.getRequestScope().setAttributes(errors.getModel());
 	}
 }

@@ -99,7 +99,7 @@ public abstract class TransitionableState extends State {
 	 */
 	protected ViewDescriptor executeTransitionOnEvent(Event event, StateContext context)
 			throws EventNotSupportedException, CannotExecuteStateTransitionException {
-		context.setEvent(event);
+		context.setLastEvent(event);
 		Transition transition = getRequiredTransition(context);
 		return transition.execute(context);
 	}
@@ -148,7 +148,7 @@ public abstract class TransitionableState extends State {
 			return transition;
 		}
 		else {
-			throw new EventNotSupportedException(this, context.getEvent());
+			throw new EventNotSupportedException(this, context.getLastEvent());
 		}
 	}
 
@@ -177,7 +177,7 @@ public abstract class TransitionableState extends State {
 	 * @return true or false
 	 */
 	public boolean isTransitionForOccurrenceOf(Event event, StateContext context) {
-		context.setEvent(event);
+		context.setLastEvent(event);
 		return getTransition(context) != null;
 	}
 

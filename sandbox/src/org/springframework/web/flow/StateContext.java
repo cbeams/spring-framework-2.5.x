@@ -37,7 +37,7 @@ public interface StateContext extends FlowExecutionContext {
 	 * in this context
 	 * @param lastEvent The last event that occured
 	 */
-	public void setEvent(Event lastEvent);
+	public void setLastEvent(Event lastEvent);
 
 	/**
 	 * Return the active flow session, the local client instance of a single

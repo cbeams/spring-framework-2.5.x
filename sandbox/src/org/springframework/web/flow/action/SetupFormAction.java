@@ -76,7 +76,7 @@ public class SetupFormAction extends BindAndValidateAction {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Prepopulating backing form object from request parameters");
 			}
-			binder.bind(new MutablePropertyValues(context.getEvent().getParameters()));
+			binder.bind(new MutablePropertyValues(context.getLastEvent().getParameters()));
 		}
 		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors(), getFormObjectScope());
 		exposeViewPlaceholders(context);
@@ -102,8 +102,8 @@ public class SetupFormAction extends BindAndValidateAction {
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
 			// development only
-			context.requestScope().setAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
-			context.requestScope().setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
+			context.getRequestScope().setAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
+			context.getRequestScope().setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
 		}
 	}
 

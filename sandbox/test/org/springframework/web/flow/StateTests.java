@@ -39,7 +39,7 @@ public class StateTests extends TestCase {
 		FlowExecution flowExecution = flow.createExecution();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertNull(view);
-		assertEquals("success", flowExecution.getEventId());
+		assertEquals("success", flowExecution.getLastEventId());
 		assertEquals(1, ((ExecutionCounterAction)state.getAction()).getExecutionCount());
 	}
 
@@ -54,7 +54,7 @@ public class StateTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertNull(view);
-		assertEquals("success", flowExecution.getEventId());
+		assertEquals("success", flowExecution.getLastEventId());
 		Action[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
@@ -88,7 +88,7 @@ public class StateTests extends TestCase {
 		FlowExecution flowExecution = flow.createExecution();
 		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertNull(view);
-		assertEquals("action4.success", flowExecution.getEventId());
+		assertEquals("action4.success", flowExecution.getLastEventId());
 		Action[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());

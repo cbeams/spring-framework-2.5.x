@@ -262,7 +262,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the last event id
 	 */
 	protected String getEventId() {
-		return flowExecution.getEventId();
+		return flowExecution.getLastEventId();
 	}
 
 	/**

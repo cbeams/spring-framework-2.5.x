@@ -33,12 +33,12 @@ public class AddItemAction extends AbstractAction {
 			// processing
 			return new LocalEvent("txError");
 		}
-		List list = (List)context.requestScope().getAttribute("list");
+		List list = (List)context.getRequestScope().getAttribute("list");
 		if (list == null) {
 			list = new ArrayList();
-			context.requestScope().setAttribute("list", list);
+			context.getRequestScope().setAttribute("list", list);
 		}
-		String data = (String)context.requestScope().getAttribute("data");
+		String data = (String)context.getRequestScope().getAttribute("data");
 		if (data != null && data.length() > 0) {
 			list.add(data);
 		}
