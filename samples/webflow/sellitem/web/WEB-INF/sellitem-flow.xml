@@ -2,7 +2,7 @@
 <!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
 	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<webflow id="sellItemFlow" start-state="setupForm">
+<webflow id="sellItem" start-state="setupForm">
 
 	<action-state id="setupForm">
 		<action bean="sellItemAction"/>
