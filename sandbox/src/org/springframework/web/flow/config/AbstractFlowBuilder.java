@@ -27,8 +27,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Returns the id (name) of the flow built by this builder. Subclasses should
-	 * override to return the unique flowId.
+	 * Returns the id (name) of the flow built by this builder. Subclasses
+	 * should override to return the unique flowId.
 	 * 
 	 * @return The unique flow id.
 	 */
@@ -263,8 +263,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Request that the actions with the specified implementations be executed
 	 * in the order specified when the action state being built is entered.
 	 * Looks the action up by implementation class and returns it.
-	 * @param actionImplementationClasses The action implementations, must
-	 *        be unique
+	 * @param actionImplementationClasses The action implementations, must be
+	 *        unique
 	 * @return The actions The actions
 	 * @throws NoSuchActionException
 	 */
@@ -394,15 +394,19 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ActionState addActionState(String stateId, Transition transition) {
-		return new ActionState(getFlow(), stateId, executeAction(actionName(stateId)), transition);
+		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transition);
 	}
 
-	protected String actionName(String stateId) {
+	/**
+	 * @param stateId
+	 * @return
+	 */
+	protected String actionId(String stateId) {
 		return stateId;
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param action
 	 * @param transition
 	 * @return
@@ -414,11 +418,33 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * @param stateId
 	 * @param actionName
+	 * @param action
 	 * @param transition
 	 * @return
 	 */
-	protected ActionState addActionState(String stateId, String actionName, Transition transition) {
-		return new ActionState(getFlow(), stateId, executeAction(actionName), transition);
+	protected ActionState addActionState(String stateId, String actionName, Action action, Transition transition) {
+		return new ActionState(getFlow(), stateId, actionName, action, transition);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionId
+	 * @param transition
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String actionId, Transition transition) {
+		return new ActionState(getFlow(), stateId, executeAction(actionId), transition);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionName
+	 * @param actionId
+	 * @param transition
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition transition) {
+		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transition);
 	}
 
 	/**
@@ -427,7 +453,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ActionState addActionState(String stateId, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, executeAction(actionName(stateId)), transitions);
+		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transitions);
 	}
 
 	/**
@@ -443,11 +469,33 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * @param stateId
 	 * @param actionName
+	 * @param action
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addActionState(String stateId, String actionName, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, executeAction(actionName), transitions);
+	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, actionName, action, transitions);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionId
+	 * @param transitions
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String actionId, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, executeAction(actionId), transitions);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionName
+	 * @param actionId
+	 * @param transitions
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transitions);
 	}
 
 	/**
@@ -463,11 +511,33 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * @param stateId
 	 * @param actionNames
+	 * @param actions
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addActionState(String stateId, String[] actionNames, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, executeActions(actionNames), transitions);
+	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, actionNames, actions, transitions);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionIds
+	 * @param transitions
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String[] actionIds, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, executeActions(actionIds), transitions);
+	}
+
+	/**
+	 * @param stateId
+	 * @param actionNames
+	 * @param actionIds
+	 * @param transitions
+	 * @return
+	 */
+	protected ActionState addActionState(String stateId, String[] actionNames, String[] actionIds, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, actionNames, executeActions(actionIds), transitions);
 	}
 
 	/**
@@ -922,8 +992,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ActionState addDeleteState(String stateIdPrefix, Action action) {
-		return addDeleteState(stateIdPrefix, action,
-				new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+		return addDeleteState(stateIdPrefix, action, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
 	/**
@@ -999,8 +1068,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected ActionState addValidateState(String stateIdPrefix, Action action) {
-		return addValidateState(stateIdPrefix, action, new Transition[] { onSuccessEnd(),
-				onErrorView(stateIdPrefix) });
+		return addValidateState(stateIdPrefix, action, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
 	/**
@@ -1021,10 +1089,19 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return addActionState(validate(stateIdPrefix), action, transitions);
 	}
 
+	/**
+	 * @param endStateId
+	 * @param viewName
+	 * @return
+	 */
 	protected EndState addEndState(String endStateId, String viewName) {
 		return new EndState(getFlow(), endStateId, viewName);
 	}
 
+	/**
+	 * @param endStateId
+	 * @return
+	 */
 	protected EndState addEndState(String endStateId) {
 		return new EndState(getFlow(), endStateId);
 	}
@@ -1100,6 +1177,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected Transition onEvent(String eventId, String stateId) {
 		return new Transition(eventId, stateId);
 	}
+	
+	/**
+	 * @param actionName
+	 * @param eventId
+	 * @param stateId
+	 * @return
+	 */
+	protected Transition onEvent(String actionName, String eventId, String stateId) {
+		return new Transition(join(actionName, eventId), stateId);
+	}
 
 	/**
 	 * @param eventIdCriteria
@@ -1137,6 +1224,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition onSuccess(String successStateId) {
 		return onEvent(getSuccessEventId(), successStateId);
+	}
+
+	/**
+	 * @param actionName
+	 * @param successStateId
+	 * @return
+	 */
+	protected Transition onSuccess(String actionName, String successStateId) {
+		return onEvent(actionName, getSuccessEventId(), successStateId);
 	}
 
 	/**
@@ -1434,6 +1530,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return FlowConstants.RESET;
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	protected Transition onResume(String stateIdPrefix) {
 		return onEvent(getResumeEventId(), stateIdPrefix);
 	}
@@ -1474,6 +1574,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition onError(String stateIdPrefix) {
 		return onEvent(getErrorEventId(), stateIdPrefix);
+	}
+
+	/**
+	 * @param actionName
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	protected Transition onError(String actionName, String stateIdPrefix) {
+		return onEvent(actionName, getErrorEventId(), stateIdPrefix);
 	}
 
 	/**
@@ -1557,8 +1666,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 			return stateIdPrefix;
 		}
 		else {
-			return stateIdPrefix + DOT_SEPARATOR + stateIdSuffix;
+			return join(stateIdPrefix, stateIdSuffix);
 		}
+	}
+	
+	/**
+	 * @param prefix
+	 * @param suffix
+	 * @return
+	 */
+	protected String join(String prefix, String suffix) {
+		return prefix + DOT_SEPARATOR + suffix;
 	}
 
 	/**
