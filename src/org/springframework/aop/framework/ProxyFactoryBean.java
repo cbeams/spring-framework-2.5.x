@@ -455,8 +455,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 			// We expected this to be an Advisor or Advice,
 			// but it wasn't. This is a configuration error.
 			throw new AopConfigException("Unknown advisor type " + next.getClass() +
-					"; Can only include Advisor or Advice type beans in interceptorNames chain expect for last entry," +
-					"which may be target or TargetSource", ex);
+					"; Can only include Advisor or Advice type beans in interceptorNames chain except for last entry," +
+					"which may also be target or TargetSource", ex);
 		}
 	}
 
