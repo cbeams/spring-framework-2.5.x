@@ -3,20 +3,13 @@
  */
 package org.springframework.web.servlet.view.jasperreports;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  *
  */
-public class ReportFileNotFoundException extends RuntimeException {
-
-	/**
-	 * 
-	 */
-	public ReportFileNotFoundException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
+public class ReportFileNotFoundException extends NestedRuntimeException {
 	/**
 	 * @param arg0
 	 */
@@ -33,13 +26,4 @@ public class ReportFileNotFoundException extends RuntimeException {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
-
-	/**
-	 * @param arg0
-	 */
-	public ReportFileNotFoundException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
 }

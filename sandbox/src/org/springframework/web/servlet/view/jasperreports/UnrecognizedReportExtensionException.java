@@ -3,19 +3,13 @@
  */
 package org.springframework.web.servlet.view.jasperreports;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  *
  */
-public class UnrecognizedReportExtensionException extends RuntimeException {
-
-	/**
-	 * 
-	 */
-	public UnrecognizedReportExtensionException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+public class UnrecognizedReportExtensionException extends NestedRuntimeException {
 
 	/**
 	 * @param arg0
@@ -33,13 +27,4 @@ public class UnrecognizedReportExtensionException extends RuntimeException {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
-
-	/**
-	 * @param arg0
-	 */
-	public UnrecognizedReportExtensionException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
 }

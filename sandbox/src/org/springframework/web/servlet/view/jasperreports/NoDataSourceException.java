@@ -3,18 +3,13 @@
  */
 package org.springframework.web.servlet.view.jasperreports;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  *
  */
-public class NoDataSourceException extends RuntimeException {
-
-	/**
-	 * 
-	 */
-	public NoDataSourceException() {
-		super();
-	}
+public class NoDataSourceException extends NestedRuntimeException {
 
 	/**
 	 * @param arg0
@@ -30,12 +25,4 @@ public class NoDataSourceException extends RuntimeException {
 	public NoDataSourceException(String msg, Throwable rootCause) {
 		super(msg, rootCause);
 	}
-
-	/**
-	 * @param arg0
-	 */
-	public NoDataSourceException(Throwable rootCause) {
-		super(rootCause);
-	}
-
 }

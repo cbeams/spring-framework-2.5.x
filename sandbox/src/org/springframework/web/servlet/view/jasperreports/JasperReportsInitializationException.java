@@ -3,19 +3,13 @@
  */
 package org.springframework.web.servlet.view.jasperreports;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * @author robh
  *
  */
-public class JasperReportsInitializationException extends RuntimeException {
-
-	/**
-	 * 
-	 */
-	public JasperReportsInitializationException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+public class JasperReportsInitializationException extends NestedRuntimeException {
 
 	/**
 	 * @param arg0
@@ -33,13 +27,4 @@ public class JasperReportsInitializationException extends RuntimeException {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
-
-	/**
-	 * @param arg0
-	 */
-	public JasperReportsInitializationException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
 }
