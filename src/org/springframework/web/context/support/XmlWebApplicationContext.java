@@ -127,6 +127,7 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+		beanFactory.ignoreDependencyType(ServletContext.class);
 	}
 
 	/**
