@@ -34,16 +34,24 @@ import org.springframework.util.ClassUtils;
  * that point to locators with static load() methods. In this case, the load()
  * method is called directly on the locator instance to configure the singleton
  * instance. For example:
+ * 
  * <pre>
- *     &lt;bean id=&quot;serviceLocatorLoader&quot;
- *           class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
- *       &lt;constructor-arg index=&quot;0&quot;&gt;
- *         &lt;listgt;
- *           &lt;valuegt;consoleServices&lt;/value&gt;
- *         &lt;/list&gt;
- *       &lt;/constructor-arg&gt;        
- *     &lt;/bean&gt;
+ * 
+ *  
+ *   
+ *        &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *              class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *          &lt;constructor-arg index=&quot;0&quot;&gt;
+ *            &lt;listgt;
+ *              &lt;valuegt;consoleServices&lt;/value&gt;
+ *            &lt;/list&gt;
+ *          &lt;/constructor-arg&gt;        
+ *        &lt;/bean&gt;
+ *    
+ *   
+ *  
  * </pre>
+ * 
  * ... will call the static <code>load</code> method on the
  * <code>ConsoleServices</code> class, passing in the configured
  * <code>consoleServices</code> bean.
@@ -56,20 +64,26 @@ import org.springframework.util.ClassUtils;
  * </ol>
  * 
  * <pre>
- *    &lt;pre&gt;
- *     &lt;bean id=&quot;serviceLocatorLoader&quot;
- *           class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
- *       &lt;constructor-arg index=&quot;0&quot;&gt;
- *         &lt;listgt;
- *           &lt;valuegt;consoleServices@com.acme.ConsoleServicesSingletonAccessor&lt;/value&gt;
- *         &lt;/list&gt;
- *       &lt;/constructor-arg&gt;        
- *     &lt;/bean&gt;
- *    &lt;/pre&gt;
+ * 
+ *  
+ *   
+ *       &lt;pre&gt;
+ *        &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *              class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *          &lt;constructor-arg index=&quot;0&quot;&gt;
+ *            &lt;listgt;
+ *              &lt;valuegt;consoleServices@com.acme.ConsoleServicesSingletonLocator&lt;/value&gt;
+ *            &lt;/list&gt;
+ *          &lt;/constructor-arg&gt;        
+ *        &lt;/bean&gt;
+ *       &lt;/pre&gt;
+ *    
+ *   
+ *  
  * </pre>
  * 
  * ... will call the static <code>load</code> method on the
- * <code>ConsoleServicesSingletonAccessor</code> class, passing in the
+ * <code>ConsoleServicesSingletonLocator</code> class, passing in the
  * configured <code>consoleServices</code> bean.
  * 
  * Note - take care not to abuse this pattern. Generally dependency
@@ -84,17 +98,24 @@ public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor {
     private String loadMethodName = "load";
     private static final char CLASS_SEPARATOR = '@';
 
+    /**
+     * Creates a SingletonServiceLocatorLoader that loads the specified services
+     * using a static <code>load</code> method.
+     * 
+     * @param beanIds
+     *            The configured service locator bean ids.
+     */
     public SingletonServiceLocatorLoader(String[] beanIds) {
         Assert.hasElements(beanIds);
         this.locatorBeanIds = beanIds;
     }
 
     /**
-     * Set the name of the static load method to configure the locator with the
-     * shared bean instance.
+     * Set the name of the static load method to call to configure locators
+     * with the shared bean instance.
      * 
      * @param loadMethodName
-     *            The load method name, "load" is used by default.
+     *            The load method name, <code>load</code> is used by default.
      */
     public void setLoadMethodName(String loadMethodName) {
         Assert.notNull(loadMethodName);
