@@ -8,11 +8,12 @@ import org.apache.commons.logging.LogFactory;
  * Used by BindUtils' bindAndValidate method.
  *
  * @author Juergen Hoeller
+ * @author Dmitriy Kopylenko
  * @since 06.05.2003
  * @see Validator
  * @see Errors
  * @see org.springframework.web.bind.BindUtils#bindAndValidate
- * @version $Id: ValidationUtils.java,v 1.2 2003-12-05 02:24:36 dkopylenko Exp $
+ * @version $Id: ValidationUtils.java,v 1.3 2003-12-05 02:27:13 dkopylenko Exp $
  */
 public abstract class ValidationUtils {
 
