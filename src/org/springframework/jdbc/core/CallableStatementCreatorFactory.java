@@ -5,9 +5,11 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,12 +122,16 @@ public class CallableStatementCreatorFactory {
 				Object in = inParameters.get(p.getName());
 				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
 					// Input parameters must be supplied
-					if (in != null) {
-						cs.setObject(sqlColIndx, in, p.getSqlType());
+					if (in == null && p.getTypeName() != null) {
+						cs.setNull(sqlColIndx, p.getSqlType(), p.getTypeName());
 					}
-					else {
-						cs.setNull(sqlColIndx, p.getSqlType());
-					}
+					else
+						if (in != null) {
+							cs.setObject(sqlColIndx, in, p.getSqlType());
+						}
+						else {
+							cs.setNull(sqlColIndx, p.getSqlType());
+						}
 				}
 				else {
 					// It's an output parameter. Skip SqlReturnResultSet parameters
