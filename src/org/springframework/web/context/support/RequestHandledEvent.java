@@ -29,7 +29,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class RequestHandledEvent extends ApplicationEvent {
 
-	private final String url;
+	private final String requestUrl;
 
 	/** Request processing time */
 	private final long processingTimeMillis;
@@ -54,16 +54,16 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Create a new RequestHandledEvent.
 	 * @param source the component that published the event
-	 * @param url the URL of the request
+	 * @param requestUrl the URL of the request
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 */
-	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
-	                           String method, String servletName) {
+	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
+														 String clientAddress, String method, String servletName) {
 		super(source);
-		this.url = url;
+		this.requestUrl = requestUrl;
 		this.processingTimeMillis = processingTimeMillis;
 		this.clientAddress = clientAddress;
 		this.method = method;
@@ -73,23 +73,24 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Create a new RequestHandledEvent.
 	 * @param source the component that published the event
-	 * @param url the URL of the request
+	 * @param requestUrl the URL of the request
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
-	                           String method, String servletName, Throwable failureCause) {
-		this(source, url, processingTimeMillis, clientAddress, method, servletName);
+	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
+														 String clientAddress, String method, String servletName,
+														 Throwable failureCause) {
+		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName);
 		this.failureCause = failureCause;
 	}
 
 	/**
 	 * Create a new RequestHandledEvent with session information.
 	 * @param source the component that published the event
-	 * @param url the URL of the request
+	 * @param requestUrl the URL of the request
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
@@ -98,9 +99,10 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * @param userName the name of the user that was associated with the
 	 * request, if any (usually the UserPrincipal)
 	 */
-	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
-	                           String method, String servletName, String sessionId, String userName) {
-		this(source, url, processingTimeMillis, clientAddress, method, servletName);
+	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
+														 String clientAddress, String method, String servletName,
+														 String sessionId, String userName) {
+		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName);
 		this.sessionId = sessionId;
 		this.userName = userName;
 	}
@@ -108,7 +110,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Create a new RequestHandledEvent with session information.
 	 * @param source the component that published the event
-	 * @param url the URL of the request
+	 * @param requestUrl the URL of the request
 	 * @param processingTimeMillis the processing time of the request in milliseconds
 	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
@@ -118,10 +120,10 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * request, if any (usually the UserPrincipal)
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
-	                           String method, String servletName, String sessionId, String userName,
-														 Throwable failureCause) {
-		this(source, url, processingTimeMillis, clientAddress, method, servletName, sessionId, userName);
+	public RequestHandledEvent(Object source, String requestUrl, long processingTimeMillis,
+														 String clientAddress, String method, String servletName,
+														 String sessionId, String userName, Throwable failureCause) {
+		this(source, requestUrl, processingTimeMillis, clientAddress, method, servletName, sessionId, userName);
 		this.failureCause = failureCause;
 	}
 
@@ -129,16 +131,16 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the URL of the request.
 	 */
-	public String getUrl() {
-		return url;
+	public String getRequestUrl() {
+		return requestUrl;
 	}
 
 	/**
 	 * Return the URL of the request.
-	 * @deprecated in favor of {@link #getUrl getUrl}
+	 * @deprecated in favor of {@link #getRequestUrl getRequestUrl}
 	 */
 	public String getURL() {
-		return url;
+		return requestUrl;
 	}
 
 	/**
@@ -218,7 +220,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("RequestHandledEvent: ");
-		sb.append("url=[").append(this.url).append("]; ");
+		sb.append("url=[").append(this.requestUrl).append("]; ");
 		sb.append("time=[").append(this.processingTimeMillis).append("ms]; ");
 		sb.append("client=[").append(this.clientAddress).append("]; ");
 		sb.append("method=[").append(this.method).append("]; ");
