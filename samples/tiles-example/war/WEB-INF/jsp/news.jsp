@@ -1,5 +1,5 @@
-<%@taglib uri="http://jakarta.apache.org/tiles" prefix="tiles" %>
-<%@taglib uri="http://java.sun.com/jstl/c" prefix="c" %>
+<%@ taglib prefix="tiles" uri="http://jakarta.apache.org/struts/tags-tiles" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
 <tiles:importAttribute name="sourceName"/>
 <tiles:importAttribute name="items"/>

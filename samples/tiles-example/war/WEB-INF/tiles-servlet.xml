@@ -4,28 +4,30 @@
 <beans>
 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass"><value>org.springframework.web.servlet.view.tiles.TilesJstlView</value></property>
+		<property name="viewClass">
+			<value>org.springframework.web.servlet.view.tiles.TilesJstlView</value>
+		</property>
 	</bean>
-	
+
 	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
-	    <property name="definitions">
-		    <list>
-		 	   <value>/WEB-INF/defs/definitions.xml</value>
-		    </list>
-	    </property>
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/defs/definitions.xml</value>
+			</list>
+		</property>
 	</bean>
-	
-    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings">
-            <props>
-                <prop key="/*.html">viewController</prop>
-            </props>
-        </property>
-    </bean>
-    
-    <bean id="viewController" class="tiles.FileNameViewController"/>
-    
-	<bean id="feedConfigurator" class="tiles.NewsFeedConfigurator">
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/*.html">viewController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="viewController" class="org.springframework.web.servlet.mvc.FileNameViewController"/>
+
+	<bean id="feedConfigurer" class="org.springframework.samples.tiles.NewsFeedConfigurer">
 		<property name="feeds">
 			<props>
 				<prop key="theserverside">http://www.theserverside.com/rss/theserverside-1.0.rdf</prop>

@@ -19,21 +19,20 @@
 		<fileset dir="${lib.dir}">
 			<include name="*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/dom4j">
+			<include name="dom4j.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet.jar"/>
-			<include name="jdbc2_0-stdext.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/hibernate">
-			<include name="dom4j.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/tiles">
-			<include name="*.jar"/>
+			<include name="struts-1.1.jar"/>
 		</fileset>
 
 	</path>
@@ -42,7 +41,7 @@
 	<target name="usage">
 
 		<echo message=""/>
-		<echo message="PetClinic build file"/>
+		<echo message="Tiles Example build file"/>
 		<echo message="------------------------------------------------------"/>
 		<echo message=""/>
 		<echo message="Available targets are:"/>
@@ -56,13 +55,11 @@
 	</target>
 
 
-	<target name="clean" description="Clean output dirs (build, dist, testbuild, weblib)">
+	<target name="clean" description="Clean output dirs (build, docs, weblib, dist)">
 
 		<delete dir="${build.dir}"/>
 		<delete dir="${docs.dir}"/>
 		<delete dir="${weblib.dir}"/>
-		<delete dir="${testbuild.dir}"/>
-		<delete dir="${testreports.dir}"/>
 		<delete dir="${dist.dir}"/>
 
 	</target>
@@ -88,18 +85,17 @@
 				<include name="hsqldb.jar"/>
 				<include name="mysql*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jstl">
-				<include name="jstl.jar"/>
-				<include name="standard.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/hibernate">
+			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="*.jar"/>
+				<include name="commons-beanutils.jar"/>
+				<include name="commons-digester.jar"/>
+				<include name="commons-logging.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">				
-				<include name="log4j*.jar"/>
+			<fileset dir="${spring.root}/lib/jstl">
+				<include name="jstl.jar"/>
+				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -120,8 +116,8 @@
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" packagenames="*" private="true"
 			 author="true" version="true" use="true" windowtitle="Petclinic">
-			<doctitle><![CDATA[<h1>Petclinic</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Ken Krebs and Spring contributors 2003.</i>]]></bottom>
+			<doctitle><![CDATA[<h1>Tiles Example</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Alef Arendsen and Spring contributors 2003.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 		</javadoc>
 
@@ -138,18 +134,14 @@
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="WEB-INF/*-servlet.xml"/>
-			<include name="WEB-INF/spring.tld"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
-			<include name="WEB-INF/tld/**"/>
 			<include name="WEB-INF/defs/**"/>
 			<include name="WEB-INF/classes/**"/>
 			<exclude name="**/.*"/>
 		</war>
 
 	</target>
-
-
 
 
 </project>

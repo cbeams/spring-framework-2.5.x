@@ -1,4 +1,5 @@
-<%@taglib uri="http://jakarta.apache.org/tiles" prefix="tiles" %>
+<%@ taglib prefix="tiles" uri="http://jakarta.apache.org/struts/tags-tiles" %>
+
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="styles.css"/>

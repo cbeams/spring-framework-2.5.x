@@ -14,7 +14,7 @@
 	Besides the templates describes above, there's another template called <code>news</code>
 	that automatically imports news from Slashdot, TheServerside or WorldPress. Those
 	templates use the Tiles Controller notion as can be seen in the <code>definitions.xml</code> file
-	By extending <code>ComponentControllerSupport</code>, you can access the applicationcontext.
+	By extending <code>ComponentControllerSupport</code>, you can access the application context.
 </p>
 
 <p>
@@ -23,9 +23,9 @@
 </p>
 
 <p>
-	Todo, implement some caching on the newsfeeds, it's a little bit slow right now
+	Todo, implement some caching on the newsfeeds, it's a little bit slow right now.
 </p>
 
 <p>
-	Toto, review code to do errorhandling and more comments!!!
+	Toto, review code to do error handling and more comments!!!
 </p>
