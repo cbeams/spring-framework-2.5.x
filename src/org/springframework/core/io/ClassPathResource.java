@@ -1,13 +1,19 @@
 package org.springframework.core.io;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
- * Resource implementation for classpath resources.
- * Uses either the Thread context class loader
- * or a given Class for loading resources.
+ * Resource implementation for class path resources.
+ * Uses either the Thread context class loader or a given
+ * Class for loading resources.
+ *
+ * <p>Supports resolution as File if the class path resource
+ * resides in the file system, but not for resources in a JAR.
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see java.lang.Thread#getContextClassLoader
@@ -15,6 +21,8 @@ import java.io.InputStream;
  * @see java.lang.Class#getResourceAsStream
  */
 public class ClassPathResource extends AbstractResource {
+
+	private static final String URL_PROTOCOL_FILE = "file";
 
 	private final String path;
 
@@ -60,6 +68,26 @@ public class ClassPathResource extends AbstractResource {
 			throw new FileNotFoundException("Could not open " + getDescription());
 		}
 		return is;
+	}
+
+	public File getFile() throws IOException {
+		URL url = null;
+		if (this.clazz != null) {
+			url = this.clazz.getResource(this.path);
+		}
+		else {
+			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+			url = ccl.getResource(this.path);
+		}
+		if (url == null) {
+			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
+																			"because it does not exist");
+		}
+		if (!URL_PROTOCOL_FILE.equals(url.getProtocol())) {
+			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
+																			"because it does not reside in the file system: URL=[" + url + "]");
+		}
+		return new File(url.getFile());
 	}
 
 	public String getDescription() {
