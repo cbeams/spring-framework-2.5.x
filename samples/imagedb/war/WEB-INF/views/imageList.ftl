@@ -1,4 +1,4 @@
-<!-- imageList.fm -->
+<!-- imageList.ftl -->
 
 <html>
 <body>
