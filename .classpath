@@ -36,5 +36,8 @@
     <classpathentry kind="src" path="load"/>
     <classpathentry kind="src" path="sandbox"/>
     <classpathentry kind="src" path="samples/countries/src"/>
+    <classpathentry kind="lib" path="lib/tiles/commons-beanutils-1.6.jar"/>
+    <classpathentry kind="lib" path="lib/tiles/commons-digester-1.5.jar"/>
+    <classpathentry kind="lib" path="lib/tiles/struts-1.1.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
