@@ -113,37 +113,37 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		this.targetInThread = null;
 	}
 
-	public int getNrOfInvocations() {
+	public int getInvocationCount() {
 		return invocations;
 	}
 
-	public int getNrOfHits() {
+	public int getHitCount() {
 		return hits;
 	}
 
-	public int getNrOfObjects() {
+	public int getObjectCount() {
 		return targetSet.size();
 	}
 
 	/**
-	 * @deprecated in favour of getNrOfInvocations
-	 * @see #getNrOfInvocations
+	 * @deprecated in favor of getInvocationCount
+	 * @see #getInvocationCount
 	 */
 	public int getInvocations() {
 		return invocations;
 	}
 
 	/**
-	 * @deprecated in favour of getNrOfHits
-	 * @see #getNrOfHits
+	 * @deprecated in favor of getHitCount
+	 * @see #getHitCount
 	 */
 	public int getHits() {
 		return hits;
 	}
 
 	/**
-	 * @deprecated in favour of getNrOfObjects
-	 * @see #getNrOfObjects
+	 * @deprecated in favor of getObjectCount
+	 * @see #getObjectCount
 	 */
 	public int getObjects() {
 		return targetSet.size();

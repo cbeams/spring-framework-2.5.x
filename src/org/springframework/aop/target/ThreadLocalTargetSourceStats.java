@@ -26,33 +26,33 @@ public interface ThreadLocalTargetSourceStats {
 	/**
 	 * Return the number of client invocations.
 	 */
-	int getNrOfInvocations();
+	int getInvocationCount();
 
 	/**
 	 * Return the number of hits that were satisfied by a thread-bound object.
 	 */
-	int getNrOfHits();
+	int getHitCount();
 
 	/**
 	 * Return the number of thread-bound objects created.
 	 */
-	int getNrOfObjects();
+	int getObjectCount();
 
 	/**
-	 * @deprecated in favour of getNrOfInvocations
-	 * @see #getNrOfInvocations
+	 * @deprecated in favor of getInvocationCount
+	 * @see #getInvocationCount
 	 */
 	int getInvocations();
 
 	/**
-	 * @deprecated in favour of getNrOfHits
-	 * @see #getNrOfHits
+	 * @deprecated in favor of getHitCount
+	 * @see #getHitCount
 	 */
 	int getHits();
 
 	/**
-	 * @deprecated in favour of getNrOfObjects
-	 * @see #getNrOfObjects
+	 * @deprecated in favor of getObjectCount
+	 * @see #getObjectCount
 	 */
 	int getObjects();
 
