@@ -23,8 +23,8 @@ public class ValidationResultsTests extends TestCase {
     private static final Constraints constraints = Constraints.instance();
 
     static {
-        ac = new ClassPathXmlApplicationContext(
-                "org/springframework/rules/rules-context.xml");
+        ac =
+            new ClassPathXmlApplicationContext("org/springframework/rules/rules-context.xml");
         rulesSource = (RulesSource)ac.getBean("rulesSource");
         rules = rulesSource.getRules(Person.class);
     }
@@ -32,7 +32,8 @@ public class ValidationResultsTests extends TestCase {
     public void testValidationResultsCollector() {
         Person p = new Person();
         ValidationResultsCollector c = new ValidationResultsCollector(p);
-        ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
+        ValidationResults r =
+            c.collectResults(rulesSource.getRules(Person.class));
         assertEquals(2, r.getViolatedCount());
     }
 
@@ -40,27 +41,35 @@ public class ValidationResultsTests extends TestCase {
         Person p = new Person();
         ValidationResultsCollector c = new ValidationResultsCollector(p);
         c.setCollectAllErrors(true);
-        ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
+        ValidationResults r =
+            c.collectResults(rulesSource.getRules(Person.class));
         assertEquals(2, r.getViolatedCount());
     }
-  
+
     public void testNestedValidationResultsPropertyConstraint() {
         Person p = new Person();
-        
+
         Rules rules = Rules.createRules(Person.class);
-        UnaryPredicate constraint = constraints.or(
-                constraints.all("firstName",
-                        new UnaryPredicate[] {
-                            constraints.required(),
-                            constraints.maxLength(2) }
-                        ),
+        UnaryPredicate constraint =
+            constraints.or(
+                constraints.all(
+                    "firstName",
+                    new UnaryPredicate[] {
+                        constraints.required(),
+                        constraints.minLength(2)}),
                 constraints.not(
-                        constraints.eqProperty("firstName", "lastName")));
+                    constraints.eqProperty("firstName", "lastName")));
         rules.add(constraint);
         ValidationResultsCollector c = new ValidationResultsCollector(p);
         c.setCollectAllErrors(true);
         ValidationResults r = c.collectResults(rules);
-        assertEquals(2, r.getViolatedCount());
-        System.out.println(ac.getMessage(r.getResults("firstName"), Locale.getDefault()));
+        assertEquals(3, r.getViolatedCount());
+        String message =
+            r.getResults("firstName").buildMessage(ac, Locale.getDefault());
+        System.out.println(message);
+        assertEquals(
+            "First Name must *not* equal Last Name or must have text and must be at least 2 characters",
+            message);
+
     }
 }

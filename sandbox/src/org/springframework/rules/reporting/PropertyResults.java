@@ -7,24 +7,22 @@ package org.springframework.rules.reporting;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
+import org.springframework.rules.predicates.StringLengthConstraint;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org
-    .springframework
-    .rules
-    .predicates
-    .beans
-    .ParameterizedBeanPropertyExpression;
+import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
@@ -33,14 +31,14 @@ import org.springframework.util.visitor.Visitor;
 /**
  * @author Keith Donald
  */
-public class PropertyResults implements MessageSourceResolvable {
+public class PropertyResults {
     protected static final Log logger =
         LogFactory.getLog(PropertyResults.class);
     private String propertyName;
     private Object rejectedValue;
     private UnaryPredicate violatedConstraint;
     private Severity severity = Severity.ERROR;
-    private Object[] resolvedArgs;
+    private MessageSourceResolvable[] resolvedArgs;
 
     public PropertyResults(
         String propertyName,
@@ -83,10 +81,19 @@ public class PropertyResults implements MessageSourceResolvable {
         return severity;
     }
 
-    /**
-     * @see org.springframework.context.MessageSourceResolvable#getArguments()
-     */
-    public Object[] getArguments() {
+    public String buildMessage(MessageSource source, Locale locale) {
+        StringBuffer buf = new StringBuffer(255);
+        MessageSourceResolvable[] args = getMessageArguments();
+        for (int i = 0; i < args.length - 1; i++) {
+            MessageSourceResolvable arg = args[i];
+            buf.append(source.getMessage(arg, locale));
+            buf.append(' ');
+        }
+        buf.append(source.getMessage(args[args.length - 1], locale));
+        return buf.toString();
+    }
+
+    public MessageSourceResolvable[] getMessageArguments() {
         if (resolvedArgs == null) {
             this.resolvedArgs =
                 new DefaultArgumentTranslator(this).resolveArguments();
@@ -107,10 +114,11 @@ public class PropertyResults implements MessageSourceResolvable {
             this.results = results;
         }
 
-        public Object[] resolveArguments() {
+        public MessageSourceResolvable[] resolveArguments() {
             args.add(resolvableProperty(results.propertyName));
             visitorSupport.invokeVisit(this, results.violatedConstraint);
-            return args.toArray();
+            return (MessageSourceResolvable[])args.toArray(
+                new MessageSourceResolvable[0]);
         }
 
         void visit(CompoundBeanPropertyExpression rule) {
@@ -181,6 +189,11 @@ public class PropertyResults implements MessageSourceResolvable {
             visitorSupport.invokeVisit(this, not.getPredicate());
         }
 
+        //@HACK - please consider standard visitor here...
+        void visit(StringLengthConstraint constraint) {
+            add(getAsProperty(constraint), new Object[] { new Integer(2) }, constraint.toString());
+        }
+
         void visit(UnaryPredicate constraint) {
             add(getAsProperty(constraint), null, constraint.toString());
         }
@@ -234,20 +247,6 @@ public class PropertyResults implements MessageSourceResolvable {
             sum++;
         }
 
-    }
-
-    /**
-     * @see org.springframework.context.MessageSourceResolvable#getCodes()
-     */
-    public String[] getCodes() {
-        return new String[] { "args" };
-    }
-
-    /**
-     * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
-     */
-    public String getDefaultMessage() {
-        return violatedConstraint.toString();
     }
 
 }
