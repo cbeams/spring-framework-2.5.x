@@ -25,6 +25,7 @@ import java.util.Set;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -46,7 +47,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.27 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: AdvisedSupport.java,v 1.28 2004-04-14 18:52:50 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -215,6 +216,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			throw new AopConfigException("IntroductionInterceptors may only be added as part of IntroductionAdvice");
 		}
 		addAdvisor(pos, new DefaultPointcutAdvisor(interceptor));
+	}
+	
+	public void addAfterReturningAdvice(final AfterReturningAdvice ara) throws AopConfigException {
+		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ara));
 	}
 	
 	public void addBeforeAdvice(final MethodBeforeAdvice ba) throws AopConfigException {
