@@ -16,6 +16,7 @@
 		<patternset refid="image.files" />
 		<patternset refid="html.files" />
 		<include name="**/logoff.jsp" />
+		<include name="**/index.jsp" />
 		<include name="**/*.js" />
 		<exclude name="WEB-INF/**" />
 	</patternset>
