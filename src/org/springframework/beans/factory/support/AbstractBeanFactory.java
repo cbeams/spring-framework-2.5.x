@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.21 2003-11-15 12:42:16 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.22 2003-11-21 09:52:46 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -158,7 +158,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * Return the bean name, stripping out the factory deference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 */
-	private String transformedBeanName(String name) {
+	private String transformedBeanName(String name) throws NoSuchBeanDefinitionException {
+		if (name == null) {
+			throw new NoSuchBeanDefinitionException(name, "Cannot get bean with null name");
+		}
 		if (name.startsWith(FACTORY_BEAN_PREFIX)) {
 			name = name.substring(FACTORY_BEAN_PREFIX.length());
 		}
@@ -181,14 +184,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param name name of the bean to retrieve
 	 */
 	public Object getBean(String name) {
-		if (name == null) {
-			throw new NoSuchBeanDefinitionException(name, "Cannot get bean with null name");
-		}
+		String beanName = transformedBeanName(name);
 		RootBeanDefinition mergedBeanDefinition = null;
 
 		// check if bean definition exists
 		try {
-			mergedBeanDefinition = getMergedBeanDefinition(transformedBeanName(name));
+			mergedBeanDefinition = getMergedBeanDefinition(beanName);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// not found -> check parent
@@ -215,15 +216,39 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		return bean;
 	}
 
-	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+	public boolean containsBean(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
 		try {
-			return getBeanDefinition(beanName).isSingleton();
+			getBeanDefinition(beanName);
+			return true;
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// not found -> check parent
-			if (this.parentBeanFactory != null)
+			if (this.parentBeanFactory != null) {
+				return this.parentBeanFactory.containsBean(beanName);
+			}
+			return false;
+		}
+	}
+
+	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+		try {
+			RootBeanDefinition bd = getMergedBeanDefinition(beanName);
+			// in case of FactoryBean, return singleton status of created object if not a dereference
+			if (FactoryBean.class.isAssignableFrom(bd.getBeanClass()) && !isFactoryDereference(name)) {
+				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+				return factoryBean.isSingleton();
+			}
+			else {
+				return bd.isSingleton();
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// not found -> check parent
+			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.isSingleton(beanName);
+			}
 			throw ex;
 		}
 	}
@@ -246,8 +271,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// not found -> check parent
-			if (this.parentBeanFactory != null)
+			if (this.parentBeanFactory != null) {
 				return this.parentBeanFactory.getAliases(beanName);
+			}
 			throw ex;
 		}
 	}
@@ -256,6 +282,42 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	//---------------------------------------------------------------------
 	// Implementation methods
 	//---------------------------------------------------------------------
+
+	/**
+	 * Make a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
+	 * @return a merged RootBeanDefinition with overriden properties
+	 */
+	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+		try {
+			AbstractBeanDefinition bd = getBeanDefinition(beanName);
+			if (bd instanceof RootBeanDefinition) {
+				return (RootBeanDefinition) bd;
+			}
+			else if (bd instanceof ChildBeanDefinition) {
+				ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
+				// Deep copy
+				RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName()));
+				// Override settings
+				rbd.setSingleton(cbd.isSingleton());
+				rbd.setLazyInit(cbd.isLazyInit());
+				// Override properties
+				for (int i = 0; i < cbd.getPropertyValues().getPropertyValues().length; i++) {
+					rbd.addPropertyValue(cbd.getPropertyValues().getPropertyValues()[i]);
+				}
+				return rbd;
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (this.parentBeanFactory instanceof AbstractBeanFactory) {
+				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName);
+			}
+			else {
+				throw ex;
+			}
+		}
+		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName +
+																 "' is neither a RootBeanDefinition or ChildBeanDefinition");
+	}
 
 	/**
 	 * Get a singleton instance of this bean name. Note that this method shouldn't
@@ -754,42 +816,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			}
 		}
 		return ml;
-	}
-
-	/**
-	 * Make a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
-	 * @return a merged RootBeanDefinition with overriden properties
-	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-		try {
-			AbstractBeanDefinition bd = getBeanDefinition(beanName);
-			if (bd instanceof RootBeanDefinition) {
-				return (RootBeanDefinition) bd;
-			}
-			else if (bd instanceof ChildBeanDefinition) {
-				ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
-				// Deep copy
-				RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName()));
-				// Override settings
-				rbd.setSingleton(cbd.isSingleton());
-				rbd.setLazyInit(cbd.isLazyInit());
-				// Override properties
-				for (int i = 0; i < cbd.getPropertyValues().getPropertyValues().length; i++) {
-					rbd.addPropertyValue(cbd.getPropertyValues().getPropertyValues()[i]);
-				}
-				return rbd;
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			if (this.parentBeanFactory instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName);
-			}
-			else {
-				throw ex;
-			}
-		}
-		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName +
-																 "' is neither a RootBeanDefinition or ChildBeanDefinition");
 	}
 
 	/**

@@ -91,7 +91,6 @@
 		Must have target because there are no interceptors.
 	-->
 	<bean id="noInterceptorNames" 
-			singleton="false"
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>			
@@ -100,7 +99,6 @@
 	
 	<!-- Same effect as noInterceptor names: also invalid -->
 	<bean id="emptyInterceptorNames" 
-			singleton="false"
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>			
@@ -112,7 +110,6 @@
 		Must have target after *.
 	-->
 	<bean id="globalsWithoutTarget" 
-			singleton="false"
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>			

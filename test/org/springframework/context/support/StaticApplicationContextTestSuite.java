@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.14 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.15 2003-11-21 09:52:46 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -108,7 +108,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		ACATest acaPr = (ACATest) getListableBeanFactory().getBean("aca-prototype");
 		acaPr.getApplicationContext();
 		TestInterceptor ti = (TestInterceptor) getListableBeanFactory().getBean("testInterceptorForCreator");
-		assertEquals(2, ti.nrOfInvocations);
+		assertEquals(1, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) getListableBeanFactory().getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
 	}
@@ -139,6 +139,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		public int nrOfInvocations = 0;
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+			System.out.println(methodInvocation.getMethod().getName());
 			if (!methodInvocation.getMethod().getName().equals("finalize")) {
 				nrOfInvocations++;
 			}

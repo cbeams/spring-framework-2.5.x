@@ -32,7 +32,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface BeanFactory {
 
@@ -64,8 +64,17 @@ public interface BeanFactory {
 	 * @return the instance of the bean
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws BeansException if the bean could not be created
 	 */
 	Object getBean(String name, Class requiredType) throws BeansException;
+
+	/**
+	 * Does this bean factory contain a bean with the given name?
+	 * @param name name of the bean to query
+	 * @return whether a bean with the given name is defined
+	 * @throws BeansException if there were retrieval errors
+	 */
+	boolean containsBean(String name) throws BeansException;
 
 	/**
 	 * Is this bean a singleton? That is, will getBean() always return the same object?

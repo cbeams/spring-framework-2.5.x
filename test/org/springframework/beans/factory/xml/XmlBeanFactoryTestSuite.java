@@ -30,7 +30,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.17 2003-11-15 12:44:27 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.18 2003-11-21 09:52:46 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -721,6 +721,17 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
+			// expected
+		}
+	}
+
+	public void testFactoryBeanDefinedAsPrototype()  {
+		try {
+			InputStream is = getClass().getResourceAsStream("invalid-factory.xml");
+			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
 			// expected
 		}
 	}

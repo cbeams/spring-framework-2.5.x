@@ -151,23 +151,21 @@ public class BeanFactoryBootstrapTests extends TestCase {
 			m.put("s", new String());
 		}
 		
-		/**
-		 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
-		 */
-		public Object getBean(String name, Class requiredType) throws BeansException {
-			return getBean(name, null);	// HACK
-		}
-
-		/**
-		 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
-		 */
 		public Object getBean(String name) throws BeansException {
 			Object bean = m.get(name);
 			if (bean == null)
 				throw new NoSuchBeanDefinitionException(name, "no message");
 			return bean;
 		}
-		
+
+		public Object getBean(String name, Class requiredType) throws BeansException {
+			return getBean(name);
+		}
+
+		public boolean containsBean(String name) throws BeansException {
+			return m.containsKey(name);
+		}
+
 		public boolean isSingleton(String name) {
 			return true;
 		}

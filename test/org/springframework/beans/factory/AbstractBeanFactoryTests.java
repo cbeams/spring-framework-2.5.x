@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.5 2003-11-04 23:10:04 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.6 2003-11-21 09:52:46 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -39,6 +39,8 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 * overriding name only
 	 */
 	public void testInheritance() {
+		assertTrue(getBeanFactory().containsBean("rod"));
+		assertTrue(getBeanFactory().containsBean("roderick"));
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean roderick = (TestBean) getBeanFactory().getBean("roderick");
 		assertTrue("not == ", rod != roderick);
@@ -187,6 +189,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	*/
 
 	public void testNotThere() {
+		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
 		try {
 			Object o = getBeanFactory().getBean("Mr Squiggle");
 			fail("Can't find missing bean");
@@ -237,8 +240,9 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
 	}
 
-
 	public void testFactorySingleton() throws Exception {
+		assertTrue(getBeanFactory().isSingleton("&singletonFactory"));
+		assertTrue(getBeanFactory().isSingleton("singletonFactory"));
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertTrue("Singleton from factory has correct name, not " + tb.getName(), tb.getName().equals(DummyFactory.SINGLETON_NAME));
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
@@ -246,6 +250,8 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	}
 	
 	public void testFactoryPrototype() throws Exception {
+		assertTrue(getBeanFactory().isSingleton("&prototypeFactory"));
+		assertFalse(getBeanFactory().isSingleton("prototypeFactory"));
 		TestBean tb = (TestBean) getBeanFactory().getBean("prototypeFactory");
 		assertTrue(!tb.getName().equals(DummyFactory.SINGLETON_NAME));
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("prototypeFactory");

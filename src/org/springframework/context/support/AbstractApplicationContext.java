@@ -42,6 +42,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.config.ApplicationContextAwareProcessor;
 import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -66,7 +67,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -470,6 +471,10 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	public Object getBean(String name, Class requiredType) throws BeansException {
 		return getBeanFactory().getBean(name, requiredType);
+	}
+
+	public boolean containsBean(String name) throws BeansException {
+		return getBeanFactory().containsBean(name);
 	}
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {

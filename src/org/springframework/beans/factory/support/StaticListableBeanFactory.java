@@ -10,16 +10,16 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.StringUtils;
 
 /**
  * Static factory that allows to register existing singleton instances programmatically.
  * @author Rod Johnson
  * @since 06-Jan-03
- * @version $Id: StaticListableBeanFactory.java,v 1.3 2003-11-04 23:10:02 jhoeller Exp $
+ * @version $Id: StaticListableBeanFactory.java,v 1.4 2003-11-21 09:52:46 jhoeller Exp $
  */
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
@@ -49,8 +49,19 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return bean;
 	}
 
-	public boolean isSingleton(String name) {
-		return true;
+	public boolean containsBean(String name) {
+		return this.beans.containsKey(name);
+	}
+
+	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+		Object bean = getBean(name);
+		// in case of FactoryBean, return singleton status of created object
+		if (bean instanceof FactoryBean) {
+			return ((FactoryBean) bean).isSingleton();
+		}
+		else {
+			return true;
+		}
 	}
 
 	public String[] getAliases(String name) {
