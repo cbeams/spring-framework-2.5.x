@@ -166,7 +166,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation returns null.
+	 * <p>Default implementation delegates to referenceData(HttpServletRequest, int).
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
@@ -174,10 +174,26 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param page current wizard page
 	 * @return a Map with reference data entries, or null if none
 	 * @throws Exception in case of invalid state or arguments
+	 * @see #referenceData(HttpServletRequest, int)
 	 * @see ModelAndView
 	 */
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors, int page)
 	    throws Exception {
+		return referenceData(request, page);
+	}
+
+	/**
+	 * Create a reference data map for the given request, consisting of
+	 * bean name/bean instance pairs as expected by ModelAndView.
+	 * <p>Default implementation returns null.
+	 * Subclasses can override this to set reference data used in the view.
+	 * @param request current HTTP request
+	 * @param page current wizard page
+	 * @return a Map with reference data entries, or null if none
+	 * @throws Exception in case of invalid state or arguments
+	 * @see ModelAndView
+	 */
+	protected Map referenceData(HttpServletRequest request, int page) throws Exception {
 		return null;
 	}
 
@@ -306,10 +322,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
 		validatePage(command, errors, currentPage);
 
-		int targetPage = getTargetPage(request, currentPage);
+		int targetPage = getTargetPage(request, command, errors, currentPage);
+		logger.debug("Target page " + targetPage + " requested");
 		if (targetPage != currentPage) {
 			if (!errors.hasErrors() || (this.allowDirtyBack && targetPage < currentPage) ||
-				(this.allowDirtyForward && targetPage > currentPage)) {
+					(this.allowDirtyForward && targetPage > currentPage)) {
 				// allowed to go to target page
 				return showPage(request, errors, targetPage);
 			}		
@@ -337,10 +354,29 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
+	 * <p>Default implementation delegates to getTargetPage(HttpServletRequest, int).
+	 * Subclasses can override this for customized target page determination.
+	 * @param request current HTTP request
+	 * @param command form object with request parameters bound onto it
+	 * @param errors validation errors holder
+	 * @param currentPage the current page, to be returned as fallback
+	 * if no target page specified
+	 * @return the page specified in the request, or current page if not found
+	 * @see #getTargetPage(HttpServletRequest, int)
+	 */
+	protected int getTargetPage(HttpServletRequest request, Object command, Errors errors, int currentPage) {
+		return getTargetPage(request, currentPage);
+	}
+
+	/**
+	 * Return the target page specified in the request.
+	 * <p>Default implementation examines "_target" parameter (e.g. "_target1").
+	 * Subclasses can override this for customized target page determination.
 	 * @param request current HTTP request
 	 * @param currentPage the current page, to be returned as fallback
 	 * if no target page specified
 	 * @return the page specified in the request, or current page if not found
+	 * @see #PARAM_TARGET
 	 */
 	protected int getTargetPage(HttpServletRequest request, int currentPage) {
 		Enumeration paramNames = request.getParameterNames();
