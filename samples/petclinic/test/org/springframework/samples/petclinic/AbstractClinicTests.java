@@ -6,6 +6,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.samples.petclinic.util.EntityUtils;
 
 /**
  * Base class for Clinic tests.
@@ -27,11 +28,11 @@ public abstract class AbstractClinicTests extends TestCase {
 	public void testGetVets() {
 		List vets = clinic.getVets();
 		assertEquals(6, vets.size());
-		Vet v1 = (Vet) Entity.getById(vets, Vet.class, 2);
+		Vet v1 = (Vet) EntityUtils.getById(vets, Vet.class, 2);
 		assertEquals("Leary", v1.getLastName());
 		assertEquals(1, v1.getNrOfSpecialties());
 		assertEquals("radiology", ((Specialty) v1.getSpecialties().get(0)).getName());
-		Vet v2 = (Vet) Entity.getById(vets, Vet.class, 3);
+		Vet v2 = (Vet) EntityUtils.getById(vets, Vet.class, 3);
 		assertEquals("Douglas", v2.getLastName());
 		assertEquals(2, v2.getNrOfSpecialties());
 		assertEquals("dentistry", ((Specialty) v2.getSpecialties().get(0)).getName());
@@ -41,9 +42,9 @@ public abstract class AbstractClinicTests extends TestCase {
 	public void testGetPetTypes() {
 		List petTypes = clinic.getPetTypes();
 		assertEquals(6, petTypes.size());
-		PetType t1 = (PetType) Entity.getById(petTypes, PetType.class, 1);
+		PetType t1 = (PetType) EntityUtils.getById(petTypes, PetType.class, 1);
 		assertEquals("cat", t1.getName());
-		PetType t4 = (PetType) Entity.getById(petTypes, PetType.class, 4);
+		PetType t4 = (PetType) EntityUtils.getById(petTypes, PetType.class, 4);
 		assertEquals("snake", t4.getName());
 	}
 
@@ -85,11 +86,11 @@ public abstract class AbstractClinicTests extends TestCase {
 		List types = clinic.getPetTypes();
 		Pet p7 = clinic.loadPet(7);
 		assertTrue(p7.getName().startsWith("Samantha"));
-		assertEquals(Entity.getById(types, PetType.class, 1).getId(), p7.getType().getId());
+		assertEquals(EntityUtils.getById(types, PetType.class, 1).getId(), p7.getType().getId());
 		assertEquals("Jean", p7.getOwner().getFirstName());
 		Pet p6 = clinic.loadPet(6);
 		assertEquals("George", p6.getName());
-		assertEquals(Entity.getById(types, PetType.class, 4).getId(), p6.getType().getId());
+		assertEquals(EntityUtils.getById(types, PetType.class, 4).getId(), p6.getType().getId());
 		assertEquals("Peter", p6.getOwner().getFirstName());
 	}
 
@@ -100,7 +101,7 @@ public abstract class AbstractClinicTests extends TestCase {
 		pet.setName("bowser");
 		o6.addPet(pet);
 		List types = clinic.getPetTypes();
-		pet.setType((PetType) Entity.getById(types, PetType.class, 2));
+		pet.setType((PetType) EntityUtils.getById(types, PetType.class, 2));
 		pet.setBirthDate(new Date());
 		assertEquals(found + 1, o6.getPets().size());
 		clinic.storePet(pet);
