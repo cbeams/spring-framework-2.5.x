@@ -320,6 +320,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue("singleton from parent and child is the same", beanFromParent == beanFromChild);
 	}
 
+	public void testNestedPropertyValue() {
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		IndexedTestBean bean = (IndexedTestBean) child.getBean("indexedTestBean");
+		assertEquals("name applied correctly", "myname", bean.getArray()[0].getName());
+	}
+
 	public void testCircularReferences() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
