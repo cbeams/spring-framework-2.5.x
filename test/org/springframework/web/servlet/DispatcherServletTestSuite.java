@@ -19,11 +19,15 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.util.Locale;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -36,7 +40,9 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.BaseCommandController;
+import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
@@ -46,6 +52,8 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  * @author Juergen Hoeller
  */
 public class DispatcherServletTestSuite extends TestCase {
+	
+	static final String URL_KNOWN_ONLY_PARENT = "/knownOnlyToParent.do";
 
 	private MockServletConfig servletConfig;
 
@@ -375,7 +383,58 @@ public class DispatcherServletTestSuite extends TestCase {
 		complexDispatcherServlet.service(request, response);
 		assertTrue(response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
+	
+	
+	public void testHandlerNotMappedWithAutodetect() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		// No parent
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
 
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", 
+				URL_KNOWN_ONLY_PARENT);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
+	}
+	
+	public void testDetectHandlerMappingFromParent() throws ServletException, IOException {
+		// Create a parent context that includes a mapping
+		StaticWebApplicationContext parent = new StaticWebApplicationContext();
+		parent.registerSingleton("parentHandler", ControllerFromParent.class, new MutablePropertyValues());
+		
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("mappings", URL_KNOWN_ONLY_PARENT + "=parentHandler"));
+		
+		parent.registerSingleton("parentMapping", SimpleUrlHandlerMapping.class, pvs);
+		parent.refresh();
+
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		// Will have parent
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		
+		ServletConfig config = new MockServletConfig(servletConfig.getServletContext(), "complex");
+		config.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, parent);
+		complexDispatcherServlet.init(config);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", 
+				URL_KNOWN_ONLY_PARENT);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		
+		assertFalse("Matched through parent controller/handler pair: not response=" + response.getStatus(),
+				response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	public static class ControllerFromParent implements Controller {
+		
+		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+			return new ModelAndView(ControllerFromParent.class.getName());
+		}
+	}
+	
 	public void testNotDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);

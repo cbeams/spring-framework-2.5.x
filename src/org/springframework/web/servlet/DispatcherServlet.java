@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.OrderComparator;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -96,7 +97,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.36 2004-08-04 08:52:30 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.37 2004-08-11 17:22:38 johnsonr Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -322,8 +323,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings() throws BeansException {
 		this.handlerMappings = new ArrayList();
 		if (this.detectAllHandlerMappings) {
-			// find all HandlerMappings in the ApplicationContext
-			Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
+			// find all HandlerMappings in the ApplicationContext,
+			// including ancestor contexts
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(), HandlerMapping.class, true, false);
 			this.handlerMappings = new ArrayList(matchingBeans.values());
 			// we keep HandlerMappings in sorted order
 			Collections.sort(this.handlerMappings, new OrderComparator());
@@ -354,7 +356,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerAdapters() throws BeansException {
 		// find all HandlerAdapters in the ApplicationContext
-		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerAdapter.class, true, false);
+		Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(), HandlerAdapter.class, true, false);
 		this.handlerAdapters = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
@@ -378,7 +380,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.handlerExceptionResolvers = new ArrayList();
 		if (this.detectAllHandlerExceptionResolvers) {
 			// find all HandlerExceptionResolvers in the ApplicationContext
-			Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(), HandlerExceptionResolver.class, true, false);
 			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
 			// we keep HandlerExceptionResolvers in sorted order
 			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
@@ -403,7 +405,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.viewResolvers = new ArrayList();
 		if (this.detectAllViewResolvers) {
 			// find all ViewResolvers in the ApplicationContext
-			Map matchingBeans = getWebApplicationContext().getBeansOfType(ViewResolver.class, true, false);
+			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(), ViewResolver.class, true, false);
 			this.viewResolvers.addAll(matchingBeans.values());
 			// we keep ViewResolvers in sorted order
 			Collections.sort(this.viewResolvers, new OrderComparator());
