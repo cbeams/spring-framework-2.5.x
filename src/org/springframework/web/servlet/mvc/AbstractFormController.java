@@ -222,19 +222,29 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
+		// Form submission or new form to show?
 		if (isFormSubmission(request)) {
-			HttpSession session = request.getSession(false);
-			if (isSessionForm() &&
-					(session == null || session.getAttribute(getFormSessionAttributeName(request)) == null)) {
-				// Cannot submit a session form if no form object is in the session.
-				return handleInvalidSubmit(request, response);
+
+			// Form submission: in session-form mode, we need to find
+			// the form object in the HTTP session.
+			if (isSessionForm()) {
+				HttpSession session = request.getSession(false);
+				if (session == null || session.getAttribute(getFormSessionAttributeName(request)) == null) {
+					// Cannot submit a session form if no form object is in the session.
+					return handleInvalidSubmit(request, response);
+				}
 			}
-			// process submit
+
+			// Found form object in HTTP session: fetch form object,
+			// bind, validate, process submission.
 			Object command = getCommand(request);
 			ServletRequestDataBinder binder = bindAndValidate(request, command);
 			return processFormSubmission(request, response, command, binder.getErrors());
 		}
+
 		else {
+			// New form to show: render form view.
 			return showNewForm(request, response);
 		}
 	}
@@ -311,6 +321,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #handleInvalidSubmit
 	 */
 	protected final BindException getErrorsForNewForm(HttpServletRequest request) throws Exception {
+		// Create form-backing object for new form.
 		Object command = formBackingObject(request);
 		if (command == null) {
 			throw new ServletException("Form object returned by formBackingObject() must not be null");
@@ -318,6 +329,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (!checkCommand(command)) {
 			throw new ServletException("Form object returned by formBackingObject() must match commandClass");
 		}
+
 		// Bind without validation, to allow for prepopulating a form, and for
 		// convenient error evaluation in views (on both first attempt and resubmit).
 		ServletRequestDataBinder binder = createBinder(request, command);
@@ -325,6 +337,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 			logger.debug("Binding to new form");
 			binder.bind(request);
 		}
+
+		// Return BindException object that resulted from binding.
 		return binder.getErrors();
 	}
 
@@ -340,9 +354,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #formBackingObject
 	 */
 	protected final Object getCommand(HttpServletRequest request) throws Exception {
+		// If not in session-form mode, create a new form-backing object.
 		if (!isSessionForm()) {
 			return formBackingObject(request);
 		}
+
+		// Session-form mode: retrieve form object from HTTP session attribute.
 		HttpSession session = request.getSession(false);
 		if (session == null) {
 			throw new ServletException("Must have session when trying to bind (in session-form mode)");
@@ -352,10 +369,15 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (sessionFormObject == null) {
 			throw new ServletException("Form object not found in session (in session-form mode)");
 		}
+
+		// Remove form object from HTTP session: we might finish the form workflow
+		// in this request. If it turns out that we need to show the form view again,
+		// we'll re-bind the form object to the HTTP session.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removing form session attribute [" + formAttrName + "]");
 		}
 		session.removeAttribute(formAttrName);
+
 		return sessionFormObject;
 	}
 
@@ -445,6 +467,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final ModelAndView showForm(
 			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
 
+		// In session form mode, re-expose form object as HTTP session attribute.
+		// Re-binding is necessary for proper state handling in a cluster,
+		// to notify other nodes of changes in the form object.
 		if (isSessionForm()) {
 			String formAttrName = getFormSessionAttributeName(request);
 			if (logger.isDebugEnabled()) {
@@ -452,14 +477,23 @@ public abstract class AbstractFormController extends BaseCommandController {
 			}
 			request.getSession().setAttribute(formAttrName, errors.getTarget());
 		}
+
+		// Fetch errors model as starting point, containing form object under
+		// "commandName", and corresponding Errors instance under internal key.
 		Map model = errors.getModel();
+
+		// Merge reference data into model, if any.
 		Map referenceData = referenceData(request, errors.getTarget(), errors);
 		if (referenceData != null) {
 			model.putAll(referenceData);
 		}
+
+		// Merge control attributes into model, if any.
 		if (controlModel != null) {
 			model.putAll(controlModel);
 		}
+
+		// Trigger rendering of the specified view, using the final model.
 		return new ModelAndView(viewName, model);
 	}
 
