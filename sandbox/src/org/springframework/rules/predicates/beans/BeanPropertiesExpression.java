@@ -72,8 +72,8 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
     }
 
     public String toString() {
-        return super.toString() + " must be "
-                + beanPropertyExpression.toString() + " " + otherPropertyName;
+        return super.toString() + " " + beanPropertyExpression.toString() + " "
+                + otherPropertyName;
     }
 
 }

@@ -32,6 +32,7 @@ import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
+import org.springframework.rules.predicates.beans.NegatedBeanPropertyExpression;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 
 /**
@@ -84,8 +85,8 @@ public class Constraints {
     }
 
     /**
-     * Bind the specified <code>float</code> parameter to the second argument of
-     * the <code>BinaryPredicate</code>. The result is a
+     * Bind the specified <code>float</code> parameter to the second argument
+     * of the <code>BinaryPredicate</code>. The result is a
      * <code>UnaryPredicate</code> which will test a single variable argument
      * against the constant <code>float</code> parameter.
      * 
@@ -100,8 +101,8 @@ public class Constraints {
     }
 
     /**
-     * Bind the specified <code>double</code> parameter to the second argument of
-     * the <code>BinaryPredicate</code>. The result is a
+     * Bind the specified <code>double</code> parameter to the second argument
+     * of the <code>BinaryPredicate</code>. The result is a
      * <code>UnaryPredicate</code> which will test a single variable argument
      * against the constant <code>double</code> parameter.
      * 
@@ -116,8 +117,8 @@ public class Constraints {
     }
 
     /**
-     * Bind the specified <code>boolean</code> parameter to the second argument of
-     * the <code>BinaryPredicate</code>. The result is a
+     * Bind the specified <code>boolean</code> parameter to the second
+     * argument of the <code>BinaryPredicate</code>. The result is a
      * <code>UnaryPredicate</code> which will test a single variable argument
      * against the constant <code>boolean</code> parameter.
      * 
@@ -129,7 +130,7 @@ public class Constraints {
      */
     public UnaryPredicate bind(BinaryPredicate predicate, boolean parameter) {
         return new ParameterizedBinaryPredicate(predicate, parameter);
-    }    
+    }
 
     /**
      * Attaches a predicate that tests the result returned by evaluating the
@@ -232,7 +233,7 @@ public class Constraints {
      *            The predicate to negate
      * @return The negated predicate.
      */
-    public UnaryPredicate negate(UnaryPredicate predicate) {
+    public UnaryPredicate not(UnaryPredicate predicate) {
         if (predicate instanceof UnaryNot) {
             throw new IllegalArgumentException("Predicate is already negated");
         }
@@ -321,6 +322,17 @@ public class Constraints {
     public BeanPropertyExpression any(String propertyName,
             UnaryPredicate[] constraints) {
         return value(propertyName, any(constraints));
+    }
+
+    /**
+     * Negate a bean property expression.
+     * 
+     * @param e
+     *            the expression to negate
+     * @return The negated expression
+     */
+    public BeanPropertyExpression not(BeanPropertyExpression e) {
+        return new NegatedBeanPropertyExpression(e);
     }
 
     /**
