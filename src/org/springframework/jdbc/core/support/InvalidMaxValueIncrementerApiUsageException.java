@@ -9,18 +9,18 @@
 
 package org.springframework.jdbc.core.support;
 
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Exception thrown on incorrect usage of the API, such as failing
- * to provide IncrementerName or ColumnName before usage.
+ * to provide incrementerName or columnName before usage.
  *
  * <p>This represents a problem in our Java data access framework,
- * not the underlying data access infrastructure.
+ * not the underlying data store.
  *
  * @author Thomas Risberg
  */
-public class InvalidMaxValueIncrementerApiUsageException extends DataAccessException {
+public class InvalidMaxValueIncrementerApiUsageException extends InvalidDataAccessApiUsageException {
 
 	/**
 	 * Constructor for InvalidMaxValueIncrementerApiUsageException.

@@ -37,7 +37,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.2 2003-08-17 20:37:14 jhoeller Exp $
+ * @version $Id: HsqlMaxValueIncrementer.java,v 1.3 2003-10-21 07:47:19 jhoeller Exp $
  */
 
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
@@ -189,7 +189,6 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 					}
 					long maxValue = valueCache[(valueCache.length - 1)];
 					stmt.executeUpdate(deleteSql + maxValue);
-					logger.info("Delete SQL is : " + deleteSql + maxValue);
 				}
 				catch (SQLException ex) {
 					throw new DataAccessResourceFailureException("Could not obtain last_insert_id", ex);
@@ -218,11 +217,10 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 		}
 
 		private void initPrepare() throws InvalidMaxValueIncrementerApiUsageException {
-			afterPropertiesSet();
 			if (getIncrementerName() == null)
-				throw new InvalidMaxValueIncrementerApiUsageException("IncrementerName property must be set on " + getClass().getDeclaringClass().getName());
+				throw new InvalidMaxValueIncrementerApiUsageException("incrementerName property must be set on " + getClass().getDeclaringClass().getName());
 			if (getColumnName() == null)
-				throw new InvalidMaxValueIncrementerApiUsageException("ColumnName property must be set on " + getClass().getDeclaringClass().getName());
+				throw new InvalidMaxValueIncrementerApiUsageException("columnName property must be set on " + getClass().getDeclaringClass().getName());
 			StringBuffer buf = new StringBuffer();
 			buf.append("insert into ");
 			buf.append(getIncrementerName());

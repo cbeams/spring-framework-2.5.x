@@ -10,23 +10,22 @@ import org.springframework.jdbc.core.DataFieldMaxValueIncrementer;
  * Implementation of {@link org.springframework.jdbc.core.DataFieldMaxValueIncrementer}
  * Uses <b>Template Method</b> design pattern
  * Subclasses should provide implementations of protected abstract methods.
- * <br><br><b>History:</b> 
+ *
+ * <p><b>History:</b>
  * <li>17/04/2003 : donated to Spring by Dmitriy Kopylenko
  * <li>19/04/2003 : modified by Isabelle Muszynski, added nextDoubleValue
  * <li>09/05/2003 : modified by JPP, added nextLongValue
- * <li>17/06/2003 : modified by Ken Krebs, added common functionality form subclasses
+ * <li>17/06/2003 : modified by Ken Krebs, added common functionality for subclasses
+ *
  * @author Dmitriy Kopylenko
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Ken Krebs
- * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.1.1.1 2003-08-14 16:20:29 trisberg Exp $
+ * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.2 2003-10-21 07:47:19 jhoeller Exp $
  *
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 
-	//-----------------------------------------------------------------
-	// Instance data
-	//-----------------------------------------------------------------
 	private DataSource dataSource;
 
 	/** The name of the sequence/table containing the sequence */
@@ -41,7 +40,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/** Flag if dirty definition */
 	private boolean dirty = true;
 
-	/** Gets the state of the dirty flag */
+	/** Get the state of the dirty flag */
 	public boolean isDirty() {
 		return this.dirty;
 	}
@@ -100,22 +99,14 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 		this.cacheSize = cacheSize;
 	}
 
-	/** Sets the state of the dirty flag	 */
+	/** Set the state of the dirty flag	 */
 	public void setDirty(boolean dirty) {
 		this.dirty = dirty;
 	}
 
 	/**
-	 * Gets the data source.
-	 * @return ds The data source to return
-	 */
-	public DataSource getDataSource() {
-		return this.dataSource;
-	}
-
-	/**
-	 * Sets the data source.
-	 * @param ds The data source to set
+	 * Set the data source.
+	 * @param dataSource The data source to set
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -123,15 +114,15 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Gets the incrementerName.
-	 * @return incrementerName The incrementerName to return
+	 * Get the data source.
+	 * @return ds The data source to return
 	 */
-	public String getIncrementerName() {
-		return this.incrementerName;
+	public DataSource getDataSource() {
+		return this.dataSource;
 	}
 
 	/**
-	 * Sets the incrementerName.
+	 * Set the incrementerName.
 	 * @param incrementerName The incrementerName to set
 	 */
 	public void setIncrementerName(String incrementerName) {
@@ -140,15 +131,15 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Gets the columnName.
-	 * @return columnName The columnName to return
+	 * Get the incrementerName.
+	 * @return incrementerName The incrementerName to return
 	 */
-	public String getColumnName() {
-		return this.columnName;
+	public String getIncrementerName() {
+		return this.incrementerName;
 	}
 
 	/**
-	 * Sets the columnName.
+	 * Set the columnName.
 	 * @param columnName The columnName to set
 	 */
 	public void setColumnName(String columnName) {
@@ -157,20 +148,28 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 	/**
-	 * Gets the cacheSize.
-	 * @return cacheSize The cacheSize to return
+	 * Get the columnName.
+	 * @return columnName The columnName to return
 	 */
-	public int getCacheSize() {
-		return this.cacheSize;
+	public String getColumnName() {
+		return this.columnName;
 	}
 
 	/**
-	 * Sets the cacheSize.
+	 * Set the cacheSize.
 	 * @param cacheSize The number of buffered keys
 	 */
 	public void setCacheSize(int cacheSize) {
 		this.cacheSize = cacheSize;
 		this.dirty = true;
+	}
+
+	/**
+	 * Get the cacheSize.
+	 * @return cacheSize The cacheSize to return
+	 */
+	public int getCacheSize() {
+		return this.cacheSize;
 	}
 
 	/**

@@ -4,31 +4,29 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.object.SqlFunction;
 
 /**
- * Class to retrieve the next value of a given Oracle SEQUENCE 
+ * Class to retrieve the next value of a given Oracle SEQUENCE
  * If the cacheSize is set then we will retrive that number of values from sequence and
-*  then serve the intermediate values without querying the database
+ *  then serve the intermediate values without querying the database
  * @author Dmitriy Kopylenko
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: OracleSequenceMaxValueIncrementer.java,v 1.1.1.1 2003-08-14 16:20:31 trisberg Exp $
+ * @version $Id: OracleSequenceMaxValueIncrementer.java,v 1.2 2003-10-21 07:47:19 jhoeller Exp $
  */
 public class OracleSequenceMaxValueIncrementer
-	extends AbstractDataFieldMaxValueIncrementer {
+		extends AbstractDataFieldMaxValueIncrementer {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private long[] valueCache = null;
 
-    private NextMaxValueProvider nextMaxValueProvider;
+	private NextMaxValueProvider nextMaxValueProvider;
 
-	//-----------------------------------------------------------------
-	// Constructors
-	//-----------------------------------------------------------------
 	/**
 	 * Default constructor
 	 **/
@@ -38,11 +36,11 @@ public class OracleSequenceMaxValueIncrementer
 
 	/**
 	 * Constructor
-	 * @param dataSource the datasource to use
+	 * @param ds the DataSource to use
 	 * @param incrementerName the name of the sequence/table to use
 	 */
 	public OracleSequenceMaxValueIncrementer(DataSource ds, String incrementerName) {
-        super(ds, incrementerName);
+		super(ds, incrementerName);
 		this.nextMaxValueProvider = new NextMaxValueProvider();
 	}
 
@@ -53,7 +51,7 @@ public class OracleSequenceMaxValueIncrementer
 	 * @param cacheSize the number of buffered keys
 	 **/
 	public OracleSequenceMaxValueIncrementer(DataSource ds, String incrementerName, int cacheSize) {
-        super(ds, incrementerName, cacheSize);
+		super(ds, incrementerName, cacheSize);
 		this.nextMaxValueProvider = new NextMaxValueProvider();
 	}
 
@@ -65,7 +63,7 @@ public class OracleSequenceMaxValueIncrementer
 	 * @param padding the length to which the string return value should be padded with zeroes
 	 */
 	public OracleSequenceMaxValueIncrementer(DataSource ds, String incrementerName, boolean prefixWithZero, int padding) {
-        super(ds, incrementerName);
+		super(ds, incrementerName);
 		this.nextMaxValueProvider = new NextMaxValueProvider();
 		this.nextMaxValueProvider.setPrefixWithZero(prefixWithZero, padding);
 	}
@@ -79,7 +77,7 @@ public class OracleSequenceMaxValueIncrementer
 	 * @param cacheSize the number of buffered keys
 	 */
 	public OracleSequenceMaxValueIncrementer(DataSource ds, String incrementerName, boolean prefixWithZero, int padding, int cacheSize) {
-        super(ds, incrementerName, cacheSize);
+		super(ds, incrementerName, cacheSize);
 		this.nextMaxValueProvider = new NextMaxValueProvider();
 		this.nextMaxValueProvider.setPrefixWithZero(prefixWithZero, padding);
 	}
@@ -128,8 +126,10 @@ public class OracleSequenceMaxValueIncrementer
 		private int nextValueIx = -1;
 
 		protected long getNextKey(int type) throws DataAccessException {
-			if (isDirty()) { initPrepare(); }
-			if(nextValueIx < 0 || nextValueIx >= getCacheSize()) {
+			if (isDirty()) {
+				initPrepare();
+			}
+			if (nextValueIx < 0 || nextValueIx >= getCacheSize()) {
 				SqlFunction sqlf = new SqlFunction(getDataSource(), "SELECT " + getIncrementerName() + ".NEXTVAL FROM DUAL", type);
 				sqlf.compile();
 				valueCache = new long[getCacheSize()];
@@ -142,15 +142,14 @@ public class OracleSequenceMaxValueIncrementer
 				logger.info("Next sequence value is : " + valueCache[nextValueIx]);
 			return valueCache[nextValueIx++];
 		}
-	
+
 		private void initPrepare() throws InvalidMaxValueIncrementerApiUsageException {
 			afterPropertiesSet();
 			if (getIncrementerName() == null)
-				throw new InvalidMaxValueIncrementerApiUsageException("IncrementerName property must be set on " + getClass().getDeclaringClass().getName());
+				throw new InvalidMaxValueIncrementerApiUsageException("incrementerName property must be set on " + getClass().getDeclaringClass().getName());
 			nextValueIx = -1;
-			setDirty(false); 			
+			setDirty(false);
 		}
-	
 	}
 
 }
