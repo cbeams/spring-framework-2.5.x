@@ -666,6 +666,19 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param sessionExecutionStack
+	 * @param request
+	 * @param response
+	 * @param subFlowAttributes
+	 * @return
+	 */
+	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, String stateId, HttpServletRequest request,
+			HttpServletResponse response, Map inputAttributes) {
+		TransitionableState state = getRequiredTransitionableState(stateId);
+		return new StartState(state).enter(this, sessionExecution, request, response, inputAttributes);
+	}
+
+	/**
+	 * @param sessionExecutionStack
 	 * @return
 	 */
 	Flow getActiveFlow(FlowSessionExecutionInfo sessionExecution) {
