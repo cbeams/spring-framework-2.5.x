@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.97 2004-02-27 01:27:36 davison Exp $
+$Id: changelog.txt,v 1.98 2004-02-27 09:01:44 jhoeller Exp $
 
 
 Changes in version 1.0 RC2 (29.2.2003)
@@ -8,6 +8,7 @@ Changes in version 1.0 RC2 (29.2.2003)
 
 Package org.springframework.aop
 * simplified Advisor interface hierarchy, reducing Advisor subinterfaces to PointcutAdvisor and IntroductionAdvisor
+* adapted metadata-driven auto-proxying support and tests to Commons Attributes snapshot from January 15th
 
 Package org.springframework.beans
 * fixed PropertyValue's "equals" implementation, added corresponding "hashCode" implementation
@@ -16,9 +17,10 @@ Package org.springframework.beans
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * revised BeanFactoryLocator exception handling
 * renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
+* added "systemPropertiesMode" setting to PropertyPlaceholderConfigurer, with values "never", "fallback" and "override"
 * added PreferencesPlaceholderConfigurer, being able to resolve placeholders via J2SE 1.4 Preferences
 * reworked MethodInvocationFactoryBean to derive from org.springframework.util.MethodInvoker
-* renamed DTD file to "spring-beans_1_0.dtd", still supporting "spring-beans.dtd" as shortcut
+* added "null" tag to XML bean definition format, for denoting Java null values
 * added optional "type" attribute to "constructor-arg" tag, for resolving ambiguities when converting String values
 
 Package org.springframework.context
@@ -29,17 +31,17 @@ Package org.springframework.context
 * renamed NestingMessageSource to HierarchicalMessageSource and AbstractNestingMessageSource to AbstractMessageSource
 * fixed bug in ReloadableResourceBundleMessageSource's filename caching that prevented loading from multiple basenames
 * added "clearCacheIncludingAncestors" method to ReloadableResourceBundleMessageSource
+* added "createBeanFactory" and "initBeanDefinitionReader" hooks to AbstractXmlApplicationContext
 
 Package org.springframework.core
+* added "getURL" method to Resource interface, supported by FileSystem/ClassPath/ServletContextResource
 * ClassPathResource returns a File on "getFile" if the classpath resource resides in the file system
-
-Package org.springframework.jndi
-* renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
 
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
 
 Package org.springframework.jdbc
+* moved CannotGetJdbcConnectionException and CannotCloseJdbcConnectionException to root jdbc package
 * added "execute(String sql) method to support static sql and ddl statements
 * renamed method "execute(CallableStatementCreator csc, List declaredParameters)" to call
 * added support for new SQL error code categories: DataRetrieval/OptimisticLocking/DataAccessResourceFailureException
@@ -48,13 +50,32 @@ Package org.springframework.jdbc
 * allowed ResultSetExtractor's "extractData" and JdbcTemplate's "doWithResultSetXxx" to return a result object
 * removed "doWithResultSetXxx" methods from JdbcOperations interface
 * removed JdbcHelper and its helper classes ColumnExtractor and DefaultColumnExtractor
+* revised DataFieldMaxValueIncrementer implementation hierarchy, removed NextMaxValueProvider inner classes
+* factored out AbstractSequenceMaxValueIncrementer from OracleSequenceMaxValueIncrementer, with no value cache
+* added PostgrSQLSequenceMaxValueIncrementer as subclass of AbstractSequenceMaxValueIncrementer
+
+Package org.springframework.jndi
+* renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
+
+Package org.springframework.orm
+* reworked LocalSessionFactoryBean's "configLocation" into Resource
+* added "mappingLocations" and "mappingDirectoryLocations" to LocalSessionFactoryBean, each taking a Resource array
+* reworked LocalSessionFactoryBean's "mappingResourceJars" property into "mappingJarLocations" Resource array
+* flush Hibernate sessions when using JtaTransactionManager with pre-bound Sessions (e.g. with Open Session in View)
+* added support for the SqlMapClient API of iBATIS SQL Maps 2 (SqlMapClientFactoryBean/Template/Callback/Operations)
+* added SqlMapClientDaoSupport class for DAOs that work with iBATIS SQL Maps 2
 
 Package org.springframework.remoting
 * added support for custom RMI socket factories to RmiServiceExporter
 * unbind RMI object from RMI registry on shutdown of RmiServiceExporter
+* renamed RemoteInvocationHandler/RemoteInvocationWrapper to RmiInvocationHandler/RmiInvocationWrapper
+* RmiInvocationHandler uses RemoteInvocation class as argument, allowing for custom subclasses with additional params
 
 Package org.springframework.transaction
 * consider a JTA transaction with STATUS_MARKED_ROLLBACK as existing transaction in JtaTransactionManager
+
+Package org.springframework.samples
+* added scheduling demo to Image Database sample app, illustrating Quartz and Timer, also showing MailSender usage
 
 Package org.springframework.scheduler
 * added Quartz support, for setting up Schedulers, JobDetails and Triggers in a Spring context
@@ -73,12 +94,13 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * added "allowedFields" property to DataBinder, to avoid unwanted modifications when binding request parameters
+* added overridable "isAllowed" method to DataBinder
 
 Package org.springframework.web
 * added "defaultMethod" property to ParameterMethodNameResolver
-
-Package org.springframework.web.servlet.view.xslt
-* relaxed exceptions for null models / null root tag name in AbstractXsltView
+* added "numberToolAttribute" to VelocityView, for exposing a locale-aware NumberTool (from Velocity Tools 1.1)
+* added "velocityFormatter" property to VelocityView, for exposing a VelocityFormatter (part of standard Velocity)
+* relaxed exceptions for null models/null root tag name in AbstractXsltView
 * added stylesheet parameters to AbstractXsltView which subclasses can create
 
 
@@ -401,7 +423,7 @@ Package org.springframework.web
 * renamed VelocityView's "templateName" property to "url" for consistency, deriving from AbstractUrlBasedView now
 * added VelocityViewResolver convenience class, deriving from UrlBasedViewResolver
 * removed "exposeDateFormatter" and "exposeCurrencyFormatter" properties in VelocityView
-* added "dateToolAttribute" to VelocityView, for exposing a DateTool instance (DateTool is from Velocity Tools)
+* added "dateToolAttribute" to VelocityView, for exposing a locale-aware DateTool (from Velocity Tools 1.0)
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
 
 New package org.springframework.metadata plus supporting packages
