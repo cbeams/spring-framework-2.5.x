@@ -27,13 +27,24 @@ import org.springframework.dao.DataAccessException;
  * Implemented by JdoTemplate. Not often used, but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides JdoTemplate's data access methods that mirror
- * various PersistenceManager methods.
+ * <p>Provides JdoTemplate's data access methods that mirror various
+ * PersistenceManager methods. See the JDO PersistenceManager javadocs
+ * for details on those methods.
+ *
+ * <p>Note that lazy loading will just work with an open JDO PersistenceManager,
+ * either within a Spring-driven transaction (with JdoTransactionManager or
+ * JtaTransactionManager) or within OpenPersistenceManagerInViewFilter/Interceptor.
+ * Furthermore, some operations just make sense within transactions,
+ * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
  * @author Juergen Hoeller
  * @since 12.06.2004
  * @see JdoTemplate
  * @see javax.jdo.PersistenceManager
+ * @see JdoTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
+ * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
  */
 public interface JdoOperations {
 

@@ -42,14 +42,25 @@ import org.springframework.dao.DataAccessResourceFailureException;
  *
  * <p>Typically used to implement data access or business logic services that
  * use OJB within their implementation but are OJB-agnostic in their interface.
- * The latter resp. code calling the latter only have to deal with business
- * objects, query objects, and org.springframework.dao exceptions.
+ * The latter or code calling the latter only have to deal with business objects,
+ * query objects, and <code>org.springframework.dao</code> exceptions.
+ *
+ * <p>Note that operations that return an Iterator (that is,
+ * <code>getIteratorByQuery</code> and <code>getReportQueryIteratorByQuery</code>)
+ * are supposed to be used within Spring-managed transactions
+ * (with PersistenceBrokerTransactionManager or JtaTransactionManager).
+ * Else, the Iterator won't be able to read results from its ResultSet anymore,
+ * as the underlying PersistenceBroker will already have been closed.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setPbKey
  * @see PersistenceBrokerCallback
+ * @see org.apache.ojb.broker.PersistenceBroker
+ * @see #getIteratorByQuery
+ * @see #getReportQueryIteratorByQuery
  * @see PersistenceBrokerTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class PersistenceBrokerTemplate extends OjbAccessor implements PersistenceBrokerOperations {
 

@@ -32,12 +32,30 @@ import org.springframework.dao.DataAccessException;
  * to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Provides HibernateTemplate's data access methods that mirror
- * various Session methods.
+ * various Session methods. See the Hibernate Session javadocs
+ * for details on those methods.
+ *
+ * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
+ * are supposed to be used within Spring-driven or JTA-driven transactions
+ * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
+ * Else, the Iterator won't be able to read results from its ResultSet anymore,
+ * as the underlying Hibernate Session will already have been closed.
+ *
+ * <p>Lazy loading will also just work with an open Hibernate Session,
+ * either within a transaction or within OpenSessionInViewFilter/Interceptor.
+ * Furthermore, some operations just make sense within transactions,
+ * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
+ * <code>flush</code>, <code>clear</code>.
  *
  * @author Juergen Hoeller
  * @since 05.02.2004
  * @see HibernateTemplate
  * @see net.sf.hibernate.Session
+ * @see #iterate
+ * @see HibernateTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
+ * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
  */
 public interface HibernateOperations {
 

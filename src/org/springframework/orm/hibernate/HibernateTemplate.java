@@ -43,9 +43,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
  * <p>Typically used to implement data access or business logic services that
- * use Hibernate within their implementation but are Hibernate-agnostic in
- * their interface. The latter resp. code calling the latter only have to deal
- * with domain objects, query objects, and org.springframework.dao exceptions.
+ * use Hibernate within their implementation but are Hibernate-agnostic in their
+ * interface. The latter or code calling the latter only have to deal with
+ * domain objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
  * <p>The central method is "execute", supporting Hibernate code implementing
  * the HibernateCallback interface. It provides Hibernate Session handling
@@ -78,6 +78,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Alternatively, use a JndiObjectFactoryBean to fetch a SessionFactory
  * from JNDI (possibly set up via a JCA Connector).
  *
+ * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
+ * are supposed to be used within Spring-driven or JTA-driven transactions
+ * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
+ * Else, the Iterator won't be able to read results from its ResultSet anymore,
+ * as the underlying Hibernate Session will already have been closed.
+ *
+ * <p>Lazy loading will also just work with an open Hibernate Session,
+ * either within a transaction or within OpenSessionInViewFilter/Interceptor.
+ * Furthermore, some operations just make sense within transactions,
+ * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
+ * <code>flush</code>, <code>clear</code>.
+ *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
  * @author Juergen Hoeller
@@ -85,12 +97,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setSessionFactory
  * @see #setJdbcExceptionTranslator
  * @see HibernateCallback
+ * @see net.sf.hibernate.Session
  * @see HibernateInterceptor
- * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.jdbc.support.SQLExceptionTranslator
- * @see net.sf.hibernate.Session
+ * @see HibernateTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
+ * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
  */
 public class HibernateTemplate extends HibernateAccessor implements HibernateOperations {
 

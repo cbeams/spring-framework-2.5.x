@@ -41,8 +41,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Typically used to implement data access or business logic services that
  * use JDO within their implementation but are JDO-agnostic in their interface.
- * The latter resp. code calling the latter only have to deal with business
- * objects, query objects, and org.springframework.dao exceptions.
+ * The latter or code calling the latter only have to deal with business
+ * objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
  * <p>Can be used within a service implementation via direct instantiation
  * with a PersistenceManagerFactory reference, or get prepared in an
@@ -70,10 +70,24 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * cares for initialization. Else, portability is rather limited: Manual
  * JNDI binding isn't supported by some application servers (e.g. Tomcat).
  *
+ * <p>Note that lazy loading will just work with an open JDO PersistenceManager,
+ * either within a Spring-driven transaction (with JdoTransactionManager or
+ * JtaTransactionManager) or within OpenPersistenceManagerInViewFilter/Interceptor.
+ * Furthermore, some operations just make sense within transactions,
+ * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
+ *
  * @author Juergen Hoeller
  * @since 03.06.2003
+ * @see #setPersistenceManagerFactory
  * @see JdoCallback
+ * @see javax.jdo.PersistenceManager
+ * @see JdoInterceptor
+ * @see LocalPersistenceManagerFactoryBean
+ * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JdoTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
+ * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
  */
 public class JdoTemplate extends JdoAccessor implements JdoOperations {
 

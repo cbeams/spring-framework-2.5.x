@@ -29,13 +29,24 @@ import org.springframework.dao.DataAccessException;
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Provides PersistenceBrokerTemplate's data access methods that mirror
- * various PersistenceBroker methods. See the PersistenceBroker javadocs
+ * various PersistenceBroker methods. See the OJB PersistenceBroker javadocs
  * for details on those methods.
+ *
+ * <p>Note that operations that return an Iterator (that is,
+ * <code>getIteratorByQuery</code> and <code>getReportQueryIteratorByQuery</code>)
+ * are supposed to be used within Spring-managed transactions
+ * (with PersistenceBrokerTransactionManager or JtaTransactionManager).
+ * Else, the Iterator won't be able to read results from its ResultSet anymore,
+ * as the underlying PersistenceBroker will already have been closed.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see PersistenceBrokerTemplate
  * @see org.apache.ojb.broker.PersistenceBroker
+ * @see #getIteratorByQuery
+ * @see #getReportQueryIteratorByQuery
+ * @see PersistenceBrokerTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public interface PersistenceBrokerOperations {
 
