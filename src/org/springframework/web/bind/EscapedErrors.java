@@ -1,6 +1,5 @@
 package org.springframework.web.bind;
 
-import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,89 +38,90 @@ public class EscapedErrors implements Errors {
 	}
 
 	public Errors getSource() {
-		return source;
+		return this.source;
 	}
 
 	public String getObjectName() {
-		return source.getObjectName();
+		return this.source.getObjectName();
 	}
 
 	public void reject(String errorCode, String defaultMessage) {
-		source.reject(errorCode, defaultMessage);
+		this.source.reject(errorCode, defaultMessage);
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
-		source.reject(errorCode, errorArgs, defaultMessage);
+		this.source.reject(errorCode, errorArgs, defaultMessage);
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {
-		source.rejectValue(field, errorCode, defaultMessage);
+		this.source.rejectValue(field, errorCode, defaultMessage);
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
-		source.rejectValue(field, errorCode, errorArgs, defaultMessage);
+		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
 
 	public boolean hasErrors() {
-		return source.hasErrors();
+		return this.source.hasErrors();
 	}
 
 	public int getErrorCount() {
-		return source.getErrorCount();
+		return this.source.getErrorCount();
 	}
 
 	public List getAllErrors() {
-		return escapeObjectErrors(source.getAllErrors());
+		return escapeObjectErrors(this.source.getAllErrors());
 	}
 
 	public boolean hasGlobalErrors() {
-		return source.hasGlobalErrors();
+		return this.source.hasGlobalErrors();
 	}
 
 	public int getGlobalErrorCount() {
-		return source.getGlobalErrorCount();
+		return this.source.getGlobalErrorCount();
 	}
 
 	public List getGlobalErrors() {
-		return escapeObjectErrors(source.getGlobalErrors());
+		return escapeObjectErrors(this.source.getGlobalErrors());
 	}
 
 	public ObjectError getGlobalError() {
-		return escapeObjectError(source.getGlobalError());
+		return escapeObjectError(this.source.getGlobalError());
 	}
 
 	public boolean hasFieldErrors(String field) {
-		return source.hasFieldErrors(field);
+		return this.source.hasFieldErrors(field);
 	}
 
 	public int getFieldErrorCount(String field) {
-		return source.getFieldErrorCount(field);
+		return this.source.getFieldErrorCount(field);
 	}
 
 	public List getFieldErrors(String field) {
-		return escapeObjectErrors(source.getFieldErrors(field));
+		return escapeObjectErrors(this.source.getFieldErrors(field));
 	}
 
 	public FieldError getFieldError(String field) {
-		return (FieldError) escapeObjectError(source.getFieldError(field));
+		return (FieldError) escapeObjectError(this.source.getFieldError(field));
 	}
 
 	public Object getFieldValue(String field) {
-		Object value = source.getFieldValue(field);
+		Object value = this.source.getFieldValue(field);
 		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
 	}
 
 	public void setNestedPath(String nestedPath) {
-		source.setNestedPath(nestedPath);
+		this.source.setNestedPath(nestedPath);
 	}
 
-	public PropertyEditor getCustomEditor(String property) {
-		return null;
+	public String getNestedPath() {
+		return this.source.getNestedPath();
 	}
 
 	private ObjectError escapeObjectError(ObjectError source) {
-		if (source == null)
+		if (source == null) {
 			return null;
+		}
 		if (source instanceof FieldError) {
 			FieldError fieldError = (FieldError) source;
 			Object value = fieldError.getRejectedValue();

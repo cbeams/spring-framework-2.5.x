@@ -130,6 +130,7 @@ public class ValidationTestSuite extends TestCase {
 		binder.getErrors().rejectValue("name", "someCode", "someMessage");
 		binder.getErrors().rejectValue("touchy", "someCode", "someMessage");
 
+		assertEquals("", binder.getErrors().getNestedPath());
 		assertEquals("value", binder.getErrors().getFieldValue("name"));
 		assertEquals("prefixvalue", binder.getErrors().getFieldError("name").getRejectedValue());
 		assertEquals("prefixvalue", tb.getName());
@@ -206,9 +207,11 @@ public class ValidationTestSuite extends TestCase {
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
 		errors.setNestedPath("spouse");
+		assertEquals("spouse.", errors.getNestedPath());
 		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 		errors.setNestedPath("");
+		assertEquals("", errors.getNestedPath());
 		assertTrue(!errors.hasErrors());
 		assertTrue(!errors.hasGlobalErrors());
 		assertTrue(!errors.hasFieldErrors("age"));
@@ -221,7 +224,8 @@ public class ValidationTestSuite extends TestCase {
 		Errors errors = new BindException(tb, "tb");
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
-		errors.setNestedPath("spouse");
+		errors.setNestedPath("spouse.");
+		assertEquals("spouse.", errors.getNestedPath());
 		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 		errors.setNestedPath("");

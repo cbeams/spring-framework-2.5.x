@@ -207,10 +207,14 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
-		if (nestedPath.length() > 0) {
+		if (nestedPath.length() > 0 && !nestedPath.endsWith(".")) {
 			nestedPath += ".";
 		}
 		this.nestedPath = nestedPath;
+	}
+
+	public String getNestedPath() {
+		return nestedPath;
 	}
 
 	/**

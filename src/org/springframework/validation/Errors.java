@@ -140,14 +140,21 @@ public interface Errors {
 	Object getFieldValue(String field);
 
 	/**
-	 * Allow context to be changed so that standard validators can
-	 * validate subtrees. Reject calls prepend the given nested
-	 * path to the field names.
-	 * <p>For example, an address validator could validate the
-	 * subobject address of a customer object.
+	 * Allow context to be changed so that standard validators can validate
+	 * subtrees. Reject calls prepend the given path to the field names.
+	 * <p>For example, an address validator could validate the subobject
+	 * "address" of a customer object.
 	 * @param nestedPath nested path within this object,
-	 * e.g. "address" (defaults to "", null is also acceptable)
+	 * e.g. "address" (defaults to "", null is also acceptable).
+	 * Can end with a dot: both "address" and "address." are valid.
 	 */
 	void setNestedPath(String nestedPath);
+
+	/**
+	 * Return the current nested path of this Errors object.
+	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
+	 * building of concatenated paths. Default is an empty String.
+	 */
+	String getNestedPath();
 
 }
