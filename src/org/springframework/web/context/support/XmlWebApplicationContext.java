@@ -15,7 +15,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
-import org.springframework.web.util.ServletContextResource;
 
 /**
  * WebApplicationContext implementation that takes configuration from an XML document.
