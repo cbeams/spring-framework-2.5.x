@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 
 /**
@@ -17,13 +18,13 @@ import org.springframework.jdbc.core.SqlParameter;
  * This class is abstract and its execute methods are protected, preventing use other than through
  * a subclass that offers tighter typing.
  *
- * <p>The inherited sql property is the name of the stored procedure in the RDBMS.
+ * <p>The inherited <code>sql</code> property is the name of the stored procedure in the RDBMS.
  * Note that JDBC 3.0 introduces named parameters, although the other features provided
  * by this class are still necessary in JDBC 3.0.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.4 2003-09-17 01:14:49 trisberg Exp $
+ * @version $Id: StoredProcedure.java,v 1.5 2003-11-03 17:01:14 johnsonr Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 
@@ -41,6 +42,16 @@ public abstract class StoredProcedure extends SqlCall {
 	 */
 	protected StoredProcedure(DataSource ds, String name) {
 		setDataSource(ds);
+		setSql(name);
+	}
+	
+	/**
+	 * Create a new object wrapper for a stored procedure.
+	 * @param jdbcTemplate JdbcTemplate which wraps DataSource
+	 * @param name name of the stored procedure in the database.
+	 */
+	protected StoredProcedure(JdbcTemplate jdbcTemplate, String name) {
+		setJdbcTemplate(jdbcTemplate);
 		setSql(name);
 	}
 
