@@ -67,7 +67,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.26 2004-02-20 12:04:48 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.27 2004-02-25 01:03:11 kdonald Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -376,25 +376,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	//-------------------------------------------------------------------------
 	// Execute methods
 	//-------------------------------------------------------------------------
-
+    
 	public void execute(final String sql) throws DataAccessException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Running SQL execute [" + sql + "]");
-		}
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
-		int index = 0;
 		try {
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
 			stmt = con.createStatement();
-			stmt.execute(sql);
-			if (logger.isDebugEnabled()) {
-				logger.debug("SQL execute [" + sql + "]");
-			}
+            DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Executing SQL [" + sql + "]");
+            }
+            stmt.execute(sql);
 			stmt.close();
 
 			// Don't worry about warnings, as we're more likely to get exception on updates
@@ -417,19 +409,30 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	//-------------------------------------------------------------------------
 
 	public int update(final String sql) throws DataAccessException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Running SQL update [" + sql + "]");
-		}
-		return update(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement(sql);
-				DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
-				if (nativeJdbcExtractor != null) {
-					return nativeJdbcExtractor.getNativePreparedStatement(ps);
-				}
-				return ps;
-			}
-		});
+        Connection con = DataSourceUtils.getConnection(getDataSource());
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Executing SQL update [" + sql + "]");
+            }
+            int rows = stmt.executeUpdate(sql);
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL update affected " + rows + " rows");
+            }
+            stmt.close();
+            return rows;
+        }
+        catch (SQLException ex) {
+            JdbcUtils.closeStatement(stmt);
+            throw getExceptionTranslator().translate(
+                "processing a single update",
+                sql, ex);
+        }
+        finally {
+            DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+        }
 	}
 
 	public int update(PreparedStatementCreator psc) throws DataAccessException {
