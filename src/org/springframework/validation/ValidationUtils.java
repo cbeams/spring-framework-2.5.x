@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * @see Validator
  * @see Errors
  * @see org.springframework.web.bind.BindUtils#bindAndValidate
- * @version $Id: ValidationUtils.java,v 1.5 2004-03-18 02:46:00 trisberg Exp $
+ * @version $Id: ValidationUtils.java,v 1.6 2004-04-19 08:59:15 jhoeller Exp $
  */
 public abstract class ValidationUtils {
 
@@ -42,16 +42,21 @@ public abstract class ValidationUtils {
 	 */
 	public static void invokeValidator(Validator validator, Object object, Errors errors) {
 		if (validator != null) {
-			logger.debug("Invoking validator [" + validator + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking validator [" + validator + "]");
+			}
 			if (!validator.supports(object.getClass())) {
-				throw new IllegalArgumentException("Validator " + validator.getClass() + " does not support " + object.getClass());
+				throw new IllegalArgumentException("Validator " + validator.getClass() +
+																					 " does not support " + object.getClass());
 			}
 			validator.validate(object, errors);
-			if (errors.hasErrors()) {
-				logger.debug("Validator found " + errors.getErrorCount() + " errors");
-			}
-			else {
-				logger.debug("Validator found no errors");
+			if (logger.isDebugEnabled()) {
+				if (errors.hasErrors()) {
+					logger.debug("Validator found " + errors.getErrorCount() + " errors");
+				}
+				else {
+					logger.debug("Validator found no errors");
+				}
 			}
 		}
 	}
