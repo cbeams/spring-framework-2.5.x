@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.18 2004-03-19 17:45:36 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.19 2004-03-23 20:16:59 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -236,9 +236,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public int getResolvedAutowireMode() {
 		if (this.autowireMode == AUTOWIRE_AUTODETECT) {
-			// Work out whether this is a Type 2 (JavaBean) or Type 3 (constructor) object.
-			// If it has a no-args constructor it's deemed to be Type 2, otherwise
-			// we try Type 3 autowiring.
+			// Work out whether to apply setter autowiring or constructor autowiring.
+			// If it has a no-arg constructor it's deemed to be setter autowiring,
+			// otherwise we'll try constructor autowiring.
 			Constructor[] constructors = getBeanClass().getConstructors();
 			for (int i = 0; i < constructors.length; i++) {
 				if (constructors[i].getParameterTypes().length == 0) {

@@ -31,7 +31,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.10 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: Advised.java,v 1.11 2004-03-23 20:17:00 jhoeller Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -82,11 +82,12 @@ public interface Advised {
 	
 	/**
 	 * Add the given interceptor to the tail of the advice (interceptor) chain.
-	 * This will be wrapped in a DefaultInterceptionAroundAdvisor with a pointcut
-	 * that always applies, and returned from the getAdvisors() method in this
+	 * This will be wrapped in a DefaultPointcutAdvistor with a pointcut that
+	 * always applies, and returned from the getAdvisors() method in this
 	 * wrapped form.
 	 * @param interceptor to add to the tail of the chain
 	 * @see #addInterceptor(int, Interceptor)
+	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
 	 */
 	void addInterceptor(Interceptor interceptor) throws AopConfigException;
 
@@ -97,8 +98,7 @@ public interface Advised {
 	 * interceptor chain
 	 */
 	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
-	
-	
+
 	/** 
 	 * Add an Advisor at the end of the advisor chain.
 	 * The Advisor may be an IntroductionAdvisor, in which new interfaces

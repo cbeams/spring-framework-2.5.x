@@ -217,8 +217,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * "autowire constructor" (with constructor arguments by type) behaviour.
 	 * Also applied if explicit constructor argument values are specified,
 	 * matching all remaining arguments with beans from the bean factory.
-	 * <p>This corresponds to PicoContainer's "Type 3 IoC" paradigm: In this mode, a Spring bean
-	 * factory is able to host components that expect constructor-based dependency resolution.
+	 * <p>This corresponds to constructor injection: In this mode, a Spring
+	 * bean factory is able to host components that expect constructor-based
+	 * dependency resolution.
 	 * @param beanName name of the bean to autowire by type
 	 * @param mergedBeanDefinition bean definition to update through autowiring
 	 * @return BeanWrapper for the new instance
@@ -440,10 +441,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Abstract method defining "autowire by type" (bean properties by type) behaviour.
-	 * <p>This is like PicoContainer default, in which there must be exactly one bean of the
-	 * property type in the bean factory. This makes bean factories simple to configure for small
-	 * namespaces, but doesn't work as well as standard Spring behaviour for bigger applications.
+	 * Abstract method defining "autowire by type" (bean properties by type) behavior.
+	 * <p>This is like PicoContainer default, in which there must be exactly one bean
+	 * of the property type in the bean factory. This makes bean factories simple to
+	 * configure for small namespaces, but doesn't work as well as standard Spring
+	 * behavior for bigger applications.
 	 * @param beanName name of the bean to autowire by type
 	 * @param mergedBeanDefinition bean definition to update through autowiring
 	 * @param bw BeanWrapper from which we can obtain information about the bean

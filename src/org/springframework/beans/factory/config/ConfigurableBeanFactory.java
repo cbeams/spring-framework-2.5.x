@@ -23,7 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
 /**
- * SPI interface to be implemented by most if not all bean factories.
+ * Configuration interface to be implemented by most if not all bean factories.
  * Provides means to configure a bean factory in addition to the bean
  * factory client methods in the BeanFactory interface.
  *
@@ -33,7 +33,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.11 2004-03-19 17:45:35 jhoeller Exp $
+ * @version $Id: ConfigurableBeanFactory.java,v 1.12 2004-03-23 20:16:58 jhoeller Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 
@@ -46,18 +46,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void setParentBeanFactory(BeanFactory parentBeanFactory);
 
 	/**
-	 * Register the given custom property editor for all properties of the given
-	 * type. To be invoked during factory configuration.
+	 * Register the given custom property editor for all properties of the
+	 * given type. To be invoked during factory configuration.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
-
-	/**
-	 * Add a new BeanPostPrcoessor that will get applied to beans created with
-	 * this factory. To be invoked during factory configuration.
-	 */
-	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
 	/**
 	 * Ignore the given dependency type for autowiring.
@@ -71,7 +65,15 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void ignoreDependencyType(Class type);
 
 	/**
-	 * Return the registered BeanDefinition for the given bean.
+	 * Add a new BeanPostPrcoessor that will get applied to beans created
+	 * by this factory. To be invoked during factory configuration.
+	 * @param beanPostProcessor the bean processor to register
+	 */
+	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+	/**
+	 * Return the registered BeanDefinition for the given bean, allowing
+	 * access to its property values and constructor argument values.
 	 * @param beanName name of the bean
 	 * @return the registered BeanDefinition
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException

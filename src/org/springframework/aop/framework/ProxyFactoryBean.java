@@ -44,10 +44,9 @@ import org.springframework.core.OrderComparator;
  * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
  *
  * <p>Interceptors and Advisors are identified by a list of bean names in the current
- * bean factory. These beans should be of type Interceptor or an Advisor subtype
- * (presently InterceptionAroundAdvisor or InterceptionIntroductionAdvisor). The last
- * entry in the list can be the name of any bean in the factory. If it's neither an
- * Interceptor nor a MethodPointcut, a new InvokerInterceptor is added to wrap it.
+ * bean factory. These beans should be of type Interceptor or Advisor. The last entry
+ * in the list can be the name of any bean in the factory. If it's neither an
+ * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it.
  *
  * <p>Global interceptors and advisors can be added at the factory level. The specified
  * ones are expanded in an interceptor list where an "xxx*" entry is included in the
@@ -73,10 +72,12 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.24 2004-03-23 14:32:31 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.25 2004-03-23 20:17:00 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
+ * @see org.springframework.aop.Advisor
+ * @see org.springframework.aop.target.SingletonTargetSource
  */
 public class ProxyFactoryBean extends AdvisedSupport
     implements FactoryBean, BeanFactoryAware, AdvisedSupportListener {
@@ -124,8 +125,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 	/**
-	 * Set the list of Interceptor/Advisor bean names. This must
-	 * always be set to use this factory bean in a bean factory.
+	 * Set the list of Interceptor/Advisor bean names. This must always be set
+	 * to use this factory bean in a bean factory.
+	 * <p>The referenced beans should be of type Interceptor or Advisor.
+	 * The last entry in the list can be the name of any bean in the factory.
+	 * If it's neither an Interceptor nor an Advisor, a new SingletonTargetSource
+	 * is added to wrap it.
+	 * @see org.aopalliance.intercept.MethodInterceptor
+	 * @see org.springframework.aop.Advisor
+	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
 		this.interceptorNames = interceptorNames;
@@ -259,9 +267,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			String beanName = (String) this.sourceMap.get(advisors[i]);
 			if (beanName != null) {
 				logger.info("Refreshing bean named '" + beanName + "'");
-
 				Object bean = this.beanFactory.getBean(beanName);
-
 				Object refreshedAdvisor = namedBeanToAdvisorOrTargetSource(bean);
 				// might have just refreshed target source
 				if (refreshedAdvisor instanceof Advisor) {
