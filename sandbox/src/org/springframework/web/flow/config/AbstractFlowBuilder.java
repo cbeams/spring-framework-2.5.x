@@ -1008,7 +1008,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addCreateState(String stateIdPrefix) {
+	protected ActionState addCreateState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addCreateState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1041,7 +1041,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute the creational logic.
 	 * @return The action state
 	 */
-	protected ActionState addCreateState(String stateIdPrefix, Action action) {
+	protected ActionState addCreateState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addCreateState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1068,7 +1068,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addCreateState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addCreateState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(create(stateIdPrefix), transitions);
 	}
 
@@ -1086,7 +1087,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addCreateState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addCreateState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(create(stateIdPrefix), action, transitions);
 	}
 
@@ -1144,8 +1146,35 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * help reduce repetitive configuration code for common situations.
 	 * @return The action state
 	 */
-	protected ActionState addGetState() {
-		return addGetState(getFlow().getId(), onSuccessView(getFlow().getId()));
+	protected ActionState addGetState() throws IllegalArgumentException, NoSuchActionException {
+		return addGetState(getFlow().getId());
+	}
+
+	/**
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical get state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>get </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that invokes object retrieval logic.
+	 * <p>
+	 * The get action state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${flow.id}.view</code> state (e.g. <code>customer.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing some object retrieval logic
+	 * you will wish to view the results of that retrieval.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @return The action state
+	 */
+	protected ActionState addGetState(Action action) throws IllegalArgumentException {
+		return addGetState(getFlow().getId(), action);
 	}
 
 	/**
@@ -1207,7 +1236,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix) {
+	protected ActionState addGetState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addGetState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1240,7 +1269,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute the retrieval logic.
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix, Action action) {
+	protected ActionState addGetState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addGetState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1266,7 +1295,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        a path from this state to another state (triggered by an event).
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix, Transition transition) {
+	protected ActionState addGetState(String stateIdPrefix, Transition transition) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(get(stateIdPrefix), new Transition[] { transition });
 	}
 
@@ -1293,7 +1323,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addGetState(String stateIdPrefix, Transition[] transitions) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(get(stateIdPrefix), transitions);
 	}
 
@@ -1310,7 +1341,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix, Action action, Transition transition) {
+	protected ActionState addGetState(String stateIdPrefix, Action action, Transition transition)
+			throws IllegalArgumentException {
 		return addActionState(get(stateIdPrefix), action, transition);
 	}
 
@@ -1328,7 +1360,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addGetState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addGetState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(get(stateIdPrefix), action, transitions);
 	}
 
@@ -1386,8 +1419,35 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * help reduce repetitive configuration code for common situations.
 	 * @return The action state
 	 */
-	protected ActionState addSetupState() {
-		return addSetupState(getFlow().getId(), onSuccessView(getFlow().getId()));
+	protected ActionState addSetupState() throws IllegalArgumentException, NoSuchActionException {
+		return addSetupState(getFlow().getId());
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical setup state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>setup </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that invokes view (often a form) setup logic.
+	 * <p>
+	 * The setup action state will be configured with the following default
+	 * state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${flow.id}.view</code> state (e.g. <code>customer.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing view setup logic, you wish to
+	 * display the view.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @return The action state
+	 */
+	protected ActionState addSetupState(Action action) throws IllegalArgumentException {
+		return addSetupState(getFlow().getId(), action);
 	}
 
 	/**
@@ -1449,7 +1509,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix) {
+	protected ActionState addSetupState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addSetupState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1482,7 +1542,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute the retrieval logic.
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Action action) {
+	protected ActionState addSetupState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addSetupState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1508,7 +1568,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Transition transition) {
+	protected ActionState addSetupState(String stateIdPrefix, Transition transition) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(setup(stateIdPrefix), new Transition[] { transition });
 	}
 
@@ -1535,7 +1596,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addSetupState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(setup(stateIdPrefix), transitions);
 	}
 
@@ -1552,7 +1614,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Action action, Transition transition) {
+	protected ActionState addSetupState(String stateIdPrefix, Action action, Transition transition)
+			throws IllegalArgumentException {
 		return addActionState(setup(stateIdPrefix), action, new Transition[] { transition });
 	}
 
@@ -1633,7 +1696,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addLoadState(String stateIdPrefix) {
+	protected ActionState addLoadState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addLoadState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1666,7 +1729,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute the retrieval logic.
 	 * @return The action state
 	 */
-	protected ActionState addLoadState(String stateIdPrefix, Action action) {
+	protected ActionState addLoadState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addLoadState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1693,7 +1756,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addLoadState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addLoadState(String stateIdPrefix, Transition[] transitions) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(load(stateIdPrefix), transitions);
 	}
 
@@ -1711,7 +1775,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addLoadState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addLoadState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(load(stateIdPrefix), action, transitions);
 	}
 
@@ -1774,7 +1839,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addSearchState(String stateIdPrefix) {
+	protected ActionState addSearchState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addSearchState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1807,7 +1872,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute the retrieval logic.
 	 * @return The action state
 	 */
-	protected ActionState addSearchState(String stateIdPrefix, Action action) {
+	protected ActionState addSearchState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addSearchState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
 	}
 
@@ -1834,7 +1899,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSearchState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addSearchState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(search(stateIdPrefix), transitions);
 	}
 
@@ -1852,7 +1918,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSearchState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addSearchState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(search(stateIdPrefix), action, transitions);
 	}
 
@@ -1902,7 +1969,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addSetState(String stateIdPrefix, Transition[] transitions) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(set(stateIdPrefix), transitions);
 	}
 
@@ -1920,8 +1988,105 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addSetState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(set(stateIdPrefix), action, transitions);
+	}
+
+	/**
+	 * Adds a <i>bindAndValidate </i> <code>ActionState</code> to the flow
+	 * built by this builder. This method is intended as a convenience when
+	 * there is only one logical bindAndValidate state for the flow, and the
+	 * <code>flow.id</code> can be used as the qualifying stateIdPrefix. The
+	 * <i>bindAndValidate </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that binds form input
+	 * to a backing object and validates it.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * <p>
+	 * As the various flavors of this method add an action state intended to
+	 * execute retrieval logic, they establish several naming conventions and
+	 * relavent defaults. For example, the usage:
+	 * <p>
+	 * <code>ActionState bindAndValidateState = addBindAndValidateState();</code>
+	 * <p>
+	 * ... builds an action state with the following properties: <table
+	 * border="1">
+	 * <tr>
+	 * <th>Property</th>
+	 * <th>Value</th>
+	 * <th>Notes</th>
+	 * <tr>
+	 * <td>id</td>
+	 * <td>${flow.id}.bindAndValidate</td>
+	 * <td>The bindAndValidate action qualifier is appended in a hierarchical
+	 * fashion to the ${flow.id} prefix (e.g customer.bindAndValidate)</td>
+	 * <tr>
+	 * <td>action</td>
+	 * <td colspan="2">The <code>Action</code> implementation in the registry
+	 * exported with the id <code>${flow.id}.bindAndValidate</code></td>
+	 * </table>
+	 * <p>
+	 * In addition, the bindAndValidate action state will be configured with the
+	 * following default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>finish</code> end state, ending the flow.
+	 * <li>on event <code>error</code>, transition back to the
+	 * <code>${stateIdPrefix}.view</code> view state (typically the form view,
+	 * so input may be revised and subsequently resubmitted.)
+	 * </ul>
+	 * <p>
+	 * This example assumes after successfully executing bind and validate logic
+	 * the flow will end. It also assumes, if the bind and validate action
+	 * returns 'error', the form view should be displayed.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @return The action state
+	 */
+	protected ActionState addBindAndValidateState() throws IllegalArgumentException, NoSuchActionException {
+		return addBindAndValidateState(getFlow().getId());
+	}
+
+	/**
+	 * Adds a <i>bindAndValidate </i> <code>ActionState</code> to the flow
+	 * built by this builder. This method is intended as a convenience when
+	 * there is only one logical bindAndValidate state for the flow, and the
+	 * <code>flow.id</code> can be used as the qualifying stateIdPrefix. The
+	 * <i>bindAndValidate </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that binds form input
+	 * to a backing object and validates it.
+	 * <p>
+	 * In addition, the bindAndValidate action state will be configured with the
+	 * following default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>finish</code> end state, ending the flow.
+	 * <li>on event <code>error</code>, transition back to the
+	 * <code>${stateIdPrefix}.view</code> view state (typically the form view,
+	 * so input may be revised and subsequently resubmitted.)
+	 * </ul>
+	 * <p>
+	 * This example assumes after successfully executing bind and validate logic
+	 * the flow will end. It also assumes, if the bind and validate action
+	 * returns 'error', the form view should be displayed.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @param the action
+	 * @return The action state
+	 */
+	protected ActionState addBindAndValidateState(Action action) throws IllegalArgumentException {
+		return addBindAndValidateState(getFlow().getId(), action);
 	}
 
 	/**
@@ -1985,7 +2150,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        be used as the actionId, to lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addBindAndValidateState(String stateIdPrefix) {
+	protected ActionState addBindAndValidateState(String stateIdPrefix) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addBindAndValidateState(stateIdPrefix,
 				new Transition[] { onSuccessFinish(), onErrorView(stateIdPrefix) });
 	}
@@ -2020,7 +2186,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute when this state is entered
 	 * @return The action state
 	 */
-	protected ActionState addBindAndValidateState(String stateIdPrefix, Action action) {
+	protected ActionState addBindAndValidateState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addBindAndValidateState(stateIdPrefix, action, new Transition[] { onSuccessFinish(),
 				onErrorView(stateIdPrefix) });
 	}
@@ -2048,7 +2214,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addBindAndValidateState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addBindAndValidateState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(bindAndValidate(stateIdPrefix), transitions);
 	}
 
@@ -2067,8 +2234,42 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addBindAndValidateState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addBindAndValidateState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(bindAndValidate(stateIdPrefix), action, transitions);
+	}
+
+	/**
+	 * Adds a <i>save </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical save state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>save </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that saves data out to a persistent store.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 */
+	protected ActionState addSaveState() throws IllegalArgumentException, NoSuchActionException {
+		return addBindAndValidateState(getFlow().getId());
+	}
+
+	/**
+	 * Adds a <i>save </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical save state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>save </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that saves data out to a persistent store.
+	 * @param the save action
+	 */
+	protected ActionState addSaveState(Action action) throws IllegalArgumentException {
+		return addSaveState(getFlow().getId(), action);
 	}
 
 	/**
@@ -2132,7 +2333,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addSaveState(String stateIdPrefix) {
+	protected ActionState addSaveState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addSaveState(stateIdPrefix, new Transition[] { onSuccessFinish(), onErrorView(stateIdPrefix) });
 	}
 
@@ -2164,7 +2365,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        prefix to build the qualified state id (e.g customer.save).
 	 * @return The action state
 	 */
-	protected ActionState addSaveState(String stateIdPrefix, Action action) {
+	protected ActionState addSaveState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addSaveState(stateIdPrefix, action, new Transition[] { onSuccessFinish(), onErrorView(stateIdPrefix) });
 	}
 
@@ -2191,7 +2392,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSaveState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addSaveState(String stateIdPrefix, Transition[] transitions) throws IllegalArgumentException,
+			NoSuchActionException {
 		return addActionState(save(stateIdPrefix), transitions);
 	}
 
@@ -2274,7 +2476,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
-	protected ActionState addDeleteState(String stateIdPrefix) {
+	protected ActionState addDeleteState(String stateIdPrefix) throws IllegalArgumentException, NoSuchActionException {
 		return addDeleteState(stateIdPrefix, new Transition[] { onSuccessFinish(), onErrorView(stateIdPrefix) });
 	}
 
@@ -2307,7 +2509,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action The action that will execute when this state is entered
 	 * @return The action state
 	 */
-	protected ActionState addDeleteState(String stateIdPrefix, Action action) {
+	protected ActionState addDeleteState(String stateIdPrefix, Action action) throws IllegalArgumentException {
 		return addDeleteState(stateIdPrefix, action, new Transition[] { onSuccessFinish(), onErrorView(stateIdPrefix) });
 	}
 
@@ -2334,7 +2536,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addDeleteState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addDeleteState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(delete(stateIdPrefix), transitions);
 	}
 
@@ -2352,7 +2555,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addDeleteState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addDeleteState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(delete(stateIdPrefix), action, transitions);
 	}
 
@@ -2379,7 +2583,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addValidateState(String stateIdPrefix, Transition[] transitions) {
+	protected ActionState addValidateState(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchActionException {
 		return addActionState(validate(stateIdPrefix), transitions);
 	}
 
@@ -2397,7 +2602,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addValidateState(String stateIdPrefix, Action action, Transition[] transitions) {
+	protected ActionState addValidateState(String stateIdPrefix, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addActionState(validate(stateIdPrefix), action, transitions);
 	}
 
@@ -2408,7 +2614,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param viewName The view name
 	 * @return The end state
 	 */
-	protected EndState addEndState(String endStateId, String viewName) {
+	protected EndState addEndState(String endStateId, String viewName) throws IllegalArgumentException {
 		return new EndState(getFlow(), endStateId, viewName);
 	}
 
@@ -2417,7 +2623,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param endStateId The end state id
 	 * @return The end state
 	 */
-	protected EndState addEndState(String endStateId) {
+	protected EndState addEndState(String endStateId) throws IllegalArgumentException {
 		return new EndState(getFlow(), endStateId);
 	}
 
@@ -2425,7 +2631,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an end state with id <code>finish</code>.
 	 * @return The end state
 	 */
-	protected EndState addFinishEndState() {
+	protected EndState addFinishEndState() throws IllegalArgumentException {
 		return addEndState(getFinishEndStateId());
 	}
 
@@ -2435,7 +2641,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param viewName the view
 	 * @return The end state the end state
 	 */
-	protected EndState addFinishEndState(String viewName) {
+	protected EndState addFinishEndState(String viewName) throws IllegalArgumentException {
 		return addEndState(getFinishEndStateId(), viewName);
 	}
 
@@ -2461,7 +2667,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param viewName the view
 	 * @return The end state
 	 */
-	protected EndState addBackEndState(String viewName) {
+	protected EndState addBackEndState(String viewName) throws IllegalArgumentException {
 		return addEndState(getBackEndStateId(), viewName);
 	}
 
@@ -2479,7 +2685,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param viewName the view
 	 * @return The end state
 	 */
-	protected EndState addCancelEndState(String viewName) {
+	protected EndState addCancelEndState(String viewName) throws IllegalArgumentException {
 		return addEndState(getCancelEndStateId(), viewName);
 	}
 
@@ -2487,7 +2693,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an end state with id <code>error</code>.
 	 * @return The end state
 	 */
-	protected EndState addErrorEndState() {
+	protected EndState addErrorEndState() throws IllegalArgumentException {
 		return addEndState(getErrorEndStateId());
 	}
 
@@ -2497,7 +2703,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param viewName the view
 	 * @return The end state
 	 */
-	protected EndState addErrorEndState(String viewName) {
+	protected EndState addErrorEndState(String viewName) throws IllegalArgumentException {
 		return addEndState(getErrorEndStateId(), viewName);
 	}
 
@@ -2523,7 +2729,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state will request rendering of the specified view when entered.
 	 * @param viewName the view
 	 */
-	protected void addDefaultEndStates(String viewName) {
+	protected void addDefaultEndStates(String viewName) throws IllegalArgumentException {
 		addCancelEndState(viewName);
 		addBackEndState(viewName);
 		addFinishEndState(viewName);
