@@ -24,13 +24,13 @@ import org.springframework.web.servlet.support.RequestContext;
  * a Spring 1.1 jar to an existing web application with precompiled JSPs.
  *
  * <p>As of Spring 1.1, use the BindStatus class in the generic support package
- * instead. That class is also used for VelocityFormView and FreeMarkerFormView.
+ * instead. That class is also used for the RequestContext in a Velocity or
+ * FreeMarker view.
  *
  * @author Juergen Hoeller
- * @deprecated will be removed in Spring 1.2
+ * @deprecated in favor of org.springframework.web.servlet.support.BindStatus
  * @see org.springframework.web.servlet.support.BindStatus
- * @see org.springframework.web.servlet.view.velocity.VelocityFormView
- * @see org.springframework.web.servlet.view.freemarker.FreeMarkerFormView
+ * @see org.springframework.web.servlet.support.RequestContext#getBindStatus
  */
 public class BindStatus extends org.springframework.web.servlet.support.BindStatus {
 

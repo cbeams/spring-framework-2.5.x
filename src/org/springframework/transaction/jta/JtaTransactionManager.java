@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.jta;
 
@@ -32,6 +32,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import org.aopalliance.aop.AspectException;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -140,12 +141,12 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * implementations. Note that some resource-specific transaction managers like
  * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
  * custom isolation levels, and transaction suspension without JTA's restrictions.
- * 
- * <p>This class is serializable. Synchronizations do not
- * survive serialization.
+ *
+ * <p>This class is serializable. Synchronizations do not survive serialization.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
+ * @version $Id: JtaTransactionManager.java,v 1.20 2004-07-27 10:22:22 jhoeller Exp $
  * @see #setUserTransactionName
  * @see #setUserTransaction
  * @see #setTransactionManagerName
@@ -157,7 +158,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
- * @version $Id: JtaTransactionManager.java,v 1.19 2004-07-27 09:18:43 johnsonr Exp $
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -532,23 +532,27 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			throw new TransactionSystemException("JTA failure on setRollbackOnly", ex);
 		}
 	}
-	
+
+
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
+
 	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
+		// rely on default serialization, just initialize state after deserialization
 		try {
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize JtaTransactionManager:" +
-					"Check that JTA and Spring transaction libraries are available on the client side", ex);
+			throw new AspectException("Failed to deserialize JtaTransactionManager: " +
+																"Check that JTA and Spring transaction libraries are available on the client side",
+																ex);
 		}
-		
-		// Do client-side JNDI lookup
+
+		// do client-side JNDI lookup
 		this.jndiTemplate = new JndiTemplate();
-		// Run lookup code
+
+		// run lookup code for UserTransaction
 		this.userTransaction = lookupUserTransaction(this.userTransactionName);
 	}
 

@@ -30,6 +30,7 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -44,29 +45,29 @@ import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
 
 /**
- * Superclass for AOP Proxy configuration managers.
- * These are not themselves AOP proxies, but
- * subclasses of this class are normally factories from which 
- * AOP proxy instances are obtained directly.
+ * Superclass for AOP proxy configuration managers.
+ * These are not themselves AOP proxies, but subclasses of this class are
+ * normally factories from which  AOP proxy instances are obtained directly.
  *
- * <p>This class frees subclasses of the housekeeping of Interceptors
+ * <p>This class frees subclasses of the housekeeping of Advices
  * and Advisors, but doesn't actually implement proxy creation
  * methods, which are provided by subclasses.
- * <p>
- * This class is serializable; subclasses need not be. This class is used
- * to hold snapshots of proxies.
+ *
+ * <p>This class is serializable; subclasses need not be.
+ * This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.34 2004-07-25 15:58:55 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.35 2004-07-27 10:22:22 jhoeller Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised, Serializable {
 	
 	/**
-	 * Canonical TargetSource when there's no target, and behavior is supplied
-	 * by the advisors.
+	 * Canonical TargetSource when there's no target, and behavior is
+	 * supplied by the advisors.
 	 */
 	public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
+
 
 	/** List of AdvisedSupportListener */
 	private transient List listeners = new LinkedList();
@@ -88,7 +89,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	 * Array updated on changes to the advisors list,
 	 * which is easier to manipulate internally
 	 */
-	private Advisor[] advisorsArray = new Advisor[0];
+	private Advisor[] advisorArray = new Advisor[0];
 
 	/** Interfaces to be implemented by the proxy */
 	private Set interfaces = new HashSet();
@@ -108,19 +109,19 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	}
 	
 	/**
-	 * Initialize the default AdvisorChainFactory
-	 */
-	private void initDefaultAdvisorChainFactory() {
-		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
-	}
-
-	/**
 	 * Create a DefaultProxyConfig with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
 	public AdvisedSupport(Class[] interfaces) {
 		this();
 		setInterfaces(interfaces);
+	}
+
+	/**
+	 * Initialize the default AdvisorChainFactory.
+	 */
+	private void initDefaultAdvisorChainFactory() {
+		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
 	}
 
 
@@ -205,6 +206,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 		return this.interfaces.remove(intf);
 	}
 	
+	/**
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
+	 * @see Advised#addInterceptor(org.aopalliance.intercept.Interceptor)
+	 */
 	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
 		addAdvice(interceptor);
 	}
@@ -224,6 +230,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 		return false;
 	}
 
+	/**
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(int, org.aopalliance.aop.Advice)
+	 * @see Advised#addInterceptor(int, org.aopalliance.intercept.Interceptor)
+	 */
 	public void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException {
 		addAdvice(pos, interceptor);
 	}
@@ -245,7 +256,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	
 	/**
 	 * Convenience method to remove an interceptor.
-	 * @deprecated
+	 * @deprecated in favor or removeAdvice
+	 * @see #removeAdvice
 	 */
 	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
 		return removeAdvice(interceptor);
@@ -269,26 +281,29 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	}
 
 	/**
-	 * @deprecated
-	 * @see org.springframework.aop.framework.Advised#addAfterReturningAdvice(org.springframework.aop.AfterReturningAdvice)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
+	 * @see Advised#addAfterReturningAdvice
 	 */
-	public void addAfterReturningAdvice(final AfterReturningAdvice ara) throws AopConfigException {
+	public void addAfterReturningAdvice(AfterReturningAdvice ara) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ara));
 	}
 	
 	/**
-	 * @deprecated
-	 * @see org.springframework.aop.framework.Advised#addBeforeAdvice(org.springframework.aop.MethodBeforeAdvice)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
+	 * @see Advised#addBeforeAdvice
 	 */
-	public void addBeforeAdvice(final MethodBeforeAdvice ba) throws AopConfigException {
+	public void addBeforeAdvice(MethodBeforeAdvice ba) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ba));
 	}
 	
 	/**
-	 * @deprecated
-	 * @see org.springframework.aop.framework.Advised#addThrowsAdvice(org.springframework.aop.ThrowsAdvice)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
+	 * @see Advised#addThrowsAdvice
 	 */
-	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) throws AopConfigException {
+	public void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(throwsAdvice));
 	}
 	
@@ -300,7 +315,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	 * @param interceptor AOP Alliance interceptor to search for
 	 * @return index from 0 of this interceptor, or -1 if there's
 	 * no such advice.
-	 * @deprecated
+	 * @deprecated in favor of indexOf(Advice)
+	 * @see #indexOf(org.aopalliance.aop.Advice)
 	 */
 	public int indexOf(Interceptor interceptor) {
 		// Invoke generic form of this method that's recommended
@@ -367,7 +383,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 		}
 		
 		this.advisors.remove(index);
-		updateAdvisorsArray();
+		updateAdvisorArray();
 		adviceChanged();
 	}
 
@@ -376,7 +392,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 			throw new AopConfigException("Cannot add advisor: config is frozen");
 		}
 		this.advisors.add(pos, advice);
-		updateAdvisorsArray();
+		updateAdvisorArray();
 		adviceChanged();
 	}
 	
@@ -399,25 +415,25 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 		}
 	}
 	
-	public void addAdvisor(Advisor advice) {
+	public void addAdvisor(Advisor advisor) {
 		int pos = this.advisors.size();
-		addAdvisor(pos, advice);
+		addAdvisor(pos, advisor);
 	}
 
 	/**
 	 * Bring the array up to date with the list.
 	 */
-	private void updateAdvisorsArray() {
-		this.advisorsArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
+	private void updateAdvisorArray() {
+		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
 	
 	public final Advisor[] getAdvisors() {
-		return this.advisorsArray;
+		return this.advisorArray;
 	}
 
 	/**
 	 * Replace the given advisor.
-	 * <b>NB:</b>If the advisor is an IntroductionAdvisor
+	 * <p><b>NB:</b>If the advisor is an IntroductionAdvisor
 	 * and the replacement is not or implements different interfaces,
 	 * the proxy will need to be re-obtained or the old interfaces
 	 * won't be supported and the new interface won't be implemented.
@@ -440,7 +456,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	 * Is this interceptor included in any advisor?
 	 * @param mi interceptor to check inclusion of
 	 * @return whether this interceptor instance could be run in an invocation
-	 * @deprecated
+	 * @deprecated in favor of adviceIncluded
+	 * @see #adviceIncluded
 	 */
 	public final boolean interceptorIncluded(Interceptor mi) {
 		return adviceIncluded(mi);
@@ -465,10 +482,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	}
 
 	/**
-	 * Count interceptors of the given class
+	 * Count interceptors of the given class.
 	 * @param interceptorClass class of the interceptor to check
 	 * @return the count of the interceptors of this class or subclasses
-	 * @deprecated
+	 * @deprecated in favor of countAdvicesOfType
+	 * @see #countAdvicesOfType
 	 */
 	public final int countInterceptorsOfType(Class interceptorClass) {
 		return countAdvicesOfType(interceptorClass);
@@ -530,16 +548,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	}
 	
 
-	public String toProxyConfigString() {
-		return toString();
-	}
-	
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
 	
 	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
+		// rely on default serialization, just initialize state after deserialization
 		try {
 			ois.defaultReadObject();
 		}
@@ -548,7 +562,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 					"Check that Spring AOP libraries are available on the client side");
 		}
 		
-		// Initialize transient fields
+		// initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 		this.isActive = true;
 		this.listeners = new LinkedList();
@@ -556,6 +570,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised, Serializable
 	}
 	
 	
+	public String toProxyConfigString() {
+		return toString();
+	}
+
 	/**
 	 * For debugging/diagnostic use.
 	 */

@@ -18,6 +18,7 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -34,14 +35,13 @@ import org.springframework.aop.ThrowsAdvice;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.14 2004-07-23 08:44:22 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.15 2004-07-27 10:22:22 jhoeller Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
 	
 	/**
-	 * Return the TargetSource used by this Advised object
-	 * @return the TargetSource used by this advised object
+	 * Return the TargetSource used by this Advised object.
 	 */
 	TargetSource getTargetSource();
 	
@@ -53,11 +53,10 @@ public interface Advised {
 	void setTargetSource(TargetSource targetSource);
 	
 	/**
-	 * Get whether the factory should expose the proxy as a ThreadLocal. 
+	 * Return whether the factory should expose the proxy as a ThreadLocal.
 	 * This can be necessary if a target object needs to invoke a method on itself
 	 * benefitting from advice. (If it invokes a method on <code>this</code> no advice
 	 * will apply.) Getting the proxy is analogous to an EJB calling getEJBObject().
-	 * @return whether the factory should expose the proxy as a ThreadLocal
 	 * @see AopContext
 	 */
 	boolean getExposeProxy();
@@ -65,14 +64,13 @@ public interface Advised {
 	/**
 	 * Should we proxy the target class as well as any interfaces?
 	 * Can use this to force CGLIB proxying.
-	 * @return whether we proxy the target class as well as any interfaces
 	 */
 	boolean getProxyTargetClass();
 	
 	/**
 	 * Return the Advisors applying to this proxy.
-	 * @return a list of Advisors applying to this proxy. Cannot return null,
-	 * but may return the empty array.
+	 * @return a list of Advisors applying to this proxy.
+	 * Cannot return null, but may return the empty array.
 	 */
 	Advisor[] getAdvisors();
 	
@@ -84,27 +82,24 @@ public interface Advised {
 	Class[] getProxiedInterfaces();
 	
 	/**
-	 * Return whether this interface is proxied
+	 * Return whether this interface is proxied.
 	 * @param intf interface to test
-	 * @return whether the interface is proxied
 	 */
 	boolean isInterfaceProxied(Class intf);
 	
 	/**
-	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain..
-	 * Use addAdvice method instead.
+	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain.
+	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
 	 * @param interceptor to add to the tail of the chain
-	 * @see #addInterceptor(int, Interceptor)
-	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
-	 * @deprecated will be removed in Spring 1.2
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
 	 */
 	void addInterceptor(Interceptor interceptor) throws AopConfigException;
 	
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
-	 * This will be wrapped in a DefaultPointcutAdvisor with a pointcut that
-	 * always applies, and returned from the getAdvisors() method in this
-	 * wrapped form.
+	 * This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
+	 * applies, and returned from the getAdvisors() method in this wrapped form.
 	 * @param advice advice to add to the tail of the chain
 	 * @see #addAdvice(int, Advice)
 	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
@@ -112,69 +107,76 @@ public interface Advised {
 	void addAdvice(Advice advice) throws AopConfigException;
 
 	/**
-	 * Add the given AOP Alliance interceptor at the specified position in the interceptor chain.
-	 * Use addAdvice(int, Advice) instead.
+	 * Add the given AOP Alliance interceptor at the specified position in the
+	 * interceptor chain.
+	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
 	 * @param pos index from 0 (head)
 	 * @param interceptor interceptor to add at the specified position in the
 	 * interceptor chain
-	 * @deprecated
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(int, org.aopalliance.aop.Advice)
 	 */
 	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
 	
 	/**
-	 * Add the given AOP Alliance Advice at the specified position in the interceptor chain.
+	 * Add the given AOP Alliance Advice at the specified position in the advice chain.
 	 * @param pos index from 0 (head)
-	 * @param advice advice to add at the specified position in the
-	 * interceptor chain
+	 * @param advice advice to add at the specified position in the advice chain
 	 */
 	void addAdvice(int pos, Advice advice) throws AopConfigException;
 	
 	/**
-	 * Add an AfterReturningAdvice to the tail of the advice chain
+	 * Add an AfterReturningAdvice to the tail of the advice chain.
+	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
 	 * @param afterReturningAdvice AfterReturningAdvice to add
-	 * @throws AopConfigException if the advice cannot be added--for example, because
-	 * the proxy configuration is frozen
-	 * @deprecated
+	 * @throws AopConfigException if the advice cannot be added
+	 * (for example, because the proxy configuration is frozen)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
 	 */
 	void addAfterReturningAdvice(AfterReturningAdvice afterReturningAdvice) throws AopConfigException;
 	
 	/**
-	 * Add a MethodBeforeAdvice to the tail of the advice chain
+	 * Add a MethodBeforeAdvice to the tail of the advice chain.
+	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
 	 * @param beforeAdvice MethodBeforeAdvice to add
-	 * @throws AopConfigException if the advice cannot be added--for example, because
-	 * the proxy configuration is frozen
-	 * @deprecated
-	 */		
+	 * @throws AopConfigException if the advice cannot be added
+	 * (for example, because the proxy configuration is frozen)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
+	 */
 	void addBeforeAdvice(MethodBeforeAdvice beforeAdvice) throws AopConfigException;
 	
 	/**
-	 * Add a ThrowsAdvice to the tail of the advice chain
+	 * Add a ThrowsAdvice to the tail of the advice chain.
+	 * <p><b>Use the <code>addAdvice</code> method instead.</b>
 	 * @param throwsAdvice ThrowsAdvice to add
-	 * @throws AopConfigException if the advice cannot be added--for example, because
-	 * the proxy configuration is frozen
-	 * @deprecated
+	 * @throws AopConfigException if the advice cannot be added
+	 * (for example, because the proxy configuration is frozen)
+	 * @deprecated in favor of addAdvice
+	 * @see #addAdvice(org.aopalliance.aop.Advice)
 	 */
 	void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException;
 
 	/** 
 	 * Add an Advisor at the end of the advisor chain.
-	 * The Advisor may be an IntroductionAdvisor, in which new interfaces
+	 * <p>The Advisor may be an IntroductionAdvisor, in which new interfaces
 	 * will be available when a proxy is next obtained from the relevant factory.
 	 * @param advisor Advisor to add to the end of the chain
 	 */
 	void addAdvisor(Advisor advisor) throws AopConfigException;
 
 	/** 
-	 * Add an Advisor at the specified position in the chain
+	 * Add an Advisor at the specified position in the chain.
 	 * @param advisor advisor to add at the specified position in the chain
 	 * @param pos position in chain (0 is head). Must be valid.
 	 */
 	void addAdvisor(int pos, Advisor advisor) throws AopConfigException;
 	
 	/**
-	 * Return the index (from 0) of the given advisor,
-	 * or -1 if no such advisor applies to this proxy.
-	 * The return value of this method can be used to index into
+	 * Return the index (from 0) of the given advisor, or -1 if no such
+	 * advisor applies to this proxy.
+	 * <p>The return value of this method can be used to index into
 	 * the Advisors array.
 	 * @param advisor advisor to search for
 	 * @return index from 0 of this advisor, or -1 if there's
@@ -183,7 +185,7 @@ public interface Advised {
 	int indexOf(Advisor advisor);
 	
 	/**
-	 * Remove the given advisor
+	 * Remove the given advisor.
 	 * @param advisor advisor to remove
 	 * @return true if the advisor was removed; false if the
 	 * advisor was not found and hence could not be removed
@@ -191,23 +193,23 @@ public interface Advised {
 	boolean removeAdvisor(Advisor advisor) throws AopConfigException;
 	
 	/**
-	 * Remove the advisor at the given index
+	 * Remove the advisor at the given index.
 	 * @param index index of advisor to remove
 	 * @throws AopConfigException if the index is invalid
 	 */
 	void removeAdvisor(int index) throws AopConfigException;
 	
 	/**
-	 * Remove the Advisor containing the given advice
+	 * Remove the Advisor containing the given advice.
 	 * @param advice advice to remove
-	 * @return whether the Advice was found and removed (false if
-	 * there was no such advice)
+	 * @return whether the Advice was found and removed
+	 * (false if there was no such advice)
 	 */
 	boolean removeAdvice(Advice advice) throws AopConfigException;
 	
 	/**
 	 * Replace the given advisor.
-	 * <b>NB:</b>If the advisor is an IntroductionAdvisor
+	 * <p><b>NB:</b>If the advisor is an IntroductionAdvisor
 	 * and the replacement is not or implements different interfaces,
 	 * the proxy will need to be re-obtained or the old interfaces
 	 * won't be supported and the new interface won't be implemented.
@@ -219,14 +221,14 @@ public interface Advised {
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
 	
 	/**
-	 * @return whether the Advised configuration is frozen, and no
-	 * advice changes can be made
+	 * Return whether the Advised configuration is frozen, and no
+	 * advice changes can be made.
 	 */
 	boolean isFrozen();
 	
 	/**
 	 * As toString() will normally be delegated to the target, 
-	 * this returns the equivalent for the AOP proxy
+	 * this returns the equivalent for the AOP proxy.
 	 * @return a string description of the proxy configuration
 	 */
 	String toProxyConfigString();

@@ -19,9 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.beans.TestBean;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFactoryTests {
 
@@ -62,13 +60,13 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	}
 	
 	/**
-	 * Check that count refers to factory class, not
-	 * bean class (we don't know what type factories may return,
-	 * and it may even change over time).
+	 * Check that count refers to factory class, not bean class. (We don't know
+	 * what type factories may return, and it may even change over time.)
 	 */
 	public void testGetCountForFactoryClass() {
-		assertTrue("Should have 2 factories, not " + getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
-			getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
+		assertTrue("Should have 2 factories, not " +
+							 getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length,
+							 getListableBeanFactory().getBeanDefinitionNames(FactoryBean.class).length == 2);
 	}
 
 	public void testContainsBeanDefinition() {

@@ -35,12 +35,9 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
 
 /**
  * Subclasses must implement setUp() to initialize bean factory
- * and any other variables they need
+ * and any other variables they need.
  * @author Rod Johnson
- * @version $RevisionId$
- * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
- * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.11 2004-03-18 03:01:20 trisberg Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.12 2004-07-27 10:22:21 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -91,7 +88,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
 		assertEquals("lifecycle", lb.getBeanName());
 		// The dummy business method will throw an exception if the
-		// necessary callbacks weren't invoked in the right order
+		// necessary callbacks weren't invoked in the right order.
 		lb.businessMethod();
 		assertTrue("Not destroyed", !lb.isDestroyed());
 	}
@@ -186,7 +183,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		}
 	}
 	
-	/*
 	public void testPrototypeInstancesAreIndependent() {
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("kathy");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("kathy");
@@ -198,7 +194,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		assertTrue("2 age independent = 2", tb2.getAge() == 2);
 		assertTrue("object equal now false", !tb1.equals(tb2));
 	}
-	*/
 
 	public void testNotThere() {
 		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
@@ -334,8 +329,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			// expected
 		}
 
-		// Check prototype support
-		// TODO
+		// TODO: check prototype support
 	}
 
 
