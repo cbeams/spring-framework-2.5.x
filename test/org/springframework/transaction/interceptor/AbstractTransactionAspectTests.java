@@ -42,7 +42,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.5 2004-07-24 11:25:17 johnsonr Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.6 2004-07-26 17:20:03 johnsonr Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
@@ -75,7 +75,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	 * @return transactional advised object
 	 */
 	protected abstract Object advised(Object target, PlatformTransactionManager ptm,
-	                                  TransactionAttributeSource tas);
+	                                  TransactionAttributeSource tas) throws Exception;
 
 	public void testNoTransaction() throws Exception {
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
