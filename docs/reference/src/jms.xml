@@ -364,7 +364,26 @@ public void simpleSendCoverter() {
       body that can not be encapsulated inside a converter class, the
       interface <literal>MessagePostProcessor</literal> gives you access
       to the message after it has been converted, but before it is sent.
+      The example below shows how to modify a message header and 
+      a property.
       </para>
+      <programlisting>
+public void sendObject() {
+    jt.setConverter(new ToStringConverter());
+    jt.send("testQueue", new Person(34.4, 173.2),
+        new MessagePostProcessor() {
+            
+            public Message postProcess(Message message)
+                throws JMSException {
+
+                message.setIntProperty("AccountID", 1234);
+                message.setJMSCorrelationID("123-00001");
+
+                return message;
+            }
+        });
+}
+      </programlisting>
     </sect2>
     <sect2>
         <title>SessionCallback and ProducerCallback</title>
@@ -374,7 +393,7 @@ public void simpleSendCoverter() {
         JMS Session or MessageProducer.  The <literal>SessionCallback</literal>
         and <literal>ProduerCallback</literal> expose the JMS Session
         and Session/MessageProducer pair respectfully.  The 
-        <literal>exeucte()</literal> methods on JmsTemplate call these
+        <literal>execute()</literal> methods on JmsTemplate call these
         callback methods.
         </para>
     </sect2>
