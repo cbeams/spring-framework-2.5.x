@@ -39,7 +39,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class JdbcUtils {
+public abstract class JdbcUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
