@@ -38,6 +38,58 @@
       exceptions to be propageted to the caller.      
     </para>
   </sect1>
+  
+  <sect1 id="jdbc-core">
+    <title>Using the JDBC Core classes to control basic JDBC processing and error handling</title>
+      <sect2 id="jdbc-JDBCTemplate">
+    	  <title>JDBCTemplate</title>
+			</sect2>
+      <sect2 id="jdbc-SQLExceptionTranslator">
+    	  <title>SQLExceptionTranslator</title>
+			</sect2>
+
+  </sect1>
+	
+  <sect1 id="jdbc-datasource">
+    <title>Controling how we connect to the database</title>
+      <sect2 id="jdbc-DataSourceUtils">
+    	  <title>DataSourceUtils</title>
+			</sect2>
+      <sect2 id="jdbc-SmartDataSource">
+    	  <title>SmartDataSource</title>
+			</sect2>
+      <sect2 id="jdbc-AbstractDataSource">
+    	  <title>AbstractDataSource</title>
+			</sect2>
+      <sect2 id="jdbc-SingleConnectionDataSource">
+    	  <title>SingleConnectionDataSource</title>
+			</sect2>
+      <sect2 id="jdbc-DriverManagerDataSource">
+    	  <title>DriverManagerDataSource</title>
+			</sect2>
+      <sect2 id="jdbc-DataSourceTransactionManager">
+    	  <title>DataSourceTransactionManager</title>
+			</sect2>
+  </sect1>
+	
+  <sect1 id="jdbc-object">
+    <title>Modeling JDBC operations as Java objects</title>
+      <sect2 id="jdbc-SqlQuery">
+    	  <title>SqlQuery</title>
+			</sect2>
+      <sect2 id="jdbc-MappingSqlQuery">
+    	  <title>MappingSqlQuery</title>
+			</sect2>
+      <sect2 id="jdbc-SqlUpdate">
+    	  <title>SqlUpdate</title>
+			</sect2>
+      <sect2 id="jdbc-StoredProcedure">
+    	  <title>StoredProcedure</title>
+			</sect2>
+      <sect2 id="jdbc-SqlFunction">
+    	  <title>SqlFunction</title>
+			</sect2>
+  </sect1>
 
 </chapter>
 
