@@ -190,7 +190,24 @@
 		</property>
 	</bean>
 	
-	<bean id="emptyProps" class="org.springframework.beans.factory.HasMap">	
+	<bean id="emptySet" class="org.springframework.beans.factory.HasMap">
+		<property name="set">
+			<set>
+			</set>
+		</property>
+	</bean>
+
+
+	<bean id="set" class="org.springframework.beans.factory.HasMap">
+		<property name="set">
+			<set>
+				<value>bar</value>
+				<ref local="jenny"/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="emptyProps" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<props>
 			</props>
@@ -228,7 +245,7 @@
 	<!--
 	Why does this fail with arrayStoreException? Seems like no
 	conversion takes place? RJ, June 7 03
-	<bean id="integerArray" class="org.springframework.beans.factory.HasMap">	
+	<bean id="integerArray" class="org.springframework.beans.factory.HasMap">
 		<property name="integerArray">
 			<list>
 				<value>0</value>
@@ -239,6 +256,85 @@
 	</bean>
 	-->
 
-</beans>		
-	
-	
+	<bean id="listFactory" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>bar</value>
+				<value>jenny</value>
+			</list>
+		</property>
+		<property name="targetListClass">
+			<value>java.util.LinkedList</value>
+		</property>
+	</bean>
+
+	<bean id="pListFactory" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>bar</value>
+				<value>jenny</value>
+			</list>
+		</property>
+		<property name="targetListClass">
+			<value>java.util.LinkedList</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<bean id="setFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>bar</value>
+				<value>jenny</value>
+			</set>
+		</property>
+		<property name="targetSetClass">
+			<value>java.util.TreeSet</value>
+		</property>
+	</bean>
+
+	<bean id="pSetFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>bar</value>
+				<value>jenny</value>
+			</set>
+		</property>
+		<property name="targetSetClass">
+			<value>java.util.TreeSet</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<bean id="mapFactory" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="jen"><value>jenny</value></entry>
+			</map>
+		</property>
+		<property name="targetMapClass">
+			<value>java.util.TreeMap</value>
+		</property>
+	</bean>
+
+	<bean id="pMapFactory" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="jen"><value>jenny</value></entry>
+			</map>
+		</property>
+		<property name="targetMapClass">
+			<value>java.util.TreeMap</value>
+		</property>
+		<property name="singleton">
+			<value>true</value>
+		</property>
+	</bean>
+
+</beans>

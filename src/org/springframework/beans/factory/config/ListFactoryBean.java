@@ -3,7 +3,9 @@ package org.springframework.beans.factory.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -12,14 +14,36 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Juergen Hoeller
  * @since 09.12.2003
  */
-public class ListFactoryBean implements FactoryBean {
+public class ListFactoryBean implements FactoryBean, InitializingBean {
 
-	private List list;
+	private List sourceList;
+
+	private Class targetListClass = ArrayList.class;
+
+	private List targetList;
 
 	private boolean singleton = true;
 
-	public void setList(List list) {
-		this.list = list;
+	/**
+	 * Set the source List, typically populated via XML "list" elements.
+	 */
+	public void setSourceList(List sourceList) {
+		this.sourceList = sourceList;
+	}
+
+	/**
+	 * Set the class to use for the target List.
+	 * Default is <code>java.util.ArrayList</code>.
+	 * @see java.util.ArrayList
+	 */
+	public void setTargetListClass(Class targetListClass) {
+		if (targetListClass == null) {
+			throw new IllegalArgumentException("targetListClass must not be null");
+		}
+		if (!List.class.isAssignableFrom(targetListClass)) {
+			throw new IllegalArgumentException("targetListClass must implement java.util.List");
+		}
+		this.targetListClass = targetListClass;
 	}
 
 	/**
@@ -30,12 +54,24 @@ public class ListFactoryBean implements FactoryBean {
 		this.singleton = singleton;
 	}
 
+	public void afterPropertiesSet() {
+		if (this.sourceList == null) {
+			throw new IllegalArgumentException("sourceList is required");
+		}
+		if (this.singleton) {
+			this.targetList = (List) BeanUtils.instantiateClass(this.targetListClass);
+			this.targetList.addAll(this.sourceList);
+		}
+	}
+
 	public Object getObject() {
 		if (this.singleton) {
-			return this.list;
+			return this.targetList;
 		}
 		else {
-			return new ArrayList(this.list);
+			List result = (List) BeanUtils.instantiateClass(this.targetListClass);
+			result.addAll(this.sourceList);
+			return result;
 		}
 	}
 

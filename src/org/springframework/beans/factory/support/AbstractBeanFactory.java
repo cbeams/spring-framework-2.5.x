@@ -68,7 +68,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.40 2004-01-20 11:26:43 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.41 2004-01-21 23:13:18 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
@@ -732,7 +732,7 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 			catch (BeansException ex) {
 				logger.debug("Ignoring constructor [" + constructors[i] + "] of bean '" + beanName +
 						"': could not satisfy dependencies. Detail: " + ex.getMessage());
-				
+
 				if (i == constructors.length - 1 && constructorToUse == null) {
 					// all constructors tried
 					throw ex;
@@ -1004,15 +1004,18 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 			return resolveReference(mergedBeanDefinition, beanName, argName, ref);
 		}
 		else if (value instanceof ManagedList) {
-			// Convert from managed list. This is a special container that
-			// may contain runtime bean references.
-			// May need to resolve references.
+			// Convert from managed list. This is a special container that may
+			// contain runtime bean references. May need to resolve references.
 			return resolveManagedList(beanName, mergedBeanDefinition, argName, (ManagedList) value);
 		}
+		else if (value instanceof ManagedSet) {
+			// Convert from managed set. This is a special container that may
+			// contain runtime bean references. May need to resolve references.
+			return resolveManagedSet(beanName, mergedBeanDefinition, argName, (ManagedSet) value);
+		}
 		else if (value instanceof ManagedMap) {
-			// Convert from managed map. This is a special container that
-			// may contain runtime bean references as values.
-			// May need to resolve references.
+			// Convert from managed map. This is a special container that may
+			// contain runtime bean references. May need to resolve references.
 			ManagedMap mm = (ManagedMap) value;
 			return resolveManagedMap(beanName, mergedBeanDefinition, argName, mm);
 		}
@@ -1047,6 +1050,18 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 		List resolved = new ArrayList();
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[" + i + "]", ml.get(i)));
+		}
+		return resolved;
+	}
+
+	/**
+	 * For each element in the ManagedList, resolve reference if necessary.
+	 */
+	protected Set resolveManagedSet(String beanName, RootBeanDefinition mergedBeanDefinition,
+																	 String argName, ManagedSet ms) throws BeansException {
+		Set resolved = new HashSet();
+		for (Iterator it = ms.iterator(); it.hasNext();) {
+			resolved.add(resolveValueIfNecessary(beanName, mergedBeanDefinition, argName + "[(set-element)]", it.next()));
 		}
 		return resolved;
 	}

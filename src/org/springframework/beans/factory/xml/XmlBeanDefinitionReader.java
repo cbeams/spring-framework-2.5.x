@@ -38,7 +38,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.5 2004-01-20 11:26:43 jhoeller Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.6 2004-01-21 23:13:18 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -99,7 +99,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		InputStream is = null;
 		try {
-			logger.info("Loading XmlBeanFactory from resource [" + resource + "]");
+			logger.info("Loading XML bean definitions from " + resource + "");
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			logger.debug("Using JAXP implementation [" + factory + "]");
 			factory.setValidating(this.validating);

@@ -6,9 +6,16 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 
@@ -28,6 +35,9 @@ import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.ListFactoryBean;
+import org.springframework.beans.factory.config.MapFactoryBean;
+import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
@@ -35,10 +45,10 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.32 2004-01-21 20:21:35 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.33 2004-01-21 23:13:19 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
-	
+
 	public void testDescriptionButNoProperties() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -147,7 +157,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Shouldn't have changed first instance
 		assertTrue(inherits.getAge() == 1);
 	}
-	
+
 	public void testDependenciesMaterializeThis() throws Exception {
 		InputStream pis = getClass().getResourceAsStream("dependenciesMaterializeThis.xml");
 		XmlBeanFactory bf = new XmlBeanFactory(pis);
@@ -237,14 +247,14 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		TestBean verbose = (TestBean) xbf.getBean("verbose2");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
-	
+
 	public void testPropertyWithIdRefBeanAttrSubelement() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		TestBean verbose = (TestBean) xbf.getBean("verbose3");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
-	
+
 	public void testRefSubelementsBuildCollection() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
@@ -304,7 +314,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Ensure that a test runner like Eclipse, that keeps the same JVM up,
 		// will get fresh static values
 		MixedCollectionBean.resetStaticState();
-		
+
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
@@ -451,11 +461,27 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			m.get("jenny").equals(jenny));
 	}
 
+	public void testEmptySet() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		HasMap hasMap = (HasMap) xbf.getBean("emptySet");
+		assertTrue(hasMap.getSet().size() == 0);
+	}
+
+	public void testPopulatedSet() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		HasMap hasMap = (HasMap) xbf.getBean("set");
+		assertTrue(hasMap.getSet().size() == 2);
+		assertTrue(hasMap.getSet().contains("bar"));
+		TestBean jenny = (TestBean) xbf.getBean("jenny");
+		assertTrue(hasMap.getSet().contains(jenny));
+	}
+
 	public void testEmptyProps() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
-		assertTrue(hasMap.getMap().size() == 0);
 		assertTrue(hasMap.getMap().size() == 0);
 	}
 
@@ -864,6 +890,83 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			fail("Should not have thrown BeanDefinitionStoreException");
 		}
+	}
+
+	public void testListFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		List list = (List) xbf.getBean("listFactory");
+		assertTrue(list instanceof LinkedList);
+		assertTrue(list.size() == 2);
+		assertEquals("bar", list.get(0));
+		assertEquals("jenny", list.get(1));
+	}
+
+	public void testPrototypeListFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		List list = (List) xbf.getBean("pListFactory");
+		assertTrue(list instanceof LinkedList);
+		assertTrue(list.size() == 2);
+		assertEquals("bar", list.get(0));
+		assertEquals("jenny", list.get(1));
+	}
+
+	public void testSetFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		Set set = (Set) xbf.getBean("setFactory");
+		assertTrue(set instanceof TreeSet);
+		assertTrue(set.size() == 2);
+		assertTrue(set.contains("bar"));
+		assertTrue(set.contains("jenny"));
+	}
+
+	public void testPrototypeSetFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		Set set = (Set) xbf.getBean("pSetFactory");
+		assertTrue(set instanceof TreeSet);
+		assertTrue(set.size() == 2);
+		assertTrue(set.contains("bar"));
+		assertTrue(set.contains("jenny"));
+	}
+
+	public void testMapFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		Map map = (Map) xbf.getBean("mapFactory");
+		assertTrue(map instanceof TreeMap);
+		assertTrue(map.size() == 2);
+		assertEquals("bar", map.get("foo"));
+		assertEquals("jenny", map.get("jen"));
+	}
+
+	public void testPrototypeMapFactory() throws Exception {
+		InputStream is = getClass().getResourceAsStream("collections.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		Map map = (Map) xbf.getBean("pMapFactory");
+		assertTrue(map instanceof TreeMap);
+		assertTrue(map.size() == 2);
+		assertEquals("bar", map.get("foo"));
+		assertEquals("jenny", map.get("jen"));
+	}
+
+	public void testCollectionFactoryDefaults() {
+		ListFactoryBean listFactory = new ListFactoryBean();
+		listFactory.setSourceList(new LinkedList());
+		listFactory.afterPropertiesSet();
+		assertTrue(listFactory.getObject() instanceof ArrayList);
+
+		SetFactoryBean setFactory = new SetFactoryBean();
+		setFactory.setSourceSet(new TreeSet());
+		setFactory.afterPropertiesSet();
+		assertTrue(setFactory.getObject() instanceof HashSet);
+
+		MapFactoryBean mapFactory = new MapFactoryBean();
+		mapFactory.setSourceMap(new TreeMap());
+		mapFactory.afterPropertiesSet();
+		assertTrue(mapFactory.getObject() instanceof HashMap);
 	}
 
 

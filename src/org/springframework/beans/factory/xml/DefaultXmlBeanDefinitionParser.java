@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
@@ -68,6 +70,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String REF_ELEMENT = "ref";
 	public static final String IDREF_ELEMENT = "idref";
 	public static final String LIST_ELEMENT = "list";
+	public static final String SET_ELEMENT = "set";
 	public static final String MAP_ELEMENT = "map";
 	public static final String KEY_ATTRIBUTE = "key";
 	public static final String ENTRY_ELEMENT = "entry";
@@ -414,6 +417,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		else if (ele.getTagName().equals(LIST_ELEMENT)) {
 			return getList(ele, beanName);
 		}
+		else if (ele.getTagName().equals(SET_ELEMENT)) {
+			return getSet(ele, beanName);
+		}
 		else if (ele.getTagName().equals(MAP_ELEMENT)) {
 			return getMap(ele, beanName);
 		}
@@ -437,6 +443,21 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		return l;
+	}
+
+	/**
+	 * Return list of collection.
+	 */
+	protected Set getSet(Element collectionEle, String beanName) {
+		NodeList nl = collectionEle.getChildNodes();
+		ManagedSet s = new ManagedSet();
+		for (int i = 0; i < nl.getLength(); i++) {
+			if (nl.item(i) instanceof Element) {
+				Element ele = (Element) nl.item(i);
+				s.add(parsePropertySubelement(ele, beanName));
+			}
+		}
+		return s;
 	}
 
 	protected Map getMap(Element mapEle, String beanName) {

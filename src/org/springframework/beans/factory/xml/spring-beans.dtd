@@ -31,7 +31,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.19 2004-01-20 11:26:43 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.20 2004-01-21 23:13:18 jhoeller Exp $
 -->
 
 <!--
@@ -41,7 +41,7 @@
 -->
 <!ELEMENT description (#PCDATA)>
 
-<!-- 
+<!--
 	The document root.
 	At least one bean definition is required.
 -->
@@ -174,7 +174,7 @@
 <!--
 	Optional attribute for the name of the custom initialization method
 	to invoke after setting bean properties. The method must have no arguments,
-	but may throw any exception. 
+	but may throw any exception.
 -->
 <!ATTLIST bean init-method CDATA #IMPLIED>
 
@@ -193,7 +193,7 @@
 -->
 <!ELEMENT constructor-arg (
         description?,
-        (bean | ref | list | map | props | value)
+        (bean | ref | idref | list | set | map | props | value)
 )>
 
 <!--
@@ -204,14 +204,14 @@
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
 
 <!--
-	Bean definitions can have zero or more properties. 
+	Bean definitions can have zero or more properties.
 	Property elements correspond to JavaBean setter methods exposed
 	by the bean classes. Spring supports primitives, references to other
 	beans in the same or related factories, lists, maps and properties.
 -->
 <!ELEMENT property (
         description?,
-        (bean | ref | idref | list | map | props | value)
+        (bean | ref | idref | list | set | map | props | value)
 )>
 
 <!--
@@ -223,7 +223,7 @@
 
 <!--
 	Defines a reference to another bean in this factory or an external
-	factory (parent or included factory). 
+	factory (parent or included factory).
 -->
 <!ELEMENT ref EMPTY>
 
@@ -261,12 +261,21 @@
 <!--
 	A list can contain multiple inner bean, ref, collection, or value elements.
 	Java lists are untyped, pending generics support in Java 1.5,
-	although references will be strongly typed. 
+	although references will be strongly typed.
 	A list can also map to an array type. The necessary conversion
-	is automatically performed by AbstractBeanFactory. 
+	is automatically performed by AbstractBeanFactory.
 -->
 <!ELEMENT list (
-        (bean | ref | idref | list | map | props | value)*
+        (bean | ref | idref | list | set | map | props | value)*
+)>
+
+<!--
+	A set can contain multiple inner bean, ref, collection, or value elements.
+	Java sets are untyped, pending generics support in Java 1.5,
+	although references will be strongly typed.
+-->
+<!ELEMENT set (
+        (bean | ref | idref | list | set | map | props | value)*
 )>
 
 <!--
@@ -282,7 +291,7 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (bean | ref | idref | list | map | props | value)
+        (bean | ref | idref | list | set | map | props | value)
 )>
 
 <!ATTLIST entry key CDATA #REQUIRED>
