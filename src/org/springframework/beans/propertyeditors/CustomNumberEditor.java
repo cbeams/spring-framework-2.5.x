@@ -1,6 +1,8 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -62,17 +64,26 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 				if (this.numberClass.isInstance(number)) {
 					setValue(number);
 				}
-				else if (this.numberClass.equals(Long.class)) {
-					setValue(new Long(number.longValue()));
+				else if (this.numberClass.equals(Short.class)) {
+					setValue(new Short(number.shortValue()));
 				}
 				else if (this.numberClass.equals(Integer.class)) {
 					setValue(new Integer(number.intValue()));
 				}
-				else if (this.numberClass.equals(Double.class)) {
-					setValue(new Double(number.doubleValue()));
+				else if (this.numberClass.equals(Long.class)) {
+					setValue(new Long(number.longValue()));
+				}
+				else if (this.numberClass.equals(BigInteger.class)) {
+					setValue(BigInteger.valueOf(number.longValue()));
 				}
 				else if (this.numberClass.equals(Float.class)) {
 					setValue(new Float(number.floatValue()));
+				}
+				else if (this.numberClass.equals(Double.class)) {
+					setValue(new Double(number.doubleValue()));
+				}
+				else if (this.numberClass.equals(BigDecimal.class)) {
+					setValue(new BigDecimal(Double.toString(number.doubleValue())));
 				}
 				else {
 					throw new IllegalArgumentException("Cannot convert [" + text + "] to [" + this.numberClass + "]");

@@ -1,37 +1,47 @@
 package org.springframework.beans;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * @author Juergen Hoeller
  * @since 10.06.2003
  */
 public class NumberTestBean {
 
-	private long long1;
-	private Long long2;
+	private short short1;
+	private Short short2;
 
 	private int int1;
 	private Integer int2;
 
-	private double double1;
-	private Double double2;
+	private long long1;
+	private Long long2;
+
+	private BigInteger bigInteger;
 
 	private float float1;
 	private Float float2;
 
-	public long getLong1() {
-		return long1;
+	private double double1;
+	private Double double2;
+
+	private BigDecimal bigDecimal;
+
+	public short getShort1() {
+		return short1;
 	}
 
-	public void setLong1(long long1) {
-		this.long1 = long1;
+	public void setShort1(short short1) {
+		this.short1 = short1;
 	}
 
-	public Long getLong2() {
-		return long2;
+	public Short getShort2() {
+		return short2;
 	}
 
-	public void setLong2(Long long2) {
-		this.long2 = long2;
+	public void setShort2(Short short2) {
+		this.short2 = short2;
 	}
 
 	public int getInt1() {
@@ -50,20 +60,28 @@ public class NumberTestBean {
 		this.int2 = int2;
 	}
 
-	public double getDouble1() {
-		return double1;
+	public long getLong1() {
+		return long1;
 	}
 
-	public void setDouble1(double double1) {
-		this.double1 = double1;
+	public void setLong1(long long1) {
+		this.long1 = long1;
 	}
 
-	public Double getDouble2() {
-		return double2;
+	public Long getLong2() {
+		return long2;
 	}
 
-	public void setDouble2(Double double2) {
-		this.double2 = double2;
+	public void setLong2(Long long2) {
+		this.long2 = long2;
+	}
+
+	public BigInteger getBigInteger() {
+		return bigInteger;
+	}
+
+	public void setBigInteger(BigInteger bigInteger) {
+		this.bigInteger = bigInteger;
 	}
 
 	public float getFloat1() {
@@ -80,6 +98,30 @@ public class NumberTestBean {
 
 	public void setFloat2(Float float2) {
 		this.float2 = float2;
+	}
+
+	public double getDouble1() {
+		return double1;
+	}
+
+	public void setDouble1(double double1) {
+		this.double1 = double1;
+	}
+
+	public Double getDouble2() {
+		return double2;
+	}
+
+	public void setDouble2(Double double2) {
+		this.double2 = double2;
+	}
+
+	public BigDecimal getBigDecimal() {
+		return bigDecimal;
+	}
+
+	public void setBigDecimal(BigDecimal bigDecimal) {
+		this.bigDecimal = bigDecimal;
 	}
 
 }
