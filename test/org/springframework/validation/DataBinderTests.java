@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -35,6 +37,7 @@ import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
@@ -485,6 +488,25 @@ public class DataBinderTests extends TestCase {
 		assertEquals("TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
 		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
+	}
+
+	public void testBindingStringArrayToIntegerSet() {
+		IndexedTestBean tb = new IndexedTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class) {
+			protected Object convertElement(Object element) {
+				return new Integer(element.toString());
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("set", new String[] {"10", "20", "30"});
+		binder.bind(pvs);
+
+		assertTrue(tb.getSet() instanceof TreeSet);
+		assertEquals(3, tb.getSet().size());
+		assertTrue(tb.getSet().contains(new Integer(10)));
+		assertTrue(tb.getSet().contains(new Integer(20)));
+		assertTrue(tb.getSet().contains(new Integer(30)));
 	}
 
 	public void testBindingToIndexedField() {
