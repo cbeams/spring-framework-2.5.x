@@ -1,6 +1,7 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -85,7 +86,13 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		if (this.configLocation != null) {
 			// load JDO properties from given location
-			prop.load(this.configLocation.getInputStream());
+			InputStream is = this.configLocation.getInputStream();
+			try {
+				prop.load(is);
+			}
+			finally {
+				is.close();
+			}
 		}
 
 		if (this.jdoProperties != null) {

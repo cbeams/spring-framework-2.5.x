@@ -1,6 +1,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -110,7 +111,13 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	protected Properties loadProperties() throws IOException {
 		logger.info("Loading properties file from class path location [" + this.location + "]");
 		Properties properties = new Properties();
-		properties.load(this.location.getInputStream());
+		InputStream is = this.location.getInputStream();
+		try {
+			properties.load(is);
+		}
+		finally {
+			is.close();
+		}
 		return properties;
 	}
 

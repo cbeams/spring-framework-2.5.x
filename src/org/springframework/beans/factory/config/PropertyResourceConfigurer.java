@@ -1,6 +1,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -81,7 +82,13 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 		if (this.location != null) {
 			logger.info("Loading properties file from " + this.location + "");
 			try {
-				props.load(this.location.getInputStream());
+				InputStream is = this.location.getInputStream();
+				try {
+					props.load(is);
+				}
+				finally {
+					is.close();
+				}
 			}
 			catch (IOException ex) {
 				String msg = "Could not load properties file from " + this.location;
