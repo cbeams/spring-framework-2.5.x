@@ -105,6 +105,8 @@ public class ValidationResults implements Visitor {
                         .invokeVisit(ValidationResults.this, predicate))
                         .booleanValue();
                 UnaryPredicate top = (UnaryPredicate)levels.pop();
+                boolean negated = (levels.peek() instanceof UnaryNot);
+                result = negated ? !result: result;
                 if (!result) {
                     errors.rejectValue(
                         propertyName,
@@ -128,8 +130,6 @@ public class ValidationResults implements Visitor {
     public String getDefaultMessage(UnaryPredicate predicate) {
         return propertyName + " is " + predicate.toString();
     }
-
-
 
     public void visit(UnaryNot not) {
         levels.push(not);
