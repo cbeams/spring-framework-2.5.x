@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -53,7 +54,7 @@ import org.springframework.beans.BeansException;
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
-	private Map urlMap;
+	private final Map urlMap = new HashMap();
 
 	/**
 	 * Set a Map with URLs as keys and handler beans as values.
@@ -61,7 +62,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @param urlMap map with URLs as keys and beans as values
 	 */
 	public void setUrlMap(Map urlMap) {
-		this.urlMap = urlMap;
+		this.urlMap.putAll(urlMap);
 	}
 
 	/**
@@ -69,11 +70,11 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @param mappings properties with URL as key and bean name as value
 	 */
 	public void setMappings(Properties mappings) {
-		this.urlMap = mappings;
+		this.urlMap.putAll(mappings);
 	}
 
 	public void initApplicationContext() throws BeansException {
-		if (this.urlMap == null || this.urlMap.isEmpty()) {
+		if (this.urlMap.isEmpty()) {
 			logger.info("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
 		}
 		else {
