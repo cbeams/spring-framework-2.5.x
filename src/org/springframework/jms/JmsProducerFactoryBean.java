@@ -124,7 +124,7 @@ public class JmsProducerFactoryBean
     }
 
     /**
-     * @param session
+     * @param s
      */
     public void setSession(Session s)
     {
@@ -148,7 +148,7 @@ public class JmsProducerFactoryBean
     }
 
     /**
-     * @param destination
+     * @param d
      */
     public void setDestination(Destination d)
     {

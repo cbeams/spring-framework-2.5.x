@@ -61,7 +61,7 @@ public class JmsConnectionFactoryBean
         return Connection.class;
     }
 
-
+    
     public boolean isSingleton()
     {
         return true;

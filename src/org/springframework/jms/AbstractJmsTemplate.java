@@ -126,7 +126,7 @@ public abstract class AbstractJmsTemplate
 
     /**
      * Set the connection factory used for sending messages.
-     * @param cf the connection factory.
+     * @param c the connection factory.
      */
     public void setConnectionFactory(ConnectionFactory c) {
         cf = c;
@@ -270,7 +270,7 @@ public abstract class AbstractJmsTemplate
 
     /**
      * Set the priority of the message to be send.
-     * @param priority of the message.
+     * @param p of the message.
      */
     public void setPriority(int p) {
         priority = p;
@@ -278,7 +278,7 @@ public abstract class AbstractJmsTemplate
 
     /**
      * Set the message's lifetime in milliseconds.
-     * @param timeToLive message's lifetime.
+     * @param ttl message's lifetime.
      */
     public void setTimeToLive(long ttl) {
         timeToLive = ttl;

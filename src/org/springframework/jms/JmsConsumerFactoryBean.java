@@ -46,7 +46,7 @@ public class JmsConsumerFactoryBean implements FactoryBean, InitializingBean {
 
     /**
      * Set the JMS destination to consume messages from.
-     * @param destination JMS destination.
+     * @param d JMS destination.
      */
     public void setDestination(Destination d) {
         destination = d;

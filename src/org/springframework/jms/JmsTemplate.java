@@ -183,7 +183,7 @@ public interface JmsTemplate {
 	
 	/**
 	 * Set the connection factory used for sending messages.
-	 * @param cf the connection factory.
+	 * @param c the connection factory.
 	 */
 	public void setConnectionFactory(ConnectionFactory c);
 	
