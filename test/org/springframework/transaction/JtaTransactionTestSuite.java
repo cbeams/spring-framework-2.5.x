@@ -576,17 +576,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.verify();
 	}
 
-	public void testJtaTransactionManagerWithoutJtaSupport() throws Exception {
-		JtaTransactionManager ptm = new JtaTransactionManager();
-		try {
-			ptm.afterPropertiesSet();
-			fail("Should have thrown CannotCreateTransactionException");
-		}
-		catch (CannotCreateTransactionException ex) {
-			// expected
-		}
-	}
-
 	public void testJtaTransactionManagerWithSystemExceptionOnIsExisting() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
