@@ -15,12 +15,8 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collection;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
@@ -54,6 +50,11 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * <code>id</code>.
 	 */
 	private FlowLocator flowLocator;
+
+	/**
+	 * JUnit assertion support class, for common assertions.
+	 */
+	private JUnitAssertSupport asserts;
 
 	/**
 	 * Returns the flow locator used to resolve the Flow to be tested by
@@ -260,65 +261,11 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 
 	/**
-	 * Assert that an attribute with specified name is present in given model.
+	 * Returns a support class for doing additional JUnit assertion operations
+	 * not supported out-of-the-box by JUnit 3.8.1.
+	 * @return The junit assert support.
 	 */
-	protected void assertModelAttributePresent(Map model, String attributeName) {
-		assertTrue("The model attribute '" + attributeName + "' is not present in model", model
-				.containsKey(attributeName));
-	}
-
-	/**
-	 * Assert that an attribute exists in the model map of the specified type.
-	 * @param model the model map
-	 * @param attributeName the attribute name
-	 * @param clazz the required type
-	 */
-	protected void assertModelAttributeInstanceOf(Map model, String attributeName, Class clazz) {
-		assertModelAttributePresent(model, attributeName);
-		Assert.isInstanceOf(clazz, model.get(attributeName));
-	}
-
-	/**
-	 * Assert that an attribute exists in the model map of the specified value.
-	 * @param model the model map
-	 * @param attributeName the attribute name
-	 * @param attributeValue the attribute value
-	 */
-	protected void assertModelAttributeEquals(Map model, String attributeName, Object attributeValue) {
-		if (attributeValue != null) {
-			assertModelAttributeInstanceOf(model, attributeName, attributeValue.getClass());
-		}
-		assertEquals("The model attribute '" + attributeName + "' must equal '" + attributeValue + "'", attributeValue,
-				model.get(attributeName));
-	}
-
-	/**
-	 * Assert that a collection exists in the model map under the provided
-	 * attribute name, with the specified size.
-	 * @param model the model map
-	 * @param attributeName the attribute name
-	 * @param size the expected collection size
-	 */
-	protected void assertModelCollectionAttributeSize(Map model, String attributeName, int size) {
-		assertModelAttributeInstanceOf(model, attributeName, Collection.class);
-		assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
-				((Collection)model.get(attributeName)).size());
-	}
-
-	/**
-	 * Assert that a bean property attribute in the model map has a property
-	 * with the provided property value.
-	 * @param model the model map
-	 * @param attributeName the attribute name (of a javabean)
-	 * @param propertyName the bean property name
-	 * @param propertyValue the expected property value
-	 */
-	protected void assertModelAttributePropertyEquals(Map model, String attributeName, String propertyName,
-			Object propertyValue) {
-		assertModelAttributePresent(model, attributeName);
-		Object value = model.get(attributeName);
-		Assert.isTrue(!BeanUtils.isSimpleProperty(value.getClass()), "Attribute value must be a bean");
-		BeanWrapper wrapper = new BeanWrapperImpl(value);
-		assertEquals(propertyValue, wrapper.getPropertyValue(propertyName));
+	protected JUnitAssertSupport asserts() {
+		return asserts;
 	}
 }
