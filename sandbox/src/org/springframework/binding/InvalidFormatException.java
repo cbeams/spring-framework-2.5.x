@@ -6,54 +6,42 @@ package org.springframework.binding;
 /**
  * @author Keith Donald
  */
-public class InvalidFormatException extends TypeConversionException {
+public class InvalidFormatException extends Exception {
 
-    /**
-     * @param value
-     * @param convertToClass
-     */
-    public InvalidFormatException(Object value, Class convertToClass) {
-        super(value, convertToClass);
-    }
+	private String invalidValue;
 
-    /**
-     * @param value
-     * @param convertToClass
-     * @param convertFromClass
-     */
-    public InvalidFormatException(Object value, Class convertToClass, Class convertFromClass) {
-        super(value, convertToClass, convertFromClass);
-    }
+	private String expectedFormat;
 
-    /**
-     * @param value
-     * @param convertToClass
-     * @param convertFromClass
-     * @param cause
-     * @param message
-     */
-    public InvalidFormatException(Object value, Class convertToClass, Class convertFromClass, Throwable cause,
-            String message) {
-        super(value, convertToClass, convertFromClass, cause, message);
-    }
+	public InvalidFormatException(String invalidValue) {
+		this.invalidValue = invalidValue;
+	}
 
-    /**
-     * @param value
-     * @param convertToClass
-     * @param cause
-     */
-    public InvalidFormatException(Object value, Class convertToClass, Throwable cause) {
-        super(value, convertToClass, cause);
-    }
+	public InvalidFormatException(String invalidValue, Throwable cause) {
+		super(cause);
+		this.invalidValue = invalidValue;
+	}
 
-    /**
-     * @param value
-     * @param convertToClass
-     * @param cause
-     * @param message
-     */
-    public InvalidFormatException(Object value, Class convertToClass, Throwable cause, String message) {
-        super(value, convertToClass, cause, message);
-    }
+	public InvalidFormatException(String invalidValue, String expectedFormat) {
+		this.invalidValue = invalidValue;
+		this.expectedFormat = expectedFormat;
+	}
+
+	public InvalidFormatException(String invalidValue, String expectedFormat, String message) {
+		super(message);
+		this.invalidValue = invalidValue;
+		this.expectedFormat = expectedFormat;
+	}
+
+	public InvalidFormatException(String invalidValue, String expectedFormat, Throwable cause) {
+		super(cause);
+		this.invalidValue = invalidValue;
+		this.expectedFormat = expectedFormat;
+	}
+
+	public InvalidFormatException(String invalidValue, String expectedFormat, String message, Throwable cause) {
+		super(message, cause);
+		this.invalidValue = invalidValue;
+		this.expectedFormat = expectedFormat;
+	}
 
 }

@@ -7,7 +7,7 @@ package org.springframework.binding;
  * 
  * @author Keith Donald
  */
-public abstract class TypeConversionException extends RuntimeException {
+public class TypeConversionException extends RuntimeException {
     private Object value;
 
     private Class convertToClass;
