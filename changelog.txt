@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.191 2004-07-26 09:24:36 jhoeller Exp $
+$Id: changelog.txt,v 1.192 2004-07-26 15:38:22 johnsonr Exp $
 
 
 Changes in version 1.1 RC1 (28.7.2004)
@@ -10,6 +10,8 @@ Package org.springframework.aop
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
 * AOP proxies now Serializable if all Advisors and the TargetSource are Serializable
 * added invocableClone() method to ReflectiveMethodInvocation to allow proceed to be called more than once
+* added SETTERS and GETTERS constants to org.springframework.aop.support.Pointcuts
+* improved NameMatchMethodPointcut for programmatic use
 * deprecated addInterceptor, addThrowsAdvice and other methods taking Advice subtype on Advised: use addAdvice etc.
 * deprected RegexpMethodPointcut to allow for other regular expression syntaxes besides Perl5: use Perl5RegexpMethodPointcut
 
