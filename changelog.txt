@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.85 2004-02-07 00:34:43 jhoeller Exp $
+$Id: changelog.txt,v 1.86 2004-02-11 11:01:56 jhoeller Exp $
 
 
-Changes in version 1.0 RC1 (09.02.2003)
+Changes in version 1.0 RC1 (11.02.2003)
 ---------------------------------------
 
 Package org.springframework.aop
@@ -36,6 +36,7 @@ Package org.springframework.beans
 * moved BeanFactoryBootstrap and BootstrapException to package beans.factory.access
 * moved BeanFactoryUtils from package beans.factory.support to beans.factory
 * added "getAliases" method to BeanDefinitionRegistry interface (same as in BeanFactory)
+* allow for FactoryBeans as inner bean definitions
 * redesigned RootBeanDefinition and DefaultXmlBeanDefinitionParser to alternatively work with plain class names
 * load "spring-beans.dtd" via class loader of BeansDtdResolver instead of thread context class loader
 * removed deprecated "ref external" support from XML bean definition format (use "ref bean" instead)
@@ -62,6 +63,9 @@ Package org.springframework.core
 * added "equals" and "hashCode" implementations to AbstractResource, based on descriptions strings
 * allow for ${...} placeholders in resource locations parsed by ResourceEditor, replacing them with system properties
 
+Package org.springframework.dao
+* TypeMismatchException extends InvalidDataAccessResourceUsageException
+
 Package org.springframework.jdbc
 * added support for transaction suspension to DataSourceTransactionManager
 * added "isNativeConnectionNecessaryForNativePreparedStatements/CallableStatements" methods to NativeJdbcExtractor
@@ -84,19 +88,20 @@ Package org.springframework.orm
 * added "jtaTransactionManager" property to LocalSessionFactoryBean, for driving Hibernate's TransactionManagerLookup
 * added ClobStringType for mapping Strings to LobHandler-managed CLOBs with Hibernate
 * added "lobHandler" property to LocalSessionFactoryBean, for driving ClobStringType
-* added "evict" method to HibernateTemplate
+* added "evict", "saveOrUpdateCopy" and overloaded "delete" and "update" methods to HibernateTemplate
 * changed the argument of JdoDialect's "flush" from Transaction to PersistenceManager
 * JdoTransactionManager uses JdoDialect's "translateException" in case of flushing failure on commit
 
 Package org.springframework.remoting
 * made RemoteExporter's "serviceInterface" property required
 * added skeleton class check to Hessian/BurlapServiceExporter, to make them work with both Hessian/Burlap 2.x and 3.x
+* fixed exception handling in BurlapClientInterceptor
 
 Package org.springframework.samples
 * introduced Image Database sample application, illustrating LobHandler and HTTP multipart file uploads
 
 Package org.springframework.transaction
-* added propagation behaviors "REQUIRES_NEW", "NOT_SUPPORTED", and "NEVER" to TransactionDefinition
+* added propagation behaviors "REQUIRES_NEW", "NOT_SUPPORTED" and "NEVER" to TransactionDefinition
 * refactored TransactionStatus into minimal interface, with DefaultTransactionStatus as default implementation
 * rollback on Error in TransactionInterceptor, via DefaultTransactionAttribute's "rollbackOn" implementation
 * added "readOnly" argument to TransactionSynchronization's "beforeCommit" method

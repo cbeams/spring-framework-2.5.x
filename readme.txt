@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.0 M4 (December 2003)
-----------------------------------------------------
+THE SPRING FRAMEWORK, release 1.0 RC1 (February 2004)
+-----------------------------------------------------
 http://www.springframework.org
 
 
@@ -23,7 +23,7 @@ SQLException), simplifies error handling, and greatly reduces the amount of code
 You'll never need to write another finally block to use JDBC again. The JDBC-oriented exceptions comply to
 Spring's generic DAO exception hierarchy.
 
-* Integration with Hibernate, JDO, and iBATIS Database Layer: in terms of resource holders, DAO implementation
+* Integration with Hibernate, JDO, and iBATIS SQL Maps: in terms of resource holders, DAO implementation
 support, and transaction strategies. First-class Hibernate support with lots of IoC convenience features,
 addressing many typical Hibernate integration issues. All of these comply to Spring's generic transaction
 and DAO exception hierarchies.
@@ -51,15 +51,11 @@ about it immediately.
 
 2. RELEASE INFO
 
-The Spring Framework is released under the terms of the Apache Software License (see license.txt). This is the
-sixth public release towards 1.0 final. Since 1.0 M1, the framework uses the package name "org.springframework",
-superseding the former "com.interface21" that dated back to the Wrox version. The next release will be 1.0 RC1;
-the main focus will be on finishing the reference documentation.
-
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
-Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Hibernate 2.0, JDO 1.0,
-Caucho's Hessian/Burlap 2.1, JSTL 1.0, Velocity 1.3, Tiles 1.1, Commons FileUpload, Jason Hunter's COS, etc.
+Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes,
+Hibernate 2.1, JDO 1.0, iBATIS SQL Maps 1.3, JAX-RPC 1.1, Caucho's Hessian and Burlap 2.1/3.0, JSTL 1.0,
+Velocity 1.3, Struts-Tiles 1.1, Jakarta Commons FileUpload, Jason Hunter's COS, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -77,38 +73,48 @@ the included Ant runtime by invoking the corresponding "build.bat" files (see sa
 Latest info is available at the public website: http://www.springframework.org
 Project info at the SourceForge site: http://sourceforge.net/projects/springframework
 
+The Spring Framework is released under the terms of the Apache Software License (see license.txt).
 This product includes software developed by the Apache Software Foundation (http://www.apache.org).
 This product includes software developed by Clinton Begin (http://www.ibatis.com).
 
 
 3. DISTRIBUTION JAR FILES
 
-The "dist" directory contains the following overlapping JAR files for use in applications. Each addresses a
-typical usage of the Spring Framework, specifying the respective contents and third-party dependencies.
-Libraries in brackets are optional, i.e. just necessary for certain functionality.
+The "dist" directory contains the following distinct JAR files for use in applications. Both module-specific
+JAR files and a JAR file with all of Spring are provided. The following list specifies the respective contents
+and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-beans" (~140 KB)
-- Target: minimal bean container for wiring up within restricted environments like applets
+* "spring-core" (~170 KB)
 - Contents: bean container, core utilities
-- Dependencies: Commons Logging
+- Dependencies: Commons Logging, (Log4J)
 
-* "spring-context" (~330 KB)
-- Target: basic application context for use outside a J2EE container
-- Contents: bean container, utilities, AOP framework, application context, validation framework
-- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB)
+* "spring-aop" (~110 KB)
+- Contents: AOP framework, source-level metadata support
+- Dependencies: spring-beans, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-jdbc" (~515 KB)
-- Target: application context with transaction framework and JDBC support
-- Contents: bean container, utilities, AOP framework, application context, validation framework,
-transaction framework, JDBC support
-- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB; JTA, JavaMail)
+* "spring-context" (~135 KB)
+- Contents: application context, validation framework, UI support, JNDI, mail, remoting, EJB
+- Dependencies: spring-beans, (JavaMail, EJB, JAX-RPC, Hessian, Burlap)
 
-* "spring" (~825 KB)
-- Target: full application framework for use within a J2EE container (and suitable where JAR size does not matter)
-- Contents: bean container, utilities, AOP framework, EJB support, transaction framework, JDBC support, O/R Mapping
-support, application context, web application context, validation framework, web MVC framework, remoting support
-- Dependencies: Commons Logging, (Log4J, AOP Alliance, CGLIB; JTA, JavaMail; Hibernate, JDO; EJB 2.0, Servlet 2.3,
-JSP 1.2, JSTL; Velocity, iText, POI; Hessian, Burlap)
+* "spring-dao" (~175 KB)
+- Contents: DAO support, transaction infrastructure, JDBC support
+- Dependencies: spring-beans, (spring-aop, spring-context, JTA)
+
+* "spring-orm" (~90 KB)
+- Contents: Hibernate support, JDO support, iBATIS SQL Maps support
+- Dependencies: spring-jdbc, (Hibernate, JDO, iBATIS SQL Maps)
+
+* "spring-web" (~60 KB)
+- Contents: web application context, multipart resolver, web utilities
+- Dependencies: spring-context, Servlet, (Commons FileUpload, COS)
+
+* "spring-webmvc" (~130 KB)
+- Contents: web MVC framework, web controllers, web views
+- Dependencies: spring-web, (JSP, JSTL, Velocity, iText, POI)
+
+* "spring" (~870 KB)
+- Contents: all of the above
+- Dependencies: all of the above
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
 Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,
@@ -121,6 +127,7 @@ the JSTL (standard.jar) has to be available in the class path. Else, any JSTL im
 4. WHERE TO START?
 
 Documentation can be found in the "docs" directory:
+* the Spring reference documentation
 * "The Spring Framework - A Lightweight Container"
 * "Data Access and Transaction Abstraction with the Spring Framework"
 * "Container Resources vs Local Resources"
@@ -130,6 +137,7 @@ Documentation can be found in the "docs" directory:
 
 Documented sample applications and skeletons can be found in "samples":
 * "countries"
+* "imagedb"
 * "jpetstore"
 * "petclinic"
 * "tiles-example"
