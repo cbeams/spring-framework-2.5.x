@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.163 2004-06-14 11:19:12 jhoeller Exp $
+$Id: changelog.txt,v 1.164 2004-06-16 18:55:20 jhoeller Exp $
 
 
 Changes in version 1.0.3 (27.6.2004)
@@ -11,10 +11,12 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * factored out PropertyAccessor base interface from BeanWrapper
+* BeanWrapperImpl allows dots in keys, for example "map[my.key]" 
 * refined BeanWrapperImpl to apply a custom editor strictly either to an array/Collection or to each of their elements
 * refined BeanWrapperImpl to automatically convert a value to an array with a single component when necessary
 * refined BeanWrapperImpl to support converting any Collection into an array rather than just a List
 * fixed PropertiesEditor's support for converting a Map to Properties
+* fixed PropertyPlaceholderConfigurer's parsing to detect all inner bean definitions (including BeanDefinitionHolder)
 * added ArgumentConvertingMethodInvoker subclass of MethodInvoker, converting given arguments via BeanWrapperImpl
 * MethodInvokingFactoryBean derives from ArgumentConvertingMethodInvoker to inherit argument conversion
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
@@ -37,6 +39,7 @@ Package org.springframework.mail
 
 Package org.springframework.orm
 * added "delete" and "iterate" methods to HibernateOperations/HibernateTemplate, analogous to the Session interface
+* added "cacheQueries" property to HibernateTemplate, for marking all executed queries as cacheable
 * HibernateTransactionManager and JdoTransactionManager close Session resp. PersistenceManager if "doBegin" fails
 * JdoTransactionManager supports isolation levels and timeouts via JdoDialect's "beginTransaction" method
 * JdoTransactionManager passes readOnly flag to JdoDialect's "getJdbcConnection" and invokes "releaseJdbcConnection"
@@ -62,9 +65,12 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
+* added "getContextLoader" accessor to ContextLoaderListener and ContextLoaderServlet
 * deprecated RequestHandledEvent's getURL/getTimeMillis/getIpAddress -> getUrl/getProcessingTime/getClientAddress
 * added optional "sessionId" and "userName" fields to RequestHandledEvent, for easier session and user tracking
 * support multiple delimited URLs in ResourceServlet, including them one by one (and taking the latest file timestamp)
+* added FixedLocaleResolver implementation, returning a given "defaultLocale" for any request
+* removed unused (and misleading) "makeThemeNameAvailable" method from AbstractThemeResolver
 
 
 Changes in version 1.0.2 (3.6.2004)
