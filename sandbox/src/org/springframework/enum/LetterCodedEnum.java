@@ -33,5 +33,8 @@ public abstract class LetterCodedEnum extends AbstractCodedEnum {
                 + " is invalid; it must be a letter.");
     }
 
+    public char getLetterCode() {
+        return ((Character)getCode()).charValue();
+    }
 
 }

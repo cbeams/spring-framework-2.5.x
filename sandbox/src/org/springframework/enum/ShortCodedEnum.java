@@ -27,5 +27,8 @@ public abstract class ShortCodedEnum extends AbstractCodedEnum {
         super(new Short((short)code), label);
     }
 
+    public short getShortCode() {
+        return ((Short)getCode()).shortValue();
+    }
 
 }

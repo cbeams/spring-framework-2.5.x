@@ -22,5 +22,9 @@ public abstract class StringCodedEnum extends AbstractCodedEnum {
     protected StringCodedEnum(String code) {
         super(code);
     }
+    
+    public String getStringCode() {
+        return (String)getCode();
+    }
 
 }

@@ -100,7 +100,8 @@ public class ValuePropertyChangeListenerMediator implements
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        if (!accessStrategy.isValueUpdating()) {
+        // we should still publish change for the benefit of listeners
+        //if (!accessStrategy.isValueUpdating()) {
             if (logger.isDebugEnabled()) {
                 logger
                         .debug("Property change event received from domain object for property '"
@@ -110,7 +111,7 @@ public class ValuePropertyChangeListenerMediator implements
                                 + "; notifiying value listener.");
             }
             this.listener.valueChanged();
-        }
+        //}
     }
 
 }
