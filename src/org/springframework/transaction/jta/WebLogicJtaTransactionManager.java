@@ -262,7 +262,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					Integer isolationLevel = new Integer(definition.getIsolationLevel());
 					/*
 					weblogic.transaction.Transaction wtx = (weblogic.transaction.Transaction) tx;
-					wtx.setProperty("isolationLevel", isolationLevel);
+					wtx.setProperty(ISOLATION_LEVEL_KEY, isolationLevel);
 					*/
 					this.setPropertyMethod.invoke(tx, new Object[] {ISOLATION_LEVEL_KEY, isolationLevel});
 				}
