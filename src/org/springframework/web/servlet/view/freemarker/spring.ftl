@@ -20,7 +20,26 @@
  -->
 
 <#--
- * spring:bind
+ * message
+ *
+ * Macro to translate a message code into a message.
+ -->
+<#macro message code>
+	${springMacroRequestContext.getMessage(code)}
+</#macro>
+
+<#--
+ * messageText
+ *
+ * Macro to translate a message code into a message,
+ * using the given default text if no message found.
+ -->
+<#macro messageText code, text>
+	${springMacroRequestContext.getMessage(code, text)}
+</#macro>
+
+<#--
+ * bind
  *
  * Exposes a BindStatus object for the given bind path, which can be
  * a bean (e.g. "person") to get global errors, or a bean property
@@ -53,7 +72,7 @@
 </#macro>
 
 <#--
- * spring:bindEscaped
+ * bindEscaped
  *
  * Similar to spring:bind, but takes an explicit HTML escape flag rather
  * than relying on the default HTML escape setting.
