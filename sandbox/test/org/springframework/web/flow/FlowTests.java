@@ -27,6 +27,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * @author Keith Donald
  * @author Rod Johnson
+ * @author Colin Sampaleanu
  */
 public class FlowTests extends TestCase {
 
