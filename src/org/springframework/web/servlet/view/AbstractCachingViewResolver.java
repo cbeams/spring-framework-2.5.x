@@ -90,6 +90,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * This can be handy in case developer are able to modify views
 	 * (e.g. Velocity templates) at runtime after which you'd need to
 	 * clear the cache for the specified view.
+	 * @param viewName the view name for which the cached view object
+	 * (if any) needs to be removed
+	 * @param locale the locale for which the view object should be removed
 	 */
 	public void removeFromCache(String viewName, Locale locale) {
 		if (!this.cache) {
@@ -100,7 +103,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			if (viewMap.remove(cacheKey) == null) {
 				// some debug output might be useful
 				if (logger.isDebugEnabled()) {
-					logger.debug("No cached instance for view " + cacheKey + " was found");
+					logger.debug("No cached instance for view '" + cacheKey + "' was found");
 				}
 			} 
 			else {
