@@ -17,16 +17,18 @@
 package org.springframework.orm.jdo.support;
 
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.jdo.JdoAccessor;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.orm.jdo.PersistenceManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Spring web HandlerInterceptor that binds a JDO PersistenceManager to the
@@ -53,7 +55,27 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenPersistenceManagerInViewInterceptor extends JdoAccessor implements HandlerInterceptor {
+public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorAdapter {
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private PersistenceManagerFactory persistenceManagerFactory;
+
+	/**
+	 * Set the JDO PersistenceManagerFactory that should be used to create
+	 * PersistenceManagers.
+	 */
+	public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
+		this.persistenceManagerFactory = pmf;
+	}
+
+	/**
+	 * Return the JDO PersistenceManagerFactory that should be used to create
+	 * PersistenceManagers.
+	 */
+	public PersistenceManagerFactory getPersistenceManagerFactory() {
+		return persistenceManagerFactory;
+	}
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 													 Object handler) throws DataAccessException {
@@ -61,10 +83,6 @@ public class OpenPersistenceManagerInViewInterceptor extends JdoAccessor impleme
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
 		TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(), new PersistenceManagerHolder(pm));
 		return true;
-	}
-
-	public void postHandle(HttpServletRequest request, HttpServletResponse response,
-												 Object handler, ModelAndView modelAndView) {
 	}
 
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
