@@ -33,33 +33,41 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- *     public Event ${executeMethodName}(RequestContext context) throws Exception
+ * 
+ *      public Event ${executeMethodName}(RequestContext context) throws Exception
+ *  
  * </pre>
  * 
  * By default, the ${executeMethodName} will be the name of a <i>named action</i>,
- * or the name of the <i>current state</i> of the flow if the action is unnamed.
- * So the follow state definition
+ * or the name of the <i>current state</i> of the flow if the action is
+ * unnamed. So the follow state definition
  * 
  * <pre>
- *    &lt;action-state id=&quot;search&quot;&gt;
- *         &lt;action bean=&quot;my.search.action&quot;/&gt;
- *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
- *    &lt;/action-state&gt;
+ * 
+ *     &lt;action-state id=&quot;search&quot;&gt;
+ *          &lt;action bean=&quot;my.search.action&quot;/&gt;
+ *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *     &lt;/action-state&gt;
+ *  
  * </pre>
  * 
  * ... will execute the method:
  * 
  * <pre>
- *    public Event search(RequestContext context) throws Exception
+ * 
+ *     public Event search(RequestContext context) throws Exception
+ *  
  * </pre>
  * 
  * Alternatively you could have used a named action to execute the above method:
  * 
  * <pre>
- *    &lt;action-state id=&quot;searchState&quot;&gt;
- *         &lt;action name="search" bean=&quot;my.search.action&quot;/&gt;
- *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
- *    &lt;/action-state&gt;
+ * 
+ *     &lt;action-state id=&quot;searchState&quot;&gt;
+ *          &lt;action name=&quot;search&quot; bean=&quot;my.search.action&quot;/&gt;
+ *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *     &lt;/action-state&gt;
+ *  
  * </pre>
  * 
  * <p>
@@ -207,8 +215,8 @@ public class MultiAction extends AbstractAction {
 	}
 
 	/**
-	 * Action execution method name resolver that uses the following
-	 * algorithm to calculate a method name:
+	 * Action execution method name resolver that uses the following algorithm
+	 * to calculate a method name:
 	 * <ol>
 	 * <li>If the currently executing action is a <i>named action</i>, use the
 	 * name of the action as a method name.</li>
@@ -222,7 +230,7 @@ public class MultiAction extends AbstractAction {
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-			String actionName=((ActionState)context.getCurrentState()).getActionName(action);
+			String actionName = ((ActionState)context.getCurrentState()).getActionInfo(action).getName();
 			if (StringUtils.hasText(actionName)) {
 				// use action name as method name
 				return actionName;
