@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,11 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	private static final Object DEFAULT_KEY = new Object();
 
-	private final Map sessionMap = new HashMap(1);
+	/**
+	 * This Map needs to be synchronized because there might be multi-threaded
+	 * access in the case of JTA with remote transaction propagation.
+	 */
+	private final Map sessionMap = Collections.synchronizedMap(new HashMap(1));
 
 	private Transaction transaction;
 
@@ -66,7 +71,12 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public Session getAnySession() {
-		return (Session) this.sessionMap.values().iterator().next();
+		synchronized (this.sessionMap) {
+			if (!this.sessionMap.isEmpty()) {
+				return (Session) this.sessionMap.values().iterator().next();
+			}
+			return null;
+		}
 	}
 
 	public void addSession(Object key, Session session) {
@@ -86,8 +96,10 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public boolean doesNotHoldNonDefaultSession() {
-		return isEmpty() ||
-		    (this.sessionMap.size() == 1 && this.sessionMap.containsKey(DEFAULT_KEY));
+		synchronized (this.sessionMap) {
+			return this.sessionMap.isEmpty() ||
+					(this.sessionMap.size() == 1 && this.sessionMap.containsKey(DEFAULT_KEY));
+		}
 	}
 
 
