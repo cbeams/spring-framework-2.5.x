@@ -37,7 +37,7 @@ import java.util.Set;
  * recognize the same names as the constants themselves, and freeing them
  * from maintaining their own mapping.
  *
- * @version $Id: Constants.java,v 1.3 2004-05-23 20:23:32 jhoeller Exp $
+ * @version $Id: Constants.java,v 1.4 2004-06-02 00:49:40 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16-Mar-2003
@@ -58,12 +58,12 @@ public class Constants {
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (int i = 0; i < fields.length; i++) {
-			Field f = fields[i];
-			if (Modifier.isFinal(f.getModifiers()) && Modifier.isStatic(f.getModifiers())	&&
-			    Modifier.isPublic(f.getModifiers())) {
-				String name = f.getName();
+			Field field = fields[i];
+			if (Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())	&&
+			    Modifier.isPublic(field.getModifiers())) {
+				String name = field.getName();
 				try {
-					Object value = f.get(null);
+					Object value = field.get(null);
 					this.fieldCache.put(name, value);
 				}
 				catch (IllegalAccessException ex) {
@@ -75,7 +75,6 @@ public class Constants {
 
 	/**
 	 * Return the number of constants exposed.
-	 * @return int the number of constants exposed
 	 */
 	public int getSize() {
 		return this.fieldCache.size();
@@ -86,8 +85,8 @@ public class Constants {
 	 * @param code name of the field
 	 * @return long value if successful
 	 * @see #asObject
-	 * @throws org.springframework.core.ConstantException if the field name wasn't found or
-	 * if the type wasn't compatible with Number
+	 * @throws ConstantException if the field name wasn't found
+	 * or if the type wasn't compatible with Number
 	 */
 	public Number asNumber(String code) throws ConstantException {
 		Object o = asObject(code);
@@ -103,7 +102,7 @@ public class Constants {
 	 * @return String string value if successful.
 	 * Works even if it's not a string (invokes toString()).
 	 * @see #asObject
-	 * @throws org.springframework.core.ConstantException if the field name wasn't found
+	 * @throws ConstantException if the field name wasn't found
 	 */
 	public String asString(String code) throws ConstantException {
 		return asObject(code).toString();
@@ -113,7 +112,7 @@ public class Constants {
 	 * Parse the given string (upper or lower case accepted) and return 
 	 * the appropriate value if it's the name of a constant field in the
 	 * class we're analysing.
-	 * @throws org.springframework.core.ConstantException if there's no such field
+	 * @throws ConstantException if there's no such field
 	 */
 	public Object asObject(String code) throws ConstantException {
 		code = code.toUpperCase();
@@ -158,7 +157,7 @@ public class Constants {
 	 * @param value constant value to look up
 	 * @param namePrefix prefix of the constant names to search
 	 * @return the name of the constant field
-	 * @throws org.springframework.core.ConstantException if the value wasn't found
+	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
 		namePrefix = namePrefix.toUpperCase();
@@ -178,7 +177,7 @@ public class Constants {
 	 * @param value constant value to look up
 	 * @param propertyName the name of the bean property
 	 * @return the name of the constant field
-	 * @throws org.springframework.core.ConstantException if the value wasn't found
+	 * @throws ConstantException if the value wasn't found
 	 * @see #propertyToConstantNamePrefix
 	 */
 	public String toCodeForProperty(Object value, String propertyName) throws ConstantException {
