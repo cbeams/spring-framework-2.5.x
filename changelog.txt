@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.156 2004-06-02 21:18:08 jhoeller Exp $
+$Id: changelog.txt,v 1.157 2004-06-03 00:33:52 jhoeller Exp $
 
 
-Changes in version 1.0.2 (2.6.2004)
+Changes in version 1.0.2 (3.6.2004)
 -----------------------------------
 
 Package org.springframework.aop
@@ -126,6 +126,7 @@ Package org.springframework.validation
 * added support for "xxx*" field patterns to BindException's "getFieldErrors" and "getFieldError" methods
 * added "getArgumentsForBindingError" method to DataBinder, for missing required fields and for type mismatches
 * default argument for DataBinder binding errors is MessageSourceResolvable with "objectName.field"/ "field" as codes
+* fixed DefaultMessageCodesResolver to check whether field type is null (e.g. in case of an empty map entry)
 
 Package org.springframework.web
 * WebUtils' "setWebAppRootSystemProperty" method uses StringUtils.pathEquals when checking an existing property value

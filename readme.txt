@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.0.2 (May 2004)
-----------------------------------------------
+THE SPRING FRAMEWORK, release 1.0.2 (June 2004)
+-----------------------------------------------
 http://www.springframework.org
 
 
@@ -85,7 +85,7 @@ The "dist" directory contains the following distinct JAR files for use in applic
 JAR files and a JAR file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~195 KB)
+* "spring-core" (~200 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -97,7 +97,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~180 KB)
+* "spring-dao" (~185 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
@@ -113,7 +113,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~955 KB)
+* "spring" (~985 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
