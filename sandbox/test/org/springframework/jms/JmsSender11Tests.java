@@ -17,10 +17,14 @@ import javax.naming.NamingException;
 
 
 import org.easymock.MockControl;
+import org.springframework.jms.support.DefaultJmsAdmin;
 
 
 /**
  * Unit test for the JmsSender implemented using JMS 1.1
+ * 
+ * @author Andre Biryukov
+ * @author Mark Pollack
  */
 public class JmsSender11Tests extends JmsTestCase {
 
@@ -91,6 +95,7 @@ public class JmsSender11Tests extends JmsTestCase {
 	{
 		JmsSender11 sender = new JmsSender11();
 		sender.setConnectionFactory(_mockConnectionFactory);
+		sender.setJmsAdmin(new DefaultJmsAdmin());
 
 		//Mock the javax.jms MessageProducer
 		MockControl messageProducerControl =

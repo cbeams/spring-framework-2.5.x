@@ -17,6 +17,8 @@ import junit.framework.TestCase;
 
 /**
  * Helper class to put common functionality for JMS 1.0.2 and 1.1 test cases.
+ * @author Andre Biryukov
+ * @author Mark Pollack
  */
 public class JmsTestCase extends TestCase {
 

@@ -40,7 +40,8 @@ public class JmsHelper
     
     
     /**
-     * @return
+     * The JMS message producer for use in the Helper send methods.
+     * @return A message producer
      */
     public MessageProducer getMessageProducer()
     {
@@ -48,7 +49,8 @@ public class JmsHelper
     }
 
     /**
-     * @return
+     * The JMS session 
+     * @return The JMS sesion
      */
     public Session getSession()
     {
@@ -56,7 +58,8 @@ public class JmsHelper
     }
 
     /**
-     * @param producer
+     * Set the JMS MessageProducer
+     * @param producer the message producer
      */
     public void setMessageProducer(MessageProducer producer)
     {
@@ -64,7 +67,8 @@ public class JmsHelper
     }
 
     /**
-     * @param session
+     * Set the JMS session
+     * @param session the session
      */
     public void setSession(Session session)
     {

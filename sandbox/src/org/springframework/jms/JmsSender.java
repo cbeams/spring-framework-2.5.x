@@ -41,7 +41,7 @@ public interface JmsSender {
 	 * Execute the action specified by the given action object within
 	 * a JMS TopicSession.  This version of execute should be used with
 	 * 1.0.2 providers so topic specific methods are available to the
-	 * action. 
+	 * action.   
 	 * @param action callback object that specifies the action
 	 * @throws JmsException if there is any problem
 	 */
@@ -69,9 +69,9 @@ public interface JmsSender {
     public void send(String destinationName, JmsSenderCallback callback) throws JmsException;
 
 	/**
-	 * Send a message to a supplied JMS destination.
-	 * @param destinationName The destination name is looked up first looked up in JNDI.
-     * If it is not found then a call to 
+	 * Send a message to a JMS destination.
+	 * @param destinationName The destination name can refer to
+	 * either the a dynamic destination or one residing in JNDI.   
 	 * @param messageCreator 
 	 * @throws JmsException converted checked JMSException to unchecked.
 	 */

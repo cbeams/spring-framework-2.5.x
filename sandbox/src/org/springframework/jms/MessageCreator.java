@@ -26,7 +26,7 @@ public interface MessageCreator {
 	/**
 	 * Implement this method to return a message to be sent.
 	 *
-	 * @param The JMS session
+	 * @param session The JMS session
 	 * @return The message to be sent.
 	 * @throws The JMS Checked Exception.  Do not catch it, it will be
 	 * handled correctly by the JmsSender.

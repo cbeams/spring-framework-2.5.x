@@ -41,26 +41,29 @@ public interface JmsAdmin {
 	void destroyTopic(String topicName);
 	
 	/**
-	 * Lookup dynamic destinations that have been created with 
-	 * JmsAdmin 
+	 * Lookup JMS destinations.  If createDynamic is enabled, then
+	 * the lookup will go against a cache of dynamic destination.  The
+	 * last parameter determines what JMS destination type will be
+	 * created.  
+	 *
 	 * @param destinationName The name of a dynamic destination.
 	 * @return The JMS destination object.  Null if not found.
 	 */
-	Destination lookup(String destinationName);
+	Destination lookup(String destinationName, boolean createDynamic, boolean isPubSubDomain);
 	
 	/**
-	 * Lookup dynamic topics that have been created with JmsAdmin
+	 * Lookup topics that have been created with JmsAdmin 
 	 * @param topicName The name of a dynamic topic
 	 * @return The JMS Topic.  Null if not found.
 	 */
-	Topic lookupTopic(String topicName);
+	Topic lookupDynamicTopic(String topicName);
 	
 	/**
 	 * Lookup dynamic queues that have been created with JmsAdmin
 	 * @param queueName The name of a dynamic queue.
 	 * @return the JMS Queue.  Null if not found.
 	 */
-	Queue lookupQueue(String queueName);
+	Queue lookupDynamicQueue(String queueName);
 
 	
 	

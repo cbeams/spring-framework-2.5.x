@@ -23,11 +23,13 @@ import javax.naming.NamingException;
 
 
 import org.easymock.MockControl;
+import org.springframework.jms.support.DefaultJmsAdmin;
 
 /**
  * Unit test for the JmsSender using the JmsSender102 implementation.
  * 
- * 
+ * @author Andre Biryukov
+ * @author Mark Pollack
  */
 public class JmsSender102Tests extends JmsTestCase {
 
@@ -195,6 +197,7 @@ public class JmsSender102Tests extends JmsTestCase {
 	public void testSendQueue() throws Exception {
 		JmsSender102 sender = new JmsSender102();
 		sender.setConnectionFactory(mockQueueConnectionFactory);
+		sender.setJmsAdmin(new DefaultJmsAdmin());
 
 		//Mock the javax.jms QueueSender
 		MockControl queueSenderControl =
@@ -237,6 +240,7 @@ public class JmsSender102Tests extends JmsTestCase {
 		//Setup the test
 		JmsSender102 sender = new JmsSender102();
 		sender.setConnectionFactory(mockTopicConnectionFactory);
+		sender.setJmsAdmin(new DefaultJmsAdmin());
 
 		//Mock the javax.jms TopicPublisher
 		MockControl topicPublisherControl =

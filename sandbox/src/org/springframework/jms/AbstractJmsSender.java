@@ -4,25 +4,29 @@
  */
 package org.springframework.jms;
 
-import java.util.Properties;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.DefaultJmsAdmin;
 import org.springframework.jms.support.JmsAdmin;
-import org.springframework.jndi.JndiTemplate;
 
 /**
  * Base class for JmsSenders defining commons operations like
  * setting/getting the connection factory, session parameters,
  * and checking that all required bean properites have been set.
- * Default settings for JMS sessions are not transacted and
- * auto acknowledge. 
+ * 
+ * Default settings for JMS sessions are transacted and
+ * auto acknowledge.  As per section 17.3.5 of the EJB specification,
+ * the transaction and acknowledgement parameters are ignored 
+ * when a JMS Session is created inside the container environment.
+ * 
+ * Default setting for isEnabledDynamicDestinations is false.
+ * 
+ * Default setting for isPubSubDomain is false.  Point-to-Point (Queues)
+ * is the default domain.
+ * 
  */
 public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 
@@ -37,40 +41,19 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	
 	private JmsAdmin _jmsAdmin;
 	
-	
-	//TODO this should maybe be done better...see AbstractJndiLocator
-	private final JndiTemplate _jndiTemplate = new JndiTemplate();
+	/**
+	 * 
+	 */
+	private boolean _enabledDynamicDestinations = false;
     
+	/**
+	 * By default usee the Point-to-Point domain.
+	 */
+	private boolean _isPubSubDomain = false;
+	    
     protected final Log logger = LogFactory.getLog(getClass());
     
-	/**
-	 * Set the JNDI environment to use for the JNDI lookup.
-	 * Creates a JndiTemplate with the given environment settings.
-	 * @see #setJndiTemplate
-	 */
-	public final void setJndiEnvironment(Properties jndiEnvironment) {
-		_jndiTemplate.setEnvironment(jndiEnvironment);
-	}
-
-	/**
-	 * Return the JNDI enviromment to use for the JNDI lookup.
-	 */
-	public final Properties getJndiEnvironment() {
-		return _jndiTemplate.getEnvironment();
-	}
-	
-	/**
-	 * Looks up any object in the Jndi context. The consumer of this method is responsible
-	 * for the casting to the actual type expected.
-	 *
-	 * @param name Jndi key that will be used to query the context.
-	 * @return Object that needs to be cast to the actual type.
-	 * @throws NamingException if nothing is found under the name passed.
-	 */
-	protected final Object lookupJndiResource(final String name) throws NamingException {
-		return _jndiTemplate.lookup(name);
-	}
-	
+    
 	/**
      * Return the connection factory used sending messages.
 	 * @return the connection factory.
@@ -99,6 +82,9 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 		if (_jmsAdmin == null)
 		{
 			logger.info("Using DefaultJmsAdmin implementation");
+			//TODO This should be a singleton......since it has a cache of
+			//dynamic jms destinations.  Maybe place all lookup of destinations
+			//here and have it configured to use a JNDILookup template?
 			DefaultJmsAdmin admin = new DefaultJmsAdmin();
 			//TODO bad smell....
 			admin.setJmsSender(this);
@@ -151,17 +137,59 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 }
 
 	/**
-	 * @{inheritDoc}
+	 * {@inheritDoc}
 	 */
 	public JmsAdmin getJmsAdmin() {
 		return _jmsAdmin;
 	}
 
 	/**
-	 * @{inheritDoc}
+	 * {@inheritDoc}
 	 */
 	public void setJmsAdmin(JmsAdmin admin) {
 		_jmsAdmin = admin;
+	}
+
+	/**
+	 * If a destination name is not found in JNDI, then it will
+	 * be created dynamically.
+	 * @return true if enabled.
+	 */
+	public boolean isEnabledDynamicDestinations() {
+		return _enabledDynamicDestinations;
+	}
+
+	/**
+	 * Set the ability of JmsSender to create dynamic destinations
+	 * if the destination name is not found in JNDI.
+	 * @param b true to enable.
+	 */
+	public void setEnabledDynamicDestinations(boolean b) {
+		_enabledDynamicDestinations = b;
+	}
+
+	/**
+	 * Configure the JmsSender with knowledge of the JMS Domain used.
+	 * For the JMS 1.0.2 based senders this tells the JMS 1.0.2 which
+	 * class hierarchy to use in the implementation of the various
+	 * send and execute methods.  For the JMS 1.1 based senders it
+	 * tells what type of destination to create if dynamic destinations
+	 * are enabled.
+	 * @return true if the Publish/Subscribe domain (Topics) are used.
+	 * otherwise the Point-to-Point domain (Queues) are used.
+	 */
+	public boolean isPubSubDomain() {
+		return _isPubSubDomain;
+	}
+
+	/**
+	 * Set the type of domain the sender is configured for.  See 
+	 * {@link #isPubSubDomain() isPubSubDomain} for more information.
+	 * @param b true for Publish/Subscribe domain (Topics) false for
+	 * Point-to-Point domain (Queues)
+	 */
+	public void setPubSubDomain(boolean b) {
+		_isPubSubDomain = b;
 	}
 
 }
