@@ -21,28 +21,37 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.rules.RulesSource;
 import org.springframework.util.Assert;
 
 /**
  * @author Oliver Hutchison
  */
 public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
-        implements FormModel {
+        implements NestableFormModel {
 
     protected final Log logger = LogFactory.getLog(getClass());
-    
-    private MutablePropertyAccessStrategy domainObjectAccessStrategy;
-    
-    private Set commitListeners;
-    
+
+    private NestingFormModel parent;
+
+    private RulesSource rulesSource;
+
     private boolean bufferChanges = true;
-    
+
     private boolean enabled = true;
-    
-    protected AbstractFormModel(MutablePropertyAccessStrategy domainObjectAccessStrategy) {
+
+    private MutablePropertyAccessStrategy domainObjectAccessStrategy;
+
+    private Set commitListeners;
+
+    protected AbstractFormModel() {
+    }
+
+    protected AbstractFormModel(
+            MutablePropertyAccessStrategy domainObjectAccessStrategy) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
     }
-    
+
     public Object getFormObject() {
         return getPropertyAccessStrategy().getDomainObject();
     }
@@ -54,7 +63,23 @@ public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
     protected Class getFormObjectClass() {
         return getPropertyAccessStrategy().getDomainObject().getClass();
     }
-    
+
+    public NestingFormModel getParent() {
+        return parent;
+    }
+
+    public void setParent(NestingFormModel parent) {
+        this.parent = parent;
+    }
+
+    public RulesSource getRulesSource() {
+        return rulesSource;
+    }
+
+    public void setRulesSource(RulesSource rulesSource) {
+        this.rulesSource = rulesSource;
+    }
+
     public boolean getBufferChangesDefault() {
         return bufferChanges;
     }
@@ -91,7 +116,7 @@ public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
         assertValueModelNotNull(valueModel, formProperty);
         return valueModel.get();
     }
-    
+
     public void addValueListener(String formProperty,
             ValueListener valueListener) {
         ValueModel valueModel = getValueModel(formProperty);
@@ -105,7 +130,7 @@ public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
         assertValueModelNotNull(valueModel, formProperty);
         valueModel.removeValueListener(valueListener);
     }
-    
+
     private void assertValueModelNotNull(ValueModel valueModel,
             String formProperty) {
         Assert
@@ -116,17 +141,17 @@ public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
                                 + "' has not been added to this form model (or to any parents.)");
     }
 
-
     public MutablePropertyAccessStrategy getPropertyAccessStrategy() {
         return domainObjectAccessStrategy;
     }
 
-    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
-        return domainObjectAccessStrategy.getMetadataAccessStrategy();
+    public void setPropertyAccessStrategy(
+            MutablePropertyAccessStrategy domainObjectAccessStrategy) {
+        this.domainObjectAccessStrategy = domainObjectAccessStrategy;
     }
 
-    protected MutablePropertyAccessStrategy getAccessStrategy() {
-        return domainObjectAccessStrategy;
+    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
+        return domainObjectAccessStrategy.getMetadataAccessStrategy();
     }
 
     public void addCommitListener(CommitListener listener) {
@@ -160,6 +185,4 @@ public abstract class AbstractFormModel extends AbstractPropertyChangePublisher
             l.postEditCommitted(getFormObject());
         }
     }
-    
-    
 }

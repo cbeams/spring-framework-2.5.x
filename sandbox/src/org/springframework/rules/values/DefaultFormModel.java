@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-
 /**
  * @author Keith Donald
  */
@@ -30,9 +29,10 @@ public class DefaultFormModel extends AbstractFormModel implements
 
     private ValueModel commitTrigger;
 
-    private NestingFormModel parent;
-
     private Map formValueModels = new HashMap();
+
+    public DefaultFormModel() {
+    }
 
     public DefaultFormModel(Object domainObject) {
         this(new BeanPropertyAccessStrategy(domainObject));
@@ -70,10 +70,6 @@ public class DefaultFormModel extends AbstractFormModel implements
         }
     }
 
-    public void setParent(NestingFormModel parent) {
-        this.parent = parent;
-    }
-    
     protected void handleEnabledChange() {
         if (isEnabled()) {
             validate();
@@ -83,10 +79,10 @@ public class DefaultFormModel extends AbstractFormModel implements
         }
     }
 
-    protected void validate() {    
+    protected void validate() {
     }
 
-    protected void clearErrors() {    
+    protected void clearErrors() {
     }
 
     protected Iterator valueModelIterator() {
@@ -147,8 +143,8 @@ public class DefaultFormModel extends AbstractFormModel implements
         return formValueModel;
     }
 
-    protected ValueModel preProcessNewFormValueModel(
-            String formPropertyPath, ValueModel formValueModel) {
+    protected ValueModel preProcessNewFormValueModel(String formPropertyPath,
+            ValueModel formValueModel) {
         return formValueModel;
     }
 
@@ -167,19 +163,17 @@ public class DefaultFormModel extends AbstractFormModel implements
     }
 
     private ValueModel recursiveGetWrappedModel(ValueModel valueModel) {
-        if (valueModel instanceof ValueModelWrapper) { 
-            return recursiveGetWrappedModel(((ValueModelWrapper)valueModel)
+        if (valueModel instanceof ValueModelWrapper) { return recursiveGetWrappedModel(((ValueModelWrapper)valueModel)
                 .getWrappedModel()); }
         return valueModel;
     }
 
-    public ValueModel getValueModel(String formPropertyPath,
-            boolean queryParent) {
+    public ValueModel getValueModel(String formPropertyPath, boolean queryParent) {
         ValueModel valueModel = (ValueModel)formValueModels
                 .get(formPropertyPath);
         if (valueModel == null) {
-            if (parent != null && queryParent) {
-                valueModel = parent.findValueModelFor(this,
+            if (getParent() != null && queryParent) {
+                valueModel = getParent().findValueModelFor(this,
                         formPropertyPath);
             }
         }

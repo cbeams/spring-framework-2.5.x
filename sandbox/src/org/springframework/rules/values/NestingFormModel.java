@@ -20,6 +20,20 @@ package org.springframework.rules.values;
  */
 public interface NestingFormModel extends FormModel {
 
+    /**
+     * Called by a nestable form model contained by this form model, where the
+     * calling child form model is searching for a value model associated with
+     * the provided form property path. The nesting form model will then query
+     * the other form models it nests in an effort to find the value model. If
+     * no value model exists for the <code>formPropertyPath</code> after
+     * searching all nested models, <code>null</code> is returned.
+     * 
+     * @param delegatingChild
+     *            The delegating nestable form model.
+     * @param formPropertyPath
+     *            The form property path to search for.
+     * @return The value model if one exists at the provided formPropertyPath
+     */
     public ValueModel findValueModelFor(FormModel delegatingChild,
             String formPropertyPath);
 
@@ -48,6 +62,18 @@ public interface NestingFormModel extends FormModel {
     /**
      * Create a child form model nested by this form model identified by the
      * provided name. The form object associated with the created child model is
+     * the value model at the specified parent property path.
+     * 
+     * @param childFormModelName
+     * @param parentPropertyFormObjectPath
+     * @return The child form model
+     */
+    public NestingFormModel createCompoundChild(String childFormModelName,
+            String parentPropertyFormObjectPath);
+
+    /**
+     * Create a child form model nested by this form model identified by the
+     * provided name. The form object associated with the created child model is
      * accessed via the provided value model.
      * 
      * @param childFormModelName
@@ -55,6 +81,18 @@ public interface NestingFormModel extends FormModel {
      * @return The child form model
      */
     public MutableFormModel createChild(String childFormModelName,
+            ValueModel childFormObjectHolder);
+
+    /**
+     * Create a child form model nested by this form model identified by the
+     * provided name. The form object associated with the created child model is
+     * accessed via the provided value model.
+     * 
+     * @param childFormModelName
+     * @param childFormObjectHolder
+     * @return The child form model
+     */
+    public NestingFormModel createCompoundChild(String childFormModelName,
             ValueModel childFormObjectHolder);
 
     /**

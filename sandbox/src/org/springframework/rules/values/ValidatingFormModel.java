@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.rules.RulesProvider;
-import org.springframework.rules.RulesSource;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
@@ -37,11 +36,12 @@ import org.springframework.util.DefaultObjectStyler;
  */
 public class ValidatingFormModel extends DefaultFormModel implements
         PropertyAccessStrategy {
-    private RulesSource rulesSource;
-
     private Map validationErrors = new HashMap();
 
     private List validationListeners = new ArrayList();
+    
+    public ValidatingFormModel() {
+    }
 
     public ValidatingFormModel(Object domainObject) {
         super(domainObject);
@@ -60,14 +60,6 @@ public class ValidatingFormModel extends DefaultFormModel implements
             MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy, bufferChanges);
-    }
-
-    public void setRulesSource(RulesSource rulesSource) {
-        this.rulesSource = rulesSource;
-    }
-
-    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
-        return getAccessStrategy().getMetadataAccessStrategy();
     }
 
     public Object getDomainObject() {
@@ -184,12 +176,12 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     .getRules(domainObjectProperty);
         }
         else {
-            if (rulesSource == null) {
+            if (getRulesSource() == null) {
                 logger
                         .info("No rules source has been configured; "
                                 + "please set a valid reference to enable rules-based validation.");
             }
-            constraint = rulesSource.getRules(getFormObjectClass(),
+            constraint = getRulesSource().getRules(getFormObjectClass(),
                     domainObjectProperty);
         }
         return constraint;

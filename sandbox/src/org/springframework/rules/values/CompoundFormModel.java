@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.rules.Algorithms;
-import org.springframework.rules.RulesSource;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.UnaryProcedure;
 import org.springframework.util.Assert;
@@ -35,7 +34,8 @@ public class CompoundFormModel extends AbstractFormModel implements
 
     private Map formModels = new LinkedHashMap(9);
 
-    private RulesSource rulesSource;
+    public CompoundFormModel() {
+    }
 
     public CompoundFormModel(Object domainObject) {
         this(new BeanPropertyAccessStrategy(domainObject));
@@ -57,31 +57,39 @@ public class CompoundFormModel extends AbstractFormModel implements
         setBufferChangesDefault(bufferChanges);
     }
 
-    public void setRulesSource(RulesSource rulesSource) {
-        this.rulesSource = rulesSource;
-    }
-
     public MutableFormModel createChild(String childFormModelName) {
         ValidatingFormModel childModel = new ValidatingFormModel(
-                getAccessStrategy(), getBufferChangesDefault());
-        childModel.setRulesSource(rulesSource);
+                getPropertyAccessStrategy(), getBufferChangesDefault());
+        childModel.setRulesSource(getRulesSource());
         addChildModel(childFormModelName, childModel);
         return childModel;
     }
 
     public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath) {
+        return (MutableFormModel)createChildInternal(new ValidatingFormModel(),
+                childFormModelName, parentPropertyFormObjectPath);
+    }
+
+    public NestingFormModel createCompoundChild(String childFormModelName,
+            String parentPropertyFormObjectPath) {
+        return (NestingFormModel)createChildInternal(new CompoundFormModel(),
+                childFormModelName, parentPropertyFormObjectPath);
+    }
+
+    private FormModel createChildInternal(AbstractFormModel childFormModel,
+            String childFormModelName, String parentPropertyFormObjectPath) {
         ValueModel valueHolder = new PropertyAdapter(
                 getPropertyAccessStrategy(), parentPropertyFormObjectPath);
         if (getBufferChangesDefault()) {
             valueHolder = new BufferedValueModel(valueHolder);
         }
         boolean enabledDefault = valueHolder.get() != null;
-        Class valueClass = getPropertyAccessStrategy()
-                .getMetadataAccessStrategy().getPropertyType(
-                        parentPropertyFormObjectPath);
+        Class valueClass = getMetadataAccessStrategy().getPropertyType(
+                parentPropertyFormObjectPath);
         new ChildFormObjectSetter(valueHolder, valueClass);
-        return createChild(childFormModelName, valueHolder, enabledDefault);
+        return createChildInternal(childFormModel, childFormModelName,
+                valueHolder, enabledDefault);
     }
 
     private static class ChildFormObjectSetter implements ValueListener {
@@ -114,18 +122,35 @@ public class CompoundFormModel extends AbstractFormModel implements
         return createChild(childFormModelName, childFormObjectHolder, true);
     }
 
+    public NestingFormModel createCompoundChild(String childFormModelName,
+            ValueModel childFormObjectHolder) {
+        return createCompoundChild(childFormModelName, childFormObjectHolder,
+                true);
+    }
+
     public MutableFormModel createChild(String childFormModelName,
             ValueModel childFormObjectHolder, boolean enabled) {
+        return (MutableFormModel)createChildInternal(new ValidatingFormModel(),
+                childFormModelName, childFormObjectHolder, enabled);
+    }
+
+    public NestingFormModel createCompoundChild(String childFormModelName,
+            ValueModel childFormObjectHolder, boolean enabled) {
+        return (NestingFormModel)createChildInternal(new CompoundFormModel(),
+                childFormModelName, childFormObjectHolder, enabled);
+    }
+
+    private FormModel createChildInternal(AbstractFormModel childModel,
+            String childFormModelName, ValueModel childFormObjectHolder,
+            boolean enabled) {
         MutablePropertyAccessStrategy childObjectAccessStrategy = getPropertyAccessStrategy()
                 .newNestedAccessor(childFormObjectHolder);
-        ValidatingFormModel childModel = new ValidatingFormModel(
-                childObjectAccessStrategy);
+        childModel.setPropertyAccessStrategy(childObjectAccessStrategy);
         childModel.setEnabled(enabled);
         childModel.setBufferChangesDefault(getBufferChangesDefault());
-        childModel.setRulesSource(rulesSource);
+        childModel.setRulesSource(getRulesSource());
         addChildModel(childFormModelName, childModel);
         return childModel;
-
     }
 
     public NestableFormModel addChildModel(String childFormModelName,
@@ -187,7 +212,7 @@ public class CompoundFormModel extends AbstractFormModel implements
     }
 
     public ValueModel getValueModel(String formProperty) {
-        return findValueModelFor(null, formProperty);
+        return getValueModel(formProperty, true);
     }
 
     public ValueModel findValueModelFor(FormModel delegatingChild,
@@ -207,6 +232,17 @@ public class CompoundFormModel extends AbstractFormModel implements
                     + "' found on any nested form models... returning [null]");
         }
         return null;
+    }
+
+    public ValueModel getValueModel(String formPropertyPath, boolean queryParent) {
+        ValueModel valueModel = findValueModelFor(null, formPropertyPath);
+        if (valueModel == null) {
+            if (getParent() != null && queryParent) {
+                valueModel = getParent().findValueModelFor(this,
+                        formPropertyPath);
+            }
+        }
+        return valueModel;
     }
 
     protected void handleEnabledChange() {
