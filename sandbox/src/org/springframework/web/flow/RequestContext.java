@@ -84,11 +84,11 @@ public interface RequestContext {
 	public State getCurrentState() throws IllegalStateException;
 
 	/**
-	 * Returns the client event that triggered this request.
-	 * @return the first event, the one that triggered the current execution
-	 *         request
+	 * Returns the client event that originated (triggered) this request.
+	 * @return the originating event, the one that triggered the current
+	 *         execution request
 	 */
-	public Event getFirstEvent();
+	public Event getOriginatingEvent();
 
 	/**
 	 * Returns the last event signaled during this request. The event may or may
