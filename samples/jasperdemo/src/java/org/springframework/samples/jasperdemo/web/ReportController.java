@@ -54,6 +54,11 @@ public class ReportController extends MultiActionController {
 		return new ModelAndView("simpleReportCompile", model);
 	}
 
+	public ModelAndView handleExporterParameters(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+	  return new ModelAndView("htmlReport", getModel());
+	}
+
 	public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
