@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.42 2004-03-11 20:02:25 davison Exp $
+    $Id: build.xml,v 1.43 2004-03-15 17:45:48 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -403,12 +403,45 @@
 
 
 	<!--
-		Run tests. This and Clover test target take their includes and excludes
+		Run test suite. This and Clover test target take their includes and excludes
 		from build.properties. However it's possible to run specific tests by passing in
 		the test.includes and (optionally) test.excludes properties through the command line, as below:
 			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
 	-->
-	<target name="tests" depends="buildtests" description="Run tests.">
+	<target name="tests" depends="buildtests" description="Run tests">
+
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<!--
+		Run test suite and generate test summary.
+		Does not halt on failure or error, in contrast to the "tests" target above.
+	-->
+	<target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
 
 		<property name="reports.dir" value="${target.junit.reports.dir}"/>
 		<property name="summary.dir" value="${target.junit.summary.dir}"/>
