@@ -146,9 +146,9 @@ public class MetadataModelMBeanInfoAssembler extends
 		if (mr.getLogFile() != null) {
 			mbeanDescriptor.setField(LOG_FILE, mr.getLogFile());
 		}
-		mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mr.getCurrencyTimeLimit()));
+		mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mr.getCurrencyTimeLimit()));
 		mbeanDescriptor.setField(PERSIST_POLICY, mr.getPersistPolicy());
-		mbeanDescriptor.setField(PERSIST_PERIOD, new Integer(mr.getPersistPeriod()));
+		mbeanDescriptor.setField(PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
 		mbeanDescriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
 		mbeanDescriptor.setField(PERSIST_NAME, mr.getPersistName());
 	}
@@ -158,7 +158,7 @@ public class MetadataModelMBeanInfoAssembler extends
 		ManagedAttribute sma = (setter == null) ? ManagedAttribute.EMPTY : attributeSource.getManagedAttribute(setter);
 
 		int ctl = resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
-		descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(ctl));
+		descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(ctl));
 
 		Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
 		descriptor.setField(DEFAULT, defaultValue);
@@ -167,7 +167,7 @@ public class MetadataModelMBeanInfoAssembler extends
 		descriptor.setField(PERSIST_POLICY, persistPolicy);
 
 		int persistPeriod = resolveIntDescriptor(gma.getPersistPeriod(), sma.getPersistPeriod());
-		descriptor.setField(PERSIST_PERIOD, new Integer(persistPeriod));
+		descriptor.setField(PERSIST_PERIOD, Integer.toString(persistPeriod));
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class MetadataModelMBeanInfoAssembler extends
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
 		ManagedOperation mo = attributeSource.getManagedOperation(method);
 		if (mo != null) {
-			descriptor.setField(CURRENCY_TIME_LIMIT, new Integer(mo.getCurrencyTimeLimit()));
+			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mo.getCurrencyTimeLimit()));
 		}
 	}
 
