@@ -245,7 +245,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Returns the first action executed by this action state.
-	 * @return The first action
+	 * @return the first action
 	 */
 	public Action getAction() {
 		return getActions()[0];
@@ -265,7 +265,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Returns the logical name associated with an action instance executed by
+	 * Returns the name associated with an action instance executed by
 	 * this action state.
 	 * @param action the action for which the name should be looked up
 	 * @return the name of given action or <code>null</code> if the action
@@ -273,7 +273,7 @@ public class ActionState extends TransitionableState {
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
 	 */
-	public String getActionName(Action action) {
+	public String getActionName(Action action) throws NoSuchElementException {
 		Assert.notNull(action, "The action should not be [null]");
 		for (Iterator it = namedActionIterator(); it.hasNext();) {
 			NamedAction namedAction = (NamedAction)it.next();
@@ -452,6 +452,11 @@ public class ActionState extends TransitionableState {
 
 			private Event resultEvent;
 
+			/**
+			 * Create a new action name qualified event.
+			 * @param actionName the name of the named action
+			 * @param resultEvent the event to qualify
+			 */
 			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {
 				super(resultEvent.getSource());
 				this.actionName = actionName;
