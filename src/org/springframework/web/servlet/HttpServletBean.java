@@ -33,7 +33,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
  * Simple extension of javax.servlet.http.HttpServlet that treats its config
@@ -59,7 +63,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
-	private Set requiredProperties = new HashSet();
+	private final Set requiredProperties = new HashSet();
 
 	/**
 	 * Subclasses can invoke this method to specify that this property
@@ -84,6 +88,9 @@ public abstract class HttpServletBean extends HttpServlet {
 		try {
 			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = new BeanWrapperImpl(this);
+			ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs);
 		}
 		catch (BeansException ex) {
@@ -96,6 +103,16 @@ public abstract class HttpServletBean extends HttpServlet {
 		logger.info("Servlet '" + getServletName() + "' configured successfully");
 	}
 	
+	/**
+	 * Initialize the BeanWrapper for this HttpServletBean,
+	 * possibly with custom editors.
+	 * @param bw the BeanWrapper to initialize
+	 * @throws BeansException if thrown by BeanWrapper methods
+	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
+	}
+
 	/**
 	 * Subclasses may override this to perform custom initialization.
 	 * All bean properties of this servlet will have been set before this
