@@ -31,7 +31,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs.addPropertyValue("properties", "tb2.age=99\ntb2.name=test2");
 		pvs.addPropertyValue("order", "0");
 		ac.registerSingleton("configurer2", PropertyOverrideConfigurer.class, pvs);
-		ac.rebuild();
+		ac.refresh();
 		TestBean tb1 = (TestBean) ac.getBean("tb1");
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
 		assertEquals(99, tb1.getAge());
@@ -66,7 +66,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs.addPropertyValue("properties", "age=98");
 		pvs.addPropertyValue("order", "0");
 		ac.registerSingleton("configurer2", PropertyPlaceholderConfigurer.class, pvs);
-		ac.rebuild();
+		ac.refresh();
 		TestBean tb1 = (TestBean) ac.getBean("tb1");
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
 		assertEquals(98, tb1.getAge());
@@ -101,7 +101,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs.addPropertyValue("order", "0");
 		ac.registerSingleton("configurer2", PropertyPlaceholderConfigurer.class, pvs);
 		try {
-			ac.rebuild();
+			ac.refresh();
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {

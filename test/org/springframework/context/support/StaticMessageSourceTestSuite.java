@@ -226,7 +226,7 @@ public class StaticMessageSourceTestSuite
 		parent.registerPrototype("father", org.springframework.beans.TestBean.class,
 		                         new MutablePropertyValues(m));
 
-		parent.rebuild();
+		parent.refresh();
 
 		this.sac = new StaticApplicationContext(parent);
 		sac.addListener(listener);
@@ -241,7 +241,7 @@ public class StaticMessageSourceTestSuite
 
 
 		LBIInit.createTestBeans(sac.getListableBeanFactory());
-		sac.rebuild();
+		sac.refresh();
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(
 		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME);
