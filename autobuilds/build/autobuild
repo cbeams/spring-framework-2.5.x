@@ -8,11 +8,11 @@
 #    application    - the sample app to build and test
 #    server         - the target server to deploy upon
 #
-# $Id: autobuild,v 1.4 2004-01-08 01:32:06 davison Exp $
+# $Id: autobuild,v 1.5 2004-11-30 19:21:01 davison Exp $
 #
 # ---------------------------------------------------------------------------
 
-ANT=ant
+ANT=$ANT_HOME/bin/ant
 USAGE="Usage: $0 [-u] sample-app target-server"
 PARAMS=$@
 
