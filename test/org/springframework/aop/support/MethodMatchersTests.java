@@ -24,9 +24,10 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
- * $Id: MethodMatchersTests.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
+ * $Id: MethodMatchersTests.java,v 1.4 2004-07-24 18:25:48 johnsonr Exp $
  */
 public class MethodMatchersTests extends TestCase {
 
@@ -54,6 +55,10 @@ public class MethodMatchersTests extends TestCase {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertTrue(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class));
 		assertTrue(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class));
+	}
+	
+	public void testMethodMatcherTrueSerializable() throws Exception {
+		assertSame(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE), MethodMatcher.TRUE);
 	}
 
 	public void testSingle() throws Exception {

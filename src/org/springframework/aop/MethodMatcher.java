@@ -40,7 +40,7 @@ import java.lang.reflect.Method;
  * 
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: MethodMatcher.java,v 1.5 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: MethodMatcher.java,v 1.6 2004-07-24 18:26:10 johnsonr Exp $
  */
 public interface MethodMatcher {
 	
@@ -86,20 +86,6 @@ public interface MethodMatcher {
 	/**
 	 * Canonical instance that matches all methods.
 	 */
-	MethodMatcher TRUE = new MethodMatcher() {
-
-		public boolean isRuntime() {
-			return false;
-		}
-
-		public boolean matches(Method m, Class targetClass) {
-			return true;
-		}
-
-		public boolean matches(Method m, Class targetClass, Object[] args) {
-			// should never be invoked as isRuntime returns false
-			throw new UnsupportedOperationException();
-		}
-	};
+	MethodMatcher TRUE = TrueMethodMatcher.INSTANCE;
 
 }
