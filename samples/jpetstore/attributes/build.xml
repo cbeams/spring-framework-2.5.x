@@ -154,7 +154,8 @@
 				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ibatis">
-				<include name="ibatis-db.jar"/>
+				<include name="ibatis-common.jar"/>
+				<include name="ibatis-sqlmap.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jaxrpc.jar"/>
