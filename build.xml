@@ -3,7 +3,7 @@
 <!--
   Build file for the Spring Framework.
 
-  $Id: build.xml,v 1.72 2004-07-26 14:26:27 jhoeller Exp $
+  $Id: build.xml,v 1.73 2004-07-26 16:20:08 jhoeller Exp $
 
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
@@ -164,6 +164,8 @@
 				<include name="org/springframework/util/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -174,6 +176,8 @@
 				<include name="org/springframework/metadata/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -190,6 +194,8 @@
 				<include name="org/springframework/validation/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -201,6 +207,8 @@
 				<include name="org/springframework/transaction/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -210,6 +218,8 @@
 				<include name="org/springframework/orm/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -225,6 +235,8 @@
 				<include name="org/springframework/web/util/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -235,6 +247,8 @@
 				<include name="org/springframework/web/servlet/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -252,6 +266,8 @@
 				<include name="org/springframework/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -291,6 +307,8 @@
 				<include name="org/springframework/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
@@ -910,6 +928,8 @@
 				<include name="org/springframework/**"/>
 			</fileset>
 			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
