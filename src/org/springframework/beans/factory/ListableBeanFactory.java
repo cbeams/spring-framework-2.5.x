@@ -7,10 +7,12 @@ package org.springframework.beans.factory;
 
 import java.util.Map;
 
+import org.springframework.beans.BeansException;
+
 /**
- * Extension of BeanFactory to be implemented by bean factories that can
- * enumerate all their bean instances, rather than attempting bean lookup
- * by name one by one as requested by clients.
+ * Extension of the BeanFactory interface to be implemented by bean factories
+ * that can enumerate all their bean instances, rather than attempting bean
+ * lookup by name one by one as requested by clients.
  *
  * <p>If this is a HierarchicalBeanFactory, the return values will not take any
  * BeanFactory hierarchy into account, but will relate only to the beans defined
@@ -26,7 +28,8 @@ import java.util.Map;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.3 2003-11-04 23:09:48 jhoeller Exp $
+ * @version $Id: ListableBeanFactory.java,v 1.4 2003-11-12 19:05:56 jhoeller Exp $
+ * @see org.springframework.beans.factory.support.BeanFactoryUtils
  */
 public interface ListableBeanFactory extends BeanFactory {
 
@@ -72,7 +75,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * or just normal beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
+	 * @throws BeansException if the beans could not be created
 	 */
-	Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans);
+	Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+	    throws BeansException;
 
 }
