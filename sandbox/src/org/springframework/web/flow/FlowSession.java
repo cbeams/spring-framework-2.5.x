@@ -31,7 +31,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
-import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**

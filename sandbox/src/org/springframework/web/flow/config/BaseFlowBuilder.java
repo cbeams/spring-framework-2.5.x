@@ -25,6 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionListener;
 
 /**

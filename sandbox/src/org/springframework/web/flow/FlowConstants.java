@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.config;
+package org.springframework.web.flow;
 
 /**
  * Constants used by the Spring web.flow system.

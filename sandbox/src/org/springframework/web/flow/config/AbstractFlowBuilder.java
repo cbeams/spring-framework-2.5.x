@@ -21,6 +21,7 @@ import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;

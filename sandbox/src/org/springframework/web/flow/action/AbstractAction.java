@@ -28,8 +28,8 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.util.WebUtils;
 
 /**
