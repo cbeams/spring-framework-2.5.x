@@ -47,9 +47,24 @@
 		-->
 	</context-param>
 
-	<!-- <listener>
+	<!--
+	  - Configures Log4J for this web app.
+	  - As this context specifies a context-param "log4jConfigLocation", its file path
+	  - is used to load the Log4J configuration, including periodic refresh checks.
+	  -
+	  - Would fall back to default Log4J initialization (non-refreshing) if no special
+	  - context-params are given.
+	  -
+	  - Exports a "web app root key", i.e. a system property that specifies the root
+	  - directory of this web app, for usage in log file paths.
+	  - This web app specifies "petclinic.root" (see log4j.properties file).
+	  -->
+	<!-- Leave the listener commented-out if using JBoss -->
+	<!--
+	<listener>
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
-	</listener> -->
+	</listener>
+	-->
 	
 	<!--
 	  - Loads the root application context of this web app at startup,
