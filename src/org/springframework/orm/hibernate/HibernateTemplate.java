@@ -1035,7 +1035,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @deprecated Use <code>session.createQuery</code> instead, which will now
-	 * automatically apply the template's query cache settings and the transation
+	 * automatically apply the template's query cache settings and the transaction
 	 * timeout (through the use of a special Session proxy).
 	 * @see HibernateCallback#doInHibernate
 	 * @see #setCacheQueries
@@ -1066,7 +1066,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @deprecated Use <code>session.getNamedQuery</code> instead, which will now
-	 * automatically apply the template's query cache settings and the transation
+	 * automatically apply the template's query cache settings and the transaction
 	 * timeout (through the use of a special Session proxy).
 	 * @see HibernateCallback#doInHibernate
 	 * @see #setCacheQueries
@@ -1097,7 +1097,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @return the Query object
 	 * @throws HibernateException if the Criteria could not be created
 	 * @deprecated Use <code>session.createCriteria</code> instead, which will now
-	 * automatically apply the template's query cache settings and the transation
+	 * automatically apply the template's query cache settings and the transaction
 	 * timeout (through the use of a special Session proxy).
 	 * @see HibernateCallback#doInHibernate
 	 * @see #setCacheQueries
