@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
+import javax.naming.NamingException;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
@@ -41,11 +42,15 @@ import org.aopalliance.intercept.MethodInvocation;
  * the "lazy-init" attribute.
  *
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.11 2004-05-18 07:54:00 jhoeller Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	protected EJBLocalObject newSessionBeanInstance() throws InvocationTargetException {
+	/**
+	 * Return a new instance of the stateless session bean.
+	 * Can be overridden to change the algorithm.
+	 */
+	protected EJBLocalObject newSessionBeanInstance() throws NamingException, InvocationTargetException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to create reference to local EJB");
 		}
@@ -63,8 +68,9 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * This is the last invoker in the chain: invoke the EJB.
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		EJBLocalObject ejb = null;
 		try {
-			EJBLocalObject ejb = newSessionBeanInstance();
+			ejb = newSessionBeanInstance();
 			return invocation.getMethod().invoke(ejb, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
@@ -79,6 +85,16 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		}
 		catch (Throwable ex) {
 			throw new AspectException("Failed to invoke local EJB [" + getJndiName() + "]", ex);
+		}
+		finally {
+			if (ejb != null) {
+				try {
+					ejb.remove();
+				}
+				catch (Throwable ex) {
+					logger.warn("Could not invoker 'remove' on Stateless Session Bean proxy", ex);
+				}
+			}
 		}
 	}
 

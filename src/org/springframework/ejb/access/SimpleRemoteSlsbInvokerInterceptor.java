@@ -55,7 +55,7 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 09-May-2003
- * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.10 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.11 2004-05-18 07:54:00 jhoeller Exp $
  * @see org.springframework.remoting.RemoteAccessException
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
@@ -91,8 +91,9 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 * Can be overridden for custom invocation strategies.
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		EJBObject ejb = null;
 		try {
-			EJBObject ejb = newSessionBeanInstance();
+			ejb = newSessionBeanInstance();
 			Method method = invocation.getMethod();
 			if (method.getDeclaringClass().isInstance(ejb)) {
 				// directly implemented
@@ -125,6 +126,16 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 		}
 		catch (Throwable ex) {
 			throw new AspectException("Failed to invoke remote EJB [" + getJndiName() + "]", ex);
+		}
+		finally {
+			if (ejb != null) {
+				try {
+					ejb.remove();
+				}
+				catch (Throwable ex) {
+					logger.warn("Could not invoker 'remove' on Stateless Session Bean proxy", ex);
+				}
+			}
 		}
 	}
 
