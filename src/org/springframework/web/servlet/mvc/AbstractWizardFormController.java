@@ -309,7 +309,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @return the name of the page session attribute
 	 */
 	protected final String getPageSessionAttributeName() {
-		return getClass() + ".page." + getCommandName();
+		return getClass().getName() + ".page." + getCommandName();
 	}
 
 	/**

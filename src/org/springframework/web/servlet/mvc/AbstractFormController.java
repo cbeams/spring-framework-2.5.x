@@ -214,7 +214,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * or null if not in session form mode.
 	 */
 	protected final String getFormSessionAttributeName() {
-		return isSessionForm() ? getClass() + ".form." + getCommandName() : null;
+		return isSessionForm() ? getClass().getName() + ".form." + getCommandName() : null;
 	}
 
 	/**
