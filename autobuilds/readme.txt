@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.5 2004-01-08 01:33:32 davison Exp $
+ * @version $Id: readme.txt,v 1.6 2004-01-17 00:08:02 davison Exp $
  */
 
 
@@ -105,8 +105,8 @@ For example;
 
 The autobuild script will check that the application and server specified seem
 genuine before embarking on the build.  The application name must be the name
-of a Spring sample application residing under the /samples directory.  Server
-names are symbolic names and configuration scripts must be present for each
+of a Spring sample application residing under the autobuilds/apps directory.  
+Server names are symbolic and configuration scripts must be present for each
 server type that autobuilds supports.  Currently configs are available for:
 
     tomcat-4.1.x (tomcat4)
@@ -114,8 +114,9 @@ server type that autobuilds supports.  Currently configs are available for:
     resin-2.1.x (resin2)
     resin-3.x (resin3)
     jetty-4.2.x (jetty4)
+    jboss-3.2.x (jboss3)
 
-Scripts for jboss3 and (hopefully) wls8 will be available very shortly.
+Scripts for wls8 (and possibly websphere5) will hopefully be available shortly.
 
 The normal sample apps are no longer used for autobuilds as they serve a
 slightly different purpose.  Presently the only two available apps are:
@@ -229,7 +230,7 @@ installation after it has been unzipped and extracted from the tarball.  For
 example, the file structure under the tomcat5 directory consists of
 'conf/server.xml' which will overwrite the default conf/server.xml of the
 target installation.  Configuration files should be created and tested with
-the various Spring sample applications and be managed by CVS.  HTTP servers
+the autobuilds test applications and should be managed by CVS.  HTTP servers
 should be configured to run on the same port as the existing apps, defined by
 the build property autobuilds.server.port (currently this is 13084 for no 
 particular reason).
@@ -270,9 +271,9 @@ org.springramework.apptests.[sampleapp].AllTests class.  This is a standard
 class name that the autobuilds scripts rely on.  Any supporting classes that
 are required for the application can also be put in the same package if it
 makes sense to do so - the only requirement is the AllTests class with the
-'testXXXX' method names.  The source directory for this code is /autobulds/src
-with classes output to /target/autobuilds/classes Refer to one of the existing
-AllTests classes for more information.
+'testXXXX' method names.  The source directory for this code is /autobuilds/src
+with classes output to /target/autobuilds/classes.  Refer to one of the 
+existing AllTests classes for more information.
 
 
 
@@ -297,12 +298,8 @@ first.  Please drop a line to the dev list
 think some functionality is missing from autobuilds and is not included here,
 or if you'd like to see something moved up this list.
 
-Items near the top are likely to be imminent.
-
- - expand httpunit tests for jpetstore
  - change views in jpetstore to include some xslt, Velocity and pdf.
- - make hsql driver load on tomcat servers
- - jboss3 / wls8 / websphere5 server builds added
+ - wls8 / websphere5 server builds added
  - support for plugging in different database implementations 
  - create remote webapp / socket listener to accept standard-format reports 
    from autobuilds and aggregate stats as html pages with links to the raw 
@@ -313,4 +310,4 @@ Items near the top are likely to be imminent.
  - lookup hsql using apps from an external props file to avoid amending 
    build.xml for new apps
  - use gui testrunner as an option (build.props / based on -k option)?
-- make anonymous cvs work
+ - make anonymous cvs work

@@ -23,7 +23,7 @@
 			<include name="axis.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/ibatis">
-			<include name="ibatis-db.jar"/>
+			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jaxrpc.jar"/>
@@ -107,7 +107,7 @@
 				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ibatis">
-				<include name="ibatis-db.jar"/>
+				<include name="*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jaxrpc.jar"/>
@@ -130,9 +130,6 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jdom">
 				<include name="jdom.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/struts">
-				<include name="struts-1.1.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
