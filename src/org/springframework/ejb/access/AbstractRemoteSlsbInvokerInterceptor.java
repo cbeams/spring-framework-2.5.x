@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ejb.access;
 
@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
@@ -40,7 +41,27 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 	
+	private Class homeInterface;
+
 	private boolean refreshHomeOnConnectFailure = false;
+
+
+	/**
+	 * Set a home interface that this invoker will narrow to before performing
+	 * the parameterless SLSB <code>create()</code> call that returns the actual
+	 * SLSB proxy.
+	 * <p>Default is none, which will work on all J2EE servers that are not based
+	 * on CORBA. A plain <code>javax.ejb.EJBHome</code> interface is known to be
+	 * sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
+	 * the specific home interface for the target SLSB might be necessary.
+	 */
+	public void setHomeInterface(Class homeInterface) {
+		if (homeInterface != null && !homeInterface.isInterface()) {
+			throw new IllegalArgumentException(
+					"Home interface class [" + homeInterface.getClass() + "] is not an interface");
+		}
+		this.homeInterface = homeInterface;
+	}
 
 	/**
 	 * Set whether to refresh the EJB home on connect failure.
@@ -59,6 +80,21 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	protected boolean isHomeRefreshable() {
 		return this.refreshHomeOnConnectFailure;
+	}
+
+
+	/**
+	 * This overridden lookup implementation performs a narrow operation
+	 * after the JNDI lookup, provided that a home interface is specified.
+	 * @see #setHomeInterface
+	 * @see javax.rmi.PortableRemoteObject#narrow
+	 */
+	protected Object lookup() throws NamingException {
+		Object homeObject = super.lookup();
+		if (this.homeInterface != null) {
+			homeObject = PortableRemoteObject.narrow(homeObject, this.homeInterface);
+		}
+		return homeObject;
 	}
 
 
@@ -136,6 +172,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		return doInvoke(invocation);
 	}
 
+
 	/**
 	 * Perform the given invocation on the current EJB home.
 	 * Template method to be implemented by a subclass.
@@ -150,7 +187,8 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Return a new instance of the stateless session bean.
-	 * Can be overridden to change the algorithm.
+	 * To be invoked by concrete remote SLSB invoker subclasses.
+	 * <p>Can be overridden to change the algorithm.
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method
 	 * @see #create
@@ -175,6 +213,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Remove the given EJB instance.
+	 * To be invoked by concrete remote SLSB invoker subclasses.
 	 * @param ejb the EJB instance to remove
 	 * @see javax.ejb.EJBObject#remove
 	 */

@@ -176,6 +176,29 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		ejbControl.verify();
 	}
 	
+	public void testInvokesMethodOnEjbInstanceWithHomeInterface() throws Exception {
+		Object retVal = new Object();
+		MockControl ejbControl = MockControl.createControl(RemoteInterface.class);
+		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
+		ejb.targetMethod();
+		ejbControl.setReturnValue(retVal, 1);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
+		ejbControl.replay();
+
+		final String jndiName= "foobar";
+		MockControl contextControl = contextControl(jndiName, ejb, 1, 1);
+
+		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
+		si.setHomeInterface(SlsbHome.class);
+
+		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
+		assertTrue(target.targetMethod() == retVal);
+
+		contextControl.verify();
+		ejbControl.verify();
+	}
+
 	public void testInvokesMethodOnEjbInstanceWithRemoteException() throws Exception {
 		MockControl ejbControl = MockControl.createControl(RemoteInterface.class);
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
