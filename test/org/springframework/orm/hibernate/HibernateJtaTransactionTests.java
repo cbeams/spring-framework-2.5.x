@@ -233,6 +233,112 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testJtaTransactionCommitWithJtaTm() throws Exception {
+		doTestJtaTransactionCommitWithJtaTm(Status.STATUS_NO_TRANSACTION);
+	}
+
+	public void testJtaTransactionCommitWithJtaTmAndExisting() throws Exception {
+		doTestJtaTransactionCommitWithJtaTm(Status.STATUS_ACTIVE);
+	}
+
+	private void doTestJtaTransactionCommitWithJtaTm(int status) throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(status, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		if (status == Status.STATUS_NO_TRANSACTION) {
+			ut.begin();
+			utControl.setVoidCallable(1);
+			ut.commit();
+			utControl.setVoidCallable(1);
+		}
+		utControl.replay();
+
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockTransaction transaction = new MockTransaction();
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
+		tm.getTransaction();
+		tmControl.setReturnValue(transaction, 6);
+
+		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
+		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		sf.getConnectionProvider();
+		sfControl.setReturnValue(null, 2);
+		sf.getTransactionManager();
+		sfControl.setReturnValue(tm, 1);
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+
+		tmControl.replay();
+		sfControl.replay();
+		sessionControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		final List l = new ArrayList();
+		l.add("test");
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				try {
+					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+					HibernateTemplate ht = new HibernateTemplate(sf);
+					List htl = ht.executeFind(new HibernateCallback() {
+						public Object doInHibernate(Session sess) {
+							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+							assertEquals(session, sess);
+							return l;
+						}
+					});
+					ht = new HibernateTemplate(sf);
+					htl = ht.executeFind(new HibernateCallback() {
+						public Object doInHibernate(Session sess) {
+							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+							assertEquals(session, sess);
+							return l;
+						}
+					});
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					sessionControl.verify();
+					sessionControl.reset();
+					try {
+						session.getFlushMode();
+						sessionControl.setReturnValue(FlushMode.AUTO, 1);
+						session.flush();
+						sessionControl.setVoidCallable(1);
+						session.close();
+						sessionControl.setReturnValue(null, 1);
+					}
+					catch (HibernateException e) {
+					}
+					sessionControl.replay();
+					return htl;
+				}
+				catch (Error err) {
+					err.printStackTrace();
+					throw err;
+				}
+			}
+		});
+
+		assertTrue("Correct result list", result == l);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testJtaTransactionWithFlushFailure() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();

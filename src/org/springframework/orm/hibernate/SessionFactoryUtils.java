@@ -273,6 +273,7 @@ public abstract class SessionFactoryUtils {
 		if (sessionHolder != null) {
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				if (allowSynchronization && !sessionHolder.isSynchronizedWithTransaction()) {
+					logger.debug("Registering Spring transaction synchronization for existing Hibernate session");
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
@@ -317,7 +318,7 @@ public abstract class SessionFactoryUtils {
 
 				if (TransactionSynchronizationManager.isSynchronizationActive()) {
 					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
-					logger.debug("Registering Spring transaction synchronization for Hibernate session");
+					logger.debug("Registering Spring transaction synchronization for new Hibernate session");
 					sessionHolder = new SessionHolder(session);
 					sessionHolder.setSynchronizedWithTransaction(true);
 					TransactionSynchronizationManager.registerSynchronization(
@@ -334,7 +335,7 @@ public abstract class SessionFactoryUtils {
 						try {
 							int jtaStatus = jtaTm.getStatus();
 							if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-								logger.debug("Registering JTA transaction synchronization for Hibernate session");
+								logger.debug("Registering JTA transaction synchronization for new Hibernate session");
 								javax.transaction.Transaction jtaTx = jtaTm.getTransaction();
 								boolean newHolder = false;
 								if (sessionHolder == null) {
@@ -347,7 +348,8 @@ public abstract class SessionFactoryUtils {
 								}
 								jtaTx.registerSynchronization(
 										new JtaSessionSynchronization(
-												new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true),
+												new SpringSessionSynchronization(
+												    sessionHolder, sessionFactory, jdbcExceptionTranslator, true),
 												jtaTm));
 								if (newHolder) {
 									TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
@@ -355,8 +357,8 @@ public abstract class SessionFactoryUtils {
 							}
 						}
 						catch (Exception ex) {
-							throw new DataAccessResourceFailureException("Could not register synchronization " +
-																													 "with JTA TransactionManager", ex);
+							throw new DataAccessResourceFailureException(
+							    "Could not register synchronization with JTA TransactionManager", ex);
 						}
 					}
 				}
@@ -615,8 +617,13 @@ public abstract class SessionFactoryUtils {
 		public void beforeCommit(boolean readOnly) throws DataAccessException {
 			if (!readOnly) {
 				logger.debug("Flushing Hibernate session on transaction synchronization");
-				Session session = (this.jtaTransaction != null) ?
-				    this.sessionHolder.getSession(this.jtaTransaction) : this.sessionHolder.getSession();
+				Session session = null;
+				if (this.jtaTransaction != null) {
+					session = this.sessionHolder.getSession(this.jtaTransaction);
+				}
+				if (session == null) {
+					session = this.sessionHolder.getSession();
+				}
 				if (!session.getFlushMode().equals(FlushMode.NEVER)) {
 					try {
 						session.flush();
@@ -638,15 +645,18 @@ public abstract class SessionFactoryUtils {
 
 		public void beforeCompletion() {
 			if (this.jtaTransaction != null) {
-				// Can only happen with suspended JTA transactions:
-				// Remove the current JTA transaction, but keep the holder.
+				// Typically in case of a suspended JTA transaction:
+				// Remove the Session for the current JTA transaction, but keep the holder.
 				Session session = this.sessionHolder.removeSession(this.jtaTransaction);
-				if (this.sessionHolder.isEmpty()) {
-					TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+				if (session != null) {
+					if (this.sessionHolder.isEmpty()) {
+						TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+					}
+					closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
+					return;
 				}
-				closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 			}
-			else if (this.newSession) {
+			if (this.newSession) {
 				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 				if (this.hibernateTransactionCompletion) {
 					closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
