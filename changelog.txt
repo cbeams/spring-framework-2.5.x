@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.4 (5.1.2005)
------------------------------------
+Changes in version 1.1.4 (12.1.2005)
+------------------------------------
 
 Package org.springframework.aop
 * added "setClassFilter" method to StaticMethodMatcherPointcut, to allow for overriding the default ClassFilter.TRUE
@@ -12,28 +12,48 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed BeanWrapperImpl to allow custom PropertyEditor (setValue) to kick in before applying String[]-to-CSV conversion
 * added "getResourceDescription" and "getBeanName" accessors to BeanCreationException and BeanDefinitionStoreException
+* added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
+* added ServiceLocatorProxyFactoryBean, allowing to map custom service locator methods to BeanFactory.getBean calls
 * fixed AbstractAutowireCapableBeanFactory to avoid potential NPE in case of chained factory-methods with factory-bean
 * added "getSingletonCount" method to AbstractBeanFactory, returning the number of objects in the singleton cache
 * changed DefaultListableBeanFactory's "getBeansOfType" to ignore beans that cause BeanCreationExceptions on "getType"
+* DefaultListableBeanFactory's "getBeansOfType" returns its result as linked map (if on JDK 1.4 or Commons Collections)
 * added "factoryBean" argument to InstantiationStrategy's "instantiate" method for a factory method (required for above)
-* added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
+* XML bean definition DTD allows "lookup-method" and "replaced-method" in arbitrary order
+
+Package org.springframework.ejb
+* added "isConnectFailure(RemoteException)" hook to AbstractRemoteSlsbInvokerInterceptor, for customized failure checks
 
 Package org.springframework.jdbc
+* TransactionAwareDataSourceProxy automatically applies Spring-managed transaction timeouts to all created Statements
 * added overloaded "queryForList"/"queryForObject"/"queryForLong"/"queryForInt" methods with arg types to JdbcTemplate
+* optimized JdbcTemplate's "queryForList" result set parsing to not access result set meta data for empty results
 
 Package org.springframework.jms
 * added "messageIdEnabled" and "messageTimestampEnabled" properties to JmsTemplate, to disable id/timestamp on producer
 * added "pubSubNoLocal" property to JmsTemplate, leading to the NoLocal flag being specified on MessageConsumer creation
 * added "receiveSelected" and "receivedSelectedAndConvert" methods to JmsTemplate, accepting JMS message selectors
+* fixed JmsTemplate's send and receive operations to suppress commit and rollbacks calls within JTA transactions
 * fixed JmsTemplate's "...AndConvert" methods to return null as converted message if no JMS message received
 
 Package org.springframework.orm
 * fixed NPE in HibernateTemplate's "iterate(queryString,value)" and "iterate(queryString,values)" methods
+* SqlMapClientFactoryBean automatically lets all operations participate in Spring-managed transaction timeouts
 
 Package org.springframework.mock
 * fixed "setAttribute" in MockServletContext/HttpSession/HttpServletRequest/PageContext to correctly handle null values
 * changed "addParameter" methods in MockHttpServletRequest to check for existing values, adding given values to the list
 * fixed "getAttributeNames" in MockPageContext to correctly return attribute keys (rather than attribute values)
+
+Package org.springframework.remoting
+* added "prepare" methods and corresponding checks to all client interceptors, to allow for easier standalone usage
+* added "isConnectFailure(RemoteException)" hook to (Jndi)RmiClientInterceptor, for customized connect failure checks
+* added JaxRpcServicePostProcessor interface, intended for reusable custom type mappings etc for a JAX-RPC service
+* added "servicePostProcessors" property to LocalJaxRpcServiceFactory and subclasses (incl. JaxRpcPortProxyFactoryBean)
+* reworked JaxRpcPortClientInterceptor to work with JAX-RPC dynamic calls when not given an RMI port interface
+
+Package org.springframework.samples
+* reworked JPetStore's JAX-RPC support to avoid the RemoteOrderService RMI interface in favor of JAX-RPC dynamic calls
 
 Package org.springframework.scheduling
 * TimerFactoryBean accepts SchedulerTimerTasks with "period" <= 0 now, scheduling them for one-time execution
@@ -41,6 +61,7 @@ Package org.springframework.scheduling
 * added "jobListenerNames"/"triggerListenerNames" property to JobDetailBean, CronTriggerBean, SimpleTriggerBean (resp.)
 
 Package org.springframework.web
+* ContextLoader can optionally load a (shared) parent application context to the root web application context
 * added ServletContextAttributeFactoryBean, exposing an existing ServletContext attribute for bean references
 * added ServletContextAttributeExporter, taking Spring-defined objects and exposing them as ServletContext attributes
 * added ServletContextPropertyPlaceholderConfigurer, a subclass that falls back to web.xml context-param entries
@@ -48,7 +69,7 @@ Package org.springframework.web
 * fixed DispatcherServlet to copy attribute names before iterating over them to restore original values after include
 * added overloaded "getFormSessionAttributeName" method with HttpServletRequest argument to AbstractFormController
 * added overloaded "getPageSessionAttributeName" method with HttpServletRequest argument to AbstractWizardFormController
-* enhanced ContextLoader so that it can optionally load a (shared) parent application context to the root web application context
+* AbstractJasperReportsView sets content length header for IE when writing to the OutputStream (like AbstractPdfView)
 
 
 Changes in version 1.1.3 (12.12.2004)
