@@ -57,4 +57,10 @@
     <property name="dataIntegrityViolationCodes"><value>423,511,515,530,547,2601,2615,2714</value></property>
   </bean>
 
+	<bean id="Sybase-jConnect" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName"><value>Adaptive Server Enterprise</value></property>
+		<property name="badSqlGrammarCodes"><value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value></property>
+		<property name="dataIntegrityViolationCodes"><value>423,511,515,530,547,2601,2615,2714</value></property>
+	</bean>
+
 </beans>
