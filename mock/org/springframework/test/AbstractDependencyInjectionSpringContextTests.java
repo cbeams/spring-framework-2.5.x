@@ -27,8 +27,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 /**
  * Convenient superclass for tests depending on a Spring context.
  * The test instance itself is populated by Dependency Injection.
- * <br>
- * Really for integration testing, not unit testing.
+ *
+ * <p>Really for integration testing, not unit testing.
  * You should <i>not</i> normally use the Spring container
  * for unit tests: simply populate your POJOs in plain JUnit tests!
  *
@@ -38,27 +38,31 @@ import org.springframework.context.ConfigurableApplicationContext;
  * in the test fixture, and they will be satisfied by autowiring by type.
  * <li>Via Field Injection. Declare protected variables of the required type
  * which match named beans in the context. This is autowire by name,
- * rather than type. This approach is based on an
- * approach originated by Ara Abrahmian. Setter Dependency Injection
- * is the default: set the populateProtectedVariables property to true
- * in the constructor to switch on Field Injection.
+ * rather than type. This approach is based on an approach originated by
+ * Ara Abrahmian. Setter Dependency Injection is the default: set the
+ * "populateProtectedVariables" property to true in the constructor to switch
+ * on Field Injection.
  * </ul>
  *
  * <p>This class will normally cache contexts based on a <i>context key</i>:
- * normally the config locations String array describing the Spring Resource
- * descriptors making up the context. Unless the setDirty() method is called by
- * a test, the context will not be reloaded, even across different subclasses
- * of this test. This is particularly beneficial if your context is slow to
- * construct, for example if you are using Hibernate and the time taken to
- * load the mappings is an issue.
+ * normally the config locations String array describing the Spring resource
+ * descriptors making up the context. Unless the <code>setDirty()</code> method
+ * is called by a test, the context will not be reloaded, even across different
+ * subclasses of this test. This is particularly beneficial if your context is
+ * slow to construct, for example if you are using Hibernate and the time taken
+ * to load the mappings is an issue.
  *
- * <p>If you don't want this behaviour, you can override the contextKey() method,
- * most likely to return the test class. In conjunction with this you would
- * probably override the buildContext() method, which by default loads the
- * locations specified in the getConfigLocations() method.
+ * <p>If you don't want this behavior, you can override the <code>contextKey()</code>
+ * method, most likely to return the test class. In conjunction with this you would
+ * probably override the <code>getContext</code> method, which by default loads
+ * the locations specified in the <code>getConfigLocations()</code> method.
  *
  * @author Rod Johnson
  * @since 1.1.1
+ * @see #setDirty
+ * @see #contextKey
+ * @see #getContext
+ * @see #getConfigLocations
  */
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
 
@@ -113,7 +117,6 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
 			}
-			//System.out.println("POPULATED PROTECTED VARS");
 			populateProtectedVariables();
 		}
 		else {
@@ -244,9 +247,9 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 
 	/**
-	 * Subclasses must implement this method to return the
-	 * locations of their config files. E.g.:
-	 * "classpath:org/springframework/whatever/foo.xml"
+	 * Subclasses must implement this method to return the locations of their
+	 * config files. A plain path will be treated as class path location.
+	 * E.g.: "org/springframework/whatever/foo.xml"
 	 * @return an array of config locations
 	 */
 	protected abstract String[] getConfigLocations();

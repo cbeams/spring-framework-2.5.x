@@ -37,7 +37,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * The defaultRollback() property, which defaults to true, determines whether
  * transactions will complete by default.
  *
- * Requires a single bean in the context implementing the PlatformTransactionManager
+ * <p>Requires a single bean in the context implementing the PlatformTransactionManager
  * interface. This will be set by the superclass's Dependency Injection mechanism.
  * If using the superclass's Field Injection mechanism, the implementation should be
  * named "transactionManager". This mechanism allows the use of this superclass even
@@ -49,19 +49,19 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 public abstract class AbstractTransactionalSpringContextTests
     extends AbstractDependencyInjectionSpringContextTests {
 
-	/**
-	 * Should we commit this transction?
-	 */
-	private boolean complete;
+	protected PlatformTransactionManager transactionManager;
 
 	/**
-	 * TransactionStatus for this test. Subclasses probably won't need to use it.
+	 * TransactionStatus for this test. Typical subclasses won't need to use it.
 	 */
 	protected TransactionStatus transactionStatus;
 
-	protected PlatformTransactionManager transactionManager;
-
 	private boolean defaultRollback = true;
+
+	/**
+	 * Should we commit this transaction?
+	 */
+	private boolean complete;
 
 
 	/**
@@ -80,15 +80,13 @@ public abstract class AbstractTransactionalSpringContextTests
 	}
 
 	protected final void onSetUp() throws Exception {
-		complete = !defaultRollback;
+		this.complete = !this.defaultRollback;
 
-		// Start a transaction
-		this.transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+		// start a transaction
+		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-		// this.jdbcTemplate = (JdbcTemplate) applicationContext.getBean("jdbcTemplate");
-
-		logger.info("Began transaction: transaction manager=[" + this.transactionManager +
-		    "]; defaultCommit=" + this.complete);
+		logger.info("Began transaction: transaction manager [" + this.transactionManager +
+		    "]; defaultCommit " + this.complete);
 
 		onSetUpInTransaction();
 	}
@@ -106,14 +104,7 @@ public abstract class AbstractTransactionalSpringContextTests
 			onTearDownInTransaction();
 		}
 		finally {
-			if (!this.complete) {
-				this.transactionManager.rollback(this.transactionStatus);
-				logger.info("Rolled back transaction after test execution");
-			}
-			else {
-				this.transactionManager.commit(this.transactionStatus);
-				logger.info("Committed transaction after test execution");
-			}
+			endTransaction();
 		}
 	}
 
@@ -132,6 +123,32 @@ public abstract class AbstractTransactionalSpringContextTests
 	 */
 	protected void setComplete() {
 		this.complete = true;
+	}
+
+	/**
+	 * Immediately force a commit or rollback of the transaction,
+	 * according to the complete flag.
+	 * <p>Can be used to explicitly let the transaction end early,
+	 * for example to check whether lazy associations of persistent objects
+	 * work outside of a transaction (i.e. have been initialized properly).
+	 * @see #setComplete
+	 */
+	protected void endTransaction() {
+		if (this.transactionStatus != null) {
+			try {
+				if (!this.complete) {
+					this.transactionManager.rollback(this.transactionStatus);
+					logger.info("Rolled back transaction after test execution");
+				}
+				else {
+					this.transactionManager.commit(this.transactionStatus);
+					logger.info("Committed transaction after test execution");
+				}
+			}
+			finally {
+				this.transactionStatus = null;
+			}
+		}
 	}
 
 }
