@@ -61,7 +61,7 @@ import org.springframework.web.util.WebUtils;
  * the "namespace" servlet init-param.
  *
  * @author Rod Johnson
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see #doService
  * @see #initFrameworkServlet
  * @see #setContextClass
@@ -251,7 +251,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) throws BeansException {
 		ConfigurableWebApplicationContext wac = null;
 		logger.info("Servlet with name '" + getServletName() +
-								"' will try to create custom WebApplicationContext context of class '" + getContextClass().getName() + "'");
+								"' will try to create custom WebApplicationContext context of class '" + getContextClass().getName() + "'" +
+								" using parent context [" + parent + "]");
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
 			throw new ApplicationContextException("Fatal initialization error in servlet with name '" + getServletName() +
 																						"': custom WebApplicationContext class '" + getContextClass().getName() +
