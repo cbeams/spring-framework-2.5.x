@@ -49,7 +49,7 @@ public abstract class RemoteAccessor {
 	 * but can also be optional if the lookup returns a typed proxy.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
-		if (!serviceInterface.isInterface()) {
+		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("serviceInterface must be an interface");
 		}
 		this.serviceInterface = serviceInterface;

@@ -61,7 +61,7 @@ public abstract class RemoteExporter {
 	 * The interface must be suitable for the particular service and remoting tool.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
-		if (!serviceInterface.isInterface()) {
+		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("serviceInterface must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
