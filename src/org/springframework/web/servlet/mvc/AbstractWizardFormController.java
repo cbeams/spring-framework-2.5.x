@@ -186,7 +186,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, HttpServletResponse response, BindException errors)
 	    throws ServletException {
-		return showPage(request, errors, getInitialPage(request));
+		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
 
 	/**
@@ -215,6 +215,19 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		else {
 			throw new ServletException("Invalid page number: " + page);
 		}
+	}
+
+	/**
+	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
+	 * Default implementation delegates to getInitialPage(HttpServletRequest).
+	 * @param request current HTTP request
+	 * @param command the command object as returned by formBackingObject
+	 * @return the initial page number
+	 * @see #getInitialPage(HttpServletRequest)
+	 * @see #formBackingObject
+	 */
+	protected int getInitialPage(HttpServletRequest request, Object command) {
+		return getInitialPage(request);
 	}
 
 	/**
