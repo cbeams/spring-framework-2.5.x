@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.metadata.Attributes;
 
@@ -25,19 +26,17 @@ import org.springframework.metadata.Attributes;
  * overrides a class transaction attribute.
  * @author Rod Johnson
  * @see org.springframework.metadata.Attributes
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.3 2003-12-17 09:54:51 johnsonr Exp $
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.4 2004-01-01 23:50:02 jhoeller Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 	
 	private final Attributes attributes;
-	
-	
+
 	public AttributesTransactionAttributeSource(Attributes attributes) {
 		this.attributes = attributes;
 	}
-	
 
 	/**
 	 * Return the transaction attribute for this method invocation.
@@ -46,7 +45,6 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 	 * @param method method for the current invocation. Can't be null
 	 * @param targetClass target class for this invocation. May be null.
 	 * @return TransactionAttribute for this method, or null if the method is non-transactional
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		
