@@ -275,7 +275,7 @@ public class ActionState extends TransitionableState {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
 							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action bean to this state"));
+							+ "make sure you add at least one action to this state"));
 		}
 	}
 
