@@ -57,7 +57,7 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public String getId() {
-		return request.getParameter("eventId");
+		return request.getParameter("_eventId");
 	}
 	
 	public long getTimestamp() {
@@ -65,7 +65,7 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public String getStateId() {
-		return request.getParameter("stateId");
+		return request.getParameter("_currentStateId");
 	}
 
 	public Object getParameter(String parameterName) {
