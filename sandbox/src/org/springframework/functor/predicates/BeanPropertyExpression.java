@@ -21,8 +21,8 @@ import org.springframework.functor.functions.GetProperty;
 import org.springframework.util.Assert;
 
 /**
- * A unary predicate that test an expression consisting of two variable bean
- * property values. For example, <code>pet.ageAtFirstVisit > pet.currentAge</code>
+ * A unary predicate that returns the result of a <code>boolean</code>
+ * expression that tests two variable bean property values. For example, <code>pet.ageAtFirstVisit > pet.currentAge</code>
  * 
  * @author Keith Donald
  */
@@ -39,7 +39,8 @@ public class BeanPropertyExpression implements UnaryPredicate {
      * @param otherPropertyName
      *            The second property participating in the expression.
      * @param beanPropertyExpression
-     *            The expression predicate (tester).
+     *            The expression predicate that will test the two bean property
+     *            values.
      */
     public BeanPropertyExpression(
         String propertyName,
@@ -55,7 +56,7 @@ public class BeanPropertyExpression implements UnaryPredicate {
 
     /**
      * Tests the values of the two configured propertyNames for this bean using
-     * configured binary predicate.
+     * the configured binary predicate.
      * 
      * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
      */

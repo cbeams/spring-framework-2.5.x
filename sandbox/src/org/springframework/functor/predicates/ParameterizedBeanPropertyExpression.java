@@ -22,8 +22,9 @@ import org.springframework.functor.functions.GetProperty;
 import org.springframework.util.Assert;
 
 /**
- * A unary predicate that tests an expression that tests a variable bean
- * property value with a constant parameter value. For example: <code>pet.age > 5</code>
+ * A unary predicate that returns the result of a <code>boolean</code>
+ * expression that tests a variable bean property value against a constant
+ * parameter value. For example: <code>pet.age > 5</code>
  * 
  * @author Keith Donald
  */
