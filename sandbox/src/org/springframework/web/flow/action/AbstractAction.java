@@ -48,11 +48,6 @@ import org.springframework.web.util.WebUtils;
 public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
-	 * Default name used for a form object in flow scope.
-	 */
-	public static final String DEFAULT_FORM_OBJECT_NAME = "formObject";
-
-	/**
 	 * The form object is then aliased under this name by the default populate
 	 * and bind actions
 	 */

@@ -42,6 +42,11 @@ import org.springframework.web.flow.MutableFlowModel;
 public class BindAndValidateAction extends AbstractAction {
 
 	/**
+	 * Default name used for a form object in flow scope.
+	 */
+	public static final String DEFAULT_FORM_OBJECT_NAME = "formObject";
+
+	/**
 	 * Constant result marker that indicates to the base BindAndValidate action
 	 * that it should attempt to return a default <code>success</code> or
 	 * <code>error</code> event. What event to return is calculated based on
@@ -200,8 +205,8 @@ public class BindAndValidateAction extends AbstractAction {
 		}
 	}
 
-	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableFlowModel model) throws Exception {
+	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+			throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		String result = bindAndValidate(request, model, binder);
@@ -224,8 +229,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors possible binding errors
 	 * @return the action result
 	 */
-	protected String getDefaultActionResult(HttpServletRequest request, MutableFlowModel model,
-			Object formObject, BindException errors) {
+	protected String getDefaultActionResult(HttpServletRequest request, MutableFlowModel model, Object formObject,
+			BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
 
@@ -311,8 +316,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws IllegalAccessException if the class or its constructor is not
 	 *         accessible
 	 */
-	protected Object createFormObject(HttpServletRequest request, FlowModel model)
-			throws InstantiationException, IllegalAccessException, ServletRequestBindingException {
+	protected Object createFormObject(HttpServletRequest request, FlowModel model) throws InstantiationException,
+			IllegalAccessException, ServletRequestBindingException {
 		if (this.formObjectClass == null) {
 			throw new IllegalStateException("Cannot create formObject without formObjectClass being set - "
 					+ "either set formObjectClass, override loadFormObject, or override this method");
@@ -364,8 +369,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @return the new binder instance
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object formObject,
-			FlowModel model) {
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object formObject, FlowModel model) {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(formObject, getFormObjectName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
@@ -423,8 +427,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *        registration of binding errors
 	 * @see #bindAndValidate
 	 */
-	protected void onBind(HttpServletRequest request, MutableFlowModel model, Object formObject,
-			BindException errors) {
+	protected void onBind(HttpServletRequest request, MutableFlowModel model, Object formObject, BindException errors) {
 		onBind(request, model, formObject);
 	}
 
@@ -483,8 +486,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors the possible binding errors
 	 * @return the action result
 	 */
-	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model,
-			Object formObject, BindException errors) {
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model, Object formObject,
+			BindException errors) {
 		return onBindAndValidateSuccess(request, model, formObject);
 	}
 
@@ -498,8 +501,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param formObject the form object
 	 * @return the action result
 	 */
-	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model,
-			Object formObject) {
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model, Object formObject) {
 		return null;
 	}
 
