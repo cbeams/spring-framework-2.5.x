@@ -40,7 +40,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 17.05.2004
- * @version $Id: AbstractTemplateView.java,v 1.3 2004-07-23 08:38:52 jhoeller Exp $
+ * @version $Id: AbstractTemplateView.java,v 1.4 2004-08-04 19:21:14 davison Exp $
  */
 public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
@@ -56,6 +56,10 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	private boolean exposeSessionAttributes = false;
 
 	private boolean exposeSpringMacroHelpers = false;
+	
+	private boolean allowRequestOverride = false;
+	
+	private boolean allowSessionOverride = false;
 
 
 	/**
@@ -75,6 +79,26 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	}
 
 	/**
+     * Set whether HttpRequest attributes are allowed to override (hide)
+     * controller generated model attributes of the same name.  Default
+     * is false and an exception is thrown if request attributes of the
+     * same name as model attributes are found.
+     */
+    public void setAllowRequestOverride(boolean allowRequestOverride) {
+        this.allowRequestOverride = allowRequestOverride;
+    }
+    
+    /**
+     * Set whether HttpSession attributes are allowed to override (hide)
+     * controller generated model attributes of the same name.  Default
+     * is false and an exception is thrown if session attributes of the
+     * same name as model attributes are found.
+     */
+    public void setAllowSessionOverride(boolean allowSessionOverride) {
+        this.allowSessionOverride = allowSessionOverride;
+    }
+    
+    /**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
 	 * under the name "springBindRequestContext". Default is false.
 	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
@@ -87,14 +111,14 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	}
 
 	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
-																							 HttpServletResponse response) throws Exception {
+												 HttpServletResponse response) throws Exception {
 
 		if (this.exposeRequestAttributes) {
 			for (Enumeration enum = request.getAttributeNames(); enum.hasMoreElements();) {
 				String attribute = (String) enum.nextElement();
-				if (model.containsKey(attribute)) {
+				if (model.containsKey(attribute) && !allowRequestOverride) {
 					throw new ServletException("Cannot expose request attribute '" + attribute +
-																		 "' because of an existing model object of the same name");
+						"' because of an existing model object of the same name");
 				}
 				Object attributeValue = request.getAttribute(attribute);
 				if (logger.isDebugEnabled()) {
@@ -110,9 +134,9 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 			if (session != null) {
 				for (Enumeration enum = session.getAttributeNames(); enum.hasMoreElements();) {
 					String attribute = (String) enum.nextElement();
-					if (model.containsKey(attribute)) {
+					if (model.containsKey(attribute) && !allowSessionOverride) {
 						throw new ServletException("Cannot expose session attribute '" + attribute +
-																			 "' because of an existing model object of the same name");
+							"' because of an existing model object of the same name");
 					}
 					Object attributeValue = session.getAttribute(attribute);
 					if (logger.isDebugEnabled()) {
