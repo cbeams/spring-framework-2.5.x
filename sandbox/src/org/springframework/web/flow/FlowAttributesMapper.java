@@ -27,22 +27,20 @@ import java.util.Map;
 public interface FlowAttributesMapper {
 
 	/**
-	 * Create a map of model attributes that should be passed to the child flow.
+	 * Create a map of model attributes that should be passed to the spawning
+	 * child flow.
 	 * @param parentFlowModel The parent flow attributes, the possible set to
 	 *        pass down to the child.
-	 * @return A map of attributes to pass as input down to the newly spawned
-	 *         child subflow.
+	 * @return A map of attributes to pass as input down to the spawning child
+	 *         subflow.
 	 */
-	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowModel);
+	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel);
 
 	/**
 	 * Map relavent attributes of an ending sub flow model back up to a resuming
 	 * parent flow model.
-	 * @param subFlowAttributes The child's attributes that should be mapped
-	 *        from
-	 * @param parentFlowAttributes The parent's attributes that should be mapped
-	 *        to
+	 * @param subFlowModel The child's attributes that should be mapped from
+	 * @param parentFlowModel The parent's attributes that should be mapped to
 	 */
-	public void mapToResumingParentFlow(AttributesAccessor endingSubFlowModel,
-			MutableAttributesAccessor resumingParentFlowModel);
+	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel, MutableAttributesAccessor parentFlowModel);
 }

@@ -72,7 +72,7 @@ public class EndState extends AbstractState {
 			}
 			Assert.isInstanceOf(FlowAttributesMapper.class, flowExecution.getCurrentState());
 			FlowAttributesMapper resumingState = (FlowAttributesMapper)flowExecution.getCurrentState();
-			resumingState.mapToResumingParentFlow(endingFlowSession, flowExecution.getActiveFlowSession());
+			resumingState.mapSubFlowOutputAttributes(endingFlowSession, flowExecution.getActiveFlowSession());
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			return ((TransitionableState)resumingState).signalEvent(getId(), flowExecution, request, response);

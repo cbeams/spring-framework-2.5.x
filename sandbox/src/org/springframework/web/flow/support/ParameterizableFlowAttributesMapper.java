@@ -212,15 +212,15 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		return this.mapMissingAttributesToNull;
 	}
 
-	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes) {
+	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
 		Map subFlowAttributes = new HashMap();
-		map(parentFlowAttributes, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
+		map(parentFlowModel, new MapAttributesAccessorAdapter(subFlowAttributes), toMappings);
 		return Collections.unmodifiableMap(subFlowAttributes);
 	}
 
-	public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,
-			MutableAttributesAccessor parentFlowAttributes) {
-		map(subFlowAttributes, parentFlowAttributes, fromMappings);
+	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
+			MutableAttributesAccessor parentFlowModel) {
+		map(subFlowModel, parentFlowModel, fromMappings);
 	}
 
 	/**
@@ -238,14 +238,12 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 					// fromName is something like "beanName.propName"
 					String beanName = fromName.substring(0, idx);
 					String propName = fromName.substring(idx + 1);
-
 					BeanWrapper bw = createBeanWrapper(from.getAttribute(beanName));
 					fromValue = bw.getPropertyValue(propName);
 				}
 				else {
 					fromValue = from.getAttribute(fromName);
 				}
-
 				// set target value
 				String toName = (String)mappings.get(fromName);
 				idx = toName.indexOf('.');

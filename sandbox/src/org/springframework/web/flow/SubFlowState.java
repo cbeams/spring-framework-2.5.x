@@ -84,17 +84,17 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '"
 					+ flowExecution.getActiveFlowId() + "'");
 		}
-		Map subFlowAttributes = createSpawnedSubFlowAttributesMap(flowExecution);
-		return flowExecution.spawn(getSubFlow(), subFlowAttributes, request, response);
+		Map subFlowInput = createSubFlowInputAttributes(flowExecution);
+		return flowExecution.spawn(getSubFlow(), subFlowInput, request, response);
 	}
 
-	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowModel) {
+	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
 		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			return this.flowAttributesMapper.createSpawnedSubFlowAttributesMap(parentFlowModel);
+			return this.flowAttributesMapper.createSubFlowInputAttributes(parentFlowModel);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -108,15 +108,14 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 		}
 	}
 
-	public void mapToResumingParentFlow(AttributesAccessor endingSubFlowModel,
-			MutableAttributesAccessor resumingParentFlowModel) {
+	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel, MutableAttributesAccessor parentFlowModel) {
 		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger
 						.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
 								+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
 			}
-			this.flowAttributesMapper.mapToResumingParentFlow(endingSubFlowModel, resumingParentFlowModel);
+			this.flowAttributesMapper.mapSubFlowOutputAttributes(subFlowModel, parentFlowModel);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
