@@ -97,6 +97,7 @@ public class DefaultConversionServiceTests extends TestCase {
 		mapping = (Mapping)executor.execute("id,java.lang.Long");
 		mapping = (Mapping)executor.execute("id->id");
 		mapping = (Mapping)executor.execute("id->colleagueId,java.lang.Long");
+		mapping = (Mapping)executor.execute("id,java.lang.String->colleagueId");
 		mapping = (Mapping)executor.execute("id,java.lang.String->colleagueId,java.lang.Long");
 	}
 

@@ -81,12 +81,12 @@ public class TextToMappingConverter extends AbstractConverter {
 			}
 			String[] targetMappingInfo = StringUtils.commaDelimitedListToStringArray(sourceTarget[1]);
 			String targetAttributeName = targetMappingInfo[0];
-			Class targetAttributeClass = null;
+			Class targetAttributeClass = String.class;
 			if (targetMappingInfo.length == 2) {
 				targetAttributeClass = (Class)getConversionService().getConversionExecutor(String.class, Class.class)
 						.call(targetMappingInfo[1]);
 			}
-			if (targetAttributeClass != null) {
+			if (!sourceAttributeClass.equals(targetAttributeClass)) {
 				return new Mapping(sourceAttributeName, targetAttributeName, getConversionService()
 						.getConversionExecutor(sourceAttributeClass, targetAttributeClass));
 			}
