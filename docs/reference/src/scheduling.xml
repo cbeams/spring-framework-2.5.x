@@ -116,6 +116,22 @@ public class BusinessObject {
 			create one-line jobs that just invoke a method, and you only need to create the actual
 			business object and wire up the detail object.
 		</para>
+		<para>
+			By default, Quartz Jobs are stateless, resulting in the possibility of jobs interfering
+			with eachother. If you specify two triggers for the same JobDetail, it might be possible
+			that before the first job has finished, the second one will start. If JobDetail objects
+			implement the Stateful interface, this won't happen. The second job will not start
+			before the first one has finished. To make jobs resulting from the MethodInvokingJobDetailFactoryBEan
+			non-concurrent set the <literal>concurrent</literal> flag to <literal>false</literal>.
+			<programlisting><![CDATA[
+<bean id="methodInvokingJobDetail" 
+  class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+    <property name="targetObject"><ref bean="exampleBusinessObject"/></property>
+    <property name="targetMethod"><value>doIt</value></property>
+</bean>			
+			]]></programlisting>	
+			<emphasis>Note: By default, jobs will run in a concurrent fashion.</emphasis>
+		</para>
 	</sect2>
 	
 	<sect2>

@@ -24,6 +24,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
+import org.quartz.StatefulJob;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -39,13 +40,18 @@ import org.springframework.util.MethodInvoker;
  *
  * <p>Derived from MethodInvoker to share common properties and
  * behavior with MethodInvokingFactoryBean.
+ * 
+ * <p>Supports both concurrently running jobs and non-currently running
+ * ones through the {@link #setConcurrent(boolean}} property.
  *
  * <p><b>Note: JobDetails created via this FactoryBean are <i>not</i>
  * serializable and thus not suitable for persistent job stores.</b>
  * You need to implement your own Quartz Job as a thin wrapper for
  * each case where you want to delegate to an external method.
+ * 
  *
  * @author Juergen Hoeller
+ * @author Alef Arendsen
  * @since 18.02.2004
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
@@ -59,6 +65,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	private String beanName;
 
 	private JobDetail jobDetail;
+	
+	private boolean concurrent = true;
 
 	/**
 	 * Set the name of the job.
@@ -78,6 +86,25 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	public void setGroup(String group) {
 		this.group = group;
 	}
+	
+	/**
+	 * Specified whether or not multiple jobs should
+	 * be run in a concurrent fashion. The behavior when
+	 * one does not want concurrent jobs to be executed is
+	 * realized through adding the {@link StatefulJob} interface.
+	 * More information on Stateful versus Stateless jobs can
+	 * be found 
+	 * <a href="http://www.opensymphony.com/quartz/tutorial.html#jobsMore">here</a>.
+	 * <p>The default setting specified to run jobs concurrently.
+	 * @since 23-06-2004 (release 1.1)
+	 * @param concurrent <code>true</code> if one wants to execute 
+	 * multiple jobs creating by this bean concurrently (this is also
+	 * the default setting) and <code>false</code> otherwise.
+	 * in a concurrent 
+	 */
+	public void setConcurrent(boolean concurrent) {
+		this.concurrent = concurrent;
+	}
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
@@ -85,10 +112,14 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();
+		// consider the concurrent flag and choose between Stateful or Stateless job
 		this.jobDetail = new JobDetail(this.name != null ? this.name : this.beanName,
-		                               this.group, MethodInvokingJob.class);
+		                               this.group, 
+									   this.concurrent ? 
+									   		MethodInvokingJob.class : 
+									   		StatefulMethodInvokingJob.class);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
-		this.jobDetail.setVolatility(true);
+		this.jobDetail.setVolatility(true);		
 	}
 
 	public Object getObject() {
@@ -146,6 +177,16 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				throw new JobExecutionException(this.errorMessage, ex, false);
 			}
 		}
+	}
+	
+	/**
+	 * Extension of the MethodInvokingJob implementing
+	 * @{link StatefulJob}. Quartz checks whether or not jobs are stateful and if so,
+	 * jobs won't interfere with eachother. 
+	 */
+	public static class StatefulMethodInvokingJob extends MethodInvokingJob implements StatefulJob {
+		// no implementation, just a addition of the tagging interface StatefulJob in order
+		// to allow stateful method invoking jobs
 	}
 
 }

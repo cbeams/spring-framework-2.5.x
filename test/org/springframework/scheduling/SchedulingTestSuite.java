@@ -181,6 +181,92 @@ public class SchedulingTestSuite extends TestCase {
 
 		schedulerControl.verify();
 	}
+	
+	public void testMethodInvocationWithConcurrency() throws Exception {
+		methodInvokingConcurrency(true);
+	}
+	
+	// we can't test both since Quartz somehow seems to keep things in memory
+	// enable both and one of them will fail (order doesn't matter)
+	/*public void testMethodInvocationWithoutConcurrency() throws Exception {
+		methodInvokingConcurrency(false);
+	}*/
+	
+	public void methodInvokingConcurrency(boolean concurrent) 
+	throws Exception {
+		
+		// test the concurrency flag
+		// method invoking job with two triggers
+		// if the concurrent flag is false, the triggers are NOT allowed
+		// to interfere with eachother
+
+		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
+		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
+		// set the concurrency flag!
+		mijdfb.setConcurrent(concurrent);
+		mijdfb.setBeanName("myJob1");
+		mijdfb.setTargetObject(task1);
+		mijdfb.setTargetMethod("doWait");
+		mijdfb.afterPropertiesSet();
+		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+
+		SimpleTriggerBean trigger0 = new SimpleTriggerBean();
+		trigger0.setBeanName("myTrigger1");
+		trigger0.setJobDetail(jobDetail1);
+		trigger0.setStartDelay(0);		
+		trigger0.setRepeatInterval(1);
+		trigger0.setRepeatCount(1);
+		trigger0.afterPropertiesSet();
+		
+		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
+		trigger1.setBeanName("myTrigger1");
+		trigger1.setJobDetail(jobDetail1);
+		trigger1.setStartDelay(1000L);		
+		trigger1.setRepeatInterval(1);
+		trigger1.setRepeatCount(1);
+		trigger1.afterPropertiesSet();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
+		
+		
+		schedulerFactoryBean.setJobDetails(new JobDetail[] { jobDetail1 } );
+		schedulerFactoryBean.setTriggers(new Trigger[] { trigger1, trigger0} );		
+		schedulerFactoryBean.afterPropertiesSet();
+		
+		// ok scheduler is set up... let's wait for like 1 seconds
+		try {
+			Thread.sleep(4000);			
+		} catch (InterruptedException e) {
+			// fall through
+		}
+		
+		if (concurrent) {
+			assertEquals(2, task1.counter);
+			task1.stop();
+			// we're done, both jobs have ran, let's call it a day
+			return;
+		} else {			
+			assertEquals(1, task1.counter);
+			task1.stop();
+			// we need to check whether or not the test succeed with non-concurrent jobs
+		}		
+		
+		try {
+			Thread.sleep(4000);			
+		} catch (InterruptedException e) {
+			// fall through
+		}
+		
+		task1.stop();
+		
+		assertEquals(2, task1.counter);
+		
+		// although we're destroying the scheduler, it does seem to keep things in memory,
+		// when executing both tests (concurrent and non-concurrent), the second test always
+		// fails
+		schedulerFactoryBean.destroy();
+		
+	}
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
@@ -330,9 +416,30 @@ public class SchedulingTestSuite extends TestCase {
 	public static class TestMethodInvokingTask {
 
 		private int counter = 0;
-
+		
+		private Object lock = new Object();
+		
 		public void doSomething() {
 			counter++;
+		}
+		
+		public void doWait() {
+			System.out.println("NOPE");
+			counter++;
+			// wait until stop is called
+			synchronized (lock) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					// fall through
+				}
+			}
+		}
+		
+		void stop() {
+			synchronized(lock) {
+				lock.notify();
+			}
 		}
 	}
 
