@@ -36,11 +36,10 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
- * The command class is the object that will be created filled using the request
- * parameters. What the actual command class is, is customizable in many ways,
- * through extending controllers or overriding methods. Command classes should
- * preferrably be JavaBeans in order to be able to fill instances of the classes
- * using the request parameters.</p>
+ * An instance of the command class will be created for each request and populated
+ * with request parameters. A command class can basically be any Java class; the only
+ * requirement is a no-arg constructor. The command class should preferably be a
+ * JavaBean in order to be able to populate bean properties with request parameters.</p>
  *
  * <p><b>Populating using request parameters and PropertyEditors:</b><br>
  * Upon receiving a request, any BaseCommandController will attempt to fill the
@@ -62,11 +61,11 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  * for more information on that matter.</p>
  *
  * <p><b>Validators:</b>
- * After the controller has successfully filled the command object with
- * the parameters from the request, it will attempt use any configured validators
- * to validate the object. Validation results will be put in a
- * {@link org.springframework.validation.Errors Errors} object which can be used
- * in a View to render any input problems.</p>
+ * After the controller has successfully populated the command object with
+ * parameters from the request, it will use any configured validators to
+ * validate the object. Validation results will be put in a
+ * {@link org.springframework.validation.Errors Errors} object which can be
+ * used in a View to render any input problems.</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="AbstractController.html#workflow">and that defined by superclass</a>):</b><br>
@@ -99,23 +98,23 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  *      <td>commandClass</td>
  *      <td><i>null</i></td>
  *      <td>the class to use upon receiving a request and which to fill
- *          using the request parameters. What object is used and
- *          whether or not it should be created is defined by extending classes
- *          and their configuration properties and methods</td>
+ *          using the request parameters. What object is used and whether
+ *          or not it should be created is defined by extending classes
+ *          and their configuration properties and methods.</td>
  *  </tr>
  *  <tr>
  *      <td>validator</td>
  *      <td><i>null</i></td>
  *      <td>Validator bean (usually passed in using a &lt;ref bean="beanId"/&gt;
- *          property. The validator will be called somewhere in the workflow
- *          of implementing classes (have a look at those for more info) to
- *          validate the command object</td>
+ *          property. The validator will be called at appropriate places in the
+ *          workflow of subclasses (have a look at those for more info) to
+ *          validate the command object.</td>
  *  </tr>
  *  <tr>
  *      <td>validateOnBinding</td>
  *      <td>true</td>
- *      <td>Indicates whether or not to validate the command object
- *          after the object has been filled using the request parameters</td>
+ *      <td>Indicates whether or not to validate the command object after the
+ *          object has been populated with request parameters.</td>
  *  </tr>
  * </table>
  * </p>

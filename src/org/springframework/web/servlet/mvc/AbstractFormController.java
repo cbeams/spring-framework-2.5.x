@@ -47,70 +47,72 @@ import org.springframework.web.servlet.ModelAndView;
  * BaseCommandController) can be used, reporting via the same "errors" instance.</p>
  *
  * <p>Comparing this Controller to the Struts notion of the <code>Action</code>
- * shows us that with Spring, you can use any ordinary JavaBeans or database
- * backed JavaBean without having to implement a framework specific class
- * (in case of Struts, this is <code>ActionForm</code>). More complex properties
- * of JavaBeans (Dates, Locales, but also your own application specific
- * or compound types) can be represented and submitted to the controller, by
- * using the notion of <code>java.beans.PropertyEditors</code>. For more information on that
+ * shows us that with Spring, you can use any ordinary JavaBeans or database-
+ * backed JavaBeans without having to implement a framework-specific class
+ * (like Struts' <code>ActionForm</code>). More complex properties of JavaBeans
+ * (Dates, Locales, but also your own application-specific or compound types)
+ * can be represented and submitted to the controller, by using the notion of
+ * <code>java.beans.PropertyEditors</code>. For more information on that
  * subject, see the workflow of this controller and the explanation of the
  * {@link BaseCommandController BaseCommandController}.</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="BaseCommandController.html#workflow">and that defined by superclass</a>):</b><br>
  * <ol>
- *  <li>GET request on the controller is received</li>
- *  <li>call to {@link #formBackingObject formBackingObject()} which by default,
+ *  <li><b>The controller receives a request for a new form (typically a GET).</b></li>
+ *  <li>Call to {@link #formBackingObject formBackingObject()} which by default,
  *      returns an instance of the commandClass that has been configured
- *      (see the properties the superclass exposes), but can also be overriden
- *      to - for instance - retrieve an object from the database (that - for
- *      instance - needs to be modified using the form)</li>
- *  <li>call to {@link #initBinder initBinder()} which allows you to register
+ *      (see the properties the superclass exposes), but can also be overridden
+ *      to e.g. retrieve an object from the database (that needs to be modified
+ * using the form).</li>
+ *  <li>Call to {@link #initBinder initBinder()} which allows you to register
  *      custom editors for certain fields (often properties of non-primitive
- *      or non-Sring types) or the command class. This render appropriate
- *      Strings for for instance locales</li>
- *  <li>binding of the {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
- *      in the request to be able to use the property editors in the form rendering
+ *      or non-String types) of the command class. This will render appropriate
+ *      Strings for those property values, e.g. locale-specific date strings.</li>
+ *  <li>The {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
+ *      gets applied to populate the new form object with initial request parameters.
  *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)</li>
- *  <li>call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
+ *  <li>Call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
  *      to return a View that should be rendered (typically the view that renders
- *      the form). This method has be overridden in extending classes</li>
- *  <li>call to {@link #referenceData referenceData()} to allow you to bind
- *      any relevant reference data you might need when editing a form
- *      (for instance a List of Locale objects you're going to let the user
- *      select one from)</li>
- *  <li>model gets exposed and view gets rendered. Continue after user has filled
- *      in form</li>
- *  <li>POST request on the controller is received</li>
- *  <li>if <code>sessionForm</code> is not set, {@link #formBackingObject formBackingObject()}
+ *      the form). This method has to be implemented in subclasses.</li>
+ *  <li>Call to {@link #referenceData referenceData()} to allow you to bind any
+ *      relevant reference data you might need when editing a form (e.g. a List
+ *      of Locale objects you're going to let the user select one from)</li>
+ *  <li>Model gets exposed and view gets rendered, to let the user fill in the form.</li>
+ *  <li><b>The controller receives a form submission (typically a POST).</b>
+ *      To use a different way of detecting a form submission, override the
+ *      {@link #isFormSubmission isFormSubmission} method.
+ *      </li>
+ *  <li>If <code>sessionForm</code> is not set, {@link #formBackingObject formBackingObject()}
  *      is called to retrieve a form object. Otherwise, the controller tries to
  *      find the command object which is already bound in the session. If it cannot
- *      find the object, it'll do a call to {@link #handleInvalidSubmit handleInvalidSubmit}
- *      which - by default - tries to create a new form object and resubmit the form</li>
- *  <li>controller tries to put all parameters from the request into the
- *      JavaBeans (command object) and if <code>validateOnBinding</code> is
- *      set, validation will occur</li>
- *  <li>call to {@link #onBindAndValidate onBindAndValidate()} which allows
- *      you to do custom processing after binding and validation (for instance
- *      to perform database persistency)</li>
- *  <li>call to {@link #processFormSubmission processFormSubmission} which, in implementing
- *      classes returns a sort of successview, for instance congratulating
- *      the user with a successfull form submission</li>
+ *      find the object, it does a call to {@link #handleInvalidSubmit handleInvalidSubmit}
+ *      which - by default - tries to create a new form object and resubmit the form.</li>
+ *  <li>The {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
+ *      gets applied to populate the form object with current request parameters.
+ *  <li>Call to {@link #onBind onBind(HttpServletRequest, Object, Errors)} which allows
+ *      you to do custom processing after binding but before validation (e.g. to manually
+ *      bind request parameters to bean properties, to be seen by the Validator).</li>
+ *  <li>If <code>validateOnBinding</code> is set, a registered Validator will be invoked.
+ *      The Validator will check the form object properties, and register corresponding
+ *      errors via the given {@link org.springframework.validation.Errors Errors}</li> object.
+ *  <li>Call to {@link #onBindAndValidate onBindAndValidate()} which allows you
+ *      to do custom processing after binding and validation (e.g. to manually
+ *      bind request parameters, and to validate them outside a Validator).</li>
+ *  <li>Call {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
+ *      again if there have been any binding and/or validation errors. Else, call to
+ *      {@link #processFormSubmission processFormSubmission} to process the valid form
+ *      submission. This method has to be implemented in subclasses.</li>
  * </ol>
  * </p>
  *
- * <p>Note that by default POST requests are treated as form submissions. This can be
- * customized by overriding isFormSubmission. Custom binding can be achieved either
- * by registering custom property editors before binding in an initBinder
- * implementation, or by custom bean population from request parameters after binding
- * in an onBindAndValidate implementation.</p>
- *
  * <p>In session form mode, a submission without an existing form object in the
  * session is considered invalid, like in case of a resubmit/reload by the browser.
- * The handleInvalidSubmit method is invoked then, trying a resubmit by default.
- * It can be overridden in subclasses to show respective messages or redirect to a
- * new form, in order to avoid duplicate submissions. The form object in the session
- * can be considered a transaction token in this case.</p>
+ * The {@link #handleInvalidSubmit handleInvalidSubmit} method is invoked then,
+ * by default trying to resubmit. It can be overridden in subclasses to show
+ * corresponding messages or to redirect to a new form, in order to avoid duplicate
+ * submissions. The form object in the session can be considered a transaction
+ * token in that case.</p>
  *
  * <p>Note that views should never retrieve form beans from the session but always
  * from the request, as prepared by the form controller. Remember that some view
@@ -127,20 +129,18 @@ import org.springframework.web.servlet.ModelAndView;
  *  <tr>
  *      <td>bindOnNewForm</td>
  *      <td>false</td>
- *      <td>Indicates whether to bind servletrequestparameters as well when
- *          creating a new form. If set to <code>true</code> this will happen,
- *          if set to <code>false</code>, the parameters will only be bound on
- *          formsubmissions</td>
+ *      <td>Indicates whether to bind servlet request parameters when
+ *          creating a new form. Otherwise, the parameters will only be
+ *          bound on form submission attempts.</td>
  *  </tr>
  *  <tr>
  *      <td>sessionForm</td>
  *      <td>false</td>
- *      <td>Indicates whether or not the command object should be bound onto
- *          the session when a user asks for a new form. This allows you
- *          to for instance retrieve an object from the database, let the
- *          user edit it, and then persist it again. If this is set to false,
- *          a new command object will be created on all requests (both
- *          requests for the form and submissions of the form)</td>
+ *      <td>Indicates whether the form object should be kept in the session
+ *          when a user asks for a new form. This allows you e.g. to retrieve
+ *          an object from the database, let the user edit it, and then persist
+ *          it again. Otherwise, a new command object will be created for each
+ *          request (even when showing the form again after validation errors).</td>
  *  </tr>
  * </table>
  * </p>
