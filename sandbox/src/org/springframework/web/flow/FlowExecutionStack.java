@@ -412,30 +412,30 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		assertActive();
 		return (FlowSession)executingFlowSessions.peek();
 	}
-	
+
 	//
-	
+
 	/**
 	 * Returns the name of the flow execution attribute, a special index to
 	 * lookup this flow execution as an attribute.
 	 * <p>
-	 * The flow execution will also be exposed in the model returned from
-	 * the <code>getModel()</code> method under this name.
+	 * The flow execution will also be exposed in the model returned from the
+	 * <code>getModel()</code> method under this name.
 	 * @return This flow execution's name
 	 */
 	protected Object getFlowExecutionAttributeName() {
 		return ATTRIBUTE_NAME;
 	}
-	
+
 	/**
-	 * The flow execution id will be exposed in the model returned from
-	 * the <code>getModel()</code> method under this name.
+	 * The flow execution id will be exposed in the model returned from the
+	 * <code>getModel()</code> method under this name.
 	 * @return This flow execution's id's name
 	 */
 	protected Object getFlowExecutionIdAttributeName() {
 		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
-	
+
 	/**
 	 * The current state of the flow execution will be exposed in the model
 	 * returned from the <code>getModel()</code> method under this name.
@@ -452,16 +452,14 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 */
 	public Map getModel() {
 		Map model = new HashMap(getActiveFlowSession().getModel());
-		
 		//the flow execution itself is available in the model
 		model.put(getFlowExecutionAttributeName(), this);
-		
-		model.put(getFlowExecutionIdAttributeName(), this.getId());
-		model.put(getCurrentStateIdAttributeName(), this.getCurrentStateId());
-		
+		// these are added for convenience for views that aren't easily
+		// javabean aware
+		model.put(getFlowExecutionIdAttributeName(), getId());
+		model.put(getCurrentStateIdAttributeName(), getCurrentStateId());
 		return model;
 	}
-
 
 	//methods implementing AttributesAccessor
 

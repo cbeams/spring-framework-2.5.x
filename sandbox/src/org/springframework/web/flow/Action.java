@@ -46,7 +46,8 @@ public interface Action {
 	 * current request. Execution is typically triggered in production when an
 	 * <code>ActionState</code> is entered in an ongoing
 	 * <code>FlowExecution</code> for a specific <code>Flow</code>
-	 * definition.
+	 * definition. The result of execution is used as grounds for a
+	 * transition in the calling action state.
 	 * <p>
 	 * Note: The <code>MutableAttributesAccessor</code> model argument to this
 	 * method provides access to the <b>data model </b> of the active flow
@@ -75,6 +76,6 @@ public interface Action {
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
 	 */
-	public ActionResult execute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception;
+	public String execute(HttpServletRequest request, HttpServletResponse response, MutableAttributesAccessor model)
+			throws Exception;
 }

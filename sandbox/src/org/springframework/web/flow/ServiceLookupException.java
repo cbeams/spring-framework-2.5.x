@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.config;
+package org.springframework.web.flow;
 
 import org.springframework.util.StringUtils;
 
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class FlowServiceLookupException extends RuntimeException {
+public abstract class ServiceLookupException extends RuntimeException {
 
 	private String serviceId;
 
@@ -33,7 +33,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 * Create a new service lookup exception
 	 * @param serviceId The id of the service that cannot be found
 	 */
-	public FlowServiceLookupException(String serviceId) {
+	public ServiceLookupException(String serviceId) {
 		super();
 		this.serviceId = serviceId;
 	}
@@ -43,7 +43,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 * @param serviceId The id of the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public FlowServiceLookupException(String serviceId, Throwable cause) {
+	public ServiceLookupException(String serviceId, Throwable cause) {
 		super(cause);
 		this.serviceId = serviceId;
 	}
@@ -54,7 +54,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 * @param message Descriptive message
 	 * @param cause The underlying cause of this exception
 	 */
-	public FlowServiceLookupException(String serviceId, String message, Throwable cause) {
+	public ServiceLookupException(String serviceId, String message, Throwable cause) {
 		super(message, cause);
 		this.serviceId = serviceId;
 	}
@@ -64,7 +64,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 */
-	public FlowServiceLookupException(Class serviceImplementationClass) {
+	public ServiceLookupException(Class serviceImplementationClass) {
 		super();
 		this.serviceImplementationClass = serviceImplementationClass;
 	}
@@ -75,7 +75,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 *        the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public FlowServiceLookupException(Class serviceImplementationClass, Throwable cause) {
+	public ServiceLookupException(Class serviceImplementationClass, Throwable cause) {
 		super(cause);
 		this.serviceImplementationClass = serviceImplementationClass;
 	}
@@ -87,7 +87,7 @@ public abstract class FlowServiceLookupException extends RuntimeException {
 	 * @param message Descriptive message
 	 * @param cause The underlying cause of this exception
 	 */
-	public FlowServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
+	public ServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
 		super(message, cause);
 		this.serviceImplementationClass = serviceImplementationClass;
 	}

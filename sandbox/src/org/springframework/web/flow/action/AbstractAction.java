@@ -21,12 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.MutableAttributesAccessor;
@@ -72,55 +72,20 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		initAction();
 	}
 
+	protected String error() {
+		return FlowConstants.ERROR;
+	}
+
+	protected String success() {
+		return FlowConstants.SUCCESS;
+	}
+
 	/**
 	 * Action initializing callback, may be overriden by subclasses to perform
 	 * custom initialization.
 	 */
 	protected void initAction() {
 
-	}
-
-	/**
-	 * Factory method that produces the common 'success' result parameter
-	 * object.
-	 * @return a success result object
-	 */
-	protected ActionResult success() {
-		return new ActionResult(FlowConstants.SUCCESS);
-	}
-
-	/**
-	 * Factory method that produces the common 'error' result parameter object.
-	 * @return a error result object
-	 */
-	protected ActionResult error() {
-		return new ActionResult(FlowConstants.ERROR);
-	}
-
-	/**
-	 * Factory method that produces the common 'add' result parameter object.
-	 * @return a add result object
-	 */
-	protected ActionResult add() {
-		return new ActionResult(FlowConstants.ADD);
-	}
-
-	/**
-	 * Factory method that produces the common 'search' result parameter object.
-	 * @return a search result object
-	 */
-	protected ActionResult search() {
-		return new ActionResult(FlowConstants.SEARCH);
-	}
-
-	/**
-	 * Factory method that produces a <code>ActionResult</code> parameter
-	 * object given a string identifier
-	 * @param resultId The result id
-	 * @return The action result
-	 */
-	protected ActionResult actionResult(String resultId) {
-		return new ActionResult(resultId);
 	}
 
 	/**
@@ -365,13 +330,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		model.setAttributes(errors.getModel());
 	}
 
-	public final ActionResult execute(HttpServletRequest request, HttpServletResponse response,
+	public final String execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
-		ActionResult result = onPreExecute(request, response, model);
-		if (result == null) {
+		String result = onPreExecute(request, response, model);
+		if (!StringUtils.hasText(result)) {
 			result = doExecuteAction(request, response, model);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Action '" + getClass().getName() + "' completed execution; event result is " + result);
@@ -401,7 +366,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return
 	 * @throws Exception
 	 */
-	protected ActionResult onPreExecute(HttpServletRequest request, HttpServletResponse response,
+	protected String onPreExecute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		return null;
 	}
@@ -415,7 +380,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return The action result
 	 * @throws Exception A unrecoverable exception occured
 	 */
-	protected abstract ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected abstract String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception;
 
 	/**

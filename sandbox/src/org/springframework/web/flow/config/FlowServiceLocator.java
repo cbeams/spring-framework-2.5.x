@@ -18,80 +18,74 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.ServiceLookupException;
 
 /**
- * Service locator interface used by flow builders to retrieve needed artifacts.
- * 
+ * Service locator interface used by flow builders at configuration time to
+ * retrieve needed artifacts.
  * <p>
- * Note that a service locator is a configuration time object. It is not used
+ * Note that this service locator is a configuration time object. It is not used
  * during flow execution!
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  */
-public interface FlowServiceLocator {
-
-	/**
-	 * Lookup an action with specified id.
-	 * @param actionId The action id
-	 * @return The action
-	 * @throws FlowServiceLookupException When the action cannot be found
-	 */
-	public Action getAction(String actionId) throws FlowServiceLookupException;
-
-	/**
-	 * Lookup an action of specified implementation class.
-	 * @param actionImplementationClass The required implementation class
-	 * @return the action
-	 * @throws FlowServiceLookupException When the action cannot be found
-	 */
-	public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException;
-
-	/**
-	 * Lookup a flow with specified id.
-	 * @param flowDefinitionId The flow id
-	 * @return The flow
-	 * @throws FlowServiceLookupException When the flow cannot be found
-	 */
-	public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException;
+public interface FlowServiceLocator extends FlowLocator {
 
 	/**
 	 * Lookup a flow build by specified type of flow builder.
 	 * @param flowDefinitionId the flow id
 	 * @param requiredFlowBuilderImplementationClass The required builder type
 	 * @return the flow
-	 * @throws FlowServiceLookupException When the flow cannot be found
+	 * @throws ServiceLookupException When the flow cannot be found
 	 */
 	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-			throws FlowServiceLookupException;
+			throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow of specified implementation class.
-	 * @param flowDefinitionImplementationClass The required implementation class.
+	 * @param flowDefinitionImplementationClass The required implementation
+	 *        class.
 	 * @return The flow
-	 * @throws FlowServiceLookupException When the flow cannot be found
+	 * @throws ServiceLookupException When the flow cannot be found
 	 */
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException;
+	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException;
+
+	/**
+	 * Lookup an action with specified id.
+	 * @param actionId The action id
+	 * @return The action
+	 * @throws ServiceLookupException When the action cannot be found
+	 */
+	public Action getAction(String actionId) throws ServiceLookupException;
+
+	/**
+	 * Lookup an action of specified implementation class.
+	 * @param actionImplementationClass The required implementation class
+	 * @return the action
+	 * @throws ServiceLookupException When the action cannot be found
+	 */
+	public Action getAction(Class actionImplementationClass) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow attributes mapper with specified id.
 	 * @param flowAttributesMapperId The flow attributes mapper id
 	 * @return The flow attributes mapper
-	 * @throws FlowServiceLookupException When the flow attributes mapper cannot
-	 *         be found
+	 * @throws ServiceLookupException When the flow attributes mapper cannot be
+	 *         found
 	 */
-	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
-			throws FlowServiceLookupException;
+	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow attributes mapper of specified implementation class.
 	 * @param flowAttributesMapperId The required implementation class
 	 * @return The flow attributes mapper
-	 * @throws FlowServiceLookupException When the flow attributes mapper cannot
-	 *         be found
+	 * @throws ServiceLookupException When the flow attributes mapper cannot be
+	 *         found
 	 */
 	public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
-			throws FlowServiceLookupException;
+			throws ServiceLookupException;
 
 }

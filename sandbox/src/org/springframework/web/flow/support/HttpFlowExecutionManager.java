@@ -32,9 +32,8 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
-import org.springframework.web.flow.FlowExecutionStack;
+import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
-import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -51,14 +50,14 @@ public class HttpFlowExecutionManager {
 
 	private Flow flow;
 
-	private FlowServiceLocator flowServiceLocator;
+	private FlowLocator flowLocator;
 
 	private Collection flowExecutionListeners;
-	
+
 	/**
-	 * Create a new flow execution manager. Since the flow is specified,
-	 * the id of the flow for which executions will be managed is expected
-	 * in the request.
+	 * Create a new flow execution manager. Since the flow is specified, the id
+	 * of the flow for which executions will be managed is expected in the
+	 * request.
 	 */
 	public HttpFlowExecutionManager() {
 		this.flow = null;
@@ -75,38 +74,38 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Create a new flow execution manager.
 	 * @param flow the flow for which executions will be managed
-	 * @param flowExecutionListeners the set of listeners that should be notified
-	 *        of lifecycle events in the managed flow execution
+	 * @param flowExecutionListeners the set of listeners that should be
+	 *        notified of lifecycle events in the managed flow execution
 	 */
 	public HttpFlowExecutionManager(Flow flow, Collection flowExecutionListeners) {
 		this.flow = flow;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	public HttpFlowExecutionManager(FlowServiceLocator flowServiceLocator) {
-		this.flowServiceLocator = flowServiceLocator;
+	public HttpFlowExecutionManager(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
 	}
 
-	public HttpFlowExecutionManager(FlowServiceLocator flowServiceLocator, Collection flowExecutionListeners) {
-		this.flowServiceLocator = flowServiceLocator;
+	public HttpFlowExecutionManager(FlowLocator flowLocator, Collection flowExecutionListeners) {
+		this.flowLocator = flowLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	public HttpFlowExecutionManager(Flow flow, FlowServiceLocator flowServiceLocator) {
+	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator) {
 		this.flow = flow;
-		this.flowServiceLocator = flowServiceLocator;
+		this.flowLocator = flowLocator;
 	}
 
-	public HttpFlowExecutionManager(String flowId, FlowServiceLocator flowServiceLocator) {
+	public HttpFlowExecutionManager(String flowId, FlowLocator flowLocator) {
 		if (StringUtils.hasText(flowId)) {
-			this.flow = flowServiceLocator.getFlow(flowId);
+			this.flow = flowLocator.getFlow(flowId);
 		}
-		this.flowServiceLocator = flowServiceLocator;
+		this.flowLocator = flowLocator;
 	}
 
-	public HttpFlowExecutionManager(Flow flow, FlowServiceLocator flowServiceLocator, Collection flowExecutionListeners) {
+	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator, Collection flowExecutionListeners) {
 		this.flow = flow;
-		this.flowServiceLocator = flowServiceLocator;
+		this.flowLocator = flowLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
@@ -146,8 +145,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * @return marker value indicating that the event id parameter was
-	 *         not properly set in the request
+	 * @return marker value indicating that the event id parameter was not
+	 *         properly set in the request
 	 */
 	protected String getNotSetEventIdParameterMarker() {
 		return FlowConstants.NOT_SET_EVENT_ID;
@@ -206,12 +205,13 @@ public class HttpFlowExecutionManager {
 			if (!StringUtils.hasText(eventId)) {
 				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 				if (!StringUtils.hasText(eventId)) {
-					throw new IllegalArgumentException("The '"
-						+ getEventIdParameterName()
-						+ "' request parameter (or '"
-						+ getEventIdRequestAttributeName()
-						+ "' request attribute) is required to signal an event in the current state of this executing flow '"
-						+ flowExecution.getCaption() + "' -- programmer error?");
+					throw new IllegalArgumentException(
+							"The '"
+									+ getEventIdParameterName()
+									+ "' request parameter (or '"
+									+ getEventIdRequestAttributeName()
+									+ "' request attribute) is required to signal an event in the current state of this executing flow '"
+									+ flowExecution.getCaption() + "' -- programmer error?");
 				}
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
@@ -257,8 +257,8 @@ public class HttpFlowExecutionManager {
 			return this.flow;
 		}
 		else {
-			Assert.notNull("The flow service locator is required to lookup flows to execute by an id parameter");
-			return flowServiceLocator.getFlow(flowId);
+			Assert.notNull("The flow locator is required to lookup flows to execute by an id request parameter");
+			return flowLocator.getFlow(flowId);
 		}
 	}
 
@@ -268,7 +268,7 @@ public class HttpFlowExecutionManager {
 	 * @return The created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = new FlowExecutionStack(flow);
+		FlowExecution flowExecution = flow.createExecution();
 		if (flowExecutionListeners != null && !flowExecutionListeners.isEmpty()) {
 			flowExecution.getListenerList().add(
 					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
@@ -332,7 +332,7 @@ public class HttpFlowExecutionManager {
 	 * try to obtain a parameter value using the following algorithm:
 	 * <ol>
 	 * <li>Try to get the parameter value from the request using just the given
-	 * <i>logical</i> name. This handles request parameters of the form
+	 * <i>logical </i> name. This handles request parameters of the form
 	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
 	 * submitted using a hidden HTML form field, this will return the requested
 	 * value.</li>
@@ -347,7 +347,7 @@ public class HttpFlowExecutionManager {
 	 * </li>
 	 * </ol>
 	 * @param request the current HTTP request
-	 * @param logicalName the <i>logical</i> name of the request parameter
+	 * @param logicalName the <i>logical </i> name of the request parameter
 	 * @param delimiter the delimiter to use
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request
@@ -361,7 +361,7 @@ public class HttpFlowExecutionManager {
 	 * try to obtain a parameter value using the following algorithm:
 	 * <ol>
 	 * <li>Try to get the parameter value from the request using just the given
-	 * <i>logical</i> name. This handles request parameters of the form
+	 * <i>logical </i> name. This handles request parameters of the form
 	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
 	 * submitted using a hidden HTML form field, this will return the requested
 	 * value.</li>
@@ -377,7 +377,7 @@ public class HttpFlowExecutionManager {
 	 * </li>
 	 * </ol>
 	 * @param request the current HTTP request
-	 * @param logicalName the <i>logical</i> name of the request parameter
+	 * @param logicalName the <i>logical </i> name of the request parameter
 	 * @param delimiter the delimiter to use
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request

@@ -15,13 +15,15 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.web.flow.ServiceLookupException;
+
 /**
  * Thrown when an action cannot be found.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchActionException extends FlowServiceLookupException {
+public class NoSuchActionException extends ServiceLookupException {
 	
 	/**
 	 * Create a new action lookup exception.

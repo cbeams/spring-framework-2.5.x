@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.PropertyEditorRegistrar;
@@ -27,7 +28,6 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
@@ -42,13 +42,12 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 public class BindAndValidateAction extends AbstractAction {
 
 	/**
-	 * Constant <code>ActionResult</code> marker that indicates to the base
-	 * BindAndValidate action that it should attempt to return a default
-	 * <code>success</code> or <code>error</code> event. What event to
-	 * return is calculated based on whether any errors were generated during
-	 * the bind and validate process.
+	 * Constant result marker that indicates to the base BindAndValidate action
+	 * that it should attempt to return a default <code>success</code> or
+	 * <code>error</code> event. What event to return is calculated based on
+	 * whether any errors were generated during the bind and validate process.
 	 */
-	protected static final ActionResult USE_DEFAULT_EVENT = ActionResult.NULL_RESULT;
+	protected static final String USE_DEFAULT_EVENT = null;
 
 	private String formObjectName = DEFAULT_FORM_OBJECT_NAME;
 
@@ -204,14 +203,14 @@ public class BindAndValidateAction extends AbstractAction {
 	/*
 	 *  
 	 */
-	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
-		ActionResult event = bindAndValidate(request, model, binder);
+		String result = bindAndValidate(request, model, binder);
 		exportErrorsInternal(model, binder.getErrors());
-		if (event != null && event != USE_DEFAULT_EVENT) {
-			return event;
+		if (StringUtils.hasText(result)) {
+			return result;
 		}
 		else {
 			return getDefaultActionResult(request, model, formObject, binder.getErrors());
@@ -228,7 +227,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors
 	 * @return
 	 */
-	protected ActionResult getDefaultActionResult(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String getDefaultActionResult(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
@@ -335,7 +334,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *         validation
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ActionResult bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
+	protected final String bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
 			ServletRequestDataBinder binder) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
@@ -475,8 +474,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
-	protected ActionResult onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
-			Object formObject, BindException errors) {
+	protected String onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
+			BindException errors) {
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(request, model, formObject, errors);
 		}
@@ -493,7 +492,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors
 	 * @return
 	 */
-	protected ActionResult onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return onBindAndValidateSuccess(request, model, formObject);
 	}
@@ -508,7 +507,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param formObject
 	 * @return
 	 */
-	protected ActionResult onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject) {
 		return null;
 	}

@@ -117,15 +117,16 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Returns the <i>default</i> set of flow execution listeners for all executions
-	 * created for this flow. The set returned is a mutable list object.
+	 * Returns the <i>default </i> set of flow execution listeners for all
+	 * executions created for this flow. The set returned is a mutable list
+	 * object.
 	 * <p>
 	 * This is really a convenience feature since flow execution listeners are
-	 * managed and notified by a <code>FlowExecution</code> and not by the flow
-	 * itself! You can use this when you want certain listeners to always be notified
-	 * when a flow execution is created for this flow, irrespective of the web
-	 * controller that is driving the execution.
-	 *  
+	 * managed and notified by a <code>FlowExecution</code> and not by the
+	 * flow itself! You can use this when you want certain listeners to always
+	 * be notified when a flow execution is created for this flow, irrespective
+	 * of the web controller that is driving the execution.
+	 * 
 	 * @return The set of flow execution listeners
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
@@ -331,6 +332,19 @@ public class Flow implements Serializable {
 		}
 		Flow flow = (Flow)o;
 		return id.equals(flow.id);
+	}
+
+	/**
+	 * Factory method that produces a new <code>FlowExecution</code> instance
+	 * for this flow on every invocation. Typically called by controller clients
+	 * that need to manage a new flow execution; might also be called by flow
+	 * execution test code.
+	 * @return A new flow execution, used by caller to manage a single client
+	 *         instance of an executing flow (typically managed in the http
+	 *         session.)
+	 */
+	public FlowExecution createExecution() {
+		return new FlowExecutionStack(this);
 	}
 
 	public int hashCode() {

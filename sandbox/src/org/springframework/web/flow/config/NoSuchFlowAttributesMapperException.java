@@ -15,13 +15,15 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.web.flow.ServiceLookupException;
+
 /**
  * Throw when a flow attributes mapper cannot be found.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchFlowAttributesMapperException extends FlowServiceLookupException {
+public class NoSuchFlowAttributesMapperException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow attributes mapper lookup exception.

@@ -23,14 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
- * Action that allows multiple event types types to be processed by
- * a single action.
+ * Action that allows multiple event types types to be processed by a single
+ * action.
  * 
  * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
  * 
@@ -59,25 +58,25 @@ public class MultiAction extends AbstractAction {
 	}
 
 	private EventHandlerMethodNameResolver methodNameResolver = new DefaultEventHandlerMethodNameResolver();
-	
+
 	public void setMethodNameResolver(EventHandlerMethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
 	}
 
-	protected ActionResult doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws Exception {
 		FlowExecution flowExecution = FlowUtils.getFlowExecution(model);
 		String eventId = flowExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {
 			Method handlerMethod = getHandlerMethod(handlerMethodName);
-			Object result=handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
-			Assert.isInstanceOf(ActionResult.class, result,
-					"Event handler methods should return an object of type ActionResult");
-			return (ActionResult)result;
+			Object result = handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
+			Assert.isInstanceOf(String.class, result,
+					"Event handler methods should return a result object of type String");
+			return (String)result;
 		}
 		catch (InvocationTargetException e) {
-			Throwable t=e.getTargetException();
+			Throwable t = e.getTargetException();
 			if (t instanceof Exception) {
 				throw (Exception)e.getTargetException();
 			}

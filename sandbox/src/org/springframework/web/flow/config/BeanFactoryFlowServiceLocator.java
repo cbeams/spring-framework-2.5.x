@@ -23,6 +23,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
+import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.ServiceLookupException;
 
 /**
  * A flow service locator that uses a Spring bean factory to lookup services.
@@ -70,7 +72,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (ListableBeanFactory)getBeanFactory();
 	}
 
-	public Action getAction(String actionId) throws FlowServiceLookupException {
+	public Action getAction(String actionId) throws ServiceLookupException {
 		try {
 			return (Action)getBeanFactory().getBean(actionId, Action.class);
 		}
@@ -79,7 +81,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException {
+	public Action getAction(Class actionImplementationClass) throws ServiceLookupException {
 		if (!Action.class.isAssignableFrom(actionImplementationClass)) {
 			throw new IllegalArgumentException("Your action implementation '" + actionImplementationClass
 					+ "' must implement the '" + Action.class.getName() + "' interface");
@@ -92,7 +94,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException {
+	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 		try {
 			return (Flow)getBeanFactory().getBean(flowDefinitionId, Flow.class);
 		}
@@ -102,7 +104,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	public Flow getFlow(String flowDefinitionId, Class requiredBuilderImplementationClass)
-			throws FlowServiceLookupException {
+			throws ServiceLookupException {
 		if (requiredBuilderImplementationClass == null) {
 			return getFlow(flowDefinitionId);
 		}
@@ -124,7 +126,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException {
+	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException {
 		try {
 			if (!Flow.class.isAssignableFrom(flowDefinitionImplementationClass)) {
 				throw new IllegalArgumentException("The flow definition implementation  '"
@@ -139,7 +141,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
-			throws FlowServiceLookupException {
+			throws ServiceLookupException {
 		try {
 			return (FlowAttributesMapper)getBeanFactory().getBean(flowAttributesMapperId, FlowAttributesMapper.class);
 		}
@@ -149,7 +151,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
-			throws FlowServiceLookupException {
+			throws ServiceLookupException {
 		if (!FlowAttributesMapper.class.isAssignableFrom(flowAttributesMapperImplementationClass)) {
 			throw new IllegalArgumentException("Your attributes mapper implementation '"
 					+ flowAttributesMapperImplementationClass + "' must implement the '"

@@ -24,9 +24,9 @@ import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.FlowExecution;
+import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.flow.support.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
@@ -76,7 +76,7 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		FlowServiceLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
+		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
 		ModelAndView modelAndView = executionManager.handleRequest(request, response);
 		// this is not very clean (pulling attribute from hard coded name)

@@ -40,8 +40,9 @@ import org.springframework.web.servlet.ModelAndView;
  * Each action executed by this action state can optionally be <i>named </i>.
  * This name is used as a qualifier in determing what transition should be
  * executed for a given result. For example, when an action named "myAction"
- * returns a "success" result, the transition "myAction.success" will be
- * executed. If the action is not named, the "success" transition will execute.
+ * returns a "success" result, a transition for "myAction.success" will be
+ * searched, and if found, executed. If the action is not named, a transition
+ * for the base "success" result will be searched, and if found, executed.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -231,7 +232,7 @@ public class ActionState extends TransitionableState {
 				return namedAction.getName();
 			}
 		}
-		throw new NoSuchElementException("action '" + action + "' is not an action executed by state '" + this + "'");
+		throw new NoSuchElementException("Action '" + action + "' is not an action executed by state '" + this + "'");
 	}
 
 	/**
@@ -247,9 +248,8 @@ public class ActionState extends TransitionableState {
 		String[] eventIds = new String[namedActions.size()];
 		while (it.hasNext()) {
 			NamedAction namedAction = (NamedAction)it.next();
-			ActionResult result = namedAction.execute(request, response, flowExecution);
+			String eventId = namedAction.execute(request, response, flowExecution);
 			executionCount++;
-			String eventId = namedAction.getEventId(result);
 			eventIds[executionCount - 1] = eventId;
 			Transition transition = getTransition(eventId);
 			if (transition != null) {
@@ -282,7 +282,6 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Wrapper class for actions that associates an action with its name (or
 	 * null if its an unnamed action).
-	 * 
 	 * <p>
 	 * For internal use only.
 	 * 
@@ -335,38 +334,37 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * Get the event id that should be used to find a matching transition
-		 * based on given event signaled by the wrapped action.
-		 * 
-		 * <p>
-		 * If the wrapped action is named, the name will be prepended to the
-		 * event Id (e.g. "myAction.ok").
-		 */
-		protected String getEventId(ActionResult result) {
-			if (result == null) {
-				return null;
-			}
-			if (isNamed()) {
-				return name + FlowConstants.DOT_SEPARATOR + result.getId();
-			}
-			else {
-				return result.getId();
-			}
-		}
-
-		/**
 		 * Execute the wrapped action.
 		 */
-		protected ActionResult execute(HttpServletRequest request, HttpServletResponse response,
+		protected String execute(HttpServletRequest request, HttpServletResponse response,
 				FlowExecutionStack flowExecution) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				return action.execute(request, response, flowExecution);
+				return getEventId(action.execute(request, response, flowExecution));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(actionState, this, e);
+			}
+		}
+
+		/**
+		 * Get the event id to be as grounds for a transition in this state,
+		 * based on given result returned from action execution.
+		 * <p>
+		 * If the wrapped action is named, the name will be used as a qualifier
+		 * (e.g. "myAction.success").
+		 */
+		protected String getEventId(String result) {
+			if (!StringUtils.hasText(result)) {
+				return null;
+			}
+			if (isNamed()) {
+				return name + FlowConstants.DOT_SEPARATOR + result;
+			}
+			else {
+				return result;
 			}
 		}
 

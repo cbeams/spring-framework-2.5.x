@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.config;
+package org.springframework.web.flow;
+
 
 /**
  * Thrown when a flow definition cannot be found.
@@ -21,7 +22,7 @@ package org.springframework.web.flow.config;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchFlowDefinitionException extends FlowServiceLookupException {
+public class NoSuchFlowDefinitionException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow definition lookup exception.
