@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,8 +34,8 @@ public abstract class ClassUtils {
 	public static final String ARRAY_SUFFIX = "[]";
 
 	/** All primitive classes */
-	private static Class[] PRIMITIVE_CLASSES = {boolean.class, byte.class, char.class, short.class,
-	                                            int.class, long.class, float.class, double.class};
+	private static Class[] PRIMITIVE_CLASSES = {
+		boolean.class, byte.class, char.class, short.class, int.class, long.class, float.class, double.class};
 
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR_CHAR = '.';
@@ -53,7 +53,20 @@ public abstract class ClassUtils {
 	 * @see java.lang.Class#forName
 	 * @see java.lang.Thread#getContextClassLoader
 	 */
-	public static Class forName(String name) throws ClassNotFoundException{
+	public static Class forName(String name) throws ClassNotFoundException {
+		return forName(name, Thread.currentThread().getContextClassLoader());
+	}
+
+	/**
+	 * Replacement for <code>Class.forName()</code> that also returns Class instances
+	 * for primitives (like "int") and array class names (like "String[]").
+	 * @param name the name of the Class
+	 * @param classLoader the class loader to use
+	 * @return Class instance for the supplied name
+	 * @see java.lang.Class#forName
+	 * @see java.lang.Thread#getContextClassLoader
+	 */
+	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
 		if (name.length() <= 8) {
@@ -68,10 +81,10 @@ public abstract class ClassUtils {
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			// special handling for array class names
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
-			Class elementClass = Class.forName(elementClassName, true, Thread.currentThread().getContextClassLoader());
+			Class elementClass = Class.forName(elementClassName, true, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
-		return Class.forName(name, true, Thread.currentThread().getContextClassLoader());
+		return Class.forName(name, true, classLoader);
 	}
 
 	/**
