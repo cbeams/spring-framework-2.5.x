@@ -51,8 +51,8 @@ import org.springframework.util.ToStringCreator;
  * action, spawning a sub flow, or terminating the flow.
  * <p>
  * Each state has one or more transitions that are used to move to another
- * state. A transition is typically triggered by the occurence of a supported event
- * within an execution context. An event is a identifier signalling the
+ * state. A transition is typically triggered by the occurence of a supported
+ * event within a request context. An event is a identifier signalling the
  * occurence of something: e.g "submit", "back", "success", "error".
  * <p>
  * Each Flow has exactly one start state. A start state is simply a marker for
@@ -67,7 +67,7 @@ import org.springframework.util.ToStringCreator;
  * <p>
  * A flow object also acts as a factory for <code>FlowExecution</code>s
  * executing the flow as the top-level flow. See the {@link #createExecution()}
- * method for more information.
+ * factory method for more information.
  * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
@@ -205,8 +205,10 @@ public class Flow {
 	 * <code>stateId</code>; a state must exist by the provided
 	 * <code>stateId</code> and it must be transitionable.
 	 * @param stateId the id of the new start state
-	 * @throws IllegalStateException when the specified start state is not transitionable
-	 * @throws NoSuchFlowStateException when no state exists with the id you provided
+	 * @throws IllegalStateException when the specified start state is not
+	 *         transitionable
+	 * @throws NoSuchFlowStateException when no state exists with the id you
+	 *         provided
 	 */
 	public void setStartState(String stateId) throws IllegalStateException, NoSuchFlowStateException {
 		setStartState(getRequiredTransitionableState(stateId));
@@ -216,7 +218,8 @@ public class Flow {
 	 * Set the start state for this flow to the state provided; any
 	 * transitionable state may be the start state.
 	 * @param state the new start state
-	 * @throws NoSuchFlowStateException the state has not been added to this flow
+	 * @throws NoSuchFlowStateException the state has not been added to this
+	 *         flow
 	 */
 	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
@@ -315,10 +318,13 @@ public class Flow {
 	 * </id>, throwing an exception if not found.
 	 * @param stateId id of the state to look up
 	 * @return the transitionable state
-	 * @throws IllegalStateException when the identified state is not transitionable
-	 * @throws NoSuchFlowStateException when no transitionable state exists by this id
+	 * @throws IllegalStateException when the identified state is not
+	 *         transitionable
+	 * @throws NoSuchFlowStateException when no transitionable state exists by
+	 *         this id
 	 */
-	public TransitionableState getRequiredTransitionableState(String stateId) throws IllegalStateException, NoSuchFlowStateException {
+	public TransitionableState getRequiredTransitionableState(String stateId) throws IllegalStateException,
+			NoSuchFlowStateException {
 		State state = getRequiredState(stateId);
 		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
