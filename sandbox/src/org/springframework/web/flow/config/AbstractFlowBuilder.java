@@ -2946,6 +2946,19 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Creates a transition stating:
 	 * <ul>
 	 * <li>on an occurence of the '<code>select</code>' event, transition
+	 * to the action state with the id <code>${stateIdPrefix}.set</code>.
+	 * </ul>
+	 * @param stateIdPrefix The state id qualifier (e.g personId)
+	 * @return The transition (e.g select->personId.set)
+	 */
+	protected Transition onSelectSet(String stateIdPrefix) {
+		return onSelect(set(stateIdPrefix));
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>select</code>' event, transition
 	 * to the action state with the id <code>${stateIdPrefix}.delete</code>.
 	 * </ul>
 	 * @param stateIdPrefix The state id qualifier (e.g person)
