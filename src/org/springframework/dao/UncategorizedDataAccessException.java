@@ -18,12 +18,11 @@ package org.springframework.dao;
 
 
 /**
- * Normal superclass when we can't distinguish anything
- * more specific than "something went wrong with the
- * underlying resource": for example, a SQLException from JDBC we
- * can't pinpoint more precisely.
+ * Normal superclass when we can't distinguish anything more specific
+ * than "something went wrong with the underlying resource": for example,
+ * a SQLException from JDBC we can't pinpoint more precisely.
  * @author Rod Johnson
- * @version $Id: UncategorizedDataAccessException.java,v 1.3 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: UncategorizedDataAccessException.java,v 1.4 2004-07-02 15:25:39 jhoeller Exp $
  */
 public abstract class UncategorizedDataAccessException extends DataAccessException {
 

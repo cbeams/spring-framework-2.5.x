@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>The central method is "execute", supporting JDO code implementing
  * the JdoCallback interface. It provides JDO PersistenceManager handling
- * such that neither theJdoCallback implementation nor the calling code
+ * such that neither the JdoCallback implementation nor the calling code
  * needs to explicitly care about retrieving/closing PersistenceManagers,
  * or handling JDO lifecycle exceptions.
  *

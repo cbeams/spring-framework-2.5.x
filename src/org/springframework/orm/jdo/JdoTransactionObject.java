@@ -29,6 +29,8 @@ import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
  *
  * @author Juergen Hoeller
  * @since 13.06.2003
+ * @see JdoTransactionManager
+ * @see PersistenceManagerHolder
  */
 public class JdoTransactionObject extends JdbcTransactionObjectSupport {
 

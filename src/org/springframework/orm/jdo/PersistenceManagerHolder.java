@@ -22,7 +22,7 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 
 /**
  * Holder wrapping a JDO PersistenceManager.
- *JdoTransactionManager binds instances of this class
+ * JdoTransactionManager binds instances of this class
  * to the thread, for a given PersistenceManagerFactory.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
@@ -35,8 +35,6 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 public class PersistenceManagerHolder extends ResourceHolderSupport {
 
 	private PersistenceManager persistenceManager;
-
-	private boolean rollbackOnly;
 
 	public PersistenceManagerHolder(PersistenceManager persistenceManager) {
 		this.persistenceManager = persistenceManager;

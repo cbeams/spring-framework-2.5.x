@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -50,7 +51,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * 
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.10 2004-07-01 02:34:43 trisberg Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.11 2004-07-02 15:26:42 jhoeller Exp $
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -126,6 +127,13 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 
 
 	public DataAccessException translate(String task, String sql, SQLException sqlex) {
+		if (task == null) {
+			task = "";
+		}
+		if (sql == null) {
+			sql = "";
+		}
+		
 		// first, try custom translation from overridden method
 		DataAccessException dex = customTranslate(task, sql, sqlex);
 		if (dex != null) {

@@ -72,7 +72,12 @@ public class JdbcAccessor {
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
+			if (getDataSource() != null) {
+				this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
+			}
+			else {
+				this.exceptionTranslator = new SQLStateSQLExceptionTranslator();
+			}
 		}
 		return this.exceptionTranslator;
 	}

@@ -66,7 +66,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.17 2004-06-21 09:08:30 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.18 2004-07-02 15:26:27 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -116,11 +116,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doGetTransaction() {
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
-		if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-			ConnectionHolder conHolder =
-					(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
-			txObject.setConnectionHolder(conHolder);
-		}
+		ConnectionHolder conHolder =
+		    (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
+		txObject.setConnectionHolder(conHolder);
 		return txObject;
 	}
 
@@ -138,16 +136,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		// cache to avoid repeated checks
 		boolean debugEnabled = logger.isDebugEnabled();
 
-		if (txObject.getConnectionHolder() == null) {
-			if (debugEnabled) {
-				logger.debug("Opening new connection for JDBC transaction");
-			}
-			Connection con = DataSourceUtils.getConnection(this.dataSource, false);
-			txObject.setConnectionHolder(new ConnectionHolder(con));
+		if (debugEnabled) {
+			logger.debug("Opening new connection for JDBC transaction");
 		}
-
+		Connection con = DataSourceUtils.getConnection(this.dataSource, false);
+		txObject.setConnectionHolder(new ConnectionHolder(con));
 		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
-		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
 
 			// apply read-only

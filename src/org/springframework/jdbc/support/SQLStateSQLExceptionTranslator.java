@@ -33,7 +33,7 @@ import org.springframework.jdbc.UncategorizedSQLException;
  * code in the SQLException. Can't diagnose all problems, but is
  * portable between databases.
  * @author Rod Johnson
- * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.4 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.5 2004-07-02 15:26:42 jhoeller Exp $
  * @see java.sql.SQLException#getSQLState
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
@@ -60,6 +60,13 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	}
 	
 	public DataAccessException translate(String task, String sql, SQLException sqlex) {
+		if (task == null) {
+			task = "";
+		}
+		if (sql == null) {
+			sql = "";
+		}
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Translating SQLException with SQLState '" + sqlex.getSQLState() +
 			            "' and errorCode '" + sqlex.getErrorCode() + "' and message [" +

@@ -237,16 +237,16 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given SQLException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Uses a JDBC exception translater if set,
-	 * and a generic HibernateJdbcException else. Can be overridden in subclasses.
+	 * org.springframework.dao hierarchy. Can be overridden in subclasses.
 	 * <p>Note that SQLException can just occur here when callback code
 	 * performs direct JDBC access via Session.connection().
 	 * @param ex SQLException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
+	 * @see net.sf.hibernate.Session#connection
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		return this.jdbcExceptionTranslator.translate("Hibernate operation", null, ex);
+		return getJdbcExceptionTranslator().translate("Hibernate operation", null, ex);
 	}
 
 }

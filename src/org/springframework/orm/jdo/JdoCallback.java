@@ -60,7 +60,7 @@ public interface JdoCallback {
 	 *
 	 * @param pm active PersistenceManager
 	 * @return a result object, or null if none
-	 * @throws javax.jdo.JDOException in case of JDO errors
+	 * @throws JDOException in case of JDO errors
 	 * @see JdoTemplate#execute
 	 * @see JdoTransactionManager
 	 */
