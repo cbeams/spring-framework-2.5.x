@@ -73,7 +73,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.23 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.24 2004-03-23 14:32:31 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -186,7 +186,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	private Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
 			// This object can configure the proxy directly if it's
-			// being used as a singleton
+			// being used as a singleton.
 			this.singletonInstance = createAopProxy().getProxy();
 		}
 		return this.singletonInstance;
@@ -196,7 +196,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		refreshAdvisorChain();
 		refreshTarget();
 		// In the case of a prototype, we need to give the proxy
-		// an independent instance of the configuration
+		// an independent instance of the configuration.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
 		}
@@ -241,7 +241,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				}
 			}
 			else {
-				// Add a named interceptor
+				// add a named interceptor
 				Object advice = this.beanFactory.getBean(this.interceptorNames[i]);
 				addAdvisor(advice, this.interceptorNames[i]);
 			}
@@ -250,9 +250,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Refresh named beans from the interceptor chain.
-	 * We need to do this every time a new prototype instance is
-	 * returned, to return distinct instances of prototype interfaces
-	 * and pointcuts.
+	 * We need to do this every time a new prototype instance is returned,
+	 * to return distinct instances of prototype interfaces and pointcuts.
 	 */
 	private void refreshAdvisorChain() {
 		Advisor[] advisors = getAdvisors();
@@ -264,7 +263,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				Object bean = this.beanFactory.getBean(beanName);
 
 				Object refreshedAdvisor = namedBeanToAdvisorOrTargetSource(bean);
-				// Might have just refreshed target source
+				// might have just refreshed target source
 				if (refreshedAdvisor instanceof Advisor) {
 					// What about aspect interfaces!? we're only updating
 					replaceAdvisor(advisors[i], (Advisor) refreshedAdvisor);
@@ -272,8 +271,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 				else {
 					setTargetSource((TargetSource) refreshedAdvisor);
 				}
-				// Keep name mapping up to date
-				sourceMap.put(refreshedAdvisor, beanName);
+				// keep name mapping up to date
+				this.sourceMap.put(refreshedAdvisor, beanName);
 			}
 			else {
 				// We can't throw an exception here, as the user may have added additional
@@ -320,28 +319,28 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * more strongly.
 	 * @param next interceptor, pointcut or target object.
 	 * @param name bean name from which we obtained this object in our owning
-	 * bean factory.
+	 * bean factory
 	 */
 	private void addAdvisor(Object next, String name) {
 		logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
 		// We need to add a method pointcut so that our source reference matches
-		// what we find from superclass interceptors
+		// what we find from superclass interceptors.
 		Object advisor = namedBeanToAdvisorOrTargetSource(next);
 		if (advisor instanceof Advisor) {
-			// If it wasn't just updating the TargetSource
+			// if it wasn't just updating the TargetSource
 			logger.debug("Adding advisor with name [" + name + "]");
 			addAdvisor((Advisor) advisor);
-			//			Record the pointcut as descended from the given bean name.
-			 // This allows us to refresh the interceptor list, which we'll need to
-			 // do if we have to create a new prototype instance. Otherwise the new
-			 // prototype instance wouldn't be truly independent, because it might reference
-			 // the original instances of prototype interceptors.
-			 this.sourceMap.put(advisor, name);
+			// Record the pointcut as descended from the given bean name.
+			// This allows us to refresh the interceptor list, which we'll need to
+			// do if we have to create a new prototype instance. Otherwise the new
+			// prototype instance wouldn't be truly independent, because it might
+			// reference the original instances of prototype interceptors.
+			this.sourceMap.put(advisor, name);
 		}
 		else {
 			logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
 			setTargetSource((TargetSource) advisor);
-			// Save target name
+			// save target name
 			this.targetName = name;
 		}
 	}

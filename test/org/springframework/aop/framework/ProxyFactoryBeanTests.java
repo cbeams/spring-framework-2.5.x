@@ -24,7 +24,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -54,7 +53,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.25 2004-03-19 16:54:41 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.26 2004-03-23 14:33:06 jhoeller Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -496,8 +495,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 	}
 	
-	//public void testGlobalsCannotBeProxies
-	
+
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
@@ -523,33 +521,37 @@ public class ProxyFactoryBeanTests extends TestCase {
 			//System.out.println(mi.getMethod().getReturnType());
 			return m.getReturnType() == Void.TYPE;
 		}
-
 	}
-	
+
+
 	/**
 	 * Aspect interface
 	 */
 	public interface AddedGlobalInterface {
 		int globalsAdded();
 	}
-	
+
+
 	/**
 	 * Use as a global interceptor. Checks that 
 	 * global interceptors can add aspect interfaces.
 	 * NB: Add only via global interceptors in XML file.
 	 */
 	public static class GlobalAspectInterfaceInterceptor implements IntroductionInterceptor {
+
 		public boolean implementsInterface(Class intf) {
 			return intf.equals(AddedGlobalInterface.class);
 		}
+
 		public Object invoke(MethodInvocation mi) throws Throwable {
-			//System.out.println("GlobalAspectInterfaceInterceptor.invoke");
-			if (mi.getMethod().getDeclaringClass().equals(AddedGlobalInterface.class))
+			if (mi.getMethod().getDeclaringClass().equals(AddedGlobalInterface.class)) {
 				return new Integer(-1);
+			}
 			return mi.proceed();
 		}
 	}
-	
+
+
 	public static class GlobalIntroductionAdvice implements IntroductionAdvisor {
 		
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
@@ -572,7 +574,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		public void validateInterfaces() {
 		}
-		
 	}
 	
 }
