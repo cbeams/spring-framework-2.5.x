@@ -30,5 +30,13 @@ public class NopInterceptor implements MethodInterceptor {
 	public int getCount() {
 		return this.count;
 	}
+	
+	public boolean equals(Object other) {
+		if (!(other instanceof NopInterceptor))
+			return false;
+		if (this == other)
+			return true;
+		return count == ((NopInterceptor) other).count;
+	}
 
 }
