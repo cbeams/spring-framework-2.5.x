@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
@@ -30,10 +30,14 @@ import org.springframework.jdbc.UncategorizedSQLException;
 
 /**
  * Implementation of SQLExceptionTranslator that uses the SQLState
- * code in the SQLException. Can't diagnose all problems, but is
- * portable between databases.
+ * code in the SQLException.
+ *
+ * <p>Not able to diagnose all problems, but is portable between databases.
+ * For more precise translation, consider SQLErrorCodeSQLExceptionTranslator.
+ *
  * @author Rod Johnson
  * @see java.sql.SQLException#getSQLState
+ * @see SQLErrorCodeSQLExceptionTranslator
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	
@@ -45,7 +49,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	/** Set of String 2-digit codes that indicate RDBMS integrity violation */
 	private static Set INTEGRITY_VIOLATION_CODES = new HashSet();
 	
-	// Populate reference data
+	// Populate reference data.
 	static {
 		BAD_SQL_CODES.add("07");
 		BAD_SQL_CODES.add("42");
@@ -58,7 +62,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 		INTEGRITY_VIOLATION_CODES.add("44");	// With check violation
 	}
 	
-	public DataAccessException translate(String task, String sql, SQLException sqlex) {
+	public DataAccessException translate(String task, String sql, SQLException sqlEx) {
 		if (task == null) {
 			task = "";
 		}
@@ -66,33 +70,34 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 			sql = "";
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Translating SQLException with SQLState '" + sqlex.getSQLState() +
-			            "' and errorCode '" + sqlex.getErrorCode() + "' and message [" +
-			            sqlex.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Translating SQLException with SQLState '" + sqlEx.getSQLState() +
+					"' and errorCode '" + sqlEx.getErrorCode() + "' and message [" +
+					sqlEx.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
 		}
 
-		String sqlState = sqlex.getSQLState();
-		// some JDBC drivers nest the actual exception from a batched update - need to get the nested one
+		String sqlState = sqlEx.getSQLState();
+		// Some JDBC drivers nest the actual exception from a batched update - need to get the nested one.
 		if (sqlState == null) {
-			SQLException nestedEx = sqlex.getNextException();
-			if (nestedEx != null)
+			SQLException nestedEx = sqlEx.getNextException();
+			if (nestedEx != null) {
 				sqlState = nestedEx.getSQLState();
+			}
 		}
 		if (sqlState != null && sqlState.length() >= 2) {
 			String classCode = sqlState.substring(0, 2);
 			if (BAD_SQL_CODES.contains(classCode)) {
-				return new BadSqlGrammarException(task, sql, sqlex);
+				return new BadSqlGrammarException(task, sql, sqlEx);
 			}
 			else if (INTEGRITY_VIOLATION_CODES.contains(classCode)) {
-				return new DataIntegrityViolationException("(" + task + "): data integrity violated by SQL '" +
-				                                           sql + "'", sqlex);
+				return new DataIntegrityViolationException(
+						"(" + task + "): data integrity violated by SQL '" + sql + "'", sqlEx);
 			}
 		}
 		
-		// we couldn't identify it more precisely
-		return new UncategorizedSQLException("(" + task + "): encountered SQLException [" +
-		                                     sqlex.getMessage() + "]", sql, sqlex);
+		// We couldn't identify it more precisely.
+		return new UncategorizedSQLException(
+				"(" + task + "): encountered SQLException [" + sqlEx.getMessage() + "]", sql, sqlEx);
 	}
 
 }

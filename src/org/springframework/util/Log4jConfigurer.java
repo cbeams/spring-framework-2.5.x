@@ -26,10 +26,20 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * Convenience class that features simple methods for custom Log4J configuration.
+ *
+ * <p>Only needed for non-default Log4J initialization, for example with a custom
+ * config location or a refresh interval. By default, Log4J will simply read its
+ * configuration from a "log4j.properties" file in the root of the class path.
+ *
+ * <p>For web environments, the analogous Log4jWebConfigurer class can be found
+ * in the web package. In a J2EE web application, Log4J is usually set up via
+ * Log4jConfigListener or Log4jConfigServlet.
+ *
  * @author Juergen Hoeller
  * @since 13.03.2003
  * @see org.springframework.web.util.Log4jWebConfigurer
  * @see org.springframework.web.util.Log4jConfigListener
+ * @see org.springframework.web.util.Log4jConfigServlet
  */
 public abstract class Log4jConfigurer {
 
@@ -97,7 +107,10 @@ public abstract class Log4jConfigurer {
 	}
 
 	/**
-	 * Shutdown Log4J to release all file locks.
+	 * Shut down Log4J, properly releasing all file locks.
+	 * <p>This isn't strictly necessary, but recommended for shutting down
+	 * Log4J in a scenario where the host VM stays alive (for example, when
+	 * shutting down an application in a J2EE environment).
 	 */
 	public static void shutdownLogging() {
 		LogManager.shutdown();
@@ -105,9 +118,10 @@ public abstract class Log4jConfigurer {
 
 	/**
 	 * Set the specified system property to the current working directory.
-	 * This can be used e.g. for test environments, for applications that leverage
+	 * <p>This can be used e.g. for test environments, for applications that leverage
 	 * Log4jWebConfigurer's "webAppRootKey" support in a web environment.
-	 * @param key system property key to use
+	 * @param key system property key to use, as expected in Log4j configuration
+	 * (for example: "demo.root", used as "${demo.root}/WEB-INF/demo.log")
 	 * @see org.springframework.web.util.Log4jWebConfigurer
 	 */
 	public static void setWorkingDirSystemProperty(String key) {

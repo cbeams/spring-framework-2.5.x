@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
  *
  * <p>If no config location is specified, a CacheManager will be
  * configured from "ehcache.xml" in the root of the class path
- * (i.e., defautl EHCache initialization will apply).
+ * (i.e., default EHCache initialization will apply).
  *
  * <p>Setting up a separate EhCacheManagerFactoryBean is also advisable
  * when using EhCacheFactoryBean, as it cares for proper shutdown of the
@@ -56,16 +56,16 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	private CacheManager cacheManager;
 
 	/**
-	 * Set the location of the EHCache config file. A typical value is "WEB-INF/ehcache.xml".
-	 * Default is "ehcache.xml" in the root of the class path or if not found,
-	 * "ehcache-failsafe.xml" in the ehcache class path (default EHCache initialization).
+	 * Set the location of the EHCache config file. A typical value is "/WEB-INF/ehcache.xml".
+	 * <p>Default is "ehcache.xml" in the root of the class path, or if not found,
+	 * "ehcache-failsafe.xml" in the EHCache jar (default EHCache initialization).
 	 */
 	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
 	public void afterPropertiesSet() throws IOException, CacheException {
-		logger.info("Creating EHCache CacheManager");
+		logger.info("Initializing EHCache CacheManager");
 		if (this.configLocation != null) {
 			this.cacheManager = CacheManager.create(this.configLocation.getURL());
 		}
