@@ -61,13 +61,13 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.14 2003-11-26 23:09:58 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.15 2003-11-28 16:54:57 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
  * @see org.springframework.jdbc.datasource
  */
-public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
+public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, InitializingBean {
 
 	/**
 	 * Constant for use as a parameter to query methods to force use of a PreparedStatement
@@ -86,17 +86,8 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Used to obtain connections throughout the lifecycle of this object.
-	 * This enables this class to close connections if necessary.
-	 **/
-	private DataSource dataSource;
-
-	/** Helper to translate SQL exceptions to DataAccessExceptions */
-	private SQLExceptionTranslator exceptionTranslator;
-
-	/** 
-	 * Custom query executor. This default may be overridden by a JavaBean property
-	 * if desired.
+	 * Custom query executor.
+	 * This default may be overridden by a JavaBean property if desired.
 	 */
 	private QueryExecutor queryExecutor = new DefaultQueryExecutor();
 
@@ -108,7 +99,7 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 	 * Construct a new JdbcTemplate for bean usage.
 	 * Note: The DataSource has to be set before using the instance.
 	 * This constructor can be used to prepare a JdbcTemplate via a BeanFactory,
-	 * typically setting the DataSource via setDataSourceName.
+	 * typically setting the DataSource via setDataSource.
 	 * @see #setDataSource
 	 */
 	public JdbcTemplate() {
@@ -122,44 +113,6 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 	public JdbcTemplate(DataSource dataSource) {
 		setDataSource(dataSource);
 		afterPropertiesSet();
-	}
-
-	/**
-	 * Set the JDBC DataSource to obtain connections from.
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Return the DataSource used by this template.
-	 */
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-
-	/**
-	 * Set the exception translator for this instance.
-	 * If no custom translator is provided, a default is used
-	 * which examines the SQLException's vendor-specific error code.
-	 * @param exceptionTranslator exception translator
-	 * @see SQLErrorCodeSQLExceptionTranslator
-	 * @see SQLStateSQLExceptionTranslator
-	 *
-	 */
-	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
-		this.exceptionTranslator = exceptionTranslator;
-	}
-
-	/**
-	 * Return the exception translator for this instance.
-	 * Creates a default one for the specified DataSource if none set.
-	 */
-	public synchronized SQLExceptionTranslator getExceptionTranslator() {
-		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
-		}
-		return this.exceptionTranslator;
 	}
 
 	/**
@@ -190,17 +143,6 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 	 */
 	public boolean getIgnoreWarnings() {
 		return ignoreWarnings;
-	}
-
-	/**
-	 * Eagerly initialize the exception translator,
-	 * creating a default one for the specified DataSource if none set.
-	 */
-	public void afterPropertiesSet() {
-		if (this.dataSource == null) {
-			throw new IllegalArgumentException("dataSource is required");
-		}
-		getExceptionTranslator();
 	}
 
 
@@ -245,7 +187,7 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 			throw new InvalidDataAccessApiUsageException(
 			    "Cannot execute [" + sql + "] as a static query: it contains bind variables");
 
-		Connection con = DataSourceUtils.getConnection(this.dataSource);;
+		Connection con = DataSourceUtils.getConnection(this.dataSource);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
