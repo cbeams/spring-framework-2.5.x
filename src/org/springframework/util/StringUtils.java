@@ -179,6 +179,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Tokenize the given String into a String array via a StringTokenizer.
+	 * Trims tokens and omits empty tokens.
 	 * <p>The given delimiters string is supposed to consist of any number of
 	 * delimiter characters. Each of those characters can be used to separate
 	 * tokens. A delimiter is always a single character; for multi-character
@@ -186,7 +187,25 @@ public abstract class StringUtils {
 	 * @param str the String to tokenize
 	 * @param delimiters the delimiter characters, assembled as String
 	 * (each of those characters is individually considered as delimiter).
-	 * @param trimTokens trim the tokens via String.trim
+	 * @return an array of the tokens
+	 * @see java.util.StringTokenizer
+	 * @see java.lang.String#trim
+	 * @see #delimitedListToStringArray
+	 */
+	public static String[] tokenizeToStringArray(String str, String delimiters) {
+		return tokenizeToStringArray(str, delimiters, true, true);
+	}
+
+	/**
+	 * Tokenize the given String into a String array via a StringTokenizer.
+	 * <p>The given delimiters string is supposed to consist of any number of
+	 * delimiter characters. Each of those characters can be used to separate
+	 * tokens. A delimiter is always a single character; for multi-character
+	 * delimiters, consider using <code>delimitedListToStringArray</code>
+	 * @param str the String to tokenize
+	 * @param delimiters the delimiter characters, assembled as String
+	 * (each of those characters is individually considered as delimiter).
+	 * @param trimTokens trim the tokens via String's <code>trim</code>
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
@@ -457,15 +476,15 @@ public abstract class StringUtils {
 	 * @return the normalized path
 	 */
 	public static String cleanPath(String path) {
-		String p = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
-		String[] pArray = delimitedListToStringArray(p, FOLDER_SEPARATOR);
-		List pList = new LinkedList();
+		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
+		List pathElements = new LinkedList();
 		int tops = 0;
-		for (int i = pArray.length - 1; i >= 0; i--) {
-			if (CURRENT_PATH.equals(pArray[i])) {
-				// Do nothing
+		for (int i = pathArray.length - 1; i >= 0; i--) {
+			if (CURRENT_PATH.equals(pathArray[i])) {
+				// do nothing
 			}
-			else if (TOP_PATH.equals(pArray[i])) {
+			else if (TOP_PATH.equals(pathArray[i])) {
 				tops++;
 			}
 			else {
@@ -473,11 +492,11 @@ public abstract class StringUtils {
 					tops--;
 				}
 				else {
-					pList.add(0, pArray[i]);
+					pathElements.add(0, pathArray[i]);
 				}
 			}
 		}
-		return collectionToDelimitedString(pList, FOLDER_SEPARATOR);
+		return collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
 	}
 
 	/**

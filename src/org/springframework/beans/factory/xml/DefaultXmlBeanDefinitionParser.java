@@ -245,7 +245,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		List aliases = new ArrayList();
 		if (StringUtils.hasLength(nameAttr)) {
-			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true);
+			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
@@ -295,7 +295,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
-				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
+				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS));
 			}
 
 			if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {

@@ -185,22 +185,26 @@ public class ResourceServlet extends HttpServletBean {
 				doInclude(request, response, resourceUrl);
 			}
 			catch (ServletException ex) {
-				logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
-				// try including default URL if appropriate
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
+				}
+				// Try including default URL if appropriate.
 				if (!includeDefaultUrl(request, response)) {
 					throw ex;
 				}
 			}
 			catch (IOException ex) {
-				logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
-				// try including default URL if appropriate
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
+				}
+				// Try including default URL if appropriate.
 				if (!includeDefaultUrl(request, response)) {
 					throw ex;
 				}
 			}
 		}
 
-		// no resource URL specified -> try to include default URL
+		// no resource URL specified -> try to include default URL.
 		else if (!includeDefaultUrl(request, response)) {
 			throw new ServletException("No target resource URL found for request");
 		}
@@ -249,12 +253,12 @@ public class ResourceServlet extends HttpServletBean {
 			response.setContentType(this.contentType);
 		}
 		String[] resourceUrls =
-		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS, true, true);
+		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 		for (int i = 0; i < resourceUrls.length; i++) {
 			// check whether URL matches allowed resources
 			if (this.allowedResources != null && !PathMatcher.match(this.allowedResources, resourceUrls[i])) {
-				throw new ServletException("Resource [" + resourceUrls[i] + "] does not match allowed pattern [" +
-				                           this.allowedResources + "]");
+				throw new ServletException("Resource [" + resourceUrls[i] +
+						"] does not match allowed pattern [" + this.allowedResources + "]");
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Including resource [" + resourceUrls[i] + "]");
@@ -284,8 +288,7 @@ public class ResourceServlet extends HttpServletBean {
 				resourceUrl = this.defaultUrl;
 			}
 			if (resourceUrl != null) {
-				String[] resourceUrls =
-				    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS, true, true);
+				String[] resourceUrls = StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 				long latestTimestamp = -1;
 				for (int i = 0; i < resourceUrls.length; i++) {
 					long timestamp = getFileTimestamp(resourceUrls[i]);
@@ -311,13 +314,13 @@ public class ResourceServlet extends HttpServletBean {
 			long lastModifiedTime = resource.lastModified();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Last-modified timestamp of resource file [" + resource.getAbsolutePath() +
-										 "] is [" + lastModifiedTime + "]");
+						"] is [" + lastModifiedTime + "]");
 			}
 			return lastModifiedTime;
 		}
 		catch (IOException ex) {
 			logger.warn("Couldn't retrieve lastModified timestamp of resource [" + resourceUrl +
-			            "] - returning ResourceServlet startup time");
+					"] - returning ResourceServlet startup time");
 			return -1;
 		}
 	}

@@ -64,13 +64,12 @@ public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 		try {
 			beanFactoryPath = (String) (new JndiTemplate()).lookup(factoryKey);
 			logger.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
-			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath,
-					BEAN_FACTORY_PATH_DELIMITERS, true, true);
+			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath, BEAN_FACTORY_PATH_DELIMITERS);
 			return createBeanFactory(paths);
 		}
 		catch (NamingException ex) {
 			throw new BootstrapException("Define an environment variable 'ejb/BeanFactoryPath' containing " +
-			                             "the class path locations of XML bean definition files", ex);
+					"the class path locations of XML bean definition files", ex);
 		}
 	}
 	
