@@ -106,8 +106,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set whether to interpret the given URL as relative to the current
-	 * ServletContext, i.e. as relative to the web application root.
+	 * Set whether to interpret a given URL that starts with a slash ("/")
+	 * as relative to the current ServletContext, i.e. as relative to the
+	 * web application root.
 	 * <p>Default is false: The URL will be intepreted as absolute, i.e.
 	 * taken as-is. If true, the context path will be prepended to the URL.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
@@ -149,7 +150,8 @@ public class RedirectView extends AbstractUrlBasedView {
 
 		// prepare target URL
 		StringBuffer targetUrl = new StringBuffer();
-		if (this.contextRelative) {
+		if (this.contextRelative && getUrl().startsWith("/")) {
+			// do not apply context path to relative URLs
 			targetUrl.append(request.getContextPath());
 		}
 		targetUrl.append(getUrl());
