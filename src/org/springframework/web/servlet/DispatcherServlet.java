@@ -761,7 +761,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @return the processed request (multipart wrapper if necessary)
 	 */
-	private HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
+	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (request instanceof MultipartHttpServletRequest) {
 				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
@@ -783,7 +783,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
 	 * @return the HandlerExceutionChain, or null if no handler could be found
 	 */
-	private HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
+	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
 		HandlerExecutionChain handler =
 				(HandlerExecutionChain) request.getAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
 		if (handler != null) {
@@ -817,7 +817,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param response current HTTP response
 	 * @throws IOException if thrown by the HttpServletResponse
 	 */
-	private void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
@@ -831,7 +831,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws ServletException if no HandlerAdapter can be found for the handler.
 	 * This is a fatal error.
 	 */
-	private HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
+	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
 		Iterator it = this.handlerAdapters.iterator();
 		while (it.hasNext()) {
 			HandlerAdapter ha = (HandlerAdapter) it.next();
@@ -856,7 +856,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return a corresponding ModelAndView to forward to
 	 * @throws Exception if no error ModelAndView found
 	 */
-	private ModelAndView processHandlerException(
+	protected ModelAndView processHandlerException(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
 		ModelAndView exMv = null;
@@ -884,7 +884,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param response current HTTP servlet response
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	private void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response)
+	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
 		// Determine locale for request and apply it to the response.
@@ -894,10 +894,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		View view = null;
 		if (mv.isReference()) {
 			// We need to resolve the view name.
-			for (Iterator it = this.viewResolvers.iterator(); it.hasNext() && view == null;) {
-				ViewResolver viewResolver = (ViewResolver) it.next();
-				view = viewResolver.resolveViewName(mv.getViewName(), locale);
-			}
+			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
 						"' in servlet with name '" + getServletName() + "'");
@@ -920,6 +917,33 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Resolve the given view name into a View object (to be rendered).
+	 * <p>Default implementations asks all ViewResolvers of this dispatcher.
+	 * Can be overridden for custom resolution strategies, potentially based
+	 * on specific model attributes or request parameters.
+	 * @param viewName the name of the view to resolve
+	 * @param model the model to be passed to the view
+	 * @param locale the current locale
+	 * @param request current HTTP servlet request
+	 * @return the View object, or null if none found
+	 * @throws Exception if the view cannot be resolved
+	 * (typically in case of problems creating an actual View object)
+	 * @see ViewResolver#resolveViewName
+	 */
+	protected View resolveViewName(String viewName, Map model, Locale locale, HttpServletRequest request)
+			throws Exception {
+
+		for (Iterator it = this.viewResolvers.iterator(); it.hasNext();) {
+			ViewResolver viewResolver = (ViewResolver) it.next();
+			View view = viewResolver.resolveViewName(viewName, locale);
+			if (view != null) {
+				return view;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
 	 * Will just invoke afterCompletion for all interceptors whose preHandle
 	 * invocation has successfully completed and returned true.
@@ -936,7 +960,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Apply afterCompletion methods of registered interceptors.
 		if (mappedHandler != null) {
 			if (mappedHandler.getInterceptors() != null) {
-				for (int i = interceptorIndex; i >=0; i--) {
+				for (int i = interceptorIndex; i >= 0; i--) {
 					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
 					try {
 						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
