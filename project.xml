@@ -363,11 +363,11 @@
          <id>itext</id>
          <version>1.02b</version>
       </dependency>
-      <dependency>
+      <!--dependency>
          <groupId>jboss</groupId>
          <artifactId>jboss-common-jdbc-wrapper</artifactId>
          <version>3.2.1</version>
-      </dependency>
+      </dependency-->
        <dependency>
          <id>jdom</id>
          <version>b9</version>
