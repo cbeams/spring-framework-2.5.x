@@ -31,8 +31,8 @@
    <!-- the project home page -->
    <url>http://sourceforge.net/projects/springframework</url>
    <issueTrackingUrl>http://sourceforge.net/tracker/?group_id=73357</issueTrackingUrl>
-   <siteAddress>sourceforge.net</siteAddress>
-   <siteDirectory></siteDirectory>
+   <siteAddress></siteAddress>
+   <siteDirectory>/srv/www/htdocs/spring</siteDirectory>
    <distributionDirectory>http://sourceforge.net/project/showfiles.php?group_id=73357</distributionDirectory>
 
    <!-- the version control repository and http url for online access
@@ -436,7 +436,7 @@
       <report>maven-developer-activity-plugin</report>
       <report>maven-file-activity-plugin</report>
       <!-- report>maven-statcvs-plugin</report -->
-      <report>maven-checkstyle-plugin</report> 
+      <!-- report>maven-checkstyle-plugin</report --> 
       <report>maven-javadoc-plugin</report>
       <report>maven-jxr-plugin</report>
       <report>maven-junit-report-plugin</report>
