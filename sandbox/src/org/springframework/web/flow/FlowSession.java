@@ -34,10 +34,13 @@ import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
- * A single client session instance for a flow participating in a FlowExecution.
- * 
+ * A single client session instance for a <code>Flow</code> participating in a
+ * <code>FlowExecution</code>. Also a <code>MutableAttributesAccessor</code>,
+ * as the flow session acts as a "flow-scope" data model.
  * <p>
- * Transaction maintenance is implemented using a <i>synchronizer token</i>.
+ * The stack of executing flow sessions (managed within
+ * <code>FlowExecutionStack</code>) represents the complete state of an
+ * ongoing flow execution.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -46,14 +49,26 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	protected final Log logger = LogFactory.getLog(FlowSession.class);
 
+	/**
+	 * The flow definition (a singleton)
+	 */
 	private Flow flow;
 
+	/**
+	 * The current state of this flow session.
+	 */
 	private AbstractState currentState;
 
-	private FlowSessionStatus status=FlowSessionStatus.CREATED;
+	/**
+	 * The session status; may be CREATED, ACTIVE, SUSPENDED, or ENDED.
+	 */
+	private FlowSessionStatus status = FlowSessionStatus.CREATED;
 
+	/**
+	 * The session data model ("flow scope");
+	 */
 	private Map attributes = new HashMap();
-	
+
 	/**
 	 * Create a new flow session.
 	 * @param flow The flow associated with this session
@@ -119,7 +134,9 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	}
 
 	/**
-	 * @param newState Set the state that is currently active i this flow session
+	 * Set the current state of this flow session.
+	 * @param newState Set the state that is currently active i this flow
+	 *        session
 	 */
 	protected void setCurrentState(AbstractState newState) {
 		Assert.notNull(newState, "The newState is required");
@@ -136,23 +153,22 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		this.currentState = newState;
 	}
-	
+
 	/**
-	 * Get the name for the transaction token attribute.
-	 * Defaults to "txToken".
+	 * Get the name for the transaction token attribute. Defaults to "txToken".
 	 */
 	protected String getTransactionTokenAttributeName() {
 		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
 	}
 
 	/**
-	 * Get the name for the transaction token parameter in requests.
-	 * Defaults to "_txToken".
+	 * Get the name for the transaction token parameter in requests. Defaults to
+	 * "_txToken".
 	 */
 	protected String getTransactionTokenParameterName() {
 		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
-	
+
 	//methods implementing AttributesAccessor
 
 	/**
@@ -191,7 +207,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		return value;
 	}
-	
+
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
 		getRequiredAttribute(attributeName, requiredType);
 	}
@@ -199,7 +215,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	public void assertAttributePresent(String attributeName) throws IllegalStateException {
 		getRequiredAttribute(attributeName);
 	}
-	
+
 	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
 		Assert.state(FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
 				getTransactionTokenParameterName(), clear),
@@ -219,7 +235,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			return false;
 		}
 	}
-	
+
 	public boolean inTransaction(HttpServletRequest request, boolean clear) {
 		return FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
 				getTransactionTokenParameterName(), clear);
@@ -248,7 +264,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		return filteredEntries;
 	}
-	
+
 	//methods implementing MutableAttributesAccessor
 
 	public void setAttribute(String attributeName, Object attributeValue) {
