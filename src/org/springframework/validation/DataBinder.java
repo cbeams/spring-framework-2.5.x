@@ -28,6 +28,7 @@ import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.util.StringUtils;
 
 /**
  * Binder that allows for binding property values to a target object.
@@ -224,7 +225,8 @@ public class DataBinder {
 		if (this.requiredFields != null) {
 			for (int i = 0; i < this.requiredFields.length; i++) {
 				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
-				if (pv == null || "".equals(pv.getValue()) || pv.getValue() == null) {
+				if (pv == null || pv.getValue() == null ||
+						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// create field error with code "required"
 					String field = this.requiredFields[i];
 					this.errors.addError(
