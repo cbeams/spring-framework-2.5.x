@@ -276,12 +276,12 @@ public class RulesTestSuite extends TestCase {
 	}
 
 	public void testNoRules() {
-		Rules r = Rules.createRules(TestBean.class);
+		Rules r = new Rules(TestBean.class);
 		assertTrue(r.test(new TestBean()));
 	}
 
 	public void testMinMaxRules() {
-		Rules r = Rules.createRules(TestBean.class);
+		Rules r = new Rules(TestBean.class);
 		r.add(constraints.inRangeProperties("number", "min", "max"));
 		assertTrue(r.test(new TestBean()));
 		TestBean b = new TestBean();
@@ -290,7 +290,7 @@ public class RulesTestSuite extends TestCase {
 	}
 
 	public void testBasicCompoundRules() {
-		Rules r = Rules.createRules(TestBean.class);
+		Rules r = new Rules(TestBean.class);
 		r.add(constraints.inRangeProperties("number", "min", "max")).add(constraints.eqProperty("test", "confirmTest"));
 		assertTrue(r.test(new TestBean()));
 
