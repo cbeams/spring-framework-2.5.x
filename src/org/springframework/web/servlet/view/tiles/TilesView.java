@@ -46,6 +46,10 @@ public class TilesView extends InternalResourceView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
+		if (!response.isCommitted()) {
+			response.setContentType(getContentType());
+		}
+		
 		try {
 			// get definitions factory			
 			DefinitionsFactory factory = (DefinitionsFactory)
