@@ -32,7 +32,7 @@ public class PhoneBook {
 		Person rj = new Person(5, "Rod", "Johnson", "rod", "55555");
 		Person tr = new Person(6, "Thomas", "Risberg", "trisberg", "66666");
 		Person aa = new Person(7, "Alef", "Arendsen", "alef", "77777");
-		Person mp = new Person(8, "Mark", "Pollack", "mark", "888888");
+		Person mp = new Person(8, "Mark", "Pollack", "mark", "88888");
 
 		kd.addColleague(ev);
 		kd.addColleague(cs);
