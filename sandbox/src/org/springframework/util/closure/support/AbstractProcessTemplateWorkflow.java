@@ -8,7 +8,7 @@ import org.springframework.util.closure.Closure;
 /**
  * @author Keith Donald
  */
-public abstract class AbstractLocalProcessTemplateWorkflow extends AbstractLocalProcessTemplate {
+public abstract class AbstractProcessTemplateWorkflow extends AbstractProcessTemplate {
 
 	public final void run(Closure templateCallback) {
 		reset();

@@ -24,17 +24,17 @@ import org.springframework.util.closure.ProcessTemplate;
  * <p>
  * @author Keith Donald
  */
-public abstract class AbstractLocalProcessTemplate implements ProcessTemplate {
+public abstract class AbstractProcessTemplate implements ProcessTemplate {
 
 	private ProcessTemplate wrappedTemplate;
 
 	private volatile boolean stopped;
 
-	protected AbstractLocalProcessTemplate() {
+	protected AbstractProcessTemplate() {
 
 	}
 
-	protected AbstractLocalProcessTemplate(ProcessTemplate wrappedTemplate) {
+	protected AbstractProcessTemplate(ProcessTemplate wrappedTemplate) {
 		this.wrappedTemplate = wrappedTemplate;
 	}
 
@@ -53,7 +53,7 @@ public abstract class AbstractLocalProcessTemplate implements ProcessTemplate {
 	}
 
 	public ProcessTemplate findAll(final Constraint constraint) {
-		return new AbstractLocalProcessTemplate(this) {
+		return new AbstractProcessTemplate(this) {
 			public void run(final Closure closure) {
 				getWrappedTemplate().run(new ConstrainedBlock(closure, constraint));
 			}

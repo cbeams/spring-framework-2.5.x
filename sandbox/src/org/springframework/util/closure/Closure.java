@@ -18,11 +18,10 @@ package org.springframework.util.closure;
 /**
  * A function object that evaluates one argument, executing a block of code. It
  * returns a single result.
- * <p><p>
+ * <p>
  * A closure evaluates a single argument against some expression. For example, a
  * "StringLength" closure might accept any object and return the length of the
  * object's string form.
- * 
  * @author Keith Donald
  */
 public interface Closure {

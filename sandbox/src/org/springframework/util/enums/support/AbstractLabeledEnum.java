@@ -69,7 +69,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceR
 	}
 
 	public int hashCode() {
-		return getCode().hashCode() + getType().hashCode();
+		return getType().hashCode() + getCode().hashCode();
 	}
 
 	/**
