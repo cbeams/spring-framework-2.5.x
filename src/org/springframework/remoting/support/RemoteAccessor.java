@@ -25,11 +25,16 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>Note that the service interface being used will show some signs of
  * remotability, like the granularity of method calls that it offers.
- * Furthermore, it has to require serializable arguments etc.
+ * Furthermore, it has to have serializable arguments etc.
+ *
+ * <p>Accessors are supposed to throw Spring's generic RemoteAccessException
+ * in case of remote invocation failure, provided that the service interface
+ * does not declare java.rmi.RemoteException.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
  * @see org.springframework.remoting.RemoteAccessException
+ * @see java.rmi.RemoteException
  */
 public abstract class RemoteAccessor {
 
@@ -39,8 +44,9 @@ public abstract class RemoteAccessor {
 
 	/**
 	 * Set the interface of the service to access.
-	 * Typically required to be able to create a suitable serviuce proxy.
 	 * The interface must be suitable for the particular service and remoting tool.
+	 * <p>Typically required to be able to create a suitable service proxy,
+	 * but can also be optional if the lookup returns a typed proxy.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (!serviceInterface.isInterface()) {

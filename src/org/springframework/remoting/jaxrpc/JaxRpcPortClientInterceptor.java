@@ -221,6 +221,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (this.portName == null) {
 			throw new IllegalArgumentException("portName is required");
 		}
+		if (this.serviceInterface == null && this.portInterface == null) {
+			throw new IllegalArgumentException("Either serviceInterface or portInterface is required");
+		}
 
 		if (this.jaxRpcService == null) {
 			this.jaxRpcService = createJaxRpcService();
@@ -228,12 +231,12 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		}
 
 		this.portQName = getQName(this.portName);
-		Class actualInterface = (this.portInterface != null ? this.portInterface : getServiceInterface());
+		Class actualInterface = (this.portInterface != null ? this.portInterface : this.serviceInterface);
 		Remote remoteObj = this.jaxRpcService.getPort(this.portQName, actualInterface);
 
-		if (getServiceInterface() != null) {
-			boolean isImpl = getServiceInterface().isInstance(remoteObj);
-			logger.info("Using service interface [" + getServiceInterface().getName() + "] for JAX-RPC object [" +
+		if (this.serviceInterface != null) {
+			boolean isImpl = this.serviceInterface.isInstance(remoteObj);
+			logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC object [" +
 									this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
 		}
 

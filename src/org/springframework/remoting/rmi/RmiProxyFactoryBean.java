@@ -43,7 +43,8 @@ import org.springframework.beans.factory.FactoryBean;
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
  * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI.
+ * HTTP-based and thus much easier to setup than RMI. Alternatively, use Spring's
+ * HTTP invoker to combine Java serialization with HTTP-based transport.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -51,9 +52,12 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setServiceUrl
  * @see RmiClientInterceptor
  * @see RmiServiceExporter
- * @see org.springframework.remoting.RemoteAccessException
- * @see java.rmi.RemoteException
  * @see java.rmi.Remote
+ * @see java.rmi.RemoteException
+ * @see org.springframework.remoting.RemoteAccessException
+ * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
+ * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  */
 public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean {
 
