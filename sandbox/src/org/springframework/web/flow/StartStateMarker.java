@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Keith Donald
@@ -47,18 +48,17 @@ public class StartStateMarker implements Serializable {
 		return state;
 	}
 
-	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
-			Map inputAttributes) {
+	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response, Map inputAttributes) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getStartState()
 					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
 		}
 		FlowExecutionStack sessionExecution = createFlowSessionExecutionStack();
-		ViewDescriptor startingView = startIn(sessionExecution, request, response, inputAttributes);
+		ModelAndView startingView = startIn(sessionExecution, request, response, inputAttributes);
 		return new FlowExecutionStartResult(sessionExecution, startingView);
 	}
 
-	public ViewDescriptor startIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	public ModelAndView startIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		sessionExecution.activate(createSession(flow, inputAttributes));
 		return getStartState().enter(sessionExecution, request, response);
@@ -71,6 +71,5 @@ public class StartStateMarker implements Serializable {
 	protected FlowSession createSession(Flow flow, Map input) {
 		return new FlowSession(flow, input);
 	}
-
 
 }

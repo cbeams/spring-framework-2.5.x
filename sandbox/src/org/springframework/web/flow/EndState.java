@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Provides end state functionality for a web flow.
@@ -51,14 +52,11 @@ public class EndState extends AbstractState {
 		return true;
 	}
 
-	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		ViewDescriptor descriptor;
+		ModelAndView descriptor = null;
 		if (getViewName() != null) {
-			descriptor = new ViewDescriptor(getViewName(), sessionExecution.getAttributes());
-		}
-		else {
-			descriptor = ViewDescriptor.NULL_OBJECT;
+			descriptor = new ModelAndView(getViewName(), sessionExecution.getAttributes());
 		}
 		FlowSession endingFlowSession = sessionExecution.endActiveSession();
 		Assert.isTrue(endingFlowSession.getCurrentState().equals(this),

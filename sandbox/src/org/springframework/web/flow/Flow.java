@@ -31,6 +31,7 @@ import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Singleton definition of a web flow.
@@ -408,14 +409,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.execute
 	 */
-	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
+	public ModelAndView signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
 		Assert.isTrue(flowExecutionInfo.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
 		FlowExecutionStack flowExecution = ((FlowExecutionStack)flowExecutionInfo);
 		fireRequestSubmitted(flowExecution, request);
 		TransitionableState state = flowExecution.getActiveFlow().getRequiredTransitionableState(stateId);
-		ViewDescriptor view = state.execute(eventId, flowExecution, request, response);
+		ModelAndView view = state.execute(eventId, flowExecution, request, response);
 		fireRequestProcessed(flowExecution, request);
 		return view;
 	}
@@ -440,7 +441,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowAttributes
 	 * @return
 	 */
-	public ViewDescriptor spawnIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	public ModelAndView spawnIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		return getStartStateMarker().startIn(sessionExecution, request, response, inputAttributes);
 	}
@@ -452,7 +453,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowAttributes
 	 * @return
 	 */
-	public ViewDescriptor spawnIn(FlowExecutionStack sessionExecution, String stateId, HttpServletRequest request,
+	public ModelAndView spawnIn(FlowExecutionStack sessionExecution, String stateId, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		TransitionableState state = getRequiredTransitionableState(stateId);
 		return new StartStateMarker(this, state).startIn(sessionExecution, request, response, inputAttributes);

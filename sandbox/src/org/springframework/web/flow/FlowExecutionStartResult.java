@@ -5,6 +5,8 @@ package org.springframework.web.flow;
 
 import java.io.Serializable;
 
+import org.springframework.web.servlet.ModelAndView;
+
 /**
  * A parameter object that encapsulates the result of starting a new session
  * execution for a flow.
@@ -13,9 +15,9 @@ import java.io.Serializable;
 public class FlowExecutionStartResult implements Serializable {
 	private FlowExecutionInfo executionInfo;
 
-	private ViewDescriptor startingView;
+	private ModelAndView startingView;
 
-	public FlowExecutionStartResult(FlowExecutionInfo executionInfo, ViewDescriptor startingView) {
+	public FlowExecutionStartResult(FlowExecutionInfo executionInfo, ModelAndView startingView) {
 		this.executionInfo = executionInfo;
 		this.startingView = startingView;
 	}
@@ -30,7 +32,7 @@ public class FlowExecutionStartResult implements Serializable {
 	/**
 	 * @return Returns the startingView.
 	 */
-	public ViewDescriptor getStartingView() {
+	public ModelAndView getStartingView() {
 		return startingView;
 	}
 }

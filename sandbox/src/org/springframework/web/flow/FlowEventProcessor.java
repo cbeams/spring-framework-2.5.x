@@ -20,6 +20,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.servlet.ModelAndView;
+
 /**
  * Handles flow events signaled by the web-tier in response to web-controller
  * requests. There are two major different types of event processing operations:
@@ -96,7 +98,7 @@ public interface FlowEventProcessor {
 	 *         or if the <code>stateId</code> does not map to a valid flow
 	 *         state.
 	 */
-	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
+	public ModelAndView signal(String eventId, String stateId, FlowExecutionInfo flowExecutionInfo,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException;
 
 }

@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A view state is a state in which a physical view resource should be rendered
@@ -86,19 +87,19 @@ public class ViewState extends TransitionableState {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (StringUtils.hasText(getViewName())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning view name '" + viewName + "' to render");
 			}
-			return new ViewDescriptor(viewName, sessionExecution.getAttributes());
+			return new ModelAndView(viewName, sessionExecution.getAttributes());
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
 			}
-			return ViewDescriptor.NULL_OBJECT;
+			return null;
 		}
 	}
 

@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.AbstractConstraint;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Keith Donald
@@ -100,7 +101,7 @@ public class Transition implements Serializable {
 		return eventIdCriteria.test(eventId);
 	}
 
-	protected ViewDescriptor execute(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView execute(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
 			return getTargetState().enter(sessionExecution, request, response);

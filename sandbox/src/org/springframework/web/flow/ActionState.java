@@ -22,6 +22,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.servlet.ModelAndView;
+
 /**
  * A state that executes one or more action beans when entered.
  * @author Keith Donald
@@ -81,7 +83,7 @@ public class ActionState extends TransitionableState {
 	 * not the ActionBean instance, the instance is retrieved from the
 	 * <code>FlowServiceLocator</code>
 	 */
-	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Iterator it = actionIterator();
 		int executionCount = 0;

@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.ToStringCreator;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A state that has one or more transitions. State transitions are triggered by
@@ -78,7 +79,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
 	 *         does not map to a valid transition for this state.
 	 */
-	protected ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
@@ -86,7 +87,7 @@ public abstract class TransitionableState extends AbstractState {
 					+ "' signaled");
 		}
 		sessionExecution.setLastEventId(eventId);
-		ViewDescriptor viewDescriptor = getTransition(eventId).execute(sessionExecution, request, response);
+		ModelAndView viewDescriptor = getTransition(eventId).execute(sessionExecution, request, response);
 		if (logger.isDebugEnabled()) {
 			if (sessionExecution.isActive()) {
 				logger.debug("Event '" + eventId + "' within state '" + this + "' for flow '" + getFlow().getId()

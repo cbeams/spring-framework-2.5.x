@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.flow.config.NoSuchFlowAttributesMapperException;
 import org.springframework.web.flow.config.NoSuchFlowDefinitionException;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Keith Donald
@@ -73,7 +74,7 @@ public class SubFlowState extends TransitionableState {
 		return true;
 	}
 
-	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {

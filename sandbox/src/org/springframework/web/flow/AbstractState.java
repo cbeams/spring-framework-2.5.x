@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A base super class for a state definition, associatable with any number of
@@ -179,7 +180,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected final ViewDescriptor enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected final ModelAndView enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + this + "' in flow '" + sessionExecution.getActiveFlowId() + "'");
@@ -197,7 +198,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ViewDescriptor doEnterState(FlowExecutionStack sessionExecutionStack,
+	protected abstract ModelAndView doEnterState(FlowExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response);
 
 	public String toString() {

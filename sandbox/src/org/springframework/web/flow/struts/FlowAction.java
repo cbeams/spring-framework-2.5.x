@@ -32,8 +32,8 @@ import org.springframework.web.flow.FlowEventProcessor;
 import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionStartResult;
 import org.springframework.web.flow.NoSuchFlowSessionException;
-import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.AbstractAction;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 
@@ -143,7 +143,7 @@ public class FlowAction extends TemplateAction {
 		// end struts specific
 
 		FlowExecutionInfo sessionExecution;
-		ViewDescriptor viewDescriptor = null;
+		ModelAndView viewDescriptor = null;
 
 		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
@@ -254,7 +254,7 @@ public class FlowAction extends TemplateAction {
 	 * Return a Struts ActionForward given this ViewDescriptor. We need to add
 	 * all attributes from the ViewDescriptor as request attributes.
 	 */
-	private ActionForward createForwardFromViewDescriptor(ViewDescriptor viewDescriptor, ActionMapping mapping,
+	private ActionForward createForwardFromViewDescriptor(ModelAndView viewDescriptor, ActionMapping mapping,
 			HttpServletRequest request) {
 		if (viewDescriptor != null) {
 			Iterator it = viewDescriptor.getModel().entrySet().iterator();
