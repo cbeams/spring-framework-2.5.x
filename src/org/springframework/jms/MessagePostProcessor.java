@@ -13,35 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 package org.springframework.jms;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.Session;
 
-import org.springframework.jms.converter.ConversionException;
-import org.springframework.jms.converter.Converter;
 
 /**
- * A simple converter that uses the toString method.
+ * To be used with JmsTemplate's send method that convert an object to a message.
+ * It allows for futher modification of the message after it has been processed
+ * by the converter. This is useful for setting of JMS Header and Properties  
+ * This often as an anonymous class within a method implementation.  
+ *
  * @author Mark Pollack
  */
-public class ToStringConverter implements Converter {
+public interface MessagePostProcessor
+{
 
-    public Message toMessage(Object object, Session session) {
-        try {
-            return session.createTextMessage(object.toString());
-        } catch (JMSException e) {
-            throw new ConversionException(
-                "Could not convert object to mesage",
-                e);
-        }
-    }
-
-    public Object fromMessage(Message message) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    /**
+     * Apply a MessagePostProcessor to the message.  The returned message is
+     * typically a modified version of the original
+     * @param message The JMS message from the Converter
+     * @return a modified version of the Message.
+     * @throws JMSException an error occurs modifying the message.
+     */
+    Message postProcess(Message message) throws JMSException;
+    
 }

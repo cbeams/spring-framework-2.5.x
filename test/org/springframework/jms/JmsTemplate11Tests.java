@@ -137,7 +137,7 @@ public class JmsTemplate11Tests extends JmsTestCase
         _mockConnection.close();
         _connectionControl.replay();
 
-        sender.execute(new JmsSenderCallback()
+        sender.execute(new ProducerCallback()
         {
             public void doInJms(Session session, MessageProducer msgProducer) throws JMSException
             {
@@ -351,7 +351,7 @@ public class JmsTemplate11Tests extends JmsTestCase
 	{
 		JmsTemplate11 sender = new JmsTemplate11();
 		sender.setConnectionFactory(_mockConnectionFactory);
-		sender.setJmsConverter(new ToStringConverter());
+		sender.setConverter(new ToStringConverter());
 		String s = "Hello world";
 		
 		//Mock the javax.jms MessageProducer

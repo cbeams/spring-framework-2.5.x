@@ -20,6 +20,9 @@ import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.Message;
+
+import org.springframework.jms.converter.Converter;
 
 
 /**
@@ -59,7 +62,7 @@ public interface JmsTemplate {
      * the callback.  
      * 
      *
-     * @param action callback object that specifies the action
+     * @param action callback object that exposes the session.
      * @throws JmsException if there is any problem
      */
     public void execute(SessionCallback action) throws JmsException;
@@ -69,10 +72,10 @@ public interface JmsTemplate {
      * Send a message to a JMS destination.  The callback gives access to
      * the JMS session and MessageProducer in order to do more complex
      * send operations.
-     * @param action callback object that specified the action.
+     * @param action callback object that exposes the session/producer pair.
      * @throws JmsException
      */
-    public void execute(JmsSenderCallback action)
+    public void execute(ProducerCallback action)
         throws JmsException;
 
     /**
@@ -184,17 +187,52 @@ public interface JmsTemplate {
 	 */
 	public void setConnectionFactory(ConnectionFactory c);
 	
+    
+    /**
+     * Set the converter to use when using the send methods that take a Object parameter.
+     * @param converter The JMS converter
+     */
+    public void setConverter(Converter converter);
+        
 	/**
-	 * Send an object, converting to a jms message, to the given
+	 * Send an object to the destination converting the object to a JMS message
+     * with the template's converter.
 	 * destination
      * @param d the destination to send this message to
-	 * @param o the object to use to convert to a messsage.
+	 * @param o the object to convert to a messsage.
      * @throws JmsException converted checked JMSException to unchecked.
 	 */
-	public void send(Destination d, Object o);
-	
-	
-    //TODO  send(Object), send(Dest, Object, Map, map)
+	public void send(Destination d, Object o);    
+    
+    /**
+     * Send an object to the destination converting the object to a JMS message.
+     * The callback allows for modification of the message after conversion.
+     * @param d the destination to send this message to
+     * @param o the object to convert to a message
+     * @param c The callback to modify the message.
+     */
+    public void send(Destination d, Object o, MessagePostProcessor c);
+    /**
+     * Send an object, converting to a JMS message, to the given destination.
+     * @param d the destination to send this message to.  A JNDI destination or a
+     * dynamic destination if enabled.  
+     * @param o the object to convert to a message.
+     */
+    public void send(String d, Object o);
+    
+    
+    /**
+     * Send an object to the destination, converting the object to a JMS message.
+     * The callback allows for modification of the message after conversion.
+     * @param d the destination to send this message to. A JNDI destination or a
+     * dynamic destination if enabled.  
+     * @param o the object to convert to a message.
+     * @param c The callback to modify the message.
+     */
+    public void send(String d, Object o, MessagePostProcessor c);
+    
+
+
     
     //TODO  receive(Destination, timeout)
     

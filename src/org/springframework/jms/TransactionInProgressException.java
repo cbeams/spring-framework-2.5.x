@@ -24,7 +24,7 @@ package org.springframework.jms;
  * behavior is maintained.
  *
  * @see javax.jms.TransactionInProgressException
- * @author <a href="mailto:les@hazlewood.com">Les Hazlewood</a>
+ * @author Les Hazlewood
  */
 public class TransactionInProgressException extends JmsException {
 

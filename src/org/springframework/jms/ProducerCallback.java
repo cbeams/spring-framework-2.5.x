@@ -13,17 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 package org.springframework.jms;
 
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+
 /**
- * Information about a JMS Queue.
+ * Callback interface for JMS code.  To be used with JmsTemplate's send method,
+ * often as an anonymous class within a method implementation.  The typical
+ * implementation will perform multiple operations on the JMS Session and 
+ * MessageProducer.   When used with a 1.0.2 provider, you need to downcast
+ * to the appropriate domain implementation, either QueueSender or TopicPublisher,
+ * to send a message.
+ *
  * @author Mark Pollack
  */
-public class QueueInfo extends DestinationInfo {
-
-	public QueueInfo(String name)
-	{
-		setName(name);
-	}
+public interface ProducerCallback
+{
+    void doInJms(Session session, MessageProducer msgProducer) throws JMSException;
 }

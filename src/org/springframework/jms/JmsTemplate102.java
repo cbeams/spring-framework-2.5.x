@@ -276,7 +276,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
 
     }
 
-    public void execute(JmsSenderCallback action) throws JmsException {
+    public void execute(ProducerCallback action) throws JmsException {
         if (isPubSubDomain()) {
             executeTopicJmsSenderCallback(action);
         } else {
@@ -294,7 +294,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
 
     }
 
-    private void executeTopicJmsSenderCallback(JmsSenderCallback action) {
+    private void executeTopicJmsSenderCallback(ProducerCallback action) {
         TopicConnection topicConnection = null;
         try {
             topicConnection =
@@ -347,7 +347,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
         }
     }
 
-    private void executeQueueJmsSenderCallback(JmsSenderCallback action) {
+    private void executeQueueJmsSenderCallback(ProducerCallback action) {
         QueueConnection queueConnection = null;
         try {
             queueConnection =
@@ -416,5 +416,50 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
 			});
 		}
 	}
+    
+    
+    public void send(Destination d, final Object o, final MessagePostProcessor postProcessor) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    Message m = getJmsConverter().toMessage(o, session);
+                    return postProcessor.postProcess(m);
+                }
+            });
+        }
+    }
+    
+    public void send(String d, final Object o) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    return getJmsConverter().toMessage(o, session);
+                }
+            });
+        }
+    }
+    
+    public void send(String d, final Object o, final MessagePostProcessor postProcessor) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    Message m = getJmsConverter().toMessage(o, session);
+                    return postProcessor.postProcess(m);
+                }
+            });
+        }
+    }
 
 }

@@ -23,27 +23,24 @@ import javax.jms.Session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Create a JMS Producer from a Session
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * Create a JMS Producer from a Session.  It is creates non-singleton/prototype bean.
+ * Requires a JMS 1.1 provider.
+ * 
+ * @author Mark Pollack
  */
 public class JmsProducerFactoryBean
-    implements FactoryBean, InitializingBean, DisposableBean
+    implements FactoryBean, InitializingBean
 {
 
     private MessageProducer messageProducer;
     
     private Session session;
     
-    private Destination jndiDestination;
-    
-    private String topicDestination;
-    
-    private String queueDestination;
+    private Destination destination;
     
     private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
     
@@ -70,7 +67,7 @@ public class JmsProducerFactoryBean
 
     public boolean isSingleton()
     {
-        return true;
+        return false;
     }
 
 
@@ -80,32 +77,10 @@ public class JmsProducerFactoryBean
             throw new IllegalArgumentException("Did not set required JMS session property");        
         }
         logger.info("Creating JMS Producer");
-        int destCount = 0;
-        if (jndiDestination != null)
+
+        if (destination != null)
         {
-            destCount++;
-        }
-        if (topicDestination != null)
-        {
-            destCount++;
-        }       
-        if (queueDestination != null)
-        {
-            destCount ++;
-        }
-        if (destCount > 1)
-        {
-            throw new IllegalArgumentException("Must only specify one of jndi, queue, or topic destination");
-        }
-        if (jndiDestination != null)
-        {
-            messageProducer = session.createProducer(jndiDestination);
-        } else if (topicDestination != null)
-        {
-            messageProducer = session.createProducer(session.createTopic(topicDestination));
-        } else if (queueDestination != null)
-        {
-            messageProducer = session.createProducer(session.createQueue(queueDestination));
+            messageProducer = session.createProducer(destination);
         } else
         {
             logger.info("Creating a MessageProducer without a destination.  Just specify destination on each " +                "send operation.");
@@ -123,13 +98,8 @@ public class JmsProducerFactoryBean
     }
 
 
-    public void destroy() throws Exception
-    {
-        logger.info("Closing JMS Session");
-        session.close();
-    }
-
     /**
+     * Set the delivery mode for the MessageProducer being created.
      * @param i
      */
     public void setDeliveryMode(int i)
@@ -180,35 +150,13 @@ public class JmsProducerFactoryBean
     /**
      * @param destination
      */
-    public void setJndiDestination(Destination d)
+    public void setDestination(Destination d)
     {
-        jndiDestination = d;
+        destination = d;
     }
 
-    /**
-     * @param producer
-     */
-    public void setMessageProducer(MessageProducer producer)
-    {
-        messageProducer = producer;
-    }
 
-    /**
-     * Set the destination as a queue
-     * @param d queue name
-     */
-    public void setQueueDestination(String d)
-    {
-        queueDestination = d;
-    }
 
-    /**
-     * Set the destination as a topic
-     * @param d destination name
-     */
-    public void setTopicDestination(String d)
-    {
-        topicDestination = d;
-    }
+
 
 }

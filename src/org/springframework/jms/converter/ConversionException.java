@@ -19,7 +19,7 @@ package org.springframework.jms.converter;
 /**
  * Thrown by JmsConverter when it can not convert an object to/from a JMS Message.
  *
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public class ConversionException extends org.springframework.core.NestedRuntimeException {
 

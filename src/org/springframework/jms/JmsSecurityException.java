@@ -23,8 +23,10 @@ package org.springframework.jms;
  * encountering its JMS counterpart so that Spring Runtime exception
  * behavior is maintained.
  *
- * @author <a href="mailto:les@hazlewood.com">Les Hazlewood</a>
  * @see javax.jms.JMSSecurityException
+ * 
+ * @author Les Hazlewood
+ *
  */
 public class JmsSecurityException extends JmsException {
 
@@ -69,7 +71,10 @@ public class JmsSecurityException extends JmsException {
  * Modification history:
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2004/07/08 13:09:32  markpollack
+ * initial import from sandbox
+ *
  * Revision 1.1  2004/07/01 18:12:38  markpollack
- * rework QOS support, add Les's ExceptionConversion, add defaultDestination, add JmsSenderCallback support.
+ * rework QOS support, add Les's ExceptionConversion, add defaultDestination, add ProducerCallback support.
  *
  */

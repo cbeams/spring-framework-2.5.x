@@ -24,7 +24,7 @@ package org.springframework.jms;
  * behavior is maintained.
  *
  * @see javax.jms.MessageNotWriteableException
- * @author <a href="mailto:les@hazlewood.com">Les Hazlewood</a>
+ * @author Les Hazlewood
  */
 public class MessageNotWriteableException extends JmsException {
 

@@ -190,7 +190,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
     }
 
     /**
-     * Test the execute(JmsSenderCallback) using a topic
+     * Test the execute(ProducerCallback) using a topic
      * @throws Exception unexpected, let JUnit handle it.
      */
     public void testTopicJmsSenderCallback() throws Exception {
@@ -221,7 +221,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _mockTopicConnection.close();
         _topicConnectionControl.replay();
 
-        sender.execute(new JmsSenderCallback() {
+        sender.execute(new ProducerCallback() {
             public void doInJms(Session session, MessageProducer msgProducer)
                 throws JMSException {
                 boolean b = session.getTransacted();
@@ -265,7 +265,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
 
     }
     /**
-     * Test the method execute(JmsSenderCallback) with a Queue.
+     * Test the method execute(ProducerCallback) with a Queue.
      * @throws Exception unexpected, let JUnit handle it.
      */
     public void testQueueJmsSenderCallback() throws Exception {
@@ -297,7 +297,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _mockQueueConnection.close();
         _queueConnectionControl.replay();
 
-        sender.execute(new JmsSenderCallback() {
+        sender.execute(new ProducerCallback() {
             public void doInJms(Session session, MessageProducer msgProducer)
                 throws JMSException {
                 boolean b = session.getTransacted();
@@ -602,7 +602,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
     	
 		JmsTemplate102 sender = new JmsTemplate102();
 		sender.setConnectionFactory(_mockQueueConnectionFactory);
-		sender.setJmsConverter(new ToStringConverter());
+		sender.setConverter(new ToStringConverter());
 		String s = "Hello world";
 		
 		//Mock the javax.jms QueueSender

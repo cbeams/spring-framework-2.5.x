@@ -36,14 +36,14 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
- * Just quickly copy over the existing code base into some semblence of the
- * new refactoring....  The XStream library is a good candidate to look for
- * inspiration.
+ * Converts between a JavaBean and a MapMessage.  
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
- * @author <a href="mailto:jawaid.hakim@codestreet.com">Jawaid Hakim</a>
+ * @author Mark Pollack
+ * @author Jawaid Hakim
  */
-public class MapMessageConverter implements JmsConverter {
+public class MapMessageConverter implements Converter {
+
+    //TODO refactoring.
 
     private static Map beanInfo_ = new HashMap();
 

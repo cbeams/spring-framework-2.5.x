@@ -24,7 +24,7 @@ package org.springframework.jms;
  * behavior is maintained.
  *
  * @see javax.jms.ResourceAllocationException
- * @author <a href="mailto:les@hazlewood.com">Les Hazlewood</a>
+ * @author Les Hazlewood
  */
 public class ResourceAllocationException extends JmsException {
 

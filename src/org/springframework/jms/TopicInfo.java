@@ -18,7 +18,7 @@ package org.springframework.jms;
 
 /**
  * Information about a JMS Topic.
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public class TopicInfo extends DestinationInfo {
 

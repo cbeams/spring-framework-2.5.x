@@ -20,7 +20,7 @@ package org.springframework.jms;
  * Information about a JMS Destination.  Queue and Topic subclasses
  * contain information specific to those desintation types.
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public abstract class DestinationInfo {
 

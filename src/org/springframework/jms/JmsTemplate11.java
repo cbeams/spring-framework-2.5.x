@@ -35,7 +35,7 @@ import javax.jms.Session;
  * {@link AbstractJmsTemplate#setPubSubDomain(boolean) setPubSubDomain}.
  * 
  * 
- * @version $Id: JmsTemplate11.java,v 1.3 2004-07-12 02:21:01 markpollack Exp $
+ * @version $Id: JmsTemplate11.java,v 1.4 2004-07-15 04:08:14 markpollack Exp $
  * @author Mark Pollack
  */
 public class JmsTemplate11 extends AbstractJmsTemplate {
@@ -80,7 +80,7 @@ public class JmsTemplate11 extends AbstractJmsTemplate {
 
     }
 
-    public void execute(JmsSenderCallback action) throws JmsException {
+    public void execute(ProducerCallback action) throws JmsException {
         Connection connection = null;
         try {
             connection = getConnectionFactory().createConnection();
@@ -218,6 +218,36 @@ public class JmsTemplate11 extends AbstractJmsTemplate {
                 public Message createMessage(Session session)
                     throws JMSException {
                     return getJmsConverter().toMessage(o, session);
+                }
+            });
+        }
+    }
+    
+    public void send(Destination d, final Object o, final MessagePostProcessor postProcessor) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    Message m = getJmsConverter().toMessage(o, session);
+                    return postProcessor.postProcess(m);
+                }
+            });
+        }
+    }
+    
+    public void send(String d, final Object o,  final MessagePostProcessor postProcessor) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    Message m = getJmsConverter().toMessage(o, session);
+                    return postProcessor.postProcess(m);
                 }
             });
         }

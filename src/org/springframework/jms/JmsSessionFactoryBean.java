@@ -25,9 +25,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 /**
- * Create a JMS Session from a Connection.
+ * Create a JMS Session from a Connection.  Requires a JMS 1.1 provider.
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public class JmsSessionFactoryBean
     implements FactoryBean, InitializingBean, DisposableBean
@@ -36,9 +36,9 @@ public class JmsSessionFactoryBean
     
     private Session session;
     
-    private boolean transacted;
+    private boolean transacted = false;
     
-    private int acknowledgeMode;
+    private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
     
     protected final Log logger = LogFactory.getLog(getClass());
     

@@ -29,7 +29,7 @@ import javax.naming.NamingException;
  * Create a vendor specific implementation for you needs if the
  * supplied DefaultJmsAdmin is not sufficient.
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public interface JmsAdmin {
 
