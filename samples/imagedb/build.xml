@@ -15,9 +15,6 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${spring.root}/lib/aopalliance">
-			<include name="aopalliance.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jdbc2_0-stdext.jar"/>
 			<include name="servlet-api.jar"/>
@@ -82,9 +79,6 @@
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${spring.root}/lib/aopalliance">
-				<include name="aopalliance.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/c3p0">
 				<include name="c3p0*.jar"/>
 			</fileset>

@@ -53,9 +53,6 @@
 		<fileset dir="${spring.root}/lib/antlr">
 			<include name="antlr*.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/aopalliance">
-			<include name="aopalliance.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/cglib">
 			<include name="cglib*.jar"/>
 		</fileset>
@@ -162,9 +159,6 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/antlr">
 				<include name="antlr*.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/aopalliance">
-				<include name="aopalliance.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">
 				<include name="cglib*.jar"/>

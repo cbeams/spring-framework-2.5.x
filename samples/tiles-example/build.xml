@@ -43,9 +43,6 @@
 
 	<path id="test-classpath">
 
-		<fileset dir="${spring.root}/lib/aopalliance">
-			<include name="aopalliance.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet-api.jar"/>
 		</fileset>

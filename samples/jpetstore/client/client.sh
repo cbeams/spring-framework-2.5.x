@@ -3,7 +3,6 @@
 
 CLIENT_HOME=`dirname $0`
 
-CPATH=$CLIENT_HOME/../../../lib/aopalliance/aopalliance.jar
 CPATH=$CLIENT_HOME/../../../lib/axis/axis.jar:$CPATH
 CPATH=$CLIENT_HOME/../../../lib/axis/saaj.jar:$CPATH
 CPATH=$CLIENT_HOME/../../../lib/axis/wsdl4j.jar:$CPATH

@@ -16,9 +16,6 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${spring.root}/lib/aopalliance">
-			<include name="aopalliance.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/axis">
 			<include name="axis.jar"/>
 		</fileset>
@@ -92,9 +89,6 @@
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${spring.root}/lib/aopalliance">
-				<include name="aopalliance.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/axis">
 				<include name="axis.jar"/>
 				<include name="saaj.jar"/>
