@@ -21,10 +21,13 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
 /**
- * Convenient superclass for pointcut-driven advisors, implementing
+ * Convenient pointcut-driven advisor implementation, implementing
  * the getPointcut() and isPerInstance() methods.
+ * This is the most commonly used Advisor implementation.
+ * It can be used with any pointcut and advice type, except for 
+ * introductions.
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.5 2004-03-19 16:54:39 johnsonr Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.6 2004-03-20 15:59:58 johnsonr Exp $
  */
 public class DefaultPointcutAdvisor implements PointcutAdvisor {
 	
@@ -54,6 +57,10 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor {
 
 	public Pointcut getPointcut() {
 		return pointcut;
+	}
+	
+	public void setPointcut(Pointcut pointcut) {
+		this.pointcut = pointcut;
 	}
 
 	public boolean isPerInstance() {
