@@ -96,7 +96,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Bind the given resource for the given key to the current thread.
 	 * @param key key to bind the value to
 	 * @param value value to bind
-	 * @throws java.lang.IllegalStateException if there is already a value bound to the thread
+	 * @throws IllegalStateException if there is already a value bound to the thread
 	 */
 	public static void bindResource(Object key, Object value) {
 		if (hasResource(key)) {
@@ -111,9 +111,10 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Unbind a resource for the given key from the current thread.
 	 * @param key key to check
-	 * @throws java.lang.IllegalStateException if there is no value bound to the thread
+	 * @return the previously bound value
+	 * @throws IllegalStateException if there is no value bound to the thread
 	 */
-	public static void unbindResource(Object key) {
+	public static Object unbindResource(Object key) {
 		if (!hasResource(key)) {
 			throw new IllegalStateException("No value for key [" + key + "] bound to thread");
 		}
@@ -121,6 +122,7 @@ public abstract class TransactionSynchronizationManager {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removed value [" + value + "] for key [" + key + "] from thread [" + Thread.currentThread().getName() + "]");
 		}
+		return value;
 	}
 
 
