@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.propertyeditors;
 
@@ -106,14 +106,12 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			setValue(null);
 		}
-
-		// use given NumberFormat for parsing text
 		else if (this.numberFormat != null) {
+			// Use given NumberFormat for parsing text.
 			setValue(NumberUtils.parseNumber(text, this.numberClass, this.numberFormat));
 		}
-
-		// use default valueOf methods for parsing text
 		else {
+			// Use default valueOf methods for parsing text.
 			setValue(NumberUtils.parseNumber(text, this.numberClass));
 		}
 	}
@@ -125,11 +123,11 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		Object value = getValue();
 		if (value != null) {
 			if (this.numberFormat != null) {
-				// use NumberFormat for rendering value
+				// Use NumberFormat for rendering value.
 				return this.numberFormat.format(value);
 			}
 			else {
-				// use toString method for rendering value
+				// Use toString method for rendering value.
 				return value.toString();
 			}
 		}
