@@ -13,7 +13,6 @@
 	</bean>
 
 
-
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 		<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource"><ref local="dataSource"/></property>
@@ -27,7 +26,7 @@
 	
 	
 	<bean id="boPrototype" 
-		autowire="constructor" class="org.springframework.beans.factory.xml.DummyBo"
+		autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"
 		singleton="false"
 	/>
 	
@@ -40,6 +39,7 @@
 	<bean id="prototypeBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="target"><ref local="prototypeBmInvokerInterceptor"/></property>
+		<property name="proxyInterfaces"><value>org.springframework.beans.factory.xml.DummyBo</value></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="placeOrder">PROPAGATION_REQUIRED</prop>
@@ -48,7 +48,7 @@
 	</bean>
 	
 
-	<bean id="boSingleton" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBo">
+	<bean id="boSingleton" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl">
 	</bean>
 	
 	

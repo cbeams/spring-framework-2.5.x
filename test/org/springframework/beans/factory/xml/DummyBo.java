@@ -8,15 +8,10 @@ package org.springframework.beans.factory.xml;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DummyBo.java,v 1.1 2003-11-22 15:08:28 johnsonr Exp $
+ * @version $Id: DummyBo.java,v 1.2 2003-11-22 15:53:50 johnsonr Exp $
  */
-public class DummyBo {
+public interface DummyBo {
 	
-	DummyDao dao;
-
-	public DummyBo(DummyDao dao) {
-		this.dao = dao;
-		
-	}
+	void something();
 
 }

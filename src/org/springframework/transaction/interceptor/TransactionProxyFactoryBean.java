@@ -3,7 +3,9 @@ package org.springframework.transaction.interceptor;
 import java.util.Iterator;
 import java.util.Properties;
 
+import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AopConfigException;
@@ -38,10 +40,11 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @since 21.08.2003
- * @version $Id: TransactionProxyFactoryBean.java,v 1.10 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.11 2003-11-22 15:55:11 johnsonr Exp $
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.11 2003-11-22 15:55:11 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean implements FactoryBean, InitializingBean {
 
@@ -52,6 +55,12 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 	private Properties transactionAttributes;
 
 	private boolean proxyInterfacesOnly = true;
+	
+	/** 
+	 * Interfaces to proxy. If left null (the default)
+	 * the AOP infrastructure works out which interfaces need proxying
+	 */
+	private Class[] interfaces;
 
 	private Pointcut pointcut;
 
@@ -71,7 +80,10 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 
 	/**
 	 * Set the target object, i.e. the bean to be wrapped with a
-	 * transactional proxy.
+	 * transactional proxy. The target may be any object, in case an
+	 * InvokerInterceptor will be created. If it is a MethodInterceptor no
+	 * wrapper interceptor is created. This enables the use of a pooling target
+	 * or prototype interceptor etc.
 	 */
 	public void setTarget(Object target) {
 		this.target = target;
@@ -133,6 +145,25 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 	public void setPostInterceptors(Interceptor[] preInterceptors) {
 		this.postInterceptors = preInterceptors;
 	}
+	
+	
+	/**
+	 * Optional: you only need to set this property to filter the set of interfaces
+	 * being proxied (default is to pick up all interfaces on the target),
+	 * or if providing a custom invoker interceptor instead of a target.
+	 */
+	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+		// TODO similar code in ProxyFactoryBean: may be able to refactor conversion from
+		// String[] to Class[]
+		this.interfaces = new Class[interfaceNames.length];
+		for (int i = 0; i < interfaceNames.length; i++) {
+			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
+			// Check it's an interface
+			if (!interfaces[i].isInterface())
+				throw new AspectException("Can proxy only interfaces: " + interfaces[i] + " is a class");
+		}
+	}
+	
 
 	public void afterPropertiesSet() throws AopConfigException {
 		if (this.target == null) {
@@ -176,13 +207,39 @@ public class TransactionProxyFactoryBean implements FactoryBean, InitializingBea
 			}
 		}
 
-		proxyFactory.addInterceptor(new InvokerInterceptor(this.target));
-		if (this.proxyInterfacesOnly) {
+		proxyFactory.addInterceptor(createInvokerInterceptor(this.target));
+		if (this.interfaces != null) {
+			proxyFactory.setInterfaces(this.interfaces);
+		}
+		else if (this.proxyInterfacesOnly) {
+			// Rely on AOP infrastucture to tell us what interfaces to proxy
 			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
 		}
 		this.proxy = proxyFactory.getProxy();
 	}
 
+	
+	/**
+	 * Get the final interceptor in the chain from the target object
+	 * @param pTarget target object
+	 * @return an interceptor
+	 */
+	protected MethodInterceptor createInvokerInterceptor(Object pTarget) {
+		if (pTarget instanceof MethodInterceptor) {
+			// The user hopefully knows what they're doing...
+			// Maybe they want to set a prototype interceptor etc
+			if (this.interfaces == null) {
+				throw new AspectException("Cannot use custom invoker interceptor without setting interfaces to proxy " +
+						"using the 'proxyInterfaces' property");
+			}
+			return (MethodInterceptor) pTarget;
+		}
+		else {
+			return new InvokerInterceptor(pTarget);
+		}
+	}
+
+	
 	public Object getObject() {
 		return this.proxy;
 	}
