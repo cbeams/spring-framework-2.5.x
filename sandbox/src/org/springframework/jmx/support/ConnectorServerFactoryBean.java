@@ -74,44 +74,112 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	 */
 	private Map environment;
 
+	/**
+	 * The <code>String</code> representation of the <code>ObjectName</code> for the
+	 * <code>JMXConnectorServer</code>.
+	 */
 	private String objectName;
 
+	/**
+	 * Indicates whether or not the <code>JMXConnectorServer</code> should be started in a
+	 * separate thread.
+	 */
 	private boolean threaded = false;
 
+	/**
+	 * Indicates whether or not the <code>JMXConnectorServer</code> should be started in a
+	 * daemon thread. Only applicable if <code>threaded</code> is set to <code>true</code>.
+	 */
 	private boolean daemon = false;
 
+	/**
+	 * Stores the <code>JMXConnectoreServer</code> instance.
+	 */
 	private JMXConnectorServer connectorServer;
 
-
+	/**
+	 * Sets the <code>MBeanServer</code> that the <code>JMXConnectorServer</code> should
+	 * expose.
+	 *
+	 * @param mbeanServer an <code>MBeanServer</code>.
+	 */
 	public void setServer(MBeanServer mbeanServer) {
 		this.server = mbeanServer;
 	}
 
+	/**
+	 * Sets the service URL for the <code>JMXConnectorServer</code>.
+	 *
+	 * @param serviceUrl the service URL.
+	 */
 	public void setServiceUrl(String serviceUrl) {
 		this.serviceUrl = serviceUrl;
 	}
 
+	/**
+	 * Sets the environment properties used to construct the <code>JMXConnectorServer</code>.
+	 *
+	 * @param environment the environment properties.
+	 */
 	public void setEnvironment(Map environment) {
 		this.environment = environment;
 	}
 
+	/**
+	 * Sets the <code>ObjectName</code> used to register the <code>JMXConnectorServer</code> itself
+	 * with the <code>MBeanServer</code>.
+	 *
+	 * @param objectName the <code>String</code> representation of the <code>ObjectName</code>.
+	 */
 	public void setObjectName(String objectName) {
 		this.objectName = objectName;
 	}
 
+	/**
+	 * Sets the <code>threaded</code> flag, indicating whether the <code>JMXConnectorServer</code> should
+	 * be started in a separate thread.
+	 *
+	 * @param threaded <code>true</code> to start the <code>JMXConnectorServer</code> in a separate thread,
+	 * otherwise <code>false</code>.
+	 * @see #start()
+	 */
 	public void setThreaded(boolean threaded) {
 		this.threaded = threaded;
 	}
 
+	/**
+	 * Sets the <code>daemon</code> flag, indicating whether any threads started for the
+	 * <code>JMXConnectorServer</code> should be started daemon threads.
+	 *
+	 * @param daemon <code>true</code> to start daemon threads,otherwise <code>false</code>.
+	 * @see #start()
+	 */
 	public void setDaemon(boolean daemon) {
 		this.daemon = daemon;
 	}
 
-
+	/**
+	 * Starts the <code>JMXConnectorServer</code> automatically when running
+	 * in an <code>ApplicationContext</code>.
+	 *
+	 * @throws IOException if there is a problem starting or running the <code>JMXConnectorServer</code>.
+	 * @throws JMException if a problem occured when registering the <code>JMXConnectorServer</code> with
+	 * the <code>MBeanServer</code>.
+	 * @see #start()
+	 */
 	public void afterPropertiesSet() throws IOException, JMException {
 		start();
 	}
 
+	/**
+	 * Starts the <code>JMXConnectorServer</code>. If the <code>threaded</code> flag is set to <code>true</code>, the
+	 * <code>JMXConnectorServer</code> will be started in a separate thread. If the <code>daemon</code> flag is set
+	 * to <code>true</code> this thread will be started as a daemon thread.
+	 *
+	 * @throws IOException if there is a problem starting or running the <code>JMXConnectorServer</code>.
+	 * @throws JMException if a problem occured when registering the <code>JMXConnectorServer</code> with
+	 * the <code>MBeanServer</code>.
+	 */
 	public void start() throws IOException, JMException {
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
@@ -152,19 +220,42 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	}
 
 
+	/**
+	 * Gets the <code>JMXConnectorServer</code> instance.
+	 *
+	 * @return an instance of <code>JMXConnectorServer</code>.
+	 * @throws Exception
+	 */
 	public Object getObject() throws Exception {
 		return this.connectorServer;
 	}
 
+	/**
+	 * Returns the type of object managed by this class.
+	 *
+	 * @return if possible, the exact implementation type of the
+	 *         <code>JMXConnectorServer</code>, otherwise returns
+	 *         <code>JMXConnectorServer.</code>
+	 */
 	public Class getObjectType() {
 		return (this.connectorServer != null ? this.connectorServer.getClass() : JMXConnectorServer.class);
 	}
 
+	/**
+	 * Indicates that the <code>JMXConnectorServer</code> instance managed by this object
+	 * is a singleton.
+	 *
+	 * @return always <code>true</code>.
+	 */
 	public boolean isSingleton() {
 		return true;
 	}
 
-
+	/**
+	 * Stops the <code>JMXConnectorServer</code> managed by an instance of this class.
+	 *
+	 * @throws IOException if there is an error stopping the <code>JMXConnectorServer</code>.
+	 */
 	public void destroy() throws IOException {
 		this.connectorServer.stop();
 	}

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Factory Bean to create and obtain an <code>MBeanServer</code> instance.
+ * <code>FactoryBean</code> implementation to create and obtain an <code>MBeanServer</code> instance.
  *
  * @author Rob Harrop
  * @since 1.2
@@ -58,7 +58,7 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 	/**
 	 * Returns the default domain used by the <code>MBeanServer</code>
 	 *
-	 * @return
+	 * @return the default domain for the <code>MBeanServer</code>.
 	 */
 	public String getDefaultDomain() {
 		return defaultDomain;
@@ -79,7 +79,7 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 	 * Indicates whether the <code>MBeanServerFactory</code>. was instruced to maintain
 	 * a reference to the <code>MBeanServer</code> after creation.
 	 *
-	 * @return True if the <code>MBeanServerFactory</code> has the reference otherwise false
+	 * @return <code>true</code> if the <code>MBeanServerFactory</code> has the reference otherwise <code>false</code>.
 	 */
 	public boolean getHaveFactoryHoldReference() {
 		return haveFactoryHoldReference;
@@ -136,7 +136,7 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean {
 		}
 		else {
 			// create an MBeanServer instance that is not accessible
-			// using MBeanServerFactory.findMBeanServer
+			// using MBeanServerFactory.findMBeanServer()
 			if (defaultDomain != null) {
 				server = MBeanServerFactory.newMBeanServer(defaultDomain);
 			}

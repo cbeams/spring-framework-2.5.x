@@ -19,30 +19,56 @@ package org.springframework.jmx.support.adapter;
 import com.sun.jdmk.comm.HtmlAdaptorServer;
 
 /**
+ * Implementation of <code>AdapterHost</code> for the <code>HtmlAdaptorServer</code> included
+ * in the JMX Reference Implementation.
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class HtmlAdapterHost extends AbstractAdapterHost {
 
+	/**
+	 * The default port for the adapter to listen on.
+	 */
 	private int port = 9090;
 
+	/**
+	 * The <code>HtmlAdaptorServer</code> instance.
+	 */
 	private HtmlAdaptorServer adapter;
 
+	/**
+	 * Sets the port used by the adapter.
+	 * @param port the port the adapter should listen on.
+	 */
 	public void setPort(int port) {
 		this.port = port;
 	}
 
+	/**
+	 * Creates the adapter instance.
+	 */
 	protected void initAdapterHost() {
 		this.adapter = new HtmlAdaptorServer(this.port);
 	}
 
+	/**
+	 * Gets the adapter instance.s
+	 * @return
+	 */
 	protected Object getAdapterMBean() {
 		return this.adapter;
 	}
 
+	/**
+	 * Starts the adapter.
+	 */
 	public void start() {
 		this.adapter.start();
 	}
 
+	/**
+	 * Stops the adapter.
+	 */
 	public void stop() {
 		this.adapter.stop();
 	}

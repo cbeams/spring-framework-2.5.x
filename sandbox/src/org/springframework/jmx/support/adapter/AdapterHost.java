@@ -17,12 +17,20 @@
 package org.springframework.jmx.support.adapter;
 
 /**
+ * Interface for classes that host non-standard JMX adapters such as the HTTP adapter supplied with
+ * the reference implementation.
  * @author Rob Harrop
  */
 public interface AdapterHost {
 
+	/**
+	 * Starts the adapter.
+	 */
 	void start();
 
+	/**
+	 * Stops the adapter.
+	 */
 	void stop();
 
 }
