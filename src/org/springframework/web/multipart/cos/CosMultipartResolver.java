@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
-import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -32,7 +32,7 @@ import org.springframework.web.util.WebUtils;
  * @see CosMultipartHttpServletRequest
  * @see com.oreilly.servlet.MultipartRequest
  */
-public class CosMultipartResolver extends WebApplicationObjectSupport implements MultipartResolver {
+public class CosMultipartResolver implements MultipartResolver, ServletContextAware {
 
 	public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data";
 
@@ -47,15 +47,20 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 
 
 	/**
-	 * Constructor for use as bean in an application context.
-	 * Determines the servlet container's temporary directory via the application context.
+	 * Constructor for use as bean. Determines the servlet container's
+	 * temporary directory via the ServletContext passed in as through the
+	 * ServletContextAware interface (typically by a WebApplicationContext).
+	 * @see #setServletContext
+	 * @see org.springframework.web.context.ServletContextAware
+	 * @see org.springframework.web.context.WebApplicationContext
 	 */
 	public CosMultipartResolver() {
 	}
 
 	/**
-	 * Constructor for standalone usage.
-	 * Determines the servlet container's temporary directory via the given ServletContext.
+	 * Constructor for standalone usage. Determines the servlet container's
+	 * temporary directory via the given ServletContext.
+	 * @param servletContext the ServletContext to use
 	 */
 	public CosMultipartResolver(ServletContext servletContext) {
 		this.uploadTempDir = WebUtils.getTempDir(servletContext);
@@ -105,9 +110,9 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 		return uploadTempDir;
 	}
 
-	protected void initApplicationContext() {
+	public void setServletContext(ServletContext servletContext) {
 		if (this.uploadTempDir == null) {
-			this.uploadTempDir = getTempDir();
+			this.uploadTempDir = WebUtils.getTempDir(servletContext);
 		}
 	}
 

@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -45,7 +45,7 @@ import org.springframework.web.util.WebUtils;
  * @see CommonsMultipartFile
  * @see org.apache.commons.fileupload.DiskFileUpload
  */
-public class CommonsMultipartResolver extends WebApplicationObjectSupport implements MultipartResolver {
+public class CommonsMultipartResolver implements MultipartResolver, ServletContextAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -53,21 +53,27 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 
 	private File uploadTempDir;
 
+
 	/**
-	 * Constructor for use as bean in an application context.
-	 * Determines the servlet container's temporary directory via the application context.
+	 * Constructor for use as bean. Determines the servlet container's
+	 * temporary directory via the ServletContext passed in as through the
+	 * ServletContextAware interface (typically by a WebApplicationContext).
+	 * @see #setServletContext
+	 * @see org.springframework.web.context.ServletContextAware
+	 * @see org.springframework.web.context.WebApplicationContext
 	 */
 	public CommonsMultipartResolver() {
 		this.fileUpload = newFileUpload();
 	}
 
 	/**
-	 * Constructor for standalone usage.
-	 * Determines the servlet container's temporary directory via the given ServletContext.
+	 * Constructor for standalone usage. Determines the servlet container's
+	 * temporary directory via the given ServletContext.
+	 * @param servletContext the ServletContext to use
 	 */
 	public CommonsMultipartResolver(ServletContext servletContext) {
 		this();
-		this.fileUpload.setRepositoryPath(WebUtils.getTempDir(servletContext).getAbsolutePath());
+		setServletContext(servletContext);
 	}
 
 	/**
@@ -133,9 +139,9 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 		this.uploadTempDir = uploadTempDir.getFile();
 	}
 
-	protected void initApplicationContext() {
+	public void setServletContext(ServletContext servletContext) {
 		if (this.uploadTempDir == null) {
-			this.fileUpload.setRepositoryPath(getTempDir().getAbsolutePath());
+			this.fileUpload.setRepositoryPath(WebUtils.getTempDir(servletContext).getAbsolutePath());
 		}
 	}
 

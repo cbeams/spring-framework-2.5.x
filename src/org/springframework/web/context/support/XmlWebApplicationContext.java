@@ -10,6 +10,7 @@ import java.io.IOException;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
@@ -109,6 +110,10 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 			}
 		}
 		super.refresh();
+	}
+
+	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 	}
 
 	/**

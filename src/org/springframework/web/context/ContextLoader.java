@@ -109,7 +109,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent)
-		throws BeansException {
+			throws BeansException {
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		Class contextClass = DEFAULT_CONTEXT_CLASS;
 		if (contextClassName != null) {
@@ -124,7 +124,8 @@ public class ContextLoader {
 					"Custom context class [" + contextClassName + "] is not of type ConfigurableWebApplicationContext");
 			}
 		}
-		ConfigurableWebApplicationContext wac = (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+		ConfigurableWebApplicationContext wac =
+		    (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 		wac.setParent(parent);
 		wac.setServletContext(servletContext);
 		String configLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);

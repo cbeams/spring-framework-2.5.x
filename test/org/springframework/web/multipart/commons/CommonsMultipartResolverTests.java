@@ -54,12 +54,12 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.setServletContext(new MockServletContext());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.refresh();
-		CommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
+		MockCommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
 		DiskFileUpload fileUpload = resolver.getFileUpload();
 		resolver.setMaxUploadSize(1000);
 		resolver.setMaxInMemorySize(100);
 		resolver.setHeaderEncoding("enc");
-		resolver.setApplicationContext(wac);
+		resolver.setServletContext(wac.getServletContext());
 		assertEquals(1000, fileUpload.getSizeMax());
 		assertEquals(100, fileUpload.getSizeThreshold());
 		assertEquals("enc", fileUpload.getHeaderEncoding());
@@ -176,6 +176,19 @@ public class CommonsMultipartResolverTests extends TestCase {
 		resolver.cleanupMultipart(request);
 		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
 		assertTrue(((MockFileItem) file2.getFileItem()).deleted);
+
+		resolver.setEmpty(true);
+		request = resolver.resolveMultipart(originalRequest);
+		binder.setBindEmptyMultipartFiles(false);
+		String firstBound = mtb2.getField1();
+		binder.bind(request);
+		assertTrue(mtb2.getField1().length() > 0);
+		assertEquals(firstBound, mtb2.getField1());
+
+		request = resolver.resolveMultipart(originalRequest);
+		binder.setBindEmptyMultipartFiles(true);
+		binder.bind(request);
+		assertTrue(mtb2.getField1().length() == 0);
 	}
 
 	public void testWithServletContextAndFilter() throws ServletException, IOException {
@@ -286,30 +299,36 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public static class MockCommonsMultipartResolver extends CommonsMultipartResolver {
 
-		protected DiskFileUpload newFileUpload() {
-			return new MockDiskFileUpload();
+		private boolean empty;
+
+		protected void setEmpty(boolean empty) {
+			this.empty = empty;
 		}
-	}
 
-
-	private static class MockDiskFileUpload extends DiskFileUpload {
-
-		public List parseRequest(HttpServletRequest request) {
-			if (request instanceof MultipartHttpServletRequest) {
-				throw new IllegalStateException("Already a multipart request");
-			}
-			List fileItems = new ArrayList();
-			MockFileItem fileItem1 = new MockFileItem("field1", "type1", "field1.txt", "text1");
-			MockFileItem fileItem2 = new MockFileItem("field2", "type2", "C:/field2.txt", "text2");
-			MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
-			MockFileItem fileItem4 = new MockFileItem("field4", null, null, "value4");
-			MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");
-			fileItems.add(fileItem1);
-			fileItems.add(fileItem2);
-			fileItems.add(fileItem3);
-			fileItems.add(fileItem4);
-			fileItems.add(fileItem5);
-			return fileItems;
+		protected DiskFileUpload newFileUpload() {
+			return new DiskFileUpload() {
+				public List parseRequest(HttpServletRequest request) {
+					if (request instanceof MultipartHttpServletRequest) {
+						throw new IllegalStateException("Already a multipart request");
+					}
+					List fileItems = new ArrayList();
+					MockFileItem fileItem1 = new MockFileItem("field1", "type1",
+					                                          empty ? "" : "field1.txt",
+					                                          empty ? "" : "text1");
+					MockFileItem fileItem2 = new MockFileItem("field2", "type2",
+					                                          empty ? "" : "C:/field2.txt",
+					                                          empty ? "" : "text2");
+					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
+					MockFileItem fileItem4 = new MockFileItem("field4", null, null, "value4");
+					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");
+					fileItems.add(fileItem1);
+					fileItems.add(fileItem2);
+					fileItems.add(fileItem3);
+					fileItems.add(fileItem4);
+					fileItems.add(fileItem5);
+					return fileItems;
+				}
+			};
 		}
 	}
 
