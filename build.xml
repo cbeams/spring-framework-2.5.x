@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.57 2004-05-15 21:56:54 aarendsen Exp $
+    $Id: build.xml,v 1.58 2004-05-18 08:06:11 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -502,6 +502,7 @@
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.classes.dir}"/>
 
 			<!-- Need files loaded as resources -->
