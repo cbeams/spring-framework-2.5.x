@@ -70,7 +70,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.11 2004-06-23 09:07:50 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.12 2004-07-22 09:54:01 jhoeller Exp $
  */
 public class SchedulerFactoryBean
     implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -109,6 +109,8 @@ public class SchedulerFactoryBean
 	private Map calendars;
 
 	private List triggers;
+
+	private boolean autoStartup = true;
 
 	private int startupDelay = 0;
 
@@ -301,6 +303,14 @@ public class SchedulerFactoryBean
 	}
 
 	/**
+	 * Set whether to automatically start the scheduler after initialization.
+	 * Default is true; set this to false to allow for manual startup.
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
+	/**
 	 * Set the number of seconds to wait after initialization before
 	 * starting the scheduler asynchronously. Default is 0, meaning
 	 * immediate synchronous startup on initialization of this bean.
@@ -393,7 +403,10 @@ public class SchedulerFactoryBean
 
 		registerJobsAndTriggers();
 
-		startScheduler(this.scheduler, this.startupDelay);
+		// start Sheduler if demanded
+		if (this.autoStartup) {
+			startScheduler(this.scheduler, this.startupDelay);
+		}
 	}
 
 	/**
