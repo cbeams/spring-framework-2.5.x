@@ -25,10 +25,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.NullValueInNestedPathException;
 
 /**
  * PropertyComparator performs a comparison of two beans,
@@ -57,15 +57,21 @@ public class PropertyComparator implements Comparator {
 			v2 = ((String) v2).toLowerCase();
 		}
 		int result;
+		
+		// Put the null property at the end of the sort
 		try {
 			if (v1 != null) {
-				result = ((Comparable) v1).compareTo(v2);
+				if (v2 != null) {
+					result = ((Comparable) v1).compareTo(v2);
+				} else {
+					result = -1;
+				}
 			}
 			else {
 				if (v2 != null) {
-					result = - ((Comparable) v2).compareTo(v1);
+					result = 1;
 				} else {
-					return 0;
+					result = 0;
 				}
 			}
 		}
@@ -82,7 +88,14 @@ public class PropertyComparator implements Comparator {
 			bw = new BeanWrapperImpl(o);
 			this.cachedBeanWrappers.put(o, bw);
 		}
-		return bw.getPropertyValue(this.sortDefinition.getProperty());
+
+		// If a parent is null, simply done the property as null
+		try {
+			return bw.getPropertyValue(this.sortDefinition.getProperty());
+		} catch (NullValueInNestedPathException e) {
+			logger.info("Null value in nested properties path");
+			return null;
+		}
 	}
 
 
