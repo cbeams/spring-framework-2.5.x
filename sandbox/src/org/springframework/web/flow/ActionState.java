@@ -338,7 +338,7 @@ public class ActionState extends TransitionableState {
 			executionCount++;
 		}
 		if (executionCount > 0) {
-			throw new CannotExecuteStateTransitionException(this, "No transition was matched to the event(s) "
+			throw new NoMatchingTransitionException(this, context, "No transition was matched to the event(s) "
 					+ "signaled by the " + executionCount + " action(s) that executed in this action state '" + getId()
 					+ "' of flow '" + getFlow().getId()
 					+ "'; transitions must be defined to handle action result outcomes -- "
@@ -347,10 +347,10 @@ public class ActionState extends TransitionableState {
 					+ Styler.call(getTransitionalCriteria()) + "'");
 		}
 		else {
-			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
+			throw new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
 							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action to this state"));
+							+ "make sure you add at least one action to this state");
 		}
 	}
 

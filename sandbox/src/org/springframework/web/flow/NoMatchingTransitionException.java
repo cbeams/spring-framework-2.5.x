@@ -48,7 +48,7 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	 *        transition
 	 */
 	public NoMatchingTransitionException(TransitionableState state, RequestContext context) {
-		this(state, context, null);
+		this(state, context, (Throwable)null);
 	}
 
 	/**
@@ -63,6 +63,31 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 				+ state.getId() + "' of flow '" + state.getFlow().getId() + "' -- valid transitional criteria are "
 				+ Styler.call(state.getTransitionalCriteria())
 				+ " -- likely programmer error, check the set of TransitionCriteria for this state", cause);
+		this.state = state;
+		this.context = context;
+	}
+
+	/**
+	 * Create a new no matching transition exception.
+	 * @param state the state that could not be transitioned out of
+	 * @param context the request context that did not trigger a valid
+	 *        transition
+	 * @param message the message
+	 */
+	public NoMatchingTransitionException(TransitionableState state, RequestContext context, String message) {
+		this(state, context, message, null);
+	}
+
+	/**
+	 * Create a new no matching transition exception.
+	 * @param state the state that could not be transitioned out of
+	 * @param context the request context that did not trigger a valid
+	 *        transition
+	 * @param message the message
+	 * @param cause the underlying cause
+	 */
+	public NoMatchingTransitionException(TransitionableState state, RequestContext context, String message, Throwable cause) {
+		super(state.getFlow(), message, cause);
 		this.state = state;
 		this.context = context;
 	}

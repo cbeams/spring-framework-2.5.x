@@ -16,8 +16,8 @@
 package org.springframework.web.flow;
 
 /**
- * Central interface used by clients to interact with the flow system
- * and an ongoing flow execution.
+ * Central interface used by clients to interact with the flow system and an
+ * ongoing flow execution.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -34,8 +34,8 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 * Start this flow execution, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by a
 	 * flow controller, but also in test code.
-	 * @param originatingEvent the event that occured that triggered flow execution
-	 *        creation
+	 * @param originatingEvent the event that occured that triggered flow
+	 *        execution creation
 	 * @return the starting view descriptor, which returns control to the client
 	 *         and requests that a view be rendered with model data
 	 * @throws IllegalStateException if this execution has already been started,
@@ -50,12 +50,12 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 * @return the next model and view descriptor to display for this flow
 	 *         execution, this returns control to the client and requests that a
 	 *         view be rendered with model data
-	 * @throws NoMatchingTransitionException if the signaled event does not map to
-	 *         any state transitions in the current state
+	 * @throws FlowNavigationException if the signaled event does not map
+	 *         to any state transitions in the current state
 	 * @throws IllegalStateException if the flow execution is not active and
 	 *         thus is no longer (or not yet) processing events
 	 */
-	public ViewDescriptor signalEvent(Event event) throws NoMatchingTransitionException, IllegalStateException;
+	public ViewDescriptor signalEvent(Event event) throws FlowNavigationException, IllegalStateException;
 
 	/**
 	 * Called by a client to restore this flow execution's state after

@@ -35,17 +35,17 @@ import org.springframework.util.ToStringCreator;
 
 /**
  * Default implementation of FlowExecution that uses a stack-based data
- * structure to manage {@link org.springframework.web.flow.FlowSession flow sessions}.
+ * structure to manage
+ * {@link org.springframework.web.flow.FlowSession flow sessions}.
  * <p>
  * This implementation of FlowExecution is serializable so it can be safely
  * stored in an HTTP session.
  * <p>
  * Note: this implementation synchronizes both execution entry points
- * {@link #start(Event)} and {@link #signalEvent(Event)}.
- * They are locked on a per client basis for this flow execution.
- * Synchronization prevents a client from being able to signal other events
- * before previously signaled ones have processed in-full, preventing possible
- * race conditions.
+ * {@link #start(Event)} and {@link #signalEvent(Event)}. They are locked on a
+ * per client basis for this flow execution. Synchronization prevents a client
+ * from being able to signal other events before previously signaled ones have
+ * processed in-full, preventing possible race conditions.
  * 
  * @see org.springframework.web.flow.FlowSession
  * 
@@ -127,7 +127,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// methods implementing FlowExecutionMBean
-	
+
 	public String getId() {
 		return id;
 	}
@@ -141,7 +141,8 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getCaption() {
-		return "[" + FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE + "=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
+		return "[" + FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE + "=" + getId() + ", " + getQualifiedActiveFlowId()
+				+ "]";
 	}
 
 	/**
@@ -156,8 +157,8 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	/**
-	 * Check that this flow execution is active and throw an exception
-	 * if it's not.
+	 * Check that this flow execution is active and throw an exception if it's
+	 * not.
 	 */
 	protected void assertActive() throws IllegalStateException {
 		if (!isActive()) {
@@ -226,7 +227,8 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		this.lastEventId = lastEvent.getId();
 		this.lastEventTimestamp = lastEvent.getTimestamp();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Set last event id to '" + this.lastEventId + "' and updated timestamp to " + this.lastEventTimestamp);
+			logger.debug("Set last event id to '" + this.lastEventId + "' and updated timestamp to "
+					+ this.lastEventTimestamp);
 		}
 	}
 
@@ -235,7 +237,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// methods implementing FlowExecution
-	
+
 	public FlowExecutionListenerList getListenerList() {
 		return listenerList;
 	}
@@ -254,19 +256,19 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return viewDescriptor;
 	}
 
-	public synchronized ViewDescriptor signalEvent(Event event) throws NoMatchingTransitionException,
-			IllegalStateException {
+	public synchronized ViewDescriptor signalEvent(Event event) throws FlowNavigationException, IllegalStateException {
 		assertActive();
 		String eventId = event.getId();
 		String stateId = event.getStateId();
 		if (!StringUtils.hasText(stateId)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Current state id was not provided in request to signal event '"
-						+ eventId
-						+ "' in flow "
-						+ getCaption()
-						+ "' -- pulling current state id from session -- "
-						+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
+				logger
+						.debug("Current state id was not provided in request to signal event '"
+								+ eventId
+								+ "' in flow "
+								+ getCaption()
+								+ "' -- pulling current state id from session -- "
+								+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
 			}
 			stateId = getCurrentStateId();
 		}
@@ -305,20 +307,20 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		assertActive();
 		return (FlowSession)executingFlowSessions.peek();
 	}
-	
+
 	/**
 	 * Returns the parent flow session of the currently active flow session.
 	 * @return the parent flow session
-	 * @throws IllegalArgumentException when this execution is not active
-	 *         or when the current flow session has no parent (e.g. is the
-	 *         root flow session)
+	 * @throws IllegalArgumentException when this execution is not active or
+	 *         when the current flow session has no parent (e.g. is the root
+	 *         flow session)
 	 */
 	public FlowSession getParentFlowSession() throws IllegalArgumentException {
 		assertActive();
 		Assert.state(!isRootFlowActive(), "There is no parent flow session for the currently active flow session");
 		return (FlowSession)executingFlowSessions.get(executingFlowSessions.size() - 2);
 	}
-	
+
 	/**
 	 * Returns the root flow of this flow execution.
 	 */
@@ -334,7 +336,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		assertActive();
 		return (FlowSession)executingFlowSessions.get(0);
 	}
-	
+
 	/**
 	 * Returns the current state of the active flow session.
 	 */
@@ -362,9 +364,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	/**
-	 * Create a new flow session and activate in this flow execution stack.
-	 * This will push the flow session onto the stack and mark it as the
-	 * active flow session.
+	 * Create a new flow session and activate in this flow execution stack. This
+	 * will push the flow session onto the stack and mark it as the active flow
+	 * session.
 	 * @param subFlow the flow that should be associated with the flow session
 	 * @param input the input parameters used to populate the flow session
 	 * @return the created and activated flow session
@@ -392,7 +394,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		}
 		return endingSession;
 	}
-	
+
 	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
@@ -418,8 +420,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 			// nothing to do, we're already hydrated
 			return;
 		}
-		Assert.notNull(rootFlowId,
-				"The root flow id was not set during deserialization: cannot restore"
+		Assert.notNull(rootFlowId, "The root flow id was not set during deserialization: cannot restore"
 				+ " -- was this flow execution deserialized properly?");
 		this.rootFlow = flowLocator.getFlow(rootFlowId);
 		this.rootFlowId = null;
@@ -444,9 +445,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 			return "[Empty FlowExecutionStack '" + getId() + "'; no flows are active]";
 		}
 		else {
-			return new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId())
-				.append("currentStateId", getCurrentStateId()).append("rootFlow", getRootFlow())
-				.append("executingFlowSessions", executingFlowSessions).toString();
+			return new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId()).append(
+					"currentStateId", getCurrentStateId()).append("rootFlow", getRootFlow()).append(
+					"executingFlowSessions", executingFlowSessions).toString();
 		}
 	}
 }
