@@ -38,7 +38,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class BindTag extends RequestContextAwareTag {
+public class BindTag extends HtmlEscapingAwareTag {
 
 	public static final String STATUS_VARIABLE_NAME = "status";
 

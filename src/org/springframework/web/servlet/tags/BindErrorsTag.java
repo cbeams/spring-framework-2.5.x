@@ -30,7 +30,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @see BindTag
  * @see org.springframework.validation.Errors
  */
-public class BindErrorsTag extends RequestContextAwareTag {
+public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	public static final String ERRORS_VARIABLE_NAME = "errors";
 

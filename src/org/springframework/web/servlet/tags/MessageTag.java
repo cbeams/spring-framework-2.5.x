@@ -45,9 +45,9 @@ import org.springframework.web.util.TagUtils;
  * @see #setText
  * @see #setHtmlEscape
  * @see HtmlEscapeTag#setDefaultHtmlEscape
- * @see HtmlEscapeTag#HTML_ESCAPE_CONTEXT_PARAM
+ * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
-public class MessageTag extends RequestContextAwareTag {
+public class MessageTag extends HtmlEscapingAwareTag {
 
 	private String code;
 
@@ -58,6 +58,7 @@ public class MessageTag extends RequestContextAwareTag {
 	private String var;
 	
 	private String scope = TagUtils.SCOPE_PAGE;
+
 
 	/**
 	 * Set the message code for this tag.
@@ -101,6 +102,7 @@ public class MessageTag extends RequestContextAwareTag {
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
+
 
 	protected final int doStartTagInternal() throws JspException, IOException {
 		MessageSource messageSource = getMessageSource();
@@ -164,6 +166,7 @@ public class MessageTag extends RequestContextAwareTag {
 	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return ex.getMessage();
 	}
+	
 
 	public void doFinally() {
 		super.doFinally();

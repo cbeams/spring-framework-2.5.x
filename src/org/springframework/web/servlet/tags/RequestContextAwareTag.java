@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * Superclass for all tags that require a RequestContext.
@@ -43,37 +42,18 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @see org.springframework.web.servlet.support.RequestContext
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see HtmlEscapeTag#setDefaultHtmlEscape
- * @see HtmlEscapeTag#HTML_ESCAPE_CONTEXT_PARAM
+ * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** PageContext attribute for page-level RequestContext instance */
+	protected static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
+			"org.springframework.web.servlet.tags.REQUEST_CONTEXT";
 
-	private String htmlEscape;
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private RequestContext requestContext;
 
-	/**
-	 * Sets HTML escaping for this tag, overriding the default
-	 * HTML escaping setting for the current page.
-	 * @see HtmlEscapeTag#setDefaultHtmlEscape
-	 */
-	public void setHtmlEscape(String htmlEscape) {
-		this.htmlEscape =	htmlEscape;
-	}
-
-	/**
-	 * Returns the HTML escaping setting for this tag,
-	 * or the default setting if not overridden.
-	 */
-	protected boolean isHtmlEscape() throws JspException {
-		if (this.htmlEscape != null) {
-			return ExpressionEvaluationUtils.evaluateBoolean("htmlEscape", this.htmlEscape, pageContext);
-		}
-		else {
-			return HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext);
-		}
-	}
 
 	/**
 	 * Create and set the current RequestContext.
@@ -81,8 +61,12 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * @see #doStartTagInternal
 	 */
 	public final int doStartTag() throws JspException {
+		this.requestContext = (RequestContext) pageContext.getAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 		try {
-			this.requestContext =	new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+			if (this.requestContext == null) {
+				this.requestContext =	new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+				pageContext.setAttribute(REQUEST_CONTEXT_PAGE_ATTRIBUTE, this.requestContext);
+			}
 			return doStartTagInternal();
 		}
 		catch (JspException ex) {
@@ -114,6 +98,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * @see javax.servlet.jsp.tagext.TagSupport#doStartTag
 	 */
 	protected abstract int doStartTagInternal() throws Exception;
+
 
 	public void doCatch(Throwable throwable) throws Throwable {
 		throw throwable;

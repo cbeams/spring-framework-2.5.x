@@ -31,6 +31,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Context holder for request-specific state, like current web application
@@ -86,13 +87,13 @@ public class RequestContext {
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view
 	 */
-	public RequestContext(HttpServletRequest request, Map model)
-		throws ServletException {
+	public RequestContext(HttpServletRequest request, Map model) throws ServletException {
 		this.request = request;
+		this.model = model;
 		this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request);
 		this.locale = RequestContextUtils.getLocale(request);
 		this.theme = RequestContextUtils.getTheme(request);
-		this.model = model;
+		this.defaultHtmlEscape = WebUtils.isDefaultHtmlEscape(this.webApplicationContext.getServletContext());
 	}
 
 	/**
@@ -126,7 +127,10 @@ public class RequestContext {
 	}
 
 	/**
-	 * (De)activate default HTML escaping for messages and errors.
+	 * (De)activate default HTML escaping for messages and errors, for the scope
+	 * of this RequestContext. The default is the application-wide setting
+	 * (the "defaultHtmlEscape" context-param in web.xml).
+	 * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
@@ -360,7 +364,7 @@ public class RequestContext {
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
-	public BindStatus createBindStatus(String path) throws IllegalStateException {
+	public BindStatus getBindStatus(String path) throws IllegalStateException {
 		return new BindStatus(this, path, this.defaultHtmlEscape);
 	}
 
@@ -373,7 +377,7 @@ public class RequestContext {
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
-	public BindStatus createBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
+	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
 		return new BindStatus(this, path, htmlEscape);
 	}
 

@@ -42,7 +42,7 @@ import org.springframework.web.util.HtmlUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Darren Davison
- * @see RequestContext#createBindStatus
+ * @see RequestContext#getBindStatus
  * @see org.springframework.web.servlet.tags.BindTag
  */
 public class BindStatus {

@@ -51,8 +51,14 @@ public abstract class WebUtils {
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
 	/**
+	 * HTML escape parameter at the servlet context level
+	 * (i.e. a context-param in web.xml): "defaultHtmlEscape".
+	 */
+	public static final String HTML_ESCAPE_CONTEXT_PARAM = "defaultHtmlEscape";
+
+	/**
 	 * Web app root key parameter at the servlet context level
-	 * (i.e. web.xml): "webAppRootKey".
+	 * (i.e. a context-param in web.xml): "webAppRootKey".
 	 */
 	public static final String WEB_APP_ROOT_KEY_PARAM = "webAppRootKey";
 
@@ -92,6 +98,17 @@ public abstract class WebUtils {
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: " + key + " = " + root);
+	}
+
+	/**
+	 * Return whether default HTML escaping is enabled for the web application,
+	 * i.e. the value of the "defaultHtmlEscape" context-param in web.xml (if any).
+	 * @param servletContext the servlet context of the web application
+	 * @return whether default HTML escaping is enabled (default is false)
+	 */
+	public static boolean isDefaultHtmlEscape(ServletContext servletContext) {
+		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
+		return Boolean.valueOf(param).booleanValue();
 	}
 
 	/**
