@@ -6,16 +6,36 @@
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
 
-  Building Spring requires J2SE 1.4; the "dist" JARs are built with Sun's JDK 1.4.2.
-  Note: To successfully run the tests, you need to use Xerces or any other JAXP parser
-  that properly supports XML includes. A simple way to achieve this is to put
-  xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
+  Building Spring requires J2SE 1.4+; the releases are built with Sun's JDK 1.5.0.
+	This script will automatically adapt to the Java version that Ant is running on:
+	Spring will only be built with JDK 1.5 support if Ant is running on JDK 1.5.
+
+  Note: To successfully run the tests on JDK < 1.5.0, you need to use Xerces or any
+	other JAXP parser that properly supports XML includes. A simple way to achieve this
+	is to put xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
 -->
 
 <project name="spring-core" default="usage" basedir=".">
 
 	<property file="build.properties"/>
 	<property file="project.properties"/>
+
+
+	<!--
+		Set up properties that indicate whether we're building on JDK 1.5.
+		Currently simply checks whether the Java version is not 1.4,
+		due to the lack of a greater-than comparator in Ant.
+	-->
+
+	<condition property="tiger.available">
+		<not>
+			<equals arg1="${ant.java.version}" arg2="1.4"/>
+		</not>
+	</condition>
+
+	<condition property="tiger.unavailable">
+		<equals arg1="${ant.java.version}" arg2="1.4"/>
+	</condition>
 
 
 	<path id="all-libs">
@@ -103,7 +123,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="build" depends="compileattr" description="Compile main source tree java files into class files">
+	<target name="buildmain" depends="compileattr" description="Compile main source tree java files into class files">
 
 		<mkdir dir="${target.classes.dir}"/>
 		<mkdir dir="${target.classes.dir}/META-INF"/>
@@ -135,6 +155,26 @@
 		</copy>
 
 	</target>
+
+
+	<!--
+		Compile the JDK 1.5 source tree.
+	-->
+	<target name="buildtiger" depends="buildmain" if="tiger.available" description="Compile JDK 1.5 source tree java files into class files">
+
+		<javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.src.dir}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+	</target>
+
+
+	<!--
+		Compile the main and the JDK 1.5 source tree.
+	-->
+	<target name="build" depends="buildmain,buildtiger" if="tiger.available" description="Compile main and JDK 1.5 sources"/>
 
 
 	<target name="initdist" description="Initialize the distribution directory">
@@ -382,14 +422,18 @@
 	<target name="clean_alljars" depends="clean, alljars"/>
 
 
-	<target name="javadoc" description="Generate framework Javadocs.">
+	<!--
+		Generate javadoc on JDK 1.4, excluding the JDK 1.5 source tree.
+	-->
+	<target name="javadoc14" description="Generate framework Javadocs on JDK 1.4" if="tiger.unavailable">
 
+		<delete dir="${javadocs.dir}"/>
 		<mkdir dir="${javadocs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${javadocs.dir}" windowtitle="Spring Framework"
 				additionalparam="-breakiterator" source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (C) 2002-2005 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -438,6 +482,75 @@
 	</target>
 
 
+	<!--
+		Generate javadoc on JDK 1.5, including the JDK 1.5 source tree.
+	-->
+	<target name="javadoc15" description="Generate framework Javadocs on JDK 1.5" if="tiger.available">
+
+		<delete dir="${javadocs.dir}"/>
+		<mkdir dir="${javadocs.dir}"/>
+
+		<javadoc sourcepath="${src.dir}" destdir="${javadocs.dir}" windowtitle="Spring Framework"
+				additionalparam="-breakiterator" source="1.5" access="package" author="true" version="true" use="true" defaultexcludes="true">
+			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright (C) 2002-2005 The Spring Framework Project.</i>]]></bottom>
+			<classpath refid="all-libs"/>
+			<packageset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${tiger.src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
+			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+			<link href="http://aopalliance.sourceforge.net/doc"/>
+			<!-- Burlap -->
+			<!-- Hessian -->
+			<link href="http://cglib.sourceforge.net/apidocs"/>
+			<!-- COS -->
+			<!-- EasyMock -->
+			<!-- EHCache -->
+			<link href="http://freemarker.sourceforge.net/docs/api/"/>
+			<link href="http://www.hibernate.org/hib_docs/api/"/>
+			<link href="http://httpunit.sourceforge.net/doc/api/"/>
+			<link href="http://www.ibatis.com/common/javadocs/"/>
+			<!-- iText -->
+			<!-- Commons Attributes (api + compiler -->
+			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
+			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/logging/api/"/>
+			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
+			<!-- JasperReports -->
+			<!-- JDO -->
+			<!-- JMX -->
+			<!-- JOTM -->
+			<!-- JSF -->
+			<link href="http://www.junit.org/junit/javadoc/"/>
+			<link href="http://logging.apache.org/log4j/docs/api/"/>
+			<!-- OJB -->
+			<link href="http://jakarta.apache.org/poi/apidocs/"/>
+			<!-- Portlet -->
+			<link href="http://quartz.sourceforge.net/javadoc/"/>
+			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
+			<link href="http://struts.apache.org/api/"/>
+			<link href="http://jakarta.apache.org/velocity/api/"/>
+		</javadoc>
+
+	</target>
+
+
+	<!--
+		Generate javadoc on either JDK 1.4 or JDK 1.5.
+	-->
+	<target name="javadoc" depends="javadoc14,javadoc15" description="Generate framework Javadocs"/>
+ 
+ 
  	<target name="compiletestattr" depends="buildmock">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -454,10 +567,11 @@
 
 
 	<!--
+		Compile the main test tree.
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildtests" depends="compiletestattr" description="Compile test source tree java files into class files">
+	<target name="buildmaintests" depends="compiletestattr" description="Compile test source tree java files into class files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
@@ -477,9 +591,35 @@
 				<include name="**/*.properties"/>
 				<include name="**/*.xml"/>
 			</fileset>
+			<fileset dir="${tiger.test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
 		</copy>
 
 	</target>
+
+
+	<!--
+		Compile the JDK 1.5 test tree.
+	-->
+	<target name="buildtigertests" depends="buildmaintests" if="tiger.available" description="Compile test source tree java files into class files">
+
+		<javac destdir="${target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${tiger.test.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+	</target>
+
+
+	<!--
+		Compile the main and the JDK 1.5 test source tree.
+	-->
+	<target name="buildtests" depends="buildmaintests,buildtigertests" description="Compile main and JDK 1.5 test source tree"/>
 
 
 	<!--
@@ -515,6 +655,7 @@
 			<batchtest fork="yes" todir="${reports.dir}">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
+
 		</junit>
 
 	</target>
@@ -791,7 +932,7 @@
 	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf" description="Generate and copy reference documentation"/>
 
 
-	<target name="release" depends="alljars,distfiles,javadoc,doc.all" description="Generate release zip file">
+	<target name="release" depends="alljars,distfiles,javadoc,doc.all" description="Generate release zips">
 
 		<mkdir dir="${target.release.dir}"/>
 
@@ -823,6 +964,7 @@
 			<include name="mock/**"/>
 			<include name="src/**"/>
 			<include name="test/**"/>
+			<include name="tiger/**"/>
 			<include name="*.bat"/>
 			<include name="*.txt"/>
 			<include name="*.xml"/>
