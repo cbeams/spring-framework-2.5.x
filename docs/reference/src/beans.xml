@@ -314,7 +314,7 @@
     checking</title>
 
     <sect2 id="beans-factory-collaborators">
-      <title>Setting beans properties and collaborators</title>
+      <title>Setting bean properties and collaborators</title>
 
       <para>Inversion of Control has already been referred to as
       <emphasis>Dependency Injection</emphasis>. The basic principle is that
@@ -498,15 +498,17 @@
       <para>Now, an example of using the BeanFactory for IoC type 3
       (Constructor Dependency Injection). Below is a snippet from an XML
       configuration that specifies constructor arguments and the actual bean
-      code, showing the constructor: <programlisting>&lt;bean id="exampleBean"
-      class="examples.ExampleBean"&gt; &lt;constructor-arg&gt;&lt;ref
-      bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
-      &lt;constructor-arg&gt;&lt;ref
-      bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-      &lt;constructor-arg&gt;&lt;value&gt;<value>1&lt;/value&gt;</value>&lt;/constructor-arg&gt;
-      &lt;/bean&gt; &lt;bean id="anotherExampleBean"
-      class="examples.AnotherBean"/&gt; &lt;bean id="yetAnotherBean"
-      class="examples.YetAnotherBean"/&gt;</programlisting> <programlisting>public class ExampleBean {
+      code, showing the constructor: <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+    &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
+    &lt;constructor-arg&gt;&lt;value&gt;1&lt;/value&gt;&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+
+&lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
+&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;
+</programlisting>
+
+<programlisting>public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
@@ -919,6 +921,20 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
           BeanDefinition</para>
         </listitem>
       </itemizedlist></para>
+
+    <sect2>
+      <title>Obtaining a FactoryBean, not its product</title>
+
+      <para>Sometimes there is a need to ask a BeanFactory for an actual
+      FactoryBean instance itself, not the bean it produces. This may be done
+      by prepending the bean id with <literal>&amp;</literal> when calling the
+      <methodname>getBean</methodname> method of BeanFactory (including
+      ApplicationContext). So for a given FactoryBean with an id
+      <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
+      on the BeanFactory will return the product of the FactoryBean, but
+      invoking <literal>getBean("&amp;myBean")</literal> will return the
+      FactoryBean instance itself.</para>
+    </sect2>
   </sect1>
 
   <sect1 id="beans-factory-customizing">
