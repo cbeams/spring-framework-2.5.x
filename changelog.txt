@@ -28,6 +28,10 @@ Package org.springframework.orm
 Package org.springframework.samples
 * migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
 
+Package org.springframework.validation
+* added RequiredFieldErrorProcessor, PropertyAccessExceptionProcessor and corresponding default implementations
+  offering the possibility for people to override the default behavior of translating binding errors
+
 Package org.springframework.web
 * changed MultiActionController's log level from INFO to DEBUG
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)

@@ -66,6 +66,10 @@ import org.springframework.util.StringUtils;
  * MessageCodesResolver strategy. DefaultMessageCodesResolver's javadoc
  * gives details on the default resolution rules.
  *
+ * <p>By default, binding errors are resolved through the binding errors processors
+ * for required binding errors and property access exceptions. You can override
+ * those if needed.
+ *
  * <p>This generic data binder can be used in any sort of environment.
  * It is heavily used by Spring's web binding features, via the subclass
  * ServletRequestDataBinder.
@@ -76,20 +80,19 @@ import org.springframework.util.StringUtils;
  * @see #setRequiredFields
  * @see #registerCustomEditor
  * @see #setMessageCodesResolver
+ * @see #setPropertyAccessExceptionProcessor
+ * @see #setRequiredFieldErrorProcessor
  * @see #bind
  * @see #getErrors
  * @see DefaultMessageCodesResolver
+ * @see DefaultRequiredFieldErrorProcessor
+ * @see DefaultPropertyAccessExceptionProcessor
  * @see org.springframework.context.MessageSource
  * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class DataBinder {
 
-	/**
-	 * Error code that a missing field error (i.e. a required field not
-	 * found in the list of property values) will be registered with:
-	 * "required".
-	 */
-	public static final String MISSING_FIELD_ERROR_CODE = "required";
+
 
 	/**
 	 * Error code that a type mismatch error (i.e. a property value not
@@ -121,8 +124,12 @@ public class DataBinder {
 
 	private String[] requiredFields;
 
+    private PropertyAccessExceptionProcessor propertyAccessExceptionProcessor;
 
-	/**
+    private RequiredFieldErrorProcessor requiredFieldErrorProcessor;
+
+
+    /**
 	 * Create a new DataBinder instance.
 	 * @param target target object to bind onto
 	 * @param objectName name of the target object
@@ -279,6 +286,14 @@ public class DataBinder {
 		this.errors.setMessageCodesResolver(messageCodesResolver);
 	}
 
+    public void setPropertyAccessExceptionProcessor(PropertyAccessExceptionProcessor propertyAccessExceptionProcessor) {
+        this.propertyAccessExceptionProcessor = propertyAccessExceptionProcessor;
+    }
+
+    public void setRequiredFieldErrorProcessor(RequiredFieldErrorProcessor requiredFieldErrorProcessor) {
+        this.requiredFieldErrorProcessor = requiredFieldErrorProcessor;
+    }
+
 
 	/**
 	 * Bind the given property values to this binder's target.
@@ -317,12 +332,12 @@ public class DataBinder {
 				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
 				if (pv == null || pv.getValue() == null ||
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
-					// create field error with code "required"
+					// use error processor to create errors (use the default one if no processor is set)
+                    if (this.requiredFieldErrorProcessor == null) {
+                        this.requiredFieldErrorProcessor = new DefaultRequiredFieldErrorProcessor();
+                    }
 					String field = this.requiredFields[i];
-					this.errors.addError(
-							new FieldError(this.errors.getObjectName(), field, "", true,
-							this.errors.resolveMessageCodes(MISSING_FIELD_ERROR_CODE, field),
-							getArgumentsForBindingError(field), "Field '" + field + "' is required"));
+                    this.requiredFieldErrorProcessor.processRequiredFieldError(field, this.errors);
 				}
 			}
 		}
@@ -332,14 +347,13 @@ public class DataBinder {
 			this.errors.getBeanWrapper().setPropertyValues(pvs, this.ignoreUnknownFields);
 		}
 		catch (PropertyAccessExceptionsException ex) {
+            // use property access exception processor to create errors (use the default one if no processor is set)
+            if (propertyAccessExceptionProcessor == null) {
+                this.propertyAccessExceptionProcessor = new DefaultPropertyAccessExceptionProcessor();
+            }
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
 			for (int i = 0; i < exs.length; i++) {
-				// create field with the exceptions's code, e.g. "typeMismatch"
-				String field = exs[i].getPropertyChangeEvent().getPropertyName();
-				this.errors.addError(
-						new FieldError(this.errors.getObjectName(), field, exs[i].getPropertyChangeEvent().getNewValue(), true,
-						this.errors.resolveMessageCodes(exs[i].getErrorCode(), field),
-						getArgumentsForBindingError(field), exs[i].getLocalizedMessage()));
+				this.propertyAccessExceptionProcessor.processPropertyAccessException(exs[i], this.errors);
 			}
 		}
 	}
@@ -378,6 +392,7 @@ public class DataBinder {
 	 * @return the Object array that represents the FieldError arguments
 	 * @see FieldError#getArguments
 	 * @see org.springframework.context.support.DefaultMessageSourceResolvable
+     * @deprecated left here for backward compatibility reasons. will be removed post 1.3
 	 */
 	protected Object[] getArgumentsForBindingError(String field) {
 		return new Object[] {
