@@ -96,5 +96,6 @@
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1-dev.jar"/>
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.RC3-snapshot.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
