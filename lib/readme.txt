@@ -54,7 +54,7 @@ distribution/website before using any of them in your own applications.
 - required for running Petclinic (by Hibernate)
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.4 (http://www.hibernate.org)
+- Hibernate 2.1.5 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
@@ -164,6 +164,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's CommonsMultipartResolver
 
+* jakarta-commons/commons-httpclient.jar
+- Commons HttpClient 2.0.1 (http://jakarta.apache.org/commons/httpclient)
+- required for building the framework
+- required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
+
 * jakarta-commons/commons-lang.jar
 - Commons Lang 1.0.1 (http://jakarta.apache.org/commons/lang)
 - required for running JPetStore's Struts web tier
@@ -203,6 +208,11 @@ distribution/website before using any of them in your own applications.
 - XAPool 1.3.3 (http://xapool.experlog.com, also included in JOTM)
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
+
+* jsf/jsf-api.jar
+- JSF API 1.1 (http://java.sun.com/j2ee/javaserverfaces)
+- required for building the framework
+- required at runtime when using Spring's JSF support
 
 * junit/junit.jar
 - JUnit 3.8.1 (http://www.junit.org)
@@ -253,4 +263,3 @@ distribution/website before using any of them in your own applications.
 - XDoclet 1.0 (http://xdoclet.sourceforge.net)
 - used by Commons Attributes to parse source-level metadata in the build process
 - required for building the framework and the attributes version of JPetStore
-
