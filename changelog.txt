@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.66 2003-12-18 19:11:17 jhoeller Exp $
+$Id: changelog.txt,v 1.67 2003-12-19 12:32:39 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -17,7 +17,8 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * removed event propagation support in BeanWrapper
-* added FileEditor to standard PropertyEditors, for creating java.io.File instances from Strings
+* added FileEditor to standard PropertyEditors, for creating java.io.File instances from String representations
+* added URLEditor to standard PropertyEditors, for creating java.net.URL instances from String representations
 * added "registerCustomEditor(Class, PropertyEditor)" convenience method to the BeanWrapper interface
 * added "registerCustomEditor(Class, PropertyEditor)" method to the ConfigurableBeanFactory interface
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
@@ -38,6 +39,7 @@ Package org.springframework.beans
 * added "default-lazy-init" attribute for XML bean definitions
 * allow for "bean/"list"/"map"/"props" as sub-element of "list" and "entry" in XML bean definitions
 * added two "beanOfType" convenience methods to BeanFactoryUtils
+* added ListFactoryBean and MapFactoryBean to org.springframework.beans.factory.config
 
 Package org.springframework.context
 * ApplicationContext interface extends AutowireCapableBeanFactory
@@ -45,6 +47,10 @@ Package org.springframework.context
 * reworked ApplicationContext's "String getResourceBasePath" method into "File getResourceBase"
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
 * added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
+
+Package org.springframework.ejb
+* SimpleRemoteSlsbInvokerInterceptor/SimpleRemoteStatelessSessionProxyFactoryBean support non-RMI business interfaces
+* SimpleRemoteSlsbInvokerInterceptor/SimpleRemoteStatelessSessionProxyFactoryBean's "inContainer" default set to false
 
 Package org.springframework.jdbc
 * moved JDBC-specific DataAccessException subclasses from jdbc.core to root jdbc package
@@ -62,14 +68,24 @@ Package org.springframework.orm
 * added OpenSessionInViewInterceptor and OpenSessionInViewFilter to org.springframework.orm.hibernate.support
 * introduced support for iBATIS Database Layer, in package org.springframework.orm.ibatis
 
+Package org.springframework.remoting
+* reworked RemoteProxySupport into RemoteAccessor plus UrlBasedRemoteAccessor
+* removed AuthorizableRemoteProxyFactorySupport, deferred authorization properties to concrete implementations
+* RmiClientInterceptor/RmiProxyFactoryBean and RmiServiceExporter can work with conventional RMI services
+* RmiClientInterceptor/RmiProxyFactoryBean supports non-RMI business interfaces for conventional RMI services
+* renamed RmiServiceExporter's "name" to "serviceName" and "port" to "registryPort"
+* added "servicePort" property to RmiServiceExporter, for specifying the port that the exported object uses
+* introduced JAX-RPC service and port access classes in org.springframework.remoting.jaxrpc
+* added ServletEndpointSupport classes for implementing JAX-RPC-based services that access a Spring context
+
 Package org.springframework.samples
 * introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
 
 Package org.springframework.transaction
 * removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
 * TransactionInterceptor now keeps TransactionStatus in its own ThreadLocal, not MethodInvocation
-* introduced PropertiesTransactionAttributeSource, making properties parsing previously available in TransactionFactoryProxyBean available standalone
-* added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used by default to target transaction interception
+* introduced PropertiesTransactionAttributeSource, for reusing TransactionFactoryProxyBean's parsing standalone
+* added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used for transaction interception
 
 Package org.springframework.ui
 * replaced "appRootMarker" mechanism in VelocityEngineFactory with "resourceLoaderPath" property
