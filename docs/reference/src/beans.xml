@@ -252,52 +252,54 @@
       <title>The bean identifiers (<literal>id</literal> and
       <literal>name</literal>)</title>
 
-      <para>Every bean has one or more ids (also called identifiers, or
-	  names, these terms refer to the same thing). These ids must be unique
-	  within the BeanFactory or ApplicationContext the bean is hosted in.
-	  A bean will almost always have only one id, but if a bean has more than
-	  one id, the extra ones can essentially be considered aliases.</para>
+      <para>Every bean has one or more ids (also called identifiers, or names;
+      these terms refer to the same thing). These ids must be unique within
+      the BeanFactory or ApplicationContext the bean is hosted in. A bean will
+      almost always have only one id, but if a bean has more than one id, the
+      extra ones can essentially be considered aliases.</para>
+
       <para>In an XmlBeanFactory (including ApplicationContext variants), you
-	  user the <literal>id</literal> or <literal>name</literal> attributes to
-	  specify the bean id(s), and at least one id must be specified in one or
-	  both of these attributes. The <literal>id</literal> attribute allows
-	  you to specify one id, and as it is marked in the XML DTD (definition
-	  document) as a real XML element ID attribute, the parser is able to do
-	  some extra validation when other elements point back to this one. As such,
-	  it is the preferred way to specify a bean id. However, the XML spec does
-	  limit the charactes which are legal in XML IDs. This is usually not really
-	  a constraint, but if you have a need to use one of these characters, or
-	  want to introduce other aliases to the bean, you may also or instead
-	  specify one or more bean ids (separated by a comma (,) or semicolon (;)
-	  via the <literal>name</literal> attribute.</para>
+      user the <literal>id</literal> or <literal>name</literal> attributes to
+      specify the bean id(s), and at least one id must be specified in one or
+      both of these attributes. The <literal>id</literal> attribute allows you
+      to specify one id, and as it is marked in the XML DTD (definition
+      document) as a real XML element ID attribute, the parser is able to do
+      some extra validation when other elements point back to this one. As
+      such, it is the preferred way to specify a bean id. However, the XML
+      spec does limit the charactes which are legal in XML IDs. This is
+      usually not really a constraint, but if you have a need to use one of
+      these characters, or want to introduce other aliases to the bean, you
+      may also or instead specify one or more bean ids (separated by a comma
+      (,) or semicolon (;) via the <literal>name</literal> attribute.</para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
       <title>To singleton or not to singleton</title>
 
       <para>Beans are defined to be deployed in one of two modes: singleton or
-	  non-singleton. (The latter is also called a prototype, although the 
-	  term is used loosely as as it doesn't quite fit). When a bean
-      is a singleton, only one <emphasis>shared</emphasis> instance of the
-      bean will be managed and all requests for beans with and id or ids matching 
-      that bean definition will result in that one specific bean instance being
+      non-singleton. (The latter is also called a prototype, although the term
+      is used loosely as as it doesn't quite fit). When a bean is a singleton,
+      only one <emphasis>shared</emphasis> instance of the bean will be
+      managed and all requests for beans with and id or ids matching that bean
+      definition will result in that one specific bean instance being
       returned.</para>
 
       <para>The non-singleton, prototype mode of a bean deployment results in
-	  <emphasis>creation of a new bean instance</emphasis> every time a
-	  request for that specific bean is done. This is ideal for situation where for 
-      example each user needs an independent user object or something similar.</para>
+      <emphasis>creation of a new bean instance</emphasis> every time a
+      request for that specific bean is done. This is ideal for situation
+      where for example each user needs an independent user object or
+      something similar.</para>
 
-      <para>Beans exist in singleton mode by default, unless you specify
-      otherwise. Keep in mind that by changing the type to prototype, each
-      request for a bean will result in a newly created bean and this might
-      not be what you actually want. So only change the mode to prototype when
-      absolutely necessary.</para>
+      <para>Beans are deployed in singleton mode by default, unless you
+      specify otherwise. Keep in mind that by changing the type to prototype,
+      each request for a bean will result in a newly created bean and this
+      might not be what you actually want. So only change the mode to
+      prototype when absolutely necessary.</para>
 
       <para>In the example below, two beans are declared of which one is
-      defined as a singleton, and the other one as a prototype.
-      <literal>exampleBean</literal> is created each and every time a client
-      asks the BeanFactory for this bean, while
+      defined as a singleton, and the other one as a non-singleton
+      (prototype). <literal>exampleBean</literal> is created each and every
+      time a client asks the BeanFactory for this bean, while
       <literal>yetAnotherExample</literal> is only created one, a reference is
       returned each time a request for this bean is done. <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean" singleton="false"/&gt;
 &lt;bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/&gt;</programlisting></para>
@@ -313,25 +315,31 @@
 
       <para>Inversion of Control has already been referred to as
       <emphasis>Dependency Injection</emphasis>. The basic principle is that
-      beans themselves do not define who or what they're depending on, but
-      instead, let the container do that for them. Also, the container
-      <emphasis>injects</emphasis> the actual dependencies, as opposed to the
-      Service Locator pattern, where the beans themselves do a lookup to
-      resolve those dependencies. While not elaborating too much on the
-      advantages of Dependency Injection, it might be obvious that code gets
-      much cleaner and reaching a higher grade of decoupling is much easier
-      when beans themselves do not lookup their dependencies, but also do not
+      beans define their dependencies (i.e. the other objects they work with)
+      only through constructor arguments or properties. Then, it is the job of
+      the container to actually <emphasis>inject</emphasis> those dependencies
+      when it creates the bean. This is fundamentally the inverse (hence the
+      name) of the bean instantiating or locating its dependencies on its own
+      (perhaps using something like the <emphasis>Service Locator</emphasis>
+      pattern). While we will not elaborate too much on the advantages of
+      Dependency Injection, it might be obvious that code gets much cleaner
+      and reaching a higher grade of decoupling is much easier when beans do
+      not look up their dependencies, but are provided them, and also do not
       even know where the actual dependencies are located and of what actual
-      instance they are.</para>
+      type they are.</para>
 
       <para>The BeanFactory is capable of <emphasis>injecting</emphasis>
-      dependencies into beans its manages. It does so using the
-      <literal>BeanDefinition</literal> and the
-      <literal>PropertyEditors</literal> that are defined in the Spring
-      Framework. We'll explain that further along using some examples of beans
-      defined in the XML format. For now it might be handy to know that
-      BeanDefinitions, collaborators and properties are specified using
-      <literal>PropertyValue</literal>-objects.</para>
+      dependencies into beans its manages. It does this either when
+      constructing the bean, supplying the dependencies as constructor
+      arguments, or else, after constructing the bean with a no-arg
+      constructor, setting bean properties which represent the dependencies.
+      The configuration for the dependencies comes in the form of a
+      <literal>BeanDefinition</literal>, which is used together with
+      <literal>PropertyEditors</literal> to know how to convert properties in
+      one format to another. We'll explain that further along using some
+      examples of beans defined in the XML format. For now it might be handy
+      to know that BeanDefinitions, collaborators and properties are specified
+      using <literal>PropertyValue</literal>-objects.</para>
 
       <para>The resolving of the dependencies is a little too complex to go in
       depth here, but the basic procedure is as follows: <orderedlist
@@ -427,15 +435,15 @@
       <para>Then, an example of using the BeanFactory for IoC type 3 (using
       constructors). Below you can find a snippet from an XML configuration
       file that specifies constructor arguments and the actual bean,
-      specifying the constructor <programlisting>&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;&lt;ref bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
-    &lt;constructor-arg&gt;<value>1</value>&lt;/constructor-arg&gt;
-&lt;/bean&gt;
-
-&lt;bean id="anotherExampleBean" class="examples.AnotherBean"/&gt;
-&lt;bean id="yetAnotherBean" class="examples.YetAnotherBean"/&gt;</programlisting>
-      <programlisting>public class ExampleBean {
+      specifying the constructor <programlisting>&lt;bean id="exampleBean"
+      class="examples.ExampleBean"&gt; &lt;constructor-arg&gt;&lt;ref
+      bean="anotherExampleBean"/&gt;&lt;/constructor-arg&gt;
+      &lt;constructor-arg&gt;&lt;ref
+      bean="yetAnotherBean"/&gt;&lt;/constructor-arg&gt;
+      &lt;constructor-arg&gt;<value>1</value>&lt;/constructor-arg&gt;
+      &lt;/bean&gt; &lt;bean id="anotherExampleBean"
+      class="examples.AnotherBean"/&gt; &lt;bean id="yetAnotherBean"
+      class="examples.YetAnotherBean"/&gt;</programlisting> <programlisting>public class ExampleBean {
 
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
