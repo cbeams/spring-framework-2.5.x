@@ -24,11 +24,11 @@ import org.aopalliance.intercept.MethodInvocation;
  * that needed access to resources on the invocation. However, this
  * approach should not be used when there is a reasonable alternative,
  * as it makes application code dependent on usage under AOP and
- * --specifically--the Spring AOP framework.
+ * the Spring AOP framework.
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: AopContext.java,v 1.2 2003-11-15 16:20:15 johnsonr Exp $
+ * @version $Id: AopContext.java,v 1.3 2003-11-19 09:56:06 johnsonr Exp $
  */
 public abstract class AopContext {
 	
@@ -45,9 +45,12 @@ public abstract class AopContext {
 	 * Internal method that the AOP framework uses to set the current
 	 * AOP context if it is configured to expose call contexts.
 	 * @param invocation the current AOP invocation context
+	 * @return the old invocation, which may be null if none was bound
 	 */
-	static void setCurrentInvocation(MethodInvocation invocation) {
+	static MethodInvocation setCurrentInvocation(MethodInvocation invocation) {
+		MethodInvocation old = (MethodInvocation) currentInvocation.get();
 		currentInvocation.set(invocation);
+		return old;
 	}
 
 	/**
@@ -63,19 +66,25 @@ public abstract class AopContext {
 	 * to expose the invocation context
 	 */
 	public static MethodInvocation currentInvocation() throws AspectException {
-		if (currentInvocation == null || currentInvocation.get() == null)
+		if (currentInvocation.get() == null)
 			throw new AspectException("Cannot find invocation: set 'exposeInvocation' property on Advised to make it available");
 		return (MethodInvocation) currentInvocation.get();
 	}
 	
 	public static Object currentProxy() throws AspectException {
-		if (currentProxy == null || currentProxy.get() == null)
+		if (currentProxy.get() == null)
 			throw new AspectException("Cannot find proxy: set 'exposeProxy' property on Advised to make it available");
 		return currentProxy.get();
 	}
 	
-	static void setCurrentProxy(Object proxy) {
+	/**
+	 * @param proxy
+	 * @return the old proxy, which may be null if none was bound
+	 */
+	static Object setCurrentProxy(Object proxy) {
+		Object old = currentProxy.get();
 		currentProxy.set(proxy);
+		return old;
 	}
 
 }

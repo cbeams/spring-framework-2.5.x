@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.9 2003-11-15 16:20:17 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.10 2003-11-19 09:57:41 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -88,6 +88,11 @@ public class AopProxy implements InvocationHandler {
 	public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 	
 		MethodInvocation invocation = null;
+		MethodInvocation oldInvocation = null;
+		Object oldProxy = null;
+		boolean setInvocationContext = false;
+		boolean setProxyContext = false;
+		
 		try {
 			// Try special rules for equals() method and implementation of the
 			// ProxyConfig AOP configuration interface
@@ -112,12 +117,20 @@ public class AopProxy implements InvocationHandler {
 			invocation = this.methodInvocationFactory.getMethodInvocation(this.config, proxy, method, args);
 		
 			if (this.config.getExposeInvocation()) {
-				// Make invocation available if necessary
-				AopContext.setCurrentInvocation(invocation);
+				// Make invocation available if necessary.
+				// Save the old value to reset when this method returns
+				// so that we don't blow away any existing state
+				oldInvocation = AopContext.setCurrentInvocation(invocation);
+				// We need to know whether we actually set it, as
+				// this block may not have been reached even if exposeInvocation
+				// is true
+				setInvocationContext = true;
 			}
+			
 			if (this.config.getExposeProxy()) {
 				// Make invocation available if necessary
-				AopContext.setCurrentProxy(proxy);
+				oldProxy = AopContext.setCurrentProxy(proxy);
+				setProxyContext = true;
 			}
 			
 			// If we get here, we need to create a MethodInvocation
@@ -131,11 +144,13 @@ public class AopProxy implements InvocationHandler {
 			return retVal;
 		}
 		finally {
-			if (this.config.getExposeInvocation()) {
-				AopContext.setCurrentInvocation(null);
+			if (setInvocationContext) {
+				// Restore old invocation, which may be null
+				AopContext.setCurrentInvocation(oldInvocation);
 			}
-			if (this.config.getExposeProxy()) {
-				AopContext.setCurrentProxy(null);
+			if (setProxyContext) {
+				// Restore old proxy
+				AopContext.setCurrentProxy(oldProxy);
 			}
 			
 			if (invocation != null) {

@@ -31,7 +31,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.14 2003-11-17 20:35:46 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.15 2003-11-19 09:57:00 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -63,9 +63,6 @@ public class AopProxyTests extends TestCase {
 	}
 	
 	private static class CheckMethodInvocationIsSameInAndOutInterceptor implements MethodInterceptor {
-		/**
-		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-		 */
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			Method m = mi.getMethod();
 			Object retval = mi.proceed();
@@ -75,8 +72,46 @@ public class AopProxyTests extends TestCase {
 	}
 	
 	/**
+	 * ExposeInvocation must be set to true
+	 */
+	private static class CheckMethodInvocationViaThreadLocalIsSameInAndOutInterceptor implements MethodInterceptor {
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			String task = "get invocation on way IN";
+			try {
+				MethodInvocation current = AopContext.currentInvocation();
+				assertEquals(mi, current);
+				Object retval = mi.proceed();
+				task = "get invocation on way OUT";
+				assertEquals(current, AopContext.currentInvocation());
+				return retval;
+			}
+			catch (AspectException ex) {
+				System.err.println(task + " for " + mi.getMethod());
+				ex.printStackTrace();
+				//fail("Can't find invocation: " + ex);
+				throw ex;
+			}
+		}
+	}
+	
+	/**
+	 * Same thing for a proxy.
+	* Only works when exposeProxy is set to true.
+	* Checks that the proxy is the same on the way in and out.
+	*/
+	public static class ProxyMatcherInterceptor implements MethodInterceptor {
+		public Object invoke(MethodInvocation mi) throws Throwable {
+			Object proxy = AopContext.currentProxy();
+			Object ret = mi.proceed();
+			assertEquals(proxy, AopContext.currentProxy());
+			return ret;
+		}
+	}
+	
+	/**
 	 * Check that the two MethodInvocations necessary are independent and
-	 * don't conflict
+	 * don't conflict.
+	 * Check also proxy exposure.
 	 */
 	public void testOneAdvisedObjectCallsAnother() {
 		int age1 = 33;
@@ -84,17 +119,29 @@ public class AopProxyTests extends TestCase {
 		
 		TestBean target1 = new TestBean();
 		ProxyFactory pf1 = new ProxyFactory(target1);
+		// Permit proxy and invocation checkers to get context from AopContext
+		pf1.setExposeProxy(true);
+		pf1.setExposeInvocation(true);
+		assertTrue(pf1.getExposeInvocation());
 		DebugInterceptor di1 = new DebugInterceptor();
 		pf1.addInterceptor(0, di1);
-		pf1.addInterceptor(1, new CheckMethodInvocationIsSameInAndOutInterceptor());
+		pf1.addInterceptor(1, new ProxyMatcherInterceptor());
+		pf1.addInterceptor(2, new CheckMethodInvocationIsSameInAndOutInterceptor());
+		pf1.addInterceptor(1, new CheckMethodInvocationViaThreadLocalIsSameInAndOutInterceptor());
 		ITestBean advised1 = (ITestBean) pf1.getProxy();
 		advised1.setAge(age1); // = 1 invocation
 		
 		TestBean target2 = new TestBean();
 		ProxyFactory pf2 = new ProxyFactory(target2);
+		pf2.setExposeInvocation(true);
+		pf2.setExposeProxy(true);
+		assertTrue(pf2.getExposeInvocation());
 		DebugInterceptor di2 = new DebugInterceptor();
 		pf2.addInterceptor(0, di2);
-		pf2.addInterceptor(1, new CheckMethodInvocationIsSameInAndOutInterceptor());
+		pf2.addInterceptor(1, new ProxyMatcherInterceptor());
+		pf2.addInterceptor(2, new CheckMethodInvocationIsSameInAndOutInterceptor());
+		pf2.addInterceptor(1, new CheckMethodInvocationViaThreadLocalIsSameInAndOutInterceptor());
+		//System.err.println(pf2.toProxyConfigString());
 		ITestBean advised2 = (ITestBean) pf2.getProxy();
 		advised2.setAge(age2);
 		advised1.setSpouse(advised2); // = 2 invocations
@@ -131,6 +178,7 @@ public class AopProxyTests extends TestCase {
 		
 		assertEquals("one was invoked correct number of times", 5, di1.getCount());
 	}
+
 	
 	public interface INeedsToSeeProxy {
 		int getCount();
@@ -187,6 +235,7 @@ public class AopProxyTests extends TestCase {
 		assertEquals("Increment happened", 2, et.getCount());
 		assertEquals("Two more invocations via AOP as the first call was reentrant through the proxy", 3, di.getCount());
 	}
+
 			
 	public void testTargetCanGetProxyViaCGLIB() {
 		DebugInterceptor di = new DebugInterceptor();
@@ -908,5 +957,7 @@ public class AopProxyTests extends TestCase {
 			return this;
 		}
 	};
+
+	
 
 }
