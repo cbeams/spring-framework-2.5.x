@@ -89,7 +89,11 @@
 	</bean>
 
 	<bean id="person.Detail.collegueId.set" class="org.springframework.web.flow.action.SetAction">
-		<property name="mapping"><value>collegueId,java.lang.Long<value></property>
+		<property name="mappingMap">
+			<map>
+				<entry key="id"><value>colleagueId,java.lang.Long</value></entry>
+			</map>
+		</property>
 	</bean>
 
 	<bean id="collegueId.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">

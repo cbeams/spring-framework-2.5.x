@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow.action;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -123,13 +126,35 @@ public class SetAction extends AbstractAction {
 		for (int i = 0; i < mappings.length; i++) {
 			String[] encodedMapping = StringUtils.commaDelimitedListToStringArray(mappings[i]);
 			if (encodedMapping.length == 2) {
-				classEditor.setAsText(encodedMapping[i]);
+				classEditor.setAsText(encodedMapping[1]);
 				Class clazz = (Class)classEditor.getValue();
 				maps[i] = new Mapping(encodedMapping[0], getTypeConverterRegistry().getTypeConverter(clazz));
 			}
 			else {
-				maps[i] = new Mapping(mappings[i]);
+				maps[i] = new Mapping(encodedMapping[0]);
 			}
+		}
+		setMappings(maps);
+	}
+	
+	public void setMappingsMap(Map mappingsMap) {
+		ClassEditor classEditor = new ClassEditor();
+		Mapping[] maps = new Mapping[mappingsMap.size()];
+		Iterator it = mappingsMap.entrySet().iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry)it.next();
+			String sourceAttributeName = (String)entry.getKey();
+			String[] encodedMapping = StringUtils.commaDelimitedListToStringArray((String)entry.getValue());
+			if (encodedMapping.length == 2) {
+				classEditor.setAsText(encodedMapping[1]);
+				Class clazz = (Class)classEditor.getValue();
+				maps[i] = new Mapping(sourceAttributeName, encodedMapping[0], getTypeConverterRegistry().getTypeConverter(clazz));
+			}
+			else {
+				maps[i] = new Mapping(sourceAttributeName, encodedMapping[0]);
+			}
+			i++;
 		}
 		setMappings(maps);
 	}
