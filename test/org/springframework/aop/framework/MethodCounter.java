@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -24,9 +25,9 @@ import java.util.HashMap;
  * Useful abstract superclass for counting advices etc.
  * 
  * @author Rod Johnson
- * @version $Id: MethodCounter.java,v 1.2 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: MethodCounter.java,v 1.3 2004-07-29 12:21:35 johnsonr Exp $
  */
-public class MethodCounter {
+public class MethodCounter implements Serializable {
 	
 	/** Method name --> count, does not understand overloading */
 	private HashMap map = new HashMap();
@@ -51,5 +52,18 @@ public class MethodCounter {
 	
 	public int getCalls() {
 		return allCount;
+	}
+	
+	/**
+	 * A bit simplistic: just wants the same class.
+	 * Doesn't worry about counts.
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
+		if (other == null || other.getClass() != this.getClass()) {
+			return false;
+		}
+		MethodCounter mc2 = (MethodCounter) other;
+		return true;
 	}
 }

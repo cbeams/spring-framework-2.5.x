@@ -52,6 +52,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.transaction.CountingTxManager;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
@@ -59,7 +60,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.41 2004-07-28 11:27:45 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.42 2004-07-29 12:21:35 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -245,7 +246,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertFalse(SerializationTestUtils.isSerializable(proxy));
 	}
 	
-	public void testSerializationSerializableTargetAndAdvice() throws Exception {
+	public void testSerializationSerializableTargetAndAdvice() throws Throwable {
 		SerializablePerson personTarget = new SerializablePerson();
 		personTarget.setName("jim");
 		personTarget.setAge(26);
@@ -254,12 +255,26 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		ProxyFactory pf = new ProxyFactory(personTarget);
 		
+		CountingThrowsAdvice cta = new CountingThrowsAdvice();
+		
 		pf.addAdvice(new SerializableNopInterceptor());
+		// Try various advice types
+		pf.addAdvice(new CountingBeforeAdvice());
+		pf.addAdvice(new CountingAfterReturningAdvice());
+		pf.addAdvice(cta);
 		Person p = (Person) createAopProxy(pf).getProxy();
 		
-		// Will throw exception if it fails
-		SerializationTestUtils.testSerialization(p);
+		p.echo(null);
+		assertEquals(0, cta.getCalls());
+		try {
+			p.echo(new ServletException());
+		}
+		catch (ServletException ex) {
+			
+		}
+		assertEquals(1, cta.getCalls());
 		
+		// Will throw exception if it fails
 		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
 		assertNotSame(p, p2);
 		assertEquals(p.getName(), p2.getName());
@@ -282,6 +297,18 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		a2.addAdvice(ni);
 		p2.getAge();
 		assertEquals(1, ni.getCount());
+		
+		cta = (CountingThrowsAdvice) a2.getAdvisors()[3].getAdvice();
+		p2.echo(null);
+		assertEquals(1, cta.getCalls());
+		try {
+			p2.echo(new ServletException());
+		}
+		catch (ServletException ex) {
+			
+		}
+		assertEquals(2, cta.getCalls());
+		
 	}
 	
 	/**
