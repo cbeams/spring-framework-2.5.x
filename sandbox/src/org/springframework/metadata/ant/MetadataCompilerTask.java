@@ -33,7 +33,7 @@ import org.springframework.metadata.qdox.QDoxMetadataCompiler;
  * 
  * @since Oct 15, 2003
  * @author Mark.Pollack
- * @version $Id: MetadataCompilerTask.java,v 1.1 2003-11-22 09:05:47 johnsonr Exp $
+ * @version $Id: MetadataCompilerTask.java,v 1.2 2003-12-23 12:02:37 johnsonr Exp $
  */
 public class MetadataCompilerTask extends Task {
 
@@ -241,9 +241,11 @@ public class MetadataCompilerTask extends Task {
 		compiler.setClassPath(classpath.toString());
 		//config.put(QDoxMetadataCompiler.CLASSPATH, classpath.toString());
 
-		compiler.setAttributeWriter(new BcelAttributeWriter());
+		throw new UnsupportedOperationException("Fix up an AttributeWriter implementation");
+		//compiler.setAttributeWriter(new BcelAttributeWriter());
+		
 		//compiler.initialize(config);
-		compiler.compile();
+		//compiler.compile();
 
 	}
 

@@ -36,7 +36,7 @@ import com.thoughtworks.qdox.model.JavaSource;
  * 
  * @author Mark Pollack
  * @since Oct 13, 2003
- * @version $Id: QDoxMetadataCompiler.java,v 1.1 2003-11-22 09:05:46 johnsonr Exp $
+ * @version $Id: QDoxMetadataCompiler.java,v 1.2 2003-12-23 12:01:55 johnsonr Exp $
  */
 public class QDoxMetadataCompiler extends AbstractMetadataCompiler {
 
@@ -259,7 +259,8 @@ public class QDoxMetadataCompiler extends AbstractMetadataCompiler {
 		}
 		if (getAttributeWriter() == null) {
 			log.info("No AttributeWriter specified, using BcelAttributeWriter");
-			setAttributeWriter(new BcelAttributeWriter());	
+			throw new UnsupportedOperationException("Fix up a concrete attributewriter");
+			//setAttributeWriter(new BcelAttributeWriter());	
 		}
 	}
 
