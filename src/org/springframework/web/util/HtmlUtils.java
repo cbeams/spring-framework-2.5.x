@@ -293,7 +293,6 @@ public abstract class HtmlUtils {
 		ENTITIES.put("lsaquo", new Integer(8249));
 		ENTITIES.put("rsaquo", new Integer(8250));
 		ENTITIES.put("euro", new Integer(8364));
-		System.out.println(ENTITIES.size());
 	}
 
 	/**
