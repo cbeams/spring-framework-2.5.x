@@ -1,48 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
+<!--
+  - Application context definition for Petclinic on JDBC.
+	-->
 <beans>
 
 	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+	</bean>
 
 	<!-- Message source for this context, loaded from localized "messages_xx" files -->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename"><value>messages</value></property>										
 	</bean>
 
-	<!-- ========================= Start of PERSISTENCE DEFINITIONS ========================= -->
-  
-	<!-- NOTE: Choose exactly 1 "dataSource" bean and 1 "clinicTarget" bean -->
 
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+  
 	<!-- Local HSQL DataSource that works in any environment -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
-		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
-		<property name="username"><value>sa</value></property>
-		<property name="password"><value></value></property>
+		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
+		<property name="url"><value>${jdbc.url}</value></property>
+		<property name="username"><value>${jdbc.username}</value></property>
+		<property name="password"><value>${jdbc.password}</value></property>
 	</bean>
 
-	<!-- Local MySQL DataSource that works in any environment -->
-	<!--
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>com.mysql.jdbc.Driver</value></property>
-		<property name="url"><value>jdbc:mysql://localhost:3306/petclinic</value></property>
-		<property name="username"><value>pc</value></property>
-		<property name="password"><value>pc</value></property>
-	</bean>
-	-->
-
-	<!-- HSQL JNDI DataSource for J2EE environments -->
+	<!-- JNDI DataSource for J2EE environments -->
 	<!--
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  	<property name="jndiName"><value>jdbc/petclinicHSQL</value></property>
-	</bean>
-	-->
-
-	<!-- MySQL JNDI DataSource for J2EE environments -->
-	<!--
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName"><value>jdbc/petclinicMYSQL</value></property>
+	  	<property name="jndiName"><value>jdbc/petclinic</value></property>
 	</bean>
 	-->
 
@@ -56,10 +47,13 @@
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 	-->
 
-	<!-- Transactional proxy for the Petclinic primary business object -->
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+
+	<!-- Transactional proxy for Petclinic's primary business object -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref local="clinicTarget"/></property>
+		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
@@ -68,17 +62,15 @@
 	</bean>
 
 	<!-- Petclinic primary business object: HSQL JDBC implementation -->
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic">
+	<!-- (only initialized when referenced by the clinic proxy) -->
+	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
 	<!-- Petclinic primary business object: MySQL JDBC implementation -->
-	<!--
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic">
+	<!-- (only initialized when referenced by the clinic proxy) -->
+	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
-	-->
 
-	<!-- ========================= End of PERSISTENCE DEFINITIONS ========================= -->
-	
 </beans>

@@ -90,9 +90,9 @@
 	
 		<echo>
 			Compiling Attributes with Jakarta Commons Attributes.
-			If this target fails, remember to copy the Jakarta Commons Attributes
-			compiler Jar, xjavadoc.jar (from XDoclet) and Jakarta commons-collections.jar
-			into $ANT_HOME/lib.
+			If this target fails, remember to copy the Jakarta Commons Attributes compiler jar,
+			the Jakarta commons-collections.jar, and xjavadoc.jar (from XDoclet) into your
+			"ANT_HOME/lib" directory.
 		</echo>
  	
 	 	<!-- Bring in Jakarta Commons attribute compilation -->
@@ -205,6 +205,7 @@
 			<include name="WEB-INF/struts-config.xml"/>
 			<include name="WEB-INF/caucho-servlet.xml"/>
 			<include name="WEB-INF/server-config.wsdd"/>
+			<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/classes/*.xml"/>
 			<include name="WEB-INF/lib/**"/>

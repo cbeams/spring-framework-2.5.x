@@ -164,6 +164,7 @@
 			<include name="WEB-INF/struts-config.xml"/>
 			<include name="WEB-INF/caucho-servlet.xml"/>
 			<include name="WEB-INF/server-config.wsdd"/>
+			<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/classes/*.xml"/>
 			<include name="WEB-INF/lib/**"/>
