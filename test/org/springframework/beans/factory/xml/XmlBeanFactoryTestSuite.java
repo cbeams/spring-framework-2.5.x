@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -846,7 +847,6 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		// should have been autowired
 		assertEquals(kerry, rod1.getSpouse1());
-		assertEquals(kerry, rod1.getSpouse2());
 		assertEquals(0, rod1.getAge());
 		assertEquals(null, rod1.getName());
 
@@ -920,6 +920,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		ConstructorDependenciesBean rod13 = (ConstructorDependenciesBean) xbf.getBean("rod13");
 		assertEquals(kerry1, rod13.getSpouse1());
 		assertEquals(kerry2, rod13.getSpouse2());
+	}
+
+	public void testConstructorArgWithSingleMatch() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		File file = (File) xbf.getBean("file");
+		assertEquals(File.separator + "test", file.getPath());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

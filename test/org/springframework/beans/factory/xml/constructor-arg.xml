@@ -4,7 +4,6 @@
 <beans>
 
 	<bean id="rod1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
-		<constructor-arg><ref bean="other"/></constructor-arg>
 		<constructor-arg><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
@@ -16,15 +15,17 @@
 
 	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
 			autowire="constructor">
-		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod4" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
 			autowire="constructor">
-		<constructor-arg>
+		<constructor-arg index="0">
 			<description>wife</description>
 			<ref bean="kerry2"/>
 		</constructor-arg>
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod5" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
@@ -95,5 +96,9 @@
 	</bean>
 
 	<bean id="other" class="org.springframework.beans.IndexedTestBean"/>
+
+	<bean id="file" class="java.io.File">
+		<constructor-arg><value>/test</value></constructor-arg>
+	</bean>
 
 </beans>
