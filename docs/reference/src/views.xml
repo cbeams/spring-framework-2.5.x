@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--$Id: views.xml,v 1.7 2004-02-25 00:35:34 davison Exp $-->
 <chapter id="view">
 
     <title>Integrating view technologies</title>
@@ -1276,7 +1278,6 @@ public class PDFPage extends AbstractPdfView {
  file: xportal.application:
  
  <?xml version="1.0" encoding="UTF-8"?>
- <!--$Id: views.xml,v 1.6 2004-02-18 19:39:03 colins Exp $-->
  <!DOCTYPE application PUBLIC 
    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">

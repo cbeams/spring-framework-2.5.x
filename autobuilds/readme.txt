@@ -6,7 +6,7 @@
  *
  * @author Darren Davison
  * @since Dec 2003
- * @version $Id: readme.txt,v 1.6 2004-01-17 00:08:02 davison Exp $
+ * @version $Id: readme.txt,v 1.7 2004-02-25 00:35:35 davison Exp $
  */
 
 
@@ -298,7 +298,6 @@ first.  Please drop a line to the dev list
 think some functionality is missing from autobuilds and is not included here,
 or if you'd like to see something moved up this list.
 
- - change views in jpetstore to include some xslt, Velocity and pdf.
  - wls8 / websphere5 server builds added
  - support for plugging in different database implementations 
  - create remote webapp / socket listener to accept standard-format reports 
@@ -307,7 +306,5 @@ or if you'd like to see something moved up this list.
  - http downloads implemented
  - allow d/load of .zip tarballs for 'doze
  - handle exceptions / build failures that leave the server(s) running
- - lookup hsql using apps from an external props file to avoid amending 
-   build.xml for new apps
  - use gui testrunner as an option (build.props / based on -k option)?
  - make anonymous cvs work
