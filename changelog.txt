@@ -23,6 +23,12 @@ Package org.springframework.remoting
 * added "codebaseUrl" property to HttpInvokerClientInterceptor, specifying a URL for dynamic class download
 * added support for dynamic class downloading to AbstractHttpInvokerRequestExecutor and its subclasses
 
+Package org.springframework.ui.jasperreports
+* moved this package into the main distribution from the sandbox
+
+Package org.springframework.web.servlet.view.jasperreports
+* moved this package into the main distribution from the sandbox
+
 
 Changes in version 1.1.2 (14.11.2004)
 -------------------------------------
