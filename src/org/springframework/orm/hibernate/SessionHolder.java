@@ -19,9 +19,9 @@ package org.springframework.orm.hibernate;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.Transaction;
-import net.sf.hibernate.FlushMode;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
 
@@ -84,6 +84,11 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	public boolean isEmpty() {
 		return this.sessionMap.isEmpty();
+	}
+
+	public boolean doesNotHoldNonDefaultSession() {
+		return isEmpty() ||
+		    (this.sessionMap.size() == 1 && this.sessionMap.containsKey(DEFAULT_KEY));
 	}
 
 
