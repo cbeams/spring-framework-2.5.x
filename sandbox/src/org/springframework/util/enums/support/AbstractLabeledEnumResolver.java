@@ -17,6 +17,7 @@ package org.springframework.util.enums.support;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -41,7 +42,7 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 				return typeEnums;
 			}
 			else {
-				return Collections.unmodifiableMap(Collections.EMPTY_MAP);
+				return Collections.EMPTY_MAP;
 			}
 		}
 	};
@@ -71,7 +72,16 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 	}
 
 	public LabeledEnum getLabeledEnum(String type, String label) {
-		throw new UnsupportedOperationException();
+		Map typeEnums = getLabeledEnumMap(type);
+		Iterator it = typeEnums.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry)it.next();
+			LabeledEnum value = (LabeledEnum)entry.getValue();
+			if (value.getLabel().equals(label)) {
+				return value;
+			}
+		}
+		return null;
 	}
 
 	public LabeledEnum getRequiredEnum(String type, Comparable code) throws IllegalStateException {
