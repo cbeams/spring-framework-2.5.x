@@ -2,6 +2,8 @@ package org.springframework.web.servlet.handler;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
@@ -10,34 +12,47 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
+ * @author Juergen Hoeller
  */
 public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 
-	public static final String CONF = "/org/springframework/web/servlet/handler/map2.xml";
-	
-	private WebApplicationContext wac;
-
-	public void setUp() throws Exception {
+	public void testHandlerBeanNotFound() throws Exception {
 		MockServletContext sc = new MockServletContext("");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
-		wac = new XmlWebApplicationContext();
-		wac.setServletContext(sc);
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM,
+		                    "/org/springframework/web/servlet/handler/map1.xml");
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM,
+		                    "/org/springframework/web/servlet/handler/");
+		XmlWebApplicationContext root = new XmlWebApplicationContext();
+		root.setServletContext(sc);
+		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "map2err");
+		try {
+			wac.setServletContext(sc);
+			fail("Should have thrown NoSuchBeanDefinitionException");
+		}
+		catch (FatalBeanException ex) {
+			NoSuchBeanDefinitionException nestedEx = (NoSuchBeanDefinitionException) ex.getRootCause();
+			assertEquals("mainControlle", nestedEx.getBeanName());
+		}
 	}
 
 	public void testUrlMappingWithUrlMap() throws Exception {
-		checkMappings((HandlerMapping) wac.getBean("urlMapping"));
+		checkMappings("urlMapping");
 	}
 
 	public void testUrlMappingWithProps() throws Exception {
-		checkMappings((HandlerMapping) wac.getBean("urlMappingWithProps"));
+		checkMappings("urlMappingWithProps");
 	}
 
-	private void checkMappings(HandlerMapping hm) throws Exception {
+	private void checkMappings(String beanName) throws Exception {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM,
+		                    "/org/springframework/web/servlet/handler/map2.xml");
+		WebApplicationContext wac = new XmlWebApplicationContext();
+		wac.setServletContext(sc);
 		Object bean = wac.getBean("mainController");
-		
+		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
+
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
