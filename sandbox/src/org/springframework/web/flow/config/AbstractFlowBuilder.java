@@ -20,6 +20,8 @@ import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
 
 /**
+ * Base class for flow builders.
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractFlowBuilder extends FlowConstants implements FlowBuilder {
@@ -46,18 +48,39 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
 
+	/**
+	 * Initialize this builder; typically constructs the initial Flow
+	 * definition.
+	 */
 	public final void init() {
 		this.flow = createFlow();
 	}
 
+	/**
+	 * Create the instance of the Flow built by this builder. Subclasses may
+	 * override to return a custom Flow implementation.
+	 * @return The flow built by this builder.
+	 */
 	protected Flow createFlow() {
 		return new Flow(flowId());
 	}
 
+	/**
+	 * Returns the name of the flow id built by this builder. Subclasses should
+	 * override to return the unique flowId.
+	 * @return The unique flow id.
+	 */
 	protected abstract String flowId();
 
+	/**
+	 * Creates and adds all states for the flow built by this builder.
+	 */
 	public abstract void buildStates();
 
+	/**
+	 * Creates and/or links applicable flow execution listeners up to the flow
+	 * built by this builder.
+	 */
 	public void buildExecutionListeners() {
 		Iterator it = flowExecutionListeners.iterator();
 		while (it.hasNext()) {
@@ -66,6 +89,10 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		}
 	}
 
+	/**
+	 * Get the fully constructed and configured Flow object - called by the
+	 * builder's assembler (director) after assembly.
+	 */
 	public Flow getResult() {
 		return getFlow();
 	}
@@ -74,46 +101,157 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 		return flow;
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. The builder will attempt to resolve the Flow definition associated
+	 * with the provided subFlowId by querying the FlowServiceLocator.
+	 * @param id the state id
+	 * @param subFlowId the id of the Flow definition to retieve (could also be
+	 *        the ID of a FlowFactoryBean that produces the Flow)
+	 * @param transitions The eligible set of state transitions
+	 */
 	protected void addSubFlowState(String id, String subFlowId, Transition[] transitions) {
 		addSubFlowState(id, spawnFlow(subFlowId), transitions);
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID.
+	 * @param id the state id
+	 * @param subFlow the flow to be used as a subflow
+	 * @param transitions The eligible set of state transitions
+	 */
 	protected void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
 		new SubFlowState(flow, id, subFlow, transitions);
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * definition, to be used for retrieval by the FlowServiceLocator.
+	 * 
+	 * The retrieved subflow definition must also be built by the specified
+	 * FlowBuilder implementation, or an exception is thrown. This allows for
+	 * easy navigation to sub flow creation logic from within the parent flow
+	 * definition, and validates that a particular build implementation does
+	 * indeed produce the subflow.
+	 * @param id the state id, as well as the subflow id
+	 * @param flowBuilderImplementation The flow builder implementation
+	 * @param transitions The eligible set of state transitions
+	 */
 	protected void addSubFlowState(String id, Class flowBuilderImplementation, Transition[] transitions) {
 		new SubFlowState(flow, id, spawnFlow(id, flowBuilderImplementation), transitions);
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. This builder will attempt to resolve the Flow definition associated
+	 * with the provided subFlowId by querying the configured
+	 * FlowServiceLocator.
+	 * @param id the state id
+	 * @param subFlowId the id of the Flow definition to retieve and to be
+	 *        spawned as a subflow (could also be the ID of a FlowFactoryBean
+	 *        that produces the Flow)
+	 * @param attributesMapperId The id of the attributes mapper, to map
+	 *        attributes between the the flow built by this builder and the sub
+	 *        flow
+	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
+	 *        sub flow ends (this assumes you always transition to the same
+	 *        state regardless of which EndState is reached in the subflow)
+	 */
 	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId,
 			String subFlowDefaultFinishStateId) {
 		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperId), subFlowDefaultFinishStateId);
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID.
+	 * @param id the state id
+	 * @param subFlow the Flow definition to be spawned as a subflow
+	 * @param attributesMapperId The id of the attributes mapper, to map
+	 *        attributes between the the flow built by this builder and the sub
+	 *        flow
+	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
+	 *        sub flow ends (this assumes you always transition to the same
+	 *        state regardless of which EndState is reached in the subflow)
+	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
-				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
+		addSubFlowState(id, subFlow, attributesMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * definition to spawn, to be used for retrieval by the FlowServiceLocator.
+	 * 
+	 * The retrieved subflow definition must be built by the specified
+	 * FlowBuilder implementation or an exception is thrown. This allows for
+	 * easy navigation to sub flow creation logic from within the parent flow
+	 * builder definition, and validates that a particular build implementation
+	 * does indeed create the subflow.
+	 * @param id the state id, as well as the subflow id
+	 * @param flowBuilderImplementation The flow builder implementation
+	 * @param transitions The eligible set of state transitions
+	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
+	 *        sub flow ends (this assumes you always transition to the same
+	 *        state regardless of which EndState is reached in the subflow)
+	 */
 	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
 			FlowAttributesMapper attributesMapper, String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, new Transition[] { onBack(subFlowDefaultFinishStateId),
-				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
+		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper,
+				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. The builder will attempt to resolve the Flow definition associated
+	 * with the provided subFlowId by querying the FlowServiceLocator.
+	 * @param id the state id
+	 * @param subFlowId the id of the Flow definition to retieve (could also be
+	 *        the ID of a FlowFactoryBean that produces the Flow)
+	 * @param attributesMapperId The id of the attributes mapper to map
+	 *        attributes between the the flow built by this builder and the sub
+	 *        flow
+	 * @param transitions The eligible set of state transitions
+	 */
 	protected void addSubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		addSubFlowState(id, spawnFlow(subFlowId), useAttributesMapper(attributesMapperId), transitions);
 	}
 
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID.
+	 * @param id the state id
+	 * @param subFlow The flow definition to be used as the subflow
+	 * @param attributesMapper The attributes mapper to map attributes between
+	 *        the the flow built by this builder and the sub flow
+	 * @param transitions The eligible set of state transitions
+	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
 			Transition[] transitions) {
 		new SubFlowState(flow, id, subFlow, attributesMapper, transitions);
 	}
 
-	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowAttributesMapper attributesMapper,
-			Transition[] transitions) {
+	/**
+	 * Add a subflow state to the flow built by this builder with the specified
+	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * definition to spawn, to be used for retrieval by the FlowServiceLocator.
+	 * 
+	 * The retrieved subflow definition must be built by the specified
+	 * FlowBuilder implementation or an exception is thrown. This allows for
+	 * easy navigation to sub flow creation logic from within the parent flow
+	 * builder definition, and validates that a particular build implementation
+	 * does indeed create the subflow.
+	 * @param id the state id, as well as the subflow id
+	 * @param flowBuilderImplementation The flow builder implementation
+	 * @param attributesMapper The attributes mapper to map attributes between
+	 *        the the flow built by this builder and the sub flow
+	 * @param transitions The eligible set of state transitions
+	 */
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation,
+			FlowAttributesMapper attributesMapper, Transition[] transitions) {
 		new SubFlowState(flow, id, spawnFlow(id, subFlowBuilderImplementation), attributesMapper, transitions);
 	}
 
@@ -125,10 +263,12 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	/**
 	 * Request that the flow with the specified flowId be spawned as a subflow
-	 * when the sub flow state is entered.
+	 * when the sub flow state is entered. Simply resolves the subflow
+	 * definition by id and returns it; throwing a fail-fast exception if it
+	 * does not exist.
 	 * @param flowId The flow definition id
 	 * @return The flow to be used as a subflow, this should be passed to a
-	 *         addSubFlowState call^
+	 *         addSubFlowState call
 	 */
 	protected Flow spawnFlow(String flowId) {
 		return getFlowServiceLocator().getFlow(flowId);
@@ -137,10 +277,13 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	/**
 	 * Request that the flow with the specified flowId and built by the
 	 * specified flow builder implementation be spawned as a subflow when the
-	 * sub flow state is entered.
+	 * sub flow state is entered. Simply resolves the subflow definition by id,
+	 * verifies it is built by the specified builder, and returns it; throwing a
+	 * fail-fast exception if it does not exist or is build by the wrong
+	 * builder.
 	 * @param flowId The flow definition id
 	 * @param flowBuilderImplementationClass Ther required FlowBuilder
-	 *        implementation
+	 *        implementation that must build the sub flow.
 	 * @return The flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
@@ -150,7 +293,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	/**
 	 * Request that the action with the specified name be executed when the
-	 * action state being built is entered.
+	 * action state being built is entered. Simply looks the action up by name
+	 * and returns it.
 	 * @param actionBeanName The action name
 	 * @return The action
 	 * @throws NoSuchActionException
@@ -161,7 +305,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	/**
 	 * Request that the actions with the specified name be executed in the order
-	 * specified when the action state being built is entered.
+	 * specified when the action state being built is entered. Simply looks the
+	 * actions up by name and returns them.
 	 * @param actionBeanNames The action names
 	 * @return The actions
 	 * @throws NoSuchActionException
@@ -176,7 +321,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	/**
 	 * Request that the actions with the specified implementation be executed
-	 * when the action state being built is entered.
+	 * when the action state being built is entered. Looks the action up by
+	 * implementation class and returns it.
 	 * @param actionBeanImplementationClass The action implementation, must be
 	 *        unique
 	 * @return The actions The action
@@ -189,6 +335,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	/**
 	 * Request that the actions with the specified implementations be executed
 	 * in the order specified when the action state being built is entered.
+	 * Looks the action up by implementation class and returns it.
 	 * @param actionBeanImplementationClasses The action implementations, must
 	 *        be unique
 	 * @return The actions The actions
@@ -225,6 +372,9 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	}
 
 	/**
+	 * Add a ViewState marker to the flow built by this builder; a marker has a null viewName
+	 * and assumes the response has already been written.  The marker notes that control should
+	 * be returned to the 
 	 * @param stateIdPrefix
 	 * @return
 	 */
@@ -435,7 +585,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @return
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Transition[] transitions) {
-		return addActionState(add(stateIdPrefix), transitions);
+		return addActionState(create(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -445,7 +595,7 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @return
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Action actionBean, Transition[] transitions) {
-		return addActionState(add(stateIdPrefix), actionBean, transitions);
+		return addActionState(create(stateIdPrefix), actionBean, transitions);
 	}
 
 	/**
@@ -1476,7 +1626,12 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @return
 	 */
 	protected String buildStateId(String stateIdPrefix, String stateIdSuffix) {
-		return stateIdPrefix + DOT_SEPARATOR + stateIdSuffix;
+		if (stateIdPrefix.endsWith(stateIdSuffix)) {
+			return stateIdPrefix;
+		}
+		else {
+			return stateIdPrefix + DOT_SEPARATOR + stateIdSuffix;
+		}
 	}
 
 	/**
