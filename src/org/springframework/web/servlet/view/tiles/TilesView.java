@@ -30,11 +30,7 @@ import org.springframework.web.servlet.view.JstlView;
 public class TilesView extends JstlView {
 
 	/**
-	 * The actual method rendering the Tiles definition.
-	 * @param model the model that has to be included
-	 * @param request the request
-	 * @param response the response
-	 * @throws ServletException
+	 * The actual rendering of the Tiles definition.
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
@@ -44,8 +40,7 @@ public class TilesView extends JstlView {
 
 		try {
 			// get the required objects
-			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
-			DefinitionsFactory factory = (DefinitionsFactory) sc.getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
+			DefinitionsFactory factory = (DefinitionsFactory) getApplicationContext().sharedObject(TilesUtilImpl.DEFINITIONS_FACTORY);
 			if (factory == null) {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 				                   "Tiles definitions factory not found: TilesConfigurer not defined?");
@@ -53,6 +48,7 @@ public class TilesView extends JstlView {
 
 			// get current tile context if any
 			ComponentContext tileContext = ComponentContext.getContext(request);
+			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
 
 			ComponentDefinition definition = factory.getDefinition(getUrl(), request, sc);
 			if (definition == null) {

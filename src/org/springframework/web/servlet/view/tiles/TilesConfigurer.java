@@ -78,7 +78,7 @@ public class TilesConfigurer extends ApplicationObjectSupport {
 	}
 
 	/**
-	 * Set the tiles definitions, i.e. the list of files.
+	 * Set the Tiles definitions, i.e. the list of files.
 	 * @param definitions the files containing the definitions
 	 */
 	public void setDefinitions(String[] definitions) {
@@ -86,7 +86,7 @@ public class TilesConfigurer extends ApplicationObjectSupport {
 	}
 
 	/**
-	 * Initialization of the tiles definition factory.
+	 * Initialization of the Tiles definition factory.
 	 * @throws ApplicationContextException if an error occurs
 	 */
 	protected void initApplicationContext() throws ApplicationContextException {
@@ -107,7 +107,7 @@ public class TilesConfigurer extends ApplicationObjectSupport {
 			// initialize the definitions factory
 			ServletContext sc = ((WebApplicationContext) getApplicationContext()).getServletContext();
 			DefinitionsFactory factory = TilesUtil.createDefinitionsFactory(sc, factoryConfig);
-			sc.setAttribute(TilesUtilImpl.DEFINITIONS_FACTORY, factory);
+			getApplicationContext().shareObject(TilesUtilImpl.DEFINITIONS_FACTORY, factory);
 
 			logger.info("Tiles: initialization done");
 		}
