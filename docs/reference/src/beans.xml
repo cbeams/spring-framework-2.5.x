@@ -18,7 +18,7 @@
     url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink>
     builds on top of the BeanFactory and adds other functionality such as
     easier integration with Springs AOP features, message resource handling
-    (for use in internationalization, event propogation, declarative
+    (for use in internationalization), event propagation, declarative
     mechanisms to create the ApplicationContext and optional parent contexts,
     and application-layer specific contexts such as the
     <literal>WebApplicationContext</literal>, among other enhancements.</para>
