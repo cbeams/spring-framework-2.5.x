@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow.config;
 
+import java.util.Map;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
@@ -40,41 +42,31 @@ import org.springframework.web.flow.action.MultiAction;
  * MVC's simple form controller:
  * 
  * <pre>
+ * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  * 
- *  
- *   
- *    
- *     
- *      public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
- *      
- *      	protected String flowId() {
- *      		return &quot;customer.Detail&quot;;
- *      	}
- *      
- *       public void buildStates() {
- *          // get customer information
- *        	addActionState(&quot;getDetails&quot;,
- *                          action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                          on(success(), &quot;viewDetails&quot;));
- *          // view customer information               
- *        	addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                        on(submit(), &quot;bindAndValidate&quot;);
- *          // bind and validate customer information updates 
- *        	addActionState(&quot;bindAndValidate&quot;,
- *                          action(&quot;customer.Detail.bindAndValidate&quot;),
- *                          new Transition[] {
- *                              on(error(), &quot;viewDetails&quot;),
- *                              on(success(), &quot;finish&quot;)
- *                          }
- *          // finish
- *        	addEndState(&quot;finish&quot;);
- *       }
- *      
- *      
- *     
- *    
- *   
- *  
+ * 	protected String flowId() {
+ * 		return &quot;customer.Detail&quot;;
+ * 	}
+ * 
+ * public void buildStates() {
+ *           // get customer information
+ *           addActionState(&quot;getDetails&quot;,
+ *               action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *               on(success(), &quot;viewDetails&quot;));
+ *           // view customer information               
+ *           addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *               on(submit(), &quot;bindAndValidate&quot;);
+ *           // bind and validate customer information updates 
+ *           addActionState(&quot;bindAndValidate&quot;,
+ *               action(&quot;customer.Detail.bindAndValidate&quot;),
+ *               new Transition[] {
+ *                   on(error(), &quot;viewDetails&quot;),
+ *                   on(success(), &quot;finish&quot;)
+ *               }
+ *           // finish
+ *           addEndState(&quot;finish&quot;);
+ *        }}
+ * 
  * </pre>
  * 
  * What this Java-based FlowBuilder implementation does is add four states to a
@@ -277,15 +269,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param action the action implementation
+	 * @param targetAction the action implementation
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, Action action, Transition transition)
+	protected ActionState addActionState(String stateId, Action targetAction, Transition transition)
 			throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, action, transition);
+		return new ActionState(getFlow(), stateId, targetAction, transition);
 	}
 
 	/**
@@ -294,16 +286,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param action the action implementation
+	 * @param targetAction the action implementation
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, Action action, Transition[] transitions)
+	protected ActionState addActionState(String stateId, Action targetAction, Transition[] transitions)
 			throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, action, transitions);
+		return new ActionState(getFlow(), stateId, targetAction, transitions);
 	}
 
 	/**
@@ -355,17 +347,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * when entered.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param actions the action implementations, to be executed in order until
-	 *        a valid transitional result is returned (Chain of Responsibility)
+	 * @param targetActions the action implementations, to be executed in order
+	 *        until a valid transitional result is returned (Chain of
+	 *        Responsibility)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, Action[] actions, Transition[] transitions)
+	protected ActionState addActionState(String stateId, Action[] targetActions, Transition[] transitions)
 			throws IllegalArgumentException {
-		return new ActionState(getFlow(), stateId, actions, transitions);
+		return new ActionState(getFlow(), stateId, targetActions, transitions);
 	}
 
 	/**
@@ -404,6 +397,29 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
+	 * Request that the action with the specified implementation be instantiated
+	 * and executed when the action state being built is entered. Creates the
+	 * action instance.
+	 * @param actionImplementationClass The action implementation to instantiate
+	 * @return The action
+	 */
+	protected Action action(Class actionImplementationClass) {
+		return getFlowServiceLocator().createAction(actionImplementationClass, AutowireMode.DEFAULT);
+	}
+
+	/**
+	 * Request that the action with the specified implementation be instantiated
+	 * and executed when the action state being built is entered. Creates the
+	 * action instance.
+	 * @param actionImplementationClass The action implementation to instantiate
+	 * @param autowireMode the instance autowiring strategy
+	 * @return The action
+	 */
+	protected Action action(Class actionImplementationClass, AutowireMode autowireMode) {
+		return getFlowServiceLocator().createAction(actionImplementationClass, autowireMode);
+	}
+
+	/**
 	 * Request that the multi-action with the specified id be executed when the
 	 * action state being built is entered. Simply looks the multi-action up by
 	 * name and returns it.
@@ -415,22 +431,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		Action action = getFlowServiceLocator().getAction(actionId);
 		Assert.isInstanceOf(MultiAction.class, action, "Multi-action lookup with id '" + actionId + "' failed:");
 		return (MultiAction)action;
-	}
-
-	/**
-	 * Request that the actions with the specified ids be executed in the order
-	 * specified when the action state being built is entered. Simply looks the
-	 * actions up by id and returns them.
-	 * @param actionIds The action ids
-	 * @return The actions
-	 * @throws NoSuchActionException at least one action could not be resolved.
-	 */
-	protected Action[] actions(String[] actionIds) throws NoSuchActionException {
-		Action[] actions = new Action[actionIds.length];
-		for (int i = 0; i < actionIds.length; i++) {
-			actions[i] = getFlowServiceLocator().getAction(actionIds[i]);
-		}
-		return actions;
 	}
 
 	/**
@@ -447,77 +447,30 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the actions with the specified implementations be executed
-	 * in the order specified when the action state being built is entered.
-	 * Looks the actions up by implementation class and returns it.
-	 * @param actionImplementationClasses The action implementations--there must
-	 *        be only one action impl per type defined in the registry
-	 * @return The actions The actions
-	 * @throws NoSuchActionException One or more of the actions could not be
-	 *         resolved
+	 * Creates an action state action suitable for adding to exactly one action
+	 * state, wrapping the specified target action and annoated with the
+	 * specified name.
+	 * <p>
+	 * Note: the action name can be used to map an invocation on the target
+	 * action instance to a specified method call on that target.
+	 * @param action the action
+	 * @param name the action name
+	 * @return the action state action
 	 */
-	protected Action[] actionRefs(Class[] actionImplementationClasses) throws NoSuchActionException {
-		Action[] actions = new Action[actionImplementationClasses.length];
-		for (int i = 0; i < actionImplementationClasses.length; i++) {
-			actions[i] = getFlowServiceLocator().getAction(actionImplementationClasses[i]);
-		}
-		return actions;
+	protected ActionStateAction name(Action action, String name) {
+		return new ActionStateAction(action, name);
 	}
 
 	/**
-	 * Request that the action with the specified implementation be instantiated
-	 * and executed when the action state being built is entered. Creates the
-	 * action instance.
-	 * @param actionImplementationClass The action implementation to instantiate
-	 * @return The action
+	 * Creates an action state action suitable for adding to exactly one action
+	 * state, wrapping the specified target action and annoated with te
+	 * specified properties.
+	 * @param action the action
+	 * @param properties the action state properties
+	 * @return the action state action
 	 */
-	protected Action action(Class actionImplementationClass) {
-		return getFlowServiceLocator().createAction(actionImplementationClass, AutowireMode.DEFAULT);
-	}
-
-	/**
-	 * Request that the actions with the specified implementations be
-	 * instantiated and executed when the action state being built is entered.
-	 * Creates the action instances.
-	 * @param actionImplementationClasses The action implementations to
-	 *        instantiate
-	 * @return The actions
-	 */
-	protected Action[] actions(Class[] actionImplementationClasses) {
-		Action[] actions = new Action[actionImplementationClasses.length];
-		for (int i = 0; i < actionImplementationClasses.length; i++) {
-			actions[i] = getFlowServiceLocator().createAction(actionImplementationClasses[i], AutowireMode.DEFAULT);
-		}
-		return actions;
-	}
-
-	/**
-	 * Request that the action with the specified implementation be instantiated
-	 * and executed when the action state being built is entered. Creates the
-	 * action instance.
-	 * @param actionImplementationClass The action implementation to instantiate
-	 * @param autowireMode the instance autowiring strategy
-	 * @return The action
-	 */
-	protected Action action(Class actionImplementationClass, AutowireMode autowireMode) {
-		return getFlowServiceLocator().createAction(actionImplementationClass, autowireMode);
-	}
-
-	/**
-	 * Request that the actions with the specified implementations be
-	 * instantiated and executed when the action state being built is entered.
-	 * Creates the action instances.
-	 * @param actionImplementationClasses The action implementations to
-	 *        instantiate
-	 * @param autowireMode the instance autowiring strategy
-	 * @return The actions
-	 */
-	protected Action[] actions(Class[] actionImplementationClasses, AutowireMode autowireMode) {
-		Action[] actions = new Action[actionImplementationClasses.length];
-		for (int i = 0; i < actionImplementationClasses.length; i++) {
-			actions[i] = getFlowServiceLocator().createAction(actionImplementationClasses[i], autowireMode);
-		}
-		return actions;
+	protected ActionStateAction annotate(Action action, Map properties) {
+		return new ActionStateAction(action, properties);
 	}
 
 	/**
