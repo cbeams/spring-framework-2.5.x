@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * Helper implementation of an event listener list.
@@ -55,7 +57,7 @@ import org.springframework.util.closure.Closure;
  * 
  * @author oliverh
  */
-public class EventListenerListHelper implements Serializable {
+public class EventListenerListHelper implements Serializable, ProcessTemplate {
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
@@ -153,6 +155,34 @@ public class EventListenerListHelper implements Serializable {
 		else {
 			return new ObjectArrayIterator(listeners);
 		}
+	}
+
+	public void run(Closure closure) {
+		forEach(closure);
+	}
+	
+	public boolean anyTrue(Constraint constraint) {
+		if (listeners != EMPTY_OBJECT_ARRAY) {
+			Object[] listenersCopy = listeners;
+			for (int i = 0; i < listenersCopy.length; i++) {
+				if (constraint.test(listenersCopy[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean allTrue(Constraint constraint) {
+		if (listeners != EMPTY_OBJECT_ARRAY) {
+			Object[] listenersCopy = listeners;
+			for (int i = 0; i < listenersCopy.length; i++) {
+				if (!constraint.test(listenersCopy[i])) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -279,20 +309,36 @@ public class EventListenerListHelper implements Serializable {
 		}
 	}
 
-
 	/**
 	 * Remove all listeners
 	 */
 	public void clear() {
-		synchronized(this) {
+		synchronized (this) {
 			if (this.listeners == EMPTY_OBJECT_ARRAY) {
 				return;
-			} else {
+			}
+			else {
 				this.listeners = EMPTY_OBJECT_ARRAY;
 			}
 		}
 	}
-	
+
+	public boolean isAdded(final Class listenerClass) {
+		return anyTrue(new Constraint() {
+			public boolean test(Object o) {
+				return o.getClass().equals(listenerClass);
+			}
+		});
+	}
+
+	public boolean isAdded(final Object listener) {
+		return anyTrue(new Constraint() {
+			public boolean test(Object o) {
+				return o == listener;
+			}
+		});
+	}
+
 	private void fireEventWithReflection(String eventName, Object[] events) {
 		Method fireMethod = (Method)methodCache.get(new MethodCacheKey(listenerClass, eventName, events.length));
 		Object[] listenersCopy = listeners;
@@ -367,7 +413,7 @@ public class EventListenerListHelper implements Serializable {
 			return listenerClass.hashCode() ^ methodName.hashCode() ^ numParams;
 		}
 	}
-	
+
 	public String toString() {
 		return new ToStringCreator(this).append("listenerClass", listenerClass).append("listeners", listeners)
 				.toString();

@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.AbstractConstraint;
 import org.springframework.util.closure.support.Block;
 
@@ -301,8 +302,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private transient FlowDao flowDao;
 
-	private transient EventListenerListHelper flowLifecycleListeners = new EventListenerListHelper(
-			FlowLifecycleListener.class);
+	private transient EventListenerListHelper flowSessionExecutionListeners = new EventListenerListHelper(
+			FlowSessionExecutionListener.class);
 
 	protected Flow() {
 
@@ -351,27 +352,50 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.flowDao = dao;
 	}
 
-	public void addFlowLifecycleListener(FlowLifecycleListener listener) {
-		this.flowLifecycleListeners.add(listener);
+	public boolean equals(Object o) {
+		if (!(o instanceof Flow)) {
+			return false;
+		}
+		Flow flow = (Flow)o;
+		return id.equals(flow.id);
 	}
 
-	public void removeFlowLifecycleListener(FlowLifecycleListener listener) {
-		this.flowLifecycleListeners.remove(listener);
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	public void addFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+		this.flowSessionExecutionListeners.add(listener);
+	}
+
+	public boolean isFlowSessionExecutionListenerAdded(Class listenerClass) {
+		Assert.isTrue(FlowSessionExecutionListener.class.isAssignableFrom(listenerClass),
+				"Listener class must be a FlowSessionExecutionListener");
+		return this.flowSessionExecutionListeners.isAdded(listenerClass);
+	}
+
+	public boolean isFlowSessionExecutionListenerAdded(FlowSessionExecutionListener listener) {
+		return this.flowSessionExecutionListeners.isAdded(listener);
+	}
+
+	public void removeFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+		this.flowSessionExecutionListeners.remove(listener);
+	}
+
+	public int getFlowSessionExecutionListenerCount() {
+		return flowSessionExecutionListeners.getListenerCount();
+	}
+
+	public ProcessTemplate getFlowSessionExecutionListenerIterator() {
+		return flowSessionExecutionListeners;
 	}
 
 	/**
 	 * @param listener
 	 */
-	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
-		this.flowLifecycleListeners.clear();
-		this.flowLifecycleListeners.add(listener);
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isLifecycleListenerSet() {
-		return flowLifecycleListeners.getListenerCount() > 0;
+	public void setFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
+		this.flowSessionExecutionListeners.clear();
+		this.flowSessionExecutionListeners.add(listener);
 	}
 
 	/**
@@ -468,7 +492,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public boolean addSubFlowState(String id, Transition[] transitions) {
-		return add(new SubFlowState(id, transitions));
+		return add(new SubFlowState(id, id, transitions));
 	}
 
 	/**
@@ -511,7 +535,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public boolean addSubFlowState(String id, String attributesMapperId, Transition[] transitions) {
-		return add(new SubFlowState(id, attributesMapperId, transitions));
+		return add(new SubFlowState(id, id, attributesMapperId, transitions));
 	}
 
 	/**
@@ -681,14 +705,18 @@ public class Flow implements FlowEventProcessor, Serializable {
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
 		Assert.isTrue(sessionExecution.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
-		Flow activeFlow = getActiveFlow(sessionExecution);
+		FlowSessionExecutionStack sessionExecutionInternal = ((FlowSessionExecutionStack)sessionExecution);
+		fireRequestSubmitted(sessionExecutionInternal, request);
+		Flow activeFlow = ((FlowSessionExecutionStack)sessionExecution).getActiveFlow();
 		TransitionableState state = activeFlow.getRequiredTransitionableState(stateId);
-		ViewDescriptor viewDescriptor = state.execute(eventId, activeFlow, (FlowSessionExecutionStack)sessionExecution,
-				request, response);
-		return viewDescriptor;
+		ViewDescriptor view = state.execute(eventId, sessionExecutionInternal, request, response);
+		fireRequestProcessed(sessionExecutionInternal, request);
+		return view;
 	}
 
-	// javadoc in superclass
+	/*
+	 * see #FlowEventProcessor.resume
+	 */
 	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
@@ -725,119 +753,35 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
-	 * @param sessionExecutionStack
-	 * @return
-	 */
-	Flow getActiveFlow(FlowSessionExecutionInfo sessionExecution) {
-		String activeFlowId = sessionExecution.getActiveFlowId();
-		if (getId().equals(activeFlowId)) {
-			return this;
-		}
-		else {
-			return getFlowDao().getFlow(activeFlowId);
-		}
-	}
-
-	/**
-	 * @return
-	 */
-	protected FlowSession createSession() {
-		return new FlowSession(getId(), getStartState().getState().getId());
-	}
-
-	/**
 	 * @param input
 	 * @return
 	 */
 	protected FlowSession createSession(Map input) {
-		return new FlowSession(getId(), null, input);
+		return new FlowSession(this, input);
 	}
 
 	// lifecycle event publishers
 
-	/**
-	 * @param sessionExecutionStack
-	 * @param request
-	 */
-	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+	protected void fireRequestSubmitted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow started event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
+			logger.debug("Publishing request submitted event to " + getFlowSessionExecutionListenerCount()
+					+ " listener(s)");
 		}
-		this.flowLifecycleListeners.forEach(new Block() {
+		getFlowSessionExecutionListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
-			}
-		});
-	}
-	
-	/**
-	 * @param eventId
-	 * @param fromState
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow event signaled event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
-		}
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEventSignaled(Flow.this, eventId, fromState, sessionExecution, request);
+				((FlowSessionExecutionListener)o).requestSubmitted(sessionExecution, request);
 			}
 		});
 	}
 
-	/**
-	 * @param eventid
-	 * @param fromState
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+	protected void fireRequestProcessed(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow event processed event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
+			logger.debug("Publishing request processed event to " + getFlowSessionExecutionListenerCount()
+					+ " listener(s)");
 		}
-		this.flowLifecycleListeners.forEach(new Block() {
+		getFlowSessionExecutionListenerIterator().run(new Block() {
 			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEventProcessed(Flow.this, eventId, fromState, sessionExecution, request);
-			}
-		});
-	}
-
-	/**
-	 * @param oldState
-	 * @param state
-	 * @param sessionExecution
-	 * @param request
-	 */
-	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
-			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow state transitioned event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
-		}
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowStateTransitioned(Flow.this, oldState, newState, sessionExecution,
-						request);
-			}
-		});
-	}
-
-	/**
-	 * @param endingFlowSession
-	 * @param sessionExecutionStack
-	 * @param request
-	 */
-	protected void fireEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
-			final HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow ended event to " + flowLifecycleListeners.getListenerCount() + " listener(s)");
-		}
-		this.flowLifecycleListeners.forEach(new Block() {
-			protected void handle(Object o) {
-				((FlowLifecycleListener)o).flowEnded(Flow.this, endingFlowSession, sessionExecution, request);
+				((FlowSessionExecutionListener)o).requestProcessed(sessionExecution, request);
 			}
 		});
 	}

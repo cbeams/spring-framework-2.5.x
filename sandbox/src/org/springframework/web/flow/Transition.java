@@ -44,6 +44,10 @@ public class Transition implements Serializable {
 		public boolean test(Object o) {
 			return true;
 		}
+		
+		public String toString() {
+			return "*"; 
+		}
 	};
 
 	public Transition(String id, String toState) {
@@ -65,9 +69,17 @@ public class Transition implements Serializable {
 			public boolean test(Object eventId) {
 				return id.equals(eventId);
 			}
+			
+			public String toString() {
+				return id;
+			}
 		};
 	}
 
+	public Constraint getEventIdCriteria() {
+		return this.eventIdCriteria;
+	}
+	
 	public String getToState() {
 		return toState;
 	}
@@ -76,19 +88,18 @@ public class Transition implements Serializable {
 		return eventIdCriteria.test(eventId);
 	}
 
-	public ViewDescriptor execute(String eventId, Flow flow, TransitionableState fromState,
+	public ViewDescriptor execute(String eventId, TransitionableState fromState,
 			FlowSessionExecutionStack sessionExecution, HttpServletRequest request, HttpServletResponse response) {
+		Flow activeFlow = sessionExecution.getActiveFlow();
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing transition from state '" + fromState.getId() + "' to state '" + getToState()
 						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
 			}
-			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
-					response);
-			return descriptor;
+			return activeFlow.getRequiredState(getToState()).enter(sessionExecution, request, response);
 		}
 		catch (NoSuchFlowStateException e) {
-			throw new CannotExecuteStateTransitionException(this, flow, fromState.getId(), e);
+			throw new CannotExecuteStateTransitionException(this, eventId, activeFlow, fromState.getId(), e);
 		}
 	}
 
@@ -96,4 +107,5 @@ public class Transition implements Serializable {
 		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", toState)
 				.toString();
 	}
+
 }

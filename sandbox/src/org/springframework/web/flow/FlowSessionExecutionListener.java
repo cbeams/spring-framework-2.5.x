@@ -22,20 +22,23 @@ import javax.servlet.http.HttpServletRequest;
  * Flow object.
  * @author Keith Donald
  */
-public interface FlowLifecycleListener {
+public interface FlowSessionExecutionListener {
 
-	public void flowStarted(Flow source, FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void started(FlowSessionExecution sessionExecution);
 
-	public void flowEventSignaled(Flow source, String eventId, AbstractState state,
-			FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void requestSubmitted(FlowSessionExecution sessionExecution, HttpServletRequest request);
 
-	public void flowStateTransitioned(Flow source, AbstractState oldState, AbstractState newState,
-			FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void requestProcessed(FlowSessionExecution sessionExecution, HttpServletRequest request);
 
-	public void flowEventProcessed(Flow source, String eventId, AbstractState state,
-			FlowSessionExecution sessionExecution, HttpServletRequest request);
+	public void eventSignaled(FlowSessionExecution sessionExecution, String eventId);
+	
+	public void stateTransitioned(FlowSessionExecution sessionExecution, AbstractState previousState,
+			AbstractState newState);
 
-	public void flowEnded(Flow source, FlowSession endedFlowSession, FlowSessionExecution sessionExecution,
-			HttpServletRequest request);
+	public void subFlowSpawned(FlowSessionExecution sessionExecution);
+
+	public void subFlowEnded(FlowSessionExecution sessionExecution, FlowSession endedSession);
+
+	public void ended(FlowSessionExecution sessionExecution, FlowSession endedRootFlowSession);
 
 }

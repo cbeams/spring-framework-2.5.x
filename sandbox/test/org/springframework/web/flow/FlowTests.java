@@ -68,8 +68,8 @@ public class FlowTests extends TestCase {
 
 		FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
 
-		MockControl flowListenerMc = MockControl.createControl(FlowLifecycleListener.class);
-		FlowLifecycleListener mockListener = (FlowLifecycleListener)flowListenerMc.getMock();
+		MockControl flowListenerMc = MockControl.createControl(FlowSessionExecutionListener.class);
+		FlowSessionExecutionListener mockListener = (FlowSessionExecutionListener)flowListenerMc.getMock();
 
 		mockListener.flowStarted(flow, fes, req1);
 		flowListenerMc.setVoidCallable();
@@ -159,8 +159,8 @@ public class FlowTests extends TestCase {
 
 		FlowSessionExecutionStack fes = new FlowSessionExecutionStack();
 
-		MockControl flowListenerMc = MockControl.createControl(FlowLifecycleListener.class);
-		FlowLifecycleListener mockListener = (FlowLifecycleListener)flowListenerMc.getMock();
+		MockControl flowListenerMc = MockControl.createControl(FlowSessionExecutionListener.class);
+		FlowSessionExecutionListener mockListener = (FlowSessionExecutionListener)flowListenerMc.getMock();
 
 		mockListener.flowStarted(flow, fes, req1);
 		flowListenerMc.setVoidCallable();

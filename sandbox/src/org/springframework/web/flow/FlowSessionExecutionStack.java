@@ -29,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.Block;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
@@ -41,7 +43,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 
 	private String id;
 
-	private FlowSession NO_SESSION = new FlowSession("", "");
+	private FlowSession NO_SESSION = new FlowSession();
 
 	private Stack executingFlowSessions = new Stack();
 
@@ -69,8 +71,61 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		return executingFlowSessions.isEmpty();
 	}
 
+	public String getRootFlowId() {
+		return getRootFlowSession().getFlowId();
+	}
+
+	public Flow getRootFlow() {
+		return getRootFlowSession().getFlow();
+	}
+
+	public FlowSession getRootFlowSession() {
+		assertActive();
+		return (FlowSession)executingFlowSessions.get(0);
+	}
+
+	private void assertActive() {
+		if (!isActive()) {
+			throw new IllegalStateException(
+					"No active flow sessions executing - this flow session execution has ended (or has never been started)");
+		}
+	}
+
+	/**
+	 * Are we currently in the root flow? There can be any depth of nested
+	 * subflows below this, but sometimes the first subflow below the root may
+	 * require special treatment.
+	 * @return whether we're in the root flow
+	 */
+	public boolean isRootFlowActive() {
+		return executingFlowSessions.size() == 1;
+	}
+
+	public Flow getActiveFlow() {
+		return getActiveFlowSession().getFlow();
+	}
+
 	public String getActiveFlowId() {
 		return getActiveFlowSession().getFlowId();
+	}
+
+	public String getQualifiedActiveFlowId() {
+		assertActive();
+		Iterator it = executingFlowSessions.iterator();
+		StringBuffer qualifiedName = new StringBuffer(128);
+		while (it.hasNext()) {
+			FlowSession session = (FlowSession)it.next();
+			qualifiedName.append(session.getFlowId());
+			if (it.hasNext()) {
+				qualifiedName.append('.');
+			}
+		}
+		return qualifiedName.toString();
+	}
+
+	public FlowSession getActiveFlowSession() {
+		assertActive();
+		return (FlowSession)executingFlowSessions.peek();
 	}
 
 	public String[] getFlowIdStack() {
@@ -88,48 +143,40 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		}
 	}
 
-	public String getQualifiedActiveFlowId() {
-		Iterator it = executingFlowSessions.iterator();
-		StringBuffer qualifiedName = new StringBuffer(128);
-		while (it.hasNext()) {
-			FlowSession session = (FlowSession)it.next();
-			qualifiedName.append(session.getFlowId());
-			if (it.hasNext()) {
-				qualifiedName.append('.');
-			}
-		}
-		return qualifiedName.toString();
-	}
-
-	public Map getAttributes() {
-		return getActiveFlowSession().getAttributes();
-	}
-
-	public String getRootFlowId() {
-		return getRootFlowSession().getFlowId();
-	}
-
-	private FlowSession getRootFlowSession() {
-		if (!isActive()) {
-			return NO_SESSION;
-		}
-		else {
-			return (FlowSession)executingFlowSessions.get(0);
-		}
-	}
-
-	/**
-	 * Are we currently in the root flow? There can be any depth of nested
-	 * subflows below this, but sometimes the first subflow below the root may
-	 * require special treatment.
-	 * @return whether we're in the root flow
-	 */
-	public boolean isRootFlowActive() {
-		return executingFlowSessions.size() == 1;
+	public AbstractState getCurrentState() {
+		return getActiveFlowSession().getCurrentState();
 	}
 
 	public String getCurrentStateId() {
 		return getActiveFlowSession().getCurrentStateId();
+	}
+
+	protected void setCurrentState(AbstractState newState) {
+		AbstractState previousState = getActiveFlowSession().getCurrentState();
+		getActiveFlowSession().setCurrentState(newState);
+		fireStateTransitioned(previousState);
+	}
+
+	public String getLastEventId() {
+		return lastEventId;
+	}
+
+	public long getLastEventTimestamp() {
+		return lastEventTimestamp;
+	}
+
+	public void setLastEventId(String eventId) {
+		Assert.notNull(eventId, "The eventId is required");
+		this.lastEventId = eventId;
+		this.lastEventTimestamp = new Date().getTime();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Set last event id to '" + eventId + "' and updated timestamp to " + this.lastEventTimestamp);
+		}
+		fireEventSignaled(eventId);
+	}
+
+	public Map getAttributes() {
+		return getActiveFlowSession().getAttributes();
 	}
 
 	public boolean exists(String flowId) {
@@ -224,30 +271,6 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		return getActiveFlowSession().findAttributes(criteria);
 	}
 
-	/**
-	 * @return
-	 */
-	public String getLastEventId() {
-		return lastEventId;
-	}
-
-	public long getLastEventTimestamp() {
-		return lastEventTimestamp;
-	}
-
-	public void setLastEventId(String eventId) {
-		Assert.notNull(eventId, "The eventId is required");
-		this.lastEventId = eventId;
-		this.lastEventTimestamp = new Date().getTime();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Set last event id to '" + eventId + "' and updated timestamp to " + this.lastEventTimestamp);
-		}
-	}
-
-	protected void setCurrentStateId(String id) {
-		getActiveFlowSession().setCurrentStateId(id);
-	}
-
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
 			throw new IllegalArgumentException("Attribute name '" + FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME
@@ -264,37 +287,107 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 		getActiveFlowSession().removeAttribute(attributeName);
 	}
 
-	public FlowSession getActiveFlowSession() {
-		if (executingFlowSessions.isEmpty()) {
-			throw new IllegalStateException("No flow session is executing in this execution stack");
-		}
-		return (FlowSession)executingFlowSessions.peek();
-	}
-
-	protected void activate(FlowSession subFlowSession) {
+	protected void activate(FlowSession flowSession) {
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
 		}
-		executingFlowSessions.push(subFlowSession);
-		subFlowSession.setStatus(FlowSessionStatus.ACTIVE);
-		if (logger.isDebugEnabled()) {
-			logger.debug("After push of new Flow Session '" + subFlowSession.getFlowId()
-					+ "' - excutingFlowSessionsCount=" + executingFlowSessions.size() + ", sessionStack="
-					+ executingFlowSessions);
+		executingFlowSessions.push(flowSession);
+		flowSession.setStatus(FlowSessionStatus.ACTIVE);
+		if (isRootFlowActive()) {
+			fireStarted();
+		}
+		else {
+			fireSubFlowSpawned();
 		}
 	}
 
 	protected FlowSession endActiveSession() {
-		FlowSession s = (FlowSession)executingFlowSessions.pop();
-		s.setStatus(FlowSessionStatus.ENDED);
+		FlowSession endingSession = (FlowSession)executingFlowSessions.pop();
+		endingSession.setStatus(FlowSessionStatus.ENDED);
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.ACTIVE);
+			fireSubFlowEnded(endingSession);
 		}
+		else {
+			fireEnded(endingSession);
+		}
+		return endingSession;
+	}
+
+	protected ProcessTemplate getListenerIterator() {
+		return getRootFlow().getFlowSessionExecutionListenerIterator();
+	}
+
+	protected int getListenerCount() {
+		return getRootFlow().getFlowSessionExecutionListenerCount();
+	}
+
+	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("After pop of ended Flow Session '" + s.getFlowId() + "' - excutingFlowSessionsCount="
-					+ executingFlowSessions.size() + ", sessionStack=" + executingFlowSessions);
+			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
 		}
-		return s;
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).started(FlowSessionExecutionStack.this);
+			}
+		});
+	}
+
+	protected void fireEventSignaled(final String eventId) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing event signaled event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).eventSignaled(FlowSessionExecutionStack.this, eventId);
+			}
+		});
+	}
+
+	protected void fireStateTransitioned(final AbstractState previousState) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing state transitioned event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).stateTransitioned(FlowSessionExecutionStack.this, previousState,
+						getCurrentState());
+			}
+		});
+	}
+
+	protected void fireSubFlowSpawned() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).subFlowSpawned(FlowSessionExecutionStack.this);
+			}
+		});
+	}
+
+	protected void fireSubFlowEnded(final FlowSession endedSession) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing sub flow session ended event to " + getListenerCount() + " listener(s)");
+		}
+		getListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).subFlowEnded(FlowSessionExecutionStack.this, endedSession);
+			}
+		});
+	}
+
+	protected void fireEnded(final FlowSession endingRootFlowSession) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session execution ended event to "
+					+ endingRootFlowSession.getFlow().getFlowSessionExecutionListenerCount() + " listener(s)");
+		}
+		endingRootFlowSession.getFlow().getFlowSessionExecutionListenerIterator().run(new Block() {
+			protected void handle(Object o) {
+				((FlowSessionExecutionListener)o).ended(FlowSessionExecutionStack.this, endingRootFlowSession);
+			}
+		});
 	}
 
 	public String toString() {

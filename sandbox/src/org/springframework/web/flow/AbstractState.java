@@ -93,19 +93,13 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	public final ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) {
-		AbstractState oldState = null;
-		if (sessionExecution.getCurrentStateId() != null) {
-			oldState = flow.getRequiredState(sessionExecution.getCurrentStateId());
-		}
+	public final ViewDescriptor enter(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
+			logger.debug("Entering state '" + this + "' in flow '" + sessionExecution.getActiveFlowId() + "'");
 		}
-		sessionExecution.setCurrentStateId(getId());
-		flow.fireStateTransitioned(oldState, this, sessionExecution, request);
-		ViewDescriptor viewDescriptor = doEnterState(flow, sessionExecution, request, response);
-		return viewDescriptor;
+		sessionExecution.setCurrentState(this);
+		return doEnterState(sessionExecution, request, response);
 	}
 
 	/**
@@ -119,11 +113,10 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecutionStack,
+	protected abstract ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response);
 
 	public String toString() {
 		return new ToStringCreator(this).append("id", id).toString();
 	}
-
 }

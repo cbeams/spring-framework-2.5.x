@@ -65,7 +65,7 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 	}
 
 
-	private static class CountingListener implements FlowLifecycleListener {
+	private static class CountingListener implements FlowSessionExecutionListener {
 
 		public int flowEndedCount;
 

@@ -42,66 +42,64 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	public static final String FLOW_SESSION_ID_ATTRIBUTE_NAME = "flowSessionId";
 
-	private String flowId;
+	private Flow flow;
+
+	private AbstractState currentState;
 
 	private FlowSessionStatus status;
-	
-	private String currentStateId;
 
 	private Map attributes = new HashMap();
 
-	public FlowSession(String flowId, String startingStateId) {
-		this.flowId = flowId;
-		this.currentStateId = startingStateId;
+	protected FlowSession() {
+		this(new Flow(""), null);
 	}
 
-	public FlowSession(String flowId, String startingStateId, Map input) {
-		this.flowId = flowId;
-		this.currentStateId = startingStateId;
+	public FlowSession(Flow flow, Map input) {
+		Assert.notNull(flow, "The flow is required");
+		this.flow = flow;
 		if (input != null) {
 			setAttributes(input);
 		}
 	}
 
-	/**
-	 * @return Returns the id.
-	 */
 	public String getFlowId() {
-		return flowId;
+		return getFlow().getId();
+	}
+
+	public Flow getFlow() {
+		return flow;
 	}
 
 	public FlowSessionStatus getStatus() {
 		return status;
 	}
-	
+
 	public void setStatus(FlowSessionStatus status) {
 		this.status = status;
 	}
-	
-	/**
-	 * @return Returns the stateId.
-	 */
-	public String getCurrentStateId() {
-		return currentStateId;
+
+	public AbstractState getCurrentState() {
+		return currentState;
 	}
 	
-	protected void setCurrentStateId(String stateId) {
-		Assert.notNull(stateId, "The currentStateId is required");
-		if (this.currentStateId != null) {
-			if (this.currentStateId.equals(stateId)) {
-				throw new IllegalArgumentException("The current state is already set to '" + this.currentStateId
+	public String getCurrentStateId() {
+		return currentState.getId();
+	}
+
+	protected void setCurrentState(AbstractState newState) {
+		Assert.notNull(newState, "The newState is required");
+		if (this.currentState != null) {
+			if (this.currentState.equals(newState)) {
+				throw new IllegalArgumentException("The current state is already set to '" + newState
 						+ "' - this should not happen!");
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting current state of this '" + getFlowId() + "' flow session to '" + stateId + "'");
+			logger.debug("Setting current state of this '" + getFlowId() + "' flow session to '" + newState + "'");
 		}
-		this.currentStateId = stateId;
+		this.currentState = newState;
 	}
 
-	/**
-	 * @return Returns the attributes.
-	 */
 	public Map getAttributes() {
 		return Collections.unmodifiableMap(attributes);
 	}
@@ -181,7 +179,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		}
 		return filteredEntries;
 	}
-	
+
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue
@@ -210,7 +208,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("flowId", flowId).append("currentStateId", currentStateId).append(
+		return new ToStringCreator(this).append("flow", flow).append("currentState", currentState).append(
 				"attributesCount", (attributes != null ? attributes.size() : 0)).append("attributes", attributes)
 				.toString();
 	}

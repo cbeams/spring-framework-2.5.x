@@ -171,6 +171,40 @@ public class ActionState extends TransitionableState {
 		return this.actionBeans.remove(new ActionBeanHolder(actionBean));
 	}
 
+	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response) {
+		Iterator it = actionBeanIterator(sessionExecution.getActiveFlow());
+		int beanExecutionCount = 0;
+		while (it.hasNext()) {
+			ActionBean actionBean = (ActionBean)it.next();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing action bean '" + actionBean + "'");
+			}
+			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
+			beanExecutionCount++;
+			if (event != null) {
+				return execute(event.getId(), sessionExecution, request, response);
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
+							+ "I will attempt to proceed to the next action in the chain");
+				}
+			}
+		}
+		if (beanExecutionCount > 0) {
+			throw new CannotExecuteStateTransitionException(sessionExecution.getActiveFlow(), getId(),
+					new IllegalStateException("No valid event was signaled by any of the " + beanExecutionCount
+							+ " action bean(s) that executed in this action state '" + getId() + "' of flow '"
+							+ sessionExecution.getActiveFlowId() + "' - programmer error?"));
+		}
+		else {
+			throw new CannotExecuteStateTransitionException(sessionExecution.getActiveFlow(), getId(),
+					new IllegalStateException("No action beans executed, thus I cannot execute any state transition "
+							+ "- programmer configuration error"));
+		}
+	}
+
 	protected Iterator actionBeanIterator(final Flow flow) {
 		final Iterator it = this.actionBeans.iterator();
 		return new Iterator() {
@@ -208,40 +242,6 @@ public class ActionState extends TransitionableState {
 		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
 	}
 
-	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) {
-		Iterator it = actionBeanIterator(flow);
-		int beanExecutionCount = 0;
-		while (it.hasNext()) {
-			ActionBean actionBean = (ActionBean)it.next();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Executing action bean '" + actionBean + "'");
-			}
-			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
-			beanExecutionCount++;
-			if (event != null) {
-				return execute(event.getId(), flow, sessionExecution, request, response);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
-							+ "I will attempt to proceed to the next action in the chain");
-				}
-			}
-		}
-		if (beanExecutionCount > 0) {
-			throw new CannotExecuteStateTransitionException(flow, getId(), new IllegalStateException(
-					"No valid event was signaled by any of the " + beanExecutionCount
-							+ " action bean(s) that executed in this action state '" + getId() + "' of flow '"
-							+ flow.getId() + "' - programmer error?"));
-		}
-		else {
-			throw new CannotExecuteStateTransitionException(flow, getId(), new IllegalStateException(
-					"No action beans executed, thus I cannot execute any state transition "
-							+ "- programmer configuration error"));
-		}
-	}
-
 	protected boolean triggersTransition(ActionBeanEvent event, Flow flow) {
 		return getTransition(event, flow) != null;
 	}
@@ -252,5 +252,4 @@ public class ActionState extends TransitionableState {
 		}
 		return getTransition(event.getId(), flow);
 	}
-
 }

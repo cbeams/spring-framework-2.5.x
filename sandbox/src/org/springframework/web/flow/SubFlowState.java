@@ -38,60 +38,36 @@ public class SubFlowState extends TransitionableState {
 
 	private FlowAttributesMapper attributesMapper;
 
-	public SubFlowState(String id, Transition transition) {
-		this(id, id, null, new Transition[] { transition });
-	}
-
-	public SubFlowState(Flow subFlow, Transition transition) {
-		this(subFlow.getId(), subFlow, new Transition[] { transition });
+	public SubFlowState(String id, String subFlowId, Transition transition) {
+		this(id, subFlowId, null, new Transition[] { transition });
 	}
 
 	public SubFlowState(String id, Flow subFlow, Transition transition) {
 		this(id, subFlow, new Transition[] { transition });
 	}
 
-	public SubFlowState(String id, Transition[] transitions) {
-		this(id, id, null, transitions);
-	}
-
-	public SubFlowState(Flow subFlow, Transition[] transitions) {
-		this(subFlow.getId(), subFlow, null, transitions);
+	public SubFlowState(String id, String subFlowId, Transition[] transitions) {
+		this(id, subFlowId, null, transitions);
 	}
 
 	public SubFlowState(String id, Flow subFlow, Transition[] transitions) {
 		this(id, subFlow, null, transitions);
 	}
 
-	public SubFlowState(String id, String attributesMapperId, Transition transition) {
-		this(id, id, attributesMapperId, new Transition[] { transition });
-	}
-
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition transition) {
 		this(id, subFlowId, attributesMapperId, new Transition[] { transition });
-	}
-
-	public SubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
-		this(subFlow.getId(), subFlow, attributesMapper, new Transition[] { transition });
 	}
 
 	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
 		this(id, subFlow, attributesMapper, new Transition[] { transition });
 	}
 
-	public SubFlowState(String id, String attributesMapperId, Transition[] transitions) {
-		this(id, id, attributesMapperId, transitions);
-	}
-
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		super(id);
-		Assert.hasText(subFlowId, "The id of thr subflow definition is required");
+		Assert.hasText(subFlowId, "The id of the subflow definition is required");
 		this.subFlowId = subFlowId;
 		this.attributesMapperId = attributesMapperId;
 		addAll(transitions);
-	}
-
-	public SubFlowState(Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
-		this(subFlow.getId(), subFlow, attributesMapper, transitions);
 	}
 
 	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
@@ -106,12 +82,45 @@ public class SubFlowState extends TransitionableState {
 		return true;
 	}
 
+	protected String getAttributesMapperId() {
+		return attributesMapperId;
+	}
+
+	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+			HttpServletResponse response) {
+		Flow subFlow = getSubFlow(sessionExecution.getActiveFlow());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '"
+					+ sessionExecution.getActiveFlowId() + "'");
+		}
+		Map subFlowAttributes;
+		if (getAttributesMapper(sessionExecution.getActiveFlow()) != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
+						+ "down to the spawned subflow for access within the subflow");
+			}
+			subFlowAttributes = getAttributesMapper(sessionExecution.getActiveFlow())
+					.createSpawnedSubFlowAttributesMap(sessionExecution);
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				logger.info("No attributes mapper is configured for this subflow state '" + getId()
+						+ "' - note: as a result, no attributes in the parent flow '"
+						+ sessionExecution.getActiveFlowId() + "' scope will be passed to the spawned subflow '"
+						+ subFlow.getId() + "'");
+			}
+			subFlowAttributes = new HashMap(1);
+		}
+		return subFlow.spawnIn(sessionExecution, request, response, subFlowAttributes);
+	}
+
 	protected Flow getSubFlow(Flow flow) throws NoSuchFlowDefinitionException {
 		if (this.subFlow != null) {
 			return this.subFlow;
 		}
 		else {
 			try {
+				Assert.notNull(this.subFlowId, "The subflow id is required");
 				if (logger.isDebugEnabled()) {
 					logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
 				}
@@ -119,8 +128,8 @@ public class SubFlowState extends TransitionableState {
 				Assert.notNull(subFlow, "The subflow retrieved must be non-null");
 				if (logger.isInfoEnabled()) {
 					if (!subFlow.getId().equals(this.subFlowId)) {
-						logger.info("The subflow definition exported in the registry under id '" + this.subFlowId + "' has an id of '"
-								+ subFlow.getId() + "' -- these ids are NOT equal; is this OK?");
+						logger.info("The subflow definition exported in the registry under id '" + this.subFlowId
+								+ "' has an id of '" + subFlow.getId() + "' -- these ids are NOT equal; is this OK?");
 					}
 				}
 				return subFlow;
@@ -145,37 +154,4 @@ public class SubFlowState extends TransitionableState {
 			throw new NoSuchFlowAttributesMapperException(flow, this, e);
 		}
 	}
-
-	/**
-	 * @return
-	 */
-	protected String getAttributesMapperId() {
-		return attributesMapperId;
-	}
-
-	protected ViewDescriptor doEnterState(Flow flow, FlowSessionExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) {
-		Flow subFlow = getSubFlow(flow);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + flow.getId() + "'");
-		}
-		Map subFlowAttributes;
-		if (getAttributesMapper(flow) != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
-						+ "down to the spawned subflow for access within the subflow");
-			}
-			subFlowAttributes = getAttributesMapper(flow).createSpawnedSubFlowAttributesMap(sessionExecution);
-		}
-		else {
-			if (logger.isInfoEnabled()) {
-				logger.info("No attributes mapper is configured for this subflow state '" + getId()
-						+ "' - note: as a result, no attributes in the parent flow '" + flow.getId()
-						+ "' scope will be passed to the spawned subflow '" + subFlow.getId() + "'");
-			}
-			subFlowAttributes = new HashMap(1);
-		}
-		return subFlow.spawnIn(sessionExecution, request, response, subFlowAttributes);
-	}
-
 }

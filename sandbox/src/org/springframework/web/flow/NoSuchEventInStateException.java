@@ -52,7 +52,7 @@ public class NoSuchEventInStateException extends FlowNavigationException {
 			events = new LinkedHashSet(t.size());
 			Iterator it = t.iterator();
 			while (it.hasNext()) {
-				events.add(((Transition)it.next()).getId());
+				events.add(((Transition)it.next()).getEventIdCriteria());
 			}
 		}
 		else {

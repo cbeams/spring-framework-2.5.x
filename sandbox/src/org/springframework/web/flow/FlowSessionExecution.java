@@ -9,5 +9,9 @@ package org.springframework.web.flow;
  * @author Keith Donald
  */
 public interface FlowSessionExecution extends FlowSessionExecutionInfo, MutableAttributesAccessor {
-
+	public Flow getActiveFlow();
+	
+	public Flow getRootFlow();
+	
+	public AbstractState getCurrentState();
 }

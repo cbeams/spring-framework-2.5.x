@@ -92,51 +92,39 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws IllegalArgumentException if the <code>eventId</code> does not
 	 *         map to a valid transition for this state.
 	 */
-	public ViewDescriptor execute(String eventId, Flow flow, FlowSessionExecutionStack sessionExecution,
+	public ViewDescriptor execute(String eventId, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
-		assertActiveFlow(sessionExecution, flow);
+		String activeFlowId = sessionExecution.getQualifiedActiveFlowId();
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '"
-					+ sessionExecution.getQualifiedActiveFlowId() + "' signaled");
+			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + activeFlowId
+					+ "' signaled");
 		}
 		sessionExecution.setLastEventId(eventId);
-		flow.fireEventSignaled(eventId, this, sessionExecution, request);
-		ViewDescriptor viewDescriptor = getTransition(eventId, flow).execute(eventId, flow, this, sessionExecution,
-				request, response);
-		flow.fireEventProcessed(eventId, this, sessionExecution, request);
+		ViewDescriptor viewDescriptor = getTransition(eventId, sessionExecution.getActiveFlow()).execute(eventId, this,
+				sessionExecution, request, response);
 		if (logger.isDebugEnabled()) {
 			if (sessionExecution.isActive()) {
-				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '"
-						+ sessionExecution.getQualifiedActiveFlowId()
+				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '" + activeFlowId
 						+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
 						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
 			}
 			else {
-				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '"
-						+ sessionExecution.getQualifiedActiveFlowId()
+				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '" + activeFlowId
 						+ "' was processed; as a result, flow session execution has ended");
 			}
 		}
 		return viewDescriptor;
 	}
 
-	protected void assertActiveFlow(FlowSessionExecution sessionExecution, Flow flow) {
-		if (!flow.getId().equals(sessionExecution.getActiveFlowId())) {
-			throw new IllegalStateException("Assertion failed - the flow ID '" + flow.getId()
-					+ "' must equal the active flow ID '" + sessionExecution.getActiveFlowId()
-					+ "' for this flow session execution");
-		}
-	}
-
 	protected void updateCurrentStateIfNeccessary(String eventId, FlowSessionExecutionStack sessionExecution) {
-		if (!getId().equals(sessionExecution.getCurrentStateId())) {
+		if (!this.equals(sessionExecution.getCurrentState())) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Event '" + eventId + "' in state '" + getId()
 						+ "' was signaled by client; however the current flow session execution state is '"
 						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + getId() + "'");
 			}
-			sessionExecution.setCurrentStateId(getId());
+			sessionExecution.setCurrentState(this);
 		}
 	}
 

@@ -17,6 +17,7 @@ public class NoSuchFlowDefinitionException extends FlowException {
 	 */
 	public NoSuchFlowDefinitionException(String flowId, Throwable cause) {
 		super(cause);
+		this.flowId = flowId;
 	}
 
 	public String getMessage() {
