@@ -50,7 +50,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.3 2003-09-06 11:21:38 johnsonr Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -287,8 +287,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	private Object createBean(String name, Map newlyCreatedBeans) throws BeansException {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(name);
 		
-		mergedBeanDefinition.dependencyCheck(name);
-				
 		logger.debug("Creating instance of bean '" + name + "' with merged definition [" + mergedBeanDefinition + "]");
 		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -301,11 +299,46 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 			}
 			newlyCreatedBeans.put(name, bean);
 		}
+		
+		mergedBeanDefinition.autowireByName(name);
+		
+		// Add further property values based on autowire by type
+		// if it's applied
+		if (mergedBeanDefinition.getAutowire() == AbstractBeanDefinition.AUTOWIRE_BY_TYPE) {
+			autowireByType(name, mergedBeanDefinition, instanceWrapper);
+		}
+				
+		// We can apply dependency checks regardless of autowiring
+		mergedBeanDefinition.dependencyCheck(name);
 
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
 		applyPropertyValues(instanceWrapper, pvs, name, newlyCreatedBeans);
 		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
 		return bean;
+	}
+	
+	
+	/**
+	 * Abstract method defining autowire by type behaviour.
+	 * This is like PicoContainer default, in which there must be exactly
+	 * one bean of the property type in the bean factory. 
+	 * This makes bean factories simple to configure for small namespaces,
+	 * but doesn't work as well as standard Spring behaviour for
+	 * bigger applications.
+	 * <br>
+	 * This method is unsupported in this class, and throws UnsupportedOperationException.
+	 * Subclasses should override it if they can obtain information
+	 * about bean names by type, as a ListableBeanFactory implementation
+	 * can.
+	 * Invoked before any property setters have been applied. This method
+	 * should add more RuntimeBeanReferences to the merged bean definition's
+	 * property values.
+	 * @param name name of the bean to autowire by type
+	 * @param mergedBeanDefinition bean definition to update through autowiring
+	 * @param instanceWrapper BeanWrapper from which we can obtain information about the bean
+	 */
+	protected void autowireByType(String name, RootBeanDefinition mergedBeanDefinition, BeanWrapper instanceWrapper) {
+		throw new UnsupportedOperationException("AbstractBeanFactory does not support autowiring by type.");
 	}
 
 	/**

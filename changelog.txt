@@ -4,6 +4,9 @@ SPRING FRAMEWORK CHANGELOG
 Changes in version 1.0 M2 (XX.XX.2003)
 -------------------------------------
 * added optional dependency checking for BeanFactories, ensuring that all bean properties have been set before use
+* added "autowire" functionality so that BeanFactories can optional check
+dependencies between betweens and configure them automatically.
+Similar to PicoContainer functionality. Autowire is disabled by default.
 * removed "shared object" support in ApplicationContext as part of API simplification
 * added tiles-example showing how to use Tiles in conjunction with Spring
 

@@ -60,7 +60,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.4 2003-09-04 12:52:24 dkopylenko Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.5 2003-09-06 11:21:38 johnsonr Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -115,6 +115,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependencyCheck";
 	
 	private static final String DEFAULT_DEPENDENCY_CHECK_VALUE = "none";
+	
+	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
 	
 
 	private EntityResolver entityResolver;
@@ -305,19 +307,12 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
 		String className = null;
 		boolean singleton = true;
-		String dependencyCheck = DEFAULT_DEPENDENCY_CHECK_VALUE;
 		AbstractBeanDefinition bd = null;
 		
 		if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			// Default is singleton
 			// Can override by making non-singleton if desired
 			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
-		}
-		
-		if (el.hasAttribute(DEPENDENCY_CHECK_ATTRIBUTE)) {
-			// Default is "none"
-			// Can override by making "objects", "simple", "all"
-			dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 		}
 		
 		try {
@@ -342,25 +337,43 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			else {
 				bd = new ChildBeanDefinition(parent, pvs, singleton);
 			}
-					
-			int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;	
-			if ("all".equals(dependencyCheck)) {
-				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
-			}
-			else if ("simple".equals(dependencyCheck)) {
-				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
-			}
-			else if ("objects".equals(dependencyCheck)) {
-				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
-			}
-			// else leave default value
 			
-			bd.setDependencyCheck(dependencyCheckCode);
+			bd.setDependencyCheck(getDependencyCheck(el));
+			bd.setAutowire(getAutowire(el));
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
 			throw new FatalBeanException("Error creating bean with name [" + beanName + "]", ex);
 		}
+	}
+
+	private int getDependencyCheck(Element beanEle) {
+		String att = beanEle.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;	
+		if ("all".equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
+		}
+		else if ("simple".equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+		}
+		else if ("objects".equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+		}
+		// else leave default value
+		return dependencyCheckCode;
+	}
+
+	private int getAutowire(Element beanEle) {
+		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+		String att = beanEle.getAttribute(AUTOWIRE_ATTRIBUTE);
+		if ("byType".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
+		}
+		else if ("byName".equals(att)) {
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
+		}
+		// else leave default:
+		return autowire;
 	}
 
 	/**

@@ -6,17 +6,21 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
+* @version $Id: RootBeanDefinition.java,v 1.3 2003-09-06 11:21:38 johnsonr Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -26,6 +30,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	private String initMethodName;
 
 	private String destroyMethodName;
+	
+	private BeanWrapper bw;
 
 	public RootBeanDefinition(Class clazz, PropertyValues pvs, boolean singleton,
 	                          String initMethodName, String destroyMethodName) {
@@ -33,6 +39,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.clazz = clazz;
 		this.initMethodName = initMethodName;
 		this.destroyMethodName = destroyMethodName;
+		this.bw = new BeanWrapperImpl(this.clazz);
 	}
 	
 	public RootBeanDefinition(Class clazz, PropertyValues pvs, boolean singleton) {
@@ -48,6 +55,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.initMethodName = other.initMethodName;
 		this.destroyMethodName = other.destroyMethodName;
 		this.setDependencyCheck(other.getDependencyCheck());
+		this.setAutowire(other.getAutowire());
+		
+		// We'll just use this to look at descriptors, not make changes 
+		this.bw = other.bw;
 	}
 	
 	/**
@@ -102,6 +113,48 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Return a set of object-type property names that are unsatisfied
+	 * @return  a set of object-type property names that are unsatisfied.
+	 * These are probably unsatisfied references to other beans in the
+	 * factory. Does not include properties of type String.
+	 */
+	public Set unsatisfiedObjectProperties() {
+		Set s = new TreeSet();
+		PropertyDescriptor[] pds = this.bw.getPropertyDescriptors();
+		for (int i = 0; i < pds.length; i++) {
+			String name = pds[i].getName();
+			if (!pds[i].getPropertyType().isPrimitive()
+				&& !pds[i].getName().equals("class")
+				&& !pds[i].getPropertyType().equals(String.class)
+				&& getPropertyValues().getPropertyValue(name) == null) {
+				s.add(name);
+			}
+		}
+		return s;
+	}
+	
+	
+	/**
+	 * Fill in any missing property values with references to
+	 * other beans in this factory if autowire is set to "byName".
+	 * @param beanName name of the bean we're wiring up.
+	 * Useful for debugging. Not used functionally.
+	 */
+	public void autowireByName(String beanName) {
+		if (getAutowire() == AUTOWIRE_BY_NAME) {
+			Set s = unsatisfiedObjectProperties();
+			for (Iterator itr = s.iterator(); itr.hasNext(); ) {
+				String propertyName = (String) itr.next();
+				addPropertyValue(new PropertyValue(propertyName, new RuntimeBeanReference(propertyName)));
+				logger.info("Added autowiring by name from bean name '" + beanName + 
+					"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+			} // for each unsatisfied property
+		} // if we should autowire by name
+	}	
+
 		
 	public boolean equals(Object obj) {
 		if (!(obj instanceof RootBeanDefinition))

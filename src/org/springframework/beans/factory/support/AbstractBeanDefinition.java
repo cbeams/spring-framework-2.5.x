@@ -5,6 +5,10 @@
  
 package org.springframework.beans.factory.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 
 /**
@@ -21,7 +25,7 @@ import org.springframework.beans.PropertyValues;
  * BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.3 2003-09-06 11:21:38 johnsonr Exp $
  */
 public abstract class AbstractBeanDefinition {
 	
@@ -32,6 +36,13 @@ public abstract class AbstractBeanDefinition {
 	public static final int DEPENDENCY_CHECK_SIMPLE = 2;
 	
 	public static final int DEPENDENCY_CHECK_ALL = 3;
+	
+	public static final int AUTOWIRE_NO = 10;
+	
+	public static final int AUTOWIRE_BY_NAME = 11;
+
+	public static final int AUTOWIRE_BY_TYPE = 12;
+
 
 	/** Is this a singleton bean? */
 	private boolean singleton;
@@ -41,6 +52,12 @@ public abstract class AbstractBeanDefinition {
 	
 	/** A constant */
 	private int dependencyCheck;
+	
+	private int autowire = AUTOWIRE_NO;
+	
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	
 	/** 
 	 * Creates new BeanDefinition
@@ -78,6 +95,17 @@ public abstract class AbstractBeanDefinition {
 	public void setPropertyValues(PropertyValues pvs) {
 		this.pvs = pvs;
 	}
+	
+	/**
+	 * Convenience method to add an additional property value
+	 * @param pv new property value to add
+	 */
+	public void addPropertyValue(PropertyValue pv) {
+		// Adding an additional propertyValue requires replacing our member variable.
+		MutablePropertyValues pvs = new MutablePropertyValues(getPropertyValues());
+		pvs.addPropertyValue(pv);
+		setPropertyValues(pvs);
+	}
 
 	/**
 	 * @see Object#equals(Object)
@@ -103,6 +131,25 @@ public abstract class AbstractBeanDefinition {
 	 */
 	public void setDependencyCheck(int dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
+	}
+
+	/**
+	 * @return the autowire code
+	 */
+	protected int getAutowire() {
+		return this.autowire;
+	}
+
+	/**
+	 * Sets the autowire code. This determines whether any
+	 * automagical detection and setting of bean references
+	 * will happen. Default is AUTOWIRE_NO constant, which
+	 * means there's no autowire.
+	 * @param autowire The autowire to set.
+	 * Must be one of the three constants defined in this class
+	 */
+	public void setAutowire(int autowire) {
+		this.autowire = autowire;
 	}
 
 }

@@ -31,7 +31,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 /**
  *
  * @author Rod Johnson
-* @version $Id: XmlBeanFactoryTestSuite.java,v 1.3 2003-09-03 23:41:39 johnsonr Exp $
+* @version $Id: XmlBeanFactoryTestSuite.java,v 1.4 2003-09-06 11:21:38 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -544,6 +544,41 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertNotNull(a.getName());
 		assertNotNull(a.getSpouse());
 	}
+	
+	
+	public void testSatisfiedAutowireByType() throws Exception {
+		InputStream is = getClass().getResourceAsStream("autowire.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod1");
+		// Should have been autowired
+		assertNotNull(rod.getSpouse());
+		assertTrue(rod.getSpouse().getName().equals("Kerry"));
+
+	}
+
+
+	public void testSatisfiedAutowireByName() throws Exception {
+		InputStream is = getClass().getResourceAsStream("autowire.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod2");
+		// Should have been autowired
+		assertNotNull(rod.getSpouse());
+		assertTrue(rod.getSpouse().getName().equals("Kerry"));
+
+	}
+
+//		public void testUnsatisfiedAutowireByType() throws Exception {
+//			InputStream is = getClass().getResourceAsStream("autowire.xml");
+//			XmlBeanFactory xbf = new XmlBeanFactory(is);
+//			try {
+//				xbf.getBean("unsatisfiedAutoWireByType");
+//				fail();
+//			}
+//			catch (UnsatisfiedDependencyException ex) {
+//			
+//			}
+//
+//		}
 
 
 	public static class BadInitializer {
