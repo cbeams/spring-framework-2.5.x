@@ -169,7 +169,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Set the primary Validator for this controller.
+	 * Set the Validators for this controller.
 	 * The Validator must support the specified command class.
 	 */
 	public final void setValidators(Validator[] validators) {
@@ -177,22 +177,25 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the Validators for this controller.
+	 * @return the primary Validator for this controller.
 	 */
 	public final Validator[] getValidators() {
 		return validators;
 	}
 
 	/**
-	 * Set the Validators for this controller.
-	 * The Validator must support the specified command class.
+	 * Set the primary Validator for this controller. The Validator
+	 * must support the specified command class. If there are one
+	 * or more existing validators set already when this method is
+	 * called, only the specified validator will be kept. Use
+	 * {@link #setValidators(Validator[])} to set multiple validators.
 	 */
 	public final void setValidator(Validator validator) {
 		this.validators = new Validator[] {validator};
 	}
 
 	/**
-	 * Return the primary Validator for this controller.
+	 * @return the Validators for this controller.
 	 */
 	public final Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);
