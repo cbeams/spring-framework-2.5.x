@@ -58,9 +58,10 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.5 2004-01-14 07:35:50 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.6 2004-03-17 11:11:39 jhoeller Exp $
  */
-public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
+public abstract class AbstractAutoProxyCreator extends ProxyConfig
+		implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -91,16 +92,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	private boolean applyCommonInterceptorsFirst = true;
 	
-	private List targetSourceCreators = Collections.EMPTY_LIST;
+	private List customTargetSourceCreators = Collections.EMPTY_LIST;
 	
 	private BeanFactory owningBeanFactory;
 	
 
 	/**
-	 * Set the ordering which will apply to this class's
-	 * implementation of Ordered, used by bean post processors.
-	 * Default value is Integer.MAX_VALUE, meaning that it's
-	 * non-ordered.
+	 * Set the ordering which will apply to this class's implementation
+	 * of Ordered, used when applying multiple BeanPostProcessors.
+	 * Default value is Integer.MAX_VALUE, meaning that it's non-ordered.
 	 * @param order ordering value
 	 */
 	public final void setOrder(int order) {
@@ -114,15 +114,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	/**
 	 * Set custom TargetSourceCreators to be applied in this order.
 	 * If the list is empty, or they all return null, a SingletonTargetSource
-	 * will be created.<br>
-	 * TargetSourceCreators can only be invoked if this post processor is used in
-	 * a BeanFactory, and its BeanFactoryAware callback is used.
-	 * @param l list of TargetSourceCreator. Ordering is significant: the TargetSource
-	 * returned from the first matching TargetSourceCreator (that is, the first that returns non-null)
-	 * will be used.
+	 * will be created.
+	 * <p>TargetSourceCreators can only be invoked if this post processor is used
+	 * in a BeanFactory, and its BeanFactoryAware callback is used.
+	 * @param targetSourceCreators list of TargetSourceCreator.
+	 * Ordering is significant: The TargetSource returned from the first matching
+	 * TargetSourceCreator (that is, the first that returns non-null) will be used.
 	 */
-	public void setCustomTargetSourceCreators(List l) {
-		this.targetSourceCreators = l;
+	public void setCustomTargetSourceCreators(List targetSourceCreators) {
+		this.customTargetSourceCreators = targetSourceCreators;
 	}
 
 	/**
@@ -136,7 +136,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	public void setInterceptorNames(String[] interceptorNames) {
 		this.interceptorNames = interceptorNames;
 	}
-	
 
 	/**
 	 * Set whether the common interceptors should be applied before
@@ -147,16 +146,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
 	}
 	
-	/**
-	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
-	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.owningBeanFactory = beanFactory;
 	}
 	
 	/**
 	 * Return the owning BeanFactory
-	 * May be null, as this object doesn't need to belong to a bean factory
+	 * May be null, as this object doesn't need to belong to a bean factory.
 	 */
 	protected BeanFactory getBeanFactory() {
 		return this.owningBeanFactory;
@@ -184,12 +180,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 		
 		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
 		
-		// Handle prototypes correctly
-		Advisor[] commonInterceptors = resolveInterceptorNames();
-		
-		// Proxy if we have advice or if a TargetSourceCreator wants to do some
+		// proxy if we have advice or if a TargetSourceCreator wants to do some
 		// fancy stuff such as pooling
-		if (specificInterceptors != null || !(targetSource instanceof SingletonTargetSource)) {
+		if (specificInterceptors != DO_NOT_PROXY || !(targetSource instanceof SingletonTargetSource)) {
+
+			// handle prototypes correctly
+			Advisor[] commonInterceptors = resolveInterceptorNames();
+
 			List allInterceptors = new ArrayList();
 			if (specificInterceptors != null) {
 				allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -209,12 +206,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 										" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
-			// Copy our properties (proxyTargetClass) inherited from ProxyConfig
+
+			// copy our properties (proxyTargetClass) inherited from ProxyConfig
 			proxyFactory.copyFrom(this);
 			
 			if (!getProxyTargetClass()) {
 				// Must allow for introductions; can't just set interfaces to
-				// the target's interfaces only
+				// the target's interfaces only.
 				Class[] targetsInterfaces = AopUtils.getAllInterfaces(bean);
 				for (int i = 0; i < targetsInterfaces.length; i++) {
 					proxyFactory.addInterface(targetsInterfaces[i]);
@@ -235,9 +233,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	}
 
 	private Advisor[] resolveInterceptorNames() {
-		Advisor[] advisors = new Advisor[interceptorNames.length];
+		Advisor[] advisors = new Advisor[this.interceptorNames.length];
 		for (int i = 0; i < this.interceptorNames.length; i++) {
-			Object next = this.owningBeanFactory.getBean(interceptorNames[i]);
+			Object next = this.owningBeanFactory.getBean(this.interceptorNames[i]);
 			advisors[i] = GlobalAdvisorAdapterRegistry.getInstance().wrap(next);
 		}
 		return advisors;
@@ -245,8 +243,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	protected boolean isInfrastructureClass(Object bean, String name) {
 		return Advisor.class.isAssignableFrom(bean.getClass()) ||
-			MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
-			AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
+				MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||
+				AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
 	}
 	
 	/**
@@ -268,21 +266,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
 	private TargetSource getTargetSource(Object bean, String beanName) {
-		
-		// We can't create fancy target sources for singletons
-		if (this.owningBeanFactory != null && !owningBeanFactory.isSingleton(beanName)) {
+		// we can't create fancy target sources for singletons
+		if (this.owningBeanFactory != null && !this.owningBeanFactory.isSingleton(beanName)) {
 			logger.info("Checking for custom TargetSource for bean with name '" + beanName + "'");
-			for (int i = 0; i < targetSourceCreators.size(); i++) {
-				TargetSourceCreator tsc = (TargetSourceCreator) targetSourceCreators.get(i);
-				TargetSource ts = tsc.getTargetSource(bean, beanName, owningBeanFactory);
+			for (int i = 0; i < this.customTargetSourceCreators.size(); i++) {
+				TargetSourceCreator tsc = (TargetSourceCreator) this.customTargetSourceCreators.get(i);
+				TargetSource ts = tsc.getTargetSource(bean, beanName, this.owningBeanFactory);
 				if (ts != null) {
-					// Found a match
+					// found a match
 					logger.info("TargetSourceCreator [" + tsc + " found custom TargetSource for bean with name '" + beanName + "'");
 					return ts;
 				}
 			}
 		}
-		// Default is a simple, default target source
+		// default is a simple, default target source
 		return new SingletonTargetSource(bean);
 	}
 
