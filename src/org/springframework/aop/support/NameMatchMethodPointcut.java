@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -22,10 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Pointcut bean for simple method name matches,
- * as alternative to regexp patterns.
- * Does not handle overloaded methods--that is, all methods
- * with a given name will be eligible.
+ * Pointcut bean for simple method name matches, as alternative to regexp patterns.
+ * Does not handle overloaded methods: all methods *with a given name will be eligible.
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 11.02.2004
@@ -59,18 +57,17 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	}
 	
 	/**
-	 * Add another eligible method name, in addition
-	 * to those already named. Like the set methods, this method is for use
-	 * when configuring proxies, before a proxy is used.
-	 * <br>
-	 * <b>NB:</b> This method does not work after the proxy is in
+	 * Add another eligible method name, in addition to those already named.
+	 * Like the set methods, this method is for use when configuring proxies,
+	 * before a proxy is used.
+	 * <p><b>NB:</b> This method does not work after the proxy is in
 	 * use, as advice chains will be cached.
 	 * @param name name of the additional method that will match
 	 * @return this pointcut to allow for multiple additions in one line
 	 */
 	public NameMatchMethodPointcut addMethodName(String name) {
 		// TODO in a future release, consider a way of letting proxies
-		// cause advice changed events
+		// cause advice changed events.
 		this.mappedNames.add(name);
 		return this;
 	}

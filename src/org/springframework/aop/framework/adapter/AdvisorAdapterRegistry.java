@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.adapter;
 
@@ -31,12 +31,11 @@ import org.springframework.aop.Advisor;
 public interface AdvisorAdapterRegistry {
 	
 	/**
-	 * Return an Advisor wrapping the given advice
+	 * Return an Advisor wrapping the given advice.
 	 * @param advice object that should be an advice, such as
-	 * BeforeAdvice or ThrowsAdvice.
-	 * @return an Advisor wrapping the given advice. Never
-	 * returns null. If the advice parameter is an Advisor, return
-	 * it.
+	 * BeforeAdvice or ThrowsAdvice
+	 * @return an Advisor wrapping the given advice. Never returns null.
+	 * If the advice parameter is an Advisor, return it.
 	 * @throws UnknownAdviceTypeException if no registered AdvisorAdapter
 	 * can wrap the supposed advice
 	 */
@@ -45,10 +44,10 @@ public interface AdvisorAdapterRegistry {
 	/**
 	 * Return an AOP Alliance Interceptor to allow use of the given
 	 * Advisor in an interception-based framework. 
-	 * Don't worry about the pointcut associated with the Advisor,
-	 * if it's a PointcutAdvisor: just return an interceptor
+	 * <p>Don't worry about the pointcut associated with the Advisor,
+	 * if it's a PointcutAdvisor: just return an interceptor.
 	 * @param advisor Advisor to find an interceptor for
-	 * @return an Interceptor to expose this Advisor's behaviour
+	 * @return an Interceptor to expose this Advisor's behavior
 	 * @throws UnknownAdviceTypeException if the Advisor type is
 	 * not understood by any registered AdvisorAdapter.
 	 */
@@ -60,7 +59,7 @@ public interface AdvisorAdapterRegistry {
 	 * these must be automatically recognized by an AdvisorAdapterRegistry
 	 * implementation.
 	 * @param adapter AdvisorAdapter that understands particular Advisor
-	 * and Advice types. 
+	 * and Advice types
 	 */
 	void registerAdvisorAdapter(AdvisorAdapter adapter);
 

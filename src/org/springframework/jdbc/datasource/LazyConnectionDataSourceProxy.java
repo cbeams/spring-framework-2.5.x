@@ -176,25 +176,31 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * when asked for a Statement (or PreparedStatement or CallableStatement).
 	 * <p>The returned Connection handle implements the ConnectionProxy interface,
 	 * allowing to retrieve the underlying target Connection.
-	 * @return a transactional Connection if any, a new one else
-	 * @see DataSourceUtils#doGetConnection
+	 * @return a lazy Connection handle
 	 * @see ConnectionProxy#getTargetConnection
 	 */
 	public Connection getConnection() throws SQLException {
-		return getLazyConnectionProxy(getTargetDataSource());
+		return (Connection) Proxy.newProxyInstance(
+				ConnectionProxy.class.getClassLoader(),
+				new Class[] {ConnectionProxy.class},
+				new LazyConnectionInvocationHandler());
 	}
 
 	/**
-	 * Return a Connection proxy that delegates every method call to a target
-	 * Connection from the given DataSource, but does not fetch a physical
-	 * JDBC Connection until first creation of a Statement.
-	 * @param dataSource DataSource to get an actual Connection from
-	 * @return the wrapped Connection
-	 * @see DataSourceUtils#doCloseConnectionIfNecessary
+	 * Return a Connection handle that lazily fetches an actual JDBC Connection
+	 * when asked for a Statement (or PreparedStatement or CallableStatement).
+	 * <p>The returned Connection handle implements the ConnectionProxy interface,
+	 * allowing to retrieve the underlying target Connection.
+	 * @param username the per-Connection username
+	 * @param username the per-Connection password
+	 * @return a lazy Connection handle
+	 * @see ConnectionProxy#getTargetConnection
 	 */
-	protected Connection getLazyConnectionProxy(DataSource dataSource) {
-		return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class}, new LazyConnectionInvocationHandler());
+	public Connection getConnection(String username, String password) throws SQLException {
+		return (Connection) Proxy.newProxyInstance(
+				ConnectionProxy.class.getClassLoader(),
+				new Class[] {ConnectionProxy.class},
+				new LazyConnectionInvocationHandler(username, password));
 	}
 
 
@@ -204,7 +210,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	private class LazyConnectionInvocationHandler implements InvocationHandler {
 
-		private Connection target;
+		private String username;
+
+		private String password;
 
 		private Boolean readOnly = Boolean.FALSE;
 
@@ -214,9 +222,17 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		private boolean closed = false;
 
+		private Connection target;
+
 		public LazyConnectionInvocationHandler() {
 			this.autoCommit = defaultAutoCommit();
 			this.transactionIsolation = defaultTransactionIsolation();
+		}
+
+		public LazyConnectionInvocationHandler(String username, String password) {
+			this();
+			this.username = username;
+			this.password = password;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -314,7 +330,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		protected Connection getTargetConnection() throws SQLException {
 			if (this.target == null) {
 				// Fetch physical Connection from DataSource.
-				this.target = getTargetDataSource().getConnection();
+				this.target = (this.username != null) ?
+						getTargetDataSource().getConnection(this.username, this.password) :
+						getTargetDataSource().getConnection();
 
 				// If we still lack default connection properties, check them now.
 				checkDefaultConnectionProperties(this.target);

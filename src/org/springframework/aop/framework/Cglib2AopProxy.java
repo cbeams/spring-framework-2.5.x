@@ -42,22 +42,33 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 
 /**
- * CGLIB2 AopProxy implementation for the Spring AOP framework.
+ * CGLIB2-based AopProxy implementation for the Spring AOP framework.
+ * Requires CGLIB2 on the class path.
  *
- * <p>Objects of this type should be obtained through proxy factories, configured
- * by a AdvisedSupport implementation. This class is internal to the Spring
- * framework and need not be used directly by client code.
+ * <p>Objects of this type should be obtained through proxy factories,
+ * configured by an AdvisedSupport object. This class is internal to the
+ * Spring AOP framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class are thread-safe if the underlying (target)
- * class is thread-safe.
+ * <p>DefaultAopProxyFactory will automatically create CGLIB2-based proxies
+ * if necessary, for example in case of proxying a target class. See
+ * DefaultAopProxyFactory's javadoc for details.
+ *
+ * <p>Proxies created using this class are thread-safe if the underlying
+ * (target) class is thread-safe.
+ *
+ * <p>Built and tested against CGLIB 2.0.2, as of Spring 1.1.
+ * Basic functionality will still work on CGLIB 2.0.1, but it is
+ * generally recommended to use CGLIB 2.0.2 or later.
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @see DefaultAopProxyFactory
+ * @see AdvisedSupport#setProxyTargetClass
  */
 public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	// Constants for CGLIB callback array indices
-
 	private static final int AOP_PROXY = 0;
 	private static final int INVOKE_TARGET = 1;
 	private static final int NO_OVERRIDE = 2;
