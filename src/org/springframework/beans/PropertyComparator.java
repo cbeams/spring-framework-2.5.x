@@ -11,6 +11,7 @@ import java.util.Map;
  * PropertyComparator performs a comparison of two beans,
  * using the specified bean property via a BeanWrapper.
  * @author Juergen Hoeller
+ * @author Jean-Pierre Pawlak
  * @since 19.05.2003
  */
 public class PropertyComparator implements Comparator {
@@ -30,7 +31,16 @@ public class PropertyComparator implements Comparator {
 			v1 = ((String) v1).toLowerCase();
 			v2 = ((String) v2).toLowerCase();
 		}
-		int result = ((Comparable) v1).compareTo(v2);
+		int result;
+		if (v1 != null) {
+			result = ((Comparable) v1).compareTo(v2);
+		} else {
+			if (v2 != null) {
+				result = - ((Comparable) v2).compareTo(v1);
+			} else {
+				return 0;
+			}
+		}
 		return (this.sortDefinition.isAscending() ? result : -result);
 	}
 
