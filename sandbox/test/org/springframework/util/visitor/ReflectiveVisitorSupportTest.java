@@ -13,7 +13,7 @@ import junit.framework.TestCase;
  * 
  * @author R.J. Lorimer
  */
-public class ReflectiveVisitorSupportTests extends TestCase {
+public class ReflectiveVisitorSupportTest extends TestCase {
 
     private ReflectiveVisitorSupport support;
 

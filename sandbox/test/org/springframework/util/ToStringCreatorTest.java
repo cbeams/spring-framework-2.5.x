@@ -13,7 +13,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-public class ToStringCreatorTests extends TestCase {
+public class ToStringCreatorTest extends TestCase {
     private SomeObject s1, s2, s3;
 
     protected void setUp() throws Exception {
