@@ -43,7 +43,7 @@ public abstract class AbstractClinicForm extends SimpleFormController {
 	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		dateFormat.setLenient(false);
-		binder.registerCustomEditor(Date.class, null, new CustomDateEditor(dateFormat, false));
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 	}
 
 	/**
@@ -53,7 +53,7 @@ public abstract class AbstractClinicForm extends SimpleFormController {
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		BindException errors = new BindException(formBackingObject(request), getCommandName());
+		BindException errors = getErrorsForNewForm(request);
 		errors.reject("duplicateFormSubmission", "Duplicate form submission");
 		return showForm(request, response, errors);
 	}
