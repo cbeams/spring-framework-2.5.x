@@ -17,6 +17,7 @@
 
 package org.springframework.aop.support;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -24,13 +25,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.aopalliance.aop.AspectException;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
 /**
- * Utility methods used by the AOP framework.
+ * Utility methods used by the AOP framework and by AOP proxy factories.
  * Not intended to be used directly by applications.
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -41,15 +44,15 @@ public abstract class AopUtils {
 	 * Return whether the given object is a J2SE dynamic proxy.
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
-	public static boolean isJdkDynamicProxy(Object o) {
-		return Proxy.isProxyClass(o.getClass());
+	public static boolean isJdkDynamicProxy(Object object) {
+		return Proxy.isProxyClass(object.getClass());
 	}
 
 	/**
 	 * Return whether the given object is a CGLIB proxy.
 	 */
-	public static boolean isCglibProxy(Object o) {
-		return o.getClass().getName().indexOf("$$") != -1;
+	public static boolean isCglibProxy(Object object) {
+		return object.getClass().getName().indexOf("$$") != -1;
 	}
 
 	/**
@@ -58,10 +61,38 @@ public abstract class AopUtils {
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
 	 */
-	public static boolean isAopProxy(Object o) {
-		return isJdkDynamicProxy(o) || isCglibProxy(o);
+	public static boolean isAopProxy(Object object) {
+		return isJdkDynamicProxy(object) || isCglibProxy(object);
 	}
-	
+
+	/**
+	 * Return whether the given method is an "equals" method.
+	 * @see java.lang.Object#equals
+	 */
+	public static boolean isEqualsMethod(Method method) {
+		return method.getName().equals("equals") &&
+				method.getParameterTypes().length == 1 &&
+				method.getParameterTypes()[0] == Object.class;
+	}
+
+	/**
+	 * Return whether the given method is a "hashCode" method.
+	 * @see java.lang.Object#hashCode
+	 */
+	public static boolean isHashCodeMethod(Method method) {
+		return method.getName().equals("hashCode") &&
+				method.getParameterTypes().length == 0;
+	}
+
+	/**
+	 * Return whether the given method is an "toString" method.
+	 * @see java.lang.Object#toString
+	 */
+	public static boolean isToStringMethod(Method method) {
+		return method.getName().equals("toString") &&
+				method.getParameterTypes().length == 0;
+	}
+
 	/**
 	 * Given a method, which may come from an interface, and a targetClass
 	 * used in the current AOP invocation, find the most specific method
@@ -118,6 +149,9 @@ public abstract class AopUtils {
 	}
 	
 	/**
+	 * Build a String that consists of the names of the interfaces
+	 * in the given collection.
+	 * @param interfaces collection of Class objects that represent interfaces.
 	 * @return a string of form com.foo.Bar,com.foo.Baz
 	 */
 	public static String interfacesString(Collection interfaces) {
@@ -182,8 +216,8 @@ public abstract class AopUtils {
 	/**
 	 * Can the given pointcut apply at all on the given class?
 	 * This is an important test as it can be used to optimize
-	 * out a pointcut for a class
-	 * @param pc pc static or dynamic pointcut
+	 * out a pointcut for a class.
+	 * @param pc pc static or dynamic pointcut to check
 	 * @param targetClass class we're testing
 	 * @param proxyInterfaces proxy interfaces. If null, all methods
 	 * on class may be proxied
@@ -211,6 +245,16 @@ public abstract class AopUtils {
 		return false;
 	}
 	
+	/**
+	 * Can the given advisor apply at all on the given class?
+	 * This is an important test as it can be used to optimize
+	 * out a advisor for a class.
+	 * @param advisor the advisor to check
+	 * @param targetClass class we're testing
+	 * @param proxyInterfaces proxy interfaces. If null, all methods
+	 * on class may be proxied
+	 * @return whether the pointcut can apply on any method
+	 */
 	public static boolean canApply(Advisor advisor, Class targetClass, Class[] proxyInterfaces) {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
@@ -222,6 +266,36 @@ public abstract class AopUtils {
 		else {
 			// It doesn't have a pointcut so we assume it applies
 			return true;
+		}
+	}
+
+	/**
+	 * Invoke the target directly via reflection.
+	 * @param target the target object
+	 * @param method the method to invoke
+	 * @param args the arguments for the method
+	 * @throws Throwable if thrown by the target method
+	 * @throws org.aopalliance.aop.AspectException if encountering
+	 * a reflection error
+	 */
+	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
+	    throws Throwable {
+
+		// Use reflection to invoke the method.
+		try {
+		 return method.invoke(target, args);
+		}
+		catch (InvocationTargetException ex) {
+			// Invoked method threw a checked exception.
+			// We must rethrow it. The client won't see the interceptor.
+			throw ex.getTargetException();
+		}
+		catch (IllegalArgumentException ex) {
+			throw new AspectException("AOP configuration seems to be invalid: tried calling " +
+			    method + " on [" + target + "]: ", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new AspectException("Couldn't access method " + method, ex);
 		}
 	}
 

@@ -256,7 +256,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		tb = (ITestBean) factory.getBean("test1"); 
 		try {
 			// Will fail now
-			tb.hashCode();
+			tb.toString();
 			fail("Evil interceptor added programmatically should fail all method calls");
 		} 
 		catch (Exception thrown) {

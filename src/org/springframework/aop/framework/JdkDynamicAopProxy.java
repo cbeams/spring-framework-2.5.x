@@ -25,7 +25,9 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -100,18 +102,20 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		
 		try {
 			// Try special rules for equals() method and implementation of the
-			// Advised AOP configuration interface
+			// Advised AOP configuration interface.
 			
-			// Short-circuit expensive Method.equals() call, as Object.equals() isn't overloaded
-			if (method.getDeclaringClass() == Object.class && "equals".equals(method.getName())) {
+			if (AopUtils.isEqualsMethod(method)) {
 				// What if equals throws exception!?
-
-				// This class implements the equals() method itself
+				// This class implements the equals(Object) method itself.
 				return equals(args[0]) ? Boolean.TRUE : Boolean.FALSE;
 			}
-			else if (Advised.class == method.getDeclaringClass()) {
-				// Service invocations on ProxyConfig with the proxy config
-				return AopProxyUtils.invokeJoinpointUsingReflection(this.advisedSupport, method, args);
+			if (AopUtils.isHashCodeMethod(method)) {
+				// This class implements the hashCode() method itself.
+				return new Integer(hashCode());
+			}
+			if (Advised.class == method.getDeclaringClass()) {
+				// service invocations on ProxyConfig with the proxy config
+				return AopUtils.invokeJoinpointUsingReflection(this.advisedSupport, method, args);
 			}
 			
 			Object retVal = null;
@@ -139,14 +143,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
-				retVal = AopProxyUtils.invokeJoinpointUsingReflection(target, method, args);
+				retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
 			}
 			else {
 				// We need to create a method invocation...
-				//invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
+				//invocation = advised.getMethodInvocationFactory().getMethodInvocation(
+				//		proxy, method, targetClass, target, args, chain, advised);
 				
-				invocation = new ReflectiveMethodInvocation(proxy, target,
-									method, args, targetClass, chain);
+				invocation = new ReflectiveMethodInvocation(
+						proxy, target, method, args, targetClass, chain);
 										
 				// Proceed to the joinpoint through the interceptor chain
 				retVal = invocation.proceed();
@@ -195,34 +200,42 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	}
 
 	/**
-	 * Equality means interceptors and interfaces and
-	 * TargetSource are equal.
+	 * Proxy uses the hash code of the TargetSource.
+	 */
+	public int hashCode() {
+		return this.advisedSupport.getTargetSource().hashCode();
+	}
+
+	/**
+	 * Equality means interfaces, advisors and TargetSource are equal.
 	 * @see java.lang.Object#equals(java.lang.Object)
-	 * @param other may be a dynamic proxy wrapping an instance
-	 * of this class
+	 * @param other may be a dynamic proxy wrapping an instance of this class
 	 */
 	public boolean equals(Object other) {
-		if (other == null)
+		if (other == null) {
 			return false;
-		if (other == this)
+		}
+		if (other == this) {
 			return true;
-		
+		}
+
 		JdkDynamicAopProxy aopr2 = null;
 		if (other instanceof JdkDynamicAopProxy) {
 			aopr2 = (JdkDynamicAopProxy) other;
 		}
 		else if (Proxy.isProxyClass(other.getClass())) {
 			InvocationHandler ih = Proxy.getInvocationHandler(other);
-			if (!(ih instanceof JdkDynamicAopProxy))
+			if (!(ih instanceof JdkDynamicAopProxy)) {
 				return false;
-			aopr2 = (JdkDynamicAopProxy) ih; 
+			}
+			aopr2 = (JdkDynamicAopProxy) ih;
 		}
 		else {
-			// Not a valid comparison
+			// not a valid comparison
 			return false;
 		}
 		
-		// If we get here, aopr2 is the other AopProxy
+		// If we get here, aopr2 is the other AopProxy.
 		return AopProxyUtils.equalsInProxy(this.advisedSupport, aopr2.advisedSupport);
 	}
 

@@ -19,39 +19,53 @@ package org.springframework.aop.target;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of the TargetSource interface that holds a local object.
  * This is the default implementation of TargetSource used by the AOP framework.
  * There is no need to create objects of this class in application code.
- * <br>This class is Serializable. However, the serializability of a SingletonTargetSource
- * will depend on whether the target is Serializable.
+ *
+ * <p>This class is Serializable. However, the actual serializability of a
+ * SingletonTargetSource will depend on whether the target is Serializable.
+ *
  * @author Rod Johnson
  */
 public final class SingletonTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */	
 	private final Object target;
-	
+
+	/**
+	 * Create a new SingletonTargetSource for the given target.
+	 * @param target the target object
+	 */
 	public SingletonTargetSource(Object target) {
+		Assert.notNull(target, "target is required");
 		this.target = target;
 	}
 	
 	public Class getTargetClass() {
-		return target.getClass();
+		return this.target.getClass();
 	}
 	
 	public Object getTarget() {
 		return this.target;
 	}
 	
-	public void releaseTarget(Object o) {
-		// Nothing to do
+	public void releaseTarget(Object target) {
+		// nothing to do
 	}
 
 	public boolean isStatic() {
 		return true;
+	}
+
+	/**
+	 * SingletonTargetSource uses the hash code of the target object.
+	 */
+	public int hashCode() {
+		return this.target.hashCode();
 	}
 
 	/**
@@ -66,13 +80,10 @@ public final class SingletonTargetSource implements TargetSource, Serializable {
 			return false;
 		}
 		SingletonTargetSource otherTargetSource = (SingletonTargetSource) other;
-		return ObjectUtils.nullSafeEquals(this.target, otherTargetSource.target);
+		return this.target.equals(otherTargetSource.target);
 	}
-	
-	/**
-	 * @see java.lang.Object#toString()
-	 */
+
 	public String toString() {
-		return "SingletonTargetSource: target=(" + target + ")";
+		return "SingletonTargetSource for target: " + this.target;
 	}
 }
