@@ -6,6 +6,10 @@ http://www.springframework.org
 Changes in version 1.1 final (16.8.2004)
 ----------------------------------------
 
+Package org.springframework.aop
+* AbstractAutoProxyCreator.getInterceptorsAndAdvisorsForBean() now takes 3rd argument, TargetSource. Simply add this parameter to existing implementations.
+* added customizeProxyFactory() hook method in AbstractAutoProxyCreator
+
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
 * fixed "getBeansOfType" check (as used by autowiring) and "isSingleton" for parent bean definitions without class
