@@ -26,12 +26,13 @@ import org.springframework.transaction.CountingTxManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionException;
 
 /**
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.15 2003-12-30 00:24:19 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.16 2004-01-01 23:39:58 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -84,17 +85,24 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ptmControl.verify();
 
 		// Install facade expecting a call
-		ptmControl = MockControl.createControl(PlatformTransactionManager.class);
-		ptm = (PlatformTransactionManager) ptmControl.getMock();
-		TransactionStatus txStatus = new TransactionStatus(null, true, false, false);
-		TransactionInterceptor txInterceptor = (TransactionInterceptor) factory.getBean("txInterceptor");
-		MethodMapTransactionAttributeSource txAttSrc = (MethodMapTransactionAttributeSource) txInterceptor.getTransactionAttributeSource();
-		ptm.getTransaction((TransactionDefinition) txAttSrc.methodMap.values().iterator().next());
-		//ptm.getTransaction(null);
-		ptmControl.setReturnValue(txStatus);
-		ptm.commit(txStatus);
-		ptmControl.setVoidCallable();
-		ptmControl.replay();
+		final TransactionStatus ts = new TransactionStatus(null, true, false, false);
+		ptm = new PlatformTransactionManager() {
+			private boolean invoked;
+			public TransactionStatus getTransaction(TransactionDefinition definition)
+					throws TransactionException {
+				if (invoked) {
+					throw new IllegalStateException("getTransaction should not get invoked more than once");
+				}
+				invoked = true;
+				return ts;
+			}
+			public void commit(TransactionStatus status) throws TransactionException {
+				assertTrue(status == ts);
+			}
+			public void rollback(TransactionStatus status) throws TransactionException {
+				throw new IllegalStateException("rollback should not get invoked");
+			}
+		};
 		PlatformTransactionManagerFacade.delegate = ptm;
 
 		// TODO same as old age to avoid ordering effect for now

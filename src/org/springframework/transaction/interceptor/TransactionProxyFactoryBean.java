@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
@@ -44,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.17 2003-12-11 11:36:46 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.18 2004-01-01 23:39:58 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -54,10 +55,6 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	private Properties transactionAttributes;
 
-	/** 
-	 * Interfaces to proxy. If left null (the default)
-	 * the AOP infrastructure works out which interfaces need proxying
-	 */
 	private Class[] interfaces;
 
 	private Pointcut pointcut;
@@ -99,7 +96,6 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		this.transactionAttributes = transactionAttributes;
 	}
 
-
 	/**
 	 * Set a MethodPointcut, i.e a bean that can cause conditional invocation
 	 * of the TransactionInterceptor depending on method and attributes passed.
@@ -123,24 +119,25 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
-	 * Set additional interceptors to be applied aftr the implicit transaction
-	 * interceptor, e.g. HibernateInterceptors or JdoInterceptors for binding
-	 * Sessions respectively PersistenceManagers to the current thread when
-	 * using JtaTransactionManager. Note that this is just necessary if you
-	 * rely on those interceptors in general: HibernateTemplate and JdoTemplate
-	 * work nicely with JtaTransactionManager through implicit thread binding.
+	 * Set additional interceptors to be applied after the implicit transaction
+	 * interceptor, e.g. HibernateInterceptors or JdoInterceptors for binding Sessions
+	 * respectively PersistenceManagers to the current thread when using JTA.
+	 * <p>Note that this is just necessary if you rely on those interceptors in general:
+	 * HibernateTemplate and JdoTemplate work nicely with JtaTransactionManager through
+	 * implicit on-demand thread binding.
 	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.jdo.JdoInterceptor
 	 */
 	public void setPostInterceptors(Interceptor[] preInterceptors) {
 		this.postInterceptors = preInterceptors;
 	}
-	
-	
+
 	/**
-	 * Optional: you only need to set this property to filter the set of interfaces
+	 * Optional: You only need to set this property to filter the set of interfaces
 	 * being proxied (default is to pick up all interfaces on the target),
 	 * or if providing a custom invoker interceptor instead of a target.
+	 * <p>If left null (the default), the AOP infrastructure works out which
+	 * interfaces need proxying.
 	 */
 	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
 		this.interfaces = AopUtils.toInterfaceArray(interfaceNames);
@@ -156,7 +153,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 			throw new AopConfigException("'transactionAttributes' property must be set: if there are no transaction methods, don't use a transactional proxy");
 		}
 
-		PropertiesTransactionAttributeSource tas = new PropertiesTransactionAttributeSource();
+		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		tas.setProperties(this.transactionAttributes);
 
 		TransactionInterceptor transactionInterceptor = new TransactionInterceptor();

@@ -16,7 +16,11 @@
 	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
 		<property name="transactionManager"><ref local="mockMan"/></property>
 		<property name="transactionAttributeSource">
-			<value>org.springframework.beans.ITestBean.setAge=PROPAGATION_REQUIRED</value>
+			<value>
+				org.springframework.beans.ITestBean.s*=PROPAGATION_MANDATORY
+				org.springframework.beans.ITestBean.setAg*=PROPAGATION_REQUIRED
+				org.springframework.beans.ITestBean.set*=PROPAGATION_SUPPORTS
+			</value>
 		</property>
 	</bean>
 	
@@ -38,7 +42,9 @@
 		<property name="target"><ref local="target"/></property>
 		<property name="transactionAttributes">
 			<props>
-				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
+				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
 			</props>
 		</property>
 	</bean>
@@ -49,7 +55,9 @@
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="transactionAttributes">
 			<props>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
 				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
 			</props>
 		</property>
 		<property name="pointcut">
@@ -70,8 +78,7 @@
 	<!--
 		The HotSwappableTargetSource is a Type 3 component.
 	-->
-	<bean id="swapper" 
-		class="org.springframework.aop.target.HotSwappableTargetSource">	
+	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
 		<constructor-arg><ref local="target"/></constructor-arg>
 	</bean>
 	
@@ -81,7 +88,9 @@
 		<property name="target"><ref local="swapper"/></property>
 		<property name="transactionAttributes">
 			<props>
-				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+				<prop key="s*">PROPAGATION_MANDATORY</prop>
+				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="set*">PROPAGATION_SUPPORTS</prop>
 			</props>
 		</property>
 		<property name="proxyTargetClass"><value>true</value></property>
@@ -97,5 +106,3 @@
 	<bean id="postInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
 
 </beans>
-	
-	

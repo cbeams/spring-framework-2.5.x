@@ -24,7 +24,7 @@
 		class="org.springframework.transaction.CountingTxManager">
 	</bean>
 	
-	<bean id="tas" class="org.springframework.transaction.interceptor.PropertiesTransactionAttributeSource">
+	<bean id="tas" class="org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource">
 		<property name="properties">
 			<props>
 				<prop key="set*">PROPAGATION_REQUIRED</prop>
