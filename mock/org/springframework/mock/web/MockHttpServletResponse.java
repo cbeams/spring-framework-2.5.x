@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mock.web;
 
@@ -23,13 +23,20 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the HttpServletResponse interface.
@@ -74,7 +81,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final List cookies = new ArrayList();
 
-	private final Hashtable headers = new Hashtable();
+	private final Map headers = new HashMap();
 
 	private int status = HttpServletResponse.SC_OK;
 
@@ -210,12 +217,39 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return (Cookie[]) this.cookies.toArray(new Cookie[this.cookies.size()]);
 	}
 
+	public Cookie getCookie(String name) {
+		for (Iterator it = this.cookies.iterator(); it.hasNext();) {
+			Cookie cookie = (Cookie) it.next();
+			if (name.equals(cookie.getName())) {
+				return cookie;
+			}
+		}
+		return null;
+	}
+
 	public boolean containsHeader(String name) {
-		return this.headers.contains(name);
+		return this.headers.containsKey(name);
 	}
 
 	public Object getHeader(String name) {
 		return this.headers.get(name);
+	}
+
+	public List getHeaders(String name) {
+		Object value = this.headers.get(name);
+		if (value instanceof List) {
+			return (List) value;
+		}
+		else if (value != null) {
+			return Collections.singletonList(value);
+		}
+		else {
+			return Collections.EMPTY_LIST;
+		}
+	}
+
+	public Set getHeaderNames() {
+		return this.headers.keySet();
 	}
 
 	public String encodeURL(String url) {
@@ -234,17 +268,29 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return url;
 	}
 
-	public void sendError(int status, String errorMessage) {
+	public void sendError(int status, String errorMessage) throws IOException {
+		if (this.committed) {
+			throw new IllegalStateException("Cannot set error status - response is already committed");
+		}
 		this.status = status;
 		this.errorMessage = errorMessage;
+		this.committed = true;
 	}
 
-	public void sendError(int status) {
+	public void sendError(int status) throws IOException {
+		if (this.committed) {
+			throw new IllegalStateException("Cannot set error status - response is already committed");
+		}
 		this.status = status;
+		this.committed = true;
 	}
 
-	public void sendRedirect(String url) {
+	public void sendRedirect(String url) throws IOException {
+		if (this.committed) {
+			throw new IllegalStateException("Cannot send redirect - response is already committed");
+		}
 		this.redirectedUrl = url;
+		this.committed = true;
 	}
 
 	public String getRedirectedUrl() {
@@ -256,7 +302,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void addDateHeader(String name, long value) {
-		this.headers.put(name, new Long(value));
+		doAddHeader(name, new Long(value));
 	}
 
 	public void setHeader(String name, String value) {
@@ -264,7 +310,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void addHeader(String name, String value) {
-		this.headers.put(name, value);
+		doAddHeader(name, value);
 	}
 
 	public void setIntHeader(String name, int value) {
@@ -272,7 +318,26 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void addIntHeader(String name, int value) {
-		this.headers.put(name, new Integer(value));
+		doAddHeader(name, new Integer(value));
+	}
+
+	private void doAddHeader(String name, Object value) {
+		Assert.notNull(name, "name must not be null");
+		Assert.notNull(value, "value must not be null");
+		Object oldValue = this.headers.get(name);
+		if (oldValue instanceof List) {
+			List list = (List) oldValue;
+			list.add(value);
+		}
+		else if (oldValue != null) {
+			List list = new LinkedList();
+			list.add(oldValue);
+			list.add(value);
+			this.headers.put(name, list);
+		}
+		else {
+			this.headers.put(name, value);
+		}
 	}
 
 	public void setStatus(int status) {
