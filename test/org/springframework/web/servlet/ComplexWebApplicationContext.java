@@ -100,8 +100,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
-		pvs.addPropertyValue("exceptionMappings", "java.lang.IllegalAccessException=failed2\n" +
-		                                          "org.springframework.web.bind.ServletRequestBindingException=failed3");
+		pvs.addPropertyValue("exceptionMappings",
+		    "java.lang.IllegalAccessException=failed2\n" +
+		    "org.springframework.web.bind.ServletRequestBindingException=failed3");
 		pvs.addPropertyValue("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
@@ -111,6 +112,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		List mappedHandlers = new ManagedList();
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
 		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
+		pvs.addPropertyValue("defaultStatusCode", "500");
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		registerSingleton("multipartResolver", MockMultipartResolver.class, null);

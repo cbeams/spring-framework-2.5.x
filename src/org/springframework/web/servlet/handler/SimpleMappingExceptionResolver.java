@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class SimpleMappingExceptionResolver implements HandlerExceptionResolver, Ordered {
 
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
+	
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -56,6 +57,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	private String defaultErrorView;
 
 	private List mappedHandlers;
+
+	private Integer defaultStatusCode;
 
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
@@ -74,11 +77,12 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * and view names as values
 	 */
 	public void setExceptionMappings(Properties mappings) throws ClassNotFoundException {
-		this.exceptionMappings = new HashMap();
+		this.exceptionMappings = new HashMap(mappings.size());
 		for (Iterator it = mappings.keySet().iterator(); it.hasNext();) {
 			String exceptionClassName = (String) it.next();
 			String viewName = mappings.getProperty(exceptionClassName);
-			Class exceptionClass = Class.forName(exceptionClassName, true, Thread.currentThread().getContextClassLoader());
+			Class exceptionClass =
+			    Class.forName(exceptionClassName, true, Thread.currentThread().getContextClassLoader());
 			this.exceptionMappings.put(exceptionClass, viewName);
 		}
 	}
@@ -86,11 +90,13 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	/**
 	 * Set the name of the default error view.
 	 * This view will be returned if no specific mapping was found.
-	 * Default is null.
+	 * <p>Default is none.
 	 */
 	public void setDefaultErrorView(String defaultErrorView) {
 		this.defaultErrorView = defaultErrorView;
-		logger.info("Default error view is '" + this.defaultErrorView + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Default error view is '" + this.defaultErrorView + "'");
+		}
 	}
 
 	/**
@@ -103,6 +109,21 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
+	 * Set the default HTTP status code that this exception resolver
+	 * will apply if it resolves an error view.
+	 * <p>If not specified, no status code will be applied, either
+	 * leaving this to the controller or view, or keeping the servlet
+	 * engine's default of 200 (OK).
+	 * @param defaultStatusCode HTTP status code value, for example
+	 * 500 (SC_INTERNAL_SERVER_ERROR) or 404 (SC_NOT_FOUND)
+	 * @see javax.servlet.http.HttpServletResponse#SC_INTERNAL_SERVER_ERROR
+	 * @see javax.servlet.http.HttpServletResponse#SC_NOT_FOUND
+	 */
+	public void setDefaultStatusCode(int defaultStatusCode) {
+		this.defaultStatusCode = new Integer(defaultStatusCode);
+	}
+
+	/**
 	 * Set the name of the model attribute as which the exception should
 	 * be exposed. Default is "exception".
 	 * @see #DEFAULT_EXCEPTION_ATTRIBUTE
@@ -112,21 +133,37 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 
-	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
-	                                     Object handler, Exception ex) {
+	public ModelAndView resolveException(
+	    HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+
+		String viewName = null;
+
 		// check for specific mappings
 		if (this.exceptionMappings != null &&
 		    (this.mappedHandlers == null || this.mappedHandlers.contains(handler))) {
 			for (Iterator it = this.exceptionMappings.keySet().iterator(); it.hasNext();) {
 				Class exceptionClass = (Class) it.next();
 				if (exceptionClass.isInstance(ex)) {
-					String viewName = (String) this.exceptionMappings.get(exceptionClass);
-					return getModelAndView(viewName, ex);
+					viewName = (String) this.exceptionMappings.get(exceptionClass);
 				}
 			}
 		}
+
 		// return default error view else, if defined
-		return (this.defaultErrorView != null ? getModelAndView(this.defaultErrorView, ex) : null);
+		if (viewName == null && this.defaultErrorView != null) {
+			viewName = this.defaultErrorView;
+		}
+
+		if (viewName != null) {
+			// apply HTTP status code for error views, if specified
+			if (this.defaultStatusCode != null) {
+				response.setStatus(this.defaultStatusCode.intValue());
+			}
+			return getModelAndView(viewName, ex);
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
