@@ -4,6 +4,7 @@
  */
 package org.springframework.util;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,10 @@ import org.springframework.util.visitor.Visitor;
 
 /**
  * Spring's default <code>toString()</code> styler. Underneath the hood, uses
- * the visitor pattern to nicely encapsulate styling algorithms for each type
- * of styled object.
+ * the reflective visitor pattern to nicely encapsulate styling algorithms for
+ * each type of styled object.
+ * 
+ * This class is used by ToStringBuilder to style toString() output.
  * 
  * @author Keith Donald
  */
@@ -44,6 +47,11 @@ public class SpringToStringStyler implements ToStringStyler {
 
         public void visitClass(Class clazz) {
             buffer.append(ClassUtils.getShortName(clazz));
+        }
+        
+        public void visitMethod(Method method) {
+            buffer.append(method.getName() + "@" +
+                    ClassUtils.getShortName(method.getDeclaringClass()));
         }
 
         public void visitMap(Map value) {
@@ -132,7 +140,7 @@ public class SpringToStringStyler implements ToStringStyler {
         public void styleValue(Object value) {
             visitorSupport.invokeVisit(this, value);
         }
-        
+
         public String toString() {
             return buffer.toString();
         }
