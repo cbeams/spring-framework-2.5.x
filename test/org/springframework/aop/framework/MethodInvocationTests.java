@@ -11,10 +11,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.beans.TestBean;
 
@@ -22,7 +20,7 @@ import org.springframework.beans.TestBean;
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -86,7 +84,9 @@ new Attrib4jAttributeRegistry());
 		assertTrue("correct response", rv == returnValue);
 	}
 	
-
+/* 
+// This test is not really relevant: the framework won't invoke this twice
+ 
 	public void testLimits() throws Throwable {
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
@@ -125,6 +125,7 @@ new Attrib4jAttributeRegistry());
 //		} catch (AspectException ex) {
 //		}
 	}
+*/
 
 	public void testAttachments() throws Throwable {
 		Method m = Object.class.getMethod("hashCode", null);

@@ -10,19 +10,18 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
-import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Spring implementation of AOP Alliance MethodInvocation interface .
+ * Spring implementation of AOP Alliance MethodInvocation interface.
  * Invokes target using reflection. Subclasses can override the 
  * invokeJoinpoint() method to change this behaviour, so this is a useful
  * base class for MethodInvocation implementations.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.1 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.2 2003-12-10 12:05:26 johnsonr Exp $
  */
 public class ReflectiveMethodInvocation implements MethodInvocation {
 	
@@ -41,9 +40,9 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	protected Object proxy;
 	
 	/** 
-	 * Interceptors and any InterceptionAdvice that needs dynamic checks.
+	 * List of Methodnterceptor and InterceptorAndDynamicMethodMatcher that need dynamic checks.
 	 **/
-	public List interceptorsAndDynamicMethodMatchers;
+	protected List interceptorsAndDynamicMethodMatchers;
 	
 	/** 
 	 * Any resources attached to this invocation.
@@ -51,14 +50,12 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 */
 	private HashMap resources;
 	
-	private boolean exhausted;
-	
 	
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
 	 * -1 until we invoke: then the current interceptor
 	 */
-	private int currentInterceptor = -1;
+	private int currentInterceptorIndex = -1;
 	
 	private Class targetClass;
 	
@@ -74,16 +71,6 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	public ReflectiveMethodInvocation(Object proxy, Object target, 
 					Class targetInterface, Method m, Object[] arguments,
 					Class targetClass, List interceptorsAndDynamicMethodMatchers) {
-		populate(proxy, target, targetInterface, m, arguments,
-				targetClass, interceptorsAndDynamicMethodMatchers);
-	}
-	
-	protected ReflectiveMethodInvocation() {
-	}
-
-	protected void populate(Object proxy, Object target,
-						Class targetInterface, Method m, Object[] arguments,
-						Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		this.proxy = proxy;
 		this.target = target;
 		this.targetInterface = targetInterface;
@@ -91,18 +78,6 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 		this.method = m;
 		this.arguments = arguments;
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
-		this.currentInterceptor = -1;
-	}
-	
-	public void clear() {
-		this.proxy = null;
-		this.targetInterface = null;
-		this.targetClass = null;
-		this.target = null;
-		this.method = null;
-		this.arguments = null;
-		this.interceptorsAndDynamicMethodMatchers = null;
-		this.resources = null;
 	}
 	
 	
@@ -112,11 +87,11 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * implementation of that interface.
 	 * @return Method
 	 */
-	public Method getMethod() {
+	public final Method getMethod() {
 		return this.method;
 	}
 	
-	public AccessibleObject getStaticPart() {
+	public final AccessibleObject getStaticPart() {
 		return this.method;
 	}
 	
@@ -124,7 +99,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * Return the proxy that this interception was made through
 	 * @return Object
 	 */
-	public Object getProxy() {
+	public final Object getProxy() {
 		return this.proxy;
 	}
 	
@@ -169,7 +144,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * Private optimization method
 	 * @return Object[]
 	 */
-	public Object[] getArguments() {
+	public final Object[] getArguments() {
 		return this.arguments;
 	}
 	
@@ -188,7 +163,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	}
 
 
-	public Class getTargetInterface() {
+	public final Class getTargetInterface() {
 		return this.targetInterface;
 	}
 
@@ -196,17 +171,12 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#proceed
 	 */
 	public Object proceed() throws Throwable {
-		if (exhausted)
-			throw new AspectException("All interceptors have already been invoked");
-		
-		if (this.currentInterceptor == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
-			exhausted = true;
+		//	We start with an index of -1 and increment early
+		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
-		
-		// We begin with -1 and increment early
 
-		Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptor);
+		Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match
@@ -236,7 +206,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * @see org.aopalliance.intercept.Invocation#cloneInstance
 	 */
 	public Invocation cloneInstance() {
-		return this;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -257,7 +227,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	/**
 	 * @see org.aopalliance.intercept.Invocation#getThis
 	 */
-	public Object getThis() {
+	public final Object getThis() {
 		return this.target;
 	}
 
