@@ -43,13 +43,13 @@
 		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
 		<property name="spouse">
 			<bean id="innerBean" class="org.springframework.beans.TestBean">
-				<property name="name"><value>inner1</value></property>
-				<property name="age"><value>6</value></property>
+				<constructor-arg><value>inner1</value></constructor-arg>
+				<constructor-arg type="int"><value>6</value></constructor-arg>
 			</bean>
 		</property>
 		<property name="friends">
 			<list>
-				<bean id="innerBean" class="org.springframework.beans.DerivedTestBean">
+				<bean class="org.springframework.beans.DerivedTestBean">
 					<property name="name"><value>inner2</value></property>
 					<property name="age"><value>7</value></property>
 				</bean>
@@ -59,9 +59,15 @@
 		<property name="someMap">
 			<map>
 				<entry key="someKey">
-					<bean class="org.springframework.beans.TestBean">
+					<bean class="org.springframework.beans.TestBean" parent="jenny">
 						<constructor-arg><value>inner3</value></constructor-arg>
 						<constructor-arg type="int"><value>8</value></constructor-arg>
+					</bean>
+				</entry>
+				<entry key="someOtherKey">
+					<bean parent="jenny">
+						<property name="name"><value>inner4</value></property>
+						<property name="age"><value>9</value></property>
 					</bean>
 				</entry>
 			</map>

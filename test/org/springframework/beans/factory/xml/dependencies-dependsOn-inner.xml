@@ -3,15 +3,15 @@
 
 <beans>
 
-	<bean id="holdingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$HoldingBean">
+	<bean id="holdingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$HoldingBean">
 		<property name="dependingBean">
-			<bean id="dependingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$DependingBean"
+			<bean id="dependingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DependingBean"
 				depends-on="preparingBean1, preparingBean2"/>
 		</property>
 	</bean>
 
-	<bean id="preparingBean1" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$PreparingBean1"/>
+	<bean id="preparingBean1" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$PreparingBean1"/>
 
-	<bean id="preparingBean2" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$PreparingBean2"/>
+	<bean id="preparingBean2" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$PreparingBean2"/>
 
 </beans>

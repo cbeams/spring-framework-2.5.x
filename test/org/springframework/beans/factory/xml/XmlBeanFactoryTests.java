@@ -73,7 +73,7 @@ import org.springframework.util.StopWatch;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-public class XmlBeanFactoryTestSuite extends TestCase {
+public class XmlBeanFactoryTests extends TestCase {
 
 	public void testDescriptionButNoProperties() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
@@ -122,6 +122,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
 		assertNotNull(hasInnerBeans.getSpouse());
@@ -132,16 +133,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(2, friends.size());
 		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
 		assertEquals("inner2", inner2.getName());
-		assertEquals("innerBean", inner2.getBeanName());
+		assertEquals(DerivedTestBean.class.getName(), inner2.getBeanName());
 		assertFalse(xbf.containsBean("innerBean"));
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends.get(1);
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
 		assertNotNull(hasInnerBeans.getSomeMap());
-		assertFalse(hasInnerBeans.getSomeMap().isEmpty());
+		assertEquals(2, hasInnerBeans.getSomeMap().size());
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
-		assertEquals("inner3", inner3.getName());
-		assertEquals(8, inner3.getAge());
+		assertEquals("Jenny", inner3.getName());
+		assertEquals(30, inner3.getAge());
+		TestBean inner4 = (TestBean) hasInnerBeans.getSomeMap().get("someOtherKey");
+		assertEquals("inner4", inner4.getName());
+		assertEquals(9, inner4.getAge());
+
 		xbf.destroySingletons();
 		assertTrue(inner2.wasDestroyed());
 		assertTrue(innerFactory.getName() == null);
@@ -150,6 +155,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		assertEquals(TestBean.class, child.getType("inheritsFromParentFactory"));
 		TestBean inherits = (TestBean) child.getBean("inheritsFromParentFactory");
 		// Name property value is overridden
 		assertTrue(inherits.getName().equals("override"));
@@ -162,6 +168,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testInheritanceWithDifferentClass() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		assertEquals(DerivedTestBean.class, child.getType("inheritsWithClass"));
 		DerivedTestBean inherits = (DerivedTestBean) child.getBean("inheritsWithDifferentClass");
 		// Name property value is overridden
 		assertTrue(inherits.getName().equals("override"));
@@ -173,6 +180,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testInheritanceWithClass() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		assertEquals(DerivedTestBean.class, child.getType("inheritsWithClass"));
 		DerivedTestBean inherits = (DerivedTestBean) child.getBean("inheritsWithClass");
 		// Name property value is overridden
 		assertTrue(inherits.getName().equals("override"));
@@ -184,6 +192,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	public void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
+		assertEquals(TestBean.class, child.getType("prototypeInheritsFromParentFactoryPrototype"));
 		TestBean inherits = (TestBean) child.getBean("prototypeInheritsFromParentFactoryPrototype");
 		// Name property value is overridden
 		assertTrue(inherits.getName().equals("prototype-override"));
@@ -219,7 +228,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(parent.isSingleton("inheritedTestBeanWithoutClass"));
 
 		// abstract beans should not match
-		Map tbs = parent.getBeansOfType(TestBean.class, true, true);
+		Map tbs = parent.getBeansOfType(TestBean.class);
 		assertEquals(1, tbs.size());
 		assertEquals("inheritedTestBeanPrototype", tbs.keySet().iterator().next());
 

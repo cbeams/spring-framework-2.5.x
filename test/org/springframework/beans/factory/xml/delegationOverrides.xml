@@ -47,7 +47,7 @@
 		class="org.springframework.beans.factory.xml.FixedMethodReplacer" />
 		
 	<bean id="doSomethingReplacer" 
-		class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$DoSomethingReplacer" />
+		class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoSomethingReplacer" />
 	
 	
 	<bean id="serializableReplacer" 
