@@ -37,7 +37,7 @@ import org.springframework.web.util.HtmlUtils;
  * context, current locale, current theme, and potential binding errors.
  * Provides easy access to localized messages and Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within <jsp:useBean>,
+ * <p>Suitable for exposition to views, and usage within JSP's "useBean" tag,
  * JSP scriptlets, JSTL EL, Velocity templates, etc. Necessary for views
  * that do not have access to the servlet request, like Velocity templates.
  *
@@ -47,18 +47,19 @@ import org.springframework.web.util.HtmlUtils;
  * @author Juergen Hoeller
  * @since 03.03.2003
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
+ * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
  */
 public class RequestContext {
 
-	private HttpServletRequest request;
+	private final HttpServletRequest request;
 
-	private Map model;
+	private final Map model;
 
-	private WebApplicationContext webApplicationContext;
+	private final WebApplicationContext webApplicationContext;
 
-	private Locale locale;
+	private final Locale locale;
 
-	private Theme theme;
+	private final Theme theme;
 
 	private boolean defaultHtmlEscape;
 
@@ -100,7 +101,7 @@ public class RequestContext {
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
 	 */
 	public String getContextPath() {
-		return request.getContextPath();
+		return this.request.getContextPath();
 	}
 
 	/**
