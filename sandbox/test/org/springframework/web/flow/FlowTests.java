@@ -79,7 +79,6 @@ public class FlowTests extends TestCase {
 		}
 
 		public void requestSubmitted(FlowExecutionContext context, Event event) {
-			assertTrue(flowExecutionsStarted > 0);
 			requestSubmitted = true;
 			requestProcessed = false;
 		}

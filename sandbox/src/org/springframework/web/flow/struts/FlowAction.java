@@ -28,7 +28,7 @@ import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.action.AbstractAction;
+import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.flow.support.HttpServletFlowExecutionManager;
@@ -152,7 +152,7 @@ public class FlowAction extends TemplateAction {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
 						bindingForm.setErrors((Errors)context.requestScope().getAttribute(
-								AbstractAction.FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class));
+								FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
 						bindingForm.setRequest(request);
 					}
 				}

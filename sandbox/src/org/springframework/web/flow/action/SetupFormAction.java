@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.util.StringUtils;
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 import org.springframework.validation.DataBinder;
@@ -51,16 +52,16 @@ public class SetupFormAction extends BindAndValidateAction {
 
 	private static final String NOT_MAPPED_PLACEHOLDER_VALUE = "!NOT MAPPED!";
 
-	private boolean prepopulateFromRequest;
+	private boolean prepopulateFromEvent;
 
 	/**
 	 * Sets a flag that determines whether this setup form action should
-	 * prepopulate its form object from request parameter values when executed.
+	 * prepopulate its form object from event parameter values when executed.
 	 * @param prepopulateFromRequest true if the form object should be populated
 	 *        with request parameters, false otherwise
 	 */
-	public void setPrepopulateFromRequest(boolean prepopulateFromRequest) {
-		this.prepopulateFromRequest = prepopulateFromRequest;
+	public void setPrepopulateFromEvent(boolean prepopulateFromEvent) {
+		this.prepopulateFromEvent = prepopulateFromEvent;
 	}
 
 	// validation doesn't happen on form setup by default
@@ -71,13 +72,13 @@ public class SetupFormAction extends BindAndValidateAction {
 	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		Object formObject = loadRequiredFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
-		if (prepopulateFromRequest) {
+		if (prepopulateFromEvent) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Prepopulating backing form object from request parameters");
 			}
-			// binder.bind(context);
+			binder.bind(new MutablePropertyValues(context.getEvent().getParameters()));
 		}
-		// exposeBindExceptionErrors(context, binder.getErrors());
+		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors());
 		exposeViewPlaceholders(context);
 		try {
 			setupReferenceData(context);

@@ -40,6 +40,10 @@ public class FormObjectAccessor {
 
 	private FlowExecutionContext context;
 
+	/**
+	 * Creates a form object accessor that wraps the given context.
+	 * @param context the flow execution context.
+	 */
 	public FormObjectAccessor(FlowExecutionContext context) {
 		this.context = context;
 	}
