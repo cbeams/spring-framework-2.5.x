@@ -18,9 +18,9 @@
 		on the views!
 	-->	
 	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-		<property name="flowLocator">
+		<constructor-arg index="0">
 			<bean class="org.springframework.web.flow.config.BeanFactoryFlowServiceLocator"/>
-		</property>
+		</constructor-arg>
 		<property name="flowExecutionStorage">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 		</property>

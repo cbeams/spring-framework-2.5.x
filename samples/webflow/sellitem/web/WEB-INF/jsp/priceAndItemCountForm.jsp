@@ -38,7 +38,7 @@
 		</DIV>
 		<HR>
 		<DIV align="right">
-			<INPUT type="button" onclick="javascript:document.submitForm.submit()" value="Next">
+			<INPUT type="button" onclick="javascript:document.priceAndItemCountForm.submit()" value="Next">
 		</DIV>
 	</BODY>
 </HTML>
