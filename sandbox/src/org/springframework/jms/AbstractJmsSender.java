@@ -26,6 +26,7 @@ import javax.jms.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jms.converter.JmsConverter;
 import org.springframework.jms.support.DefaultJmsAdmin;
 import org.springframework.jms.support.JmsAdmin;
 import org.springframework.util.ClassUtils;
@@ -54,6 +55,11 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
 	 * Used to obtain JMS connections.
 	 */
 	private ConnectionFactory _cf;
+	
+	/**
+	 * The JMS Converter to use for send(object) methods.
+	 */
+	private JmsConverter _jmsConverter;
 	
     /**
      * Default transaction mode for a JMS Session. 
@@ -334,9 +340,11 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
             logger.info("Translating JMSException with errorCode '" + orig.getErrorCode() + "' and message [" +
                                     orig.getMessage() + "]; for task [" + task + "]");
         }
+        
         if ( orig instanceof JMSSecurityException ) {
             return new JmsSecurityException( orig );
         }
+        
 
         // all other exceptions in our Jms runtime exception hierarchy have the
         // same unqualified names as their javax.jms counterparts, so just
@@ -353,9 +361,21 @@ public abstract class AbstractJmsSender implements JmsSender, InitializingBean {
             Object counterpart = ctor.newInstance( new Object[]{orig} );
             return (JmsException)counterpart;
         } catch ( Exception e ) {
-            throw new IllegalStateException( "Unable to instantiate class [" +
+			throw new IllegalStateException( "Unable to instantiate class [" +
                                              longName + "]", e );
         }
+    }
+
+    public JmsConverter getJmsConverter() {
+        return _jmsConverter;
+    }
+
+    /**
+     * Set the converter to use
+     * @param converter The JMS converter
+     */
+    public void setJmsConverter(JmsConverter converter) {
+        _jmsConverter = converter;
     }
 
 }
