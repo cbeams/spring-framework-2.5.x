@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.util.Assert;
 
 /**
  * Simple attributes mapper that allows mappings to be configured in the Spring
@@ -94,10 +95,19 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
      */
     public void setToMappingsList(List toMappingsList) {
         this.toMappings = new HashMap(toMappingsList.size());
-        Iterator it = toMappingsList.iterator();
+        putListMappings(this.toMappings, toMappingsList);
+    }
+    
+    private void putListMappings(Map map, List mappingsList) {
+        Iterator it = mappingsList.iterator();
         while (it.hasNext()) {
-            String key = (String)it.next();
-            toMappings.put(key, key);
+            Object key = it.next();
+            if (key instanceof List) {
+                putListMappings(map, (List)key);
+            } else {
+                Assert.isInstanceOf(String.class, key);
+                map.put(key, key);
+            }
         }
     }
 
@@ -110,17 +120,20 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
         this.toMappings = new HashMap(toMappings);
     }
 
+    public void setToMappingsMaps(Map[] toMappings) {
+        this.toMappings = new HashMap();
+        for (int i = 0; i < toMappings.length; i++) {
+            this.toMappings.putAll(toMappings[i]);
+        }
+    }
+
     /**
      * Set the mappings that will be executed when mapping model data <i>from
      * </i> the sub flow. All keys in given list will be mapped.
      */
     public void setFromMappingsList(List fromMappingsList) {
         this.fromMappings = new HashMap(fromMappingsList.size());
-        Iterator it = fromMappingsList.iterator();
-        while (it.hasNext()) {
-            String key = (String)it.next();
-            fromMappings.put(key, key);
-        }
+        putListMappings(this.fromMappings, fromMappingsList);
     }
 
     /**
@@ -130,6 +143,13 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
      */
     public void setFromMappingsMap(Map fromMappings) {
         this.fromMappings = new HashMap(fromMappings);
+    }
+
+    public void setFromMappingsMaps(Map[] fromMappings) {
+        this.fromMappings = new HashMap();
+        for (int i = 0; i < fromMappings.length; i++) {
+            this.fromMappings.putAll(fromMappings[i]);
+        }
     }
 
     public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes) {
