@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockServletContext;
@@ -94,13 +93,8 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	}
 
 	public void testNoSuchViewEnglish() throws Exception {
-		try {
-			View v = rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH);
-			fail("No such view should fail with exception");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// OK
-		}
+		View v = rb.resolveViewName("xxxxxxweorqiwuopeir", Locale.ENGLISH);
+		assertTrue(v == null);
 	}
 
 	public void testOnSetContextCalledOnce() throws Exception {

@@ -90,7 +90,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.30 2004-04-01 14:54:55 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.31 2004-05-04 09:00:12 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -118,32 +118,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
-	 * Well-known name for the ExceptionResolver object in the bean factory for this namespace.
-	 */
-	public static final String EXCEPTION_RESOLVER_BEAN_NAME = "exceptionResolver";
-
-	/**
-	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
-	 */
-	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
-
-	/**
 	 * Request attribute to hold current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
-	 * Request attribute to hold current locale, retrievable by views.
-	 * @see org.springframework.web.servlet.support.RequestContext
-	 */
-	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
-
-	/**
 	 * Request attribute to hold current multipart resolver, retrievable by views/binders.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils
 	 */
 	public static final String MULTIPART_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".MULTIPART";
+
+	/**
+	 * Request attribute to hold current locale, retrievable by views.
+	 * @see org.springframework.web.servlet.support.RequestContext
+	 */
+	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
 
 	/**
 	 * Request attribute to hold current theme, retrievable by views.
@@ -155,6 +145,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Additional logger for use when no mapping handlers are found for a request.
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
+
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -175,7 +166,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	private List handlerExceptionResolvers;
 
 	/** ViewResolver used by this servlet */
-	private ViewResolver viewResolver;
+	private List viewResolvers;
 
 
 	/**
@@ -191,7 +182,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initHandlerMappings();
 		initHandlerAdapters();
 		initHandlerExceptionResolvers();
-		initViewResolver();
+		initViewResolvers();
 	}
 
 	/**
@@ -307,22 +298,25 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the ViewResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * Initialize the ViewResolvers used by this class.
+	 * If no ViewResolver beans are defined in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolver() throws BeansException {
-		try {
-			this.viewResolver = (ViewResolver) getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
-			logger.info("Loaded view resolver [" + viewResolver + "]");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default
+	private void initViewResolvers() throws BeansException {
+		// find all ViewResolvers in the ApplicationContext
+		Map matchingBeans = getWebApplicationContext().getBeansOfType(ViewResolver.class, true, false);
+		this.viewResolvers = new ArrayList(matchingBeans.values());
+		// Ensure we have at least one ViewResolver, by registering
+		// a default ViewResolver if no other resolvers are found.
+		if (this.viewResolvers.isEmpty()) {
 			InternalResourceViewResolver vr = new InternalResourceViewResolver();
 			vr.setApplicationContext(getWebApplicationContext());
-			this.viewResolver = vr;
-			logger.info("Unable to locate view resolver with name '" + VIEW_RESOLVER_BEAN_NAME +
-									"': using default [" + this.viewResolver + "]");
+			this.viewResolvers.add(vr);
+			logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using defaults");
+		}
+		else {
+			// we keep ViewResolvers in sorted order
+			Collections.sort(this.viewResolvers, new OrderComparator());
 		}
 	}
 
@@ -513,16 +507,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	    throws Exception {
 		View view = null;
 		if (mv.isReference()) {
-			// we need to resolve this view name
-			view = this.viewResolver.resolveViewName(mv.getViewName(), locale);
+			// we need to resolve the view name
+			for (Iterator it = this.viewResolvers.iterator(); it.hasNext() && view == null;) {
+				ViewResolver viewResolver = (ViewResolver) it.next();
+				view = viewResolver.resolveViewName(mv.getViewName(), locale);
+			}
+			if (view == null) {
+				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
+																	 "' in servlet with name '" + getServletName() + "'");
+			}
 		}
 		else {
 			// no need to lookup: the ModelAndView object contains the actual View object
 			view = mv.getView();
-		}
-		if (view == null) {
-			throw new ServletException("Error in ModelAndView object or View resolution encountered by servlet with name '" +
-																 getServletName() + "': View to render cannot be null with ModelAndView [" + mv + "]");
+			if (view == null) {
+				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a View object " +
+																	 " in servlet with name '" + getServletName() + "'");
+			}
 		}
 		view.render(mv.getModel(), request, response);
 	}

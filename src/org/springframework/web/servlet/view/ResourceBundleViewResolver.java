@@ -24,8 +24,10 @@ import java.util.ResourceBundle;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.web.servlet.View;
@@ -33,22 +35,29 @@ import org.springframework.web.servlet.View;
 /**
  * Implementation of ViewResolver that uses bean definitions in a
  * ResourceBundle, specified by the bundle basename. The bundle is
- * typically defined in a properties file, located in the classpath.
+ * typically defined in a properties file, located in the class path.
+ * The default bundle basename is "views".
  *
- * <p>This ViewResolver supports internationalization,
+ * <p>This ViewResolver supports localized view definitions,
  * using the default support of java.util.PropertyResourceBundle.
  *
- * <p>Extends AbstractCachingViewResolver for decent performance.
+ * <p>Note: This ViewResolver implements the Ordered interface to allow for
+ * flexible participation in ViewResolver chaining. For example, some special
+ * views could be defined via this ViewResolver (giving it 0 as "order" value),
+ * while all remaining views could be resolved by a UrlBasedViewResolver.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see java.util.ResourceBundle#getBundle
  * @see java.util.PropertyResourceBundle
+ * @see UrlBasedViewResolver
  */
-public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
+public class ResourceBundleViewResolver extends AbstractCachingViewResolver implements Ordered {
 
 	/** Default if no other basename is supplied */
 	public final static String DEFAULT_BASENAME = "views";
+
+	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private String[] basenames = new String[] {DEFAULT_BASENAME};
 
@@ -56,6 +65,14 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 
 	/** Locale -> BeanFactory */
 	private Map cachedFactories = new HashMap();
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
+	}
 
 	/**
 	 * Set the basename, as defined in the java.util.ResourceBundle documentation.
@@ -93,7 +110,13 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 	}
 
 	protected View loadView(String viewName, Locale locale) throws MissingResourceException, BeansException {
-		return (View) initFactory(locale).getBean(viewName, View.class);
+		try {
+			return (View) initFactory(locale).getBean(viewName, View.class);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// to allow for ViewResolver chaining
+			return null;
+		}
 	}
 
 	/**

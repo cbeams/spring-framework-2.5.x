@@ -20,36 +20,51 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.web.servlet.View;
 
 /**
- * Implementation of ViewResolver that uses bean definitions in an XML
- * file, specified by location (URL or relative path, according to the
- * ApplicationContext implementation).
- * The file will typically be located in the WEB-INF directory.
+ * Implementation of ViewResolver that uses bean definitions in an
+ * XML file, specified by resource location. The file will typically
+ * be located in the WEB-INF directory; default is "/WEB-INF/views.xml".
  *
  * <p>This ViewResolver does not support internationalization.
  * Consider ResourceBundleViewResolver if you need to apply
  * different view resources per locale.
  *
- * <p>Extends AbstractCachingViewResolver for decent performance.
+ * <p>Note: This ViewResolver implements the Ordered interface to allow for
+ * flexible participation in ViewResolver chaining. For example, some special
+ * views could be defined via this ViewResolver (giving it 0 as "order" value),
+ * while all remaining views could be resolved by a UrlBasedViewResolver.
  *
  * @author Juergen Hoeller
  * @since 18.06.2003
  * @see org.springframework.context.ApplicationContext#getResource
  * @see ResourceBundleViewResolver
+ * @see UrlBasedViewResolver
  */
-public class XmlViewResolver extends AbstractCachingViewResolver {
+public class XmlViewResolver extends AbstractCachingViewResolver implements Ordered {
 
 	/** Default if no other location is supplied */
 	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
+	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
+
 	private Resource location;
 
 	private BeanFactory cachedFactory;
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
+	}
 
 	/**
 	 * Set the location of the XML file that defines the view beans.
@@ -79,7 +94,13 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 	}
 
 	protected View loadView(String viewName, Locale locale) throws BeansException {
-		return (View) initFactory().getBean(viewName, View.class);
+		try {
+			return (View) initFactory().getBean(viewName, View.class);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// to allow for ViewResolver chaining
+			return null;
+		}
 	}
 
 	/**

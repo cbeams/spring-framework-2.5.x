@@ -49,6 +49,7 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
 
 /**
@@ -80,8 +81,13 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class, null);
 
 		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("order", new Integer(0)));
 		pvs.addPropertyValue(new PropertyValue("basename", "org.springframework.web.servlet.complexviews"));
-		registerSingleton(DispatcherServlet.VIEW_RESOLVER_BEAN_NAME, ResourceBundleViewResolver.class, pvs);
+		registerSingleton("viewResolver1", ResourceBundleViewResolver.class, pvs);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("suffix", ".jsp"));
+		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("commandClass", "org.springframework.beans.TestBean"));

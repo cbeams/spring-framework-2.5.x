@@ -27,6 +27,10 @@ package org.springframework.web.servlet.view;
  * WEB-INF, to hide them from direct access (e.g. via a manually entered URL).
  * Only controllers will be able to access them then.
  *
+ * <p>Note: When chaining ViewResolvers, a InternalResourceViewResolver always
+ * needs to be last, as it will attempt to resolve any view name, no matter
+ * whether the underlying resource actually exists.
+ *
  * @author Juergen Hoeller
  * @since 17.02.2003
  * @see #setViewClass

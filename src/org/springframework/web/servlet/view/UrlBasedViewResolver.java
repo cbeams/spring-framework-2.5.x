@@ -1,24 +1,25 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view;
 
 import java.util.Locale;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.View;
 
 /**
@@ -40,6 +41,10 @@ import org.springframework.web.servlet.View;
  *
  * <p>Note: This class does not support localized resolution, i.e. resolving
  * a symbolic view name to different resources depending on the current locale.
+ *
+ * <p>Note: When chaining ViewResolvers, a UrlBasedViewResolver always needs
+ * to be last, as it will attempt to resolve any view name, no matter whether
+ * the underlying resource actually exists.
  *
  * @author Juergen Hoeller
  * @since 13.12.2003
@@ -118,7 +123,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	/**
 	 * This implementation returns just the view name,
-	 * as InternalResourceViewResolver doesn't support localized resolution.
+	 * as this ViewResolver doesn't support localized resolution.
 	 */
 	protected String getCacheKey(String viewName, Locale locale) {
 		return viewName;
@@ -131,14 +136,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		}
 	}
 
-	/**
-	 * Method creating the view, possibly overriden by subclasses. Remember that
-	 * this method does not fully initialize the view (for example,
-	 * ApplicationContextAware-methods haven't been called yet), clients should only
-	 * be using {@link AbstractCachingViewResolver#resolveViewName(String, Locale)}, which
-	 * does fully initialize the view objects found.
-	 */
-	protected View loadView(String viewName, Locale locale) {
+	protected View loadView(String viewName, Locale locale) throws BeansException {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
 		view.setBeanName(viewName);
 		view.setUrl(this.prefix + viewName + this.suffix);

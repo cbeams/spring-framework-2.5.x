@@ -106,13 +106,19 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Subclasses must implement this method. There need be no concern for efficiency,
-	 * as this class will cache views. Not all subclasses may support internationalization:
+	 * Subclasses must implement this method. There need be no concern
+	 * for efficiency, as this class will cache views.
+	 * <p>Not all subclasses may support internationalization:
 	 * A subclass that doesn't can simply ignore the locale parameter.
+	 * <p>This method is not supposed to fully initialize the view (for example,
+	 * ApplicationContextAware methods haven't been called yet). Clients should only
+	 * be using resolveViewName, which does fully initialize the view objects found.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
-	 * @return the View instance
+	 * @return the View instance, or null if not found
+	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view couldn't be resolved
+	 * @see #resolveViewName
 	 */
 	protected abstract View loadView(String viewName, Locale locale) throws Exception;
 
