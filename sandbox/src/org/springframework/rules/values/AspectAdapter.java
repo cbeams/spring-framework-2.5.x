@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/AspectAdapter.java,v 1.1 2004-06-12 07:27:08 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-06-12 07:27:08 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/AspectAdapter.java,v 1.2 2004-06-12 16:32:18 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2004-06-12 16:32:18 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -16,15 +16,15 @@ package org.springframework.rules.values;
 public class AspectAdapter extends AbstractValueModel {
     private String aspect;
 
-    private AspectAccessStrategy aspectAccessStrategy;
+    private MutableAspectAccessStrategy aspectAccessStrategy;
 
-    public AspectAdapter(AspectAccessStrategy aspectAccessStrategy,
+    public AspectAdapter(MutableAspectAccessStrategy aspectAccessStrategy,
             String aspect) {
         this(null, aspectAccessStrategy, aspect);
     }
 
     public AspectAdapter(final ValueModel domainObjectHolder,
-            AspectAccessStrategy aspectAccessStrategy, String aspect) {
+            MutableAspectAccessStrategy aspectAccessStrategy, String aspect) {
         if (domainObjectHolder != null) {
             if (logger.isDebugEnabled()) {
                 logger

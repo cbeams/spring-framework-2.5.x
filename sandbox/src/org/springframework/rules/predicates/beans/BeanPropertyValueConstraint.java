@@ -17,6 +17,7 @@ package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
+import org.springframework.rules.values.AspectAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -46,13 +47,12 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
         this.valueConstraint = valueConstraint;
     }
 
-    /**
-     * Tests the value of the configured propertyName for this bean against the
-     * configured predicate constraint.
-     * 
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
-    public boolean test(Object bean) {
+    protected boolean test(AspectAccessStrategy domainObjectAccessStrategy) {
+        return valueConstraint.test(domainObjectAccessStrategy
+                .getValue(getPropertyName()));
+    }
+
+    protected boolean testJavaBean(Object bean) {
         GetProperty getProperty = new GetProperty(bean);
         return valueConstraint.test(getProperty.evaluate(getPropertyName()));
     }

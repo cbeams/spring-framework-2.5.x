@@ -18,6 +18,7 @@ package org.springframework.rules.predicates.beans;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.Required;
+import org.springframework.rules.values.AspectAccessStrategy;
 
 /**
  * Predicate that tests if the specified bean property is "present" - that is,
@@ -38,13 +39,12 @@ public class PropertyPresent extends AbstractBeanPropertyExpression implements
         super(propertyName);
     }
 
-    /**
-     * Test if the value of <code>propertyName</code> is present for the
-     * specified bean.
-     * 
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
-    public boolean test(Object bean) {
+    protected boolean test(AspectAccessStrategy domainObjectAccessStrategy) {
+        return Required.instance().test(
+                domainObjectAccessStrategy.getValue(getPropertyName()));
+    }
+
+    protected boolean testJavaBean(Object bean) {
         GetProperty getProperty = new GetProperty(bean);
         return Required.instance()
                 .test(getProperty.evaluate(getPropertyName()));

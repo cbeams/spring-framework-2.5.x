@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/BeanPropertyAccessStrategy.java,v 1.1 2004-06-12 07:27:08 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-06-12 07:27:08 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/rules/values/BeanPropertyAccessStrategy.java,v 1.2 2004-06-12 16:32:18 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2004-06-12 16:32:18 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -23,8 +23,7 @@ import org.springframework.beans.BeanWrapperImpl;
  * 
  * @author Keith Donald
  */
-public class BeanPropertyAccessStrategy implements AspectAccessStrategy {
-
+public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     private static final Log logger = LogFactory
             .getLog(BeanPropertyAccessStrategy.class);
 
@@ -84,18 +83,22 @@ public class BeanPropertyAccessStrategy implements AspectAccessStrategy {
     }
 
     /**
-     * @see org.springframework.rules.values.AspectAccessStrategy#getValue(java.lang.String)
+     * @see org.springframework.rules.values.MutableAspectAccessStrategy#getValue(java.lang.String)
      */
     public Object getValue(String aspect) {
         return beanWrapper.getPropertyValue(aspect);
     }
 
     /**
-     * @see org.springframework.rules.values.AspectAccessStrategy#setValue(java.lang.String,
+     * @see org.springframework.rules.values.MutableAspectAccessStrategy#setValue(java.lang.String,
      *      java.lang.Object)
      */
     public void setValue(String aspect, Object value) {
         this.beanWrapper.setPropertyValue(aspect, value);
+    }
+    
+    public Object getDomainObject() {
+        return beanHolder.get();
     }
 
 }

@@ -17,6 +17,7 @@ package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.functions.GetProperty;
+import org.springframework.rules.values.AspectAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.util.Assert;
  */
 public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
     private String otherPropertyName;
+
     private BinaryPredicate beanPropertyExpression;
 
     /**
@@ -58,13 +60,13 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
         return beanPropertyExpression;
     }
 
-    /**
-     * Tests the values of the two configured propertyNames for this bean using
-     * the configured binary predicate.
-     * 
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
-    public boolean test(Object bean) {
+    protected boolean test(AspectAccessStrategy domainObjectAccessStrategy) {
+        return beanPropertyExpression.test(domainObjectAccessStrategy
+                .getValue(getPropertyName()), domainObjectAccessStrategy
+                .getValue(getOtherPropertyName()));
+    }
+
+    protected boolean testJavaBean(Object bean) {
         GetProperty getProperty = new GetProperty(bean);
         return beanPropertyExpression.test(getProperty
                 .evaluate(getPropertyName()), getProperty

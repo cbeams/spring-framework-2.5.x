@@ -4,6 +4,7 @@
  */
 package org.springframework.rules.predicates.beans;
 
+import org.springframework.rules.values.AspectAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -15,7 +16,11 @@ public abstract class AbstractBeanPropertyExpression implements
         BeanPropertyExpression {
     private String propertyName;
 
-    public AbstractBeanPropertyExpression(String propertyName) {
+    protected AbstractBeanPropertyExpression() {
+        
+    }
+    
+    protected AbstractBeanPropertyExpression(String propertyName) {
         setPropertyName(propertyName);
     }
 
@@ -30,6 +35,20 @@ public abstract class AbstractBeanPropertyExpression implements
         Assert.notNull(propertyName);
         this.propertyName = propertyName;
     }
+
+    public final boolean test(Object o) {
+        if (o instanceof AspectAccessStrategy) {
+            return test((AspectAccessStrategy)o);
+        }
+        else {
+            return testJavaBean(o);
+        }
+    }
+
+    protected abstract boolean test(
+            AspectAccessStrategy domainObjectAccessStrategy);
+
+    protected abstract boolean testJavaBean(Object javaBean);
 
     public String toString() {
         return getPropertyName();

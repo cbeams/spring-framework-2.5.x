@@ -18,6 +18,7 @@ package org.springframework.rules.predicates.beans;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.Required;
+import org.springframework.rules.values.AspectAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.util.Assert;
 public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
         UnaryPredicate {
     private String propertyName;
+
     private UnaryPredicate predicate;
 
     /**
@@ -50,28 +52,34 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
     public UnaryPredicate getPredicate() {
         return predicate;
     }
-    
+
     protected void setPredicate(UnaryPredicate predicate) {
         Assert.notNull(predicate);
         this.predicate = predicate;
     }
 
-    /**
-     * Tests the RequiredIfTrue condition.
-     * 
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
-    public boolean test(Object bean) {
+    protected boolean test(AspectAccessStrategy domainObjectAccessStrategy) {
+        if (predicate.test(domainObjectAccessStrategy)) {
+            return Required.instance().test(
+                    domainObjectAccessStrategy.getValue(getPropertyName()));
+        }
+        else {
+            return true;
+        }
+    }
+
+    protected boolean testJavaBean(Object bean) {
         Assert.notNull(propertyName);
         if (predicate.test(bean)) {
             GetProperty getProperty = new GetProperty(bean);
             return Required.instance().test(
                     getProperty.evaluate(getPropertyName()));
-        } else {
+        }
+        else {
             return true;
         }
     }
-    
+
     public String toString() {
         return "required if (" + predicate + ")";
     }
