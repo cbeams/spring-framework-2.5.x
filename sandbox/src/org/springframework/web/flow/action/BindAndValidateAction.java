@@ -417,12 +417,12 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
     protected void onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
             BindException errors) {
         if (!errors.hasErrors()) {
-            onBindAndValidateSuccess(request, model, formObject);
+            onBindAndValidateSuccess(request, model, formObject, errors);
         }
     }
 
     protected void onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
-            Object formObject) {
+            Object formObject, BindException errors) {
 
     }
 
