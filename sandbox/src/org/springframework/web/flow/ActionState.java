@@ -315,10 +315,9 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger
-								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-										+ eventIds[executionCount] + "' -- "
-										+ "I will proceed to the next action in the chain");
+						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+								+ eventIds[executionCount] + "' -- "
+								+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -339,14 +338,14 @@ public class ActionState extends TransitionableState {
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-							+ "-- programmer configuration error; "
-							+ "make sure you add at least one action to this state"));
+					+ "-- programmer configuration error; "
+					+ "make sure you add at least one action to this state"));
 		}
 	}
 
 	/**
 	 * Wrapper class for actions that associates an action with its name (or
-	 * null if its an unnamed action).
+	 * <code>null</code> if its an unnamed action).
 	 * <p>
 	 * For internal use by the ActionState.
 	 * 
@@ -430,7 +429,7 @@ public class ActionState extends TransitionableState {
 		 * execution.
 		 * <p>
 		 * If the wrapped action is named, the name will be used as a qualifier
-		 * (e.g. "myAction.success").
+		 * for the event (e.g. "myAction.success").
 		 */
 		protected Event getEvent(Event resultEvent) {
 			if (resultEvent == null) {

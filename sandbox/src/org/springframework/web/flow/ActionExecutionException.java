@@ -42,7 +42,6 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * @param state the action state that attempted to execute the action
 	 * @param action the action that generated the exception
 	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
@@ -51,14 +50,25 @@ public class ActionExecutionException extends NestedRuntimeException {
 				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
 	}
 
+	/**
+	 * Returns the action state of the flow that was executing the action that
+	 * threw the unhandled exception occured.
+	 */
 	public ActionState getState() {
 		return action.getState();
 	}
 
+	/**
+	 * Returns the action that threw the unhandled exception.
+	 */
 	public Action getAction() {
 		return action.getAction();
 	}
 
+	/**
+	 * Returns the name of the action that threw the unhandled exception, or
+	 * <code>null</code> if it was an unnamed action.
+	 */
 	public String getActionName() {
 		return action.getName();
 	}	
