@@ -199,8 +199,9 @@ public abstract class SessionFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator, boolean)
 	 */
-	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-	                                 SQLExceptionTranslator jdbcExceptionTranslator) {
+	public static Session getSession(
+			SessionFactory sessionFactory, Interceptor entityInterceptor,
+			SQLExceptionTranslator jdbcExceptionTranslator) {
 		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, true);
 	}
 
@@ -240,8 +241,9 @@ public abstract class SessionFactoryUtils {
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-	                                 SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
+	public static Session getSession(
+			SessionFactory sessionFactory, Interceptor entityInterceptor,
+			SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
 			throws DataAccessResourceFailureException {
 		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, allowSynchronization, true);
 	}
@@ -262,9 +264,9 @@ public abstract class SessionFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
 	 */
-	private static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-	                                  SQLExceptionTranslator jdbcExceptionTranslator,
-	                                  boolean allowSynchronization, boolean allowCreate)
+	private static Session getSession(
+			SessionFactory sessionFactory, Interceptor entityInterceptor,
+			SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization, boolean allowCreate)
 			throws DataAccessResourceFailureException, IllegalStateException {
 
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
@@ -447,9 +449,19 @@ public abstract class SessionFactoryUtils {
 
 
 	/**
-	 * Initialize deferred close for the given SessionFactory.
-	 * Sessions will not be actually closed on close calls then,
-	 * but rather at a final processDeferredClose call.
+	 * Return if deferred close is active for the current thread
+	 * and the given SessionFactory.
+	 * @param sessionFactory Hibernate SessionFactory
+	 */
+	public static boolean isDeferredCloseActive(SessionFactory sessionFactory) {
+		Map holderMap = (Map) deferredCloseHolder.get();
+		return (holderMap != null && holderMap.containsKey(sessionFactory));
+	}
+
+	/**
+	 * Initialize deferred close for the current thread and the given SessionFactory.
+	 * Sessions will not be actually closed on close calls then, but rather at a
+	 * processDeferredClose call at a finishing point (like request completion).
 	 * <p>Used by OpenSessionInViewFilter and OpenSessionInViewInterceptor
 	 * when not configured for a single session.
 	 * @param sessionFactory Hibernate SessionFactory
@@ -469,7 +481,8 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Process Sessions that have been registered for deferred close.
+	 * Process Sessions that have been registered for deferred close
+	 * for the given SessionFactory.
 	 * @param sessionFactory Hibernate SessionFactory
 	 * @see #initDeferredClose
 	 * @see #closeSessionIfNecessary
@@ -567,8 +580,9 @@ public abstract class SessionFactoryUtils {
 
 		private Transaction jtaTransaction = null;
 
-		private SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory,
-																				 SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
+		private SpringSessionSynchronization(
+				SessionHolder sessionHolder, SessionFactory sessionFactory,
+				SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
 			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
@@ -665,8 +679,8 @@ public abstract class SessionFactoryUtils {
 
 		private final TransactionManager jtaTransactionManager;
 
-		private JtaSessionSynchronization(SpringSessionSynchronization springSessionSynchronization,
-		                                  TransactionManager jtaTransactionManager) {
+		private JtaSessionSynchronization(
+				SpringSessionSynchronization springSessionSynchronization, TransactionManager jtaTransactionManager) {
 			this.springSessionSynchronization = springSessionSynchronization;
 			this.jtaTransactionManager = jtaTransactionManager;
 		}

@@ -74,6 +74,11 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.replay();
 		interceptor.preHandle(request, response, "handler");
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
+
+		// check that a further invocation simply participates
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
 		sfControl.verify();
 		sessionControl.verify();
 
@@ -167,6 +172,11 @@ public class OpenSessionInViewTests extends TestCase {
 		interceptor.preHandle(request, response, "handler");
 		Session sess = SessionFactoryUtils.getSession(sf, true);
 		SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+
+		// check that a further invocation simply participates
+		interceptor.preHandle(request, response, "handler");
+		interceptor.postHandle(request, response, "handler", null);
+		interceptor.afterCompletion(request, response, "handler", null);
 		sfControl.verify();
 		sessionControl.verify();
 
