@@ -204,8 +204,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	}
 
 	protected void parsePropertyValues(Properties props, MutablePropertyValues pvs) {
-		for (int j = 0; j < pvs.getPropertyValues().length; j++) {
-			PropertyValue pv = pvs.getPropertyValues()[j];
+		PropertyValue[] pvArray = pvs.getPropertyValues();
+		for (int i = 0; i < pvArray.length; i++) {
+			PropertyValue pv = pvArray[i];
 			Object newVal = parseValue(props, pv.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
 				pvs.addPropertyValue(pv.getName(), newVal);
@@ -216,7 +217,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	protected void parseIndexedArgumentValues(Properties props, Map ias) {
 		for (Iterator it = ias.keySet().iterator(); it.hasNext();) {
 			Integer index = (Integer) it.next();
-			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) ias.get(index);
+			ConstructorArgumentValues.ValueHolder valueHolder =
+					(ConstructorArgumentValues.ValueHolder) ias.get(index);
 			Object newVal = parseValue(props, valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
 				valueHolder.setValue(newVal);
@@ -226,7 +228,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
 	protected void parseGenericArgumentValues(Properties props, Set gas) {
 		for (Iterator it = gas.iterator(); it.hasNext();) {
-			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
+			ConstructorArgumentValues.ValueHolder valueHolder =
+					(ConstructorArgumentValues.ValueHolder) it.next();
 			Object newVal = parseValue(props, valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
 				valueHolder.setValue(newVal);

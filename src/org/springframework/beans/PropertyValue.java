@@ -35,14 +35,12 @@ import java.io.Serializable;
  */
 public class PropertyValue implements Serializable {
 
-	/** Property name */
 	private final String name;
 
-	/** Value of the property */
 	private final Object value;
 
 	/**
-	 * Create new PropertyValue.
+	 * Create a new PropertyValue instance.
 	 * @param name name of the property
 	 * @param value value of the property (possibly before type conversion)
 	 */
@@ -72,7 +70,7 @@ public class PropertyValue implements Serializable {
 	}
 
 	public String toString() {
-		return "PropertyValue: name='" + this.name + "'; value=[" + this.value + "]";
+		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
 	}
 
 	public boolean equals(Object other) {
