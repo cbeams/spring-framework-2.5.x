@@ -60,14 +60,14 @@
 					<td>type: <a href="../../api/org/springframework/web/servlet/tags/BindStatus.html">org.springframework.web.servlet.support.BindStatus</a></td>
 				</tr>
 				<tr>
-					<td><code>status.epxression</code>: the expression that was used to retrieve the bean or property</td>
+					<td><code>status.expression</code>: the expression that was used to retrieve the bean or property</td>
 				</tr>
 				<tr>
 					<td><code>status.value</code>: the actual value of the bean or property (transformed using PropertyEditors
 					registered</td>
 				</tr>
 				<tr>
-					<td><code>status.errors</code>: an array of errors Strings, resulting from validation</td>
+					<td><code>status.errorMessages</code>: an array of errors Strings, resulting from validation</td>
 				</tr>
 				<tr>
 					<td class="tagsection" colspan="2"><b>Also have a look at</b></td>
@@ -134,7 +134,7 @@
             value="&lt;c:out value="${status.value}"/&gt;"
             name="&lt;c:out value="${status.expression}"/&gt;"&gt;
             ## if there are error codes, display them!
-            &lt;c:if test="${status.isError}"&gt;
+            &lt;c:if test="${status.error}"&gt;
                 Error codes:
                 &lt;c:forEach items="${status.errorMessages}" var"error"&gt;
                     &lt;c:out value="${error}"/&gt;
@@ -147,7 +147,7 @@
             type="text"
             value="&lt;c:out value="${status.value}"/&gt;"
             name="&lt;c:out value="${status.expression}"/&gt;"&gt;
-            &lt;c:if test="${status.isError}"&gt;
+            &lt;c:if test="${status.error}"&gt;
                 Error codes:
                 &lt;c:forEach items="${status.errorMessages}" var"error"&gt;
                     &lt;c:out value="${error}"/&gt;
