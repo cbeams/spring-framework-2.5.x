@@ -74,7 +74,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=formHandler"));
 		pvs.addPropertyValue(new PropertyValue("order", "1"));
-		registerSingleton("myUrlMapping3", SimpleUrlHandlerMapping.class, pvs);
+		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
 		registerSingleton("myDummyAdapter", MyDummyAdapter.class, null);
 		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class, null);
@@ -111,7 +111,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		List mappedHandlers = new ManagedList();
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
 		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
-		registerSingleton("exceptionResolver2", SimpleMappingExceptionResolver.class, pvs);
+		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		registerSingleton("multipartResolver", MockMultipartResolver.class, null);
 

@@ -96,7 +96,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.33 2004-05-17 11:01:57 luke_t Exp $
+ * @version $Id: DispatcherServlet.java,v 1.34 2004-05-18 12:25:45 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -122,6 +122,20 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
 	 */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
+
+	/**
+	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
+	 * Only used when "detectAllViewResolvers" is turned off.
+	 * @see #setDetectAllViewResolvers
+	 */
+	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
+
+	/**
+	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
+	 * Only used when "detectAllViewResolvers" is turned off.
+	 * @see #setDetectAllViewResolvers
+	 */
+	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
 	/**
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
@@ -160,6 +174,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
 
+	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
+	private boolean detectAllHandlerMappings = true;
+
+	/** Detect all HandlerExceptionResolvers or just expect "handlerExceptionResolver" bean? */
+	private boolean detectAllHandlerExceptionResolvers = true;
+
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
 
@@ -186,15 +206,33 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
+	 * Set whether to detect all HandlerMapping beans in this servlet's context.
+	 * Else, just a single bean with name "handlerMapping" will be expected.
+	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * single HandlerMapping, despite multiple HandlerMapping beans being
+	 * defined in the context.
+	 */
+	public void setDetectAllHandlerMappings(boolean detectAllHandlerMappings) {
+		this.detectAllHandlerMappings = detectAllHandlerMappings;
+	}
+
+	/**
+	 * Set whether to detect all HandlerExceptionResolver beans in this servlet's context.
+	 * Else, just a single bean with name "handlerExceptionResolver" will be expected.
+	 * <p>Default is true. Turn this off if you want this servlet to use a
+	 * single HandlerExceptionResolver, despite multiple HandlerExceptionResolver
+	 * beans being defined in the context.
+	 */
+	public void setDetectAllHandlerExceptionResolvers(boolean detectAllHandlerExceptionResolvers) {
+		this.detectAllHandlerExceptionResolvers = detectAllHandlerExceptionResolvers;
+	}
+
+	/**
 	 * Set whether to detect all ViewResolver beans in this servlet's context.
 	 * Else, just a single bean with name "viewResolver" will be expected.
 	 * <p>Default is true. Turn this off if you want this servlet to use a
-	 * single ViewResolver, despite multiple ViewResolver beans being defined
-	 * in the context.
-	 * <p>You'll rarely have to touch this setting; it is mainly provided
-	 * for full backward compatibility with earlier Spring behavior that
-	 * some applications might rely on. <b>This setting will be removed
-	 * for Spring 1.1.</b>
+	 * single ViewResolver, despite multiple ViewResolver beans being
+	 * defined in the context.
 	 */
 	public void setDetectAllViewResolvers(boolean detectAllViewResolvers) {
 		this.detectAllViewResolvers = detectAllViewResolvers;
@@ -277,9 +315,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
 	private void initHandlerMappings() throws BeansException {
-		// find all HandlerMappings in the ApplicationContext
-		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
-		this.handlerMappings = new ArrayList(matchingBeans.values());
+		this.handlerMappings = new ArrayList();
+		if (this.detectAllHandlerMappings) {
+			// find all HandlerMappings in the ApplicationContext
+			Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
+			this.handlerMappings = new ArrayList(matchingBeans.values());
+			// we keep HandlerMappings in sorted order
+			Collections.sort(this.handlerMappings, new OrderComparator());
+		}
+		else {
+			try {
+				Object vr = getWebApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME);
+				this.handlerMappings.add(vr);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore, we'll add a default HandlerMapping later
+			}
+		}
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings.isEmpty()) {
@@ -287,10 +339,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			hm.setApplicationContext(getWebApplicationContext());
 			this.handlerMappings.add(hm);
 			logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
-		}
-		else {
-			// we keep HandlerMappings in sorted order
-			Collections.sort(this.handlerMappings, new OrderComparator());
 		}
 	}
 
@@ -322,11 +370,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * for this namespace, we default to no exception resolver.
 	 */
 	private void initHandlerExceptionResolvers() throws BeansException {
-		// find all HandlerExceptionResolvers in the ApplicationContext
-		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
-		this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
-		// we keep HandlerExceptionResolvers in sorted order
-		Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+		this.handlerExceptionResolvers = new ArrayList();
+		if (this.detectAllHandlerExceptionResolvers) {
+			// find all HandlerExceptionResolvers in the ApplicationContext
+			Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
+			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
+			// we keep HandlerExceptionResolvers in sorted order
+			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+		}
+		else {
+			try {
+				Object her = getWebApplicationContext().getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME);
+				this.handlerExceptionResolvers.add(her);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore, no HandlerExceptionResolver is fine too
+			}
+		}
 	}
 
 	/**
@@ -347,7 +407,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			try {
 				Object vr = getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
 				this.viewResolvers.add(vr);
-				logger.info("Using view resolver [" + vr + "]");
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// ignore, we'll add a default ViewResolver later
@@ -581,8 +640,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see HandlerInterceptor#afterCompletion
 	 */
 	private void triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
-																					 HttpServletRequest request, HttpServletResponse response,
-																					 Exception ex) throws Exception {
+	                                    HttpServletRequest request, HttpServletResponse response,
+	                                    Exception ex) throws Exception {
 		// apply afterCompletion methods of registered interceptors
 		Exception currEx = ex;
 		if (mappedHandler != null) {

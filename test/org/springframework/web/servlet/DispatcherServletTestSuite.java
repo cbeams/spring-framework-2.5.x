@@ -363,6 +363,38 @@ public class DispatcherServletTestSuite extends TestCase {
 		}
 	}
 
+	public void testNotDetectAllHandlerMappings() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.setDetectAllHandlerMappings(false);
+		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/unknown.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.doGet(request, response);
+		assertTrue(response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	public void testNotDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
+		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.setDetectAllHandlerExceptionResolvers(false);
+		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/unknown.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexDispatcherServlet.doGet(request, response);
+			fail("Should have thrown ServletException");
+		}
+		catch (ServletException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("No adapter for handler") != -1);
+		}
+	}
+
 	public void testNotDetectAllViewResolvers() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
