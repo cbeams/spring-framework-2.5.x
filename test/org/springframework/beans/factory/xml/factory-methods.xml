@@ -37,6 +37,8 @@
 		singleton="false"
 	>
 		<constructor-arg><ref local="juergen"/></constructor-arg>
+		
+		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
 	</bean>
 
 	<bean id="fullPrototype" 

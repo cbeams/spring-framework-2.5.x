@@ -75,7 +75,7 @@ import org.springframework.core.JdkVersion;
  * @author Juergen Hoeller
  * @since 13.02.2004
  * @see #findMatchingBeans
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.25 2004-06-24 14:33:17 jhoeller Exp $
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.26 2004-06-27 14:38:14 johnsonr Exp $
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
@@ -198,9 +198,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Delegates to full createBean version with allowEagerCaching=true.
 	 * @see #createBean(String, RootBeanDefinition, boolean).
 	 */
-	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition)
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
 	    throws BeansException {
-		return createBean(beanName, mergedBeanDefinition, true);
+		return createBean(beanName, mergedBeanDefinition, args, true);
 	}
 
 	/**
@@ -209,11 +209,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param allowEagerCaching whether eager caching of singletons is allowed
 	 * (typically true for normal beans, but false for inner beans)
+	 * @param args arguments to use if this is a prototype constructed by a factory method.
+	 * In this case, this will override any args specified in the bean definitions.
+	 * This parameter should be null otherwise.
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition,
-	                            boolean allowEagerCaching) throws BeansException {
+	                            Object[] args, boolean allowEagerCaching) throws BeansException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating instance of bean '" + beanName +
 			             "' with merged definition [" + mergedBeanDefinition + "]");
@@ -236,7 +239,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			errorMessage = "Instantiation of bean failed";
 
 			if (mergedBeanDefinition.getStaticFactoryMethodName() != null)  {
-				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition);
+				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
 			}
 			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
 					mergedBeanDefinition.hasConstructorArgumentValues() )  {
@@ -302,12 +305,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * methods with the name specified in the RootBeanDefinition (the method may be overloaded)
 	 * and trying to match with the parameters. Unfortunately we don't have the types attached to
 	 * constructor args, so trial and error is the only way to go here.
+	 * The args array may contain argument values passed in programmatically via the overloaded
+	 * getBean() method.
 	 */
-	protected BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+	protected BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition,
+					Object[] args) throws BeansException {
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
-		resolveConstructorArguments(beanName, mergedBeanDefinition, cargs, resolvedValues);
-
+		int expectedArgCount = 0;
+		
+		// We don't have arguments passed in programmatically, so we need to resolve the
+		// arguments specified in the constructor arguments held in the bean definition
+		if (args == null) {
+			expectedArgCount = cargs.getNrOfArguments();
+			resolveConstructorArguments(beanName, mergedBeanDefinition, cargs, resolvedValues);
+		}
+		else {
+			// If we have constructor args, don't need to resolve them 
+			expectedArgCount = args.length;
+		}
+		
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		initBeanWrapper(bw);
 
@@ -316,12 +333,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Method factoryMethod = mergedBeanDefinition.getBeanClass().getMethods()[i];
 			if (Modifier.isStatic(factoryMethod.getModifiers()) &&
 					factoryMethod.getName().equals(mergedBeanDefinition.getStaticFactoryMethodName()) &&
-					factoryMethod.getParameterTypes().length == cargs.getNrOfArguments()) {
+					factoryMethod.getParameterTypes().length == expectedArgCount) {
 
 				Class[] argTypes = factoryMethod.getParameterTypes();
 
 				try {
-					Object[] args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+					if (args == null) {
+						args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+					}
 
 					Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this, factoryMethod, args);
 
@@ -816,7 +835,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition bd)
 	    throws BeansException {
 		RootBeanDefinition mbd = getMergedBeanDefinition(innerBeanName, bd);
-		Object bean = createBean(innerBeanName, mbd, false);
+		Object bean = createBean(innerBeanName, mbd, null, false);
 		if (bean instanceof DisposableBean) {
 			// keep reference to inner bean, to be able to destroy it on factory shutdown
 			this.disposableInnerBeans.add(bean);

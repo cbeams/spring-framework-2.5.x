@@ -35,6 +35,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
@@ -63,7 +64,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.51 2004-06-25 17:59:38 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.52 2004-06-27 14:37:33 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1275,6 +1276,59 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		assertEquals(33, tb.getAge());
 		assertEquals("Rod", tb.getName());
+	}
+	
+	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		TestBean tbArg = new TestBean();
+		tbArg.setName("arg1");
+		TestBean tbArg2 = new TestBean();
+		tbArg2.setName("arg2");
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] { tbArg });	
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] { tbArg2 });	
+		
+		assertEquals(0, fm1.getNum());
+		assertEquals("default", fm1.getName());
+		// This comes from the test bean
+		assertEquals("arg1", fm1.getTestBean().getName());
+		assertEquals("arg2", fm2.getTestBean().getName());
+		assertEquals(fm1.getNum(), fm2.getNum());
+		assertEquals(fm2.getStringValue(), "testBeanOnlyPrototypeDISetterString");
+		assertEquals(fm2.getStringValue(), fm2.getStringValue());
+		// The TestBean reference is resolved to a prototype in the factory
+		assertSame(fm2.getTestBean(), fm2.getTestBean());
+		assertNotSame(fm1, fm2);
+	}
+	
+	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		try {
+			xbf.getBean("testBeanOnly", new Object[] { new TestBean() });	
+			fail("Shouldn't allow args to be passed to a singleton");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// OK
+		}
+	}
+	
+	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+		try {
+			xbf.getBean("overrideOnPrototype", new Object[] { new TestBean() });	
+			fail("Shouldn't allow args to be passed to a Setter-Injected object");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// OK			
+		}
 	}
 
 

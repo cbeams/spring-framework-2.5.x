@@ -61,12 +61,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.58 2004-06-24 14:33:17 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.59 2004-06-27 14:38:13 johnsonr Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
  */
-public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, HierarchicalBeanFactory {
+public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	/**
 	 * Used to dereference a FactoryBean and distinguish it from beans
@@ -127,6 +127,19 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 * @param name name of the bean to retrieve
 	 */
 	public Object getBean(String name) throws BeansException {
+		return getBean(name, (Object[]) null);
+	}
+		
+	/**
+	 * Return the bean with the given name,
+	 * checking the parent bean factory if not found.
+	 * @param name name of the bean to retrieve
+	 * @param args arguments to use if creating a prototype using explicit arguments to a static
+	 * factory method. It is invalid to use a non-null args value in any other case.
+	 * TODO we could consider supporting this for constructor args also, but it's really a 
+	 * corner case required for AspectJ integration.
+	 */
+	public Object getBean(String name, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
 		// eagerly check singleton cache for manually registered singletons
 		Object sharedInstance = this.singletonCache.get(beanName);
@@ -149,6 +162,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 				}
 				throw ex;
 			}
+			
+			// Check validity of the usage of the args parameter. This 
+			// can only be used for prototypes constructed via a factory method.
+			if (args != null) {
+				if (mergedBeanDefinition.isSingleton()) {			
+					throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
+				}
+				else if (mergedBeanDefinition.getStaticFactoryMethodName() == null) {			
+					throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in conjunction with a static factory method");
+				}
+			}
+			
 			// create bean instance
 			if (mergedBeanDefinition.isSingleton()) {
 				synchronized (this.singletonCache) {
@@ -156,14 +181,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 					sharedInstance = this.singletonCache.get(beanName);
 					if (sharedInstance == null) {
 						logger.info("Creating shared instance of singleton bean '" + beanName + "'");
-						sharedInstance = createBean(beanName, mergedBeanDefinition);
+						sharedInstance = createBean(beanName, mergedBeanDefinition, args);
 						addSingleton(beanName, sharedInstance);
 					}
 				}
 				return getObjectForSharedInstance(name, sharedInstance);
 			}
 			else {
-				return createBean(name, mergedBeanDefinition);
+				// Non-singleton
+				return createBean(name, mergedBeanDefinition, args);
 			}
 		}
 	}
@@ -584,11 +610,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 * instantiation within this class is performed by this method.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @param args arguments to use if creating a prototype using explicit arguments to a static
+	 * factory method. This parameter must be null except in this case.
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
-	protected abstract Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition)
-	    throws BeansException;
+	protected abstract Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException;
 
 	/**
 	 * Destroy the given bean. Must destroy beans that depend on the given
