@@ -70,7 +70,7 @@ public class DefaultFormModel implements MutableFormModel {
     public void setParent(NestingFormModel parent) {
         this.parent = parent;
     }
-    
+
     public void setBufferChanges(boolean bufferChanges) {
         this.bufferChanges = bufferChanges;
     }
@@ -132,8 +132,7 @@ public class DefaultFormModel implements MutableFormModel {
                         .debug("No buffer created; value model updates will commit directly to the domain layer");
             }
         }
-        add(domainObjectProperty, formValueModel);
-        return formValueModel;
+        return add(domainObjectProperty, formValueModel);
     }
 
     public ValueModel add(String domainObjectProperty, ValueModel formValueModel) {
@@ -141,19 +140,23 @@ public class DefaultFormModel implements MutableFormModel {
             ((BufferedValueModel)formValueModel)
                     .setCommitTrigger(commitTrigger);
         }
-        formValueModel = onPreProcessNewFormValueModel(domainObjectProperty,
+        formValueModel = preProcessNewFormValueModel(domainObjectProperty,
                 formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
-        onFormValueModelAdded(domainObjectProperty, formValueModel);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering '" + domainObjectProperty
+                    + "' form property, property value model=" + formValueModel);
+        }
+        postProcessFormValueModel(domainObjectProperty, formValueModel);
         return formValueModel;
     }
 
-    protected ValueModel onPreProcessNewFormValueModel(
+    protected ValueModel preProcessNewFormValueModel(
             String domainObjectProperty, ValueModel formValueModel) {
         return formValueModel;
     }
 
-    protected void onFormValueModelAdded(String domainObjectProperty,
+    protected void postProcessFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
 
     }
@@ -161,6 +164,8 @@ public class DefaultFormModel implements MutableFormModel {
     public Object getValue(String formProperty) {
         ValueModel valueModel = getValueModel(formProperty);
         assertValueModelNotNull(valueModel, formProperty);
+        if (valueModel instanceof ValueModelWrapper) { return ((ValueModelWrapper)valueModel)
+                .getWrapped(); }
         return valueModel.get();
     }
 

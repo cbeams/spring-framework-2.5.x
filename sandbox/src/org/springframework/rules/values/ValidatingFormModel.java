@@ -27,6 +27,7 @@ import org.springframework.rules.RulesSource;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
+import org.springframework.rules.reporting.TypeResolvable;
 import org.springframework.util.Assert;
 
 /**
@@ -101,27 +102,44 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
     }
 
-    protected ValueModel onPreProcessNewFormValueModel(
+    protected ValueModel preProcessNewFormValueModel(
             String domainObjectProperty, ValueModel formValueModel) {
         if (getFormObject() instanceof PropertyEditorProvider) {
             PropertyEditorProvider provider = (PropertyEditorProvider)getFormObject();
             PropertyEditor editor = provider
                     .getPropertyEditor(domainObjectProperty);
-            if (editor != null) {
-                TypeConverter converter = new TypeConverter(formValueModel,
-                        editor);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Installed type converter '" + converter
-                            + "' with editor '" + editor + "' for property '"
-                            + domainObjectProperty + "'");
-                }
-                formValueModel = converter;
-            }
+            formValueModel = installTypeConverter(formValueModel,
+                    domainObjectProperty, editor);
         }
-        return formValueModel;
+        else {
+            PropertyEditor editor = getAspectAccessStrategy().findCustomEditor(
+                    getMetaAspectAccessor()
+                            .getAspectClass(domainObjectProperty),
+                    domainObjectProperty);
+            formValueModel = installTypeConverter(formValueModel,
+                    domainObjectProperty, editor);
+        }
+        return new ValidatingFormValueModel(domainObjectProperty,
+                formValueModel);
     }
 
-    protected void onFormValueModelAdded(String domainObjectProperty,
+    private ValueModel installTypeConverter(ValueModel formValueModel,
+            String domainObjectProperty, PropertyEditor editor) {
+        if (editor != null) {
+            TypeConverter converter = new TypeConverter(formValueModel, editor);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Installed type converter '" + converter
+                        + "' with editor '" + editor + "' for property '"
+                        + domainObjectProperty + "'");
+            }
+            return converter;
+        }
+        else {
+            return formValueModel;
+        }
+    }
+
+    protected void postProcessFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
         Assert
                 .notNull(rulesSource,
@@ -140,13 +158,75 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
         if (constraint != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Creating form validator for property '"
+                logger.debug("Creating validator for form property '"
                         + domainObjectProperty + "'");
             }
             FormValueModelValidator validator = new FormValueModelValidator(
                     constraint, formValueModel);
             formValueModel.addValueListener(validator);
             validator.validate();
+        }
+    }
+
+    private class ValidatingFormValueModel extends ValueModelWrapper {
+        private BeanPropertyExpression setterConstraint;
+
+        public ValidatingFormValueModel(String domainObjectProperty,
+                ValueModel model) {
+            super(model);
+            this.setterConstraint = new ValueSetterConstraint(
+                    getWrappedModel(), domainObjectProperty);
+        }
+
+        public void set(Object value) {
+            if (!setterConstraint.test(value)) {
+                PropertyResults results = new PropertyResults(setterConstraint
+                        .getPropertyName(), value, setterConstraint);
+                constraintViolated(setterConstraint, this, results);
+            } else {
+                constraintSatisfied(setterConstraint, this);
+            }
+        }
+    }
+
+    private static class ValueSetterConstraint implements
+            BeanPropertyExpression, TypeResolvable {
+        private ValueModel valueModel;
+
+        private String property;
+
+        private String type = "typeMismatch";
+
+        public ValueSetterConstraint(ValueModel valueModel, String property) {
+            this.valueModel = valueModel;
+            this.property = property;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getPropertyName() {
+            return property;
+        }
+
+        public boolean test(Object value) {
+            try {
+                valueModel.set(value);
+                return true;
+            }
+            catch (NullPointerException e) {
+                type = "required";
+                return false;
+            }
+            catch (IllegalArgumentException e) {
+                type = "typeMismatch";
+                return false;
+            }
+            catch (Exception e) {
+                type = "unknown";
+                return false;
+            }
         }
     }
 

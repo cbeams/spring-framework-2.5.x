@@ -22,23 +22,21 @@ import org.springframework.rules.UnaryFunction;
 /**
  * @author Keith Donald
  */
-public class TypeConverter implements ValueModel {
-    private ValueModel wrappedModel;
-
+public class TypeConverter extends ValueModelWrapper {
     private UnaryFunction convertFrom;
 
     private UnaryFunction convertTo;
 
     public TypeConverter(ValueModel wrappedModel, UnaryFunction convertTo,
             UnaryFunction convertFrom) {
-        this.wrappedModel = wrappedModel;
+        super(wrappedModel);
         this.convertFrom = convertTo;
         this.convertTo = convertFrom;
     }
 
     public TypeConverter(ValueModel wrappedModel,
             final PropertyEditor propertyEditor) {
-        this.wrappedModel = wrappedModel;
+        super(wrappedModel);
         this.convertFrom = new UnaryFunction() {
             public Object evaluate(Object o) {
                 propertyEditor.setValue(o);
@@ -50,7 +48,8 @@ public class TypeConverter implements ValueModel {
                 if (o instanceof String) {
                     propertyEditor.setAsText((String)o);
                     return propertyEditor.getValue();
-                } else {
+                }
+                else {
                     return o;
                 }
             }
@@ -58,27 +57,11 @@ public class TypeConverter implements ValueModel {
     }
 
     public Object get() {
-        return convertFrom.evaluate(wrappedModel.get());
+        return convertFrom.evaluate(super.get());
     }
 
     public void set(Object value) {
-        wrappedModel.set(convertTo.evaluate(value));
-    }
-
-    public Object getWrappedValue() {
-        return wrappedModel.get();
-    }
-
-    public ValueModel getWrappedValueModel() {
-        return wrappedModel;
-    }
-
-    public void addValueListener(ValueListener l) {
-        wrappedModel.addValueListener(l);
-    }
-
-    public void removeValueListener(ValueListener l) {
-        wrappedModel.removeValueListener(l);
+        super.set(convertTo.evaluate(value));
     }
 
 }

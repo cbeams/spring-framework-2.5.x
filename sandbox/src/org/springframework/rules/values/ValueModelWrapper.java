@@ -15,39 +15,48 @@
  */
 package org.springframework.rules.values;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * @author Keith Donald
  */
-public class ValueModelWrapper implements ValueModel, ValueListener {
-
-    private Object value;
+public abstract class ValueModelWrapper implements ValueModel {
+    protected final Log logger = LogFactory.getLog(getClass());
 
     private ValueModel wrappedModel;
 
     public ValueModelWrapper(ValueModel valueModel) {
         this.wrappedModel = valueModel;
-        this.value = wrappedModel.get();
-        this.wrappedModel.addValueListener(this);
+    }
+
+    protected ValueModel getWrappedModel() {
+        return wrappedModel;
     }
 
     public Object get() {
-        return value;
+        return wrappedModel.get();
+    }
+
+    public Object getWrapped() {
+        if (wrappedModel instanceof ValueModelWrapper) {
+            return ((ValueModelWrapper)wrappedModel).getWrapped();
+        }
+        else {
+            return wrappedModel.get();
+        }
     }
 
     public void set(Object value) {
         this.wrappedModel.set(value);
     }
 
-    public void valueChanged() {
-        this.value = wrappedModel.get();
-    }
-
     public void addValueListener(ValueListener l) {
-        throw new UnsupportedOperationException();
+        wrappedModel.addValueListener(l);
     }
 
     public void removeValueListener(ValueListener l) {
-        throw new UnsupportedOperationException();
+        wrappedModel.removeValueListener(l);
     }
 
 }

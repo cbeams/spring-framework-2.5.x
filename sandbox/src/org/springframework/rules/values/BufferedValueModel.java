@@ -131,9 +131,6 @@ public class BufferedValueModel extends AbstractValueModel implements
         set(NO_VALUE);
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#get()
-     */
     public Object get() {
         if (bufferedValue != NO_VALUE) {
             return bufferedValue;
@@ -143,9 +140,6 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
-    /**
-     * @see org.springframework.rules.values.ValueModel#set(java.lang.Object)
-     */
     public void set(Object value) {
         if (ObjectUtils.nullSafeEquals(this.bufferedValue, value)) { return; }
         if (logger.isDebugEnabled()) {
