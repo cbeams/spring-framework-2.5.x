@@ -102,6 +102,9 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 			code = codedEnum.getCode();
 			Assert.notNull(code, "Enum codes cannot be null, but this one is");
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding enum code '" + code + "' to parameter index " + index);
+		}
 		persistentType().nullSafeSet(stmt, code, index);
 	}
 
