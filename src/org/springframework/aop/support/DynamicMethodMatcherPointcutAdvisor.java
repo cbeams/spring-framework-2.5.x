@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.ClassFilter;
@@ -26,10 +28,12 @@ import org.springframework.core.Ordered;
 
 /**
  * Convenient superclass for Advisors that are also dynamic pointcuts.
+ * Serializable if Advice and subclass is.
  * @author Rod Johnson
+ * @version $Id: DynamicMethodMatcherPointcutAdvisor.java,v 1.5 2004-07-25 13:26:12 johnsonr Exp $
  */
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcher
-    implements PointcutAdvisor, Pointcut, Ordered {
+    implements PointcutAdvisor, Pointcut, Ordered, Serializable {
 
 	private int order = Integer.MAX_VALUE;
 

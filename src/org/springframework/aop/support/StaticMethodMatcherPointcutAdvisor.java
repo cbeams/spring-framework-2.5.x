@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
@@ -24,11 +26,12 @@ import org.springframework.core.Ordered;
 
 /**
  * Convenient superclass for Advisors that are also static pointcuts.
+ * Serializable if Advice and subclass are.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.7 2004-03-23 14:29:45 jhoeller Exp $
+ * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.8 2004-07-25 13:26:12 johnsonr Exp $
  */
 public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut
-		implements PointcutAdvisor, Ordered {
+		implements PointcutAdvisor, Ordered, Serializable {
 
 	private int order = Integer.MAX_VALUE;
 

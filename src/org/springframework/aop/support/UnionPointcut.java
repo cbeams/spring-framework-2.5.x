@@ -28,7 +28,7 @@ import org.springframework.aop.Pointcut;
  * OR the MethodMatchers: we need to check that each MethodMatcher's
  * ClassFilter was happy as well.
  * @author Rod Johnson
- * @version $Id: UnionPointcut.java,v 1.3 2004-07-25 12:19:31 johnsonr Exp $
+ * @version $Id: UnionPointcut.java,v 1.4 2004-07-25 13:26:12 johnsonr Exp $
  */
 class UnionPointcut implements Pointcut, Serializable {
 	
@@ -59,7 +59,7 @@ class UnionPointcut implements Pointcut, Serializable {
 		return mm; 
 	}
 	
-	private class PointcutUnionMethodMatcher implements MethodMatcher {
+	private class PointcutUnionMethodMatcher implements MethodMatcher, Serializable {
 
 		public boolean matches(Method m, Class targetClass) {
 			return (a.getClassFilter().matches(targetClass) && a.getMethodMatcher().matches(m, targetClass)) || 
