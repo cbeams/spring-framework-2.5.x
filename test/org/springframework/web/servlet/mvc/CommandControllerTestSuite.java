@@ -143,7 +143,6 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		System.out.println(response.getHeader("Expires"));
 		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
 		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
 	}

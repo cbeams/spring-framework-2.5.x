@@ -350,7 +350,7 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		pvs.addPropertyValue("myFloat", "1.1");
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
-		System.out.println(testBean.getMyFloat().floatValue());
+		//System.out.println(testBean.getMyFloat().floatValue());
 		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
 	}
 

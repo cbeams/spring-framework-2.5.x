@@ -26,6 +26,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
+ * Additional and overriden tests for the CGLIB proxy.
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
@@ -48,11 +49,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		return true;
 	}
 
-	
-	/*public void testSerializationSerializableTargetAndAdvice() throws Exception {
-		// TODO remove override--
-		// it's only to conceal superclass test that fails here
-	}*/
 	
 	public void testNullConfig() {
 		try {
@@ -102,7 +98,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			ProxyFactory pf = new ProxyFactory(mine);
 			pf.getProxy();
 			fail("Shouldn't be able to proxy non-visible class with CGLIB");
-		} catch (AspectException ex) {
+		} 
+		catch (AspectException ex) {
 			// Check that stack trace is preserved
 			// FIX: CGLIB will throw an IllegalArgumentException when trying to
 			// create a proxy
@@ -113,6 +110,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			// Check that error message is helpful
 
 			// TODO check why these methods fail with NPE on AOP Alliance code
+			//ex.printStackTrace();
 			//assertTrue(ex.getMessage().indexOf("final") != -1);
 			//assertTrue(ex.getMessage().indexOf("visible") != -1);
 		}
@@ -128,12 +126,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 		ITestBean proxy1 = getAdvisedProxy(target);
 		ITestBean proxy2 = getAdvisedProxy(target2);
-
-		System.out.println(proxy1.getClass().getName());
-		System.out.println(proxy2.getClass().getName());
-
 		assertTrue(proxy1.getClass() == proxy2.getClass());
-
+		assertEquals(target.getAge(), proxy1.getAge());
+		assertEquals(target2.getAge(), proxy2.getAge());
 	}
 
 	private ITestBean getAdvisedProxy(TestBean target) {

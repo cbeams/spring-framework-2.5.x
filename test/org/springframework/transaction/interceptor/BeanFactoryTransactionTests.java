@@ -148,7 +148,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void testGetBeansOfTypeWithAbstract() {
 		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
-		System.out.println(beansOfType.size());
+		//System.out.println(beansOfType.size());
 	}
 
 	/**

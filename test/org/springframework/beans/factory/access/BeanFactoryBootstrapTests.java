@@ -128,18 +128,16 @@ public class BeanFactoryBootstrapTests extends TestCase {
 		
 		
 		System.setProperties(p);
-		System.getProperties().list(System.out);
+		//System.getProperties().list(System.out);
 		
 		BeanFactoryBootstrap.reinitialize();
 
 		try {
 			BeanFactoryBootstrap bsb = BeanFactoryBootstrap.getInstance();
-			System.out.println("Got bean factory");
 			assertNotNull("Bsb instance is not null", bsb);
 			assertTrue("Is dummy", bsb.getBeanFactory() instanceof DummyBeanFactory);
 			TestBean tb = (TestBean) bsb.getBeanFactory().getBean("test");
 			assertNotNull("Test bean is not null", tb);
-			System.out.println(tb);
 			//assertTrue("Property set", tb.getFoo().equals("bar"));
 		}
 		catch (Exception ex) {

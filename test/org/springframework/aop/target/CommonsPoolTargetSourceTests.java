@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.Person;
-import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
@@ -97,7 +96,7 @@ public class CommonsPoolTargetSourceTests extends TestCase {
 	public void testProxySerializableWithoutConfigMixin() throws Exception {
 		Person pooled = (Person) beanFactory.getBean("pooledPerson");
 
-		System.out.println(((Advised) pooled).toProxyConfigString());
+		//System.out.println(((Advised) pooled).toProxyConfigString());
 		assertTrue(((Advised) pooled).getTargetSource() instanceof CommonsPoolTargetSource);
 		
 		//((Advised) pooled).setTargetSource(new SingletonTargetSource(new SerializablePerson()));

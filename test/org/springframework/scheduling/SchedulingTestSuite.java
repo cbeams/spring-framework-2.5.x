@@ -424,13 +424,13 @@ public class SchedulingTestSuite extends TestCase {
 		}
 		
 		public void doWait() {
-			System.out.println("NOPE");
 			counter++;
 			// wait until stop is called
 			synchronized (lock) {
 				try {
 					lock.wait();
-				} catch (InterruptedException e) {
+				} 
+				catch (InterruptedException e) {
 					// fall through
 				}
 			}

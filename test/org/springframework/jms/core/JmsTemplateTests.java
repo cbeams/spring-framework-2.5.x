@@ -119,7 +119,7 @@ public class JmsTemplateTests extends TestCase {
 		PrintWriter out = new PrintWriter(sw);
 		springJmsEx.printStackTrace(out);
 		String trace = sw.toString();
-		System.out.println("trace = " + trace);
+		//System.out.println("trace = " + trace);
 		assertTrue("inner jms exception not found", trace.indexOf("host not found") > 0);
 		
 	}

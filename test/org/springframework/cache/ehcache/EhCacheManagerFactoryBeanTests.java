@@ -42,7 +42,7 @@ public class EhCacheManagerFactoryBeanTests extends TestCase {
         EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
         cacheManagerFb.afterPropertiesSet();
         CacheManager cm = (CacheManager)cacheManagerFb.getObject();
-        System.out.println(cm.getCacheNames().length);
+        //System.out.println(cm.getCacheNames().length);
         assertTrue("Loaded CacheManager with no caches", cm.getCacheNames().length == 0);
 
         Cache myCache1 = cm.getCache("myCache1");
