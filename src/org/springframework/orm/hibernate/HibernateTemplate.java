@@ -321,10 +321,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Save respectively update the given persistent instance,
-	 * according to its id (matching the configured "unsaved-value"?).
+	 * according to its ID (matching the configured "unsaved-value"?).
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.saveOrUpdate.
-	 * @param entity the persistent instance to save resp. update
+	 * @param entity the persistent instance to save respectively update
+	 * (to be associated with the Hibernate Session)
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
 	 */
@@ -333,6 +334,28 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.saveOrUpdate(entity);
 				return null;
+			}
+		});
+	}
+
+	/**
+	 * Save respectively update the contents of given persistent object,
+	 * according to its ID (matching the configured "unsaved-value"?).
+	 * Will copy the contained fields to an already loaded instance
+	 * with the same ID, if appropriate.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.saveOrUpdateCopy.
+	 * @param entity the persistent object to save respectively update
+	 * (<i>not</i> necessarily to be associated with the Hibernate Session)
+	 * @return the actually associated persistent object
+	 * (either an already loaded instance with the same ID, or the given object)
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#saveOrUpdateCopy(Object)
+	 */
+	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException {
+		return execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return session.saveOrUpdateCopy(entity);
 			}
 		});
 	}

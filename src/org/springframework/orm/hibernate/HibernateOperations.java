@@ -27,8 +27,6 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or null if not found.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.get.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance, or null if not found
@@ -41,8 +39,6 @@ public interface HibernateOperations {
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or null if not found.
 	 * Obtains the specified lock mode if the instance exists.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.get.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance, or null if not found
@@ -55,8 +51,6 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.load.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance
@@ -70,8 +64,6 @@ public interface HibernateOperations {
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
 	 * Obtains the specified lock mode if the instance exists.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.load.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance
@@ -84,8 +76,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Remove the given object from the Session cache.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.evict.
 	 * @param entity the persistent instance to lock
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#evict(Object)
@@ -96,8 +86,6 @@ public interface HibernateOperations {
 	 * Obtain the specified lock level upon the given object, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.lock.
 	 * @param entity the persistent instance to lock
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
@@ -107,8 +95,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Save the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.save.
 	 * @param entity the persistent instance to save
 	 * @return the generated identifier
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -118,8 +104,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Save the given persistent instance with the given identifier.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.save.
 	 * @param entity the persistent instance to save
 	 * @param id the identifier to assign
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -129,19 +113,30 @@ public interface HibernateOperations {
 
 	/**
 	 * Save respectively update the given persistent instance,
-	 * according to its id (matching the configured "unsaved-value"?).
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.saveOrUpdate.
-	 * @param entity the persistent instance to save resp. update
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * according to its ID (matching the configured "unsaved-value"?).
+	 * @param entity the persistent instance to save respectively update
+	 * (to be associated with the Hibernate Session)
+	 * @throws DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
 	 */
 	void saveOrUpdate(final Object entity) throws DataAccessException;
 
 	/**
+	 * Save respectively update the contents of given persistent object,
+	 * according to its ID (matching the configured "unsaved-value"?).
+	 * Will copy the contained fields to an already loaded instance
+	 * with the same ID, if appropriate.
+	 * @param entity the persistent object to save respectively update
+	 * (<i>not</i> necessarily to be associated with the Hibernate Session)
+	 * @return the actually associated persistent object
+	 * (either an already loaded instance with the same ID, or the given object)
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#saveOrUpdateCopy(Object)
+	 */
+	public Object saveOrUpdateCopy(final Object entity) throws DataAccessException;
+
+	/**
 	 * Update the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.update.
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#update(Object)
@@ -153,10 +148,6 @@ public interface HibernateOperations {
 	 * Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.update.
-	 * <p>Implementation note: Invokes Session.update <i>before</i> Session.lock,
-	 * as an initial lock would reassociate the given entity as <i>unmodified</i>.
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
@@ -166,8 +157,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Delete the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.delete.
 	 * @param entity the persistent instance to delete
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#delete(Object)
@@ -179,8 +168,6 @@ public interface HibernateOperations {
 	 * Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.delete.
 	 * @param entity the persistent instance to delete
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
@@ -192,8 +179,6 @@ public interface HibernateOperations {
 	 * Delete all given persistent instances.
 	 * This can be combined with any of the find methods to delete by query
 	 * in two lines of code, similar to Session's delete by query methods.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.delete.
 	 * @param entities the persistent instances to delete
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#delete(String)
@@ -202,9 +187,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @return the List of persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -216,9 +198,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding
 	 * one value to a "?" parameter in the query string.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @return the List of persistent instances
@@ -231,9 +210,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding one value
 	 * to a "?" parameter of the given type in the query string.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter
@@ -248,9 +224,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding a
 	 * number of values to "?" parameters in the query string.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @return the List of persistent instances
@@ -263,9 +236,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding a number of
 	 * values to "?" parameters of the given types in the query string.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters
@@ -280,9 +250,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding the properties
 	 * of the given bean to <i>named</i> parameters in the query string.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Query.setProperties. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param valueBean the values of the parameters
 	 * @return the List of persistent instances
@@ -297,9 +264,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a named query for persistent instances.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find for named queries. Use a custom HibernateCallback
-	 * implementation to leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @return the List of persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -312,9 +276,6 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances, binding
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find for named queries. Use a custom HibernateCallback
-	 * implementation to leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @return the List of persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -328,9 +289,6 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances, binding
 	 * one value to a "?" parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find for named queries. Use a custom HibernateCallback
-	 * implementation to leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param type Hibernate type of the parameter
 	 * @return the List of persistent instances
@@ -345,9 +303,6 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances, binding a
 	 * number of values to "?" parameters in the query string.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find for named queries. Use a custom HibernateCallback
-	 * implementation to leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
 	 * @return the List of persistent instances
@@ -362,9 +317,6 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances, binding a
 	 * number of values to "?" parameters in the query string.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Session.find for named queries. Use a custom HibernateCallback
-	 * implementation to leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters
@@ -380,9 +332,6 @@ public interface HibernateOperations {
 	 * Execute a named query for persistent instances, binding the properties
 	 * of the given bean to <i>named</i> parameters in the query string.
 	 * A named query is defined in a Hibernate mapping file.
-	 * <p>This is a convenience method for single step actions, mirroring
-	 * Query.setProperties. Use a custom HibernateCallback implementation to
-	 * leverage the full power of Hibernate's Query API.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param valueBean the values of the parameters
 	 * @return the List of persistent instances
