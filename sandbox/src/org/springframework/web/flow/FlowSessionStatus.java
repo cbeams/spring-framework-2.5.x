@@ -13,11 +13,7 @@ public class FlowSessionStatus extends ShortCodedEnum {
 
 	public static FlowSessionStatus SUSPENDED = new FlowSessionStatus(1, "Suspended");
 
-	public static FlowSessionStatus RESUMING = new FlowSessionStatus(2, "Resuming");
-
-	public static FlowSessionStatus ENDING = new FlowSessionStatus(3, "Ending");
-
-	public static FlowSessionStatus ENDED = new FlowSessionStatus(4, "Ended");
+	public static FlowSessionStatus ENDED = new FlowSessionStatus(2, "Ended");
 
 	private FlowSessionStatus(int code, String label) {
 		super(code, label);

@@ -283,7 +283,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		}
 		return s;
 	}
-
+	
 	public String toString() {
 		return executingFlowSessions.isEmpty() ? "[Empty FlowSessionExecutionStack " + getId()
 				+ "; no flows are active]" : new ToStringCreator(this).append("id", getId()).append("activeFlowId",
