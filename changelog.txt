@@ -45,6 +45,8 @@ Package org.springframework.jdbc
 * added "queryForRowSet" methods to JdbcTemplate, returning a SqlRowSet as generic representation of the result rows
 * added "queryForObject" convenience methods to JdbcTemplate, taking a RowMapper argument and expecting a single row
 * factored out protected "createJdbcTemplate" in JdbcDaoSupport, allowing to override JdbcTemplate creation
+* added PessimisticLockingFailureException as a super class for CannotAquireLockException, CannotSerializeTransactionException and DeadlockLoserDataAccesssException
+* added error translation entries for the above mentioned exception categories - coresponding codes still have to be entered in sql-error-codes.xml
 
 Package org.springframework.jmx
 * added JMX support, for registration of Spring-managed beans as JMX MBeans as well as for access to remote JMX MBeans
