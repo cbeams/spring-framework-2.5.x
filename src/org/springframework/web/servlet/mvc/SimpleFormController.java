@@ -31,17 +31,17 @@ import org.springframework.web.servlet.ModelAndView;
  * (<a href="BaseCommandController.html#workflow">and that defined by superclass</a>):</b><br>
  * The workflow of this Controller does not differ too much from the one described
  * in the {@link AbstractFormController AbstractFormController}, except for
- * the fact that overriding of the processSubmit-method and the
- * showForm-method is not necessary, since the view for the respective occasions
+ * the fact that overriding of the processFormSubmission method and the
+ * showForm method is not necessary, since the view for the respective occasions
  * can be configured externally.
  * <ol>
  *  <li>XXX After validation of the command object and the perscribed
  *      call to {@link #onBindAndValidate onBindAndValidate} (for more
  *      information on that matter, see the AbstractFormController),
  *      the following:</li>
- *  <li>call to {@link #processSubmit processSubmit} which inspects the errors
- *      object to see if any errors are available (they could be inserted in
- *      the <code>bindAndValidate</code>-method</li>
+ *  <li>call to {@link #processFormSubmission processFormSubmission} which inspects the
+ *      errors object to see if any errors are available (they could be inserted in
+ *      the <code>bindAndValidate</code> method</li>
  *  <li>If errors occured, the controller will return the formView, giving
  *      the user the form again (with possible error message render accordingly)</li>
  *  <li>If no errors occurred, a call to
@@ -177,13 +177,15 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * This implementation calls showForm in case of errors,
 	 * and delegates to onSubmit's full version else.
-	 * <p>This should only be overridden to check for an action that should
+	 * <p>This can only be overridden to check for an action that should
 	 * be executed without respect to binding errors, like a cancel action.
+	 * To just handle successful submissions without binding errors,
+	 * override one of the onSubmit methods.
 	 * @see #showForm
 	 * @see #onSubmit(HttpServletRequest,HttpServletResponse,Object,BindException)
 	 */
-	protected ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response,
-	                                     Object command, BindException errors)
+	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
+	                                             Object command, BindException errors)
 	    throws ServletException, IOException {
 		if (errors.hasErrors()) {
 			logger.debug("Data binding errors: " + errors.getErrorCount());
@@ -219,7 +221,7 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simplest onSubmit version. Called by the default implementation of
+	 * Simple onSubmit version. Called by the default implementation of
 	 * the onSubmit version with all parameters.
 	 * <p>Default implementation prepares success view.
 	 * @param command form object with request parameters bound onto it

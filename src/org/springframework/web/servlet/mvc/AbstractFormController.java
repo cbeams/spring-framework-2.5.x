@@ -37,11 +37,11 @@ import org.springframework.web.servlet.ModelAndView;
  * programmatically. To provide those views using configuration properties,
  * use the {@link SimpleFormController SimpleFormController}.</p>
  *
- * <p>Subclasses need to override showForm to prepare the form view, and processSubmit
- * to handle submit requests. For the latter, binding errors like type mismatches will
- * be reported via the given "errors" binder. For additional custom form validation,
- * a validator (property inherited from BaseCommandController) can be used, reporting
- * via the same "errors" instance.</p>
+ * <p>Subclasses need to override showForm to prepare the form view, and
+ * processFormSubmission to handle submit requests. For the latter, binding errors
+ * like type mismatches will be reported via the given "errors" binder.
+ * For additional custom form validation, a validator (property inherited from
+ * BaseCommandController) can be used, reporting via the same "errors" instance.</p>
  *
  * <p>Comparing this Controller to the Struts notion of the <code>Action</code>
  * shows us that with Spring, you can use any ordinary JavaBeans or database
@@ -70,7 +70,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      in the request to be able to use the property editors in the form rendering
  *      (<i>only if <code>bindOnNewForm</code> is set to <code>true</code></i>)</li>
  *  <li>call to {@link #referenceData referenceData()} to allow you to bind
- *      any relevant reference dat you might need when editing a form
+ *      any relevant reference data you might need when editing a form
  *      (for instance a List of Locale-object you're going to let the user
  *      select one from)<li>
  *  <li>call to {@link #showForm(HttpServletRequest, HttpServletResponse, BindException) showForm()}
@@ -92,7 +92,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>call to {@link #onBindAndValidate onBindAndValidate()} which allows
  *      you to do custom processing after binding and validation (for instance
  *      to perform database persistency)</li>
- *  <li>call to {@link #processSubmit processSubmit} which, in implementing
+ *  <li>call to {@link #processFormSubmission processFormSubmission} which, in implementing
  *      classes returns a sort of successview, for instance congratulating
  *      the user with a successfull form submission</li>
  * </ol>
@@ -173,22 +173,22 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Sets if request parameters should be bound to the form object
+	 * Set if request parameters should be bound to the form object
 	 * in case of a non-submitting request, i.e. a new form.
 	 */
-	public void setBindOnNewForm(boolean bindOnNewForm) {
+	public final void setBindOnNewForm(boolean bindOnNewForm) {
 		this.bindOnNewForm = bindOnNewForm;
 	}
 
 	/**
 	 * Return if request parameters should be bound in case of a new form.
 	 */
-	protected boolean isBindOnNewForm() {
+	protected final boolean isBindOnNewForm() {
 		return bindOnNewForm;
 	}
 
 	/**
-	 * Activates resp. deactivates session form mode. In session form mode,
+	 * Activate resp. deactivate session form mode. In session form mode,
 	 * the form is stored in the session to keep the form object instance
 	 * between requests, instead of creating a new one on each request.
 	 * <p>This is necessary for either wizard-style controllers that populate a
@@ -232,7 +232,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			// process submit
 			Object command = userObject(request);
 			ServletRequestDataBinder errors = bindAndValidate(request, command);
-			return processSubmit(request, response, command, errors);
+			return processFormSubmission(request, response, command, errors);
 		}
 		else {
 			return showNewForm(request, response);
@@ -397,7 +397,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	    throws ServletException, IOException {
 		Object command = formBackingObject(request);
 		ServletRequestDataBinder errors = bindAndValidate(request, command);
-		return processSubmit(request, response, command, errors);
+		return processFormSubmission(request, response, command, errors);
 	}
 
 	/**
@@ -424,11 +424,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Process submit request. Called by handleRequestInternal in case of a
-	 * form submission.
+	 * Process form submission request. Called by handleRequestInternal in case
+	 * of a form submission.
 	 * <p>Subclasses can override this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
-	 * and call showForm/super.onSubmit accordingly.
+	 * and call showForm or proceed with the submission accordingly.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -436,10 +436,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return the prepared model and view, or null
 	 * @throws ServletException in case of invalid state or arguments
 	 * @throws IOException in case of I/O errors
+	 * @see #isFormSubmission
 	 * @see #showForm
 	 */
-	protected abstract ModelAndView processSubmit(HttpServletRequest request,	HttpServletResponse response,
-	                                              Object command, BindException errors)
+	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,	HttpServletResponse response,
+	                                                      Object command, BindException errors)
 			throws ServletException, IOException;
 
 }

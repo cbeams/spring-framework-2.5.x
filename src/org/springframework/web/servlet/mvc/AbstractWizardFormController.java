@@ -254,12 +254,12 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Mainly useful for page-specific onBindAndValidate implementations,
 	 * as methods like validatePage explicitly feature a page parameter.
 	 * @throws IllegalStateException if the page attribute isn't in the session
-	 * anymore, i.e. when called after processSubmit.
+	 * anymore, i.e. when called after processFormSubmission.
 	 */
 	protected final int getCurrentPage(HttpServletRequest request) throws IllegalStateException {
 		Integer pageAttr = (Integer) request.getSession().getAttribute(getPageSessionAttributeName());
 		if (pageAttr == null) {
-			throw new IllegalStateException("Page attribute isn't in session anymore - called after processSubmit?");
+			throw new IllegalStateException("Page attribute isn't in session anymore - called after processFormSubmission?");
 		}
 		return pageAttr.intValue();
 	}
@@ -267,8 +267,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Apply wizard workflow: finish, cancel, page change.
 	 */
-	protected final ModelAndView processSubmit(HttpServletRequest request, HttpServletResponse response,
-	                                           Object command, BindException errors)
+	protected final ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
+	                                                   Object command, BindException errors)
 	    throws ServletException, IOException {
 
 		int page = getCurrentPage(request);
