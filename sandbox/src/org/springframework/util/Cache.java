@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Bob Lee
  * @see http://www.crazybob.org
- * @version $Id: Cache.java,v 1.1 2004-03-08 14:43:15 kdonald Exp $
+ * @version $Id: Cache.java,v 1.2 2004-03-12 03:27:59 kdonald Exp $
  */
 public abstract class Cache {
     private static final Log logger = LogFactory.getLog(Cache.class);
@@ -57,7 +57,6 @@ public abstract class Cache {
      *            Use weak references for keys.
      * @param size
      *            The initial cache size.
-     *  
      */
     public Cache(boolean weakKeys, int size) {
         this.map = weakKeys ? (Map)new WeakHashMap(size) : new HashMap(size);

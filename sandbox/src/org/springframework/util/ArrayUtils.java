@@ -55,11 +55,13 @@ public class ArrayUtils {
      * @param primitiveArray
      *            The primitive array
      * @return The object array.
+     * @throws IllegalArgumentException
+     *             if the parameter is not a primitive array.
      */
     public static Object[] toObjectArrayFromPrimitive(Object primitiveArray) {
         // if null, return
         if (primitiveArray == null) {
-            return null;
+            return EMPTY_OBJECT_ARRAY;
         }
         // if not an array or elements not primitive, illegal argument...
         Class clazz = primitiveArray.getClass();
