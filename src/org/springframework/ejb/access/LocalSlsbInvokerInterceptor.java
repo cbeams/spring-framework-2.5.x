@@ -7,20 +7,23 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.MethodInvocationException;
+
 /**
  * Interceptor that invokes a local Stateless Session Bean, after caching
  * the home object. A local EJB home can never go stale.
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.4 2003-12-20 18:20:06 johnsonr Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.5 2003-12-30 01:11:55 jhoeller Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	protected EJBLocalObject newSessionBeanInstance() {
+	protected EJBLocalObject newSessionBeanInstance() throws InvocationTargetException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Trying to create reference to remote EJB");
 		}
@@ -39,13 +42,19 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * invoke the EJB.
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		EJBLocalObject ejb = newSessionBeanInstance();
 		try {
+			EJBLocalObject ejb = newSessionBeanInstance();
 			return invocation.getMethod().invoke(ejb, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			logger.info("Method of local EJB [" + getJndiName() + "] threw exception", ex.getTargetException());
-			throw ex.getTargetException();
+			Throwable targetException = ex.getTargetException();
+			logger.info("Method of local EJB [" + getJndiName() + "] threw exception", targetException);
+			if (targetException instanceof CreateException) {
+				throw new MethodInvocationException(targetException, "create");
+			}
+			else {
+				throw targetException;
+			}
 		}
 		catch (Throwable t) {
 			throw new AspectException("Failed to invoke local EJB [" + getJndiName() + "]", t);

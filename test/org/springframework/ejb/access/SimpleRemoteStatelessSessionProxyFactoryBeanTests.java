@@ -14,27 +14,19 @@ import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
-import org.springframework.beans.MethodInvocationException;
+
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.remoting.RemoteAccessException;
 
 /**
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.4 2003-12-19 11:28:17 jhoeller Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.5 2003-12-30 01:11:54 jhoeller Exp $
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase {
 
-	/**
-	 * Constructor for LocalStatelessSessionProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public SimpleRemoteStatelessSessionProxyFactoryBeanTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;
 		final String jndiName = "foo";
@@ -74,7 +66,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		mc.verify();	
 		ec.verify();	
 	}
-	
 	
 	public void testRemoteException() throws Exception {
 		final RemoteException rex = new RemoteException();
@@ -122,7 +113,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 		ec.verify();	
 	}
 	
-	
 	public void testCreateException() throws Exception {
 		final String jndiName = "foo";
 	
@@ -158,13 +148,55 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 			mbm.getValue();
 			fail("Should have failed to create EJB");
 		}
-		catch (MethodInvocationException ex) {
-			assertTrue(ex.getRootCause() == cex);
+		catch (RemoteException ex) {
+			assertTrue(ex.getCause() == cex);
 		}
 		
 		mc.verify();	
 	}
 	
+	public void testCreateExceptionWithLocalBusinessInterface() throws Exception {
+		final String jndiName = "foo";
+
+		final CreateException cex = new CreateException();
+		MockControl mc = MockControl.createControl(MyHome.class);
+		final MyHome home = (MyHome) mc.getMock();
+		home.create();
+		mc.setThrowable(cex);
+		mc.replay();
+
+		JndiTemplate jt = new JndiTemplate() {
+			public Object lookup(String name) throws NamingException {
+				// parameterize
+				assertTrue(name.equals(jndiName));
+				return home;
+			}
+		};
+
+		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
+		fb.setJndiName(jndiName);
+		fb.setInContainer(false);	// no java:comp/env prefix
+		fb.setBusinessInterface(MyLocalBusinessMethods.class);
+		assertEquals(fb.getBusinessInterface(), MyLocalBusinessMethods.class);
+		fb.setJndiTemplate(jt);
+
+		// Need lifecycle methods
+		fb.afterPropertiesSet();
+
+		MyLocalBusinessMethods mbm = (MyLocalBusinessMethods) fb.getObject();
+		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+
+		try {
+			mbm.getValue();
+			fail("Should have failed to create EJB");
+		}
+		catch (RemoteAccessException ex) {
+			assertTrue(ex.getRootCause() == cex);
+		}
+
+		mc.verify();
+	}
+
 	public void testNoBusinessInterfaceSpecified() throws Exception {
 		// Will do JNDI lookup to get home but won't call create
 		// Could actually try to figure out interface from create?
@@ -205,15 +237,25 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 	}
 	
 	
-	public static interface MyHome extends EJBHome {
-		MyBusinessMethods create() throws CreateException, RemoteException;	
+	protected static interface MyHome extends EJBHome {
+
+		MyBusinessMethods create() throws CreateException, RemoteException;
 	}
-	
-	public static interface MyBusinessMethods  {
+
+
+	protected static interface MyBusinessMethods  {
+
 		int getValue() throws RemoteException;
 	}
-	
-	public static interface MyEjb extends EJBObject, MyBusinessMethods {
+
+
+	protected static interface MyLocalBusinessMethods  {
+
+		int getValue();
+	}
+
+
+	protected static interface MyEjb extends EJBObject, MyBusinessMethods {
 		
 	}
 

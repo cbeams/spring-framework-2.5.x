@@ -19,7 +19,7 @@ import org.springframework.jndi.AbstractJndiLocator;
  * These must be the last interceptor in the interceptor chain. In this case,
  * there is no target object.
  * @author Rod Johnson
- * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.4 2003-12-20 18:20:06 johnsonr Exp $
+ * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.5 2003-12-30 01:11:55 jhoeller Exp $
  */
 public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 		implements MethodInterceptor, InitializingBean {
@@ -41,27 +41,6 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 	protected Object getCachedEjbHome() {
 		return cachedHome;
 	}
-	
-	/**
-	 * Invoke the create() method on the cached home.
-	 * @return a new EJBObject or EJBLocalObject
-	 */
-	protected Object create() {
-		try {
-			return createMethod.invoke(cachedHome, null);
-		}
-		catch (IllegalArgumentException ex) {
-			// Can't happen
-			throw new FatalBeanException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not access ejbCreate() method", ex);
-		}
-		catch (InvocationTargetException ex) {
-			throw new MethodInvocationException(ex.getTargetException(), "create");
-		}
-	}
-
 	
  	/**
  	 * Implementation of AbstractJndiLocator's callback, to cache the home wrapper.
@@ -88,6 +67,23 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 	 * @see #located
 	 */
 	protected void afterLocated() {
+	}
+
+	/**
+	 * Invoke the create() method on the cached home.
+	 * @return a new EJBObject or EJBLocalObject
+	 */
+	protected Object create() throws InvocationTargetException {
+		try {
+			return this.createMethod.invoke(this.cachedHome, null);
+		}
+		catch (IllegalArgumentException ex) {
+			// Can't happen
+			throw new FatalBeanException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Could not access ejbCreate() method", ex);
+		}
 	}
 
 }
