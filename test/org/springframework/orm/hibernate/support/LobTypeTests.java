@@ -94,6 +94,37 @@ public class LobTypeTests extends TestCase {
 			List synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
 			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
+	public void testClobStringTypeWithFlushOnCommit() throws Exception {
+		lobHandler.getClobAsString(rs, 1);
+		lobHandlerControl.setReturnValue("content");
+		lobCreator.setClobAsString(ps, 1, "content");
+		lobCreatorControl.setVoidCallable(1);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		ClobStringType type = new ClobStringType(lobHandler, null);
+		assertEquals(1, type.sqlTypes().length);
+		assertEquals(Types.CLOB, type.sqlTypes()[0]);
+		assertEquals(String.class, type.returnedClass());
+		assertTrue(type.equals("content", "content"));
+		assertEquals("content", type.deepCopy("content"));
+		assertFalse(type.isMutable());
+
+		assertEquals("content", type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			type.nullSafeSet(ps, "content", 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
@@ -180,6 +211,7 @@ public class LobTypeTests extends TestCase {
 			List synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
 			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
@@ -277,6 +309,7 @@ public class LobTypeTests extends TestCase {
 			List synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
 			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			((TransactionSynchronization) synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();

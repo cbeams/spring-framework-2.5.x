@@ -208,12 +208,27 @@ public abstract class AbstractLobType implements UserType {
 
 		private final LobCreator lobCreator;
 
+		private boolean beforeCompletionCalled = false;
+
 		private SpringLobCreatorSynchronization(LobCreator lobCreator) {
 			this.lobCreator = lobCreator;
 		}
 
 		public void beforeCompletion() {
+			// Close the LobCreator early if possible, to avoid issues with strict JTA
+			// implementations that issue warnings when doing JDBC operations after
+			// transaction completion.
+			this.beforeCompletionCalled = true;
 			this.lobCreator.close();
+		}
+
+		public void afterCompletion(int status) {
+			if (!this.beforeCompletionCalled) {
+				// beforeCompletion not called before
+				// (probably because of flushing on commit in HibernateTransactionManager).
+				// Close the LobCreator here.
+				this.lobCreator.close();
+			}
 		}
 	}
 
