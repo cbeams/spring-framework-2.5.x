@@ -2,21 +2,19 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
- * type of resource, like file or classpath resource. Can also represent
- * a resource handle with an open stream.
+ * type of resource, like file or classpath resource.
  *
  * <p>An InputStream can be opened for every resource if it exists in
  * physical form, but a File handle can just be returned for resources
- * in the file system.
+ * in the file system. The actual behavior is implementation-specific.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
  */
-public interface Resource {
+public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return whether this resource actually exists in physical form.
@@ -30,12 +28,6 @@ public interface Resource {
 	 * <p>Will be false for all usual resource descriptors.
 	 */
 	boolean isOpen();
-
-	/**
-	 * Return an InputStream for this resource.
-	 * @throws IOException if the resource could not be opened
-	 */
-	InputStream getInputStream() throws IOException;
 
 	/**
 	 * Return a File handle for this resource.

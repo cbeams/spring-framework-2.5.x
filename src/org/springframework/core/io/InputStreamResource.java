@@ -6,12 +6,18 @@ import java.io.InputStream;
 /**
  * Resource implementation for a given InputStream. Should only
  * be used if no specific Resource implementation is applicable.
+ *
+ * <p>In contrast to other Resource implementations, this is a descriptor
+ * for an <i>already opened</i> resource - therefore returning true on
+ * isOpen(). Do not use it if you need to keep the resource descriptor
+ * somewhere, or if you need to read a stream multiple times.
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
  */
 public class InputStreamResource extends AbstractResource {
 
-	private final InputStream inputStream;
+	private InputStream inputStream;
 
 	private final String description;
 
@@ -33,8 +39,18 @@ public class InputStreamResource extends AbstractResource {
 		return true;
 	}
 
-	public InputStream getInputStream() throws IOException {
-		return inputStream;
+	/**
+	 * This implementation throws IllegalStateException if attempting to
+	 * read the underlying stream multiple times.
+	 */
+	public InputStream getInputStream() throws IOException, IllegalStateException {
+		if (this.inputStream == null) {
+			throw new IllegalStateException("InputStream has already been read - " +
+			                                "do not use InputStreamResource if a stream needs to be read multiple times");
+		}
+		InputStream result = this.inputStream;
+		this.inputStream = null;
+		return result;
 	}
 
 	public String getDescription() {
