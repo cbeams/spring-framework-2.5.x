@@ -20,7 +20,7 @@ import org.springframework.transaction.TransactionDefinition;
  * 
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
 
@@ -39,9 +39,6 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	public void testRuleForRollbackOnChecked() {
 		List l = new LinkedList();
 		l.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
-		
-		// Add irrelevant object: should be ignored
-		l.add(new Object());
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
@@ -65,7 +62,7 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		assertTrue(rta.rollbackOn(new ServletException()));
 	}
 	
-	public void testRuleForSelectiveRollbackOnchecked() {
+	public void testRuleForSelectiveRollbackOnChecked() {
 		List l = new LinkedList();
 		l.add(new RollbackRuleAttribute("java.rmi.RemoteException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
@@ -80,15 +77,12 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	public void testRollbackNever() {
 		List l = new LinkedList();
 		l.add(new NoRollbackRuleAttribute("Throwable"));
-		
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
 	
 		assertTrue(!rta.rollbackOn(new Throwable()));
 		assertTrue(!rta.rollbackOn(new RuntimeException()));
-		
 		assertTrue(!rta.rollbackOn(new EJBException()));
 		assertTrue(!rta.rollbackOn(new Exception()));
-	
 		assertTrue(!rta.rollbackOn(new ServletException()));
 	}
 
