@@ -23,7 +23,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: LiveBenchmarkTests.java,v 1.3 2003-12-30 13:52:39 jhoeller Exp $
+ * @version $Id: LiveBenchmarkTests.java,v 1.4 2004-02-26 22:53:14 dkopylenko Exp $
  */
 public class LiveBenchmarkTests extends TestCase {
 	
@@ -31,7 +31,7 @@ public class LiveBenchmarkTests extends TestCase {
 	
 	private JdbcHelper jh;
 	
-	public LiveBenchmarkTests(String s) {
+	public LiveBenchmarkTests(String s)  throws Exception{
 		super(s);
 		
 		DataSource ds = new SingleConnectionDataSource("oracle.jdbc.OracleDriver", 
