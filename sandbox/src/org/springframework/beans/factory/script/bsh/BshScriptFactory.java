@@ -14,24 +14,24 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.script.groovy;
+package org.springframework.beans.factory.script.bsh;
 
-import org.springframework.beans.factory.script.Hello;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.script.AbstractScriptFactory;
+import org.springframework.beans.factory.script.Script;
 
 /**
  * 
  * @author Rod Johnson
  */
-public class DelegatingHello implements Hello {
-	
-	private Hello hello;
-	
-	public void setHello(Hello hello) {
-		this.hello = hello;
-	}
-	
-	public String sayHello() {
-		return this.hello.sayHello();
+public class BshScriptFactory extends AbstractScriptFactory {
+
+	/**
+	 * @see org.springframework.beans.factory.script.AbstractScriptFactory#createScript(java.lang.String)
+	 */
+	protected Script createScript(String location) throws BeansException {
+		//if (geti)
+		return new BshScript(location, this);
 	}
 
 }

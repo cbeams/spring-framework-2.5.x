@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.script.groovy;
+package org.springframework.beans.factory.script;
 
 /**
  * 
