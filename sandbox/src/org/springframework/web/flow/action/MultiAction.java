@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.FlowExecutionInfo;
@@ -28,6 +29,11 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
+ * Action that allows multiple event types types to be processed by
+ * a single action.
+ * 
+ * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -65,7 +71,10 @@ public class MultiAction extends AbstractAction {
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
 		try {
 			Method handlerMethod = getHandlerMethod(handlerMethodName);
-			return (ActionResult)handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
+			Object result=handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
+			Assert.isInstanceOf(ActionResult.class, result,
+					"Event handler methods should return an object of type ActionResult");
+			return (ActionResult)result;
 		}
 		catch (InvocationTargetException e) {
 			Throwable t=e.getTargetException();
