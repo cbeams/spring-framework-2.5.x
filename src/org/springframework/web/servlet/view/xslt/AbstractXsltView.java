@@ -27,6 +27,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.w3c.dom.Node;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
@@ -47,12 +48,12 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.4 2003-12-12 19:46:14 jhoeller Exp $
+ * @version $Id: AbstractXsltView.java,v 1.5 2003-12-30 00:35:26 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
 	/** URL of stylesheet */
-	private String stylesheet;
+	private Resource stylesheetLocation;
 
 	/** Document root element name */
 	private String root;
@@ -71,11 +72,12 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Set the URL of the XSLT stylesheet.
-	 * @param url the URL of the XSLT stylesheet
+	 * Set the location of the XSLT stylesheet.
+	 * @param stylesheetLocation the location of the XSLT stylesheet
+	 * @see org.springframework.context.ApplicationContext#getResource
 	 */
-	public final void setStylesheet(String url) {
-		this.stylesheet = url;
+	public final void setStylesheetLocation(Resource stylesheetLocation) {
+		this.stylesheetLocation = stylesheetLocation;
 	}
 
 	/** 
@@ -116,19 +118,19 @@ public abstract class AbstractXsltView extends AbstractView {
 			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" + getName() + "'");
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
-		logger.debug("Url in view is " + stylesheet);
+		logger.debug("URL in view is " + this.stylesheetLocation);
 		cacheTemplates();
 	}	
 
 	private void cacheTemplates() throws ApplicationContextException {
-		if (this.stylesheet != null && !"".equals(this.stylesheet)) {
+		if (this.stylesheetLocation != null && !"".equals(this.stylesheetLocation)) {
 			try {
-				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheet));
+				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheetLocation));
 				logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getName() + "'");
 			}
 			catch (TransformerConfigurationException ex) {
 				throw new ApplicationContextException(
-					"Can't load stylesheet at [" + this.stylesheet + "] in XSLT view '" + getName() + "'", ex);
+					"Can't load stylesheet at [" + this.stylesheetLocation + "] in XSLT view '" + getName() + "'", ex);
 			}
 		}
 	}
@@ -136,13 +138,13 @@ public abstract class AbstractXsltView extends AbstractView {
 	/** 
 	 * Load the stylesheet. Subclasses can override this.
 	 */
-	protected Source getStylesheetSource(String url) throws ApplicationContextException {
-		logger.debug("Loading XSLT stylesheet '" + url + "'");
+	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
+		logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
 		try {
-			return new StreamSource(getApplicationContext().getResourceAsStream(url));
+			return new StreamSource(stylesheetLocation.getInputStream());
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Can't load XSLT stylesheet from [" + url + "]", ex);
+			throw new ApplicationContextException("Can't load XSLT stylesheet from [" + stylesheetLocation + "]", ex);
 		}
 	}
 
@@ -231,16 +233,16 @@ public abstract class AbstractXsltView extends AbstractView {
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			trans.transform(new DOMSource(dom), new StreamResult(new BufferedOutputStream(response.getOutputStream())));
 
-			logger.debug("XSLT transformed OK with stylesheet '" + this.stylesheet + "'");
+			logger.debug("XSLT transformed OK with stylesheet '" + this.stylesheetLocation + "'");
 		}
 		catch (TransformerConfigurationException ex) {
 			throw new ServletException(
-				"Couldn't create XSLT transformer for stylesheet '" + this.stylesheet +
+				"Couldn't create XSLT transformer for stylesheet '" + this.stylesheetLocation +
 				"' in XSLT view with name='" + getName() + "'", ex);
 		}
 		catch (TransformerException ex) {
 			throw new ServletException(
-				"Couldn't perform transform with stylesheet '" + this.stylesheet +
+				"Couldn't perform transform with stylesheet '" + this.stylesheetLocation +
 				"' in XSLT view with name='" + getName() + "'", ex);
 		}
 	}
