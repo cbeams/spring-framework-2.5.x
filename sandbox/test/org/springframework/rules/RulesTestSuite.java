@@ -176,12 +176,15 @@ public class RulesTestSuite extends TestCase {
     public void testBeanPropertyValueConstraint() {
         UnaryAnd p = Constraints.conjunction();
         p.add(Constraints.required());
-        p.add(Constraints.maxLength(3));
+        p.add(Constraints.maxLength(9));
+        System.out.println(p);
         BeanPropertyExpression e = new BeanPropertyValueConstraint("test", p);
+        assertTrue(e.test(new TestBean()));
 
         p = Constraints.conjunction();
+        e = new BeanPropertyValueConstraint("test", p);
         p.add(Constraints.required());
-        p.add(Constraints.maxLength(6));
+        p.add(Constraints.maxLength(3));
         assertFalse(e.test(new TestBean()));
     }
 

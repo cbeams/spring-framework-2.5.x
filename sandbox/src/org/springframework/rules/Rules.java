@@ -71,18 +71,18 @@ public class Rules implements UnaryPredicate, Validator {
             } else {
                 e = new BeanPropertyValueConstraint(propertyName, p);
             }
-            setRules(propertyName, e);
+            internalSetRules(e);
         }
     }
 
-    public void setRules(String propertyName, BeanPropertyExpression e) {
+    private void internalSetRules(BeanPropertyExpression e) {
         UnaryAnd and = new UnaryAnd();
         and.add(e);
         if (logger.isDebugEnabled()) {
-            logger.debug("Configuring rules for property '" + propertyName
-                    + "', rules -> [" + e + "]");
+            logger.debug("Configuring rules for property '"
+                    + e.getPropertyName() + "', rules -> [" + e + "]");
         }
-        propertyRules.put(propertyName, e);
+        propertyRules.put(e.getPropertyName(), e);
     }
 
     public BeanPropertyExpression getRules(String property) {
@@ -102,7 +102,11 @@ public class Rules implements UnaryPredicate, Validator {
     public Rules add(BeanPropertyExpression expression) {
         UnaryAnd and = (UnaryAnd)propertyRules
                 .get(expression.getPropertyName());
-        and.add(expression);
+        if (and == null) {
+            internalSetRules(expression);
+        } else {
+            and.add(expression);
+        }
         return this;
     }
 
