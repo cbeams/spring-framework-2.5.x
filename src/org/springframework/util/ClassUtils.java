@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Keith Donald, adapted from jakarta-commons-lang's ClassUtils
  * @author Colin Sampaleanu, code moved here form elsewhere in Spring
+ * @author Rob Harrop, added forName()
  */
 public class ClassUtils {
 
@@ -39,6 +40,47 @@ public class ClassUtils {
 	 * The inner class separator character '$'
 	 */
 	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
+	
+	/**
+	 * Primitive Name: boolean
+	 */
+	private static final String BOOLEAN = "boolean";
+	
+	/**
+	 * Primitive Name: byte
+	 */
+	private static final String BYTE = "byte";
+	
+	/**
+	 * Primitive Name: char
+	 */
+	private static final String CHAR = "char";
+	
+	/**
+	 * Primitive Name: double
+	 */
+	private static final String DOUBLE = "double";
+	
+	/**
+	 * Primitive Name: float
+	 */
+	private static final String FLOAT = "float";
+	
+	/**
+	 * Primitive Name: byte
+	 */
+	private static final String INT = "int";
+	
+	/**
+	 * Primitive Name: long
+	 */
+	private static final String LONG = "long";
+	
+	/**
+	 * Primitive Name: short
+	 */
+	private static final String SHORT = "short";
+	
 
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
@@ -174,6 +216,45 @@ public class ClassUtils {
 			return "";
 		}
 		return clazz.getPackage().getName().replace('.', '/');
+	}
+	
+	/**
+	 * Replacement for Class.foraName() that also 
+	 * returns Class instances for primitives.
+	 * @param name The name of the Class
+	 * @return Class instance for the supplied name.
+	 */
+	public static Class forName(String name) throws ClassNotFoundException{
+	    // most class names will be quite long
+	    // considering that the SHOULD sit in a package
+	    // so a length check is worthwhile.
+	    
+	    if(name.length() <= 8) {
+	        // could be a primtive - likely
+	        if(BOOLEAN.equals(name)) {
+	            return boolean.class;
+	        } else if(BYTE.equals(name)) {
+	            return byte.class;
+	        } else if(CHAR.equals(name)) {
+	            return char.class;
+	        } else if(DOUBLE.equals(name)) {
+	            return double.class;
+	        } else if(FLOAT.equals(name)) {
+	            return float.class;
+	        } else if(INT.equals(name)) {
+	            return int.class;
+	        } else if(LONG.equals(name)) {
+	            return long.class;
+	        } else if(SHORT.equals(name)) {
+	            return short.class;
+	        } else {
+	            // could be class with a really short name!
+	            return Class.forName(name);
+	        }
+	    } else {
+	        // not a primtive
+	        return Class.forName(name);
+	    }
 	}
 
 }
