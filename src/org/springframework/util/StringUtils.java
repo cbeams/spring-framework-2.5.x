@@ -46,13 +46,13 @@ import java.util.TreeSet;
  */
 public abstract class StringUtils {
 
-	private static final String FOLDER_SEPARATOR = "/"; // folder separator
+	private static final String FOLDER_SEPARATOR = "/";  // folder separator
 
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";	// Windows folder separator
 
-	private static final String TOP_PATH = ".."; // top folder
+	private static final String TOP_PATH = "..";  // top folder
 
-	private static final String CURRENT_PATH = "."; // current folder
+	private static final String CURRENT_PATH = ".";  // current folder
 
 
 	/**
@@ -240,9 +240,11 @@ public abstract class StringUtils {
 	 * delimiters, consider using <code>delimitedListToStringArray</code>
 	 * @param str the String to tokenize
 	 * @param delimiters the delimiter characters, assembled as String
-	 * (each of those characters is individually considered as delimiter).
+	 * (each of those characters is individually considered as delimiter)
 	 * @param trimTokens trim the tokens via String's <code>trim</code>
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
+	 * (only applies to tokens that are empty after trimming; StringTokenizer
+	 * will not consider subsequent delimiters as token in the first place).
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
 	 * @see java.lang.String#trim
@@ -250,6 +252,7 @@ public abstract class StringUtils {
 	 */
 	public static String[] tokenizeToStringArray(
 			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+
 		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List tokens = new ArrayList();
 		while (st.hasMoreTokens()) {
@@ -257,7 +260,7 @@ public abstract class StringUtils {
 			if (trimTokens) {
 				token = token.trim();
 			}
-			if (!(ignoreEmptyTokens && token.length() == 0)) {
+			if (!ignoreEmptyTokens || token.length() > 0) {
 				tokens.add(token);
 			}
 		}
