@@ -59,8 +59,7 @@ import org.springframework.beans.factory.InitializingBean;
  * transactional JVM-level caching with local SessionFactory setup too -
  * without any configuration hassle like container-specific setup.
  *
- * <p>Note: This class requires Hibernate 2.0.1; we recommend to use the
- * newest stable release in the 2.x series.
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
  *
  * @author Juergen Hoeller
  * @since 05.05.2003
@@ -242,7 +241,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		postProcessConfiguration(config);
 
 		// build SessionFactory instance
-		logger.info("Building new Hibernate SessionFactory for LocalSessionFactoryBean [" + this + "]");
+		logger.info("Building new Hibernate SessionFactory");
 		this.sessionFactory = newSessionFactory(config);
 
 		// execute schema update if requested
@@ -305,8 +304,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @see net.sf.hibernate.tool.hbm2ddl.SchemaUpdate
 	 */
 	protected void executeSchemaUpdate(final Configuration config) throws HibernateException {
+		logger.info("Executing schema update for Hibernate SessionFactory");
 		final Dialect dialect = Dialect.getDialect(config.getProperties());
 		HibernateTemplate template = new HibernateTemplate(this.sessionFactory);
+
 		template.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
@@ -316,18 +317,15 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 					Statement stmt = conn.createStatement();
 					try {
 						for (int i = 0; i < sql.length; i++) {
-							logger.info("Adding [" + sql[i] + "] to schema update batch");
-							stmt.addBatch(sql[i]);
+							logger.debug("Executing schema update statement: " + sql[i]);
+							stmt.executeUpdate(sql[i]);
 						}
-						logger.info("Executing schema update batch");
-						stmt.executeBatch();
 					}
 					finally {
 						try {
 							stmt.close();
 						}
-						catch (SQLException ex) {
-							logger.error("Statement.close threw exception", ex);
+						catch (SQLException ignore) {
 						}
 					}
 					return null;
@@ -355,7 +353,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Close the SessionFactory on bean factory shutdown.
 	 */
 	public void destroy() throws HibernateException {
-		logger.info("Closing Hibernate SessionFactory of LocalSessionFactoryBean [" + this + "]");
+		logger.info("Closing Hibernate SessionFactory");
 		this.sessionFactory.close();
 	}
 
