@@ -16,7 +16,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
 * refined BeanWrapperImpl's "findCustomEditor" to consider editors registered for all path variations without index/key
-* StringTrimmerEditor implements "getAsText" to return an empty String for a null value in case of "emptyAsNull"
+* CustomDateEditor, CustomNumberEditor, StringTrimmerEditor implement "getAsText" to return empty String for null value
 * deprecated PagedListHolder's "getNrOfPages" in favor of "getPageCount" (for consistent method naming)
 * deprecated ConstructorArgumentValues' "getNrOfArguments" in favor of "getArgumentCount" (for consistent method naming)
 * added "applyBeanPropertyValues" method to AutowireCapableBeanFactory, for populating an existing bean instance
@@ -33,7 +33,7 @@ Package org.springframework.ejb
 * factored out "getSessionBeanInstance" and "releaseSessionBeanInstance" methods in SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
-* added suppport for SqlReturnType interface which allows us to return custom types from stored procedures
+* added support for SqlReturnType interface which allows us to return custom types from stored procedures
 * StatementCreatorUtils uses specific PreparedStatement parameter setter methods, as far as possible
 * added auto-conversion of java.util.Calendar to java.sql.Date/Time/Timestamp, for SQL types DATE/TIME/TIMESTAMP
 * added auto-conversion of java.util.Date and java.util.Calendar to java.sql.Timestamp, in case of an unknown SQL type
@@ -67,6 +67,7 @@ Package org.springframework.orm
 * lazily check for existing LobHandler in AbstractLobType, to allow for plain initialization during hbm2java execution
 * added BlobSerializableType for Hibernate, for serializing arbitrary property values to BLOBs and vice versa
 * added "flush" method to HibernateOperations/HibernateTemplate and JdoOperations/JdoTemplate, for eager flushing
+* added "autodetectDataSource" flag to Hibernate/JdoTransactionManager, to suppress automatic DataSource detection
 * added "getReportQueryIteratorByQuery" method to OJB PersistenceBrokerOperations and PersistenceBrokerTemplate
 * HibernateTransactionObject, JdoTransactionObject, PersistenceBrokerTransactionObject implement SmartTransactionObject
 
@@ -87,6 +88,7 @@ Package org.springframework.transaction
 * removed dependency on AOP Alliance AspectException from AbstractPlatformTransactionManager and JtaTransactionManager
 * introduced JtaTransactionObject for JtaTransactionManager, implementing the SmartTransactionObject interface
 * added "autodetectTransactionManager" flag to JtaTransactionManager, to suppress the UserTransaction instanceof check
+* added WebLogicServerTransactionManagerFactoryBean, to be used with WebLogicJtaTransactionManager on WebLogic 7.0
 
 Package org.springframework.validation
 * fixed BindException to apply "getAsText" of a custom PropertyEditor even in case of a null value

@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1 (August 2004)
------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1 (September 2004)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -90,19 +90,19 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-aop" (~130 KB)
+* "spring-aop" (~135 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~225 KB)
+* "spring-context" (~230 KB)
 - Contents: application context, validation framework, UI support, mail, JNDI, JMS, EJB, remoting, scheduling
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~225 KB)
+* "spring-dao" (~230 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~180 KB)
+* "spring-orm" (~190 KB)
 - Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1240 KB)
+* "spring" (~1260 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
