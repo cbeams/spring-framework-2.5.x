@@ -111,7 +111,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {"1", "2", "3"});
+		mcfb.setArguments(new Object[] {new Integer(1), new Integer(2), new Integer(3)});
 		try {
 			mcfb.afterPropertiesSet();
 			Object x = mcfb.getObject();
