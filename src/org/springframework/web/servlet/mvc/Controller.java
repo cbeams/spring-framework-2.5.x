@@ -1,7 +1,18 @@
 /*
- * The Spring Framework is published under the terms
- * of the Apache Software License.
- */
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
 
 package org.springframework.web.servlet.mvc;
 
@@ -47,7 +58,7 @@ import org.springframework.web.servlet.ModelAndView;
  * </p>
  *
  * @author Rod Johnson
- * @version $Id: Controller.java,v 1.4 2003-12-09 08:48:40 jhoeller Exp $
+ * @version $Id: Controller.java,v 1.5 2004-03-18 02:46:08 trisberg Exp $
  * @see SimpleControllerHandlerAdapter
  */
 public interface Controller {
