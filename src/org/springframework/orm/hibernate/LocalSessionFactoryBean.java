@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -297,11 +297,18 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Transaction participation and transaction timeouts are already fully handled
 	 * by that infrastructure combination. Just use it to let Hibernate participate
 	 * in any other local transaction strategy, like DataSourceTransactionManager.
+	 * <p><b>WARNING: Do <i>not</i> use a transaction-aware DataSource in
+	 * combination with OpenSessionInViewFilter or OpenSessionInViewInterceptor.</b>
+	 * These Open Session In View providers are only properly supported in
+	 * combination with HibernateTransactionManager or JtaTransactionManager,
+	 * as stated in their javadoc.
 	 * @see #setDataSource
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
-	 * @see org.springframework.orm.hibernate.HibernateTransactionManager
+	 * @see HibernateTransactionManager
 	 * @see HibernateTemplate
+	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
+	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
 	 * @see net.sf.hibernate.SessionFactory#openSession
 	 */
 	public void setUseTransactionAwareDataSource(boolean useTransactionAwareDataSource) {
