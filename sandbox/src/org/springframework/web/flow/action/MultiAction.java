@@ -156,7 +156,7 @@ public class MultiAction extends AbstractAction {
 	 * Defaults to this object.
 	 */
 	public Object getDelegate() {
-		return this;
+		return delegate;
 	}
 
 	/**
