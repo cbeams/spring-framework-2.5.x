@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationContextException;
  * specified resource using a RequestDispatcher.
  *
  * @author Rod Johnson
- * @version $Id: InternalResourceView.java,v 1.1.1.1 2003-08-14 16:20:58 trisberg Exp $
+ * @version $Id: InternalResourceView.java,v 1.2 2003-11-05 19:19:15 jhoeller Exp $
  */
 public class InternalResourceView extends AbstractView {
 
@@ -100,7 +100,11 @@ public class InternalResourceView extends AbstractView {
 		if (model != null) {
 			Iterator itr = model.keySet().iterator();
 			while (itr.hasNext()) {
-				String modelName = (String) itr.next();
+				Object key = itr.next();
+				if (!(key instanceof String)) {
+					throw new ServletException("Invalid key [" + key + "] in model Map - only Strings allowed as model keys");
+				}
+				String modelName = (String) key;
 				Object modelValue = model.get(modelName);
 				if (logger.isDebugEnabled()) {
 					String msg = "Added model with name '" + modelName + "' to request in InternalResourceView with name '" + getName() + "' ";
@@ -111,7 +115,7 @@ public class InternalResourceView extends AbstractView {
 			}
 		}
 		else {
-			logger.debug("Model is null. Nothing to expose to request");
+			logger.debug("Model is null. Nothing to expose to request.");
 		}
 	}
 	
