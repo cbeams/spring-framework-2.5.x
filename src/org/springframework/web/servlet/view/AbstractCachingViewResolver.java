@@ -67,15 +67,15 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!this.cache) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
-			return loadAndConfigureView(viewName, locale);
+			return prepareView(viewName, locale);
 		}
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
 			// no synchronization, as we can live with occasional double caching
 			View view = (View) this.viewMap.get(cacheKey);
 			if (view == null) {
-				// ask the subclass to load the View
-				view = loadAndConfigureView(viewName, locale);
+				// ask the subclass to prepare the View object
+				view = prepareView(viewName, locale);
 				this.viewMap.put(cacheKey, view);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cached view '" + cacheKey + "'");
@@ -115,13 +115,22 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
+	 * Return the cache key for the given viewName and the given locale.
+	 * Needs to regard the locale in general, as a different locale can lead to a
+	 * different view! Can be overridden in subclasses.
+	 */
+	protected String getCacheKey(String viewName, Locale locale) {
+		return viewName + "_" + locale;
+	}
+
+	/**
 	 * Load and configure the given View. Only invoked once per View.
 	 * Delegates to the loadView template method for actual loading.
 	 * <p>Sets the ApplicationContext on the View if necessary.
 	 * @see #loadView
 	 */
-	private View loadAndConfigureView(String viewName, Locale locale) throws Exception {
-		View view = loadView(viewName, locale);
+	private View prepareView(String viewName, Locale locale) throws Exception {
+		View view = createView(viewName, locale);
 		if (view instanceof ApplicationContextAware) {
 			((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
 		}
@@ -129,12 +138,20 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Return the cache key for the given viewName and the given locale.
-	 * Needs to regard the locale in general, as a different locale can lead to a
-	 * different view! Can be overridden in subclasses.
+	 * Create the actual View object.
+	 * Default implementation delegates to loadView.
+	 * <p>Can be overridden to resolve certain view names in a
+	 * special fashion, before delegating to the actual loadView
+	 * implementation provided by the subclass.
+	 * @param viewName the name of the view to retrieve
+	 * @param locale the Locale to retrieve the view for
+	 * @return the View instance, or null if not found
+	 * (optional, to allow for ViewResolver chaining)
+	 * @throws Exception if the view couldn't be resolved
+	 * @see #loadView
 	 */
-	protected String getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+	protected View createView(String viewName, Locale locale) throws Exception {
+		return loadView(viewName, locale);
 	}
 
 	/**

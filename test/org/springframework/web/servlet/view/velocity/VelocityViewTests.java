@@ -40,7 +40,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * @author Rod Johnson
@@ -283,14 +285,29 @@ public class VelocityViewTests extends TestCase {
 		reqControl.verify();
 	}
 
-	public void testVelocityViewResolver() {
-		VelocityViewResolver resolver = new VelocityViewResolver();
-		resolver.setPrefix("prefix_");
-		resolver.setSuffix("_suffix");
-		resolver.setApplicationContext(new StaticWebApplicationContext());
-		VelocityView view = (VelocityView) resolver.loadView("test", Locale.CANADA);
-		assertEquals("test", view.getBeanName());
-		assertEquals("prefix_test_suffix", view.getUrl());
+	public void testVelocityViewResolver() throws Exception {
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+			}
+		};
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.getBeanFactory().registerSingleton("configurer",vc);
+
+		VelocityViewResolver vr = new VelocityViewResolver();
+		vr.setPrefix("prefix_");
+		vr.setSuffix("_suffix");
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("test", Locale.CANADA);
+		assertEquals("Correct view class", VelocityView.class, view.getClass());
+		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
+
+		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", RedirectView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
 	}
 
 }
