@@ -15,12 +15,7 @@
  */
 package org.springframework.web.servlet.view.document;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,76 +23,59 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import junit.framework.TestCase;
-import org.pdfbox.cos.COSDocument;
-import org.pdfbox.pdfparser.PDFParser;
-import org.pdfbox.util.PDFTextStripper;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public class PdfViewTests extends TestCase {
 
 	public void testPdf() throws Exception {
+		final String text = "this should be in the PDF";
+
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractPdfView pdfView = new AbstractPdfView() {
 			protected void buildPdfDocument(Map model, Document document, PdfWriter writer,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
-				document.add(new Paragraph("this should be in the PDF"));
+				document.add(new Paragraph(text));
 			}
 		};
 
 		pdfView.render(new HashMap(), request, response);
+		byte[] pdfContent = response.getContentAsByteArray();
 
-		// get the content
-		byte[] pdf = response.getContentAsByteArray();
-		String text = parsePdf(pdf);
-		if (text.indexOf("this should be in the PDF") == -1) {
-			fail("The text we put in the PDF wasn't in there when we looked at it!");
+		assertEquals("correct response content type", "application/pdf", response.getContentType());
+		assertEquals("correct response content length", pdfContent.length, response.getContentLength());
+
+		// rebuild iText document for comparison
+		Document document = new Document(PageSize.A4);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PdfWriter writer = PdfWriter.getInstance(document, baos);
+		writer.setViewerPreferences(PdfWriter.AllowPrinting | PdfWriter.PageLayoutSinglePage);
+		document.open();
+		document.add(new Paragraph(text));
+		document.close();
+		byte[] baosContent = baos.toByteArray();
+
+		assertEquals("correct size", pdfContent.length, baosContent.length);
+
+		int diffCount = 0;
+		for (int i = 0; i < pdfContent.length; i++) {
+			if (pdfContent[i] != baosContent[i]) {
+				diffCount++;
+			}
 		}
-	}
 
-	private String parsePdf(byte[] pdf) throws Exception {
-		PDFTextStripper stripper = new PDFTextStripper();
-		// parse all of it!
-		int startPage = 1;
-		int endPage = Integer.MAX_VALUE;
-
-		InputStream input = null;
-		Writer output = null;
-		COSDocument document = null;
-		try {
-			input = new ByteArrayInputStream(pdf);
-			document = parseDocument(input);
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			output = new OutputStreamWriter(baos);
-
-			stripper.setStartPage(startPage);
-			stripper.setEndPage(endPage);
-
-			stripper.writeText(document, output);
-			return new String(baos.toByteArray());
-		}
-		finally {
-			input.close();
-			output.close();
-			document.close();
-		}
-	}
-
-	/** parses a PDF document resulting in a COSDocument */
-	private static COSDocument parseDocument(InputStream input) throws IOException {
-		PDFParser parser = new PDFParser(input);
-		parser.parse();
-		return parser.getDocument();
+		assertTrue("difference only in encryption", diffCount < 70);
 	}
 
 }
