@@ -25,14 +25,13 @@ import org.springframework.context.ApplicationContext;
  * but also for application contexts embedded within JARs.
  *
  * <p>Treats resource paths as class path resources, when using
- * ApplicationContext.getResource. Only supports full classpath resource
+ * <code>getResource</code>. Only supports full class path resource
  * names that include the package path, like "mypackage/myresource.dat".
  *
- * <p>The config location defaults can be overridden via setConfigLocations,
- * respectively via the "contextConfigLocation" parameters of ContextLoader and
- * FrameworkServlet. Config locations can either denote concrete files like
- * "/mypackage/context.xml" or Ant-style patterns like "/mypackage/*-context.xml"
- * (see PathMatcher javadoc for pattern details).
+ * <p>The config location defaults can be overridden via <code>setConfigLocations</code>,
+ * Config locations can either denote concrete files like "/myfiles/context.xml"
+ * or Ant-style patterns like "/myfiles/*-context.xml" (see PathMatcher javadoc for
+ * pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
@@ -42,6 +41,7 @@ import org.springframework.context.ApplicationContext;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
+ * @see #getResourcePatternResolver
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 

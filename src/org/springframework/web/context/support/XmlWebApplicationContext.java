@@ -60,7 +60,7 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @see #getResourcePatternResolver
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
- * @see org.springframework.context.support.AbstractApplicationContext#getResource
+ * @see org.springframework.context.support.AbstractApplicationContext
  * @see org.springframework.ui.context.ThemeSource
  */
 public class XmlWebApplicationContext extends AbstractXmlApplicationContext
@@ -137,7 +137,11 @@ public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 	}
 
 	/**
-	 * This implementation supports file paths beneath the root of the web application.
+	 * Resolve file paths beneath the root of the web application.
+	 * <p>Note: Even if a given path starts with a slash, it will get
+	 * interpreted as relative to the web application root directory
+	 * (which is the way most servlet containers handle such paths).
+	 * @see ServletContextResource
 	 */
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
