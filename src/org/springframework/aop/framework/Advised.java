@@ -17,13 +17,9 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.AfterReturningAdvice;
-import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.ThrowsAdvice;
 
 /**
  * Interface to be implemented by classes that hold the configuration

@@ -28,14 +28,10 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
-import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;

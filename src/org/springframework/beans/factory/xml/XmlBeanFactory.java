@@ -16,12 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.InputStream;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
 /**
