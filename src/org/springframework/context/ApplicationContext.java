@@ -22,7 +22,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * <li>The ability to resolve messages, supporting internationalization.
  * <li>The ability to publish events. Implementations must provide a means
  * of registering event listeners.
- * <li>The ability to share objects by publishing them to the context.
  * <li>Bean factory methods, inherited from ListableBeanFactory. This
  * avoids the need for applications to use singletons.
  * <li>Notification of beans initialized by the context of the context,
@@ -36,7 +35,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.3 2003-08-28 17:23:39 jhoeller Exp $
+ * @version $Id: ApplicationContext.java,v 1.4 2003-09-02 21:59:09 johnsonr Exp $
  */
 public interface ApplicationContext extends MessageSource, ListableBeanFactory, HierarchicalBeanFactory {
 	
@@ -121,31 +120,4 @@ public interface ApplicationContext extends MessageSource, ListableBeanFactory, 
 	 */
 	String getResourceBasePath();
 
-	/**
-	 * Put an object available for sharing. Note that this
-	 * method is not synchronized. As with Java 2 collections,
-	 * it's up to calling code to ensure thread safety.
-	 * Also, this doesn't work in a cluster. It's
-	 * analogous to putting something in a ServletContext.
-	 * @param key object key
-	 * @param o object to put
-	 */
-	void shareObject(String key, Object o);
-	
-	/**
-	 * Retrieve a shared object added with a call to shareObject().
-	 * Delegate to the parent application context if not found.
-	 * @return the object, or null if no object is known under
-	 * this name (this is not an error).
-	 */
-	Object sharedObject(String key);
-	
-	/** 
-	 * Remove a shared object added with a call to shareObject().
-	 * Does nothing if the object was null.
-	 * @param key the object was added with
-	 * @return the object if it was found, or null.
-	 */
-	Object removeSharedObject(String key);
-		
 }

@@ -109,39 +109,6 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		}
 	}
 
-	public void testNoSuchSharedObject() {
-		Object o = applicationContext.sharedObject("foobar");
-		assertTrue("No such object is null. No exception was thrown", o == null);
-	}
-
-	public void testRetrievesSharedObject() {
-		Object bar = new Object();
-		applicationContext.shareObject("foo", bar);
-		Object o = applicationContext.sharedObject("foo");
-		assertTrue("Shared object is found", o != null);
-		assertTrue("==", o == bar);
-	}
-
-	public void testRetrievesSharedObjectFromParent() {
-		Object bar = new Object();
-		applicationContext.getParent().shareObject("foo", bar);
-		Object o = applicationContext.sharedObject("foo");
-		assertTrue("Shared object is found", o != null);
-		assertTrue("==", o == bar);
-	}
-
-	public void testRemoveSharedObject() {
-		Object bar = new Object();
-		applicationContext.shareObject("foo", bar);
-		Object o = applicationContext.sharedObject("foo");
-		assertTrue("Shared object is found", o != null);
-		assertTrue("==", o == bar);
-		Object removed = applicationContext.removeSharedObject("foo");
-		assertTrue("removed == original", removed == bar);
-		assertTrue("no longer there", applicationContext.sharedObject("bar") == null);
-		assertTrue("no longer there for remove", applicationContext.removeSharedObject("bar") == null);
-	}
-
 	public void testEvents() throws Exception {
 		listener.zeroCounter();
 		parentListener.zeroCounter();

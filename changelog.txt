@@ -1,6 +1,11 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
+Changes in version 1.0 M2 (XX.XX.2003)
+-------------------------------------
+* removed "shared object" support in ApplicationContext as part of API simplification
+
+
 Changes in version 1.0 M1 (30.8.2003)
 -------------------------------------
 * changed package structure from com.interface21 to org.springframework

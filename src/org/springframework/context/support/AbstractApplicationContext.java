@@ -59,7 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -116,9 +116,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * reference, to be able to avoid double initialization of managed objects.
 	 */
 	private Set managedSingletons = new HashSet();
-
-	/** Map of shared objects, keyed by String */
-	private Map sharedObjects = new HashMap();
 
 
 	//---------------------------------------------------------------------
@@ -424,32 +421,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 */
 	public String getResourceBasePath() {
 		return (new File("")).getAbsolutePath() + File.separatorChar;
-	}
-
-	public synchronized Object sharedObject(String key) {
-		Object sharedObject = this.sharedObjects.get(key);
-		if (sharedObject == null && getParent() != null) {
-			return getParent().sharedObject(key);
-		}
-		else {
-			return sharedObject;
-		}
-	}
-
-	public synchronized void shareObject(String key, Object o) {
-		logger.info("Set shared object '" + key + "'");
-		this.sharedObjects.put(key, o);
-	}
-
-	public synchronized Object removeSharedObject(String key) {
-		logger.info("Removing shared object '" + key + "'");
-		Object o = this.sharedObjects.remove(key);
-		if (o == null) {
-			logger.warn("Shared object '" + key + "' not present; could not be removed");
-		} else {
-			logger.info("Removed shared object '" + key + "'");
-		}
-		return o;
 	}
 
 
