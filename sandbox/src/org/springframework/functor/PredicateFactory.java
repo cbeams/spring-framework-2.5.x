@@ -15,21 +15,20 @@
  */
 package org.springframework.functor;
 
+import org.springframework.functor.predicates.BindConstantUnaryPredicate;
+
 /**
  * @author Keith Donald
  */
-public class UnaryFunctionEvaluator implements UnaryPredicate {
-    private UnaryPredicate evaluator;
-    private UnaryFunction function;
-
-    public UnaryFunctionEvaluator(UnaryPredicate evaluator,
-            UnaryFunction function) {
-        this.evaluator = evaluator;
-        this.function = function;
+public class PredicateFactory {
+    public static UnaryPredicate bindConstant(BinaryPredicate predicate,
+            Object value) {
+        return new BindConstantUnaryPredicate(predicate, value);
     }
 
-    public boolean evaluate(Object value) {
-        return this.evaluator.evaluate(function.execute(value));
+    public static UnaryPredicate attachResultEvaluator(
+            UnaryPredicate evaluator, UnaryFunction function) {
+        return new UnaryFunctionEvaluator(evaluator, function);
     }
 
 }
