@@ -176,7 +176,7 @@
 		<!-- Note: Was "bind" in earlier version -->
 		<variable>
 			<name-given>status</name-given>
-			<variable-class>org.springframework.web.servlet.tags.BindStatus</variable-class>
+			<variable-class>org.springframework.web.servlet.support.BindStatus</variable-class>
 		</variable>
 
 		<!-- Note: Was "value" in earlier version -->

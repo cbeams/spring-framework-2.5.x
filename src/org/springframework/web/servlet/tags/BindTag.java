@@ -45,7 +45,8 @@ public class BindTag extends RequestContextAwareTag {
 	private String path;
 	
 	private BindStatus status;
-	
+
+
 	/**
 	 * Set the path that this tag should apply. Can be a bean (e.g. "person")
 	 * to get global errors, or a bean property (e.g. "person.name") to get
@@ -68,20 +69,22 @@ public class BindTag extends RequestContextAwareTag {
 		return path;
 	}
 
+
 	protected final int doStartTagInternal() throws Exception {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", this.path, pageContext);
 		
 		try {
-		    status = new BindStatus(getRequestContext(), resolvedPath, isHtmlEscape());
-		    
-		} catch (IllegalStateException e) {
-		    throw new JspTagException(e.getMessage());
+			this.status = new BindStatus(getRequestContext(), resolvedPath, isHtmlEscape());
+		}
+		catch (IllegalStateException ex) {
+			throw new JspTagException(ex.getMessage());
 		}
 		
 		// create the status object
 		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, status);
 		return EVAL_BODY_INCLUDE;
 	}
+
 
 	/**
 	 * Retrieve the property that this tag is currently bound to,
@@ -91,7 +94,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * or <code>null</code> if none
 	 */
 	public final String getProperty() {
-		return (status == null ? null : status.getExpression());
+		return this.status.getExpression();
 	}
 
 	/**
@@ -100,7 +103,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * @return the current Errors instance, or null if none
 	 */
 	public final Errors getErrors() {
-	    return (status == null ? null : status.getErrors());
+		return this.status.getErrors();
 	}
 
 	/**
@@ -109,8 +112,9 @@ public class BindTag extends RequestContextAwareTag {
 	 * @return the current PropertyEditor, or null if none
 	 */
 	public final PropertyEditor getEditor() {
-		return (status == null ? null : status.getEditor());
+		return this.status.getEditor();
 	}
+
 
 	public void doFinally() {
 		super.doFinally();

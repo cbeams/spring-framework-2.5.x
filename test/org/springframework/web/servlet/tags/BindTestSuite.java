@@ -27,6 +27,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * @author Juergen Hoeller
