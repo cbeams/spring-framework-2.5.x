@@ -32,7 +32,7 @@ import javax.servlet.ServletContext;
  * @author Juergen Hoeller
  */
 public class MockServletConfig implements ServletConfig {
-	
+
 	private final ServletContext servletContext;
 
 	private final String name;
@@ -41,7 +41,15 @@ public class MockServletConfig implements ServletConfig {
 
 
 	/**
-	 * Create a new MockServletConfig.
+	 * Create new MockServletConfig with empty String as name.
+	 * @param servletContext the ServletContext that the servlet runs in
+	 */
+	public MockServletConfig(ServletContext servletContext) {
+		this(servletContext, "");
+	}
+
+	/**
+	 * Create new MockServletConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param name the name of the servlet
 	 */

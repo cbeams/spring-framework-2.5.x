@@ -40,7 +40,15 @@ public class MockFilterConfig implements FilterConfig {
 
 
 	/**
-	 * Create a new MockServletConfig.
+	 * Create new MockServletConfig with empty String as name.
+	 * @param servletContext the ServletContext that the servlet runs in
+	 */
+	public MockFilterConfig(ServletContext servletContext) {
+		this(servletContext, "");
+	}
+
+	/**
+	 * Create new MockServletConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param name the name of the servlet
 	 */
