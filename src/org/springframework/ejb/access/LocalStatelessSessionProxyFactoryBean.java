@@ -14,7 +14,7 @@ import org.springframework.beans.factory.FactoryBean;
  * ProxyFactoryBean rather than to rely on this class.
  * @author Rod Johnson
  * @since 09-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBean.java,v 1.5 2003-12-19 11:28:42 jhoeller Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBean.java,v 1.6 2003-12-30 01:10:04 jhoeller Exp $
  */
 public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInterceptor
     implements FactoryBean {
@@ -56,9 +56,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 		if (this.businessInterface == null) {
 			throw new IllegalArgumentException("businessInterface property must be set in LocalStatelessSessionProxyFactoryBean");
 		}
-		ProxyFactory pf = new ProxyFactory(new Class[] { this.businessInterface });
-		pf.addInterceptor(this);
-		this.proxy = pf.getProxy();
+		this.proxy = ProxyFactory.getProxy(this.businessInterface, this);
 	}
 
 	public Object getObject() {

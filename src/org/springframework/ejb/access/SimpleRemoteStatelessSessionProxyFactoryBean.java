@@ -14,7 +14,7 @@ import org.springframework.beans.factory.FactoryBean;
  * rather than rely on this class.
  * @author Rod Johnson
  * @since 09-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.5 2003-12-19 11:28:17 jhoeller Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.6 2003-12-30 01:09:38 jhoeller Exp $
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor
     implements FactoryBean {
@@ -53,9 +53,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 		if (this.businessInterface == null) {
 			throw new IllegalArgumentException("businessInterface is required");
 		}
-		ProxyFactory pf = new ProxyFactory(new Class[] { this.businessInterface });
-		pf.addInterceptor(this);
-		this.proxy = pf.getProxy();
+		this.proxy = ProxyFactory.getProxy(this.businessInterface, this);
 	}
 
 	public Object getObject() {
