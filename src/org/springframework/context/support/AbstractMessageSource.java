@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.context.support;
 
@@ -39,7 +39,8 @@ import org.springframework.context.NoSuchMessageException;
  * MessageSourceResolvables themselves.
  *
  * <p>This class does not implement caching, thus subclasses can
- * dynamically change messages over time.
+ * dynamically change messages over time. Subclasses are encouraged
+ * to cache their messages in a modification-aware fashion.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -63,10 +64,16 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	}
 
 	/**
-	 * Set whether to use the message code as default message
-	 * instead of throwing a NoSuchMessageException.
-	 * Useful for development and debugging. Default is false.
+	 * Set whether to use the message code as default message instead of
+	 * throwing a NoSuchMessageException. Useful for development and debugging.
+	 * Default is false.
+	 * <p>Note: In case of a MessageSourceResolvable with multiple codes
+	 * (like a FieldError) and a MessageSource that has a parent MessageSource,
+	 * do <i>not</i> activate "useCodeAsDefaultMessage" in the <i>parent</i>:
+	 * Else, you'll get the first code returned as message by the parent,
+	 * without attempts to check further codes.
 	 * @see #getMessage(String, Object[], Locale)
+	 * @see org.springframework.validation.FieldError
 	 */
 	public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
 		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
@@ -78,9 +85,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (msg != null) {
 			return msg;
 		}
-		if (this.parentMessageSource != null) {
-			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
-		}
 		if (defaultMessage == null && this.useCodeAsDefaultMessage) {
 			return code;
 		}
@@ -91,9 +95,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
-		}
-		if (this.parentMessageSource != null) {
-			return this.parentMessageSource.getMessage(code, args, locale);
 		}
 		if (this.useCodeAsDefaultMessage) {
 			return code;
@@ -111,9 +112,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			if (msg != null) {
 				return msg;
 			}
-		}
-		if (this.parentMessageSource != null) {
-			return this.parentMessageSource.getMessage(resolvable, locale);
 		}
 		if (resolvable.getDefaultMessage() != null) {
 			return resolvable.getDefaultMessage();
@@ -142,20 +140,28 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @see #setUseCodeAsDefaultMessage
 	 */
 	protected String getMessageInternal(String code, Object[] args, Locale locale) {
-		if (locale == null) {
-			locale = Locale.getDefault();
-		}
 		if (code == null) {
 			return null;
+		}
+		if (locale == null) {
+			locale = Locale.getDefault();
 		}
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
 			return messageFormat.format(resolveArguments(args, locale));
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Could not resolve message code [" + code + "] in locale [" + locale + "]");
+		else if (this.parentMessageSource != null) {
+			// check parent MessageSource, returning null if not found there
+			try {
+				return this.parentMessageSource.getMessage(code, args, locale);
+			}
+			catch (NoSuchMessageException ex) {
+				return null;
+			}
 		}
-		return null;
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -166,7 +172,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param locale the locale to resolve through
 	 * @return an array of arguments with any MessageSourceResolvables resolved
 	 */
-	private Object[] resolveArguments(Object[] args, Locale locale) {
+	protected Object[] resolveArguments(Object[] args, Locale locale) {
 		if (args == null) {
 			return new Object[0];
 		}
@@ -182,7 +188,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		}
 		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
 	}
-	
+
 
 	/**
 	 * Subclasses must implement this method to resolve a message.

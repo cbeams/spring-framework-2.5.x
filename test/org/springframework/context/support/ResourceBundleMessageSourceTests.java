@@ -33,7 +33,14 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 	protected void doTestMessageAccess(boolean reloadable, boolean fallbackToSystemLocale,
 	                                   boolean expectGermanFallback, boolean useCodeAsDefaultMessage) {
+
 		StaticApplicationContext ac = new StaticApplicationContext();
+		if (reloadable) {
+			StaticApplicationContext parent = new StaticApplicationContext();
+			parent.refresh();
+			ac.setParent(parent);
+		}
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		String basepath = "org/springframework/context/support/";
 		String[] basenames = null;
