@@ -14,15 +14,13 @@ import org.springframework.metadata.commons.CommonsAttributeCompilerUtils;
 /**
  * Metadata auto proxy creator test that sources attributes 
  * using Jakarta Commons Attributes.
- * <br>This test file ends with Test, rather than Tests or TestSuite,
- * to ensure that it isn't run as part of the Spring Ant build process.
  * <b>Requires source-level metadata compilation.</b>
  * <br>See the commonsBuild.xml Ant build script.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: CommonsAttributesMetadataAutoProxyTest.java,v 1.2 2003-12-15 12:49:11 johnsonr Exp $
+ * @version $Id: CommonsAttributesMetadataAutoProxyTests.java,v 1.1 2004-02-23 10:45:26 jhoeller Exp $
  */
-public class CommonsAttributesMetadataAutoProxyTest extends AbstractMetadataAutoProxyTests {
+public class CommonsAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
 	
 	static {
 		// If we're within an IDE, compile the attributes programmatically
@@ -33,7 +31,7 @@ public class CommonsAttributesMetadataAutoProxyTest extends AbstractMetadataAuto
 	 * Constructor for ProxyFactoryBeanTests.
 	 * @param arg0
 	 */
-	public CommonsAttributesMetadataAutoProxyTest(String arg0) {
+	public CommonsAttributesMetadataAutoProxyTests(String arg0) {
 		super(arg0);
 	}
 	
