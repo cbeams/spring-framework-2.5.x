@@ -27,7 +27,8 @@ import org.springframework.util.Assert;
  */
 public class ValuePropertyChangeListenerMediator implements
         PropertyChangeListener, ValueListener {
-    private Log logger = LogFactory.getLog(getClass());
+    private static final Log logger = LogFactory
+            .getLog(ValuePropertyChangeListenerMediator.class);
 
     private Object domainObject;
 
@@ -37,14 +38,17 @@ public class ValuePropertyChangeListenerMediator implements
 
     private ValueListener listener;
 
-    public ValuePropertyChangeListenerMediator(ValueListener listener,
-            String propertyName, ValueModel domainObjectHolder) {
+    private MutableAspectAccessStrategy accessStrategy;
+
+    public ValuePropertyChangeListenerMediator(
+            MutableAspectAccessStrategy accessStrategy, ValueListener listener,
+            String propertyName) {
         Assert.notNull(listener);
         Assert.notNull(propertyName);
-        Assert.notNull(domainObjectHolder);
+        this.accessStrategy = accessStrategy;
         this.listener = listener;
         this.propertyName = propertyName;
-        this.domainObjectHolder = domainObjectHolder;
+        this.domainObjectHolder = accessStrategy.getDomainObjectHolder();
         this.domainObjectHolder.addValueListener(this);
         this.domainObject = domainObjectHolder.get();
         subscribe();
@@ -61,36 +65,52 @@ public class ValuePropertyChangeListenerMediator implements
         listener.valueChanged();
     }
 
-    private void subscribe() {
-        if (domainObject != null) {
+    public void subscribe() {
+        if (domainObject == null
+                || !(domainObject instanceof PropertyChangePublisher)) { return; }
+        subscribe((PropertyChangePublisher)domainObject);
+    }
+
+    private void subscribe(PropertyChangePublisher publisher) {
+        if (publisher != null) {
             if (logger.isDebugEnabled()) {
-                logger
-                        .debug("[Subscribing to domain object for property changes.]");
+                logger.debug("[Subscribing to domain object '" + domainObject
+                        + "' for property changes on property '" + propertyName
+                        + "'.]");
             }
-            getPublisher().addPropertyChangeListener(propertyName, this);
+            publisher.addPropertyChangeListener(propertyName, this);
         }
     }
 
     public void unsubscribe() {
-        if (domainObject != null) {
-            if (logger.isDebugEnabled()) {
-                logger
-                        .debug("[Unsubscribing to domain object for property changes.]");
-            }
-            getPublisher().removePropertyChangeListener(propertyName, this);
-        }
+        if (domainObject == null
+                || !(domainObject instanceof PropertyChangePublisher)) { return; }
+        unsubscribe((PropertyChangePublisher)domainObject);
     }
 
-    private PropertyChangePublisher getPublisher() {
-        return (PropertyChangePublisher)domainObject;
+    private void unsubscribe(PropertyChangePublisher publisher) {
+        if (publisher != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Unsubscribing from domain object '"
+                        + domainObject + "' for property changes on property '"
+                        + propertyName + "'.]");
+            }
+            publisher.removePropertyChangeListener(propertyName, this);
+        }
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        if (logger.isDebugEnabled()) {
-            logger
-                    .debug("Property change event received from domain object; notifiying value listener");
+        if (!accessStrategy.isValueUpdating()) {
+            if (logger.isDebugEnabled()) {
+                logger
+                        .debug("Property change event received from domain object for property '"
+                                + evt.getPropertyName()
+                                + "', new value is="
+                                + evt.getNewValue()
+                                + "; notifiying value listener.");
+            }
+            this.listener.valueChanged();
         }
-        this.listener.valueChanged();
     }
 
 }

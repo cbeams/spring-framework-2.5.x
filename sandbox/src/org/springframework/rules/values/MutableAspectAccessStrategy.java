@@ -29,6 +29,8 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
 
     public PropertyEditor findCustomEditor(Class aspectType, String aspect);
 
+    public boolean isValueUpdating();
+    
     public void setValue(String aspect, Object value);
 
     public MutableAspectAccessStrategy newNestedAccessor(

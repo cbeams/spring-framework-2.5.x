@@ -46,6 +46,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     private MetaAspectAccessStrategy metaAspectAccessor;
 
+    private boolean updatingValue;
+
     public BeanPropertyAccessStrategy(Object bean) {
         this((bean instanceof ValueModel ? (ValueModel)bean : new ValueHolder(
                 bean)));
@@ -78,7 +80,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     public void addValueListener(ValueListener l, String aspect) {
         if (beanHolder.get() instanceof PropertyChangePublisher) {
             ValuePropertyChangeListenerMediator listener = new ValuePropertyChangeListenerMediator(
-                    l, aspect, beanHolder);
+                    this, l, aspect);
             getListeners().put(createListenerKey(l, aspect), listener);
         }
     }
@@ -116,7 +118,6 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     public void registerCustomEditor(Class aspectType, String aspect,
             PropertyEditor propertyEditor) {
-        System.out.println("Registering");
         beanWrapper.registerCustomEditor(aspectType, aspect, propertyEditor);
     }
 
@@ -145,7 +146,17 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         if (logger.isDebugEnabled()) {
             logger.debug("Setting aspect '" + aspect + "' = " + value);
         }
-        this.beanWrapper.setPropertyValue(aspect, value);
+        this.updatingValue = true;
+        try {
+            this.beanWrapper.setPropertyValue(aspect, value);
+        }
+        finally {
+            this.updatingValue = false;
+        }
+    }
+
+    public boolean isValueUpdating() {
+        return updatingValue;
     }
 
     public MetaAspectAccessStrategy getMetaAspectAccessor() {
