@@ -74,6 +74,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		Object[] args = new Object[]{"Hello", new DefaultMessageSourceResolvable(new String[]{"code1"}, null)};
 		assertEquals("Hello, message1", ac.getMessage("hello", args, Locale.ENGLISH));
 
+		assertEquals("default", ac.getMessage(null, null, "default", Locale.ENGLISH));
+
 		// test null message args
 		assertEquals("{0}, {1}", ac.getMessage("hello", null, Locale.ENGLISH));
 
