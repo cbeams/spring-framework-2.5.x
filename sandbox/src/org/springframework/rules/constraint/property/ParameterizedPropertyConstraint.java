@@ -52,7 +52,7 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 	}
 
 	public boolean isDependentOn(String propertyName) {
-		return parameterizedExpression.test(propertyName);
+		return parameterizedExpression.isDependentOn(propertyName);
 	}
 
 	public boolean isCompoundRule() {
