@@ -22,6 +22,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Constants;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 /**
@@ -47,12 +48,61 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * @author Juergen Hoeller
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
-	
+
+	/** Constants instance for AutowireCapableBeanFactory */
+	private static final Constants constants = new Constants(AutowireCapableBeanFactory.class);
+
+	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
+
+	private boolean dependencyCheck = true;
+
+
+	/**
+	 * Set the autowire mode for handlers, by the name of the corresponding constant
+	 * in the AutowireCapableBeanFactory interface, e.g. "AUTOWIRE_BY_NAME".
+	 * @param constantName name of the constant
+	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
+	 * @see #setAutowireMode
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_CONSTRUCTOR
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_AUTODETECT
+	 */
+	public void setAutowireModeName(String constantName) throws IllegalArgumentException {
+		setAutowireMode(constants.asNumber(constantName).intValue());
+	}
+
+	/**
+	 * Set the autowire mode for handlers. This determines whether any automagical
+	 * detection and setting of bean references will happen.
+	 * <p>Default is AUTOWIRE_AUTODETECT, which means either constructor autowiring or
+	 * autowiring by type (depending on the constructors available in the class).
+	 * @param autowireMode the autowire mode to set.
+	 * Must be one of the constants defined in the AutowireCapableBeanFactory interface.
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_CONSTRUCTOR
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_AUTODETECT
+	 */
+	public void setAutowireMode(int autowireMode) {
+		this.autowireMode = autowireMode;
+	}
+
+	/**
+	 * Set whether to perform a dependency check for objects on autowired handlers.
+	 * Not applicable to autowiring a constructor, thus ignored there.
+	 * <p>Default is true.
+	 */
+	public void setDependencyCheck(boolean dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
+	}
+
+
 	/**
 	 * Look for all classes with a PathMap class attribute, instantiate them in
 	 * the owning ApplicationContext and register them as MVC handlers usable
 	 * by the current DispatcherServlet.
-	 * @see org.springframework.context.support.ApplicationObjectSupport#initApplicationContext()
+	 * @see PathMap
 	 */
 	public void initApplicationContext() throws BeansException {
 		if (!(getApplicationContext() instanceof ConfigurableApplicationContext)) {
@@ -75,7 +125,7 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 				// Autowire the given handler class via AutowireCapableBeanFactory.
 				// Either autowires a constructor or by type, depending on the
 				// constructors available in the given class.
-				Object handler = beanFactory.autowire(handlerClass, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
+				Object handler = beanFactory.autowire(handlerClass, this.autowireMode, this.dependencyCheck);
 
 				// We now have an "autowired" handler, that may reference beans in the
 				// application context. We now add the new handler to the factory.

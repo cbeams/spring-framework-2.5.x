@@ -24,15 +24,15 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 /**
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * 
  * @@PathMap("/constructor.cgi")
  */
-public class ConstructorController implements Controller {
+public class BeanPropertyController implements Controller {
 	
 	public ITestBean testBean;
 
-	public ConstructorController(ITestBean testBean) {
+	public void setTestBean(ITestBean testBean) {
 		this.testBean = testBean;
 	}
 

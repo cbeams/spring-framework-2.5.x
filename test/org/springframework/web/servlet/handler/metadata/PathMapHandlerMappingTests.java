@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -40,6 +41,7 @@ public class PathMapHandlerMappingTests extends TestCase {
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap(path));
 		hm.setApplicationContext(wac);
+
 		ConstructorController cc = (ConstructorController) wac.getBean(ConstructorController.class.getName());
 		assertSame(wac.getBean("test"), cc.testBean);
 		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
@@ -64,6 +66,114 @@ public class PathMapHandlerMappingTests extends TestCase {
 		catch (UnsatisfiedDependencyException ex) {
 			// Ok
 		}
+	}
+
+	public void testSatisfiedBeanPropertyDependency() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		hm.setApplicationContext(wac);
+
+		BeanPropertyController bpc = (BeanPropertyController) wac.getBean(BeanPropertyController.class.getName());
+		assertSame(wac.getBean("test"), bpc.testBean);
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
+		assertEquals("Path is mapped correctly based on attribute", bpc, chain.getHandler());
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "completeRubbish.html"));
+		assertNull("Don't know anything about this path", chain);
+	}
+
+	public void testSatisfiedBeanPropertyDependencyWithAutowireByType() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		hm.setApplicationContext(wac);
+
+		BeanPropertyController bpc = (BeanPropertyController) wac.getBean(BeanPropertyController.class.getName());
+		assertSame(wac.getBean("test"), bpc.testBean);
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
+		assertEquals("Path is mapped correctly based on attribute", bpc, chain.getHandler());
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "completeRubbish.html"));
+		assertNull("Don't know anything about this path", chain);
+	}
+
+	public void testUnsatisfiedBeanPropertyDependencyWithAutowireByType() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.setAutowireModeName("AUTOWIRE_BY_TYPE");
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		try {
+			hm.setApplicationContext(wac);
+			fail("DependencyCheck should have failed");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+		}
+	}
+
+	public void testSatisfiedBeanPropertyDependencyWithAutowireByName() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("testBean", TestBean.class, new MutablePropertyValues());
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.setAutowireModeName("AUTOWIRE_BY_NAME");
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		hm.setApplicationContext(wac);
+
+		BeanPropertyController bpc = (BeanPropertyController) wac.getBean(BeanPropertyController.class.getName());
+		assertSame(wac.getBean("testBean"), bpc.testBean);
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
+		assertEquals("Path is mapped correctly based on attribute", bpc, chain.getHandler());
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "completeRubbish.html"));
+		assertNull("Don't know anything about this path", chain);
+	}
+
+	public void testUnsatisfiedBeanPropertyDependencyWithAutowireByName() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		try {
+			hm.setApplicationContext(wac);
+			fail("DependencyCheck should have failed");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+		}
+	}
+
+	public void testUnsatisfiedBeanPropertyDependencyWithNoDependencyCheck() throws Exception {
+		String path = "/BeanProperty.htm";
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+
+		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
+		hm.setAutowireModeName("AUTOWIRE_BY_NAME");
+		hm.setDependencyCheck(false);
+		hm.register(BeanPropertyController.class, new PathMap(path));
+		hm.setApplicationContext(wac);
+
+		BeanPropertyController bpc = (BeanPropertyController) wac.getBean(BeanPropertyController.class.getName());
+		assertNull("Not autowired but no dependency check", bpc.testBean);
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
+		assertEquals("Path is mapped correctly based on attribute", bpc, chain.getHandler());
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "completeRubbish.html"));
+		assertNull("Don't know anything about this path", chain);
 	}
 
 	public void testMultiplePaths() throws Exception {
