@@ -221,7 +221,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * monitor the activity of this execution to detect idle status.
 	 * @param lastEvent the last event to set
 	 */
-	public void setLastEvent(Event lastEvent) {
+	protected void setLastEvent(Event lastEvent) {
 		Assert.notNull(lastEvent, "The event is required");
 		this.lastEventId = lastEvent.getId();
 		this.lastEventTimestamp = lastEvent.getTimestamp();
