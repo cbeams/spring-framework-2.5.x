@@ -82,6 +82,8 @@ import org.springframework.core.io.Resource;
  */
 public class MimeMessageHelper {
 
+	private static final String MULTIPART_SUBTYPE_RELATED = "related";
+
 	private static final String CONTENT_TYPE_HTML = "text/html";
 
 	private static final String CONTENT_TYPE_CHARSET_SUFFIX = ";charset=";
@@ -130,7 +132,7 @@ public class MimeMessageHelper {
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart) throws MessagingException {
 		this.mimeMessage = mimeMessage;
 		if (multipart) {
-			this.mimeMultipart = new MimeMultipart();
+			this.mimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
 			this.mimeMessage.setContent(this.mimeMultipart);
 		}
 	}
