@@ -2259,7 +2259,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The end state
 	 */
 	protected EndState addFinishEndState() {
-		return addEndState(getDefaultFinishEndStateId());
+		return addEndState(getFinishEndStateId());
 	}
 
 	/**
@@ -2269,7 +2269,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The end state the end state
 	 */
 	protected EndState addFinishEndState(String viewName) {
-		return addEndState(getDefaultFinishEndStateId(), viewName);
+		return addEndState(getFinishEndStateId(), viewName);
 	}
 
 	/**
@@ -2277,17 +2277,25 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The end state
 	 */
 	protected EndState addBackEndState() {
-		return addEndState(getDefaultBackEndStateId());
+		return addEndState(getBackEndStateId());
+	}
+
+	/**
+	 * Returns the 'back' end state id.
+	 * @return the back end state id.
+	 */
+	protected String getBackEndStateId() {
+		return FlowConstants.BACK;
 	}
 
 	/**
 	 * Adds an end state with id <code>back</code> that will display the
-	 * specifid view when entered as part of a terminating flow execution.
+	 * specified view when entered as part of a terminating flow execution.
 	 * @param viewName the view
 	 * @return The end state
 	 */
 	protected EndState addBackEndState(String viewName) {
-		return addEndState(getDefaultBackEndStateId(), viewName);
+		return addEndState(getBackEndStateId(), viewName);
 	}
 
 	/**
@@ -2295,7 +2303,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The end state
 	 */
 	protected EndState addCancelEndState() {
-		return addEndState(getDefaultCancelEndStateId());
+		return addEndState(getCancelEndStateId());
 	}
 
 	/**
@@ -2305,7 +2313,33 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The end state
 	 */
 	protected EndState addCancelEndState(String viewName) {
-		return addEndState(getDefaultCancelEndStateId(), viewName);
+		return addEndState(getCancelEndStateId(), viewName);
+	}
+
+	/**
+	 * Adds an end state with id <code>error</code>.
+	 * @return The end state
+	 */
+	protected EndState addErrorEndState() {
+		return addEndState(getErrorEndStateId());
+	}
+
+	/**
+	 * Adds an end state with id <code>error</code> that will display the
+	 * specified view when entered as part of a terminating flow execution.
+	 * @param viewName the view
+	 * @return The end state
+	 */
+	protected EndState addErrorEndState(String viewName) {
+		return addEndState(getErrorEndStateId(), viewName);
+	}
+
+	/**
+	 * Returns the 'back' end state id.
+	 * @return the back end state id.
+	 */
+	protected String getErrorEndStateId() {
+		return FlowConstants.ERROR;
 	}
 
 	/**
@@ -2336,7 +2370,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param eventId The event id
 	 * @param stateId the state Id
-	 * @return the transition
+	 * @return the transition (eventId->stateId)
 	 */
 	protected Transition onEvent(String eventId, String stateId) {
 		return new Transition(eventId, stateId);
@@ -2365,7 +2399,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param eventIdCriteria The event id criteria
 	 * @param stateId the state Id
-	 * @return the transition
+	 * @return the transition (matchingEventIdCriteria->stateId)
 	 */
 	protected Transition onEvent(Constraint eventIdCriteria, String stateId) {
 		return new Transition(eventIdCriteria, stateId);
@@ -2377,10 +2411,22 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * <li>On the occurence of any event (*), transition to state ${stateId}.
 	 * </ul>
 	 * @param stateId the state Id
-	 * @return the transition
+	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
 		return new Transition(Transition.WILDCARD_EVENT_CRITERIA, stateId);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>On the occurence of any event (*), transition to the 'finish' end
+	 * state.
+	 * </ul>
+	 * @return the transition (*->finish)
+	 */
+	protected Transition onAnyEventFinish() {
+		return new Transition(Transition.WILDCARD_EVENT_CRITERIA, getFinishEndStateId());
 	}
 
 	/**
@@ -2404,7 +2450,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param actionName the actionName
 	 * @param stateId The state id
-	 * @return The transition
+	 * @return The transition (${actionName}.success->stateId)
 	 */
 	protected Transition onSuccess(String actionName, String stateId) {
 		return onEvent(actionName, getSuccessEventId(), stateId);
@@ -2479,7 +2525,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g success->finish)
 	 */
 	protected Transition onSuccessFinish() {
-		return onSuccess(getDefaultFinishEndStateId());
+		return onSuccess(getFinishEndStateId());
 	}
 
 	/**
@@ -2588,7 +2634,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (submit->finish)
 	 */
 	protected Transition onSubmitFinish() {
-		return onEvent(getSubmitEventId(), getDefaultFinishEndStateId());
+		return onEvent(getSubmitEventId(), getFinishEndStateId());
 	}
 
 	/**
@@ -2660,7 +2706,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g back->cancel)
 	 */
 	protected Transition onBackCancel() {
-		return onBack(getDefaultCancelEndStateId());
+		return onBack(getCancelEndStateId());
 	}
 
 	/**
@@ -2672,14 +2718,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g back->finish)
 	 */
 	protected Transition onBackFinish() {
-		return onBack(getDefaultFinishEndStateId());
+		return onBack(getFinishEndStateId());
 	}
 
 	/**
 	 * Returns the 'cancel' end state id.
 	 * @return The cancel end state id.
 	 */
-	protected String getDefaultCancelEndStateId() {
+	protected String getCancelEndStateId() {
 		return FlowConstants.CANCEL;
 	}
 
@@ -2692,15 +2738,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g back->back)
 	 */
 	protected Transition onBackEnd() {
-		return onBack(getDefaultBackEndStateId());
-	}
-
-	/**
-	 * Returns the 'back' end state id.
-	 * @return the back end state id.
-	 */
-	protected String getDefaultBackEndStateId() {
-		return FlowConstants.BACK;
+		return onBack(getBackEndStateId());
 	}
 
 	/**
@@ -2733,7 +2771,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g cancel->cancel)
 	 */
 	protected Transition onCancelEnd() {
-		return onCancel(getDefaultCancelEndStateId());
+		return onCancel(getCancelEndStateId());
 	}
 
 	/**
@@ -2745,7 +2783,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g cancel->finish)
 	 */
 	protected Transition onCancelFinish() {
-		return onBack(getDefaultFinishEndStateId());
+		return onBack(getFinishEndStateId());
 	}
 
 	/**
@@ -2778,14 +2816,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The transition (e.g finish->finish)
 	 */
 	protected Transition onFinishEnd() {
-		return onFinish(getDefaultFinishEndStateId());
+		return onFinish(getFinishEndStateId());
 	}
 
 	/**
 	 * Returns the finish end stateId.
 	 * @return the finish end stateId.
 	 */
-	protected String getDefaultFinishEndStateId() {
+	protected String getFinishEndStateId() {
 		return FlowConstants.FINISH;
 	}
 
