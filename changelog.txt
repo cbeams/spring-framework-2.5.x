@@ -11,15 +11,24 @@ Package org.springframework.beans
 * added "fileEncoding" and "propertiesPersister" properties to PropertyResourceConfigurer
 * added hooks for custom conversion of read-in property values to PropertyResourceConfigurer (e.g. for decryption)
 * fixed PropertyPlaceholderConfigurer to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
+* added "loadBeanDefinitions(Resource[])" method to XmlBeanDefinitionReader, for loading multiple files in batch
+
+Package org.springframework.context
+* ApplicationContext interface extends ResourcePatternResolver, offering "Resource[] getResources(locationPattern)" now
+* added "setResourceLoader" method to GenericApplicationContext, for overriding the default resource loading strategy
 
 Package org.springframework.core
 * added initial capacity check to CollectionFactory, to always pass a positive capacity number to Commons Collections
+* added FileSystemResourceLoader, resolving paths as file system resources rather than as class path resources
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 * PathMatchingResourcePatternResolver supports path matching in jar files now (for both "classpath:" and "classpath*:")
 
 Package org.springframework.jndi
 * added optional "proxyInterface" property to JndiObjectFactoryBean, for exposing a proxy rather than the plain object
 * added "lookupOnStartup" and "cache" properties to JndiObjectFactoryBean, allowing for lazy lookup on first access etc
+
+Package org.springframework.mock
+* implemented "getResourcePaths" in MockServletContext, to allow for pattern matching via the ServletContext
 
 Package org.springframework.remoting
 * added "codebaseUrl" property to HttpInvokerClientInterceptor, specifying a URL for dynamic class download
@@ -32,6 +41,7 @@ Package org.springframework.ui
 * added JasperReportsUtils to allow for convenient creation of CSV/HTML/PDF/XLS reports with Jasper Reports
 
 Package org.springframework.web
+* fixed BindStatus to look for plain target object in model map first (to also work in Velocity and FreeMarker views)
 * UrlBasedViewResolver supports a "forward:" prefix too, for forwards to other controllers through special view names
 * factored out "doRender" and "getTemplate(name)" methods in VelocityView, for easy subclassing (multiple templates etc)
 * factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
