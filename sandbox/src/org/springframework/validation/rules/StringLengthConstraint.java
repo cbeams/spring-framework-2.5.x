@@ -21,54 +21,69 @@ import org.springframework.functor.PredicateFactory;
 import org.springframework.functor.UnaryPredicate;
 import org.springframework.functor.functions.StringLength;
 import org.springframework.functor.predicates.Range;
+import org.springframework.util.Assert;
 
 /**
  * Constraint to validate an object's string length.
  * 
- * @author  Keith Donald
+ * @author Keith Donald
  */
 public class StringLengthConstraint implements UnaryPredicate {
-    private UnaryPredicate predicate;
+    private UnaryPredicate lengthConstraint;
 
     /**
      * Constructs a maxlength constraint of the specified length.
      * 
-     * @param length the max string length
+     * @param length
+     *            the max string length
      */
     public StringLengthConstraint(int length) {
         this(BinaryOperator.LESS_THAN_EQUAL_TO, length);
     }
-    
+
     /**
-     * Constructs a string length constraint with the specified
-     * operator and length constraint.
+     * Constructs a string length constraint with the specified operator and
+     * length constraint.
      * 
-     * @param operator the operator (one of ==, >, >=, <, <=)
-     * @param length the length constraint
+     * @param operator
+     *            the operator (one of ==, >, >=, <, <=)
+     * @param length
+     *            the length constraint
      */
     public StringLengthConstraint(BinaryOperator operator, int length) {
+        Assert.notNull(operator);
+        Assert.isTrue(length > 0);
         BinaryPredicate comparer = operator.getPredicate();
-        UnaryPredicate lengthConstraint = PredicateFactory.bind(
-                comparer, new Integer(length));
-        this.predicate = PredicateFactory.attachResultTester(
-                lengthConstraint, StringLength.instance());
+        UnaryPredicate lengthConstraint = PredicateFactory.bind(comparer,
+                new Integer(length));
+        this.lengthConstraint = PredicateFactory.attachResultTester(lengthConstraint,
+                StringLength.instance());
     }
 
     /**
      * Constructs a string length range constraint.
      * 
-     * @param min The minimum edge of the range
-     * @param max the maximum edge of the range
+     * @param min
+     *            The minimum edge of the range
+     * @param max
+     *            the maximum edge of the range
      */
     public StringLengthConstraint(int min, int max) {
+        Assert.isTrue(min <= max);
         UnaryPredicate rangeConstraint = new Range(new Integer(min),
                 new Integer(max));
-        this.predicate = PredicateFactory.attachResultTester(
-                rangeConstraint, StringLength.instance());
+        this.lengthConstraint = PredicateFactory.attachResultTester(rangeConstraint,
+                StringLength.instance());
     }
 
-    public boolean test(Object value) {
-        return this.predicate.test(value);
+    /**
+     * Tests that the string form of this argument falls within the length
+     * constraint.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
+    public boolean test(Object argument) {
+        return this.lengthConstraint.test(argument);
     }
 
 }

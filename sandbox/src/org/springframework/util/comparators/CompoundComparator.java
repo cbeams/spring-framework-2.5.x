@@ -68,7 +68,7 @@ public class CompoundComparator implements Comparator, Serializable {
     /**
      * Construct a CompoundComparator from the Comparators in the given List.
      * The sort order of each column will be drawn from the given BitSet. If a
-     * bit at a comparator index is <i>false</i>, the forward sort order is
+     * bit at a comparator index is <i>false </i>, the forward sort order is
      * used; else a reverse sort order is used.
      * 
      * @param list
@@ -132,7 +132,7 @@ public class CompoundComparator implements Comparator, Serializable {
      * @param comparator
      *            Comparator to set
      * @param reverse
-     *            false = forward sort order; true = reverse sort order
+     *            false -> forward sort order; true -> reverse sort order
      */
     public void setComparator(int index, Comparator comparator, boolean reverse) {
         Assert.notNull(comparator);
@@ -146,11 +146,10 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     /**
-     * Change the sort order at the given index in the ComparatorChain to a
-     * forward sort.
+     * Change the sort order at the given index to forward sort.
      * 
      * @param index
-     *            Index of the ComparatorChain
+     *            the index into the list of aggregated comparators
      */
     public void setForwardSort(int index) {
         Assert.isTrue(!locked);
@@ -159,11 +158,10 @@ public class CompoundComparator implements Comparator, Serializable {
     }
 
     /**
-     * Change the sort order at the given index in the ComparatorChain to a
-     * reverse sort.
+     * Change the sort order at the given index to reverse sort.
      * 
      * @param index
-     *            Index of the ComparatorChain
+     *            the index into the list of aggregated comparators
      */
     public void setReverseSort(int index) {
         Assert.isTrue(!locked);

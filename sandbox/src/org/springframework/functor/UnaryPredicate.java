@@ -23,8 +23,8 @@ import java.io.Serializable;
  * <p>
  * <p>
  * A unary predicate tests a single argument against some conditional
- * expression. For example, a "required" unary predicate may return true if the
- * provided argument is non-null, and false otherwise.
+ * expression. For example, a "required" unary predicate will return true if the
+ * provided argument is non-null, false otherwise.
  * 
  * @author Keith Donald
  */

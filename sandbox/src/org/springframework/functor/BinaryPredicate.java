@@ -23,7 +23,7 @@ import java.io.Serializable;
  * <p>
  * <p>
  * A binary predicate is a function object that tests two arguments against some
- * conditional expression. For example, a "GreaterThan" binary predicate may
+ * conditional expression. For example, a "GreaterThan" binary predicate will
  * return true if the first argument is greater than the second.
  * 
  * @author Keith Donald
