@@ -24,6 +24,9 @@ public class StringLengthFunction implements UnaryFunction {
     private static final StringLengthFunction INSTANCE = new StringLengthFunction();
 
     public Object execute(Object value) {
+        if (value == null) {
+            return new Integer(0);
+        }
         return new Integer(String.valueOf(value).length());
     }
 
