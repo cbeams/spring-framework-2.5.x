@@ -155,7 +155,7 @@ public class EscapedErrors implements Errors {
 
 	public Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
-		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
+		return (value != null ? HtmlUtils.htmlEscape(value.toString()) : value);
 	}
 
 	private ObjectError escapeObjectError(ObjectError source) {
@@ -165,8 +165,8 @@ public class EscapedErrors implements Errors {
 		if (source instanceof FieldError) {
 			FieldError fieldError = (FieldError) source;
 			Object value = fieldError.getRejectedValue();
-			if (value instanceof String) {
-				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
+			if (value != null) {
+				value = HtmlUtils.htmlEscape(value.toString());
 			}
 			return new FieldError(
 					fieldError.getObjectName(), fieldError.getField(), value,
