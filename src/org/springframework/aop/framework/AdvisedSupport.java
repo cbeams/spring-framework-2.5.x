@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -47,7 +48,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.28 2004-04-14 18:52:50 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.29 2004-04-21 17:49:36 jhoeller Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -56,7 +57,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Canonical TargetSource when there's no target, and behaviour is supplied
 	 * by the advisors.
 	 */
-	public static TargetSource EMPTY_TARGET_SOURCE = new TargetSource() {
+	public static final TargetSource EMPTY_TARGET_SOURCE = new TargetSource() {
+
 		public Class getTargetClass() {
 			return null;
 		}
@@ -91,7 +93,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	protected TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
-	
 	private MethodInvocationFactory methodInvocationFactory;
 	
 	/**
@@ -123,7 +124,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this();
 		setInterfaces(interfaces);
 	}
-	
+
+
 	public void addListener(AdvisedSupportListener l) {
 		listeners.add(l);
 	}
@@ -162,26 +164,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.advisorChainFactory;
 	}
 	
-	/**
-	 * @return Returns the methodInvocationFactory.
-	 */
 	public final MethodInvocationFactory getMethodInvocationFactory() {
 		return this.methodInvocationFactory;
 	}
-	/**
-	 * @param methodInvocationFactory The methodInvocationFactory to set.
-	 */
+
 	public void setMethodInvocationFactory(MethodInvocationFactory methodInvocationFactory) {
 		this.methodInvocationFactory = methodInvocationFactory;
 	}
 	
 	/**
-	 * Call this method on a new instance created by the no-arg consructor
-	 * to create an independent copy of the configuration
-	 * from the other.
-	 * Does not copy MethodInvocationFactory; a parameter should be provided to the constructor
-	 * if necessary. Note that the same MethodInvocationFactory should <b>not</b> be used
-	 * for the new instance, or it may not be independent.
+	 * Call this method on a new instance created by the no-arg constructor
+	 * to create an independent copy of the configuration from the other.
+	 * <p>Does not copy MethodInvocationFactory; a parameter should be provided
+	 * to the constructor if necessary. Note that the same MethodInvocationFactory
+	 * should <b>not</b> be used for the new instance, or it may not be independent.
 	 * @param other DefaultProxyConfig to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
@@ -195,14 +191,19 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
-	
 	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
 		addInterceptor(pos, interceptor);
 	}
 	
 	public boolean isInterfaceProxied(Class intf) {
-		return this.interfaces.contains(intf);
+		for (Iterator it = this.interfaces.iterator(); it.hasNext();) {
+			Class proxyIntf = (Class) it.next();
+			if (intf.isAssignableFrom(proxyIntf)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -294,7 +295,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Convenience method to remove an interceptor
+	 * Convenience method to remove an interceptor.
 	 */
 	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
 		int index = indexOf(interceptor);
@@ -337,20 +338,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	public final Class[] getProxiedInterfaces() {
-		//return (Class[]) this.interfaces.toArray();
-		Class[] classes = new Class[this.interfaces.size()];
-		int i = 0;
-		for (Iterator itr = this.interfaces.iterator(); itr.hasNext() ;) {
-			Class clazz = (Class) itr.next();
-			classes[i++] = clazz;
-		}
-		return classes;
+		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
-
 	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
-		if (isFrozen())
+		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: config is frozen");
+		}
 		this.advisors.add(pos, advice);
 		updateAdvisorsArray();
 		adviceChanged();
@@ -359,10 +353,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public void addAdvisor(int pos, IntroductionAdvisor advisor) throws AopConfigException {
 		advisor.validateInterfaces();
 		
-		// If the advisor passed validation we can make the change	 
+		// if the advisor passed validation we can make the change
 		for (int i = 0; i < advisor.getInterfaces().length; i++) {
-			 addInterface(advisor.getInterfaces()[i]);
-		 }
+			addInterface(advisor.getInterfaces()[i]);
+		}
 		addAdvisorInternal(pos, advisor);
 	}
 
@@ -381,8 +375,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Bring the array up to date with the list
-	 *
+	 * Bring the array up to date with the list.
 	 */
 	private void updateAdvisorsArray() {
 		this.advisorsArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
@@ -405,8 +398,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public final boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
 		int index = indexOf(a);
-		if (index == -1 || b == null)
+		if (index == -1 || b == null) {
 			return false;
+		}
 		removeAdvisor(index);
 		addAdvisor(index, b);
 		return true;
@@ -418,12 +412,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return whether this interceptor instance could be run in an invocation
 	 */
 	public final boolean interceptorIncluded(Interceptor mi) {
-		if (this.advisors.size() == 0)
+		if (this.advisors.size() == 0) {
 			return false;
+		}
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advice = (Advisor) this.advisors.get(i);
-			if (advice.getAdvice() == mi)
+			if (advice.getAdvice() == mi) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -434,13 +430,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return the count of the interceptors of this class or subclasses
 	 */
 	public final int countInterceptorsOfType(Class interceptorClass) {
-		if (this.advisors.size() == 0)
+		if (this.advisors.size() == 0) {
 			return 0;
+		}
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
-			if (interceptorClass.isAssignableFrom(advisor.getAdvice().getClass()))
+			if (interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
 				++count;
+			}
 		}
 		return count;
 	}
@@ -450,29 +448,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	private synchronized void adviceChanged() {
 		if (this.isActive) {
-			for (int i = 0; i < listeners.size(); i++) {
-				((AdvisedSupportListener) listeners.get(i)).adviceChanged(this);
+			for (int i = 0; i < this.listeners.size(); i++) {
+				((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);
 			}
 		}
 	}
 	
 	private void activate() {
 		this.isActive = true;
-		for (int i = 0; i < listeners.size(); i++) {
-			((AdvisedSupportListener) listeners.get(i)).activated(this);
+		for (int i = 0; i < this.listeners.size(); i++) {
+			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
 		}
 	}
-	
 
 	/**
 	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
 	 * create an AOP proxy with this as an argument.
 	 */
 	protected synchronized AopProxy createAopProxy() {
-		if (!isActive) {
+		if (!this.isActive) {
 			activate();
 		}
-		
 		return getAopProxyFactory().createAopProxy(this);
 	}
 	
@@ -482,6 +478,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	protected final boolean isActive() {
 		return isActive;
 	}
+	
 
 	public String toProxyConfigString() {
 		return toString();
@@ -492,10 +489,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
-		sb.append(this.interfaces.size() + " interfaces=[" + StringUtils.collectionToCommaDelimitedString(this.interfaces) + "]; ");
-		sb.append(this.advisors.size() + " pointcuts=[" + StringUtils.collectionToCommaDelimitedString(this.advisors) + "]; ");
-		sb.append("targetSource=[" + this.targetSource + "]; ");
-		sb.append("advisorChainFactory=" + advisorChainFactory);
+		sb.append(this.interfaces.size()).append(" interfaces=[");
+		sb.append(StringUtils.collectionToCommaDelimitedString(this.interfaces)).append("]; ");
+		sb.append(this.advisors.size()).append(" pointcuts=[");
+		sb.append(StringUtils.collectionToCommaDelimitedString(this.advisors)).append("]; ");
+		sb.append("targetSource=[").append(this.targetSource).append("]; ");
+		sb.append("advisorChainFactory=").append(this.advisorChainFactory);
 		sb.append(super.toString());
 		return sb.toString();
 	}

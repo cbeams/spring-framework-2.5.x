@@ -25,11 +25,14 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface.
- * Invokes target using reflection. Subclasses can override the 
- * invokeJoinpoint() method to change this behaviour, so this is a useful
- * base class for MethodInvocation implementations.
+ *
+ * <p>Invokes target using reflection. Subclasses can override the
+ * invokeJoinpoint() method to change this behaviour, so this is a
+ * useful base class for MethodInvocation implementations.
+ *
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.4 2004-03-19 16:54:41 johnsonr Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.5 2004-04-21 17:49:36 jhoeller Exp $
+ * @see #invokeJoinpoint
  */
 public class ReflectiveMethodInvocation implements MethodInvocation {
 
@@ -42,8 +45,9 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	protected Object proxy;
 	
 	/** 
-	 * List of Methodnterceptor and InterceptorAndDynamicMethodMatcher that need dynamic checks.
-	 **/
+	 * List of Methodnterceptor and InterceptorAndDynamicMethodMatcher
+	 * that need dynamic checks.
+	 */
 	protected List interceptorsAndDynamicMethodMatchers;
 	
 	/**
@@ -129,20 +133,20 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 			}
 		}
 		else {
-			// It's an interceptor so we just invoke it: the pointcut will have
-			// been evaluated statically before this object was constructed
+			// It's an interceptor so we just invoke it: The pointcut will have
+			// been evaluated statically before this object was constructed.
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}
 	
 	/**
-	 * Invoke the joinpoint using reflection. Subclasses can override this to use custom
-	 * invocation.
+	 * Invoke the joinpoint using reflection.
+	 * Subclasses can override this to use custom invocation.
 	 * @return the return value of the joinpoint
 	 * @throws Throwable if invoking the joinpoint resulted in an exception
 	 */
 	protected Object invokeJoinpoint() throws Throwable {
-		return AopProxyUtils.invokeJoinpointUsingReflection(target, method, arguments);
+		return AopProxyUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
 	}
 
 
@@ -154,19 +158,17 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	}
 	
 	public String toString() {
-		// Don't do toString on target, it may be
-		// proxied
-	
-		// ToString on args may also fail
-		String s =  "Invocation: method=[" + method + "] " +
-				//"args=[" + StringUtils.arrayToDelimitedString(arguments, ",") +
-				"args=" + this.arguments + 
-				"] ";
-	 
-		s += (this.target == null) ? "target is null": 
-				"target is of class " + target.getClass().getName();
-		return s;
-			
+		// Don't do toString on target, it may be proxied.
+		// toString on args may also fail.
+		StringBuffer sb = new StringBuffer("Invocation: method=[");
+		sb.append(this.method).append("] ").append("args=").append(this.arguments).append("] ");
+		if (this.target == null) {
+			sb.append("target is null");
+		}
+		else {
+			sb.append("target is of class [").append(this.target.getClass().getName()).append(']');
+		}
+		return sb.toString();
 	}
 
 }
