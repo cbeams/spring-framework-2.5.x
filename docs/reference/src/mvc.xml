@@ -1333,7 +1333,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     class="org.springframework.web.multipart.commons.CommonsMultipartResolver"&gt;
 
     &lt;!-- one of the properties available; the maximum file size in bytes --&gt;
-    &lt;property name="maximumFileSize"&gt;
+    &lt;property name="maxUploadSize"&gt;
         &lt;value&gt;100000&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting> This is an example using the
@@ -1341,7 +1341,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
 
     &lt;!-- one of the properties available; the maximum file size in bytes --&gt;
-    &lt;property name="maximumFileSize"&gt;
+    &lt;property name="maxUploadSize"&gt;
         &lt;value&gt;100000&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
