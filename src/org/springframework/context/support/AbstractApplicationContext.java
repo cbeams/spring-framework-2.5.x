@@ -60,7 +60,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -238,9 +238,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		this.startupTime = System.currentTimeMillis();
 
 		refreshBeanFactory();
-		getBeanFactory().ignoreDependencyType(ApplicationContext.class);
-		getBeanFactory().addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		getBeanFactory().registerCustomEditor(Resource.class, new ContextResourceEditor(this));
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		beanFactory.ignoreDependencyType(ApplicationContext.class);
+		beanFactory.registerCustomEditor(Resource.class, new ContextResourceEditor(this));
+		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		postProcessBeanFactory(beanFactory);
 
 		if (getBeanDefinitionCount() == 0) {
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
@@ -265,10 +267,21 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		refreshListeners();
 
 		// instantiate singletons this late to allow them to access the message source
-		getBeanFactory().preInstantiateSingletons();
+		beanFactory.preInstantiateSingletons();
 
 		// last step: publish respective event
 		publishEvent(new ContextRefreshedEvent(this));
+	}
+
+	/**
+	 * Modify the application context's internal bean factory after its standard
+	 * initialization. All bean definitions will have been loaded, but no beans
+	 * will have been instantiated yet. This allows for registering special
+	 * BeanPostProcessors etc in certain ApplicationContext implementations.
+	 * @param beanFactory the bean factory used by the application context
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 */
+	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	}
 
 	/**
