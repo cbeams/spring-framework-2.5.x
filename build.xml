@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.55 2004-04-30 10:20:20 jhoeller Exp $
+    $Id: build.xml,v 1.56 2004-05-15 21:44:00 aarendsen Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -563,6 +563,8 @@
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
+			
+			<classpath location="${dist.dir}/spring-mock.jar"/>
 
 			<classpath refid="all-libs"/>
 
