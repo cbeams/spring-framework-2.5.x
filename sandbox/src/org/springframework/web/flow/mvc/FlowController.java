@@ -100,7 +100,7 @@ public class FlowController extends AbstractController {
 						getFlowIdParameterName()));
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(getFlowInput(request), request, response);
+			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -182,7 +182,7 @@ public class FlowController extends AbstractController {
 		return flowExecution;
 	}
 
-	protected Map getFlowInput(HttpServletRequest request) {
+	protected Map getFlowExecutionInput(HttpServletRequest request) {
 		return null;
 	}
 

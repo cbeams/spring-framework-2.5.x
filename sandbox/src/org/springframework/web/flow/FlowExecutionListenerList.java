@@ -19,8 +19,7 @@ public class FlowExecutionListenerList {
 	 * The list of listeners that should receive event callbacks during managed
 	 * flow executions (client sessions).
 	 */
-	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
-			FlowExecutionListener.class);
+	private EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(FlowExecutionListener.class);
 
 	/**
 	 * @param listener
@@ -59,7 +58,7 @@ public class FlowExecutionListenerList {
 	public void remove(FlowExecutionListener listener) {
 		this.flowExecutionListeners.remove(listener);
 	}
-	
+
 	/**
 	 * 
 	 */

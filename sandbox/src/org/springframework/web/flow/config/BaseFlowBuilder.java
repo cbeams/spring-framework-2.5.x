@@ -49,8 +49,10 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 * built by this builder.
 	 */
 	public void buildExecutionListeners() throws FlowBuilderException {
-		getFlow().getFlowExecutionListenerList().add(
-				(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
+		if (!this.flowExecutionListeners.isEmpty()) {
+			getFlow().getFlowExecutionListenerList().add(
+					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
+		}
 	}
 
 	/**

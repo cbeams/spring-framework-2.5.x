@@ -155,7 +155,7 @@ public class FlowAction extends TemplateAction {
 				getFlow(getRequiredStringParameter(request, getFlowIdParameterName()));
 			}
 			flowExecution = createFlowExecution(flow);
-			modelAndView = flowExecution.start(getFlowInput(request), request, response);
+			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -256,6 +256,10 @@ public class FlowAction extends TemplateAction {
 		return flowExecution;
 	}
 
+	protected Map getFlowExecutionInput(HttpServletRequest request) {
+		return null;
+	}
+	
 	/**
 	 * Return a Struts ActionForward given a ModelAndView. We need to add all
 	 * attributes from the ModelAndView as request attributes.
@@ -282,10 +286,6 @@ public class FlowAction extends TemplateAction {
 		}
 	}
 
-	protected Map getFlowInput(HttpServletRequest request) {
-		return null;
-	}
-	
 	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)
 			throws NoSuchFlowExecutionException {
 		try {
