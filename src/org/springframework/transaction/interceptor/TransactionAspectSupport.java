@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -51,7 +52,7 @@ import org.springframework.transaction.TransactionStatus;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.7 2004-07-26 18:00:40 johnsonr Exp $
+ * @version $Id: TransactionAspectSupport.java,v 1.8 2004-08-09 08:29:30 jhoeller Exp $
  */
 public class TransactionAspectSupport implements InitializingBean, Serializable {
 
@@ -228,6 +229,21 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	}
 
 	/**
+	 * Execute after successful completion of call, but not
+	 * after an exception was handled.
+	 * Do nothing if we didn't create a transaction.
+	 * @param txInfo information about the current transaction
+	 */
+	protected void doCommitTransactionAfterReturning(TransactionInfo txInfo) {
+		if (txInfo != null && txInfo.hasTransaction()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking commit for transaction on " + txInfo.joinpointIdentification());
+			}
+			this.transactionManager.commit(txInfo.getTransactionStatus());
+		}
+	}
+
+	/**
 	 * Handle a throwable, closing out the transaction.
 	 * We may commit or roll back, depending on our configuration.
 	 * @param txInfo information about the current transaction
@@ -265,21 +281,6 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	}
 
 	/**
-	 * Execute after successful completion of call, but not
-	 * after an exception was handled.
-	 * Do nothing if we didn't create a transaction.
-	 * @param txInfo information about the current transaction
-	 */
-	protected void doCommitTransactionAfterReturning(TransactionInfo txInfo) {
-		if (txInfo != null && txInfo.hasTransaction() && txInfo.transactionStatus.isNewTransaction()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking commit for transaction on " + txInfo.joinpointIdentification());
-			}
-			this.transactionManager.commit(txInfo.getTransactionStatus());
-		}
-	}
-
-	/**
 	 * Call this in all cases: exception or normal return. Resets
 	 * the TransactionInfo ThreadLocal
 	 * @param txInfo information about the current transaction. May be null.
@@ -308,7 +309,8 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 		// Initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 	}
-	
+
+
 	/**
 	 * Opaque object used to hold Transaction information. Subclasses
 	 * must pass it back to methods on this class, but not see its internals.

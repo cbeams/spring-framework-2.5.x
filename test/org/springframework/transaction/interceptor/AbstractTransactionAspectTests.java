@@ -19,8 +19,8 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -42,7 +42,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.6 2004-07-26 17:20:03 johnsonr Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.7 2004-08-09 08:30:00 jhoeller Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
@@ -100,8 +100,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	}
 
 	/**
-	 * Check that a transaction is created and committed
-	 * @throws java.lang.Exception
+	 * Check that a transaction is created and committed.
 	 */
 	public void testTransactionShouldSucceed() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
@@ -113,7 +112,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		TransactionStatus status = transactionStatusForNewTransaction();
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
-		// Expect a transaction
+		// expect a transaction
 		ptm.getTransaction(txatt);
 		ptxControl.setReturnValue(status, 1);
 		ptm.commit(status);
@@ -132,6 +131,38 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptxControl.verify();
 	}
 	
+	/**
+	 * Check that a transaction is created and committed.
+	 */
+	public void testTransactionShouldSucceedWithNotNew() throws Exception {
+		TransactionAttribute txatt = new DefaultTransactionAttribute();
+
+		Method m = getNameMethod;
+		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
+		tas.register(m, txatt);
+
+		TransactionStatus status = new DefaultTransactionStatus(new Object(), false, false, false, false, null);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		// expect a transaction
+		ptm.getTransaction(txatt);
+		ptxControl.setReturnValue(status, 1);
+		ptm.commit(status);
+		ptxControl.setVoidCallable(1);
+		ptxControl.replay();
+
+		TestBean tb = new TestBean();
+
+		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
+
+		checkTransactionStatus(false);
+		// verification!?
+		itb.getName();
+		checkTransactionStatus(false);
+
+		ptxControl.verify();
+	}
+
 	public void testEnclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
 
