@@ -41,6 +41,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	public static final String DEFAULT_PROTOCOL = "smtp";
 
+	public static final int DEFAULT_PORT = -1;
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final Session session = Session.getInstance(new Properties());
@@ -48,6 +50,8 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	private String protocol = DEFAULT_PROTOCOL;
 
 	private String host;
+
+	private int port = DEFAULT_PORT;
 
 	private String username;
 
@@ -68,6 +72,13 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
+	* Set the mail server port. Default is 25.
+	*/
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	/**
 	 * Set the username for the account at the mail host, if any.
 	 */
 	public void setUsername(String username) {
@@ -82,7 +93,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
-		send(new SimpleMailMessage[] {simpleMessage});
+		send(new SimpleMailMessage[] { simpleMessage });
 	}
 
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
@@ -117,7 +128,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				}
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+			send((MimeMessage[])mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
@@ -129,7 +140,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(MimeMessage mimeMessage) throws MailException {
-		send(new MimeMessage[] {mimeMessage});
+		send(new MimeMessage[] { mimeMessage });
 	}
 
 	public void send(MimeMessage[] mimeMessages) throws MailException {
@@ -140,7 +151,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		Map failedMessages = new HashMap();
 		try {
 			Transport transport = getTransport();
-			transport.connect(this.host, this.username, this.password);
+			transport.connect(this.host, this.port, this.username, this.password);
 			try {
 				for (int i = 0; i < mimeMessages.length; i++) {
 					MimeMessage mimeMessage = mimeMessages[i];
@@ -170,7 +181,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
-		send(new MimeMessagePreparator[] {mimeMessagePreparator});
+		send(new MimeMessagePreparator[] { mimeMessagePreparator });
 	}
 
 	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
@@ -181,7 +192,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 				mimeMessagePreparators[i].prepare(mimeMessage);
 				mimeMessages.add(mimeMessage);
 			}
-			send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
+			send((MimeMessage[])mimeMessages.toArray(new MimeMessage[mimeMessages.size()]));
 		}
 		catch (MessagingException ex) {
 			throw new MailParseException(ex);
