@@ -49,6 +49,35 @@ import java.util.Map;
 public abstract class Assert {
 
 	/**
+	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
+	 * if the test result is <code>false</code>. Call isTrue if you wish to
+	 * throw IllegalArgumentException on an assertion failure.
+	 * <pre>
+	 * Assert.state(id == null, "The id property must not already be initialized");</pre>
+	 * @param expression a boolean expression
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if expression is <code>false</code>
+	 */
+	public static void state(boolean expression, String message) {
+		if (!expression) {
+			throw new IllegalStateException(message);
+		}
+	}
+
+	/**
+	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
+	 * if the test result is <code>false</code>. Call isTrue if you wish to
+	 * throw IllegalArgumentException on an assertion failure.
+	 * <pre>
+	 * Assert.state(id == null);</pre>
+	 * @param expression a boolean expression
+	 * @throws IllegalArgumentException if expression is <code>false</code>
+	 */
+	public static void state(boolean expression) {
+		state(expression, "[Assertion failed] - this state invariant must be true");
+	}
+
+	/**
 	 * Assert a boolean expression, throwing <code>IllegalArgumentException</code>
 	 * if the test result is <code>false</code>.
 	 * <pre>
@@ -72,40 +101,8 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if expression is <code>false</code>
 	 */
 	public static void isTrue(boolean expression) {
-        if (!expression) { throw new IllegalArgumentException(
-        	"[Assertion failed] - this expression must be true");
-        }
+		isTrue(expression, "[Assertion failed] - this expression must be true");
 	}
-
-	/**
-     * Assert a boolean expression, throwing <code>IllegalStateException</code>
-     * if the test result is <code>false</code>. Call isTrue if you wish to
-     * throw IllegalArgumentException on an assertion failure.
-	 * <pre>
-	 * Assert.state(id == null, "The id property must not already be initialized");</pre>
-	 * @param expression a boolean expression
-	 * @param message the exception message to use if the assertion fails
-	 * @throws IllegalArgumentException if expression is <code>false</code>
-	 */
-    public static void state(boolean expression, String message) {
-		if (!expression) {
-			throw new IllegalStateException(message);
-		}
-    }
-
-	/**
-     * Assert a boolean expression, throwing <code>IllegalStateException</code>
-     * if the test result is <code>false</code>. Call isTrue if you wish to
-     * throw IllegalArgumentException on an assertion failure.
-	 * <pre>
-	 * Assert.state(id == null);</pre>
-	 * @param expression a boolean expression
-	 * @throws IllegalArgumentException if expression is <code>false</code>
-	 */
-    public static void state(boolean expression) {
-        if (!expression) { throw new IllegalStateException(
-                "[Assertion failed] - this state invariant must be true"); }
-    }
 
 	/**
 	 * Assert that an object is not null.
@@ -129,9 +126,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void notNull(Object object) {
-		if (object == null) {
-			throw new IllegalArgumentException("[Assertion failed] - this argument is required; it cannot be null");
-		}
+		notNull(object, "[Assertion failed] - this argument is required; it cannot be null");
 	}
 
 	/**
@@ -155,9 +150,8 @@ public abstract class Assert {
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
-		if (!StringUtils.hasLength(text)) {
-			throw new IllegalArgumentException("[Assertion failed] - This string argument must have length; it cannot be null or empty");
-		}
+		hasLength(text,
+				"[Assertion failed] - this string argument must have length; it cannot be null or empty");
 	}
 
 	/**
@@ -183,9 +177,8 @@ public abstract class Assert {
 	 * @see StringUtils#hasText
 	 */
 	public static void hasText(String text) {
-		if (!StringUtils.hasText(text)) {
-			throw new IllegalArgumentException("[Assertion failed] - This string argument must have text; it cannot be null, empty, or blank");
-		}
+		hasText(text,
+				"[Assertion failed] - this string argument must have text; it cannot be null, empty, or blank");
 	}
 
 	/**
@@ -214,9 +207,8 @@ public abstract class Assert {
 	 * or has no elements
 	 */
 	public static void notEmpty(Object[] array) {
-		if (array == null || array.length == 0) {
-			throw new IllegalArgumentException("[Assertion failed] - this array must not be empty: it must contain at least 1 element");
-		}
+		notEmpty(array,
+				"[Assertion failed] - this array must not be empty: it must contain at least 1 element");
 	}
 
 	/**
@@ -245,9 +237,8 @@ public abstract class Assert {
 	 * or has no elements
 	 */
 	public static void notEmpty(Collection collection) {
-		if (collection == null || collection.isEmpty()) {
-			throw new IllegalArgumentException("[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
-		}
+		notEmpty(collection,
+				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
 	}
 
 	/**
@@ -276,9 +267,8 @@ public abstract class Assert {
 	 * or has no entries
 	 */
 	public static void notEmpty(Map map) {
-		if (map == null || map.isEmpty()) {
-			throw new IllegalArgumentException("[Assertion failed] - this map must not be empty; it must contain at least one entry");
-		}
+		notEmpty(map,
+				"[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 
 }
