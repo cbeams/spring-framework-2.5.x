@@ -63,6 +63,19 @@
 	    </property>    
 	</bean>
 	
+	<bean id="jmxAdapter6" class="org.springframework.jmx.JmxMBeanAdapter">
+	    <property name="beans">
+			<map>
+				<entry key="namingTest">
+					<ref local="testBean"/>
+				</entry>
+			</map>
+		</property>    
+		<property name="namingStrategy">
+	        <ref local="metadataNamingStrategy"/>
+	    </property>    
+	</bean>
+	
 	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
 		<property name="name">
 			<value>TEST</value>
@@ -82,6 +95,9 @@
 	</bean>
 	
 	<bean id="identityNamingStrategy" class="org.springframework.jmx.naming.IdentityNamingStrategy">
+	</bean>
+	
+	<bean id="metadataNamingStrategy" class="org.springframework.jmx.naming.MetadataNamingStrategy">
 	</bean>
 	
 	<bean id="metadataAssembler" class="org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler">

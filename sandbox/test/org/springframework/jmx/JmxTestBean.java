@@ -4,7 +4,7 @@
 package org.springframework.jmx;
 
 /**
- * @@org.springframework.jmx.assemblers.metadata.ManagedResource(description="My Managed
+ * @@org.springframework.jmx.metadata.support.ManagedResource(description="My Managed
  *                                                                               Bean",
  *                                                                               objectName="spring:bean=test")
  * @author robh
@@ -16,7 +16,7 @@ public class JmxTestBean {
     private int age;
 
     /**
-     * @@org.springframework.jmx.assemblers.metadata.ManagedAttribute()
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute()
      */
     public int getAge() {
         return age;
@@ -31,7 +31,7 @@ public class JmxTestBean {
     }
 
     /**
-     * @@org.springframework.jmx.assemblers.metadata.ManagedOperation()
+     * @@org.springframework.jmx.metadata.support.ManagedOperation()
      */
     public long myOperation() {
         return 1L;
@@ -42,14 +42,14 @@ public class JmxTestBean {
     }
 
     /**
-     * @@org.springframework.jmx.assemblers.metadata.ManagedAttribute()
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute()
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @@org.springframework.jmx.assemblers.metadata.ManagedOperation(description="Add Two Numbers Together")
+     * @@org.springframework.jmx.metadata.support.ManagedOperation(description="Add Two Numbers Together")
      */
     public int add(int x, int y) {
         return x + y;

@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ 
-package org.springframework.jmx.assemblers.metadata;
+package org.springframework.jmx.metadata.support;
 
 /**
+ * Provides metadata for use when registering
+ * instances of this class with a JMX server.
+ * Only valid when used on a class.
  * @author Rob Harrop
- *
+ * @see org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler
+ * @see org.springframework.jmx.naming.MetadataNamingStrategy
  */
 public class ManagedResource {
 

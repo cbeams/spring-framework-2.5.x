@@ -13,24 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ 
-package org.springframework.jmx.assemblers.metadata;
+package org.springframework.jmx.metadata.support;
 
 /**
  * @author Rob Harrop
  */
-public class ManagedOperation {
+public class ManagedAttribute {
 
-    private String description;
-    
-    public ManagedOperation() {
-        description = "";
-    }
-    
-    public String getDescription() {
-        return this.description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

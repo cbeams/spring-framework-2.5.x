@@ -12,12 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.assemblers.metadata;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 import javax.management.IntrospectionException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
@@ -29,12 +28,20 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.AbstractModelMBeanInfoAssembler;
 import org.springframework.jmx.JmxUtils;
-import org.springframework.jmx.assemblers.metadata.exceptions.InvalidMetadataException;
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
+import org.springframework.jmx.metadata.support.ManagedAttribute;
+import org.springframework.jmx.metadata.support.ManagedOperation;
+import org.springframework.jmx.metadata.support.ManagedResource;
+import org.springframework.jmx.metadata.support.MetadataReader;
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
+ * Implementation of <tt>ModelMBeanInfoAssembler</tt> that reads the
+ * management interface information from source level metadata. Uses Spring's
+ * metadata abstraction layer so that metadata can be read using any supported
+ * implementation.
+ * 
  * @author Rob Harrop
  */
 public class MetadataModelMBeanInfoAssembler extends
@@ -49,6 +56,7 @@ public class MetadataModelMBeanInfoAssembler extends
      * Set the <tt>Attributes</tt> implementation.
      * 
      * @param attributes
+     * @see org.springframework.metadata.Attributes
      */
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
@@ -65,8 +73,8 @@ public class MetadataModelMBeanInfoAssembler extends
         try {
             for (int x = 0; x < props.length; x++) {
 
-                Method getter = checkForAttribute(props[x].getReadMethod(), ManagedAttribute.class);
-                Method setter = checkForAttribute(props[x].getWriteMethod(), ManagedAttribute.class);
+                Method getter = checkForManagedAttribute(props[x].getReadMethod());
+                Method setter = checkForManagedAttribute(props[x].getWriteMethod());
 
                 if ((getter != null) || (setter != null)) {
                     // if both getter and setter are null
@@ -95,25 +103,22 @@ public class MetadataModelMBeanInfoAssembler extends
     }
 
     /**
-     * Checks to see if a method has the specified attribute defined. If so then
+     * Checks to see if a method has a ManagedAttribute defined. If so then
      * the method is returned back to the caller, otherwise null is returned.
      * 
      * @param method
      * @return
      */
-    private Method checkForAttribute(Method method, Class attributeClass) {
+    private Method checkForManagedAttribute(Method method) {
         if (method == null)
             return null;
-        
-        Collection attrs = attributes.getAttributes(method, attributeClass);
 
-        if (attrs.isEmpty()) {
+        ManagedAttribute ma = MetadataReader.getManagedAttribute(attributes, method);
+        
+        if(ma == null) {
             return null;
-        } else if (attrs.size() == 1) {
-            return method;
         } else {
-            throw new InvalidMetadataException(
-                    "A getter/setter should only contain one " + attributeClass.getName());
+            return method;
         }
     }
 
@@ -122,19 +127,13 @@ public class MetadataModelMBeanInfoAssembler extends
     }
 
     protected String getDescription(Object bean) {
-        Collection attrs = attributes.getAttributes(bean.getClass(),
-                ManagedResource.class);
+        ManagedResource mr = MetadataReader.getManagedResource(attributes,
+                bean.getClass());
 
-        if (attrs.isEmpty()) {
-            // use empty description
+        if (mr == null) {
             return "";
-        } else if (attrs.size() == 1) {
-            ManagedResource mr = (ManagedResource) attrs.iterator().next();
-            return mr.getDescription();
         } else {
-            // too many ManagedResource attrs
-            throw new InvalidMetadataException(
-                    "Only one ManagedResource attribute is allowed");
+            return mr.getDescription();
         }
     }
 
@@ -143,29 +142,23 @@ public class MetadataModelMBeanInfoAssembler extends
     }
 
     protected ModelMBeanOperationInfo[] getOperationInfo(Object bean) {
-        
+
         Method[] methods = bean.getClass().getDeclaredMethods();
         ModelMBeanOperationInfo[] info = new ModelMBeanOperationInfo[methods.length];
         int attrCount = 0;
-        
-        for(int x = 0; x < methods.length; x++) {
-            if(!JmxUtils.isProperty(methods[x])) {
-                Collection attrs = attributes.getAttributes(methods[x], ManagedOperation.class);
-                
-                if(attrs.isEmpty()) {
-                    continue;
-                } else if (attrs.size() == 1) {
-                    ManagedOperation mo = (ManagedOperation)attrs.iterator().next();
-                    
-                    info[attrCount++] = new ModelMBeanOperationInfo(mo.getDescription(), methods[x]);
-                 
-                } else {
-                    throw new InvalidMetadataException("Only one ManagedOperation attribute must be specified per operation");
+
+        for (int x = 0; x < methods.length; x++) {
+            if (!JmxUtils.isProperty(methods[x])) {
+                ManagedOperation mo = MetadataReader.getManagedOperation(
+                        attributes, methods[x]);
+
+                if (mo != null) {
+                    info[attrCount++] = new ModelMBeanOperationInfo(
+                            mo.getDescription(), methods[x]);
                 }
-                
             }
         }
-        
+
         ModelMBeanOperationInfo[] result = JmxUtils.shrink(info, attrCount);
         return result;
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ 
-package org.springframework.jmx.assemblers.metadata.exceptions;
+package org.springframework.jmx.metadata.support;
 
 import org.springframework.jmx.exceptions.MBeanAssemblyException;
 
