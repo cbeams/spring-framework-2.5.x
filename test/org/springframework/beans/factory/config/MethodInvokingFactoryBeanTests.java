@@ -1,8 +1,12 @@
 package org.springframework.beans.factory.config;
 
-import org.springframework.beans.FatalBeanException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.FatalBeanException;
 
 /**
  * Tests MethodInvokingFactoryBean
@@ -67,6 +71,58 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setStaticMethod(fqmn);
 		mcfb.afterPropertiesSet();
 		assertTrue(MethodInvokingFactoryBean.VOID.equals(mcfb.getObject()));
+
+		// now see if we can match methods with arguments that have supertype
+		// arguments
+		fqmn = TestClass1.class.getName() + ".supertypes";
+		TestClass1._staticField1 = 0;
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		// should pass
+		mcfb.afterPropertiesSet();
+
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		try {
+			mcfb.afterPropertiesSet();
+			fail("Matched method with wrong number of args: " + fqmn);
+		}
+		catch (FatalBeanException e) {
+			// expected
+		}
+
+		// now ideally we would fail on improper argument types, but
+		// unfortunately
+		// our algorithm is too stupid, so we are just going to check that in
+		// fact
+		// we match improper argument types, and then fail on the actual call.
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{"1", "2", "3"});
+		mcfb.afterPropertiesSet();
+		try {
+			Object x = mcfb.getObject();
+			fail("Should have failed on getObject with mismatched argument types");
+		}
+		catch (IllegalArgumentException e) {
+			// expected
+		}
+		
+        // verify fail if two matching methods with the same arg count
+		fqmn = TestClass1.class.getName() + ".supertypes2";
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		try {
+			mcfb.afterPropertiesSet();
+			fail("Matched method when shouldn't have matched: " + fqmn);
+		}
+		catch (FatalBeanException e) {
+			// expected
+		}
+		
 	}
 
 	public void testGetObjectType() throws Exception {
@@ -84,6 +140,28 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.afterPropertiesSet();
 		Class objType = mcfb.getObjectType();
 		assertTrue(objType.equals(MethodInvokingFactoryBean.VoidType.class));
+
+		// verify that we can call a method with args that are subtypes of the
+		// target
+		// method arg types
+		fqmn = TestClass1.class.getName() + ".supertypes";
+		TestClass1._staticField1 = 0;
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		mcfb.afterPropertiesSet();
+		mcfb.getObjectType();
+
+		// now we should fail at runtime if they don't match
+		// (ideally we would fail on improper argument types at
+		// afterPropertiesSet time, but unfortunately our algorithm is too
+		// stupid, so we are just going to check that in fact we match
+		// improper argument types, and the test for getObject will check for the
+		// runtime failure.
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setStaticMethod(fqmn);
+		mcfb.setArgs(new Object[]{"1", "2", "3"});
+		mcfb.afterPropertiesSet();
 
 	}
 
@@ -186,6 +264,17 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		public static void voidRetvalMethod() {
 		}
+
+		public static void supertypes(Collection c, List l, String s) {
+		}
+		
+		public static void supertypes2(Collection c, List l, String s, Integer i) {
+		}
+		public static void supertypes2(Collection c, List l, String s, String s2) {
+		}
+		
+		
+		
 
 	}
 

@@ -50,7 +50,7 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  * @author colin sampaleanu
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.3 2003-11-26 04:47:40 colins Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.4 2003-11-26 19:35:30 colins Exp $
  */
 public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean {
 
@@ -136,7 +136,28 @@ public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean 
 				targetClass = _target.getClass();
 				methodName = _targetMethod;
 			}
-			_methodObj = targetClass.getMethod(methodName, types);
+			
+			// try to get the exact method first
+			try {
+				_methodObj = targetClass.getMethod(methodName, types);
+			}
+			catch (NoSuchMethodException e) {
+				int matches = 0;
+				// then try to get a method with the same number of args
+				// we'll fail at runtime if in fact the args are not assignment compatible
+				Method[] methods = targetClass.getMethods();
+				for (int i = 0; i < methods.length; ++i) {
+					Method method = methods[i];
+					if (method.getName().equals(methodName) && method.getParameterTypes().length == types.length) {
+						_methodObj = method;
+						++matches;
+					}
+				}
+				
+				// just rethrow exception if we can't get a match
+				if (_methodObj == null || matches > 1)
+					throw e;
+			}
 			if (_staticMethod != null && !Modifier.isStatic(_methodObj.getModifiers()))
 				throw new IllegalArgumentException("target method should be static but is not");
 					
