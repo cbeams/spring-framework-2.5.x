@@ -142,10 +142,13 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 					proxyFactory.addInterceptor((Interceptor) interceptor);
 				}
 			}
-			proxyFactory.addInterceptor(createInvokerInterceptor(bean));
+			proxyFactory.addInterceptor(createInvokerInterceptor(bean, name));
 			if (this.proxyInterfacesOnly) {
 				proxyFactory.setInterfaces(AopUtils.getAllInterfaces(bean));
 			}
+			
+			// Transaction and other APIs might require this
+			proxyFactory.setExposeInvocation(true);
 			return proxyFactory.getProxy();
 		}
 		else {
@@ -162,7 +165,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @return an invoker interceptor wrapping this bean.
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
-	protected InvokerInterceptor createInvokerInterceptor(Object bean) {
+	protected Interceptor createInvokerInterceptor(Object bean, String beanName) {
 		return new InvokerInterceptor(bean);
 	}
 
