@@ -138,6 +138,18 @@ public abstract class CompoundConstraint extends AbstractConstraint {
 
 	public abstract boolean test(Object argument);
 
+	public void validateTypeSafety(final Class constraintType) {
+		Assert.notNull(constraintType, "Constraint type is required");
+		Assert.isTrue(Constraint.class.isAssignableFrom(constraintType),
+				"Argument must be a specialization of the Constraint interface");
+		boolean result = new AbstractConstraint() {
+			public boolean test(Object o) {
+				return constraintType.isAssignableFrom(o.getClass());
+			}
+		}.allTrue(iterator());
+		Assert.isTrue(result, "One or more of the aggregated constraints is not assignable to " + constraintType);
+	}
+
 	public String toString() {
 		return new ToStringCreator(this).append("constraints", constraints).toString();
 	}

@@ -28,6 +28,10 @@ public abstract class AbstractPropertyConstraint implements PropertyConstraint {
 		return propertyName;
 	}
 
+	public boolean tests(String propertyName) {
+		return getPropertyName().equals(propertyName);
+	}
+
 	protected void setPropertyName(String propertyName) {
 		Assert.notNull(propertyName, "The propertyName to constrain is required");
 		this.propertyName = propertyName;

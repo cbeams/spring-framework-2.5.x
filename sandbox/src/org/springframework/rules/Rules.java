@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.CompoundConstraint;
+import org.springframework.rules.constraint.ConstraintsAccessor;
+import org.springframework.rules.constraint.Range;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
@@ -38,72 +40,68 @@ import org.springframework.validation.Validator;
  * 
  * @author Keith Donald
  */
-public class Rules implements Constraint, Validator {
+public class Rules extends ConstraintsAccessor implements Constraint, Validator {
 	private static final Log logger = LogFactory.getLog(Rules.class);
 
-	private Class beanClass;
+	private Class domainObjectClass;
 
-	private Map propertyRules = new HashMap();
+	private Map propertiesConstraints = new HashMap();
 
 	public Rules() {
+		initRules();
+	}
+
+	public Rules(Class domainObjectClass) {
+		setDomainObjectClass(domainObjectClass);
+		initRules();
+	}
+
+	public void setDomainObjectClass(Class domainObjectClass) {
+		Assert.notNull(domainObjectClass, "The domainObjectClass property is required");
+		this.domainObjectClass = domainObjectClass;
+	}
+
+	public Class getDomainObjectClass() {
+		return domainObjectClass;
+	}
+
+	protected void initRules() {
 
 	}
 
-	public Rules(Class beanClass) {
-		setBeanClass(beanClass);
-	}
-
-	public Class getBeanClass() {
-		return beanClass;
-	}
-
-	public void setBeanClass(Class beanClass) {
-		Assert.notNull(beanClass, "The beanClass property is required");
-		this.beanClass = beanClass;
-	}
-
-	public void setPropertyRules(Map propertyRules) {
-		for (Iterator i = propertyRules.entrySet().iterator(); i.hasNext();) {
+	public void setPropertiesConstraints(Map propertiesConstraints) {
+		for (Iterator i = propertiesConstraints.entrySet().iterator(); i.hasNext();) {
 			Map.Entry entry = (Map.Entry)i.next();
 			String propertyName = (String)entry.getKey();
-			Object val = entry.getValue();
-			PropertyConstraint e;
-			if (val instanceof List) {
-				And and = new And();
-				and.addAll((List)val);
-				e = new PropertyValueConstraint(propertyName, and);
+			Object value = entry.getValue();
+			if (value instanceof List) {
+				add(propertyName, (Constraint[])((List)value).toArray(new Constraint[0]));
 			}
-			else {
-				Constraint p = (Constraint)val;
-				if (p instanceof CompoundConstraint) {
-					e = new CompoundPropertyConstraint((CompoundConstraint)p);
-				}
-				else if (p instanceof PropertyConstraint) {
-					e = (PropertyConstraint)p;
-				}
-				else {
-					e = new PropertyValueConstraint(propertyName, p);
-				}
+			else if (value instanceof PropertyConstraint) {
+				add((PropertyConstraint)value);
 			}
-			internalSetRules(e);
+			else if (value instanceof Constraint) {
+				add(propertyName, (Constraint)value);
+			}
 		}
 	}
 
-	private void internalSetRules(PropertyConstraint e) {
+	private void putPropertyConstraint(PropertyConstraint constraint) {
 		And and = new And();
-		and.add(e);
+		and.add(constraint);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Configuring rules for property '" + e.getPropertyName() + "', rules -> [" + e + "]");
+			logger.debug("Putting constraint for property '" + constraint.getPropertyName() + "', constraint -> ["
+					+ constraint + "]");
 		}
-		propertyRules.put(e.getPropertyName(), new CompoundPropertyConstraint(and));
+		propertiesConstraints.put(constraint.getPropertyName(), new CompoundPropertyConstraint(and));
 	}
 
-	public PropertyConstraint getRules(String property) {
-		return (PropertyConstraint)propertyRules.get(property);
+	public PropertyConstraint getPropertyConstraint(String property) {
+		return (PropertyConstraint)propertiesConstraints.get(property);
 	}
 
 	public Iterator iterator() {
-		return propertyRules.values().iterator();
+		return propertiesConstraints.values().iterator();
 	}
 
 	/**
@@ -112,25 +110,38 @@ public class Rules implements Constraint, Validator {
 	 * @param propertyName
 	 * @return A rule for a given property.
 	 */
-	public static Rules createRules(Class beanClass) {
-		return new Rules(beanClass);
+	public static Rules createRules(Class domainObjectClass) {
+		return new Rules(domainObjectClass);
+	}
+
+	/**
+	 * Factory method that creates a rules instance for a given java bean type.
+	 * 
+	 * @param propertyName
+	 * @return A rule for a given property.
+	 */
+	public static Rules createRules(Class domainObjectClass, Map propertyConstraints) {
+		Rules r = new Rules(domainObjectClass);
+		r.setPropertiesConstraints(propertyConstraints);
+		return r;
 	}
 
 	/**
 	 * Adds the provided bean property expression (constraint) to the list of
 	 * constraints for the constrained property.
 	 * 
-	 * @param expression
+	 * @param constraint
 	 *            the bean property expression
 	 * @return this, to support chaining.
 	 */
-	public Rules add(PropertyConstraint expression) {
-		CompoundPropertyConstraint and = (CompoundPropertyConstraint)propertyRules.get(expression.getPropertyName());
+	public Rules add(PropertyConstraint constraint) {
+		CompoundPropertyConstraint and = (CompoundPropertyConstraint)propertiesConstraints
+				.get(constraint.getPropertyName());
 		if (and == null) {
-			internalSetRules(expression);
+			putPropertyConstraint(constraint);
 		}
 		else {
-			and.add(expression);
+			and.add(constraint);
 		}
 		return this;
 	}
@@ -148,21 +159,47 @@ public class Rules implements Constraint, Validator {
 	}
 
 	/**
+	 * Adds a value constraint for the specified property.
+	 * 
+	 * @param propertyName
+	 *            The property name.
+	 * @param valueConstraint
+	 *            The value constraint.
+	 */
+	public void add(String propertyName, Constraint[] valueConstraints) {
+		add(new PropertyValueConstraint(propertyName, all(valueConstraints)));
+	}
+
+	public void addRequired(String propertyName) {
+		add(propertyName, required());
+	}
+
+	public void addMaxLength(String propertyName, int maxLength) {
+		add(propertyName, maxLength(maxLength));
+	}
+
+	public void addMinLength(String propertyName, int minLength) {
+		add(propertyName, minLength(minLength));
+	}
+
+	public void addRange(String propertyName, Range range) {
+		add(propertyName, range);
+	}
+
+	/**
 	 * Adds the provided compound predicate, composed of BeanPropertyExpression
 	 * objects, as a bean property constraint.
 	 * 
 	 * @param compoundPredicate
 	 */
-	public void add(Constraint compoundPredicate) {
-		Assert.isTrue(compoundPredicate instanceof CompoundConstraint,
-				"Argument must be a compound predicate composed of BeanPropertyExpression objects.");
+	public void add(CompoundConstraint compoundPredicate) {
 		add(new CompoundPropertyConstraint((CompoundConstraint)compoundPredicate));
 	}
 
 	public boolean test(Object bean) {
-		for (Iterator i = propertyRules.values().iterator(); i.hasNext();) {
-			Constraint predicate = (Constraint)i.next();
-			if (!predicate.test(bean)) {
+		for (Iterator i = propertiesConstraints.values().iterator(); i.hasNext();) {
+			PropertyConstraint propertyConstraint = (PropertyConstraint)i.next();
+			if (!propertyConstraint.test(bean)) {
 				return false;
 			}
 		}
@@ -170,7 +207,7 @@ public class Rules implements Constraint, Validator {
 	}
 
 	public boolean supports(Class clazz) {
-		return clazz.equals(this.beanClass);
+		return clazz.equals(this.domainObjectClass);
 	}
 
 	public void validate(final Object bean, final Errors errors) {
@@ -178,7 +215,8 @@ public class Rules implements Constraint, Validator {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("beanClass", beanClass).append("propertyRules", propertyRules).toString();
+		return new ToStringCreator(this).append("beanClass", domainObjectClass).append("propertyRules",
+				propertiesConstraints).toString();
 	}
 
 }

@@ -51,11 +51,15 @@ public class PropertiesConstraint extends AbstractPropertyConstraint {
 		this.beanPropertyExpression = beanPropertyExpression;
 	}
 
+	public boolean tests(String propertyName) {
+		return getPropertyName().equals(propertyName) || getOtherPropertyName().equals(propertyName);
+	}
+
 	public String getOtherPropertyName() {
 		return otherPropertyName;
 	}
 
-	public BinaryConstraint getPredicate() {
+	public BinaryConstraint getConstraint() {
 		return beanPropertyExpression;
 	}
 

@@ -50,7 +50,7 @@ public class PropertyValueConstraint extends AbstractPropertyConstraint implemen
 		return valueConstraint.test(domainObjectAccessStrategy.getPropertyValue(getPropertyName()));
 	}
 
-	public Constraint getPredicate() {
+	public Constraint getConstraint() {
 		return valueConstraint;
 	}
 

@@ -28,4 +28,9 @@ public class NegatedPropertyConstraint extends Not implements PropertyConstraint
 	public String getPropertyName() {
 		return ((PropertyConstraint)super.getConstraint()).getPropertyName();
 	}
+	
+	public boolean tests(String propertyName) {
+		return ((PropertyConstraint)super.getConstraint()).test(propertyName);
+	}
+
 }

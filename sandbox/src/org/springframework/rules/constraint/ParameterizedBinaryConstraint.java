@@ -89,7 +89,7 @@ public class ParameterizedBinaryConstraint implements Constraint {
 		return parameter;
 	}
 
-	public BinaryConstraint getPredicate() {
+	public BinaryConstraint getConstraint() {
 		return constraint;
 	}
 

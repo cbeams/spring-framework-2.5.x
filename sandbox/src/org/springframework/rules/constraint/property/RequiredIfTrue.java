@@ -49,7 +49,7 @@ public class RequiredIfTrue extends AbstractPropertyConstraint implements
 		super(propertyName);
 	}
 
-	public Constraint getPredicate() {
+	public Constraint getConstraint() {
 		return constraint;
 	}
 

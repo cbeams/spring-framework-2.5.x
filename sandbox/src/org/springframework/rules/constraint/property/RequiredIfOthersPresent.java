@@ -18,10 +18,8 @@ package org.springframework.rules.constraint.property;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.CompoundConstraint;
 import org.springframework.rules.constraint.LogicalOperator;
-import org.springframework.rules.constraint.Or;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -41,6 +39,10 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
 		this(propertyName, otherPropertyNames, LogicalOperator.AND);
 	}
 
+	public boolean tests(String propertyName) {
+		return getPropertyName().equals(propertyName) || ((CompoundPropertyConstraint)getConstraint()).tests(propertyName);
+	}
+
 	/**
 	 * Tests that the property is required if all or any of the "other
 	 * properties" are present.
@@ -50,24 +52,18 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
 	 * @param operator
 	 *            the logical operator, either AND or OR.
 	 */
-	public RequiredIfOthersPresent(String propertyName, String otherPropertyNames,
-			LogicalOperator operator) {
+	public RequiredIfOthersPresent(String propertyName, String otherPropertyNames, LogicalOperator operator) {
 		super(propertyName);
 		Assert.notNull(otherPropertyNames, "otherPropertyNames is required");
 		Assert.notNull(operator, "operator is required");
 		Set set = StringUtils.commaDelimitedListToSet(otherPropertyNames);
 		Assert.notEmpty(set, "otherPropertyNames must consist of at least one name");
-		CompoundConstraint compoundPredicate;
-		if (operator == LogicalOperator.AND) {
-			compoundPredicate = new And();
-		}
-		else {
-			compoundPredicate = new Or();
-		}
+		CompoundConstraint compoundConstraint = operator.createConstraint();
+		CompoundPropertyConstraint propertyConstraint = new CompoundPropertyConstraint(compoundConstraint);
 		for (Iterator i = set.iterator(); i.hasNext();) {
-			compoundPredicate.add(new PropertyPresent((String) i.next()));
+			propertyConstraint.add(new PropertyPresent((String)i.next()));
 		}
-		setConstraint(compoundPredicate);
+		setConstraint(compoundConstraint);
 	}
 
 }

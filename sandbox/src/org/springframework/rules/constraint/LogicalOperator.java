@@ -15,19 +15,18 @@
  */
 package org.springframework.rules.constraint;
 
-
 /**
  * Type-safe enums for various conditional or logical operators.
  *
  * @author Keith Donald
  */
-public class LogicalOperator extends Operator {
+public abstract class LogicalOperator extends Operator {
 
 	/**
 	 * The <code>AND</code> operator
 	 */
 	public static final LogicalOperator AND = new LogicalOperator("and", "&&") {
-		public CompoundConstraint createPredicate() {
+		public CompoundConstraint createConstraint() {
 			return new And();
 		}
 	};
@@ -36,7 +35,7 @@ public class LogicalOperator extends Operator {
 	 * The <code>OR</code> operator
 	 */
 	public static final LogicalOperator OR = new LogicalOperator("or", "||") {
-		public CompoundConstraint createPredicate() {
+		public CompoundConstraint createConstraint() {
 			return new Or();
 		}
 	};
@@ -45,13 +44,17 @@ public class LogicalOperator extends Operator {
 	 * The <code>OR</code> operator
 	 */
 	public static final LogicalOperator NOT = new LogicalOperator("not", "!") {
-		public Not createPredicate() {
+		public Not createNotConstraint() {
 			return new Not();
 		}
 	};
 
 	private LogicalOperator(String code, String symbol) {
 		super(code, symbol);
+	}
+
+	public CompoundConstraint createConstraint() {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -35,7 +35,7 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class DefaultRulesSource extends ConstraintsAccessor implements RulesSource {
-	private static final Log logger = LogFactory.getLog(DefaultRulesSource.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Map rules = new HashMap();
 
@@ -49,7 +49,7 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding rules -> " + rules);
 		}
-		this.rules.put(rules.getBeanClass(), rules);
+		this.rules.put(rules.getDomainObjectClass(), rules);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class DefaultRulesSource extends ConstraintsAccessor implements RulesSour
 		}
 		Rules rules = (Rules)this.rules.get(bean);
 		if (rules != null) {
-			return rules.getRules(propertyName);
+			return rules.getPropertyConstraint(propertyName);
 		}
 		else {
 			return null;

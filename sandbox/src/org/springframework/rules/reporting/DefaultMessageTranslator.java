@@ -143,13 +143,13 @@ public class DefaultMessageTranslator implements Visitor {
 
 	void visit(PropertiesConstraint e) {
 		add(
-				getMessageCode(e.getPredicate()),
+				getMessageCode(e.getConstraint()),
 				new Object[]{resolvableObjectName(e.getOtherPropertyName())},
 				e.toString());
 	}
 
 	void visit(ParameterizedPropertyConstraint e) {
-		add(getMessageCode(e.getPredicate()),
+		add(getMessageCode(e.getConstraint()),
 				new Object[]{e.getParameter()}, e.toString());
 	}
 
@@ -169,7 +169,7 @@ public class DefaultMessageTranslator implements Visitor {
 	}
 
 	void visit(PropertyValueConstraint valueConstraint) {
-		visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
+		visitorSupport.invokeVisit(this, valueConstraint.getConstraint());
 	}
 
 	void visit(And and) {
@@ -222,7 +222,7 @@ public class DefaultMessageTranslator implements Visitor {
 	private MessageSourceResolvable handleParameterizedBinaryPredicate(
 			ParameterizedBinaryConstraint p) {
 		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-				new String[]{getMessageCode(p.getPredicate())},
+				new String[]{getMessageCode(p.getConstraint())},
 				new Object[]{p.getParameter()}, p.toString());
 		return resolvable;
 	}

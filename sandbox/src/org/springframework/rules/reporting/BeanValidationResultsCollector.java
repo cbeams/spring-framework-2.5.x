@@ -131,7 +131,7 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
 					+ valueConstraint + "]...");
 		}
 		return (Boolean) visitorSupport.invokeVisit(this, valueConstraint
-				.getPredicate());
+				.getConstraint());
 	}
 
 	boolean visit(Constraint constraint) {

@@ -20,7 +20,6 @@ import org.springframework.rules.constraint.property.PropertyConstraint;
 /**
  * @author Keith Donald
  */
-public interface RulesProvider {
-
-	public PropertyConstraint getRules(String propertyName);
+public interface PropertyConstraintProvider {
+	public PropertyConstraint getPropertyConstraint(String propertyName);
 }

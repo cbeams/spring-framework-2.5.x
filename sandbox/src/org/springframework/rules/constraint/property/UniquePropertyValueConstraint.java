@@ -37,6 +37,10 @@ public class UniquePropertyValueConstraint extends AbstractConstraint implements
 		return propertyName;
 	}
 
+	public boolean tests(String propertyName) {
+		return getPropertyName().equals(propertyName);
+	}
+
 	/**
 	 * Returns <code>true</code> if each domain object in the provided collection has a unique
 	 * value for the configured property.

@@ -16,14 +16,14 @@
 package org.springframework.rules.support;
 
 import org.springframework.rules.Rules;
-import org.springframework.rules.RulesProvider;
+import org.springframework.rules.PropertyConstraintProvider;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald
  */
-public abstract class AbstractRuleProvider extends DefaultRulesSource implements RulesProvider {
+public abstract class AbstractRuleProvider extends DefaultRulesSource implements PropertyConstraintProvider {
 
 	private Rules rules = Rules.createRules(this.getClass());
 
@@ -35,7 +35,7 @@ public abstract class AbstractRuleProvider extends DefaultRulesSource implements
 		rules.add(property, valueConstraint);
 	}
 
-	public PropertyConstraint getRules(String propertyName) {
+	public PropertyConstraint getPropertyConstraint(String propertyName) {
 		return getRules(this.getClass(), propertyName);
 	}
 }

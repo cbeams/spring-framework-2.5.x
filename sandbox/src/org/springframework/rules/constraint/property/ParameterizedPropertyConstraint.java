@@ -47,16 +47,20 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 		return parameterizedExpression.getPropertyName();
 	}
 
-	public BinaryConstraint getPredicate() {
-		return getParameterizedBinaryPredicate().getPredicate();
+	public boolean tests(String propertyName) {
+		return parameterizedExpression.test(propertyName);
+	}
+	
+	public BinaryConstraint getConstraint() {
+		return getParameterizedBinaryConstraint().getConstraint();
 	}
 
 	public Object getParameter() {
-		return getParameterizedBinaryPredicate().getParameter();
+		return getParameterizedBinaryConstraint().getParameter();
 	}
 
-	public ParameterizedBinaryConstraint getParameterizedBinaryPredicate() {
-		return (ParameterizedBinaryConstraint)this.parameterizedExpression.getPredicate();
+	private ParameterizedBinaryConstraint getParameterizedBinaryConstraint() {
+		return (ParameterizedBinaryConstraint)this.parameterizedExpression.getConstraint();
 	}
 
 	/**
