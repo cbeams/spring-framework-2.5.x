@@ -32,7 +32,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 
     private Locale locale = Locale.getDefault();
 
-    private CodedEnumResolver resolver = StaticCodedEnumResolver.instance();
+    private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
 
     private boolean allowsEmpty = true;
 
@@ -48,7 +48,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 
     public CodedEnumEditor(Class type, CodedEnumResolver enumResolver) {
         setType(type);
-        setEnumResolver(resolver);
+        setEnumResolver(enumResolver);
     }
 
     public void setType(Class type) {
@@ -62,7 +62,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
      */
     public void setEnumResolver(CodedEnumResolver resolver) {
         Assert.notNull(resolver, "The enum resolver is required");
-        this.resolver = resolver;
+        this.enumResolver = resolver;
     }
 
     public void setAllowsEmpty(boolean allowsEmpty) {
@@ -123,10 +123,10 @@ public class CodedEnumEditor extends PropertyEditorSupport {
                 code = encodedCode;
             }
         }
-        CodedEnum ce = resolver.getEnum(type, code, getLocale());
+        CodedEnum ce = this.enumResolver.getEnum(type, code, getLocale());
         if (!allowsEmpty) {
-            Assert.notNull(ce, "The encoded code '" + encodedCode
-                    + "' did not map to a valid enum instance for type " + type);
+            Assert.notNull(ce, "The encoded code '" + encodedCode + "' did not map to a valid enum instance for type "
+                    + type);
             if (this.type != null) {
                 Assert.isInstanceOf(this.type, ce);
             }
