@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -22,6 +23,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -30,7 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class ActionState extends TransitionableState {
 
-	private Set actions = new LinkedHashSet(1);
+	private Set namedActions = new LinkedHashSet(1);
 
 	public ActionState(Flow flow, String id, Action action, Transition transition) {
 		super(flow, id, transition);
@@ -47,30 +50,85 @@ public class ActionState extends TransitionableState {
 		addActions(actions);
 	}
 
+	protected static class NamedAction implements Serializable {
+		private String name;
+
+		private Action action;
+
+		public NamedAction(String name, Action action) {
+			Assert.notNull(action, "The action is required");
+			this.name = name;
+			this.action = action;
+		}
+
+		protected String getCaption() {
+			return (isNameSet() ? "[name='" + name + "', class='" + action.getClass().getName() + "']" : "[class='"
+					+ action.getClass().getName() + "']");
+		}
+
+		protected String getName() {
+			return name;
+		}
+
+		protected Action getAction() {
+			return action;
+		}
+
+		public boolean isNameSet() {
+			return StringUtils.hasText(name);
+		}
+
+		protected String getEventId(ActionResult result) {
+			if (result == null) {
+				return null;
+			}
+			if (isNameSet()) {
+				return name + "." + result.getId();
+			}
+			else {
+				return result.getId();
+			}
+		}
+
+		public String toString() {
+			return getCaption();
+		}
+	}
+
 	public boolean isActionState() {
 		return true;
 	}
 
 	protected void addAction(Action action) {
-		this.actions.add(action);
+		this.namedActions.add(createNamedAction(null, action));
+	}
+
+	protected void addAction(String actionName, Action action) {
+		this.namedActions.add(createNamedAction(actionName, action));
 	}
 
 	protected void addActions(Action[] actions) {
 		for (int i = 0; i < actions.length; i++) {
-			this.actions.add(actions[i]);
+			addAction(actions[i]);
 		}
 	}
 
-	protected Action[] getActions() {
-		return (Action[])actions.toArray(new Action[actions.size()]);
+	protected void addActions(String[] names, Action[] actions) {
+		for (int i = 0; i < actions.length; i++) {
+			addAction(names[i], actions[i]);
+		}
+	}
+
+	protected NamedAction createNamedAction(String actionName, Action action) {
+		return new NamedAction(actionName, action);
 	}
 
 	/**
 	 * @return An iterator that returns the set of action beans to execute for
 	 *         this state.
 	 */
-	protected Iterator actionIterator() {
-		return actions.iterator();
+	protected Iterator namedActionIterator() {
+		return this.namedActions.iterator();
 	}
 
 	/**
@@ -83,36 +141,37 @@ public class ActionState extends TransitionableState {
 	 */
 	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		Iterator it = actionIterator();
+		Iterator it = namedActionIterator();
 		int executionCount = 0;
 		while (it.hasNext()) {
-			Action action = (Action)it.next();
+			NamedAction namedAction = (NamedAction)it.next();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing action bean '" + action + "'");
+				logger.debug("Executing action '" + namedAction.getCaption() + "'");
 			}
 			ActionResult result;
 			try {
-				result = action.execute(request, response, flowExecution);
+				result = namedAction.action.execute(request, response, flowExecution);
 			}
 			catch (Exception e) {
-				throw new ActionExecutionException(this, action, e);
+				throw new ActionExecutionException(this, namedAction, e);
 			}
 			executionCount++;
-			Transition transition = getTransition(result);
+			String eventId = namedAction.getEventId(result);
+			Transition transition = getTransition(eventId);
 			if (transition != null) {
-				flowExecution.setLastEventId(result.getId());
+				flowExecution.setLastEventId(eventId);
 				return transition.execute(flowExecution, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Action execution #" + executionCount + " resulted in no transition - "
-							+ "I will attempt to proceed to the next action in the chain");
+					logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+							+ eventId + "' - " + "I will proceed to the next action in the chain");
 				}
 			}
 		}
 		if (executionCount > 0) {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No surpported event was signaled by any of the " + executionCount
+					"No supported event was signaled by any of the " + executionCount
 							+ " actions that executed in this action state '" + getId() + "' of flow '"
 							+ getFlow().getId() + "' -- programmer error?"));
 		}
@@ -122,12 +181,5 @@ public class ActionState extends TransitionableState {
 							+ "-- programmer configuration error; "
 							+ "make sure you add at least one action bean to this state"));
 		}
-	}
-
-	protected Transition getTransition(ActionResult result) {
-		if (result == null) {
-			return null;
-		}
-		return getTransition(result.getId());
 	}
 }
