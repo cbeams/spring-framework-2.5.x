@@ -360,7 +360,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			logger.debug(pvs.toString());
 		}
 
-		if (parent == null) {
+		if (parent == null && !beanName.equals(this.defaultParentBean)) {
 			parent = this.defaultParentBean;
 		}
 

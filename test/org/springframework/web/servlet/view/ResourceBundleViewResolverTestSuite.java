@@ -33,11 +33,12 @@ import org.springframework.web.servlet.View;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ResourceBundleViewResolverTestSuite extends TestCase {
 
 	/** Comes from this package */
-	public static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
+	private static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
 
 	private ResourceBundleViewResolver rb;
 	
@@ -47,6 +48,8 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());
+		rb.setDefaultParentView("testParent");
+
 		wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
