@@ -54,12 +54,14 @@ public class Transition implements Serializable {
 
 	public ViewDescriptor execute(Flow flow, TransitionableState fromState, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
+		assertActiveFlow(sessionExecution, flow);
+		assertCurrentState(sessionExecution, fromState);
 		String qualifiedActiveFlowId = null;
 		if (logger.isDebugEnabled()) {
 			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + getId() + "' within this state '" + getId() + "' for flow '"
+			logger.debug("Event '" + getId() + "' within state '" + fromState.getId() + "' for flow '"
 					+ qualifiedActiveFlowId + "' was signaled; processing...");
 		}
 		sessionExecution.setLastEventId(getId());
@@ -69,10 +71,9 @@ public class Transition implements Serializable {
 		}
 
 		try {
-
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing transition from state '" + sessionExecution.getCurrentStateId()
-						+ "' to state '" + getToState() + "' in flow '" + qualifiedActiveFlowId + "'");
+				logger.debug("Executing transition from state '" + fromState.getId() + "' to state '" + getToState()
+						+ "' in flow '" + qualifiedActiveFlowId + "'");
 			}
 
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
@@ -100,6 +101,22 @@ public class Transition implements Serializable {
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, flow, fromState.getId(), e);
+		}
+	}
+
+	protected void assertActiveFlow(FlowSessionExecution sessionExecution, Flow flow) {
+		if (!flow.getId().equals(sessionExecution.getActiveFlowId())) {
+			throw new IllegalStateException("Assertion failed - the flow parameter ID '" + flow.getId()
+					+ "' must equal the active flow ID '" + sessionExecution.getActiveFlowId()
+					+ "' for this flow session execution");
+		}
+	}
+
+	protected void assertCurrentState(FlowSessionExecution sessionExecution, TransitionableState fromState) {
+		if (!fromState.getId().equals(sessionExecution.getCurrentStateId())) {
+			throw new IllegalStateException("Assertion failed - the from state parameter ID '" + fromState.getId()
+					+ "' must equal the current state ID '" + sessionExecution.getCurrentStateId()
+					+ "' for this flow session execution");
 		}
 	}
 
