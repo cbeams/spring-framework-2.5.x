@@ -483,8 +483,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	/**
 	 * Holder for suspended resources.
 	 * Used internally by doSuspend and doResume.
-	 * @see #doSuspend
-	 * @see #doResume
 	 */
 	private static class SuspendedResourcesHolder {
 

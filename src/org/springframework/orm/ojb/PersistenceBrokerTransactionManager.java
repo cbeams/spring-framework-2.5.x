@@ -122,6 +122,8 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	 * or JdbcTemplate. The Connection will be taken from the Hibernate Session.
 	 * @see org.springframework.orm.hibernate.LocalDataSourceConnectionProvider
 	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setDataSource
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -345,8 +347,6 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	/**
 	 * Holder for suspended resources.
 	 * Used internally by doSuspend and doResume.
-	 * @see #doSuspend
-	 * @see #doResume
 	 */
 	private static class SuspendedResourcesHolder {
 
