@@ -68,7 +68,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${var}${");
+		pvs.addPropertyValue("name", "name${var}${var}${");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 
@@ -109,7 +109,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
 		assertEquals(98, tb1.getAge());
 		assertEquals(98, tb2.getAge());
-		assertEquals("namemyvar${", tb1.getName());
+		assertEquals("namemyvarmyvar${", tb1.getName());
 		assertEquals("myvarname98", tb2.getName());
 		assertEquals(tb2, tb1.getSpouse());
 		assertEquals(2, tb2.getFriends().size());
@@ -127,7 +127,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(null, inner1.getName());
 		assertEquals(System.getProperty("os.name"), inner1.getTouchy());
 		assertEquals(98, inner2.getAge());
-		assertEquals("namemyvar${", inner2.getName());
+		assertEquals("namemyvarmyvar${", inner2.getName());
 		assertEquals(System.getProperty("os.name"), inner2.getTouchy());
 	}
 
