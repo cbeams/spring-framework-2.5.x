@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,10 @@ public interface MBeanInfoAssembler {
 
 	/**
 	 * Create the ModelMBeanInfo for the given managed resource.
-	 * @param beanKey the <code>String</code> key associated with the bean
-	 * @param beanClass the <code>Class</code> of the managed resource
-	 * @return the <code>ModelMBeanInfo</code> metadata
+	 * @param beanKey the key associated with the managed bean
+	 * @param beanClass the Class of the managed resource
+	 * @return the ModelMBeanInfo metadata object
+	 * @throws JMException in case of errors
 	 */
 	ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) throws JMException;
 

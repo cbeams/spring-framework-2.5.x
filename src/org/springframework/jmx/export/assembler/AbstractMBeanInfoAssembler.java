@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 /**
- * Abstract implementation of the <code>MBeanInfoAssembler</code> interface that
- * encapsulates the creation of a <code>ModelMBeanInfo</code> instance but delegates the
- * creation of metadata to sub-classes.
+ * Abstract implementation of the <code>MBeanInfoAssembler</code> interface
+ * that encapsulates the creation of a <code>ModelMBeanInfo</code> instance
+ * but delegates the creation of metadata to sub-classes.
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
@@ -39,10 +39,10 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	/**
 	 * Create an instance of the <code>ModelMBeanInfoSupport</code> class supplied with all
 	 * JMX implementations and populates the metadata through calls to the subclass.
-	 * @param beanKey the key associated with the MBean in the <code>beans</code> <code>Map</code>
-	 * of the <code>MBeanExporter</code>.
-	 * @param beanClass the <code>Class</code> of the MBean.
-	 * @return the populated <code>ModelMBeanInfo</code> instance.
+	 * @param beanKey the key associated with the managed bean
+	 * @param beanClass the Class of the managed resource
+	 * @return the populated ModelMBeanInfo instance
+	 * @throws JMException in case of errors
 	 * @see #getDescription(String, Class)
 	 * @see #getAttributeInfo(String, Class)
 	 * @see #getConstructorInfo(String, Class)
