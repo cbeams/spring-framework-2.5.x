@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -245,16 +246,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Set the exporter parameters that should be used when rendering a view.
-	 * @param parameters <code>Map</code> with the fully qualified field name of the
-	 * <code>JRExporterParameter</code> instance as key
+	 * @param parameters <code>Map</code> with the fully qualified field name
+	 * of the <code>JRExporterParameter</code> instance as key
 	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
 	 * and the value you wish to assign to the parameter as value
 	 */
 	public void setExporterParameters(Map parameters) {
-		// NOTE: removed conversion from here since configuraion of parameters
+		// NOTE: Removed conversion from here since configuration of parameters
 		// can also happen through access to the underlying Map using
-		// getExporterParameters(). Conversion now happens in initApplicationContext
-		// and subclasses use getConvertedExporterParameters() to access the coverted
+		// getExporterParameters(). Conversion now happens in initApplicationContext,
+		// and subclasses use getConvertedExporterParameters() to access the converted
 		// parameter Map - robh.
 		this.exporterParameters = parameters;
 	}
@@ -315,7 +316,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
-		// convert user supplied exporterParameters
+		// Convert user-supplied exporterParameters.
 		convertExporterParameters();
 
 		if (this.headers == null) {
@@ -327,39 +328,43 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Converts the exporter parameters passed in by the user which may be keyed by <code>String</code>s
-	 * corresponding to the fully qualified name of the <code>JRExporterParameter</code> into parameters
-	 * which are keyed by <code>JRExporterParameter</code>.
+	 * Converts the exporter parameters passed in by the user which may be keyed
+	 * by <code>String</code>s corresponding to the fully qualified name of the
+	 * <code>JRExporterParameter</code> into parameters which are keyed by
+	 * <code>JRExporterParameter</code>.
+	 * @see #getExporterParameter(Object)
 	 */
-	protected void convertExporterParameters() {
+	protected final void convertExporterParameters() {
 		if (this.exporterParameters != null) {
-			this.convertedExporterParameters = new HashMap(exporterParameters.size());
-
-			for (Iterator it = exporterParameters.entrySet().iterator(); it.hasNext();) {
+			this.convertedExporterParameters = new HashMap(this.exporterParameters.size());
+			for (Iterator it = this.exporterParameters.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-
-				JRExporterParameter parameter = null;
-				if (key instanceof JRExporterParameter) {
-					parameter = (JRExporterParameter) key;
-				}
-				else if (key instanceof String) {
-					parameter = convertToExporterParameter((String) key);
-				}
-				else {
-					throw new IllegalArgumentException(
-							"Key [" + key + "] is invalid type. Should be either String or JRExporterParameter");
-				}
-
-				this.convertedExporterParameters.put(parameter, entry.getValue());
+				this.convertedExporterParameters.put(getExporterParameter(entry.getKey()), entry.getValue());
 			}
 		}
 	}
 
 	/**
+	 * Return a <code>JRExporterParameter</code> for the given parameter object,
+	 * converting it from a String if necessary.
+	 * @param parameter the parameter object, either a String or a JRExporterParameter
+	 * @return a JRExporterParameter for the given parameter object
+	 * @see #convertToExporterParameter(String)
+	 */
+	protected JRExporterParameter getExporterParameter(Object parameter) {
+		if (parameter instanceof JRExporterParameter) {
+			return (JRExporterParameter) parameter;
+		}
+		if (parameter instanceof String) {
+			return convertToExporterParameter((String) parameter);
+		}
+		throw new IllegalArgumentException(
+				"Parameter [" + parameter + "] is invalid type. Should be either String or JRExporterParameter.");
+	}
+
+	/**
 	 * Convert the given fully qualified field name to a corresponding
 	 * JRExporterParameter instance.
-	 *
 	 * @param fqFieldName the fully qualified field name, consisting
 	 * of the class name followed by a dot followed by the field name
 	 * (e.g. "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI")
@@ -526,7 +531,18 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
 			}
-			return JasperFillManager.fillReport(this.report, model, this.jdbcDataSource.getConnection());
+			Connection con = this.jdbcDataSource.getConnection();
+			try {
+				return JasperFillManager.fillReport(this.report, model, con);
+			}
+			finally {
+				try {
+					con.close();
+				}
+				catch (SQLException ex) {
+					logger.warn("Could not close JDBC Connection", ex);
+				}
+			}
 		}
 	}
 
@@ -549,7 +565,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * specified "reportDataKey" first, then falls back to looking for a value
 	 * of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
 	 * object array (in that order).
-	 *
 	 * @param model the model map, as passed in for view rendering
 	 * @return the <code>JRDataSource</code> or <code>null</code> if the data source is not found
 	 * @see #setReportDataKey
