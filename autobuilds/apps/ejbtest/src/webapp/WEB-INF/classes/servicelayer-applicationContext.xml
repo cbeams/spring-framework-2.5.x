@@ -45,8 +45,10 @@
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
-				<prop key="hibernate.transaction.manager_lookup_class">net.sf.hibernate.transaction.JBossTransactionManagerLookup</prop>
         <prop key="hibernate.show_sql">true</prop>
+        <!-- the transaction manager lookup is needed to allow a Hibernate Session to be bound to the
+             CMT transaction (through JTA) when no Spring transaction is present -->
+				<prop key="hibernate.transaction.manager_lookup_class">net.sf.hibernate.transaction.JBossTransactionManagerLookup</prop>
 			</props>
 		</property>
 	</bean>
