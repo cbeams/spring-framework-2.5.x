@@ -96,6 +96,25 @@ public class MethodInvoker {
 	}
 
 	/**
+	 * Set a fully qualified static method name to invoke,
+	 * e.g. "example.MyExampleClass.myExampleMethod".
+	 * Convenient alternative to specifying targetClass and targetMethod.
+	 * @see #setTargetClass
+	 * @see #setTargetMethod
+	 */
+	public void setStaticMethod(String staticMethod) throws ClassNotFoundException {
+		int lastDotIndex = staticMethod.lastIndexOf('.');
+		if (lastDotIndex == -1 || lastDotIndex == staticMethod.length()) {
+			throw new IllegalArgumentException("staticMethod must be a fully qualified class plus method name: " +
+																				 "e.g. 'example.MyExampleClass.myExampleMethod'");
+		}
+		String className = staticMethod.substring(0, lastDotIndex);
+		String methodName = staticMethod.substring(lastDotIndex + 1);
+		setTargetClass(Class.forName(className, true, Thread.currentThread().getContextClassLoader()));
+		setTargetMethod(methodName);
+	}
+
+	/**
 	 * Set arguments for the method invocation. If this property is not set,
 	 * or the Object array is of length 0, a method with no arguments is assumed.
 	 */

@@ -53,8 +53,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// non-singleton, static
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTargetClass(TestClass1.class);
-		mcfb.setTargetMethod("staticMethod1");
+		mcfb.setStaticMethod("org.springframework.beans.factory.config.MethodInvokingFactoryBeanTests$TestClass1.staticMethod1");
 		mcfb.setSingleton(false);
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
@@ -108,7 +107,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
-		
+
 		// verify fail if two matching methods with the same arg count
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
@@ -121,7 +120,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		catch (NoSuchMethodException ex) {
 			// expected
 		}
-		
+
 	}
 
 	public void testGetObjectType() throws Exception {
@@ -268,7 +267,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		public static void supertypes(Collection c, List l, String s) {
 		}
-		
+
 		public static void supertypes2(Collection c, List l, String s, Integer i) {
 		}
 		public static void supertypes2(Collection c, List l, String s, String s2) {
