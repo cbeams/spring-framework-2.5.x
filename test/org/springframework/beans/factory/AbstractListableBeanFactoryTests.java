@@ -6,6 +6,8 @@
 
 package org.springframework.beans.factory;
 
+import org.springframework.beans.TestBean;
+
 /**
  *
  * @author Rod Johnson
@@ -22,7 +24,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	}
 	
 	/**
-	 * Subclasses can override
+	 * Subclasses can override this.
 	 */
 	public void testCount() {
 		assertCount(15);
@@ -38,7 +40,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	}
 
 	public void assertTestBeanCount(int count) {
-		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(org.springframework.beans.TestBean.class);
+		String[] defnames = getListableBeanFactory().getBeanDefinitionNames(TestBean.class);
 		assertTrue("We should have " + count + " beans for class org.springframework.beans.TestBean, not " +
 		           defnames.length, defnames.length == count);
 	}

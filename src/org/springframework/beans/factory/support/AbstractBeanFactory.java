@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.22 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.23 2003-11-21 15:35:35 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -89,16 +89,16 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	private BeanFactory parentBeanFactory;
 
 	/** BeanPostProcessors to apply on createBean */
-	private List beanPostProcessors = new ArrayList();
+	private final List beanPostProcessors = new ArrayList();
 
 	/** Dependency types to ignore on dependency check and autowire */
-	private Set ignoreDependencyTypes = new HashSet();
+	private final Set ignoreDependencyTypes = new HashSet();
 
 	/** Cache of singletons: bean name --> bean instance */
-	private Map singletonCache = new HashMap();
+	private final Map singletonCache = new HashMap();
 
 	/** Map from alias to canonical bean name */
-	private Map aliasMap = new HashMap();
+	private final Map aliasMap = new HashMap();
 
 
 	//---------------------------------------------------------------------
@@ -185,26 +185,35 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 */
 	public Object getBean(String name) {
 		String beanName = transformedBeanName(name);
-		RootBeanDefinition mergedBeanDefinition = null;
-
-		// check if bean definition exists
-		try {
-			mergedBeanDefinition = getMergedBeanDefinition(beanName);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// not found -> check parent
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.getBean(name);
+		Object sharedInstance = this.singletonCache.get(beanName);
+		if (sharedInstance != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 			}
-			throw ex;
-		}
-
-		// retrieve or create bean instance
-		if (mergedBeanDefinition.isSingleton()) {
-			return getSharedInstance(name, mergedBeanDefinition);
+			return getObjectForSharedInstance(name, sharedInstance);
 		}
 		else {
-			return createBean(name, mergedBeanDefinition);
+			// check if bean definition exists
+			RootBeanDefinition mergedBeanDefinition = null;
+			try {
+				mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// not found -> check parent
+				if (this.parentBeanFactory != null) {
+					return this.parentBeanFactory.getBean(name);
+				}
+				throw ex;
+			}
+			// create bean instance
+			if (mergedBeanDefinition.isSingleton()) {
+				logger.info("Creating shared instance of singleton bean '" + beanName + "'");
+				sharedInstance = createBean(beanName, mergedBeanDefinition);
+				return getObjectForSharedInstance(name, sharedInstance);
+			}
+			else {
+				return createBean(name, mergedBeanDefinition);
+			}
 		}
 	}
 
@@ -218,6 +227,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 	public boolean containsBean(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
+		if (this.singletonCache.containsKey(beanName)) {
+			return true;
+		}
 		try {
 			getBeanDefinition(beanName);
 			return true;
@@ -234,14 +246,25 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 		try {
-			RootBeanDefinition bd = getMergedBeanDefinition(beanName);
+			Class beanClass = null;
+			boolean singleton = true;
+			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance != null) {
+				beanClass = beanInstance.getClass();
+				singleton = true;
+			}
+			else {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+				beanClass = bd.getBeanClass();
+				singleton = bd.isSingleton();
+			}
 			// in case of FactoryBean, return singleton status of created object if not a dereference
-			if (FactoryBean.class.isAssignableFrom(bd.getBeanClass()) && !isFactoryDereference(name)) {
+			if (FactoryBean.class.isAssignableFrom(beanClass) && !isFactoryDereference(name)) {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.isSingleton();
 			}
 			else {
-				return bd.isSingleton();
+				return singleton;
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -257,7 +280,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		String beanName = transformedBeanName(name);
 		try {
 			// check if bean actually exists in this bean factory
-			getBeanDefinition(beanName);
+			if (!singletonCache.containsKey(beanName)) {
+				getBeanDefinition(beanName);
+			}
 
 			// if found, gather aliases
 			List aliases = new ArrayList();
@@ -284,10 +309,35 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	//---------------------------------------------------------------------
 
 	/**
-	 * Make a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
-	 * @return a merged RootBeanDefinition with overriden properties
+	 * Return the names of beans in the singleton cache that match the given
+	 * object type (including subclasses). Will <i>not</i> consider FactoryBeans
+	 * as the type of their created objects is not known before instantiation.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * @param type class or interface to match, or null for all bean names
+	 * @return the names of beans in the singleton cache that match the given
+	 * object type (including subclasses), or an empty array if none
 	 */
-	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+	public String[] getSingletonNames(Class type) {
+		Set keys = this.singletonCache.keySet();
+		Set matches = new HashSet();
+		Iterator itr = keys.iterator();
+		while (itr.hasNext()) {
+			String name = (String) itr.next();
+			Object singletonObject = this.singletonCache.get(name);
+			if (type == null || type.isAssignableFrom(singletonObject.getClass())) {
+				matches.add(name);
+			}
+		}
+		return (String[]) matches.toArray(new String[matches.size()]);
+	}
+
+	/**
+	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
+	 * Will ask the parent bean factory if not found in this instance.
+	 * @return a merged RootBeanDefinition with overridden properties
+	 */
+	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
+	    throws NoSuchBeanDefinitionException {
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(beanName);
 			if (bd instanceof RootBeanDefinition) {
@@ -296,7 +346,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			else if (bd instanceof ChildBeanDefinition) {
 				ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 				// Deep copy
-				RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName()));
+				RootBeanDefinition rbd = new RootBeanDefinition(getMergedBeanDefinition(cbd.getParentName(), true));
 				// Override settings
 				rbd.setSingleton(cbd.isSingleton());
 				rbd.setLazyInit(cbd.isLazyInit());
@@ -306,43 +356,30 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				}
 				return rbd;
 			}
+			else {
+				throw new FatalBeanException("BeanDefinition for '" + beanName +
+				                             "' is neither a RootBeanDefinition or ChildBeanDefinition");
+			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (this.parentBeanFactory instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName);
+			if (includingAncestors && this.parentBeanFactory instanceof AbstractBeanFactory) {
+				return ((AbstractBeanFactory) this.parentBeanFactory).getMergedBeanDefinition(beanName, true);
 			}
 			else {
 				throw ex;
 			}
 		}
-		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName +
-																 "' is neither a RootBeanDefinition or ChildBeanDefinition");
 	}
 
 	/**
-	 * Get a singleton instance of this bean name. Note that this method shouldn't
-	 * be called too often: Callers should keep hold of instances. Hence, the whole
-	 * method is synchronized here.
+	 * Get the object for the given shared bean, either the bean
+	 * instance itself or its created object in case of a FactoryBean.
 	 * @param name name that may include factory dereference prefix
+	 * @param beanInstance the shared bean instance
+	 * @return the singleton instance of the bean
 	 */
-	protected synchronized Object getSharedInstance(String name, RootBeanDefinition mergedBeanDefinition)
-			throws BeansException {
-		// get rid of the dereference prefix if there is one
+	protected Object getObjectForSharedInstance(String name, Object beanInstance) {
 		String beanName = transformedBeanName(name);
-
-		Object beanInstance = this.singletonCache.get(beanName);
-		if (beanInstance == null) {
-			logger.info("Creating shared instance of singleton bean '" + beanName + "'");
-			beanInstance = createBean(beanName, mergedBeanDefinition);
-			// Re-cache the instance even if already eagerly cached in createBean,
-			// as it could have been wrapped by a BeanPostProcessor
-			this.singletonCache.put(beanName, beanInstance);
-		}
-		else {
-			if (logger.isDebugEnabled())
-				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
-		}
-
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory
 		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
@@ -370,7 +407,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 					    "Factory bean '" + beanName + "' returned null object - " +
 					    "possible cause: not fully initialized due to circular bean reference");
 				}
-
 				// set pass-through properties
 				if (factory instanceof PropertyValuesProviderFactoryBean) {
 					PropertyValues pvs = ((PropertyValuesProviderFactoryBean) factory).getPropertyValues(beanName);
@@ -396,7 +432,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * <p>Returns a BeanWrapper object for a new instance of this bean. First looks up
 	 * BeanDefinition for the given bean name. Uses recursion to support instance "inheritance".
 	 * @param beanName name of the bean. Must be unique in the BeanFactory
-	 * @return a new instance of this bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @return a new instance of the bean
 	 */
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
 		logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mergedBeanDefinition + "]");
@@ -418,30 +455,33 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		Object bean = instanceWrapper.getWrappedInstance();
 
-		// Eagerly cache singletons to be able to resolve circular references
+		// eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware
 		if (mergedBeanDefinition.isSingleton()) {
-			this.singletonCache.put(beanName, bean);
+			registerSingleton(beanName, bean);
 		}
 
-		// Add property values based on autowire by name if it's applied
+		// add property values based on autowire by name if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 			autowireByName(beanName, mergedBeanDefinition, instanceWrapper);
 		}
 
-		// Add property values based on autowire by type if it's applied
+		// add property values based on autowire by type if it's applied
 		if (mergedBeanDefinition.getAutowire() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			autowireByType(beanName, mergedBeanDefinition, instanceWrapper);
 		}
 
-		// We can apply dependency checks regardless of autowiring
 		dependencyCheck(beanName, mergedBeanDefinition, instanceWrapper);
-
 		applyPropertyValues(beanName, instanceWrapper, mergedBeanDefinition.getPropertyValues());
-
 		callLifecycleMethodsIfNecessary(bean, beanName, mergedBeanDefinition, instanceWrapper);
 
-		return applyBeanPostProcessors(bean, beanName);
+		bean = applyBeanPostProcessors(bean, beanName);
+		// re-cache the instance even if already eagerly cached in createBean,
+		// as it could have been wrapped by a BeanPostProcessor
+		if (mergedBeanDefinition.isSingleton()) {
+			this.singletonCache.put(beanName, bean);
+		}
+		return bean;
 	}
 
 	/**
@@ -875,6 +915,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		return result;
 	}
 
+	public PropertyValues getPropertyValues(String beanName) {
+		return getBeanDefinition(beanName).getPropertyValues();
+	}
+
 	/**
 	 * Register property value for a specific bean, overriding an existing value.
 	 * If no previous value exists, a new one will be added.
@@ -904,13 +948,22 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		this.aliasMap.put(alias, beanName);
 	}
 
+	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
+		Object oldObject = this.singletonCache.get(beanName);
+		if (oldObject != null) {
+			throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
+			                                       "] under bean name '" + beanName + "': there's already object [" +
+			                                       oldObject + " bound");
+		}
+		this.singletonCache.put(beanName, singletonObject);
+	}
+
 	public void destroySingletons() {
 		logger.info("Destroying singletons in factory {" + this + "}");
 
 		for (Iterator it = this.singletonCache.keySet().iterator(); it.hasNext();) {
 			String name = (String) it.next();
 			Object bean = this.singletonCache.get(name);
-			RootBeanDefinition bd = getMergedBeanDefinition(name);
 
 			if (bean instanceof DisposableBean) {
 				logger.debug("Calling destroy() on bean with name '" + name + "'");
@@ -922,24 +975,26 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 				}
 			}
 
-			if (bd.getDestroyMethodName() != null) {
-				logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
-				             "' on bean with name '" + name + "'");
-				BeanWrapper bw = new BeanWrapperImpl(bean);
-				try {
-					bw.invoke(bd.getDestroyMethodName(), null);
+			try {
+				RootBeanDefinition bd = getMergedBeanDefinition(name, false);
+				if (bd.getDestroyMethodName() != null) {
+					logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
+											 "' on bean with name '" + name + "'");
+					BeanWrapper bw = new BeanWrapperImpl(bean);
+					try {
+						bw.invoke(bd.getDestroyMethodName(), null);
+					}
+					catch (MethodInvocationException ex) {
+						logger.error(ex.getMessage(), ex.getRootCause());
+					}
 				}
-				catch (MethodInvocationException ex) {
-					logger.error(ex.getMessage(), ex.getRootCause());
-				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore
 			}
 		}
 
 		this.singletonCache.clear();
-	}
-
-	public PropertyValues getPropertyValues(String beanName) {
-		return getBeanDefinition(beanName).getPropertyValues();
 	}
 
 

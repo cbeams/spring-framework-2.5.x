@@ -51,8 +51,8 @@ public interface ConfigurableBeanFactory extends BeanFactory {
 	 * certain property values after parsing the original bean definitions.
 	 * @param beanName name of the bean
 	 * @param pv property name and value
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if there is no bean with the given name
-	 * @throws org.springframework.beans.BeansException if the property values of the specified bean are immutable
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws BeansException if the property values of the specified bean are immutable
 	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
 	void overridePropertyValue(String beanName, PropertyValue pv) throws BeansException;
@@ -62,10 +62,19 @@ public interface ConfigurableBeanFactory extends BeanFactory {
 	 * support names that are illegal within XML ids (used for bean names).
 	 * @param beanName name of the bean
 	 * @param alias alias that will behave the same as the bean name
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if there is no bean with the given name
-	 * @throws org.springframework.beans.BeansException if the alias is already in use
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws BeansException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeansException;
+
+	/**
+	 * Register the given existing object as singleton in the bean factory,
+	 * under the given bean name.
+	 * @param beanName name of the bean
+	 * @param singletonObject the existing object
+	 * @throws BeansException if the singleton could not be registered
+	 */
+	void registerSingleton(String beanName, Object singletonObject) throws BeansException;
 
 	/**
 	 * Destroy all cached singletons in this factory.

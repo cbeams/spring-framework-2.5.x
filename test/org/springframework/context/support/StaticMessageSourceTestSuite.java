@@ -240,13 +240,6 @@ public class StaticMessageSourceTestSuite
 		                      new MutablePropertyValues());
 
 
-		// There are no properties to be set on the StaticApplicationContext
-		// (unlike on the ResourceBundleMessageSource which at least has the "basename"
-		// attribute to be set)
-		sac.registerSingleton(
-		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME,
-		    StaticMessageSource.class, null);
-
 		LBIInit.createTestBeans(sac.getListableBeanFactoryImpl());
 		sac.rebuild();
 

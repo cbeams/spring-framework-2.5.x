@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.15 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.16 2003-11-21 15:35:36 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -139,7 +139,6 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		public int nrOfInvocations = 0;
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-			System.out.println(methodInvocation.getMethod().getName());
 			if (!methodInvocation.getMethod().getName().equals("finalize")) {
 				nrOfInvocations++;
 			}

@@ -102,10 +102,9 @@ public class ContextLoaderTestSuite extends TestCase {
 		assertTrue("myinit not evaluated", "Roderick".equals(((TestBean) context.getBean("rod")).getName()));
 
 		context = new ClassPathXmlApplicationContext(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-		                                                           "/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		                                                           "/org/springframework/web/context/WEB-INF/context-addition.xml"});
 		assertTrue("Has father", context.getBean("father") != null);
 		assertTrue("Has father", context.getBean("rod") != null);
-		assertTrue("Has spouse", ((TestBean) context.getBean("rod")).getSpouse() != null);
 	}
 
 }
