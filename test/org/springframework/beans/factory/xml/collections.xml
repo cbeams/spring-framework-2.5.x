@@ -211,7 +211,7 @@
 	</bean>
 
 	<bean id="emptyProps" class="org.springframework.beans.factory.HasMap">
-		<property name="map">
+		<property name="props">
 			<props>
 			</props>
 		</property>
@@ -219,7 +219,7 @@
 	
 	
 	<bean id="props" class="org.springframework.beans.factory.HasMap">	
-		<property name="map">
+		<property name="props">
 			<props>
 				<prop key="foo">bar</prop>
 				<prop key="2">TWO</prop>
@@ -227,7 +227,16 @@
 		</property>
 	</bean>
 	
-	<bean id="objectArray" class="org.springframework.beans.factory.HasMap">	
+	<bean id="propsViaMap" class="org.springframework.beans.factory.HasMap">
+		<property name="props">
+			<map>
+				<entry key="foo"><value>bar</value></entry>
+				<entry key="2"><value>TWO</value></entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="objectArray" class="org.springframework.beans.factory.HasMap">
 		<property name="objectArray">
 			<list>
 				<value>one</value>

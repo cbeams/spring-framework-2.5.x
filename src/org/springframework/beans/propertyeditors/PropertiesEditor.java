@@ -22,11 +22,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
  * Editor for java.util.Properties objects. Handles conversion from String
- * to Properties object.
+ * to Properties object. Also handles Map to Properties conversion, for
+ * populating a Properties object via XML "map" entries.
  *
  * <p>This editor must be registered before it will be available. Standard
  * editors in this package are automatically registered by BeanWrapperImpl.
@@ -35,7 +37,8 @@ import java.util.Properties;
  * Each property must be on a new line.
  *
  * @author Rod Johnson
- * @version $Id: PropertiesEditor.java,v 1.5 2004-03-18 02:46:13 trisberg Exp $
+ * @author Juergen Hoeller
+ * @version $Id: PropertiesEditor.java,v 1.6 2004-05-18 08:03:16 jhoeller Exp $
  * @see org.springframework.beans.BeanWrapperImpl
  * @see java.util.Properties#load
  */
@@ -46,7 +49,10 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * on a line, mean that the line is a comment and should be ignored.
 	 */
 	public final static String COMMENT_MARKERS = "#!";
-	
+
+	/**
+	 * Convert String into Properties.
+	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (text == null) {
 			throw new IllegalArgumentException("Cannot set Properties to null");
@@ -62,7 +68,21 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		}
 		setValue(props);
 	}
-	
+
+	/**
+	 * Convert Map into Properties.
+	 */
+	public void setValue(Object value) {
+		if (!(value instanceof Properties) && value instanceof Map) {
+			Properties props = new Properties();
+			props.putAll((Map) value);
+			super.setValue(new Properties());
+		}
+		else {
+			super.setValue(value);
+		}
+	}
+
 	/**
 	 * Remove comment lines. We shouldn't need to do this, according to
 	 * java.util.Properties documentation, but if we don't we end up with

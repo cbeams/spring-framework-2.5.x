@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.44 2004-04-29 13:53:36 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.45 2004-05-18 08:03:18 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -521,16 +521,16 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
-		assertTrue(hasMap.getMap().size() == 0);
+		assertTrue(hasMap.getProps().size() == 0);
 	}
 
 	public void testPopulatedProps() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("props");
-		assertTrue(hasMap.getMap().size() == 2);
-		assertTrue(hasMap.getMap().get("foo").equals("bar"));
-		assertTrue(hasMap.getMap().get("2").equals("TWO"));
+		assertTrue(hasMap.getProps().size() == 2);
+		assertTrue(hasMap.getProps().get("foo").equals("bar"));
+		assertTrue(hasMap.getProps().get("2").equals("TWO"));
 	}
 
 	public void testObjectArray() throws Exception {
