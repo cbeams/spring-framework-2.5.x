@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	private long cacheMillis = -1;
 
+	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+
 	/** Cache to hold filename lists per Locale */
 	private final Map cachedFilenames = new HashMap();
 
@@ -107,10 +111,6 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/** Cache to hold merged loaded properties per basename */
 	private final Map cachedMergedProperties = new HashMap();
-
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
-
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 
 	/**
@@ -468,6 +468,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		logger.info("Clearing resource bundle cache");
 		synchronized (this.cachedProperties) {
 			this.cachedProperties.clear();
+		}
+		synchronized (this.cachedMergedProperties) {
+			this.cachedMergedProperties.clear();
 		}
 	}
 
