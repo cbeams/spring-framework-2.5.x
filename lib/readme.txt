@@ -26,8 +26,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-2.0.1.jar, cglib/asm.jar
-- CGLIB 2.0.1 with ObjectWeb ASM 1.4 (http://cglib.sourceforge.net)
+* cglib/cglib-2.0.2-dev.jar, cglib/asm.jar
+- CGLIB 2.0.2 with ObjectWeb ASM 1.4 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
 
@@ -68,7 +68,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0 RC5 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
