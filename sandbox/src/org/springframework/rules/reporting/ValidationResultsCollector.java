@@ -71,6 +71,10 @@ public class ValidationResultsCollector implements Visitor {
         this.collectAllErrors = collectAllErrors;
     }
 
+    protected ValidationResultsBuilder getResultsBuilder() {
+        return resultsBuilder;
+    }
+    
     protected void setResultsBuilder(ValidationResultsBuilder resultsBuilder) {
         this.resultsBuilder = resultsBuilder;
     }
