@@ -52,7 +52,9 @@ public class FlowAction extends TemplateAction {
 
 	public static final String EVENT_ID_PARAMETER = "_eventId";
 
-	public static String ACTION_FORM_ATTRIBUTE_NAME = "_bindingActionForm";
+    public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
+    
+    public static String ACTION_FORM_ATTRIBUTE_NAME = "_bindingActionForm";
 
 	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
 
@@ -119,6 +121,11 @@ public class FlowAction extends TemplateAction {
 				currentStateIdParam = executionStack.getCurrentStateId();
 			}
 			String eventId = getStringParameter(request, EVENT_ID_PARAMETER);
+            if (eventId == null) {
+                String mappedEventId = (String) request.getAttribute(EVENT_ID_ATTRIBUTE);
+                if (mappedEventId != null)
+                    eventId = mappedEventId;
+            }
 			if (eventId.equals(NOT_SET_EVENT_ID)) {
 				logger
 						.error("The event submitted by the browser was @NOT_SET@ - this is likely a view configuration error - "
