@@ -67,10 +67,9 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>call to {@link #referenceData referenceData()} to allow you to bind
  *      any relevant reference data you might need when editing a form
  *      (for instance a List of Locale objects you're going to let the user
- *      select one from)<li>
- *  <li>
- *  <li>XXX Return and view gets rendered. Continue after user has filled in
- *      form</li>
+ *      select one from)</li>
+ *  <li>model gets exposed and view gets rendered. Continue after user has filled
+ *      in form</li>
  *  <li>POST request on the controller is received</li>
  *  <li>if <code>sessionForm</code> is not set, {@link #getCommand getCommand()}
  *      is called to retrieve a command class. Otherwise, the controller tries
@@ -158,6 +157,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #setCommandClass
 	 * @see #setBindOnNewForm
 	 * @see #setSessionForm
+	 * @see #formBackingObject
 	 */
 	public AbstractFormController() {
 		super();
@@ -275,12 +275,23 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Retrieve a backing object for the current form from the given request.
-	 * <p>Default implementation calls BaseCommandController.createCommand.
+	 * <p>The properties of the form object will correspond to the form field values
+	 * in your form view. This object will be exposed in the model under the specified
+	 * command name, to be accessed under that name in the view: for example, with
+	 * a "spring:bind" tag. The default command name is "command".
+	 * <p>Note that you need to activate session form mode to reuse the form-backing
+	 * object across the entire form workflow. Else, a new instance of the command
+	 * class will be created for each submission attempt, just using this backing
+	 * object as template for the initial form.
+	 * <p>Default implementation calls BaseCommandController.createCommand,
+	 * creating a new empty instance of the command class.
 	 * Subclasses can override this to provide a preinitialized backing object.
 	 * @param request current HTTP request
 	 * @return the backing objact
 	 * @throws Exception in case of invalid state or arguments
-	 * @see BaseCommandController#createCommand
+	 * @see #setCommandName
+	 * @see #setCommandClass
+	 * @see #createCommand
 	 */
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return createCommand();

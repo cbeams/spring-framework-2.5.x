@@ -131,7 +131,7 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Create a reference data map for the given request, command, and errors,
+	 * Create a reference data map for the given request and command,
 	 * consisting of bean name/bean instance pairs as expected by ModelAndView.
 	 * <p>Default implementation delegates to referenceData(request).
 	 * Subclasses can override this to set reference data used in the view.
@@ -154,6 +154,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param request current HTTP request
 	 * @return a Map with reference data entries, or null if none
 	 * @throws Exception in case of invalid state or arguments
+	 * @see #referenceData(HttpServletRequest, Object, Errors)
 	 * @see ModelAndView
 	 */
 	protected Map referenceData(HttpServletRequest request) throws Exception {

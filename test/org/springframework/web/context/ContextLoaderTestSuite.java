@@ -16,7 +16,6 @@ import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
@@ -82,7 +81,7 @@ public class ContextLoaderTestSuite extends TestCase {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof FileNotFoundException);
+			assertTrue(ex.getCause() instanceof FileNotFoundException);
 		}
 	}
 
@@ -97,37 +96,37 @@ public class ContextLoaderTestSuite extends TestCase {
 		}
 		catch (ApplicationContextException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof ClassNotFoundException);
+			assertTrue(ex.getCause() instanceof ClassNotFoundException);
 		}
 	}
 
 	public void testContextLoaderWithDefaultLocation() throws Exception {
 		MockServletContext sc = new MockServletContext("");
-		sc.addInitParameter("contextClass", "org.springframework.web.context.ContextLoaderTestSuite$TestXmlWebApplicationContext");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		try {
 			listener.contextInitialized(event);
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof IOException);
-			assertEquals("/WEB-INF/applicationContext.xml", ex.getRootCause().getMessage());
+			ex.printStackTrace();
+			assertTrue(ex.getCause() instanceof IOException);
+			assertTrue(ex.getCause().getMessage().indexOf("/WEB-INF/applicationContext.xml") != -1);
 		}
 	}
 
 	public void testFrameworkServletWithDefaultLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
-		servlet.setContextClass(TestXmlWebApplicationContext.class);
+		servlet.setContextClass(XmlWebApplicationContext.class);
 		try {
 			servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof IOException);
-			assertEquals("/WEB-INF/test-servlet.xml", ex.getRootCause().getMessage());
+			assertTrue(ex.getCause() instanceof IOException);
+			assertTrue(ex.getCause().getMessage().indexOf("/WEB-INF/test-servlet.xml") != -1);
 		}
 	}
 
@@ -152,14 +151,6 @@ public class ContextLoaderTestSuite extends TestCase {
 		assertTrue("Has father", context.containsBean("father"));
 		assertTrue("Has rod", context.containsBean("rod"));
 		assertTrue("Has kerry", context.containsBean("kerry"));
-	}
-
-
-	public static class TestXmlWebApplicationContext extends XmlWebApplicationContext {
-
-		protected Resource getResourceByPath(String path) throws IOException {
-			throw new IOException(path);
-		}
 	}
 
 }

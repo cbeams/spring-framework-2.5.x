@@ -5,13 +5,13 @@
 
 package org.springframework.web.servlet.view;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.context.ApplicationContextException;
+import org.springframework.context.config.ContextResourceEditor;
+import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.View;
 
 /**
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.View;
 public class XmlViewResolver extends AbstractCachingViewResolver {
 
 	/** Default if no other location is supplied */
-	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
+	public final static String DEFAULT_LOCATION = "WEB-INF/views.xml";
 
 	private String location = DEFAULT_LOCATION;
 
@@ -80,17 +80,14 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 		if (this.cachedFactory != null) {
 			return this.cachedFactory;
 		}
-		try {
-			BeanFactory xbf = new XmlBeanFactory(getApplicationContext().getResource(this.location),
-																					 getApplicationContext());
-			if (isCache()) {
-				this.cachedFactory = xbf;
-			}
-			return xbf;
+		XmlBeanFactory xbf = new XmlBeanFactory(getApplicationContext().getResource(this.location),
+																						getApplicationContext());
+		xbf.registerCustomEditor(Resource.class, new ContextResourceEditor(getApplicationContext()));
+		xbf.preInstantiateSingletons();
+		if (isCache()) {
+			this.cachedFactory = xbf;
 		}
-		catch (IOException ex) {
-			throw new ApplicationContextException("Could not load XML view definition file [" + this.location + "]" , ex);
-		}
+		return xbf;
 	}
 
 }

@@ -28,7 +28,6 @@ import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter;
-import org.springframework.web.servlet.mvc.throwaway.ValidatableThrowawayControllerHandlerAdapter;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -80,7 +79,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.25 2004-01-14 22:05:35 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.26 2004-02-02 11:26:57 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -275,7 +274,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.handlerAdapters.isEmpty()) {
 			this.handlerAdapters.add(new SimpleControllerHandlerAdapter());
 			this.handlerAdapters.add(new ThrowawayControllerHandlerAdapter());
-			this.handlerAdapters.add(new ValidatableThrowawayControllerHandlerAdapter());
 			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using defaults");
 		}
 		else {

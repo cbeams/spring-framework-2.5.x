@@ -48,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.5 2003-12-30 00:35:26 jhoeller Exp $
+ * @version $Id: AbstractXsltView.java,v 1.6 2004-02-02 11:26:57 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -68,8 +68,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	/** XSLT Template */
 	private Templates templates;
 
-	public AbstractXsltView() {
-	}
 
 	/**
 	 * Set the location of the XSLT stylesheet.
@@ -107,7 +105,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	public final void setCache(boolean cache) {
 		this.cache = cache;
 	}
-	
+
+
 	/**
 	 * Here we load our template, as we need the ApplicationContext to do it.
 	 */
@@ -130,7 +129,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			}
 			catch (TransformerConfigurationException ex) {
 				throw new ApplicationContextException(
-					"Can't load stylesheet at [" + this.stylesheetLocation + "] in XSLT view '" + getName() + "'", ex);
+					"Can't load stylesheet from " + this.stylesheetLocation + " in XSLT view '" + getName() + "'", ex);
 			}
 		}
 	}
@@ -144,7 +143,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			return new StreamSource(stylesheetLocation.getInputStream());
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Can't load XSLT stylesheet from [" + stylesheetLocation + "]", ex);
+			throw new ApplicationContextException("Can't load XSLT stylesheet from " + stylesheetLocation, ex);
 		}
 	}
 
@@ -164,7 +163,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			response.setContentType("text/xml; charset=ISO-8859-1");
 		}
 		else {
-			// Normal case
+			// normal case
 			response.setContentType(getContentType());
 		}
 
@@ -174,7 +173,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		Node dom = null;
 		String docRoot = null;
 
-		// Value of a single element in the map, if there is one
+		// value of a single element in the map, if there is one
 		Object singleModel = null;
 
 		if (model.size() == 1) {
@@ -182,7 +181,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			singleModel = model.get(docRoot);
 		}
 
-		// Handle special case when we have a single node
+		// handle special case when we have a single node
 		if (singleModel != null && (singleModel instanceof Node)) {
 			// Don't domify if the model is already an XML node
 			// We don't need to worry about model name, either:

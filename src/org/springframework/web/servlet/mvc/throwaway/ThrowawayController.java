@@ -23,9 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
  * while BaseCommandController treats commands as plain parameter holders.
  *
  * <p>If binding request parameters to this controller fails, a fatal BindException
- * will be thrown. If you want to react to binding errors and/or add validation
- * errors through a Validator or custom validation code, consider implementing a
- * ValidatableThrowawayController.
+ * will be thrown.
  *
  * <p>If you need access to the HttpServletRequest and/or HttpServletResponse,
  * consider implementing Controller or deriving from AbstractCommandController.
@@ -35,7 +33,6 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @since 08.12.2003
- * @see ValidatableThrowawayController
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.servlet.mvc.AbstractCommandController
  */

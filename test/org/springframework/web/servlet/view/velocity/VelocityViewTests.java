@@ -32,7 +32,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.10 2003-12-15 08:33:51 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.11 2004-02-02 11:26:58 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -127,7 +127,7 @@ public class VelocityViewTests extends TestCase {
 			fail();
 		}
 		catch (ApplicationContextException ex) {
-			assertEquals(ex.getRootCause(), templateLookupException);
+			assertEquals(ex.getCause(), templateLookupException);
 		}
 
 		wmc.verify();

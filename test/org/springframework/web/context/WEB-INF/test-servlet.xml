@@ -56,10 +56,6 @@
 		<property name="singleton"><value>false</value></property>
 	</bean>
 	
-	<!--
-	 <bean name="agistListener" class="org.springframework.beans.factory.AbstractBeanFactoryTests$AgistListener" />
-	 -->
-
 	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
 		<!--	<listener property="age" beanRef="agistListener" /> -->
 		<property name="name"><value>listenerVeto</value></property>

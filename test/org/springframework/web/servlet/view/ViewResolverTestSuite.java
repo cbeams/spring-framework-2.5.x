@@ -1,6 +1,5 @@
 package org.springframework.web.servlet.view;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -17,8 +16,10 @@ import junit.framework.TestCase;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
@@ -143,7 +144,10 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testXmlViewResolver() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected Resource getResourceByPath(String path) throws IOException {
+			protected Resource getResourceByPath(String path) {
+				if ("test".equals(path)) {
+					return new FileSystemResource(path);
+				}
 				return new ClassPathResource(path, ViewResolverTestSuite.class);
 			}
 		};
@@ -156,7 +160,7 @@ public class ViewResolverTestSuite extends TestCase {
 		vr.setApplicationContext(wac);
 
 		View view1 = vr.resolveViewName("example1", Locale.getDefault());
-		assertTrue("Correct view class", InternalResourceView.class.equals(view1.getClass()));
+		assertTrue("Correct view class", TestView.class.equals(view1.getClass()));
 		assertTrue("Correct URL", "/example1.jsp".equals(((InternalResourceView) view1).getUrl()));
 
 		View view2 = vr.resolveViewName("example2", Locale.getDefault());
@@ -189,9 +193,9 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected Resource getResourceByPath(String path) throws IOException {
+			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
-				throw new IOException();
+				return super.getResourceByPath(path);
 			}
 		};
 		wac.setServletContext(new MockServletContext());
@@ -199,18 +203,18 @@ public class ViewResolverTestSuite extends TestCase {
 		XmlViewResolver vr = new XmlViewResolver();
 		try {
 			vr.setApplicationContext(wac);
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// expected
 		}
 	}
 
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected Resource getResourceByPath(String path) throws IOException {
+			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
-				throw new IOException();
+				return super.getResourceByPath(path);
 			}
 		};
 		wac.setServletContext(new MockServletContext());
@@ -225,10 +229,20 @@ public class ViewResolverTestSuite extends TestCase {
 		}
 		try {
 			vr.resolveViewName("example1", Locale.getDefault());
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// expected
+		}
+	}
+
+
+	public static class TestView extends InternalResourceView {
+
+		public void setLocation(Resource location) {
+			if (!(location instanceof FileSystemResource)) {
+				throw new IllegalArgumentException("Expecting FileSystemResource, not " + location.getClass().getName());
+			}
 		}
 	}
 

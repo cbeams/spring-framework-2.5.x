@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ReflectionUtils.java,v 1.1 2003-11-28 21:33:23 johnsonr Exp $
+ * @version $Id: ReflectionUtils.java,v 1.1 2004-02-02 11:26:56 jhoeller Exp $
  */
 public abstract class ReflectionUtils {
 	
@@ -26,7 +26,7 @@ public abstract class ReflectionUtils {
 	 * no-arg constructors.
 	 * @param src
 	 * @param dest
-	 * @throws IllegalArgumentException if arguments are incompatible or either is null
+	 * @throws java.lang.IllegalArgumentException if arguments are incompatible or either is null
 	 */
 	public static void shallowCopyFieldState(Object src, Object dest) throws IllegalArgumentException {
 		if (src == null)
@@ -34,7 +34,7 @@ public abstract class ReflectionUtils {
 		if (dest == null)
 			throw new IllegalArgumentException("Destination for field copy cannot be null");
 		if (!src.getClass().isAssignableFrom(dest.getClass()))
-			throw new IllegalArgumentException("Destination class '" + dest.getClass().getName() + 
+			throw new IllegalArgumentException("Destination class '" + dest.getClass().getName() +
 						"' must be same or subclass as source class '" + src.getClass().getName() + "'");
 		
 		log.debug("Copying fields from instance of " + src.getClass() + " to instance of " + dest.getClass());

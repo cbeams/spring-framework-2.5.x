@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="example1" class="org.springframework.web.servlet.view.InternalResourceView">
+	<bean id="example1" class="org.springframework.web.servlet.view.ViewResolverTestSuite$TestView">
 		<property name="url"><value>/example1.jsp</value></property>
 		<property name="attributesMap">
 			<map>
@@ -11,6 +11,7 @@
 				<entry key="test2"><ref bean="testBean"/></entry>
 			</map>
 		</property>
+		<property name="location"><value>test</value></property>
 	</bean>
 
 	<bean id="example2" class="org.springframework.web.servlet.view.JstlView">

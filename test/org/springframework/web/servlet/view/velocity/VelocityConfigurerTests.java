@@ -124,7 +124,7 @@ public class VelocityConfigurerTests extends TestCase {
 			fail();
 		}
 		catch (VelocityInitializationException ace) {
-			assertTrue(ace.getRootCause() == ex);
+			assertTrue(ace.getCause() == ex);
 		}
 
 		wmc.verify();

@@ -10,10 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.View;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  *
@@ -112,6 +114,12 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	public static class TestView extends AbstractView {
 
 		public int initCount;
+
+		public void setLocation(Resource location) {
+			if (!(location instanceof FileSystemResource)) {
+				throw new IllegalArgumentException("Expecting FileSystemResource, not " + location.getClass().getName());
+			}
+		}
 
 		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		}

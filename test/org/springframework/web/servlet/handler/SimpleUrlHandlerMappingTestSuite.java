@@ -33,7 +33,7 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 			fail("Should have thrown NoSuchBeanDefinitionException");
 		}
 		catch (FatalBeanException ex) {
-			NoSuchBeanDefinitionException nestedEx = (NoSuchBeanDefinitionException) ex.getRootCause();
+			NoSuchBeanDefinitionException nestedEx = (NoSuchBeanDefinitionException) ex.getCause();
 			assertEquals("mainControlle", nestedEx.getBeanName());
 		}
 	}
