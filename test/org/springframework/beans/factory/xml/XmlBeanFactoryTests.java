@@ -322,16 +322,14 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testFactoryReferenceCircle() {
-		InputStream is = getClass().getResourceAsStream("factoryCircle.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("factoryCircle.xml", getClass()));
 		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
 		DummyFactory db = (DummyFactory) xbf.getBean("&singletonFactory");
 		assertTrue(tb == db.getOtherTestBean());
 	}
 
 	public void testRefSubelement() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -339,29 +337,25 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testPropertyWithLiteralValueSubelement() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
 	public void testPropertyWithIdRefLocalAttrSubelement() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose2");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
 	public void testPropertyWithIdRefBeanAttrSubelement() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		TestBean verbose = (TestBean) xbf.getBean("verbose3");
 		assertTrue(verbose.getName().equals("verbose"));
 	}
 
 	public void testRefSubelementsBuildCollection() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -380,8 +374,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testRefSubelementsBuildCollectionWithPrototypes() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 
 		TestBean jen = (TestBean) xbf.getBean("pJenny");
 		TestBean dave = (TestBean) xbf.getBean("pDavid");
@@ -405,8 +398,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testRefSubelementsBuildCollectionFromSingleElement() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
 		TestBean loner = (TestBean) xbf.getBean("loner");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -418,8 +410,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		// Ensure that a test runner like Eclipse, that keeps the same JVM up,
 		// will get fresh static values
 		MixedCollectionBean.resetStaticState();
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);
 		MixedCollectionBean jumble = (MixedCollectionBean) xbf.getBean("jumble");
 		assertEquals(1, MixedCollectionBean.nrOfInstances);
@@ -436,8 +427,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * Test that properties with name as well as id creating an alias up front.
 	 */
 	public void testAutoAliasing() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		List beanNames = Arrays.asList(xbf.getBeanDefinitionNames());
 
 		TestBean tb1 = (TestBean) xbf.getBean("aliased");
@@ -486,15 +476,13 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testEmptyMap() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyMap");
 		assertTrue(hasMap.getMap().size() == 0);
 	}
 
 	public void testMapWithLiteralsOnly() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("literalMap");
 		assertTrue(hasMap.getMap().size() == 3);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
@@ -503,8 +491,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testMapWithLiteralsAndReferences() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMap");
 		assertTrue(hasMap.getMap().size() == 3);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
@@ -514,8 +501,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testMapWithLiteralsAndPrototypeReferences() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 
 		TestBean jenny = (TestBean) xbf.getBean("pJenny");
 		HasMap hasMap = (HasMap) xbf.getBean("pMixedMap");
@@ -532,8 +518,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testMapWithLiteralsReferencesAndList() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMapWithList");
 		assertTrue(hasMap.getMap().size() == 4);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
@@ -572,15 +557,13 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testEmptySet() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptySet");
 		assertTrue(hasMap.getSet().size() == 0);
 	}
 
 	public void testPopulatedSet() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("set");
 		assertTrue(hasMap.getSet().size() == 3);
 		assertTrue(hasMap.getSet().contains("bar"));
@@ -590,15 +573,13 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testEmptyProps() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyProps");
 		assertTrue(hasMap.getProps().size() == 0);
 	}
 
 	public void testPopulatedProps() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("props");
 		assertTrue(hasMap.getProps().size() == 2);
 		assertTrue(hasMap.getProps().get("foo").equals("bar"));
@@ -606,8 +587,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testObjectArray() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("objectArray");
 		assertTrue(hasMap.getObjectArray().length ==2);
 		assertTrue(hasMap.getObjectArray()[0].equals("one"));
@@ -615,8 +595,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testClassArray() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("classArray");
 		assertTrue(hasMap.getClassArray().length ==2);
 		assertTrue(hasMap.getClassArray()[0].equals(String.class));
@@ -638,8 +617,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	*/
 
 	public void testInitMethodIsInvoked() throws Exception {
-		InputStream is = getClass().getResourceAsStream("initializers.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		DoubleInitializer in = (DoubleInitializer) xbf.getBean("init-method1");
 		// Initializer should have doubled value
 		assertEquals(14, in.getNum());
@@ -649,8 +627,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 * Test that if a custom initializer throws an exception, it's handled correctly
 	 */
 	public void testInitMethodThrowsException() {
-		InputStream is = getClass().getResourceAsStream("initializers.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		try {
 			xbf.getBean("init-method2");
 			fail();
@@ -679,8 +656,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 */
 	public void testInitializingBeanAndInitMethod() throws Exception {
 		InitAndIB.constructed = false;
-		InputStream is = getClass().getResourceAsStream("initializers.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		assertFalse(InitAndIB.constructed);
 		xbf.preInstantiateSingletons();
 		assertFalse(InitAndIB.constructed);
@@ -699,8 +675,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	 */
 	public void testDefaultLazyInit() throws Exception {
 		InitAndIB.constructed = false;
-		InputStream is = getClass().getResourceAsStream("default-lazy-init.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("default-lazy-init.xml", getClass()));
 		assertFalse(InitAndIB.constructed);
 		xbf.preInstantiateSingletons();
 		assertTrue(InitAndIB.constructed);
@@ -1098,8 +1073,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testListFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		List list = (List) xbf.getBean("listFactory");
 		assertTrue(list instanceof LinkedList);
 		assertTrue(list.size() == 2);
@@ -1108,8 +1082,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeListFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		List list = (List) xbf.getBean("pListFactory");
 		assertTrue(list instanceof LinkedList);
 		assertTrue(list.size() == 2);
@@ -1118,8 +1091,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testSetFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Set set = (Set) xbf.getBean("setFactory");
 		assertTrue(set instanceof TreeSet);
 		assertTrue(set.size() == 2);
@@ -1128,8 +1100,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeSetFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Set set = (Set) xbf.getBean("pSetFactory");
 		assertTrue(set instanceof TreeSet);
 		assertTrue(set.size() == 2);
@@ -1138,8 +1109,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testMapFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Map map = (Map) xbf.getBean("mapFactory");
 		assertTrue(map instanceof TreeMap);
 		assertTrue(map.size() == 2);
@@ -1148,8 +1118,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeMapFactory() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		Map map = (Map) xbf.getBean("pMapFactory");
 		assertTrue(map instanceof TreeMap);
 		assertTrue(map.size() == 2);

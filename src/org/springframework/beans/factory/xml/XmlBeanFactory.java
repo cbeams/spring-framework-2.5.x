@@ -42,6 +42,8 @@ import org.springframework.core.io.Resource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
+ * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @see XmlBeanDefinitionReader
  */
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
@@ -60,12 +62,15 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	/**
 	 * Create a new XmlBeanFactory with the given InputStream,
 	 * which must be parsable using DOM.
-	 * <p>It's preferable to use a Resource argument instead of an
-	 * InputStream, to retain location information. This constructor
-	 * is mainly kept for backwards compatibility.
+	 * <p>It's preferable to use a Resource argument instead of an InputStream,
+	 * to retain location information. This constructor is only kept for
+	 * backwards compatibility and will be removed in a future version.
 	 * @param is XML InputStream to load bean definitions from
 	 * @throws BeansException in case of loading or parsing errors
+	 * @deprecated Use XmlBeanFactory(Resource) instead, if necessary
+	 * with an InputStreamResource parameter.
 	 * @see #XmlBeanFactory(Resource)
+	 * @see org.springframework.core.io.InputStreamResource
 	 */
 	public XmlBeanFactory(InputStream is) throws BeansException {
 		this(new InputStreamResource(is), null);

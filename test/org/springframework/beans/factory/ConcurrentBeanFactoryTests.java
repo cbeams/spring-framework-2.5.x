@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Guillaume Poirier
@@ -62,7 +63,7 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 	private Throwable ex = null;
 
 	protected void setUp() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(getClass().getResourceAsStream("concurrent.xml"));
+		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("concurrent.xml", getClass()));
 		CustomDateEditor editor = new CustomDateEditor(df, false);
 		factory.registerCustomEditor(Date.class, editor);
 		this.factory = factory;
