@@ -31,7 +31,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * configuration model, therefore we have to resort to such workarounds.
  *
  * @author Juergen Hoeller
- * @since 03.07.2004
+ * @since 1.1
  * @see LocalDataSourceConnectionFactory
  */
 public class LocalOjbConfigurer implements BeanFactoryAware {

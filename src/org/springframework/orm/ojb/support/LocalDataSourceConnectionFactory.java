@@ -17,6 +17,8 @@
 package org.springframework.orm.ojb.support;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -43,9 +45,15 @@ import org.springframework.beans.factory.BeanFactory;
  * Depends on LocalOjbConfigurer being defined as Spring bean, which will expose
  * the Spring BeanFactory to the corresponding static field of this connection factory.
  *
+ * <p>Consider using the subclass TransactionAwareDataSourceConnectionFactory instead,
+ * to let Spring's OJB access to participate in JDBC-based transactions managed outside
+ * of OJB (for example, by Spring's DataSourceTransactionManager), or to automatically
+ * apply transaction timeouts managed by PersistenceBrokerTransactionManager.
+ *
  * @author Juergen Hoeller
- * @since 03.07.2004
+ * @since 1.1
  * @see LocalOjbConfigurer
+ * @see TransactionAwareDataSourceConnectionFactory
  */
 public class LocalDataSourceConnectionFactory extends ConnectionFactoryManagedImpl {
 
@@ -54,21 +62,45 @@ public class LocalDataSourceConnectionFactory extends ConnectionFactoryManagedIm
 	 */
 	protected static BeanFactory beanFactory;
 
+	/**
+	 * Map that holds already retrieved DataSources,
+	 * with JCD alias Strings as keys and DataSources as values.
+	 */
+	private Map dataSources = new HashMap();
+
 	public LocalDataSourceConnectionFactory() {
 		if (beanFactory == null) {
 			throw new IllegalStateException("No BeanFactory found for configuration - " +
-																			"LocalOjbConfigurer must be defined as Spring bean");
+					"LocalOjbConfigurer must be defined as Spring bean");
 		}
 	}
 
 	public Connection lookupConnection(JdbcConnectionDescriptor jcd) throws LookupException {
 		try {
-			DataSource dataSource = (DataSource) beanFactory.getBean(jcd.getJcdAlias(), DataSource.class);
+			DataSource dataSource = null;
+			synchronized (this.dataSources) {
+				dataSource = (DataSource) this.dataSources.get(jcd.getJcdAlias());
+				if (dataSource == null) {
+					dataSource = getDataSource(jcd.getJcdAlias());
+					this.dataSources.put(jcd.getJcdAlias(), dataSource);
+				}
+			}
 			return dataSource.getConnection();
 		}
 		catch (Exception ex) {
 			throw new LookupException("Could not obtain connection from data source", ex);
 		}
+	}
+
+	/**
+	 * Return the DataSource to use for the given JCD alias.
+	 * <p>This implementation fetches looks for a bean with the
+	 * JCD alias name in the provided Spring BeanFactory.
+	 * @param jcdAlias the JCD alias to retrieve a DataSource for
+	 * @return the DataSource to use
+	 */
+	protected DataSource getDataSource(String jcdAlias) {
+		return (DataSource) beanFactory.getBean(jcdAlias, DataSource.class);
 	}
 
 }
