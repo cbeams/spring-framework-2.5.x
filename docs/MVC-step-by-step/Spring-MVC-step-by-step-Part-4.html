@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20031121;23441800">
+	<META NAME="CHANGED" CONTENT="20031122;220000">
 	<STYLE>
 	<!--
 		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
@@ -615,9 +615,9 @@ option.</P>
 <FONT COLOR="#800000">        this.pmd = pmd;</FONT>
 <FONT COLOR="#800000">    }</FONT>
 
-<FONT COLOR="#800000">    public void setProducts(List p) {</FONT>
-<FONT COLOR="#800000">        products = p;</FONT>
-<FONT COLOR="#800000">    }</FONT>
+<FONT COLOR="#800000"><STRIKE>    public void setProducts(List p) {</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>        products = p;</STRIKE></FONT>
+<FONT COLOR="#800000"><STRIKE>    }</STRIKE></FONT>
 
 <FONT COLOR="#000000">    public List getProducts() {</FONT>
 <FONT COLOR="#800000">        products = pmd.getProductList();</FONT>
@@ -628,8 +628,8 @@ option.</P>
 <FONT COLOR="#000000">        ListIterator li = products.listIterator();</FONT>
 <FONT COLOR="#000000">        while (li.hasNext()) {</FONT>
 <FONT COLOR="#000000">            Product p = (Product) li.next();</FONT>
-<FONT COLOR="#800000"><STRIKE>            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>            p.setPrice(new Double(newPrice));</STRIKE></FONT>
+<FONT COLOR="#800000">            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</FONT>
+<FONT COLOR="#800000">            p.setPrice(new Double(newPrice));</FONT>
 <FONT COLOR="#800000">            pmd.increasePrice(p, pct);</FONT>
 <FONT COLOR="#000000">        }</FONT>
 <FONT COLOR="#000000">        </FONT>
