@@ -40,7 +40,7 @@
     just by making them bean properties of the respective Action class.
     Finally, the same Action instance that handles the request gets used for
     evaluation and form population in the view. Thus, reference data needs to
-    be modelled as bean properties of the Action too. These are arguably too
+    be modeled as bean properties of the Action too. These are arguably too
     many roles in one object.</para>
 
     <para>Regarding views: Spring's view resolution is extremely flexible. A
@@ -156,14 +156,14 @@
     <para>Spring's web framework is - like many other web frameworks - a
     request driven web framework, designed around a servlet that dispatches
     requests to controllers and offers other functionality facilitating the
-    development of webapplications. Spring's
+    development of web applications. Spring's
     <literal>DispatcherServlet</literal> however, does more than just that. It
     is completely integrated with the Spring ApplicationContext and allows you
     to use every other feature Spring has.</para>
 
     <para>Servlets are declared in the <literal>web.xml</literal> of your
-    webapplication, so is the DispatcherServlet. Requests that you want the
-    DispatcherServlet to handle, will have to be mapped, using a url-mapping
+    web application, so is the DispatcherServlet. Requests that you want the
+    DispatcherServlet to handle, will have to be mapped, using a URL mapping
     in the same <literal>web.xml</literal> file.</para>
 
     <programlisting>&lt;web-app&gt;
@@ -195,7 +195,7 @@
 
     <para>The <literal>WebApplicationContext</literal> is just an ordinary
     ApplicationContext that has some extra features necessary for
-    webapplications. It differs from a normal ApplicationContext in that it is
+    web applications. It differs from a normal ApplicationContext in that it is
     capable of resolving themes (see <xref linkend="mvc-themeresolver" />),
     and that is knows to which servlet it is associated (by having a link to
     the <literal>ServletContext</literal>). The WebApplicationContext is bound
@@ -267,7 +267,7 @@
             <entry>theme resolver</entry>
 
             <entry>(<xref linkend="mvc-themeresolver" />) capable of resolving
-            themes your webapplication can use e.g. to offer personalized
+            themes your web application can use e.g. to offer personalized
             layouts</entry>
           </row>
 
@@ -438,7 +438,7 @@
 }</programlisting> As you can see, the Controller interface just states one
     single method that should be capable of handling a request and return an
     appropriate model and view. Those three concepts are the basis for the
-    Spring MVC implemente; <emphasis>ModelAndView</emphasis> and
+    Spring MVC implementation; <emphasis>ModelAndView</emphasis> and
     <emphasis>Controller</emphasis>. While the Controller interface is quite
     abstract, Spring offers a lot of controllers that already contain a lot of
     functionality you might need. The controller interface just define the
@@ -544,7 +544,7 @@
       <literal>handleRequestInternal(HttpServletRequest,
       HttpServletResponse)</literal>-method and implement your logic code and
       return a <literal>ModelAndView</literal> object there. A short example
-      consisting of a class and a declaration in the webapplicationcontext.
+      consisting of a class and a declaration in the web application context.
       <programlisting>package samples;
 
 public class SampleController extends AbstractController {
@@ -558,7 +558,7 @@ public class SampleController extends AbstractController {
 }</programlisting> <programlisting>&lt;bean id="sampleController" class="samples.SampleController"&gt;
     &lt;property name="cacheSeconds"&gt;&lt;value&gt;120&lt;/value&lt;/property&gt;
 &lt;/bean&gt;</programlisting> The class above and the declaration in the
-      webapplicationcontext is all you need to do besides setting up a handler
+      web application context is all you need to do besides setting up a handler
       mapping (see <xref linkend="mvc-handlermapping" />) to get this very
       simple controller working. This controller will generates caching
       directives telling the client to cache things for 2 minutes before
@@ -577,7 +577,7 @@ public class SampleController extends AbstractController {
       <literal>ParameterizableViewController</literal> basically is the same
       as the one in the example above, except for the fact that you can
       specify its view name that it'll be returning in the
-      webapplicationcontext (ahhh, no need to hard-code the viewname).</para>
+      web application context (ahhh, no need to hard-code the viewname).</para>
 
       <para>The <literal>FileNameViewController</literal> inspects the URL and
       retrieves the filename of the file request (the filename of
@@ -625,7 +625,7 @@ public class SampleController extends AbstractController {
               MultiActionController and specify the methods that will be
               resolved by the MethodNameResolver on the subclass (in case you
               don't need this configuration parameter), or you define a
-              delegate oject, on which methods resolved by the Resolver will
+              delegate object, on which methods resolved by the Resolver will
               be invoked. If you choose to enter this scenario, you will have
               to define the delegate using this configuration parameter as a
               collaborator</entry>
@@ -717,10 +717,10 @@ public class SampleDelegate {
         HttpServletRequest req, 
         HttpServletResponse resp) {
 
-        rerurn new ModelAndView("index", "date", new Long(System.currentTimeMillis()));
+        return new ModelAndView("index", "date", new Long(System.currentTimeMillis()));
     }
 }</programlisting> When using the delegates shown above, we could also use the
-      <literal>PropertiesMethodNameRseolver</literal> to match a couple of
+      <literal>PropertiesMethodNameResolver</literal> to match a couple of
       URLs to the method we defined: <programlisting>&lt;bean id="propsResolver" class="org....mvc.multiaction.PropertiesMethodNameResolver"&gt;
     &lt;property name="mappings"&gt;
         &lt;props&gt;
@@ -742,10 +742,10 @@ public class SampleDelegate {
 
       <para>Spring's <emphasis>CommandControllers</emphasis> are a fundamental
       part of the Spring MVC package. Command controllers provide a way to
-      interact with dataobjects and dynamically bind parameters from the
-      <literal>HttpServletRequest</literal> to the dataobject you're
+      interact with data objects and dynamically bind parameters from the
+      <literal>HttpServletRequest</literal> to the data object you're
       specifying. This compares to Struts's actionforms, where in Spring, you
-      don't have to implement any interface of superclasses to do databinding.
+      don't have to implement any interface of superclasses to do data binding.
       First, let's examine what command controllers available, just to get
       clear picture of what you can do with them: <itemizedlist
           spacing="compact">
@@ -755,14 +755,14 @@ public class SampleDelegate {
             capable of binding request parameters to a data object you're
             specifying. This class does not offer form functionality, it does
             however, offer validation features and lets you specify in the
-            controller itself what to do with the dataobject that has been
+            controller itself what to do with the data object that has been
             filled with the parameters from the request.</para>
           </listitem>
 
           <listitem>
             <para><literal>AbstractFormController</literal> - an abstract
             controller offering form submission support. Using this controller
-            you can model forms and populate them using a dataobject you're
+            you can model forms and populate them using a data object you're
             retrieving in the controller. After a user has filled the form,
             the AbstractFormController binds the fields, validates and hands
             the object back to you - the controller - to take appropriate
@@ -776,7 +776,7 @@ public class SampleDelegate {
 
           <listitem>
             <para><literal>SimpleFormController</literal> - an even more
-            concrete FormCotnroller that helps you creating a form with
+            concrete FormController that helps you creating a form with
             corresponding data object even more. The SimpleFormController
             let's you specify a command object, a viewname for the form, a
             viewname for page you want to show the user when formsubmission
@@ -922,7 +922,7 @@ public class SampleDelegate {
 
       <para>A very simple, but very powerful handler mapping is the
       <literal>BeanNameUrlHandlerMapping</literal>, which maps incoming HTTP
-      requests to names of beans, defined in the webapplicationcontext. Let's
+      requests to names of beans, defined in the web application context. Let's
       say we want to enable a user to insert an account and we've already
       provided an appropriate FormController (see <xref
       linkend="mvc-controller-command" /> for more information on Command- and
@@ -962,7 +962,7 @@ public class SampleDelegate {
 
       <para><emphasis>NOTE: if you want to use the
       <literal>BeanNameUrlHandlerMapping</literal>, you don't necessarily have
-      to define it in the webapplicationcontext (as indicated above). By
+      to define it in the web application context (as indicated above). By
       default, if no handler mapping can be found in the context, the
       DispatcherServlet creates a <literal>BeanNameUrlHandlerMapping</literal>
       for you! </emphasis></para>
@@ -1136,7 +1136,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <sect2 id="mvc-viewresolver-resolver">
       <title>ViewResolvers</title>
 
-      <para>As discussed before, all controllers in the SpringWeb framework,
+      <para>As discussed before, all controllers in the Spring web framework,
       return a <literal>ModelAndView</literal> instance. Views in Spring are
       addressed by a view name and are resolved by a viewresolver. Spring
       comes with quite a few view resolvers. We'll list most of them and then
@@ -1229,7 +1229,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       RequestDispatcher that'll send the request to
       <literal>/WEB-INF/jsp/test.jsp</literal>.</para>
 
-      <para>When mixing different view technologies in a webapplications, you
+      <para>When mixing different view technologies in a web application, you
       can use the ResourceBundleViewResolver: <programlisting>&lt;bean id="viewResolver"
       class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
     &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
@@ -1416,7 +1416,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title>Introduction</title>
 
       <para>Spring has built-in multipart support to handle fileuploads in
-      webapplications. The design for the multipart support is done with
+      web applications. The design for the multipart support is done with
       pluggable <literal>MultipartResovler</literal> objects, defined in the
       <literal>org.springframework.web.multipart</literal> package. Out of the
       box, Spring provides MultipartResolver for use with <emphasis>Commons
@@ -1428,7 +1428,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <para>By default, no multipart handling will be done by Spring, as some
       developers will want to handle multiparts themselves. You'll have to
-      enable it yourself by adding a multipartresolver to the webapplication's
+      enable it yourself by adding a multipart resolver to the web application's
       context. After you've done that, each request will be inspected for a
       multipart that it might contain. If no such multipart is found, the
       request will continue as expected. However, if a multipart is found in
@@ -1459,7 +1459,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 &lt;/bean&gt;</programlisting></para>
 
       <para>Of course you need to stick the appropriate jars in your classpath
-      for the multipartresolver to work. In the case of the
+      for the multipart resolver to work. In the case of the
       CommonsMultipartResolver, you need to use
       <literal>commons-fileupload.jar</literal>, while in the case of the
       CosMultipartResolver, use <literal>cos.jar</literal>.</para>
@@ -1589,7 +1589,7 @@ public class FileUploadBean {
 &lt;/html&gt;</programlisting> As you can see, we've created a field named
       after the property of the bean that holds the byte[]. Furthermore we've
       added the encoding attribute which is necessary to let the browser know
-      how to encode the multipart fields (dont' forget this!). Right now
+      how to encode the multipart fields (do not forget this!). Right now
       everything should work.</para>
     </sect2>
   </sect1>
@@ -1598,10 +1598,10 @@ public class FileUploadBean {
     <title>Handling exceptions</title>
 
     <para>Spring provides <literal>HandlerExceptionResolvers</literal> to ease
-    the pain of unexpected exceptions occuring while your request is being
+    the pain of unexpected exceptions occurring while your request is being
     handled by a controller which matched the request.
     <literal>HandlerExceptionResolvers</literal> somewhat resemble the
-    exception-mappings you can define in the webapplication descriptor
+    exception mappings you can define in the web application descriptor
     <literal>web.xml</literal>. However, they provide a more flexible to
     handle exceptions. about what handler was executing when the exception was
     thrown. Furthermore, a programmatic way of handling exception gives you
@@ -1616,7 +1616,7 @@ public class FileUploadBean {
     the <literal>SimpleMappingExceptionResolver</literal>. This resolver
     enables you to take the class name of any exception that might be thrown
     and map it to a view name. This is functionally equivalent to the
-    exception mapping feature from the servlet api, but it's also possible to
+    exception mapping feature from the Servlet API, but it's also possible to
     implement more fine grained mappings of exception from different
     handlers.</para>
   </sect1>

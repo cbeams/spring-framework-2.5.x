@@ -146,7 +146,7 @@
       <listitem>
         <para><emphasis role="bold">Transaction propagation</emphasis>:
         Normally all code executed within a transaction scope will run in that
-        transaction. However, there are several options specificying behaviour
+        transaction. However, there are several options specifying behavior
         if a transactional method is executed when a transaction context
         already exists: For example, simply running in the existing
         transaction (the most common case); or suspending the existing
@@ -335,7 +335,7 @@
       </listitem>
     </itemizedlist>
 
-    <para>We generally recommand the first approach.</para>
+    <para>We generally recommend the first approach.</para>
 
     <para>The second approach is similar to using the JTA
     <literal>UserTransaction</literal> API (although exception handling is
@@ -428,7 +428,7 @@ transactionManager.commit(status);</programlisting></para>
     <para>It may be helpful to begin by considering EJB CMT and explaining the
     similarities and differences with Spring declarative transaction
     management. The basic approach is similar: It's possible to specify
-    transaction behaviour (or lack of it) down to individual methods. It's
+    transaction behavior (or lack of it) down to individual methods. It's
     possible to make a <literal>setRollbackOnly() </literal>call within a
     transaction context if necessary. The differences are:</para>
 
@@ -441,7 +441,7 @@ transactionManager.commit(status);</programlisting></para>
       </listitem>
 
       <listitem>
-        <para>Spring enables declarative transaction mangement to be applied
+        <para>Spring enables declarative transaction management to be applied
         to any POJO, not just special classes such as EJBs.</para>
       </listitem>
 
@@ -453,8 +453,8 @@ transactionManager.commit(status);</programlisting></para>
 
       <listitem>
         <para>Spring gives you an opportunity to customize transactional
-        behaviour, using AOP. For example, if you want to insert custom
-        behaviour in the case of transaction rollback, you can. You can also
+        behavior, using AOP. For example, if you want to insert custom
+        behavior in the case of transaction rollback, you can. You can also
         add arbitrary advice, along with the transactional advice. With EJB
         CMT, you have no way to influence the container's transaction
         management other than <literal>setRollbackOnly()</literal>.</para>
@@ -480,13 +480,13 @@ transactionManager.commit(status);</programlisting></para>
     to depend on the transaction infrastructure. For example, they typically
     don't need to import any Spring APIs, transaction or other.</para>
 
-    <para>While the EJB default behaviour is for the EJB container to
+    <para>While the EJB default behavior is for the EJB container to
     automatically roll back the transaction on a <emphasis>system
     exception</emphasis> (usually a runtime exception), EJB CMT does not roll
     back the transaction automatically on an <emphasis>application
     exception</emphasis> (checked exception other than
     <literal>java.rmi.RemoteException</literal>). While the Spring default
-    behaviour for declarative transaction management follows EJB convention
+    behavior for declarative transaction management follows EJB convention
     (roll back is automatic only on unchecked exceptions), it's often useful
     to customize this.</para>
 
@@ -523,13 +523,13 @@ transactionManager.commit(status);</programlisting></para>
 
     <para>The transactional proxy will implement the interfaces of the target:
     in this case, the bean with id petStoreTarget. (Using CGLIB it's possible
-    to transactionaly proxy a target class. Set the proxyTargetClass property
+    to transactionally proxy a target class. Set the "proxyTargetClass" property
     to true for this. It will happen automatically if the target doesn't
     implement any interfaces. In general, of course, we want to program to
     interfaces rather than classes.) It's possible (and usually a good idea)
     to restrict the transactional proxy to proxying only specific target
     interfaces, using the proxyInterfaces property. It's also possible to
-    customize the behaviour of a TransactionProxyFactoryBean via several
+    customize the behavior of a TransactionProxyFactoryBean via several
     properties inherited from
     <literal>org.springframework.aop.framework.ProxyConfig</literal>, and
     shared with all AOP proxy factories.</para>
@@ -547,7 +547,7 @@ transactionManager.commit(status);</programlisting></para>
     if you really know what you're doing!)</para>
 
     <para>The <literal>TransactionProxyFactoryBean</literal> allows you to set
-    "pre" and "post" advice, for additional interception behaviour, using the
+    "pre" and "post" advice, for additional interception behavior, using the
     "preInterceptors" and "postInterceptors" properties. Any number of pre and
     post advices can be set, and their type may be <literal>Advisor</literal>
     (in which case they can contain a pointcut),
@@ -654,7 +654,7 @@ transactionManager.commit(status);</programlisting></para>
       intercept based on a <classname>TransactionAttributeSource</classname>
       implementing object passed to it as a property. In this case, we want to
       handle the very simple case of matching all methods. This is not
-      necessarilly the most efficient approach, but it's very quick to set up,
+      necessarily the most efficient approach, but it's very quick to set up,
       because we can use the special pre-defined
       <classname>MatchAlwaysTransactionAttributeSource</classname>, which
       simply matches all methods. If we wanted to be more specific, we could
