@@ -76,7 +76,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
         }
         new CodedEnumFieldValueGenerator(clazz).run(new Block() {
             protected void handle(Object value) {
-            	System.out.println("Adding value " + value);
                 add((CodedEnum)value);
             }
         });
