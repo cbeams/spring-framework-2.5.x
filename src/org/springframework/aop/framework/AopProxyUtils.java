@@ -25,27 +25,29 @@ import org.aopalliance.aop.AspectException;
 /**
  * Miscellaneous utilities for AOP proxies
  * @author Rod Johnson
- * @version $Id: AopProxyUtils.java,v 1.7 2004-06-25 11:10:19 robharrop Exp $
+ * @version $Id: AopProxyUtils.java,v 1.8 2004-07-28 11:28:25 johnsonr Exp $
  */
 public abstract class AopProxyUtils {
 	
 	/**
-	 * Get complete set of interfaces to proxy. This will always add the ProxyConfig interface.
+	 * Get complete set of interfaces to proxy. This will always add the Advised interface
+	 * unless the AdvisedSupport's "opaque" flag is true.
 	 * @return the complete set of interfaces to proxy
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
-		Class[] proxiedInterfaces = advised.getProxiedInterfaces();
-		if (proxiedInterfaces == null ||proxiedInterfaces.length == 0) {
-			proxiedInterfaces = new Class[1];
-			proxiedInterfaces[0] = Advised.class;
+		// Won't include Advised, which may be necessary
+		Class[] proxiedInterfacesOnConfig = advised.getProxiedInterfaces() == null ? new Class[0] : advised.getProxiedInterfaces();
+		int lengthFromConfig = proxiedInterfacesOnConfig.length;
+		int addedInterfaces = 0;
+		if (!advised.getOpaque() && !advised.isInterfaceProxied(Advised.class)) {
+			// We need to add Advised
+			addedInterfaces = 1;
 		}
-		else {
-			// Don't add the interface twice if it's already there
-			if (!advised.isInterfaceProxied(Advised.class)) {
-				proxiedInterfaces = new Class[advised.getProxiedInterfaces().length + 1];
-				proxiedInterfaces[0] = Advised.class;
-				System.arraycopy(advised.getProxiedInterfaces(), 0, proxiedInterfaces, 1, advised.getProxiedInterfaces().length);
-			}
+		Class[] proxiedInterfaces = new Class[lengthFromConfig + addedInterfaces];
+		
+		System.arraycopy(proxiedInterfacesOnConfig, 0, proxiedInterfaces, addedInterfaces, proxiedInterfacesOnConfig.length);
+		if (addedInterfaces == 1) {
+			proxiedInterfaces[0] = Advised.class;
 		}
 		return proxiedInterfaces;
 	}

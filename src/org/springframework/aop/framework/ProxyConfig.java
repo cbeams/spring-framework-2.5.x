@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  * interceptor to do so.
  *
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.13 2004-07-27 15:52:25 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.14 2004-07-28 11:28:25 johnsonr Exp $
  */
 public class ProxyConfig implements Serializable {
 	
@@ -54,6 +54,8 @@ public class ProxyConfig implements Serializable {
 	private boolean proxyTargetClass;
 	
 	private boolean optimize;
+	
+	private boolean opaque;
 
 	/**
 	 * Should proxies obtained from this configuration expose
@@ -172,6 +174,23 @@ public class ProxyConfig implements Serializable {
 		return this.aopProxyFactory;
 	}
 
+	/**
+	 * @return whether proxies created by this configuration
+	 * should be prevented from being cast to Advised
+	 */
+	public boolean getOpaque() {
+		return opaque;
+	}
+	
+	/**
+	 * @param opaque Set whether proxies created by this configuration
+	 * should be prevented from being cast to Advised to
+	 * query proxy status. Default is false, meaning that
+	 * any AOP proxy can be cast to Advised.
+	 */
+	public void setOpaque(boolean opaque) {
+		this.opaque = opaque;
+	}
 
 	/**
 	 * Copy configuration from the other config object.
@@ -182,6 +201,7 @@ public class ProxyConfig implements Serializable {
 		this.optimize = other.getOptimize();
 		this.exposeProxy = other.exposeProxy;
 		this.frozen = other.frozen;
+		this.opaque = other.opaque;
 		this.aopProxyFactory = other.aopProxyFactory;
 	}
 
@@ -190,9 +210,9 @@ public class ProxyConfig implements Serializable {
 		sb.append("proxyTargetClass=" + this.proxyTargetClass + "; ");
 		sb.append("optimize=" + this.optimize + "; ");
 		sb.append("exposeProxy=" + this.exposeProxy + "; ");
+		sb.append("opaque=" + this.opaque + "; ");
 		sb.append("frozen=" + this.frozen + "; ");
 		sb.append("aopProxyFactory=" + this.aopProxyFactory + "; ");
 		return sb.toString();
 	}
-
 }
