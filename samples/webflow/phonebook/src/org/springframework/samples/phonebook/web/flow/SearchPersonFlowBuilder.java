@@ -68,7 +68,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		// bind and validate search criteria 
 		// TODO - investigate multi action builder helpers
 		// e.g what i'd like to do here is map this state to a method on a multi action bean...
-		addActionState("bindAndValidate", action("person.Search.formAction"), new Transition[] {
+		addActionState("bindAndValidate", action("person.Search.bindAndValidate"), new Transition[] {
 				on(error(), "viewCriteria"), on(success(), "executeQuery") });
 
 		// execute query
