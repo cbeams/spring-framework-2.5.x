@@ -193,6 +193,11 @@ distribution/website before using any of them in your own applications.
 - Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, Petclinic, Countries, and Tiles Example
 
+* jasperreports/jasperreports-0.6.2.jar
+- JasperReports 0.6.2 (http://www.jasperreports.org)
+- required for building the framework
+- required at runtime when using Spring's JasperReports support
+
 * jdo/jdo.jar
 - JDO API 1.0.1 (http://access1.sun.com/jdo)
 - required for building the framework
