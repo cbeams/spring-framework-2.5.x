@@ -86,25 +86,25 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~225 KB)
+* "spring-core" (~230 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-aop" (~120 KB)
+* "spring-aop" (~130 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~165 KB)
-- Contents: application context, validation framework, UI support, JNDI, mail, EJB, remoting, scheduling
-- Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, EJB, JAX-RPC, Hessian, Burlap, Quartz)
+* "spring-context" (~205 KB)
+- Contents: application context, validation framework, UI support, mail, JNDI, JMS, EJB, remoting, scheduling
+- Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz)
 
-* "spring-dao" (~210 KB)
+* "spring-dao" (~225 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~170 KB)
-- Contents: Hibernate support, JDO support, iBATIS SQL Maps support
-- Dependencies: spring-dao, (Hibernate, JDO, iBATIS SQL Maps)
+* "spring-orm" (~175 KB)
+- Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
+- Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
 * "spring-web" (~85 KB)
 - Contents: web application context, multipart resolver, Struts support, web utilities
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1120 KB)
+* "spring" (~1195 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
