@@ -18,6 +18,7 @@ package org.springframework.binding.convert.support;
 import java.beans.PropertyEditor;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -90,18 +91,44 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		addConverter(new TextToNumberConverter(formatterLocator));
 		addConverter(new TextToLabeledEnumConverter());
 		addConverter(new TextToMappingConverter(this));
+		addConverter(new ObjectToStringConverter(formatterLocator));
 	}
 
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
-		if (this.sourceClassConverters == null) {
-			return null;
+		if (this.sourceClassConverters == null || this.sourceClassConverters.isEmpty()) {
+			throw new IllegalStateException("No converters have been added to this service's registry");
 		}
-		Map sourceTargetConverters = (Map)this.sourceClassConverters.get(sourceClass);
+		Map sourceTargetConverters = (Map)findConvertersForSource(sourceClass);
 		Converter converter = (Converter)sourceTargetConverters.get(targetClass);
 		if (converter != null) {
 			return new ConversionExecutor(converter, targetClass);
 		}
-		return null;
+		else {
+			throw new IllegalArgumentException("No converter registered to convert from sourceClass '" + sourceClass
+					+ "' to target class '" + targetClass + "'");
+		}
+	}
+
+	protected Map findConvertersForSource(Class sourceClass) {
+		LinkedList classQueue = new LinkedList();
+		classQueue.addFirst(sourceClass);
+		while (!classQueue.isEmpty()) {
+			sourceClass = (Class)classQueue.removeLast();
+			Map sourceTargetConverters = (Map)sourceClassConverters.get(sourceClass);
+			if (sourceTargetConverters != null && !sourceTargetConverters.isEmpty()) {
+				return sourceTargetConverters;
+			}
+			if (!sourceClass.isInterface() && (sourceClass.getSuperclass() != null)) {
+				classQueue.addFirst(sourceClass.getSuperclass());
+			}
+			// queue up source class's implemented interfaces.
+			Class[] interfaces = sourceClass.getInterfaces();
+			for (int i = 0; i < interfaces.length; i++) {
+				classQueue.addFirst(interfaces[i]);
+			}
+		}
+		throw new IllegalArgumentException("No converters registered to convert from sourceClass '" + sourceClass
+				+ "' (including any of its superclasses or interfaces)");
 	}
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
