@@ -75,8 +75,8 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" target="1.5" debug="true"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<src path="annotation/src"/>
 			<classpath refid="master-classpath"/>
