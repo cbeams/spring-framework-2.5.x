@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support;
 
-import java.lang.ref.WeakReference;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -46,7 +45,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.14 2004-05-27 13:20:48 jhoeller Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.15 2004-05-30 15:14:26 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -66,23 +65,14 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
-	 * Needs to be a WeakReference to allow for proper garbage collection on shutdown!
 	 */
-	private static WeakReference instance;
+	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
 
 	/**
 	 * Return singleton instance.
 	 */
-	public static synchronized SQLErrorCodesFactory getInstance() {
-		SQLErrorCodesFactory factory = null;
-		if (instance != null) {
-			factory = (SQLErrorCodesFactory) instance.get();
-		}
-		if (factory == null) {
-			factory = new SQLErrorCodesFactory();
-			instance = new WeakReference(factory);
-		}
-		return factory;
+	public static SQLErrorCodesFactory getInstance() {
+		return instance;
 	}
 
 
@@ -100,9 +90,10 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Not public to enforce Singleton design pattern.
-	 * Would be private except to allow testing via overriding the
-	 * loadInputStream() method.
+	 * Would be private except to allow testing via overriding
+	 * the loadResource method.
 	 * <b>Do not subclass in application code.</b>
+	 * @see #loadResource
 	 */
 	protected SQLErrorCodesFactory() {
 		Map errorCodes = null;
