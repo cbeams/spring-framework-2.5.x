@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,8 +279,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	protected Object parseValue(Properties props, Object value) {
-		if (value instanceof String) {
-			return parseString(props, (String) value);
+		if (value instanceof BeanDefinition) {
+			parseBeanDefinition(props, (BeanDefinition) value);
+		}
+		else if (value instanceof BeanDefinitionHolder) {
+			parseBeanDefinition(props, ((BeanDefinitionHolder) value).getBeanDefinition());
 		}
 		else if (value instanceof RuntimeBeanReference) {
       RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -298,11 +301,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		else if (value instanceof Map) {
 			parseMap(props, (Map) value);
 		}
-		else if (value instanceof BeanDefinition) {
-			parseBeanDefinition(props, (BeanDefinition) value);
+		else if (value instanceof TypedStringValue) {
+			TypedStringValue typedStringValue = (TypedStringValue) value;
+			String parsedString = parseString(props, typedStringValue.getValue());
+			typedStringValue.setValue(parsedString);
 		}
-		else if (value instanceof BeanDefinitionHolder) {
-			parseBeanDefinition(props, ((BeanDefinitionHolder) value).getBeanDefinition());
+		else if (value instanceof String) {
+			return parseString(props, (String) value);
 		}
 		return value;
 	}
