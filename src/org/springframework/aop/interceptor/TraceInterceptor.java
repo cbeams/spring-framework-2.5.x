@@ -16,10 +16,10 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Simple AOP Alliance MethodInterceptor that can be introduced in a chain to display verbose trace information about
- * intercepted method invocations with method entry and method exit info using Commons Logging at DEBUG level.
+ * intercepted method invocations with method entry and method exit info using Commons Logging at DEBUG level. *
  * 
  * @author Dmitriy Kopylenko
- * @version $Id: TraceInterceptor.java,v 1.2 2004-07-12 15:21:18 dkopylenko Exp $
+ * @version $Id: TraceInterceptor.java,v 1.3 2004-07-12 15:23:02 dkopylenko Exp $
  */
 public class TraceInterceptor implements MethodInterceptor {
 
