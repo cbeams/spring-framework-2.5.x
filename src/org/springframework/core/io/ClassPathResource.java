@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * Resource implementation for class path resources.
@@ -91,7 +92,7 @@ public class ClassPathResource extends AbstractResource {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
 																			"because it does not reside in the file system: URL=[" + url + "]");
 		}
-		return new File(url.getFile());
+		return new File(URLDecoder.decode(url.getFile()));
 	}
 
 	public String getDescription() {

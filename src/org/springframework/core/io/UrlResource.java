@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * Resource implementation for java.net.URL locators.
@@ -46,7 +47,7 @@ public class UrlResource extends AbstractResource {
 
 	public File getFile() throws IOException {
 		if (PROTOCOL_FILE.equals(this.url.getProtocol())) {
-			return new File(this.url.getFile());
+			return new File(URLDecoder.decode(this.url.getFile()));
 		}
 		else {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path - " +
