@@ -15,9 +15,6 @@
  */
 package org.springframework.web.flow.struts;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,10 +27,11 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowServiceLocator;
-import org.springframework.web.flow.mvc.HttpFlowExecutionManager;
+import org.springframework.web.flow.support.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Struts Action that acts a front controller entry point into the web flow
@@ -101,11 +99,7 @@ public class FlowAction extends TemplateAction {
 	private ActionForward createForwardFromModelAndView(ModelAndView modelAndView, ActionMapping mapping,
 			HttpServletRequest request) {
 		if (modelAndView != null) {
-			Iterator it = modelAndView.getModel().entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry)it.next();
-				request.setAttribute((String)entry.getKey(), entry.getValue());
-			}
+			WebUtils.exposeRequestAttributes(request, modelAndView.getModel());
 			ActionForward forward = mapping.findForward(modelAndView.getViewName());
 			if (forward == null) {
 				forward = new ActionForward(modelAndView.getViewName());

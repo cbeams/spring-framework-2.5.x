@@ -26,6 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
+import org.springframework.web.flow.support.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -72,13 +73,13 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	public void afterPropertiesSet() throws Exception {
 		//instantiate the flow execution manager
-		this.manager = new HttpFlowExecutionManager(this.flow, new BeanFactoryFlowServiceLocator(
-				getApplicationContext()), flowExecutionListeners);
+		this.manager = new HttpFlowExecutionManager(this.flow,
+				new BeanFactoryFlowServiceLocator(getApplicationContext()), flowExecutionListeners);
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		//delegate to the flow execution manager process the request
+		//delegate to the flow execution manager to process the request
 		return manager.handleRequest(request, response);
 	}
 }

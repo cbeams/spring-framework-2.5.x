@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.mvc;
+package org.springframework.web.flow.support;
 
 import java.util.Collection;
 import java.util.Enumeration;
@@ -43,21 +43,41 @@ import org.springframework.web.util.WebUtils;
  * execution.
  * 
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public class HttpFlowExecutionManager {
 
-	protected static final Log logger = LogFactory.getLog(HttpFlowExecutionManager.class);
+	protected final Log logger = LogFactory.getLog(HttpFlowExecutionManager.class);
 
 	private Flow flow;
 
 	private FlowServiceLocator flowServiceLocator;
 
 	private Collection flowExecutionListeners;
+	
+	/**
+	 * Create a new flow execution manager. Since the flow is specified,
+	 * the id of the flow for which executions will be managed is expected
+	 * in the request.
+	 */
+	public HttpFlowExecutionManager() {
+		this.flow = null;
+	}
 
+	/**
+	 * Create a new flow execution manager.
+	 * @param flow the flow for which executions will be managed
+	 */
 	public HttpFlowExecutionManager(Flow flow) {
 		this.flow = flow;
 	}
 
+	/**
+	 * Create a new flow execution manager.
+	 * @param flow the flow for which executions will be managed
+	 * @param flowExecutionListeners the set of listeners that should be notified
+	 *        of lifecycle events in the managed flow execution
+	 */
 	public HttpFlowExecutionManager(Flow flow, Collection flowExecutionListeners) {
 		this.flow = flow;
 		this.flowExecutionListeners = flowExecutionListeners;
@@ -90,30 +110,54 @@ public class HttpFlowExecutionManager {
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
+	/**
+	 * @return name of the flow id parameter in the request
+	 */
 	protected String getFlowIdParameterName() {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
+	/**
+	 * @return name of the flow execution id parameter in the request
+	 */
 	protected String getFlowExecutionIdParameterName() {
 		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
 
+	/**
+	 * @return name of the current state id parameter in the request
+	 */
 	protected String getCurrentStateIdParameterName() {
 		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
+	/**
+	 * @return name of the event id parameter in the request
+	 */
 	protected String getEventIdParameterName() {
 		return FlowConstants.EVENT_ID_PARAMETER;
 	}
 
+	/**
+	 * @return name of the event id attribute in the request
+	 */
 	protected String getEventIdRequestAttributeName() {
 		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
 
+	/**
+	 * @return marker value indicating that the event id parameter was
+	 *         not properly set in the request
+	 */
 	protected String getNotSetEventIdParameterMarker() {
 		return FlowConstants.NOT_SET_EVENT_ID;
 	}
 
+	/**
+	 * @return the default delimiter used to separate a request parameter name
+	 *         and value when both are embedded in the name of the request
+	 *         parameter (e.g. when using an HTML submit button)
+	 */
 	protected String getParameterValueDelimiter() {
 		return "_";
 	}
@@ -153,22 +197,21 @@ public class HttpFlowExecutionManager {
 			String eventId = request.getParameter(getEventIdParameterName());
 
 			if (!StringUtils.hasText(eventId)) {
+				eventId = searchForRequestParameter(request, getEventIdParameterName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("No '" + getEventIdParameterName() + "' parameter was found; falling back to '"
 							+ getEventIdRequestAttributeName() + "' request attribute");
 				}
-				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 			}
 			if (!StringUtils.hasText(eventId)) {
-				eventId = searchForRequestParameter(request, getEventIdParameterName());
+				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 				if (!StringUtils.hasText(eventId)) {
-					throw new IllegalArgumentException(
-							"The '"
-									+ getEventIdParameterName()
-									+ "' request parameter (or '"
-									+ getEventIdRequestAttributeName()
-									+ "' request attribute) is required to signal an event in the current state of this executing flow '"
-									+ flowExecution.getCaption() + "' -- programmer error?");
+					throw new IllegalArgumentException("The '"
+						+ getEventIdParameterName()
+						+ "' request parameter (or '"
+						+ getEventIdRequestAttributeName()
+						+ "' request attribute) is required to signal an event in the current state of this executing flow '"
+						+ flowExecution.getCaption() + "' -- programmer error?");
 				}
 			}
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
@@ -193,8 +236,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Create a input attributes for new flow executions started by the exeution
-	 * manager.
+	 * Create a map of input attributes for new flow executions started by the
+	 * exeution manager.
 	 * <p>
 	 * Default implementation returns null. Subclasses can override if needed.
 	 * @param request current HTTP request
@@ -207,14 +250,14 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Obtain a flow to use from given request.
 	 */
-	protected Flow getFlow(HttpServletRequest request) throws ServletRequestBindingException {
+	protected Flow getFlow(HttpServletRequest request) {
 		String flowId = request.getParameter(getFlowIdParameterName());
 		if (!StringUtils.hasText(flowId)) {
 			Assert.notNull(this.flow, "This flow execution manager is not configured with a default top-level flow");
 			return this.flow;
 		}
 		else {
-			Assert.notNull("The flow service locator is required to lookup flows to execute by a id parameter");
+			Assert.notNull("The flow service locator is required to lookup flows to execute by an id parameter");
 			return flowServiceLocator.getFlow(flowId);
 		}
 	}
@@ -259,6 +302,8 @@ public class HttpFlowExecutionManager {
 	 * given request.
 	 * @throws NoSuchFlowExecutionException If there is no flow execution in the
 	 *         HTTP session associated with given request.
+	 * @throws ServletRequestBindingException If there is no flow execution id
+	 *         bound in given request.
 	 */
 	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException,
 			ServletRequestBindingException {
@@ -282,6 +327,31 @@ public class HttpFlowExecutionManager {
 		request.getSession(false).removeAttribute(flowExecution.getId());
 	}
 
+	/**
+	 * Obtain a named parameter from an HTTP servlet request. This method will
+	 * try to obtain a parameter value using the following algorithm:
+	 * <ol>
+	 * <li>Try to get the parameter value from the request using just the given
+	 * <i>logical</i> name. This handles request parameters of the form
+	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
+	 * submitted using a hidden HTML form field, this will return the requested
+	 * value.</li>
+	 * <li>Try to obtain the parameter value from the parameter name, where the
+	 * parameter name in the request is of the form
+	 * <tt>logicalName_value = xyz</tt>. This deals with parameter values
+	 * submitted using an HTML form submit button.</li>
+	 * <li>If the value obtained in the previous step has a ".x" or ".y"
+	 * suffix, remove that. This handles cases where the value was submitted
+	 * using an HTML form image button. In this case the parameter in the
+	 * request would actually be of the form <tt>logicalName_value.x = 123</tt>.
+	 * </li>
+	 * </ol>
+	 * @param request the current HTTP request
+	 * @param logicalName the <i>logical</i> name of the request parameter
+	 * @param delimiter the delimiter to use
+	 * @return the value of the parameter, or <code>null</code> if the
+	 *         parameter does not exist in given request
+	 */
 	protected String searchForRequestParameter(HttpServletRequest request, String logicalName) {
 		return searchForRequestParameter(request, logicalName, getParameterValueDelimiter());
 	}
@@ -291,7 +361,7 @@ public class HttpFlowExecutionManager {
 	 * try to obtain a parameter value using the following algorithm:
 	 * <ol>
 	 * <li>Try to get the parameter value from the request using just the given
-	 * <i>logical </i> name. This handles request parameters of the form
+	 * <i>logical</i> name. This handles request parameters of the form
 	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
 	 * submitted using a hidden HTML form field, this will return the requested
 	 * value.</li>
@@ -307,7 +377,7 @@ public class HttpFlowExecutionManager {
 	 * </li>
 	 * </ol>
 	 * @param request the current HTTP request
-	 * @param logicalName the <i>logical </i> name of the request parameter
+	 * @param logicalName the <i>logical</i> name of the request parameter
 	 * @param delimiter the delimiter to use
 	 * @return the value of the parameter, or <code>null</code> if the
 	 *         parameter does not exist in given request
