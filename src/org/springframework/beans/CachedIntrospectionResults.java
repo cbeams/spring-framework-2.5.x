@@ -20,6 +20,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.11 2004-05-30 15:34:17 jhoeller Exp $
+ *  @version $Id: CachedIntrospectionResults.java,v 1.12 2004-06-02 00:29:32 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
@@ -64,12 +65,28 @@ final class CachedIntrospectionResults {
 	 * unnecessary lookup at startup only.
 	 */
 	static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
-		WeakReference weakRef = (WeakReference) classCache.get(clazz);
-		CachedIntrospectionResults results = (weakRef != null) ? (CachedIntrospectionResults) weakRef.get() : null;
+		CachedIntrospectionResults results = null;
+		Object value = classCache.get(clazz);
+		if (value instanceof Reference) {
+			Reference ref = (Reference) value;
+			results = (CachedIntrospectionResults) ref.get();
+		}
+		else {
+			results = (CachedIntrospectionResults) value;
+		}
 		if (results == null) {
 			// can throw BeansException
 			results = new CachedIntrospectionResults(clazz);
-			classCache.put(clazz, new WeakReference(results));
+			boolean cacheSafe = isCacheSafe(clazz);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Class [" + clazz.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
+			}
+			if (cacheSafe) {
+				classCache.put(clazz, results);
+			}
+			else {
+				classCache.put(clazz, new WeakReference(results));
+			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -77,6 +94,30 @@ final class CachedIntrospectionResults {
 			}
 		}
 		return results;
+	}
+
+	/**
+	 * Check whether the given class is cache-safe,
+	 * i.e. whether it is loaded by the same class loader as the
+	 * CachedIntrospectionResults class or a parent of it.
+	 * <p>Many thanks to Guillaume Poirier for pointing out the
+	 * garbage collection issues and for suggesting this solution.
+	 * @param clazz the class to analyze
+	 * @return whether the given class is thread-safe
+	 */
+	private static boolean isCacheSafe(Class clazz) {
+		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
+		ClassLoader target = clazz.getClassLoader();
+		if (target == null || cur == target) {
+			return true;
+		}
+		while (cur != null) {
+			cur = cur.getParent();
+			if (cur == target) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
@@ -134,12 +175,8 @@ final class CachedIntrospectionResults {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
-	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
-		if (pd == null) {
-			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]");
-		}
-		return pd;
+	PropertyDescriptor getPropertyDescriptor(String propertyName) {
+		return (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 	}
 
 }
