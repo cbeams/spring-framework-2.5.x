@@ -18,6 +18,7 @@ import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.BaseCommandController;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -32,38 +33,38 @@ public class DispatcherServletTestSuite extends TestCase {
 
 	private ServletConfig servletConfig;
 	
-	private DispatcherServlet simpleControllerServlet;
+	private DispatcherServlet simpleDispatcherServlet;
 
-	private DispatcherServlet complexControllerServlet;
+	private DispatcherServlet complexDispatcherServlet;
 
 	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 
-		simpleControllerServlet = new DispatcherServlet();
-		simpleControllerServlet.setContextClass(SimpleWebApplicationContext.class);
-		simpleControllerServlet.init(servletConfig);
+		simpleDispatcherServlet = new DispatcherServlet();
+		simpleDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
+		simpleDispatcherServlet.init(servletConfig);
 
-		complexControllerServlet = new DispatcherServlet();
-		complexControllerServlet.setContextClass(ComplexWebApplicationContext.class);
-		complexControllerServlet.setNamespace("test");
-		complexControllerServlet.setPublishContext(false);
-		complexControllerServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
+		complexDispatcherServlet = new DispatcherServlet();
+		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
+		complexDispatcherServlet.setNamespace("test");
+		complexDispatcherServlet.setPublishContext(false);
+		complexDispatcherServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
 	}
 
-	public void testControllerServlets() {
-		assertTrue("Correct namespace", ("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleControllerServlet.getNamespace()));
-		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple").equals(simpleControllerServlet.getServletContextAttributeName()));
-		assertTrue("Context published", simpleControllerServlet.getWebApplicationContext() == servletConfig.getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
+	public void testDispatcherServlets() {
+		assertTrue("Correct namespace", ("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace()));
+		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple").equals(simpleDispatcherServlet.getServletContextAttributeName()));
+		assertTrue("Context published", simpleDispatcherServlet.getWebApplicationContext() == servletConfig.getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
 
-		assertTrue("Correct namespace", "test".equals(complexControllerServlet.getNamespace()));
-		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex").equals(complexControllerServlet.getServletContextAttributeName()));
+		assertTrue("Correct namespace", "test".equals(complexDispatcherServlet.getNamespace()));
+		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex").equals(complexDispatcherServlet.getServletContextAttributeName()));
 		assertTrue("Context not published", servletConfig.getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex") == null);
 	}
 
 	public void testInvalidRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/invalid.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		simpleControllerServlet.doGet(request, response);
+		simpleDispatcherServlet.doGet(request, response);
 		assertTrue("Not forwarded", response.forwarded == null);
 		assertTrue("correct error code", response.getStatusCode() == HttpServletResponse.SC_NOT_FOUND);
 	}
@@ -73,7 +74,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		simpleControllerServlet.doGet(request, response);
+		simpleDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "form".equals(response.forwarded));
 		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
 		RequestContext rc = new RequestContext(request);
@@ -85,7 +86,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		assertTrue("Correct theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
 		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
 
-		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
+		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleDispatcherServlet.getWebApplicationContext());
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
 		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
@@ -104,15 +105,15 @@ public class DispatcherServletTestSuite extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertEquals(98, simpleControllerServlet.getLastModified(request));
-		simpleControllerServlet.doGet(request, response);
+		assertEquals(98, simpleDispatcherServlet.getLastModified(request));
+		simpleDispatcherServlet.doGet(request, response);
 		assertTrue("Not forwarded", response.forwarded == null);
 	}
 
 	public void testUnknownRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
@@ -122,14 +123,14 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertTrue("forwarded to form", "myform.jsp".equals(response.forwarded));
 		assertTrue("has RequestContext attribute", request.getAttribute("rc") != null);
 		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
 
 		RequestContext rc = (RequestContext) request.getAttribute("rc");
 		assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());
-		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexControllerServlet.getWebApplicationContext());
+		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexDispatcherServlet.getWebApplicationContext());
 		assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
 		assertTrue("Correct locale", Locale.CANADA.equals(rc.getLocale()));
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
@@ -160,8 +161,8 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		request.addRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertEquals(99, complexControllerServlet.getLastModified(request));
-		complexControllerServlet.doGet(request, response);
+		assertEquals(99, complexDispatcherServlet.getLastModified(request));
+		complexDispatcherServlet.doGet(request, response);
 		assertTrue("Not forwarded", response.forwarded == null);
 		assertTrue(request.getAttribute("test1") != null);
 		assertTrue(request.getAttribute("test1x") == null);
@@ -171,13 +172,26 @@ public class DispatcherServletTestSuite extends TestCase {
 		assertTrue(request.getAttribute("test2y") == null);
 	}
 
+	public void testExistingMultipartRequest() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do;abc=def");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ComplexWebApplicationContext.MockMultipartResolver multipartResolver =
+				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext().getBean("multipartResolver");
+		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+		complexDispatcherServlet.doGet(multipartRequest, response);
+		multipartResolver.cleanupMultipart(multipartRequest);
+		assertTrue(multipartResolver.cleaned);
+	}
+
 	public void testHandlerInterceptorAbort() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
 		request.addParameter("abort", "true");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertTrue("Not forwarded", response.forwarded == null);
 		assertTrue(request.getAttribute("test1") != null);
 		assertTrue(request.getAttribute("test1x") != null);
@@ -194,7 +208,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("fail", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			complexControllerServlet.doGet(request, response);
+			complexDispatcherServlet.doGet(request, response);
 			assertTrue("forwarded to failed", "failed1.jsp".equals(response.forwarded));
 		}
 		catch (ServletException ex) {
@@ -208,7 +222,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed2.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
@@ -219,7 +233,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed3.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
 	}
@@ -230,7 +244,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
@@ -241,7 +255,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
 	}
@@ -252,7 +266,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("exception", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(RuntimeException.class));
 	}
@@ -263,7 +277,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role2");
 		request.addParameter("locale", "en");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
@@ -275,7 +289,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertTrue("Not forwarded", response.forwarded == null);
 	}
 
@@ -285,7 +299,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("theme", "mytheme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		complexControllerServlet.doGet(request, response);
+		complexDispatcherServlet.doGet(request, response);
 		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
@@ -298,7 +312,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			complexControllerServlet.doGet(request, response);
+			complexDispatcherServlet.doGet(request, response);
 			assertTrue("Not forwarded", response.forwarded == null);
 		}
 		catch (ServletException ex) {
@@ -311,7 +325,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			complexControllerServlet.doGet(request, response);
+			complexDispatcherServlet.doGet(request, response);
 			assertTrue("Correct response", response.getStatusCode() == HttpServletResponse.SC_FORBIDDEN);
 		}
 		catch (ServletException ex) {
@@ -325,7 +339,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("myInt", "5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			simpleControllerServlet.doGet(request, response);
+			simpleDispatcherServlet.doGet(request, response);
 			assertTrue("Correct response", "view5".equals(response.forwarded));
 			assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
 		}
@@ -340,7 +354,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("myInt", "5x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			simpleControllerServlet.doGet(request, response);
+			simpleDispatcherServlet.doGet(request, response);
 			fail("Should have thrown ServletException");
 		}
 		catch (ServletException ex) {
@@ -355,7 +369,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("myInt", "5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			simpleControllerServlet.doGet(request, response);
+			simpleDispatcherServlet.doGet(request, response);
 			assertTrue("Correct response", "view5".equals(response.forwarded));
 			assertTrue("Correct model", request.getAttribute("test") instanceof SimpleWebApplicationContext.TestValidatableThrowawayController);
 			Errors errors = (new RequestContext(request)).getErrors("test");
@@ -372,7 +386,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("myInt", "5x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
-			simpleControllerServlet.doGet(request, response);
+			simpleDispatcherServlet.doGet(request, response);
 			assertTrue("Correct response", "view0".equals(response.forwarded));
 			assertTrue("Correct model", request.getAttribute("test") instanceof SimpleWebApplicationContext.TestValidatableThrowawayController);
 			Errors errors = (new RequestContext(request)).getErrors("test");

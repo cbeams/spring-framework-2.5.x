@@ -18,6 +18,10 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
@@ -84,6 +88,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
 		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
 		registerSingleton("exceptionResolver2", SimpleMappingExceptionResolver.class, pvs);
+
+		registerSingleton("multipartResolver", MockMultipartResolver.class, null);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
@@ -233,6 +239,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class ComplexLocaleChecker implements MyHandler {
 
 		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
+			if (!(request instanceof MultipartHttpServletRequest)) {
+				throw new ServletException("Not in a MultipartHttpServletRequest");
+			}
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof ComplexWebApplicationContext)) {
 				throw new ServletException("Incorrect WebApplicationContext");
 			}
@@ -264,6 +273,36 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		public long lastModified() {
 			return 99;
+		}
+	}
+
+
+	public static class MockMultipartResolver implements MultipartResolver {
+
+		private boolean resolved;
+		public boolean cleaned;
+
+		public boolean isMultipart(HttpServletRequest request) {
+			return true;
+		}
+
+		public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+			if (request instanceof MultipartHttpServletRequest) {
+				throw new IllegalStateException("Already a multipart request");
+			}
+			if (this.resolved) {
+				throw new IllegalStateException("Already resolved");
+			}
+			this.resolved = true;
+			return new AbstractMultipartHttpServletRequest(request) {
+			};
+		}
+
+		public void cleanupMultipart(MultipartHttpServletRequest request) {
+			if (this.cleaned) {
+				throw new IllegalStateException("Already cleaned");
+			}
+			this.cleaned = true;
 		}
 	}
 

@@ -81,7 +81,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.23 2004-01-09 06:52:27 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.24 2004-01-10 23:24:21 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -341,11 +341,13 @@ public class DispatcherServlet extends FrameworkServlet {
 		HttpServletRequest processedRequest = request;
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (request instanceof MultipartHttpServletRequest) {
-				throw new ServletException("Request is already a MultipartHttpServletRequest - have you registered both " +
-				                           "a MultipartFilter and a 'multipartResolver' bean for this DispatcherServlet?");
+				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
+										"this typically results from an additional MultipartFilter in web.xml");
 			}
-			request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
-			processedRequest = this.multipartResolver.resolveMultipart(request);
+			else {
+				request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
+				processedRequest = this.multipartResolver.resolveMultipart(request);
+			}
 		}
 
 		HandlerExecutionChain mappedHandler = null;
@@ -428,7 +430,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		finally {
 			// clean up any resources used by a multipart request
-			if (this.multipartResolver != null && processedRequest instanceof MultipartHttpServletRequest) {
+			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 		}
