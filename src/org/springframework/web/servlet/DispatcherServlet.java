@@ -16,14 +16,17 @@
 
 package org.springframework.web.servlet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +39,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.OrderComparator;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -505,12 +509,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
-	 * Obtain and use the handler for this method.
-	 * The handler will be obtained by applying the servlet's HandlerMappings in order.
-	 * The HandlerAdapter will be obtained by querying the servlet's
-	 * installed HandlerAdapters to find the first that supports the handler class.
-	 * Both doGet() and doPost() are handled by this method.
-	 * It's up to HandlerAdapters to decide which methods are acceptable.
+	 * Expose the DispatcherServlet-specific request attributes and
+	 * delegate to <code>doDispatch</code> for the actual dispatching.
+	 * @see #doDispatch
 	 */
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
@@ -527,7 +528,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			Enumeration attrNames = request.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = (String) attrNames.nextElement();
-				attributesSnapshot.put(attrName, request.getAttribute(attrName));
+				if (this.cleanupAfterInclude || attrName.startsWith(DispatcherServlet.class.getName())) {
+					attributesSnapshot.put(attrName, request.getAttribute(attrName));
+				}
 			}
 		}
 
@@ -536,6 +539,29 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 
+		try {
+			doDispatch(request, response);
+		}
+		finally {
+			// Restore the original attribute snapshot, in case of an include.
+			if (attributesSnapshot != null) {
+				restoreAttributesAfterInclude(request, attributesSnapshot);
+			}
+		}
+	}
+
+	/**
+	 * Process the actual dispatching to the handler.
+	 * <p>The handler will be obtained by applying the servlet's HandlerMappings in order.
+	 * The HandlerAdapter will be obtained by querying the servlet's installed
+	 * HandlerAdapters to find the first that supports the handler class.
+	 * <p>All HTTP methods are handled by this method. It's up to HandlerAdapters or
+	 * handlers themselves to decide which methods are acceptable.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws Exception in case of any kind of processing failure
+	 */
+	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
@@ -543,27 +569,12 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			ModelAndView mv = null;
 			try {
-				// Convert the request into a multipart request, and make multipart resolver available.
-				// If no multipart resolver is set, simply use the existing request.
-				if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
-					if (request instanceof MultipartHttpServletRequest) {
-						logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
-								"this typically results from an additional MultipartFilter in web.xml");
-					}
-					else {
-						request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
-						processedRequest = this.multipartResolver.resolveMultipart(request);
-					}
-				}
+				processedRequest = checkMultipart(request);
 
+				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
-					// If we didn't find a handler.
-					if (pageNotFoundLogger.isWarnEnabled()) {
-						pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
-								"] in DispatcherServlet with name '" + getServletName() + "'");
-					}
-					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					noHandlerFound(processedRequest, response);
 					return;
 				}
 
@@ -596,29 +607,13 @@ public class DispatcherServlet extends FrameworkServlet {
 				mv = ex.getModelAndView();
 			}
 			catch (Exception ex) {
-				ModelAndView exMv = null;
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
-				for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
-					HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
-					exMv = resolver.resolveException(request, response, handler, ex);
-				}
-				if (exMv != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
-					}
-					logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
-					mv = exMv;
-				}
-				else {
-					throw ex;
-				}
+				mv = processHandlerException(request, response, handler, ex);
 			}
 
 			// Did the handler return a view to render?
 			if (mv != null) {
-				Locale locale = this.localeResolver.resolveLocale(processedRequest);
-				response.setLocale(locale);
-				render(mv, processedRequest, response, locale);
+				render(mv, processedRequest, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -627,35 +622,27 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 			}
 
+			// Trigger after-completion for successful outcome.
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
 
 		catch (Exception ex) {
+			// Trigger after-completion for thrown exception.
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			throw ex;
+		}
+		catch (Error err) {
+			// Trigger after-completion for thrown error (rare case).
+			// Better trigger callback without exception argument rather than no callback at all;
+			// after-completion callbacks offen perform finally-style cleanup.
+			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			throw err;
 		}
 
 		finally {
 			// Clean up any resources used by a multipart request.
 			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
-			}
-
-			// Restore the original attribute snapshot, in case of an include.
-			if (attributesSnapshot != null) {
-				logger.debug("Restoring snapshot of request attributes after include");
-				Enumeration attrNames = request.getAttributeNames();
-				while (attrNames.hasMoreElements()) {
-					String attrName = (String) attrNames.nextElement();
-					if (this.cleanupAfterInclude || attrName.startsWith(DispatcherServlet.class.getName())) {
-						Object attrValue = attributesSnapshot.get(attrName);
-						if (attrValue != null) {
-							request.setAttribute(attrName, attrValue);
-						}
-						else {
-							request.removeAttribute(attrName);
-						}
-					}
-				}
 			}
 		}
 	}
@@ -685,6 +672,28 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.debug("Exception thrown in getLastModified", ex);
 			return -1;
 		}
+	}
+
+
+	/**
+	 * Convert the request into a multipart request, and make multipart resolver available.
+	 * If no multipart resolver is set, simply use the existing request.
+	 * @param request current HTTP request
+	 * @return the processed request (multipart wrapper if necessary)
+	 */
+	private HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
+		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			if (request instanceof MultipartHttpServletRequest) {
+				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
+						"this typically results from an additional MultipartFilter in web.xml");
+			}
+			else {
+				request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
+				return this.multipartResolver.resolveMultipart(request);
+			}
+		}
+		// If not returned before: return original request.
+		return request;
 	}
 
 	/**
@@ -723,6 +732,20 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * No handler found -> set appropriate HTTP response status.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws IOException if thrown by the HttpServletResponse
+	 */
+	private void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		if (pageNotFoundLogger.isWarnEnabled()) {
+			pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
+					"] in DispatcherServlet with name '" + getServletName() + "'");
+		}
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	}
+
+	/**
 	 * Return the HandlerAdapter for this handler object.
 	 * @param handler the handler object to find an adapter for
 	 * @throws ServletException if no HandlerAdapter can be found for the handler.
@@ -744,17 +767,49 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or null if none chosen at the time of
+	 * the exception (for example, if multipart resolution failed)
+	 * @param ex the exception that got thrown during handler execution
+	 * @return a corresponding ModelAndView to forward to
+	 * @throws Exception if no error ModelAndView found
+	 */
+	private ModelAndView processHandlerException(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws Exception {
+		ModelAndView exMv = null;
+		for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+			HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
+			exMv = resolver.resolveException(request, response, handler, ex);
+		}
+		if (exMv != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+			}
+			logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
+			return exMv;
+		}
+		else {
+			throw ex;
+		}
+	}
+
+	/**
 	 * Render the given ModelAndView. This is the last stage in handling a request.
 	 * It may involve resolving the view by name.
 	 * @param mv the ModelAndView to render
 	 * @param request current HTTP servlet request
 	 * @param response current HTTP servlet response
-	 * @param locale the locale for the current request
 	 * @throws Exception if there's a problem rendering the view
 	 */
-	private void render(
-			ModelAndView mv, HttpServletRequest request, HttpServletResponse response, Locale locale)
-	    throws Exception {
+	private void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		// Determine locale for request and apply it to the response.
+		Locale locale = this.localeResolver.resolveLocale(request);
+		response.setLocale(locale);
 
 		View view = null;
 		if (mv.isReference()) {
@@ -799,8 +854,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			throws Exception {
 
 		// Apply afterCompletion methods of registered interceptors.
-		Exception currEx = ex;
-
 		if (mappedHandler != null) {
 			if (mappedHandler.getInterceptors() != null) {
 				for (int i = interceptorIndex; i >=0; i--) {
@@ -808,18 +861,51 @@ public class DispatcherServlet extends FrameworkServlet {
 					try {
 						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
-					catch (Exception ex2) {
-						if (currEx != null) {
-							logger.error("Exception overridden by HandlerInterceptor.afterCompletion exception", currEx);
-						}
-						currEx = ex2;
+					catch (Throwable ex2) {
+						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
 					}
 				}
 			}
 		}
+	}
 
-		if (currEx != null) {
-			throw currEx;
+	/**
+	 * Restore the request attributes after an include.
+	 * @param request current HTTP request
+	 * @param attributesSnapshot the snapshot of the request attributes
+	 * before the include
+	 */
+	private void restoreAttributesAfterInclude(HttpServletRequest request, Map attributesSnapshot) {
+		logger.debug("Restoring snapshot of request attributes after include");
+
+		// Need to copy into separate Collection here, to avoid side effects
+		// on the Enumeration when removing attributes.
+		Set attrsToCheck = new HashSet();
+		Enumeration attrNames = request.getAttributeNames();
+		while (attrNames.hasMoreElements()) {
+			String attrName = (String) attrNames.nextElement();
+			if (this.cleanupAfterInclude || attrName.startsWith(DispatcherServlet.class.getName())) {
+				attrsToCheck.add(attrName);
+			}
+		}
+
+		// Iterate over the attributes to check, restoring the original value
+		// or removing the attribute, respectively, if appropriate.
+		for (Iterator it = attrsToCheck.iterator(); it.hasNext();) {
+			String attrName = (String) it.next();
+			Object attrValue = attributesSnapshot.get(attrName);
+			if (attrValue != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Restoring original value of attribute [" + attrName + "] after include");
+				}
+				request.setAttribute(attrName, attrValue);
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Removing attribute [" + attrName + "] after include");
+				}
+				request.removeAttribute(attrName);
+			}
 		}
 	}
 
