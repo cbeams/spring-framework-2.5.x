@@ -134,6 +134,7 @@
 			<include name="images/**"/>
 			<include name="themes/**"/>
 			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/views/**"/>

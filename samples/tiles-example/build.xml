@@ -152,7 +152,8 @@
 			for autobuilds testing
 		-->
 	</target>
-	
+
+
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
 		<!-- To not include jboss file if jboss.root was not set before -->
@@ -162,9 +163,8 @@
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
-			<include name="WEB-INF/*-servlet.xml"/>
-			<include name="WEB-INF/*Context.xml"/>
-				<include name="WEB-INF/*.properties"/>
+			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<include name="WEB-INF/defs/**"/>
@@ -173,7 +173,8 @@
 		</war>
 
 	</target>
-	
+
+
 	<target name="tests" depends="build">
 
 		<delete dir="${testbuild.dir}"/>
@@ -209,7 +210,7 @@
 			</fileset>
 			<report format="frames" todir="${testhtml.dir}"/>
 		</junitreport>
-	</target>
 
+	</target>
 
 </project>

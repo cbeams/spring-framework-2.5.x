@@ -131,10 +131,8 @@
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
-			<include name="WEB-INF/applicationContext.xml"/>
-			<include name="WEB-INF/schedulingContext*.xml"/>
-			<include name="WEB-INF/image-servlet.xml"/>
-			<include name="WEB-INF/*.properties"/>
+			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/views/**"/>
 			<exclude name="**/.*"/>
