@@ -146,8 +146,8 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
-		Session session = SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
-																										 getJdbcExceptionTranslator());
+		Session session = SessionFactoryUtils.getSession(
+				getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
 			logger.debug("Found thread-bound session for Hibernate interceptor");
 			existingTransaction = true;

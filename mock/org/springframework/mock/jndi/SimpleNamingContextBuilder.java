@@ -27,8 +27,6 @@ import javax.naming.spi.NamingManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.mock.jndi.SimpleNamingContext;
-
 /**
  * Simple implementation of a JNDI naming context builder.
  *
@@ -46,23 +44,24 @@ import org.springframework.mock.jndi.SimpleNamingContext;
  * </ul>
  *
  * <p>Typical usage in bootstrap code:
- * <p><code>
- * SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();<br>
- * DataSource ds = new DriverManagerDataSource(...);<br>
- * builder.bind("java:comp/env/jdbc/myds", ds);<br>
- * builder.activate();
- * </code>
+ *
+ * <pre>
+ * SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+ * DataSource ds = new DriverManagerDataSource(...);
+ * builder.bind("java:comp/env/jdbc/myds", ds);
+ * builder.activate();</pre>
  * 
- * <p>Note that it's impossible to activate multiple builders within the same JVM,
+ * Note that it's impossible to activate multiple builders within the same JVM,
  * due to JNDI restrictions. Thus to configure a fresh builder repeatedly, use
  * the following code to get a reference to either an already activated builder
  * or a newly activated one:
- * <p><code>
- * SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();<br>
- * DataSource ds = new DriverManagerDataSource(...);<br>
- * builder.bind("java:comp/env/jdbc/myds", ds);<br>
- * </code>
- * <p>Note that you <i>should not</i> call activate() on a builder from this
+ *
+ * <pre>
+ * SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+ * DataSource ds = new DriverManagerDataSource(...);
+ * builder.bind("java:comp/env/jdbc/myds", ds);</pre>
+ *
+ * Note that you <i>should not</i> call activate() on a builder from this
  * factory method, as there will already be an activated one in any case.
  *
  * <p>An instance of this class is only necessary at setup time.
@@ -147,12 +146,13 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 */
 	public void bind(String name, Object obj) {
 		logger.info("Static JNDI binding: [" + name + "] = [" + obj + "]");
-		boundObjects.put(name, obj);
+		this.boundObjects.put(name, obj);
 	}
 
 	/**
 	 * Simple InitialContextFactoryBuilder implementation,
 	 * creating a new SimpleNamingContext instance.
+	 * @see SimpleNamingContext
 	 */
 	public InitialContextFactory createInitialContextFactory(Hashtable environment) {
 		return new InitialContextFactory() {

@@ -166,8 +166,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public Object execute(HibernateCallback action) throws DataAccessException {
 		Session session = (!isAllowCreate() ?
 				SessionFactoryUtils.getSession(getSessionFactory(), false) :
-				SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
-																			 getJdbcExceptionTranslator()));
+				SessionFactoryUtils.getSession(
+						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator()));
 		boolean existingTransaction = TransactionSynchronizationManager.hasResource(getSessionFactory());
 		if (!existingTransaction && getFlushMode() == FLUSH_NEVER) {
 			session.setFlushMode(FlushMode.NEVER);
@@ -889,9 +889,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (FlushMode.NEVER.equals(session.getFlushMode())) {
-			throw new InvalidDataAccessApiUsageException("Write operations are not allowed in read-only mode - " +
-			                                             "turn your Session into FlushMode.AUTO respectively remove " +
-			                                             "'readOnly' marker from transaction definition");
+			throw new InvalidDataAccessApiUsageException(
+					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
+					"into FlushMode.AUTO respectively remove 'readOnly' marker from transaction definition");
 		}
 	}
 

@@ -47,7 +47,7 @@ import javax.sql.DataSource;
  * a connection pool implementation type.
  *
  * @author Juergen Hoeller
- * @since 19.07.2004
+ * @since 1.1
  * @see DataSourceUtils#doGetConnection
  * @see DataSourceUtils#doCloseConnectionIfNecessary
  */
@@ -69,7 +69,6 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		afterPropertiesSet();
 	}
 
-
 	/**
 	 * Delegate to DataSourceUtils for automatically participating in Spring-managed
 	 * transactions. Throws the original SQLException, if any.
@@ -89,9 +88,10 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see DataSourceUtils#doCloseConnectionIfNecessary
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, DataSource ds) {
-		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-		                                           new Class[] {ConnectionProxy.class},
-		                                           new TransactionAwareInvocationHandler(target, ds));
+		return (Connection) Proxy.newProxyInstance(
+				Thread.currentThread().getContextClassLoader(),
+				new Class[] {ConnectionProxy.class},
+				new TransactionAwareInvocationHandler(target, ds));
 	}
 
 

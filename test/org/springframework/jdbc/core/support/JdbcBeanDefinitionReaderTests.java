@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import org.easymock.MockControl;
+
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.AbstractJdbcTests;
@@ -30,39 +31,30 @@ import org.springframework.jdbc.AbstractJdbcTests;
 public class JdbcBeanDefinitionReaderTests extends AbstractJdbcTests {
 
 	public void testValid() throws Exception {
-		String sql =
-			"SELECT NAME AS NAME, PROPERTY AS PROPERTY, VALUE AS VALUE FROM T";
-
-		String[][] results =
-			{ { "one", "class", "org.springframework.beans.TestBean" }, {
-				"one", "age", "53" }, };
+		String sql = "SELECT NAME AS NAME, PROPERTY AS PROPERTY, VALUE AS VALUE FROM T";
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true, 2);
-		ctrlResultSet.setReturnValue(false, 1);
-		mockResultSet.getString(1);
-		ctrlResultSet.setReturnValue(results[0][0]);
-		mockResultSet.getString(2);
-		ctrlResultSet.setReturnValue(results[0][1]);
-		mockResultSet.getString(3);
-		ctrlResultSet.setReturnValue(results[0][2]);
-		mockResultSet.getString(1);
-		ctrlResultSet.setReturnValue(results[1][0]);
-		mockResultSet.getString(2);
-		ctrlResultSet.setReturnValue(results[1][1]);
-		mockResultSet.getString(3);
-		ctrlResultSet.setReturnValue(results[1][2]);
+		ctrlResultSet.expectAndReturn(mockResultSet.next(), true, 2);
+		ctrlResultSet.expectAndReturn(mockResultSet.next(), false);
+
+		// first row
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(1), "one");
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(2), "class");
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(3), "org.springframework.beans.TestBean");
+
+		// second row
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(1), "one");
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(2), "age");
+		ctrlResultSet.expectAndReturn(mockResultSet.getString(3), "53");
+
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(null);
+		ctrlStatement.expectAndReturn(mockStatement.executeQuery(sql), mockResultSet);
+		ctrlStatement.expectAndReturn(mockStatement.getWarnings(), null);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -77,9 +69,9 @@ public class JdbcBeanDefinitionReaderTests extends AbstractJdbcTests {
 		JdbcBeanDefinitionReader reader = new JdbcBeanDefinitionReader(bf);
 		reader.setDataSource(mockDataSource);
 		reader.loadBeanDefinitions(sql);
-		assertTrue(bf.getBeanDefinitionCount() == 1);
+		assertEquals("Incorrect number of bean definitions", 1, bf.getBeanDefinitionCount());
 		TestBean tb = (TestBean) bf.getBean("one");
-		assertTrue(tb.getAge() == 53);
+		assertEquals("Age in TestBean was wrong.", 53, tb.getAge());
 
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
