@@ -65,6 +65,20 @@ public class ServletContextResource extends AbstractResource {
 	}
 
 	/**
+	 * Return the ServletContext for this resource. Only for internal use.
+	 */
+	protected ServletContext getServletContext() {
+		return servletContext;
+	}
+
+	/**
+	 * Return the path for this resource. Only for internal use.
+	 */
+	protected String getPath() {
+		return path;
+	}
+
+	/**
 	 * This implementation delegates to ServletContext.getResourceAsStream,
 	 * but throws a FileNotFoundException if not found.
 	 * @see javax.servlet.ServletContext#getResourceAsStream
@@ -111,7 +125,7 @@ public class ServletContextResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return "resource [" + this.path + "] of ServletContext";
+		return "ServletContext resource [" + this.path + "]";
 	}
 
 	public boolean equals(Object obj) {

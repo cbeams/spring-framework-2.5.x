@@ -99,8 +99,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Create a new PathMatchingResourcePatternResolver.
 	 * <p>ClassLoader access will happen via the thread context class loader on actual
 	 * access (applying to the thread that does the "getResources" call)
-	 * @param resourceLoader ResourceLoader to load root directories
-	 * and actual resources with
+	 * @param resourceLoader the ResourceLoader to load root directories and
+	 * actual resources with
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
@@ -109,8 +109,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver.
-	 * @param resourceLoader ResourceLoader to load root directories
-	 * and actual resources with
+	 * @param resourceLoader the ResourceLoader to load root directories and
+	 * actual resources with
 	 * @param classLoader the ClassLoader to load classpath resources with,
 	 * or null for using the thread context class loader on actual access
 	 * (applying to the thread that does the "getResources" call)
@@ -184,25 +184,42 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param locationPattern the location pattern to match
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
+	 * @see #doFindPathMatchingFileResources
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Resource[] findPathMatchingFileResources(String locationPattern) throws IOException {
-		List result = new ArrayList();
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
-		File rootDir = this.resourceLoader.getResource(rootDirPath).getFile().getAbsoluteFile();
+		Resource rootDirResource = this.resourceLoader.getResource(rootDirPath);
+		List result = doFindPathMatchingFileResources(rootDirResource, subPattern);
+		if (logger.isInfoEnabled()) {
+			logger.info("Resolved location pattern [" + locationPattern + "] to file paths " + result);
+		}
+		return (Resource[]) result.toArray(new Resource[result.size()]);
+	}
+
+	/**
+	 * Find all file resources that match the given location pattern
+	 * via the Ant-style PathMatcher utility.
+	 * @param rootDirResource the root directory as Resource
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return the List of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @see #retrieveMatchingFiles
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected List doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
+		File rootDir = rootDirResource.getFile().getAbsoluteFile();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
 		List matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-		if (logger.isInfoEnabled()) {
-			logger.info("Resolved location pattern [" + locationPattern + "] to file paths: " + matchingFiles);
-		}
+		List result = new ArrayList(matchingFiles.size());
 		for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
 			File file = (File) it.next();
 			result.add(new FileSystemResource(file));
 		}
-		return (Resource[]) result.toArray(new Resource[result.size()]);
+		return result;
 	}
 
 	/**
@@ -213,7 +230,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * remainder of the location as pattern.
 	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
 	 * for example.
-	 * @param location the location to check
+	 * @param location the location to checkn
 	 * @return the part of the location that denotes the root directory
 	 * @see #retrieveMatchingFiles
 	 */
