@@ -20,6 +20,7 @@ import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.web.servlet.view.document.AbstractExcelView;
 
 import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.context.NoSuchMessageException;
 
 /**
  * This view demonstrates how to send an Excel file with the Spring Framework
@@ -36,14 +37,8 @@ import org.springframework.samples.countries.appli.ICountry;
  */
 public class CountriesExcelView extends AbstractExcelView {
 
-	/**
-	 * @see org.springframework.web.servlet.view.document.AbstractExcelView#buildExcelDocument(java.util.Map, org.apache.poi.hssf.usermodel.HSSFWorkbook, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	protected void buildExcelDocument(
-		Map model,
-		HSSFWorkbook wb,
-		HttpServletRequest request,
-		HttpServletResponse response) {
+	protected void buildExcelDocument(Map model, HSSFWorkbook wb,	HttpServletRequest request,
+																		HttpServletResponse response) throws NoSuchMessageException {
 
 			HSSFSheet sheet;
 			HSSFCell  cell;
@@ -162,10 +157,6 @@ public class CountriesExcelView extends AbstractExcelView {
 				getCell(sheet, row, 1 ).setCellValue(country.getName());
 				row++;
 			}
-	}
-
-	private String getMessage(String key, Locale locale) {
-		return this.getApplicationContext().getMessage(key, null, key, locale);
 	}
 
 }

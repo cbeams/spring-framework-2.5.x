@@ -118,7 +118,19 @@ public abstract class AbstractExcelView extends AbstractView {
 			wb = new HSSFWorkbook();
 			logger.info("Excel WorkBook created from scratch");
 		}
-		buildExcelDocument(model, wb, request, response);
+
+		try {
+			buildExcelDocument(model, wb, request, response);
+		}
+		catch (ServletException ex) {
+			throw ex;
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new ServletException("Error creating Excel document", ex);
+		}
 
 		// response.setContentLength(wb.getBytes().length);
 		response.setContentType(getContentType());
@@ -199,11 +211,8 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param request in case we need locale etc. Shouldn't look at attributes
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
-	protected abstract void buildExcelDocument(
-		Map model, 
-		HSSFWorkbook wb, 
-		HttpServletRequest request,
-		HttpServletResponse response);
+	protected abstract void buildExcelDocument(Map model,	HSSFWorkbook wb, HttpServletRequest request,
+																						 HttpServletResponse response) throws Exception;
 
 	/**
 	 * Convenient method to obtain the cell in the given sheet, row and column

@@ -16,6 +16,7 @@ import org.springframework.beans.SortDefinition;
 import org.springframework.samples.countries.appli.ICountry;
 import org.springframework.util.RefreshablePagedListHolder;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
+import org.springframework.context.NoSuchMessageException;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -53,16 +54,9 @@ public class CountriesPdfView extends AbstractPdfView {
 	private static final Font    BOLD_FONT = new Font( Font.TIMES_NEW_ROMAN, 8, Font.BOLD, Color.black );
 	private static final int     MARGIN = 32;
 
-	protected void buildPdfDocument(
-		Map model,
-		Document pdfDoc,
-		PdfWriter writer,
-		HttpServletRequest request,
-		HttpServletResponse response)
-		throws DocumentException {
+	protected void buildPdfDocument(Map model, Document pdfDoc,	PdfWriter writer,	HttpServletRequest request,
+																	HttpServletResponse response)	throws DocumentException, NoSuchMessageException {
 
-		Paragraph              par;
-		
 		// We search the data to insert
 		RefreshablePagedListHolder pgHolder = ( RefreshablePagedListHolder ) model.get( "countries" );
 		Locale loc = pgHolder.getLocale();
@@ -192,10 +186,6 @@ public class CountriesPdfView extends AbstractPdfView {
 		pdfDoc.add(table);
 	}
 
-	private String getMessage(String key, Locale locale) {
-		return this.getApplicationContext().getMessage(key, null, key, locale);
-	}
-
 	//~ Inner Classes ----------------------------------------------------------
 
 	class MyPageEvents extends PdfPageEventHelper {
@@ -233,7 +223,7 @@ public class CountriesPdfView extends AbstractPdfView {
 		// we override the onEndPage method
 		public void onEndPage(PdfWriter writer, Document document) {
 			int pageN = writer.getPageNumber();
-			String text = getMessage( "page", loc) + " " + pageN + " " + getMessage( "on", loc) + " ";
+			String text = getMessage("page", "page", loc) + " " + pageN + " " + getMessage("on", "on", loc) + " ";
 			float  len = bf.getWidthPoint( text, 8 );
 			cb.beginText();
 			cb.setFontAndSize(bf, 8);

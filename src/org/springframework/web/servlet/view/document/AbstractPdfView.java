@@ -25,7 +25,7 @@ import com.lowagie.text.pdf.PdfWriter;
  * <br>NB: Internet Explorer requires a .pdf extension, as
  * it doesn't always respect the declared content type.
  * <br>Exposes page width and height as bean properties.
- * @version $Id: AbstractPdfView.java,v 1.2 2003-08-27 21:41:38 pawlakjp Exp $
+ * @version $Id: AbstractPdfView.java,v 1.3 2003-10-23 10:20:44 jhoeller Exp $
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
  */
@@ -73,11 +73,16 @@ public abstract class AbstractPdfView extends AbstractView {
 			baos.writeTo(out);
 			out.flush();
 		}
-		catch (DocumentException ex) {
+		catch (ServletException ex) {
+			throw ex;
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
 			throw new ServletException("Error creating PDF document", ex);
 		}
-	}	// renderMergedOutputModel
-
+	}
 
 	/**
 	 * Subclasses must implement this method to create an iText PDF document,
@@ -85,7 +90,8 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @param request in case we need locale etc. Shouldn't look at attributes
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
-	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request, HttpServletResponse response) throws DocumentException;
+	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request,
+																					 HttpServletResponse response) throws Exception;
 
 	/**
 	 * Return a new com.lowagie.text.Document. 
