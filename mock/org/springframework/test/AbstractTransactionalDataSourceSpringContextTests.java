@@ -23,8 +23,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
  * functionality. Expects a DataSource to be defined in the Spring application context.
- * This class exposes a JdbcTemplate and provides an easy
- * way to delete from the database in a new transaction.
+ *
+ * <p>This class exposes a JdbcTemplate and provides an easy way to
+ * delete from the database in a new transaction.
+ *
  * @author Rod Johnson
  * @since 1.1.1
  */
@@ -52,7 +54,8 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	/**
 	 * Convenient method to delete all rows from these tables.
 	 * Calling this method will make avoidance of rollback by calling
-	 * setComplete() impossible.
+	 * <code>setComplete()</code> impossible.
+	 * @see #setComplete
 	 */
 	protected void deleteFromTables(String[] names) {
 		for (int i = 0; i < names.length; i++) {
