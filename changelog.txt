@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.58 2003-12-06 15:57:40 jhoeller Exp $
+$Id: changelog.txt,v 1.59 2003-12-09 08:54:40 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -28,6 +28,7 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * ApplicationContext interface extends AutowireCapableBeanFactory
+* dissolved ContextOptions support
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
 * added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
 
@@ -54,16 +55,21 @@ Package org.springframework.transaction
 
 Package org.springframework.web
 * added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
-* introduced RootWebApplicationContext and NestedWebApplicationContext configuration interfaces
-* reworked initialization workflow of XmlWebApplicationContext and StaticWebApplicationContext
-* allow for overriding context creation in ContextLoader (now a full object) and FrameworkServlet
 * introduced GenericFilterBean and OncePerRequestFilter base classes in package org.springframework.web.filter
 * reworked MultipartFilter to extend GenericFilterBean/OncePerRequestFilter
+* added "getRequiredWebApplicationContext" method to WebApplicationContextUtils
+* dissolved support for exposing "config" objects as ServletContext attributes
+* introduced ConfigurableWebApplicationContext configuration interface instead of constructor requirements
+* reworked initialization workflow of XmlWebApplicationContext and StaticWebApplicationContext
+* allowed for overriding context creation in ContextLoader (now a full object) and FrameworkServlet
+* added "contextConfigLocation" property to FrameworkServlet, analogous to ContextLoader's
 * DispatcherServlet's default exception handling lets RuntimeExceptions straight through
-* HandlerInterceptors are allowed to throw any Exception
+* HandlerMappings and HandlerInterceptors are allowed to throw any Exception
+* allowed for on-demand fetching of prototype handlers in SimpleUrlHandlerMapping and BeanNameUrlHandlerMapping
 * added ModelAndView argument to HandlerInterceptor's "postHandle" method, for exposing additional model objects
 * added "afterCompletion" method to HandlerInterceptor, invoked on any outcome for proper resource cleanup
 * added HandlerInterceptorAdapter for simplified implementation of pre-only/post-only interceptors
+* dissolved UrlHandlerAware support in AbstractUrlHandlerMappinng
 * moved SimpleMappingExceptionResolver from package org.springframework.web.servlet.support to web.servlet.handler
 * moved UserRoleAuthorizationInterceptor from package org.springframework.web.servlet.support to web.servlet.handler
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
@@ -72,6 +78,7 @@ Package org.springframework.web
 * AbstractWizardFormController overrides "handleInvalidSubmit" to show the initial page of a new wizard form
 * added additional "referenceData(request,page)" method to AbstractWizardFormController
 * added additional "getTargetPage(request,command,errors,currentPage)" method to AbstractWizardFormController
+* introduced ThrowawayController and ValidatableThrowawayController for WebWork/
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
 
 
