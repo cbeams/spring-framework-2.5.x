@@ -543,6 +543,8 @@ public class JtaTransactionTestSuite extends TestCase {
 					utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 					ut.begin();
 					utControl.setVoidCallable(1);
+					ut.rollback();
+					utControl.setVoidCallable(2);
 				}
 				catch (Exception ex) {
 				}
@@ -558,8 +560,15 @@ public class JtaTransactionTestSuite extends TestCase {
 		tm.setCacheUserTransaction(false);
 		tm.afterPropertiesSet();
 		TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition());
+		tm.rollback(status1);
 		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition());
+		tm.rollback(status2);
 		assertTrue(status1.getTransaction() != status2.getTransaction());
+	}
+
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

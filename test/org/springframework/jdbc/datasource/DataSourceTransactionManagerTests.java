@@ -109,10 +109,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		}
 		catch (RuntimeException ex2) {
 			// expected
-			assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
-			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 			assertTrue("Correct exception thrown", ex2.equals(ex));
 		}
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -153,6 +154,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			TransactionSynchronizationManager.unbindResource(ds);
 		}
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -197,6 +199,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				assertTrue("Is new transaction", status.isNewTransaction());
 			}
 		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -230,12 +234,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 			}
 		});
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -270,6 +276,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setTimeout(10);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				try {
@@ -283,6 +290,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			}
 		});
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 		dsControl.verify();
 		psControl.verify();
@@ -314,6 +322,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			// expected
 		}
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 	}
 
@@ -351,6 +360,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			// expected
 		}
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 	}
 
@@ -391,6 +401,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			// expected
 		}
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 	}
 
@@ -428,6 +439,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			// expected
 		}
 
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();
 	}
 
@@ -498,6 +510,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		dsControl.verify();
+	}
+
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

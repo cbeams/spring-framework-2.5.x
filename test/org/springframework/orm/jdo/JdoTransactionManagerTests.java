@@ -591,4 +591,9 @@ public class JdoTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+	}
+
 }

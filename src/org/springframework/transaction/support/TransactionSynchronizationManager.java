@@ -59,7 +59,14 @@ public abstract class TransactionSynchronizationManager {
 	private static final ThreadLocal synchronizations = new ThreadLocal();
 
 
-	private static Map getResourceMap() {
+	/**
+	 * Return all resources that are bound to the current thread.
+	 * <p>Mainly for debugging purposes. Resource managers should always invoke
+	 * hasResource for a specific resource key that they are interested in.
+	 * @return Map with resource keys and resource objects
+	 * @see #hasResource
+	 */
+	public static Map getResourceMap() {
 		return (Map) resources.get();
 	}
 
