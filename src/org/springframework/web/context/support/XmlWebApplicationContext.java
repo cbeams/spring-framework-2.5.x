@@ -30,12 +30,11 @@ import org.springframework.web.context.WebApplicationContext;
  * number of commas and spaces, like "applicationContext1.xml, applicationContext2.xml".
  * For example, a root application context definition can be collected from multiple
  * XML files by simply setting multiple names as "contextConfigLocation" context-param.
- * Note that bean definitions in a </i>later</i> XML file will override ones of the
- * same name in a previous file.
+ * The bean definitions in the files are not allowed to overlap.
  *
- * <p>Interprets (file) paths as servlet context resources, i.e. as paths beneath
- * the web application root. Thus, absolute paths, i.e. files outside the web app
- * root, should be accessed via "file:" URLs.
+ * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
+ * the web application root. Absolute paths, e.g. for files outside the web app root,
+ * can be accessed via "file:" URLs.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -103,7 +102,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	public XmlWebApplicationContext(ApplicationContext parent, String namespace) {
 		super(parent);
 		this.namespace = namespace;
-		setDisplayName("WebApplicationContext for namespace [" + namespace + "]");
+		setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
 	}
 
 	/**
@@ -178,11 +177,12 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	}
 
 	/**
-	 * This implementation supports file paths beneath the root
-	 * of the web application.
+	 * This implementation supports file paths beneath the root of the web application.
 	 */
 	protected InputStream getResourceByPath(String path) throws IOException {
 		if (path != null && !path.startsWith("/")) {
+			// the Servlet spec requires that resource paths start with a slash,
+			// even if many containers accept paths without leading slash too
 			path = "/" + path;
 		}
 		return getServletContext().getResourceAsStream(path);
