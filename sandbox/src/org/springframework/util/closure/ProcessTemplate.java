@@ -45,10 +45,47 @@ package org.springframework.util.closure;
  * sets. In addition to providing a common callback interface, it is intended
  * for convenience in situations where defining a separate callback hierarchy to
  * support a template callback approach is overkill.
- * 
  * @author Keith Donald
  */
 public interface ProcessTemplate {
+
+	/**
+	 * Does this process produce an element maching the given criteria?
+	 * @param constraint the criteria
+	 * @return true if yes, false otherwise
+	 */
+	public boolean anyTrue(Constraint constraint);
+
+	/**
+	 * Does this process produce all elements maching the given criteria?
+	 * @param constraint the criteria
+	 * @return true if yes, false otherwise
+	 */
+	public boolean allTrue(Constraint constraint);
+
+	/**
+	 * Find the first element that matches the given criteria.
+	 * @param constraint the criteria
+	 * @return the first element, or null if none found.
+	 */
+	public Object findFirst(Constraint constraint);
+
+	/**
+	 * Find the first element that matches the given criteria, return
+	 * <code>defaultIfNoneFound</code> if none found.
+	 * @param constraint the constraint
+	 * @param defaultIfNoneFound none found object
+	 * @return the first match, or defaultIfNoneFound if no match found
+	 */
+	public Object findFirst(Constraint constraint, Object defaultIfNoneFound);
+
+	/**
+	 * Find all elements produced by ths template that match the specified
+	 * criteria.
+	 * @param constraint the criteria
+	 * @return the elements
+	 */
+	public ProcessTemplate findAll(Constraint constraint);
 
 	/**
 	 * Execute the template with the specific closure callback for the insertion
@@ -57,4 +94,16 @@ public interface ProcessTemplate {
 	 * @param templateCallback The procedure callback.
 	 */
 	public void run(Closure templateCallback);
+
+	/**
+	 * Execute the template until the specified condition is true
+	 * @param templateCallback the callback
+	 * @param constraint the constraint condition
+	 */
+	public void runUntil(Closure templateCallback, Constraint constraint);
+
+	/**
+	 * Stop this process after it has started.
+	 */
+	public void stop() throws IllegalStateException;
 }

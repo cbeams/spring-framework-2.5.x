@@ -121,7 +121,7 @@ public class FlowExecutionListenerList {
 	 * @return The iterator process template.
 	 */
 	public ProcessTemplate iteratorTemplate() {
-		return flowExecutionListeners;
+		return flowExecutionListeners.iteratorTemplate();
 	}
 
 	/**

@@ -25,6 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.IteratorProcessTemplate;
 
 /**
  * Helper implementation of an event listener list.
@@ -35,30 +36,29 @@ import org.springframework.util.closure.ProcessTemplate;
  * Usage Example:
  * 
  * <pre>
- * private ListenerListHelper fooListeners = new ListenerListHelper(
- *         FooListener.class);
+ * private ListenerListHelper fooListeners = new ListenerListHelper(FooListener.class);
  * 
  * public void addFooListener(FooListener listener) {
- *     fooListeners.add(listener);
+ * 	fooListeners.add(listener);
  * }
  * 
  * public void removeFooListener(FooListener listener) {
- *     fooListeners.remove(listener);
+ * 	fooListeners.remove(listener);
  * }
  * 
  * protected void fireFooXXX() {
- *     fooListeners.fire(&quot;fooXXX&quot;, new Event());
+ * 	fooListeners.fire(&quot;fooXXX&quot;, new Event());
  * }
  * 
  * protected void fireFooYYY() {
- *     fooListeners.fire(&quot;fooYYY&quot;);
+ * 	fooListeners.fire(&quot;fooYYY&quot;);
  * }
  * </pre>
  * 
  * @author Oliver Hutchison
  * @author Keith Donald
  */
-public class EventListenerListHelper implements Serializable, ProcessTemplate {
+public class EventListenerListHelper implements Serializable {
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
@@ -123,7 +123,7 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 	public boolean hasListeners() {
 		return listeners.length > 0;
 	}
-	
+
 	/**
 	 * Returns true if there are no listeners registered with this list.
 	 */
@@ -163,6 +163,10 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 		else {
 			return new ObjectArrayIterator(listeners);
 		}
+	}
+	
+	public ProcessTemplate iteratorTemplate() {
+		return new IteratorProcessTemplate(iterator());
 	}
 
 	public void run(Closure closure) {

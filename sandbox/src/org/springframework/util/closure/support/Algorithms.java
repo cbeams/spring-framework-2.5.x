@@ -30,130 +30,145 @@ import org.springframework.util.closure.ProcessTemplate;
  * @author Keith Donald
  */
 public class Algorithms {
-    private static final Algorithms INSTANCE = new Algorithms();
+	/**
+	 * The shared instance.
+	 */
+	private static Algorithms INSTANCE = new Algorithms();
 
-    /**
-     * Singleton instance accessor
-     * 
-     * @return The algorithms instance
-     */
-    public static Algorithms instance() {
-        return INSTANCE;
-    }
+	/**
+	 * Load the shared instance
+	 * @param instance
+	 */
+	public static void load(Algorithms instance) {
+		INSTANCE = instance;
+	}
 
-    /**
-     * Returns true if any elements in the given collection meet the specified
-     * predicate condition.
-     * 
-     * @param collection
-     * @param constraint
-     * @return true or false
-     */
-    public boolean anyTrue(Collection collection, Constraint constraint) {
-        return anyTrue(collection.iterator(), constraint);
-    }
+	/**
+	 * Singleton instance accessor
+	 * 
+	 * @return The algorithms instance
+	 */
+	public static Algorithms instance() {
+		return INSTANCE;
+	}
 
-    public boolean anyTrue(Iterator it, Constraint constraint) {
-        return findFirst(it, constraint) != null;
-    }
+	/**
+	 * Returns true if any elements in the given collection meet the specified
+	 * predicate condition.
+	 * 
+	 * @param collection
+	 * @param constraint
+	 * @return true or false
+	 */
+	public boolean anyTrue(Collection collection, Constraint constraint) {
+		return anyTrue(collection.iterator(), constraint);
+	}
 
-    /**
-     * Returns true if all elements in the given collection meet the specified
-     * predicate condition.
-     * 
-     * @param collection
-     * @param constraint
-     * @return true or false
-     */
-    public boolean allTrue(Collection collection, Constraint constraint) {
-        return allTrue(collection.iterator(), constraint);
-    }
+	/**
+	 * Returns true if any elements in the given collection meet the specified
+	 * predicate condition.
+	 * 
+	 * @param collection
+	 * @param constraint
+	 * @return true or false
+	 */
+	public boolean anyTrue(Iterator it, Constraint constraint) {
+		return findFirst(it, constraint) != null;
+	}
 
-    public boolean allTrue(Iterator it, Constraint constraint) {
-        while (it.hasNext()) {
-            if (!constraint.test(it.next())) { return false; }
-        }
-        return true;
-    }
+	/**
+	 * Returns true if all elements in the given collection meet the specified
+	 * predicate condition.
+	 * 
+	 * @param collection
+	 * @param constraint
+	 * @return true or false
+	 */
+	public boolean allTrue(Collection collection, Constraint constraint) {
+		return allTrue(collection.iterator(), constraint);
+	}
 
-    /**
-     * Find the first element in the collection matching the specified
-     * constraint.
-     * 
-     * @param collection
-     *            the collection
-     * @param constraint
-     *            the predicate
-     * @return The first object match, or null if no match
-     */
-    public Object findFirst(Collection collection, Constraint constraint) {
-        return findFirst(collection.iterator(), constraint);
-    }
+	/**
+	 * @param it
+	 * @param constraint
+	 * @return
+	 */
+	public boolean allTrue(Iterator it, Constraint constraint) {
+		return new IteratorProcessTemplate(it).allTrue(constraint);
+	}
 
-    /**
-     * Find the first element in the collection matching the specified
-     * constraint.
-     * 
-     * @param collection
-     *            the collection
-     * @param constraint
-     *            the predicate
-     * @return The first object match, or null if no match
-     */
-    public Object findFirst(Iterator it, Constraint constraint) {
-        while (it.hasNext()) {
-            Object element = it.next();
-            if (constraint.test(element)) { return element; }
-        }
-        return null;
-    }
+	/**
+	 * Find the first element in the collection matching the specified
+	 * constraint.
+	 * 
+	 * @param collection the collection
+	 * @param constraint the predicate
+	 * @return The first object match, or null if no match
+	 */
+	public Object findFirst(Collection collection, Constraint constraint) {
+		return findFirst(collection.iterator(), constraint);
+	}
 
-    /**
-     * Find all the elements in the collection that match the specified
-     * constraint.
-     * 
-     * @param collection
-     * @param constraint
-     * @return The objects that match, or a empty collection if none match
-     */
-    public Collection findAll(Collection collection, Constraint constraint) {
-        return findAll(collection.iterator(), constraint);
-    }
+	/**
+	 * Find the first element in the collection matching the specified
+	 * constraint.
+	 * 
+	 * @param collection the collection
+	 * @param constraint the predicate
+	 * @return The first object match, or null if no match
+	 */
+	public Object findFirst(Iterator it, Constraint constraint) {
+		return new IteratorProcessTemplate(it).findFirst(constraint);
+	}
 
-    public Collection findAll(Iterator it, Constraint constraint) {
-        final Collection results = new ArrayList();
-        final ProcessTemplate filteredIterator = createFilteredIterator(it,
-                constraint);
-        filteredIterator.run(new Block() {
-            protected void handle(Object element) {
-                results.add(element);
-            }
-        });
-        return results;
-    }
+	/**
+	 * Find all the elements in the collection that match the specified
+	 * constraint.
+	 * 
+	 * @param collection
+	 * @param constraint
+	 * @return The objects that match, or a empty collection if none match
+	 */
+	public Collection findAll(Collection collection, Constraint constraint) {
+		return findAll(collection.iterator(), constraint);
+	}
 
-    private ProcessTemplate createFilteredIterator(final Iterator it,
-            final Constraint constraint) {
-        return new ProcessTemplate() {
-            public void run(Closure block) {
-                new IteratorProcessTemplate(it).run(new ConstrainedBlock(block,
-                        constraint));
-            }
-        };
-    }
+	/**
+	 * Find all the elements in the collection that match the specified
+	 * constraint.
+	 * 
+	 * @param collection
+	 * @param constraint
+	 * @return The objects that match, or a empty collection if none match
+	 */
+	public Collection findAll(Iterator it, Constraint constraint) {
+		ProcessTemplate finder = new IteratorProcessTemplate(it).findAll(constraint);
+		final Collection results = new ArrayList();
+		finder.run(new Block() {
+			protected void handle(Object element) {
+				results.add(element);
+			}
+		});
+		return results;
+	}
 
-    /**
-     * Execute the provided closure for each element in the collection.
-     * 
-     * @param collection
-     * @param closure
-     */
-    public void forEach(Collection collection, Closure closure) {
-        forEach(collection.iterator(), closure);
-    }
+	/**
+	 * Execute the provided closure for each element in the collection.
+	 * 
+	 * @param collection
+	 * @param closure
+	 */
+	public void forEach(Collection collection, Closure closure) {
+		forEach(collection.iterator(), closure);
+	}
 
-    public void forEach(Iterator it, Closure closure) {
-        new IteratorProcessTemplate(it).run(closure);
-    }
-
+	/**
+	 * Execute the provided closure for each element in the collection.
+	 * 
+	 * @param collection
+	 * @param closure
+	 */
+	public void forEach(Iterator it, Closure closure) {
+		new IteratorProcessTemplate(it).run(closure);
+	}
 }

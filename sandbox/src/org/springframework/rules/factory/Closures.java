@@ -18,14 +18,14 @@ package org.springframework.rules.factory;
 import org.springframework.util.Assert;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.AlgorithmsAccessor;
 import org.springframework.util.closure.support.ClosureChain;
 import org.springframework.util.closure.support.ConstrainedBlock;
 
 /**
- * A factory for easing the construction and composition of closure (blocks of executable code).
- *
+ * A factory for easing the construction and composition of closure (blocks of
+ * executable code).
+ * 
  * @author Keith Donald
  */
 public class Closures extends AlgorithmsAccessor {
@@ -54,14 +54,6 @@ public class Closures extends AlgorithmsAccessor {
 
 	public Closure constrain(Closure closure, Constraint predicate) {
 		return new ConstrainedBlock(closure, predicate);
-	}
-
-	public ProcessTemplate createFilteredGenerator(final ProcessTemplate generator, final Constraint constraint) {
-		return new ProcessTemplate() {
-			public void run(Closure block) {
-				generator.run(constrain(block, constraint));
-			}
-		};
 	}
 
 }

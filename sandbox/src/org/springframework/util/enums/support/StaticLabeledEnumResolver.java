@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.Closure;
-import org.springframework.util.closure.ProcessTemplate;
+import org.springframework.util.closure.support.AbstractProcessTemplate;
 import org.springframework.util.closure.support.Block;
 import org.springframework.util.enums.LabeledEnum;
 
@@ -86,7 +86,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 	 * processed.
 	 * @author Keith Donald
 	 */
-	private static class LabeledEnumFieldValueGenerator implements ProcessTemplate {
+	private static class LabeledEnumFieldValueGenerator extends AbstractProcessTemplate {
 		private static final Log logger = LogFactory.getLog(LabeledEnumFieldValueGenerator.class);
 
 		private Class clazz;

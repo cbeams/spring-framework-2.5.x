@@ -15,31 +15,38 @@
  */
 package org.springframework.util.closure.support;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.springframework.util.closure.Closure;
+import org.springframework.util.closure.Constraint;
+import org.springframework.util.closure.ProcessTemplate;
 
 /**
- * Simple process template that captures the workflow required to iterate over a
- * collection of elements.
- * 
+ * Base superclass for process templates.
  * @author Keith Donald
  */
-public class IteratorProcessTemplate extends AbstractProcessTemplate {
-	private Iterator it;
-
-	public IteratorProcessTemplate(Collection collection) {
-		this(collection.iterator());
+public abstract class AbstractProcessTemplate implements ProcessTemplate {
+	public boolean allTrue(Constraint constraint) {
+		return false;
 	}
 
-	public IteratorProcessTemplate(Iterator it) {
-		this.it = it;
+	public boolean anyTrue(Constraint constraint) {
+		return false;
 	}
 
-	public void run(Closure elementCallback) {
-		while (it.hasNext()) {
-			elementCallback.call(it.next());
-		}
+	public ProcessTemplate findAll(Constraint constraint) {
+		return null;
+	}
+
+	public Object findFirst(Constraint constraint, Object defaultIfNoneFound) {
+		return null;
+	}
+
+	public Object findFirst(Constraint constraint) {
+		return null;
+	}
+
+	public void runUntil(Closure templateCallback, Constraint constraint) {
+	}
+
+	public void stop() throws IllegalStateException {
 	}
 }
