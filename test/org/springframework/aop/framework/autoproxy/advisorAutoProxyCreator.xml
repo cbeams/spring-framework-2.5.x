@@ -47,6 +47,36 @@
 	</bean>
 	
 	
+	<!-- ====== Test for prototype definitions to try to provoke circular references ========================= -->
+	<!--
+		This advisor should never match and should not change how any of the tests run,
+		but it's a prototype referencing another (unused) prototype, as well as a
+		singleton, so it may pose circular reference problems, or
+		an infinite loop.
+	-->
+	<bean id="neverMatchAdvisor" 
+		class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
+		singleton="false"
+	>
+		<property name="dependencies">
+			<list>
+				<ref local="singletonDependency" />
+				<ref local="prototypeDependency" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- These two beans would otherwise be eligible for autoproxying -->
+	
+	<bean id="singletonDependency" class="org.springframework.beans.TestBean" 
+		singleton="true" />
+		
+	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" 
+		singleton="false" />
+	
+	
+	<!-- ====== End test for prototype definitions to try to provoke circular references ========================= -->
+	
 	<bean id="test"
 		class="org.springframework.beans.TestBean">
 		<property name="age"><value>4</value></property>

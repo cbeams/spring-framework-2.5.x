@@ -11,6 +11,8 @@ import java.util.List;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.ControlFlow;
+import org.springframework.util.ControlFlowFactory;
 
 /**
  * Abstract BeanPostProcessor implementation that creates AOP proxies. 
@@ -20,9 +22,11 @@ import org.springframework.beans.factory.BeanFactory;
  * Subclasses must implement the abstract findCandidateAdvisors() method to
  * return a list of Advisors applying to any object. Subclasses can also
  * override the inherited shouldSkip() method to exclude certain objects
- * from autoproxying.
+ * from autoproxying, but they must be careful to invoke the shouldSkip()
+ * method of this class, which tries to avoid circular reference problems
+ * and infinite loops.
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.1 2003-12-21 11:01:05 johnsonr Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.2 2003-12-21 13:30:32 johnsonr Exp $
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
@@ -93,5 +97,27 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 		findCandidateAdvisors();
+	}
+
+
+	/**
+	 * We override this to ensure that we don't get into circular reference hell
+	 * when our own infrastructure (such as this class) depends on advisors that depend
+	 * on beans... We use a ControlFlow object to check that we didn't arrived at this
+	 * call via this classes findCandidateAdvisors() method.
+	 * @see org.springframework.util.ControlFlow
+	 * @see org.springframework.aop.framework.support.AbstractAutoProxyCreator#shouldSkip(java.lang.Object, java.lang.String)
+	 */
+	protected boolean shouldSkip(Object bean, String name) {
+		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
+		// to protect all PostProcessors
+		ControlFlow cflow = ControlFlowFactory.getInstance().createControlFlow();
+		if (cflow.under(getClass(), "findCandidateAdvisors")) {
+			//System.err.println("Skipping " + name + ": " + cflow);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
