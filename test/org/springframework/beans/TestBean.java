@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.1.1.1 2003-08-14 16:21:04 trisberg Exp $
+ *	$Id: TestBean.java,v 1.2 2003-09-30 19:37:52 beanie42 Exp $
  */
 
 package org.springframework.beans;
@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 
-
 /**
  * Simple test bean used for testing bean factories,
  * AOP framework etc.
@@ -16,7 +15,7 @@ import java.util.LinkedList;
  * @since 15 April 2001
  */
 public class TestBean implements ITestBean, IOther {
-    
+
 	/** Holds value of property age. */
 	private int age;
 
@@ -24,27 +23,31 @@ public class TestBean implements ITestBean, IOther {
 	private String name;
 
 	private ITestBean spouse;
-	
+
 	private String touchy;
 
 	private Collection friends = new LinkedList();
-	
+
 	private Date date = new Date();
 
 	private Float myFloat = new Float(0.0);
 
+	private INestedTestBean doctor = new NestedTestBean();
+
+	private INestedTestBean lawyer = new NestedTestBean();
+
 	public String getTouchy() {
 		return touchy;
 	}
-	
+
 	public TestBean() {
 	}
-	
+
 	public TestBean(String name, int age) {
 		this.name = name;
 		this.age = age;
 	}
-	
+
 	public void setTouchy(String touchy) throws Exception {
 		if (touchy.indexOf('.') != -1)
 			throw new Exception("Can't contain a .");
@@ -52,45 +55,45 @@ public class TestBean implements ITestBean, IOther {
 			throw new NumberFormatException("Number format exception: contains a ,");
 		this.touchy = touchy;
 	}
-    
-    /** Getter for property age.
-     * @return Value of property age.
-     */
-    public int getAge() {
-        return age;
-    }
-    
-    /** Setter for property age.
-     * @param age New value of property age.
-     */
-  public void setAge(int age) {
-        this.age = age;
-    }
-    
-    /** Getter for property name.
-     * @return Value of property name.
-     */
-    public String getName() {
-        return name;
-    }
-    
-    /** Setter for property name.
-     * @param name New value of property name.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String toString() {
-        String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
+
+	/** Getter for property age.
+	 * @return Value of property age.
+	 */
+	public int getAge() {
+		return age;
+	}
+
+	/** Setter for property age.
+	 * @param age New value of property age.
+	 */
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+	/** Getter for property name.
+	 * @return Value of property name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/** Setter for property name.
+	 * @param name New value of property name.
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String toString() {
+		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
 		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
 		return s;
-    }
-	
+	}
+
 	public ITestBean getSpouse() {
 		return spouse;
 	}
-	
+
 	public void setSpouse(ITestBean spouse) {
 		this.spouse = spouse;
 	}
@@ -112,18 +115,18 @@ public class TestBean implements ITestBean, IOther {
 	}
 
 	public boolean equals(Object other) {
-		if (other == null || !(other instanceof TestBean)) 
+		if (other == null || !(other instanceof TestBean))
 			return false;
 		TestBean tb2 = (TestBean) other;
 		if (tb2.age != age)
 			return false;
-			
+
 		if (name == null)
 			return tb2.name == null;
-		
+
 		if (!tb2.name.equals(name))
 			return false;
-		
+
 		return true;
 	}
 
@@ -164,4 +167,20 @@ public class TestBean implements ITestBean, IOther {
 		this.friends = friends;
 	}
 
-}	// class Test
+	public INestedTestBean getDoctor() {
+		return doctor;
+	}
+
+	public INestedTestBean getLawyer() {
+		return lawyer;
+	}
+
+	public void setDoctor(INestedTestBean bean) {
+		doctor = bean;
+	}
+
+	public void setLawyer(INestedTestBean bean) {
+		lawyer = bean;
+	}
+
+} // class Test

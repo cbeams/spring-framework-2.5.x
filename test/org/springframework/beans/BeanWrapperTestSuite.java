@@ -599,6 +599,27 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 	}
 
+/*
+	public void testNestedBeanSetterMethod() {
+		String doctorCompany = "";
+		String lawyerCompany = "Dr. Sueem";
+		//
+		TestBean tb = new TestBean();
+
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+
+		try {
+			bw.setPropertyValue("doctor.company", doctorCompany );
+			bw.setPropertyValue("lawyer.company", lawyerCompany);
+
+			assertEquals(doctorCompany, tb.getDoctor().getCompany());
+			assertEquals(lawyerCompany, tb.getLawyer().getCompany());
+		}
+		catch (PropertyVetoException ex) {
+			fail("Shouldn't throw PropertyVetoException, even if getter threw an exception veto");
+		}
+	}
+*/
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());

@@ -22,6 +22,8 @@ public interface ITestBean {
 	
 	Object returnsThis();
 	
+	INestedTestBean getDoctor();
 	
+	INestedTestBean getLawyer();
 
 }
