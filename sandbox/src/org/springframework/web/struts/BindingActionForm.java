@@ -75,9 +75,6 @@ public class BindingActionForm extends ActionForm {
 
 		// Obtain the MessageResources from the Struts well-known location
 		this.messageResources = (MessageResources)request.getAttribute(Globals.MESSAGES_KEY);
-
-		Assert.notNull(this.locale, "The locale could not be retrieved");
-		Assert.notNull(this.messageResources, "The message resources could not be retrieved");
 	}
 
 	public boolean hasErrors() {
@@ -130,12 +127,14 @@ public class BindingActionForm extends ActionForm {
 			if (arg instanceof MessageSourceResolvable) {
 				MessageSourceResolvable resolvable = (MessageSourceResolvable)arg;
 				String[] codes = resolvable.getCodes();
-				for (int j = 0; j < codes.length; j++) {
-					String code = codes[j];
-					if (messageResources.isPresent(this.locale, code)) {
-						arguments[i] = messageResources.getMessage(this.locale, code, resolveArgs(resolvable
-								.getArguments()));
-						break;
+				if (messageResources != null) {
+					for (int j = 0; j < codes.length; j++) {
+						String code = codes[j];
+						if (messageResources.isPresent(this.locale, code)) {
+							arguments[i] = messageResources.getMessage(this.locale, code, resolveArgs(resolvable
+									.getArguments()));
+							break;
+						}
 					}
 				}
 				arguments[i] = resolvable.getDefaultMessage();
@@ -145,16 +144,18 @@ public class BindingActionForm extends ActionForm {
 	}
 
 	private String findEffectiveMessageKey(ObjectError error, String objectName, String field) {
-		String[] possibleMatches = error.getCodes();
-		for (int i = 0; i < possibleMatches.length; i++) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Testing error code '" + possibleMatches[i] + "'");
-			}
-			if (this.messageResources.isPresent(this.locale, possibleMatches[i])) {
+		if (messageResources != null) {
+			String[] possibleMatches = error.getCodes();
+			for (int i = 0; i < possibleMatches.length; i++) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found error code '" + possibleMatches[i] + "' in resource bundle!");
+					logger.debug("Testing error code '" + possibleMatches[i] + "'");
 				}
-				return possibleMatches[i];
+				if (this.messageResources.isPresent(this.locale, possibleMatches[i])) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found error code '" + possibleMatches[i] + "' in resource bundle!");
+					}
+					return possibleMatches[i];
+				}
 			}
 		}
 		if (logger.isDebugEnabled()) {
