@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
@@ -32,7 +31,7 @@ import org.springframework.core.Ordered;
  * Simple IntroductionAdvisor implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: DefaultIntroductionAdvisor.java,v 1.7 2004-07-24 18:48:25 johnsonr Exp $
+ * @version $Id: DefaultIntroductionAdvisor.java,v 1.8 2004-08-03 13:32:14 johnsonr Exp $
  */
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
@@ -109,6 +108,12 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 					 "does not implement interface '" + intf.getName() + "' specified in introduction advice");
 			}
 		}
+	}
+	
+	public String toString() {
+		return "DefaultIntroductionAdvisor: interfaces=(" +
+			AopUtils.interfacesString(interfaces) + "); " +
+			"introductionInterceptor=" + interceptor;
 	}
 
 }
