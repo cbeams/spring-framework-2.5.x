@@ -95,8 +95,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String REF_PREFIX = "*";
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	/** Name of default parent bean */
 	private String defaultParentBean;
 
@@ -242,7 +240,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @param m Map name -> property (String or Object). Property values
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be strings. Class keys must be Strings.
-	 * @param prefix The match or filter within the keys in the map: e.g. 'beans.'
+	 * @param prefix match or filter within the keys in the map: e.g. 'beans.'
 	 * @param resourceDescription description of the resource that the Map came from
 	 * (for logging purposes)
 	 * @return the number of bean definitions found

@@ -16,28 +16,37 @@
 
 package org.springframework.beans.factory.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * Abstract base class for bean definition readers.
- * Provides common properties like the bean factory to work on
- * and the class loader to use for loading bean classes. 
+ * Abstract base class for bean definition readers which implement
+ * the BeanDefinitionReader interface.
+ *
+ * <p>Provides common properties like the bean factory to work on
+ * and the class loader to use for loading bean classes.
+ *
  * @author Juergen Hoeller
  * @since 11.12.2003
  * @see BeanDefinitionReaderUtils
  */
-public abstract class AbstractBeanDefinitionReader {
+public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader {
 
-	private BeanDefinitionRegistry beanFactory;
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final BeanDefinitionRegistry beanFactory;
 
 	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
 
 
+	/**
+	 * Create a new AbstractBeanDefinitionReader for the given factory.
+	 * @param beanFactory the bean factory to work on
+	 */
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
-	/**
-	 * Return the BeanFactory that this reader works on.
-	 */
 	public BeanDefinitionRegistry getBeanFactory() {
 		return beanFactory;
 	}
@@ -54,9 +63,6 @@ public abstract class AbstractBeanDefinitionReader {
 		this.beanClassLoader = beanClassLoader;
 	}
 
-	/**
-	 * Return the class loader for bean classes.
-	 */
 	public ClassLoader getBeanClassLoader() {
 		return beanClassLoader;
 	}

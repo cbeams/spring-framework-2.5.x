@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -40,8 +41,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedLinkedMap;
@@ -61,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.34 2004-08-02 15:40:36 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.35 2004-08-04 11:06:30 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -137,9 +138,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private BeanDefinitionRegistry beanFactory;
-
-	private ClassLoader beanClassLoader;
+	private BeanDefinitionReader beanDefinitionReader;
 
 	private Resource resource;
 
@@ -150,10 +149,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	private String defaultAutowire;
 
 
-	public void registerBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
-																			Document doc, Resource resource) {
-		this.beanFactory = beanFactory;
-		this.beanClassLoader = beanClassLoader;
+	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
+			throws BeansException {
+		this.beanDefinitionReader = reader;
 		this.resource = resource;
 
 		logger.debug("Loading bean definitions");
@@ -176,14 +174,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		logger.debug("Found " + beanDefinitionCounter + " <" + BEAN_ELEMENT + "> elements defining beans");
+		return beanDefinitionCounter;
 	}
 
-	protected BeanDefinitionRegistry getBeanFactory() {
-		return beanFactory;
-	}
-
-	protected ClassLoader getBeanClassLoader() {
-		return beanClassLoader;
+	protected BeanDefinitionReader getBeanDefinitionReader() {
+		return beanDefinitionReader;
 	}
 
 	protected String getDefaultLazyInit() {
@@ -209,10 +204,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	protected void registerBeanDefinition(Element ele) {
 		BeanDefinitionHolder bdHolder = parseBeanDefinition(ele);
 		logger.debug("Registering bean definition with id '" + bdHolder.getBeanName() + "'");
-		this.beanFactory.registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+		this.beanDefinitionReader.getBeanFactory().registerBeanDefinition(
+				bdHolder.getBeanName(), bdHolder.getBeanDefinition());
 		if (bdHolder.getAliases() != null) {
 			for (int i = 0; i < bdHolder.getAliases().length; i++) {
-				this.beanFactory.registerAlias(bdHolder.getBeanName(), bdHolder.getAliases()[i]);
+				this.beanDefinitionReader.getBeanFactory().registerAlias(
+						bdHolder.getBeanName(), bdHolder.getAliases()[i]);
 			}
 		}
 	}
@@ -246,7 +243,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				String className = ((RootBeanDefinition) beanDefinition).getBeanClassName();
 				id = className;
 				int counter = 1;
-				while (this.beanFactory.containsBeanDefinition(id)) {
+				while (this.beanDefinitionReader.getBeanFactory().containsBeanDefinition(id)) {
 					counter++;
 					id = className + GENERATED_ID_SEPARATOR + counter;
 				}
@@ -280,7 +277,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					className, parent, cargs, pvs, getBeanClassLoader());
+					className, parent, cargs, pvs, this.beanDefinitionReader.getBeanClassLoader());
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);

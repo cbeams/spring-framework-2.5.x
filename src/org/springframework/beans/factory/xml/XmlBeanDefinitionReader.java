@@ -54,11 +54,9 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.9 2004-06-23 18:07:50 jhoeller Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.10 2004-08-04 11:06:34 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean validating = true;
 
@@ -109,9 +107,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @param resource the resource descriptor for the XML file
 	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public void loadBeanDefinitions(Resource resource) throws BeansException {
+	public int loadBeanDefinitions(Resource resource) throws BeansException {
 		if (resource == null) {
-			throw new BeanDefinitionStoreException("Resource cannot be null: expected an XML file");
+			throw new BeanDefinitionStoreException("resource cannot be null: expected an XML file");
 		}
 		InputStream is = null;
 		try {
@@ -128,7 +126,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			docBuilder.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
 			is = resource.getInputStream();
 			Document doc = docBuilder.parse(is);
-			registerBeanDefinitions(doc, resource);
+			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
 			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
@@ -159,11 +157,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Register the bean definitions contained in the given DOM document.
 	 * All calls go through this.
 	 * @param doc the DOM document
+	 * @param resource the resource descriptor (for context information)
 	 * @throws BeansException in case of parsing errors
 	 */
-	public void registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
+	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
-		parser.registerBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc, resource);
+		return parser.registerBeanDefinitions(this, doc, resource);
 	}
 
 
@@ -175,7 +174,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		/**
 		 * We can't use the enclosing class' logger as it's protected and inherited.
 		 */
-		private final static Log logger = LogFactory.getLog(XmlBeanFactory.class);
+		private final static Log logger = LogFactory.getLog(XmlBeanDefinitionReader.class);
 
 		public void error(SAXParseException ex) throws SAXException {
 			throw ex;
@@ -186,7 +185,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 
 		public void warning(SAXParseException ex) throws SAXException {
-			logger.warn("Ignored XML validation warning: " + ex);
+			logger.warn("Ignored XML validation warning: " + ex.getMessage(), ex);
 		}
 	}
 
