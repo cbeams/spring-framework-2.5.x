@@ -66,12 +66,25 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * contrast to Timer which uses a TimerTask instance that is shared
  * between repeated executions. Just JobDetail descriptors are shared.
  *
- * <p>Spring's Quartz support was developed against Quartz 1.3.
+ * <p>When using persistent jobs, it is strongly recommended to perform all
+ * operations on the Scheduler within Spring-managed (or plain JTA) transactions.
+ * Else, database locking will not properly work and might even break.
+ * (See {@link #setDataSource setDataSource} javadoc for details.)
+ *
+ * <p>The preferred way to achieve transactional execution is to demarcate
+ * declarative transactions at the business facade level, which will
+ * automatically apply to Scheduler operations performed within those scopes.
+ * Alternatively, define a TransactionProxyFactoryBean for the Scheduler itself.
+ *
+ * <p>SchedulerFactoryBean is fully compatible with both Quartz 1.3
+ * and 1.4 (through special checks where necessary).
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
+ * @see #setDataSource
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
+ * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean
     implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -79,6 +92,22 @@ public class SchedulerFactoryBean
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
 	public static final int DEFAULT_THREAD_COUNT = 10;
+
+
+	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+
+	/**
+	 * Return the DataSource for the currently configured Quartz Scheduler,
+	 * to be used by LocalDataSourceJobStore.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * Scheduler, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setDataSource
+	 * @see LocalDataSourceJobStore
+	 */
+	public static DataSource getConfigTimeDataSource() {
+		return (DataSource) configTimeDataSourceHolder.get();
+	}
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -169,6 +198,11 @@ public class SchedulerFactoryBean
 	 * this will override corresponding settings in Quartz properties.
 	 * <p>Note: If this is set, the Quartz settings should not define
 	 * a job store "dataSource" to avoid meaningless double configuration.
+	 * <p>A Spring-specific subclass of Quartz' JobStoreCMT will be used.
+	 * It is therefore strongly recommended to perform all operations on
+	 * the Scheduler within Spring-managed (or plain JTA) transactions.
+	 * Else, database locking will not properly work and might even break
+	 * (e.g. if trying to obtain a lock on Oracle without a transaction).
 	 * @see #setQuartzProperties
 	 * @see #setTransactionManager
 	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
@@ -378,14 +412,14 @@ public class SchedulerFactoryBean
 
 		if (this.dataSource != null) {
 			// make given DataSource available for SchedulerFactory configuration
-			LocalDataSourceJobStore.configTimeDataSourceHolder.set(this.dataSource);
+			configTimeDataSourceHolder.set(this.dataSource);
 		}
 
 		// get Scheduler instance from SchedulerFactory
 		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
 
 		if (this.dataSource != null) {
-			LocalDataSourceJobStore.configTimeDataSourceHolder.set(null);
+			configTimeDataSourceHolder.set(null);
 		}
 
 		// put specified objects into Scheduler context
@@ -396,15 +430,16 @@ public class SchedulerFactoryBean
 		// register ApplicationContext in Scheduler context
 		if (this.applicationContextSchedulerContextKey != null) {
 			if (this.applicationContext == null) {
-				throw new IllegalStateException("SchedulerFactoryBean needs to be set up in an ApplicationContext " +
-																				"to be able to handle an 'applicationContextSchedulerContextKey'");
+				throw new IllegalStateException(
+				    "SchedulerFactoryBean needs to be set up in an ApplicationContext " +
+				    "to be able to handle an 'applicationContextSchedulerContextKey'");
 			}
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 
 		registerJobsAndTriggers();
 
-		// start Sheduler if demanded
+		// start Scheduler if demanded
 		if (this.autoStartup) {
 			startScheduler(this.scheduler, this.startupDelay);
 		}
@@ -449,8 +484,8 @@ public class SchedulerFactoryBean
 					dataProcessor.setResourceLoader(this.applicationContext);
 				}
 				for (int i = 0; i < this.jobSchedulingDataLocations.length; i++) {
-					dataProcessor.processFileAndScheduleJobs(this.jobSchedulingDataLocations[i], this.scheduler,
-																									 this.overwriteExistingJobs);
+					dataProcessor.processFileAndScheduleJobs(
+					    this.jobSchedulingDataLocations[i], this.scheduler, this.overwriteExistingJobs);
 				}
 			}
 

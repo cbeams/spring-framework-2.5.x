@@ -46,13 +46,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  */
 public class LocalDataSourceJobStore extends JobStoreCMT {
 
-	/**
-	 * This will hold the DataSource to use for the currently configured
-	 * Quartz Scheduler. It will be set just before initialization
-	 * of the Scheduler, and reset immediately afterwards.
-	 */
-	protected static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
-
 	private DataSource dataSource;
 
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
@@ -62,11 +55,12 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		setDataSource("dummy");
 		setNonManagedTXDataSource("dummy");
 
-		this.dataSource = (DataSource) configTimeDataSourceHolder.get();
+		this.dataSource = (DataSource) SchedulerFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
-			throw new SchedulerConfigException("No local DataSource found for configuration - " +
-			                                   "dataSource property must be set on SchedulerFactoryBean");
+			throw new SchedulerConfigException(
+			    "No local DataSource found for configuration - " +
+			    "dataSource property must be set on SchedulerFactoryBean");
 		}
 
 		super.initialize(loadHelper, signaler);
@@ -78,20 +72,22 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	}
 
 	protected Connection getNonManagedTXConnection() throws JobPersistenceException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
-		// following block copied from base class implementation
 		try {
+			Connection con = this.dataSource.getConnection();
+
+			// following block copied from base class implementation
 			if (!isDontSetNonManagedTXConnectionAutoCommitFalse()) {
 				con.setAutoCommit(false);
 			}
 			if (isTxIsolationLevelReadCommitted()) {
 				con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			}
+
+			return con;
 		}
 		catch (SQLException ex) {
 			throw new JobPersistenceException("Failed to prepare JDBC connection", ex);
 		}
-		return con;
 	}
 
 	protected void closeConnection(Connection con) {
