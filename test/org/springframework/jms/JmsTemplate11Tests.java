@@ -27,7 +27,10 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import junit.framework.TestCase;
+
 import org.easymock.MockControl;
+import org.springframework.jndi.JndiTemplate;
 
 /**
  * Unit test for the JmsTemplate implemented using JMS 1.1
@@ -35,9 +38,11 @@ import org.easymock.MockControl;
  * @author Andre Biryukov
  * @author Mark Pollack
  */
-public class JmsTemplate11Tests extends JmsTestCase
+public class JmsTemplate11Tests extends TestCase
 {
-
+	private Context mockJndiContext;
+	private MockControl mockJndiControl;
+	
     private MockControl _connectionFactoryControl;
     private ConnectionFactory _mockConnectionFactory;
 
@@ -111,6 +116,7 @@ public class JmsTemplate11Tests extends JmsTestCase
     {
         JmsTemplate11 sender = new JmsTemplate11();
         sender.setConnectionFactory(_mockConnectionFactory);
+		setJndiTemplate(sender);         
 
         //Session behavior
         _mockSession.getTransacted();
@@ -160,6 +166,7 @@ public class JmsTemplate11Tests extends JmsTestCase
     {
         JmsTemplate11 sender = new JmsTemplate11();
         sender.setConnectionFactory(_mockConnectionFactory);
+		setJndiTemplate(sender);                 
 
         //Session behavior
         _mockSession.getTransacted();
@@ -262,7 +269,7 @@ public class JmsTemplate11Tests extends JmsTestCase
     {
         JmsTemplate11 sender = new JmsTemplate11();
         sender.setConnectionFactory(_mockConnectionFactory);
-        sender.setJmsAdmin(new DefaultJmsAdmin());
+		setJndiTemplate(sender);
         if (useDefaultDestination)
         {
             sender.setDefaultDestination(_mockQueue);
@@ -353,6 +360,7 @@ public class JmsTemplate11Tests extends JmsTestCase
 	{
 		JmsTemplate11 sender = new JmsTemplate11();
 		sender.setConnectionFactory(_mockConnectionFactory);
+		setJndiTemplate(sender);         		
 		sender.setConverter(new ToStringConverter());
 		String s = "Hello world";
 		
@@ -387,5 +395,13 @@ public class JmsTemplate11Tests extends JmsTestCase
 
 		_sessionControl.verify();
 
+	}
+	
+	private void setJndiTemplate(JmsTemplate sender) {
+		((DefaultJmsAdmin)sender.getJmsAdmin()).setJndiTemplate(new JndiTemplate() {
+			protected Context createInitialContext() throws NamingException {
+				return mockJndiContext;
+			}
+		}); 
 	}
 }

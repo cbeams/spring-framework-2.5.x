@@ -34,7 +34,10 @@ import javax.jms.TopicSession;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import junit.framework.TestCase;
+
 import org.easymock.MockControl;
+import org.springframework.jndi.JndiTemplate;
 
 /**
  * Unit test for the JmsTemplate using the JmsTemplate102 implementation.
@@ -42,8 +45,11 @@ import org.easymock.MockControl;
  * @author Andre Biryukov
  * @author Mark Pollack
  */
-public class JmsTemplate102Tests extends JmsTestCase {
+public class JmsTemplate102Tests extends TestCase {
 
+	private Context mockJndiContext;
+	private MockControl mockJndiControl;
+	
     private MockControl _queueConnectionFactoryControl;
     private QueueConnectionFactory _mockQueueConnectionFactory;
 
@@ -84,6 +90,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
      * Create the mock objects for testing.
      */
     protected void setUp() throws Exception {
+    	
         mockJndiControl = MockControl.createControl(Context.class);
         mockJndiContext = (Context) this.mockJndiControl.getMock();
 
@@ -92,7 +99,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
 
         mockJndiContext.close();
         mockJndiControl.replay();
-
+        
     }
 
     private void createMockforQueues() throws JMSException, NamingException {
@@ -168,6 +175,8 @@ public class JmsTemplate102Tests extends JmsTestCase {
         JmsTemplate102 sender = new JmsTemplate102();
         sender.setPubSubDomain(true);
         sender.setConnectionFactory(_mockTopicConnectionFactory);
+		setJndiTemplate(sender);       
+		sender.afterPropertiesSet();
 
         //Session behavior
         _mockTopicSession.getTransacted();
@@ -190,6 +199,14 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _topicSessionControl.verify();
     }
 
+    private void setJndiTemplate(JmsTemplate sender) {
+        ((DefaultJmsAdmin)sender.getJmsAdmin()).setJndiTemplate(new JndiTemplate() {
+        	protected Context createInitialContext() throws NamingException {
+        		return mockJndiContext;
+        	}
+        }); 
+    }
+
     /**
      * Test the execute(ProducerCallback) using a topic
      * @throws Exception unexpected, let JUnit handle it.
@@ -198,6 +215,8 @@ public class JmsTemplate102Tests extends JmsTestCase {
         JmsTemplate102 sender = new JmsTemplate102();
         sender.setPubSubDomain(true);
         sender.setConnectionFactory(_mockTopicConnectionFactory);
+		setJndiTemplate(sender);             
+		sender.afterPropertiesSet();        
 
         //Mock the javax.jms TopicPublisher
         MockControl topicPublisherControl =
@@ -245,6 +264,8 @@ public class JmsTemplate102Tests extends JmsTestCase {
         JmsTemplate102 sender = new JmsTemplate102();
         //Point to Point (queues) are the default domain.
         sender.setConnectionFactory(_mockQueueConnectionFactory);
+		setJndiTemplate(sender);               
+		sender.afterPropertiesSet();        
 
         //Session behavior
         _mockQueueSession.getTransacted();
@@ -275,6 +296,8 @@ public class JmsTemplate102Tests extends JmsTestCase {
         JmsTemplate102 sender = new JmsTemplate102();
         //Point to Point (queues) are the default domain.
         sender.setConnectionFactory(_mockQueueConnectionFactory);
+		setJndiTemplate(sender);       
+		sender.afterPropertiesSet();        
 
         //Session behavior
         _mockQueueSession.getTransacted();
@@ -320,6 +343,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
     public void testBeanProperties() throws Exception {
         JmsTemplate102 sender = new JmsTemplate102();
         sender.setConnectionFactory(_mockQueueConnectionFactory);
+        
         assertTrue(
             "connection factory ok",
             sender.getConnectionFactory() == _mockQueueConnectionFactory);
@@ -463,8 +487,12 @@ public class JmsTemplate102Tests extends JmsTestCase {
         boolean useDefaultDestination)
         throws Exception {
         JmsTemplate102 sender = new JmsTemplate102();
+		setJndiTemplate(sender);       
         sender.setConnectionFactory(_mockQueueConnectionFactory);
-        sender.setJmsAdmin(new DefaultJmsAdmin());
+		setJndiTemplate(sender);       
+		sender.afterPropertiesSet();
+        
+
         if (useDefaultDestination) {
             sender.setDefaultDestination(_mockQueue);
         }
@@ -541,8 +569,10 @@ public class JmsTemplate102Tests extends JmsTestCase {
 
         //Setup the test
         JmsTemplate102 sender = new JmsTemplate102();
+		sender.setPubSubDomain(true);            
         sender.setConnectionFactory(_mockTopicConnectionFactory);
-        sender.setJmsAdmin(new DefaultJmsAdmin());
+		setJndiTemplate(sender);       
+		sender.afterPropertiesSet();
 
         //Mock the javax.jms TopicPublisher
         MockControl topicPublisherControl =
@@ -605,6 +635,7 @@ public class JmsTemplate102Tests extends JmsTestCase {
     public void testConverter() throws Exception {
     	
 		JmsTemplate102 sender = new JmsTemplate102();
+		setJndiTemplate(sender);       		
 		sender.setConnectionFactory(_mockQueueConnectionFactory);
 		sender.setConverter(new ToStringConverter());
 		String s = "Hello world";
