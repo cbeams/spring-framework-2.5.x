@@ -60,16 +60,20 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected final Object lookupHandler(String urlPath) {
+		// direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			return handler;
 		}
+
+		// pattern match?
 		for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 			String registeredPath = (String) it.next();
 			if (PathMatcher.match(registeredPath, urlPath)) {
 				return this.handlerMap.get(registeredPath);
 			}
 		}
+
 		// no match found
 		return null;
 	}
