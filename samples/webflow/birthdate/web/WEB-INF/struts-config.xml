@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
+          "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<struts-config>
+
+	<form-beans>
+		<form-bean name="bindingActionForm" type="org.springframework.web.struts.BindingActionForm"/>
+	</form-beans>
+
+	<global-forwards>
+		<forward name="displayAge"	path="/WEB-INF/jsp/displayAge.jsp"/>
+		<forward name="enterBirthDate" path="/WEB-INF/jsp/enterBirthDate.jsp"/>
+	</global-forwards>
+
+	<action-mappings>
+
+		<!-- flow actions -->
+		
+		<action path="/birthDate.do"
+			type="org.springframework.web.flow.struts.FlowAction"
+			name="bindingActionForm" scope="request" 
+			className="org.springframework.web.flow.struts.FlowActionMapping">
+			<set-property property="flowId" value="birthDate" />
+		</action>
+
+	</action-mappings>
+
+	<!-- A custom request processor is neccessary for deferred, POJO-based binding and validation
+		 No more Action Form proliferation! :-) -->
+	
+    <controller processorClass="org.springframework.web.struts.BindingRequestProcessor"/>
+	
+	<!-- plugins -->
+    <plug-in className="org.springframework.web.struts.BindingPlugin"/>
+
+</struts-config>
