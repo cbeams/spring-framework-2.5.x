@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.20 2003-11-14 16:36:54 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.21 2003-11-15 12:42:16 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -441,8 +441,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 			try {
 				Constructor constructor = constructors[i];
 				if (constructor.getParameterTypes().length < minNrOfArgs) {
-					throw new BeanDefinitionStoreException(minNrOfArgs + " constructor arguments specified but just constructor with " +
-					                                       constructor.getParameterTypes().length + " arguments found in bean '" + beanName + "'");
+					throw new BeanDefinitionStoreException(minNrOfArgs + " constructor arguments specified but no " +
+																								 "matching constructor found in bean '" + beanName + "'");
 				}
 				Class[] argTypes = constructor.getParameterTypes();
 				Object[] args = new Object[argTypes.length];
