@@ -297,7 +297,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * Subclasses should override this method to return true if this
 	 * bean should not be considered for autoproxying by this post processor.
 	 * Sometimes we need to be able to avoid this happening if it will lead to
-	 * a circular reference. This implementation returns true.
+	 * a circular reference. This implementation returns <code>false</code>.
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
 	 */
