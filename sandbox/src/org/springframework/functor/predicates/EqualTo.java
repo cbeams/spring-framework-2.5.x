@@ -22,19 +22,19 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  */
 public class EqualTo implements BinaryPredicate {
-
+    private static final EqualTo INSTANCE = new EqualTo();
+    
     public EqualTo() {
         super();
     }
 
-    public static BinaryPredicate instance() {
-        return INSTANCE;
-    }
-
-    private static final EqualTo INSTANCE = new EqualTo();
-
     public boolean evaluate(Object value1, Object value2) {
         return ObjectUtils.nullSafeEquals(value1, value2);
     }
+    
+    public static BinaryPredicate instance() {
+        return INSTANCE;
+    }
+    
 
 }

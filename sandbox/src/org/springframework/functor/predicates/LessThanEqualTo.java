@@ -24,7 +24,8 @@ import org.springframework.functor.BinaryPredicate;
  */
 public class LessThanEqualTo extends ComparingBinaryPredicate implements
         BinaryPredicate {
-
+    private static final LessThanEqualTo INSTANCE = new LessThanEqualTo();
+    
     public LessThanEqualTo() {
         super();
     }
@@ -40,7 +41,5 @@ public class LessThanEqualTo extends ComparingBinaryPredicate implements
     public static BinaryPredicate instance() {
         return INSTANCE;
     }
-
-    private static final LessThanEqualTo INSTANCE = new LessThanEqualTo();
 
 }

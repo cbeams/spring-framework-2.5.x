@@ -8,13 +8,13 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.functor.CompoundUnaryPredicate;
 import org.springframework.functor.LogicalOperator;
-import org.springframework.functor.UnaryAnd;
-import org.springframework.functor.UnaryOr;
 import org.springframework.functor.UnaryPredicate;
+import org.springframework.functor.predicates.CompoundUnaryPredicate;
 import org.springframework.functor.predicates.PropertyPresent;
 import org.springframework.functor.predicates.Required;
+import org.springframework.functor.predicates.UnaryAnd;
+import org.springframework.functor.predicates.UnaryOr;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

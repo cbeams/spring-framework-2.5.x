@@ -15,31 +15,38 @@
  */
 package org.springframework.functor.predicates;
 
-import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.springframework.functor.BinaryPredicate;
+import org.springframework.functor.UnaryPredicate;
 
 /**
  * @author Keith Donald
  */
-public class GreaterThanEqualTo extends ComparingBinaryPredicate implements
-        BinaryPredicate {
-    private static final GreaterThanEqualTo INSTANCE = new GreaterThanEqualTo();
-    
-    public GreaterThanEqualTo() {
+public class UnaryOr extends CompoundUnaryPredicate implements UnaryPredicate {
+
+    public Set predicates = new HashSet();
+
+    public UnaryOr() {
         super();
     }
 
-    public GreaterThanEqualTo(Comparator comparator) {
-        super(comparator);
+    public UnaryOr(UnaryPredicate predicate1, UnaryPredicate predicate2) {
+        super(predicate1, predicate2);
     }
 
-    public boolean evaluateCompareResult(int result) {
-        return result >= 0;
+    public UnaryOr(UnaryPredicate[] predicates) {
+        super(predicates);
     }
 
-    public static BinaryPredicate instance() {
-        return INSTANCE;
+    public boolean evaluate(Object value) {
+        for (Iterator i = iterator(); i.hasNext();) {
+            if (!((UnaryPredicate)i.next()).evaluate(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

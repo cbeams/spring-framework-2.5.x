@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ 
-package org.springframework.functor;
+package org.springframework.functor.predicates;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.functor.Algorithms;
+import org.springframework.functor.UnaryPredicate;
 import org.springframework.util.Assert;
 
 /**

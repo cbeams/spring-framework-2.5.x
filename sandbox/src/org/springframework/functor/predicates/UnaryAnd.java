@@ -13,38 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.functor;
+package org.springframework.functor.predicates;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.functor.UnaryPredicate;
+
 /**
  * @author Keith Donald
  */
-public class UnaryOr extends CompoundUnaryPredicate implements UnaryPredicate {
+public class UnaryAnd extends CompoundUnaryPredicate implements UnaryPredicate {
 
     public Set predicates = new HashSet();
 
-    public UnaryOr() {
+    public UnaryAnd() {
         super();
     }
 
-    public UnaryOr(UnaryPredicate predicate1, UnaryPredicate predicate2) {
+    public UnaryAnd(UnaryPredicate predicate1, UnaryPredicate predicate2) {
         super(predicate1, predicate2);
     }
 
-    public UnaryOr(UnaryPredicate[] predicates) {
+    public UnaryAnd(UnaryPredicate[] predicates) {
         super(predicates);
     }
 
     public boolean evaluate(Object value) {
         for (Iterator i = iterator(); i.hasNext();) {
             if (!((UnaryPredicate)i.next()).evaluate(value)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
 }

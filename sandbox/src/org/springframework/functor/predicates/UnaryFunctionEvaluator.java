@@ -13,7 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.functor;
+package org.springframework.functor.predicates;
+
+import org.springframework.functor.UnaryFunction;
+import org.springframework.functor.UnaryPredicate;
 
 /**
  * @author Keith Donald

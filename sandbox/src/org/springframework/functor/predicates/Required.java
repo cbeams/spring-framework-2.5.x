@@ -24,6 +24,8 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  */
 public class Required implements UnaryPredicate {
+    private static final Required instance = new Required();
+    
     public boolean evaluate(Object value) {
         if (value != null) {
             if (value instanceof String) {
@@ -40,7 +42,5 @@ public class Required implements UnaryPredicate {
     public static UnaryPredicate instance() {
         return instance;
     }
-    
-    private static final Required instance = new Required();
 
 }

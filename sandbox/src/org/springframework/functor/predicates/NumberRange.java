@@ -18,7 +18,6 @@ package org.springframework.functor.predicates;
 import java.io.Serializable;
 
 import org.springframework.functor.PredicateFactory;
-import org.springframework.functor.UnaryAnd;
 import org.springframework.functor.UnaryPredicate;
 import org.springframework.functor.functions.Maximum;
 import org.springframework.functor.functions.Minimum;
