@@ -53,6 +53,7 @@ public class TilesTestSuite extends TestCase {
 		tc.setDefinitions(new String[] {"tiles-test.xml"});
 		tc.setValidateDefinitions(true);
 		tc.setApplicationContext(wac);
+		tc.afterPropertiesSet();
 
 		return wac;
 	}
