@@ -76,11 +76,41 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("Correct URL", "/example2.jsp", ((JstlView) view).getUrl());
 	}
 
+	public void testUrlBasedViewResolverWithNullViewClass() {
+		UrlBasedViewResolver resolver = new UrlBasedViewResolver();
+		try {
+			resolver.setViewClass(null);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testUrlBasedViewResolverWithoutPrefixes() throws Exception {
+		UrlBasedViewResolver vr = new UrlBasedViewResolver();
+		vr.setViewClass(InternalResourceView.class);
+		doTestUrlBasedViewResolverWithoutPrefixes(vr);
+	}
+
+	public void testUrlBasedViewResolverWithPrefixes() throws Exception {
+		UrlBasedViewResolver vr = new UrlBasedViewResolver();
+		vr.setViewClass(InternalResourceView.class);
+		doTestUrlBasedViewResolverWithPrefixes(vr);
+	}
+
 	public void testInternalResourceViewResolverWithoutPrefixes() throws Exception {
+		doTestUrlBasedViewResolverWithoutPrefixes(new InternalResourceViewResolver());
+	}
+
+	public void testInternalResourceViewResolverWithPrefixes() throws Exception {
+		doTestUrlBasedViewResolverWithPrefixes(new InternalResourceViewResolver());
+	}
+
+	private void doTestUrlBasedViewResolverWithoutPrefixes(UrlBasedViewResolver vr) throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
-		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setApplicationContext(wac);
 		vr.setContentType("myContentType");
 		vr.setRequestContextAttribute("rc");
@@ -112,11 +142,10 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
 	}
 
-	public void testInternalResourceViewResolverWithPrefixes() throws Exception {
+	private void doTestUrlBasedViewResolverWithPrefixes(UrlBasedViewResolver vr) throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
-		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setPrefix("/WEB-INF/");
 		vr.setSuffix(".jsp");
 		vr.setApplicationContext(wac);
