@@ -34,11 +34,11 @@ public interface BinaryPredicate extends Serializable {
      * Test the provided arguments against this predicates conditional
      * expression.
      * 
-     * @param value1
+     * @param argument1
      *            the first argument
-     * @param value2
+     * @param argument2
      *            the second argument
      * @return true if the condition was satisfied, false otherwise
      */
-    public boolean test(Object value1, Object value2);
+    public boolean test(Object argument1, Object argument2);
 }

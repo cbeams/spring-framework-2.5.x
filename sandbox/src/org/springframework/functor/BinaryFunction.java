@@ -20,11 +20,11 @@ public interface BinaryFunction {
     /**
      * Evaluate the function with the provided arguments, returning the result.
      * 
-     * @param value
+     * @param argument1
      *            the first argument
-     * @param value
+     * @param argument2
      *            the second argument
      * @return the function return value
      */
-    public Object evaluate(Object value1, Object value2);
+    public Object evaluate(Object argument1, Object argument2);
 }
