@@ -3,7 +3,6 @@ package org.springframework.transaction.interceptor;
 import java.util.Properties;
 
 import org.aopalliance.intercept.AspectException;
-import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
@@ -11,6 +10,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -45,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.19 2004-01-20 10:41:09 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.20 2004-02-11 17:11:05 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -53,15 +53,15 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	private Object target;
 
-	private Properties transactionAttributes;
+	private Class[] proxyInterfaces;
 
-	private Class[] interfaces;
+	private Properties transactionAttributes;
 
 	private Pointcut pointcut;
 
-	private Interceptor[] preInterceptors;
+	private Object[] preInterceptors;
 
-	private Interceptor[] postInterceptors;
+	private Object[] postInterceptors;
 
 	private Object proxy;
 
@@ -84,6 +84,17 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
+	 * Optional: You only need to set this property to filter the set of interfaces
+	 * being proxied (default is to pick up all interfaces on the target),
+	 * or if providing a custom invoker interceptor instead of a target.
+	 * <p>If left null (the default), the AOP infrastructure works out which
+	 * interfaces need proxying.
+	 */
+	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+		this.proxyInterfaces = AopUtils.toInterfaceArray(interfaceNames);
+	}
+
+	/**
 	 * Set properties with method names as keys and transaction attribute
 	 * descriptors (parsed via TransactionAttributeEditor) as values:
 	 * e.g. key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
@@ -96,11 +107,9 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
-	 * Set a MethodPointcut, i.e a bean that can cause conditional invocation
+	 * Set a pointcut, i.e a bean that can cause conditional invocation
 	 * of the TransactionInterceptor depending on method and attributes passed.
 	 * Note: Additional interceptors are always invoked.
-	 * <p>Needs to be a subclass of AbstractMethodPointcut, to be able to set
-	 * the internally used TransactionInterceptor to it.
 	 * @see #setPreInterceptors
 	 * @see #setPostInterceptors
 	 */
@@ -109,39 +118,28 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
-	 * Set additional interceptors to be applied before the implicit transaction
-	 * interceptor, e.g. PerformanceMonitorInterceptor.
+	 * Set additional interceptors (or advisors) to be applied before the
+	 * implicit transaction interceptor, e.g. PerformanceMonitorInterceptor.
 	 * @see org.springframework.aop.interceptor.PerformanceMonitorInterceptor
 	 */
-	public void setPreInterceptors(Interceptor[] preInterceptors) {
+	public void setPreInterceptors(Object[] preInterceptors) {
 		this.preInterceptors = preInterceptors;
 	}
 
 	/**
-	 * Set additional interceptors to be applied after the implicit transaction
-	 * interceptor, e.g. HibernateInterceptors or JdoInterceptors for binding Sessions
-	 * respectively PersistenceManagers to the current thread when using JTA.
+	 * Set additional interceptors (or advisors) to be applied after the
+	 * implicit transaction interceptor, e.g. HibernateInterceptors for
+	 * eagerly binding Sessions to the current thread when using JTA.
 	 * <p>Note that this is just necessary if you rely on those interceptors in general:
 	 * HibernateTemplate and JdoTemplate work nicely with JtaTransactionManager through
 	 * implicit on-demand thread binding.
 	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.jdo.JdoInterceptor
 	 */
-	public void setPostInterceptors(Interceptor[] preInterceptors) {
+	public void setPostInterceptors(Object[] preInterceptors) {
 		this.postInterceptors = preInterceptors;
 	}
 
-	/**
-	 * Optional: You only need to set this property to filter the set of interfaces
-	 * being proxied (default is to pick up all interfaces on the target),
-	 * or if providing a custom invoker interceptor instead of a target.
-	 * <p>If left null (the default), the AOP infrastructure works out which
-	 * interfaces need proxying.
-	 */
-	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
-		this.interfaces = AopUtils.toInterfaceArray(interfaceNames);
-	}
-	
 
 	public void afterPropertiesSet() throws AopConfigException {
 		if (this.target == null) {
@@ -164,7 +162,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 		if (this.preInterceptors != null) {
 			for (int i = 0; i < this.preInterceptors.length; i++) {
-				proxyFactory.addInterceptor(this.preInterceptors[i]);
+				proxyFactory.addAdvisor(GlobalAdvisorAdapterRegistry.getInstance().wrap(this.preInterceptors[i]));
 			}
 		}
 
@@ -173,24 +171,23 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 			proxyFactory.addAdvisor(advice);
 		}
 		else {
-			// Rely on default pointcut
+			// rely on default pointcut
 			proxyFactory.addAdvisor(new TransactionAttributeSourceTransactionAroundAdvisor(transactionInterceptor));
-			
-			// Could just do the following, but it's usually less efficient because of AOP advice chain caching
+			// could just do the following, but it's usually less efficient because of AOP advice chain caching
 			//proxyFactory.addInterceptor(transactionInterceptor);
 		}
 
 		if (this.postInterceptors != null) {
 			for (int i = 0; i < this.postInterceptors.length; i++) {
-				proxyFactory.addInterceptor(this.postInterceptors[i]);
+				proxyFactory.addAdvisor(GlobalAdvisorAdapterRegistry.getInstance().wrap(this.postInterceptors[i]));
 			}
 		}
 
 		proxyFactory.copyFrom(this);
 
 		proxyFactory.setTargetSource(createTargetSource(this.target));
-		if (this.interfaces != null) {
-			proxyFactory.setInterfaces(this.interfaces);
+		if (this.proxyInterfaces != null) {
+			proxyFactory.setInterfaces(this.proxyInterfaces);
 		}
 		else if (!getProxyTargetClass()) {
 			// rely on AOP infrastructure to tell us what interfaces to proxy
