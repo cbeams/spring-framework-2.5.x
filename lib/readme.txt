@@ -78,7 +78,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JavaMailSender
 
 * j2ee/ejb.jar
-- EJB API 2.0 (http://java.sun.com/products/ejb)
+- Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
 - required for building the framework
 - required at runtime when using Spring's EJB support
 
@@ -92,13 +92,18 @@ distribution/website before using any of them in your own applications.
 - required for building the framework on J2SE 1.3
 - required at runtime when using Spring's JDBC support on J2SE 1.3
 
+* j2ee/jms.jar
+- Java Message Service API 1.0.2b (java.sun.com/products/jms)
+- required for building the framework
+- required at runtime when using Spring's AbstractJmsMessageDrivenBean
+
 * j2ee/jstl.jar
-- JSTL API 1.0 (http://java.sun.com/products/jstl)
+- JSP Standard Tag Library API 1.0 (http://java.sun.com/products/jstl)
 - required for building the framework
 - required at runtime when using Spring's JstlView
 
 * j2ee/jta.jar
-- JTA API 1.0.1 (http://java.sun.com/products/jta)
+- Java Transaction API 1.0.1b (http://java.sun.com/products/jta)
 - required for building the framework
 - required at runtime when using Spring's JtaTransactionManager
 
