@@ -37,7 +37,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: InternalResourceView.java,v 1.10 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: InternalResourceView.java,v 1.11 2004-03-23 22:51:05 jhoeller Exp $
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  */
@@ -70,8 +70,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// simply forward to the JSP
 		RequestDispatcher rd = request.getRequestDispatcher(getUrl());
 		if (rd == null) {
-			throw new ServletException("Can't get RequestDispatcher for [" + getUrl() +
-			                           "']: check that this file exists within your WAR");
+			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
+			                           "]: check that this file exists within your WAR");
 		}
 
 		// if already included, include again, else forward
