@@ -48,6 +48,9 @@ public class StateGroup implements Serializable {
 	}
 
 	public void add(AbstractState state) {
+		if (flow.containsInstance(state)) {
+			return;
+		}
 		if (flow.containsState(state.getId())) {
 			throw new IllegalStateException(
 					"This flow '"

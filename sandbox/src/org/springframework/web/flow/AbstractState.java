@@ -74,6 +74,20 @@ public abstract class AbstractState implements Serializable {
 	 */
 	public AbstractState(Flow flow, String id) {
 		setId(id);
+		flow.add(this);
+		setFlow(flow);
+	}
+
+	/**
+	 * Creates a state for the provided <code>flow</code> identified by the
+	 * provided <code>id</code> in the specified <code>group</code>.
+	 * @param flow the owning flow
+	 * @param id the state identifier 
+	 * @param groupId The id of the state group
+	 */
+	public AbstractState(Flow flow, String id, String groupId) {
+		setId(id);
+		flow.add(groupId, this);
 		setFlow(flow);
 	}
 

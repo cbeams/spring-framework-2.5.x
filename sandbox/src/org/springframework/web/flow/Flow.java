@@ -552,8 +552,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper,
-			Transition[] transitions) {
+	public void addSubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
 		add(new SubFlowState(this, id, subFlow, attributesMapper, transitions));
 	}
 
@@ -618,6 +617,17 @@ public class Flow implements FlowEventProcessor, Serializable {
 			}
 		}
 		return null;
+	}
+
+	protected boolean containsInstance(AbstractState state) {
+		Iterator it = statesIterator();
+		while (it.hasNext()) {
+			AbstractState s = (AbstractState)it.next();
+			if (s == state) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
