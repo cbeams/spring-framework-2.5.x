@@ -9,8 +9,15 @@ Changes in version 1.1.2 (15.11.2004)
 Package org.springframework.aop
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
+Package org.springframework.beans
+* moved "destroyBean" implementation from AbstractAutowireCapableBeanFactory up to AbstractBeanFactory
+* refined internal structure and visibilities of AbstractBeanFactory and AbstractAutowireCapableBeanFactory
+* fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
+
 Package org.springframework.web
+* fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
+* added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
 
 
 Changes in version 1.1.1 (30.9.2004)
