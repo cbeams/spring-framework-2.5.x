@@ -119,7 +119,8 @@ public class MultiAction extends AbstractAction {
 			String executeMethodName = (String)key;
 			try {
 				return getDelegate().getClass().getMethod(executeMethodName, new Class[] { RequestContext.class });
-			} catch (NoSuchMethodException e) {
+			}
+			catch (NoSuchMethodException e) {
 				throw new ActionExecutionException(
 						"Unable to resolve action execute method with signature 'public Event " + executeMethodName
 								+ "(RequestContext context)' - make sure the method name is correct "
@@ -155,7 +156,8 @@ public class MultiAction extends AbstractAction {
 								+ "' returned an object of type " + result.getClass());
 			}
 			return (Event)result;
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof Exception) {
 				throw (Exception)e.getTargetException();

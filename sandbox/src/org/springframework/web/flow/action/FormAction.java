@@ -42,8 +42,8 @@ import org.springframework.web.flow.ScopeType;
  * (signal) the success() event if there are no setup errors, otherwise it will
  * return the error() event. </li>
  * <li> {@link #bindAndValidate(RequestContext)} - Bind all incoming event
- * parameters to the form object and validate the form object using any
- * registered validators. This action method will return (signal) the success()
+ * parameters to the form object and validate the form object using a
+ * registered validator. This action method will return (signal) the success()
  * event if there are no binding or validation errors, otherwise it will return
  * the error() event. </li>
  * </ul>
@@ -127,9 +127,9 @@ import org.springframework.web.flow.ScopeType;
  * {@link #initBinder(RequestContext, DataBinder) initBinder} hook method. </td>
  * </tr>
  * <tr>
- * <td>validator(s)</td>
- * <td>empty</td>
- * <td> The validators for this action. The validators must support the
+ * <td>validator</td>
+ * <td>null</td>
+ * <td> The validator for this action. The validator must support the
  * specified form object class. </td>
  * </tr>
  * <tr>
@@ -141,7 +141,7 @@ import org.springframework.web.flow.ScopeType;
  * <tr>
  * <td>validateOnBinding</td>
  * <td>true</td>
- * <td> Indicates if the validators should get applied when binding. </td>
+ * <td> Indicates if the validator should get applied when binding. </td>
  * </tr>
  * <tr>
  * <td>messageCodesResolver</td>
@@ -336,7 +336,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
-	 * Return if the validators should get applied when binding. Defaults to
+	 * Return if the validator should get applied when binding. Defaults to
 	 * true.
 	 */
 	public boolean isValidateOnBinding() {
@@ -344,7 +344,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
-	 * Set if the validators should get applied when binding.
+	 * Set if the validator should get applied when binding.
 	 */
 	public void setValidateOnBinding(boolean validateOnBinding) {
 		this.validateOnBinding = validateOnBinding;
@@ -400,7 +400,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 
 	/**
 	 * Bind all incoming request parameters to the form object and validate the
-	 * form object using any registered validators.
+	 * form object using a registered validator.
 	 * @param context the action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @return "success" when binding and validation is successful, "error"
@@ -562,7 +562,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
-	 * Validate given form object using any registered validators.
+	 * Validate given form object using a registered validator.
 	 * @param context the action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @param formObject the form object
@@ -572,10 +572,11 @@ public class FormAction extends MultiAction implements InitializingBean {
 		ActionStateAction action = getActionStateAction(context);
 		String validatorMethod = action.getProperty(VALIDATOR_METHOD_PROPERTY);
 		if (StringUtils.hasText(validatorMethod)) {
+			//TODO
 			throw new UnsupportedOperationException("Not yet implemented - TODO");
 		}
 		else {
-			this.validator.validate(formObject, errors);
+			getValidator().validate(formObject, errors);
 		}
 	}
 
