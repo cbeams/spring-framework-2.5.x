@@ -39,7 +39,7 @@ public class ConverterPropertyEditorAdapter extends PropertyEditorSupport {
             setValue(converter.convert(text));
         }
         catch (ConversionException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Could not convert back from string: "
+            IllegalArgumentException iae = new IllegalArgumentException("Could not convert from string: "
                     + e.getMessage());
             iae.initCause(e);
             throw iae;

@@ -3,7 +3,6 @@
  */
 package org.springframework.binding.support;
 
-import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.binding.convert.ConverterLocator;
 import org.springframework.binding.convert.support.AbstractConverter;
 import org.springframework.util.Assert;
@@ -12,6 +11,10 @@ import org.springframework.util.StringUtils;
 public class TextToMappingConverter extends AbstractConverter {
 
 	private ConverterLocator converterLocator;
+
+	public TextToMappingConverter(ConverterLocator locator) {
+		setConverterLocator(locator);
+	}
 
 	/**
 	 * Set the type converter registry
@@ -35,15 +38,25 @@ public class TextToMappingConverter extends AbstractConverter {
 	}
 
 	protected Object doConvert(Object o) throws Exception {
-		ClassEditor classEditor = new ClassEditor();
-		String[] encodedMapping = StringUtils.commaDelimitedListToStringArray((String)o);
-		if (encodedMapping.length == 2) {
-			classEditor.setAsText(encodedMapping[1]);
-			Class clazz = (Class)classEditor.getValue();
-			return new Mapping(encodedMapping[0], getConverterLocator().getConverter(String.class, clazz));
+		String[] mappingInfo = StringUtils.commaDelimitedListToStringArray((String)o);
+		String[] sourceTarget = StringUtils.delimitedListToStringArray(mappingInfo[0], "->");
+		if (mappingInfo.length == 2) {
+			Class clazz = (Class)getConverterLocator().getConverter(String.class, Class.class).convert(mappingInfo[1]);
+			if (sourceTarget.length == 2) {
+				return new Mapping(sourceTarget[0], sourceTarget[1], getConverterLocator().getConverter(String.class,
+						clazz));
+			}
+			else {
+				return new Mapping(sourceTarget[0], getConverterLocator().getConverter(String.class, clazz));
+			}
 		}
 		else {
-			return new Mapping(encodedMapping[0]);
+			if (sourceTarget.length == 2) {
+				return new Mapping(sourceTarget[0], sourceTarget[1]);
+			}
+			else {
+				return new Mapping(sourceTarget[0]);
+			}
 		}
 	}
 }

@@ -76,7 +76,8 @@ public class ThreadLocalFormatterLocator implements FormatterLocator {
 	protected Map getLocaleMap() {
 		Map map = (Map)formatterStorage.get(getLocale());
 		if (map == null) {
-			formatterStorage.put(getLocale(), new HashMap());
+			map = new HashMap();
+			formatterStorage.put(getLocale(), map);
 		}
 		return map;
 	}

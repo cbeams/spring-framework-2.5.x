@@ -88,15 +88,13 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
+	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
+
 	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"/>
 
-	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
-	
 	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.SetAction">
-		<property name="mappingsMap">
-			<map>
-				<entry key="id"><value>colleagueId,java.lang.Long</value></entry>
-			</map>
+		<property name="mapping">
+			<value>id->colleagueId,java.lang.Long</value>
 		</property>
 	</bean>
 
