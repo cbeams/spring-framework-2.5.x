@@ -17,7 +17,7 @@ import org.easymock.MockControl;
  * @task enter type comments
  * 
  * @author <a href="mailto:tcook@interprisesoftware.com">Trevor D. Cook</a>
- * @version $Id: JdbcTestCase.java,v 1.2 2003-11-03 15:14:02 johnsonr Exp $
+ * @version $Id: JdbcTestCase.java,v 1.3 2003-11-03 16:59:42 johnsonr Exp $
  */
 public abstract class JdbcTestCase extends TestCase {
 
@@ -74,10 +74,14 @@ public abstract class JdbcTestCase extends TestCase {
 		super.tearDown();
 
 		// We shouldn't verify unless the user called replay()
-		if (this.shouldVerify) {
+		if (shouldVerify()) {
 			ctrlDataSource.verify();
 			ctrlConnection.verify();
 		}
+	}
+
+	protected boolean shouldVerify() {
+		return this.shouldVerify;
 	}
 
 	protected void replay() {
