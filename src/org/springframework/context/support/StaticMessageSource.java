@@ -22,9 +22,6 @@ public class StaticMessageSource extends AbstractNestingMessageSource {
 
 	private Map messages = new HashMap();
 
-	/**
-	 * @see AbstractNestingMessageSource#messageKey(Locale, String)
-	 */
 	protected String resolve(String code, Locale locale) {
 		return (String) this.messages.get(messageKey(locale, code));
 	}
@@ -37,7 +34,11 @@ public class StaticMessageSource extends AbstractNestingMessageSource {
 	 */
 	public void addMessage(String code, Locale locale, String message) {
 		this.messages.put(messageKey(locale, code), message);
-		logger.info("Added message [" + message + " for code [" + code + "] and Locale [" + locale + "]");
+		logger.info("Added message [" + message + "] for code [" + code + "] and Locale [" + locale + "]");
+	}
+
+	public String toString() {
+		return getClass().getName() + ": " + this.messages;
 	}
 
 }

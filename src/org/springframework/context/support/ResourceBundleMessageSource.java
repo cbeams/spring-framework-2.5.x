@@ -53,7 +53,7 @@ public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
 		this.basenames = basenames;
 	}
 
-	protected String resolve(String code, Locale locale) throws MissingResourceException {
+	protected String resolve(String code, Locale locale) {
 		String msg = null;
 		for (int i = 0; msg == null && i < this.basenames.length; i++) {
 			String basename = this.basenames[i];

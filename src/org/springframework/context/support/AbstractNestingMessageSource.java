@@ -81,7 +81,8 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 	public final String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
 		try {
 			return getMessage(code, args, locale);
-		} catch (NoSuchMessageException ex) {
+		}
+		catch (NoSuchMessageException ex) {
 			return defaultMessage;
 		}
 	}
@@ -106,7 +107,8 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 		for (int i = 0; i < codes.length; i++) {
 			try {
 				return getMessage(codes[i], resolvable.getArgs(), locale);
-			} catch (NoSuchMessageException ex) {
+			}
+			catch (NoSuchMessageException ex) {
 				// swallow it, we'll retry the other codes
 			}
 		}
@@ -129,47 +131,38 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 	 * @throws NoSuchMessageException not found in any locale
 	 */
 	public final String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
-		try {
-			String mesg = resolve(code, locale);
-
-			if (mesg == null) {
-				if (parent != null)
-					mesg = parent.getMessage(code, args, locale);
-				else
-					throw new NoSuchMessageException(code, locale);
-			}
-
-			// Cache MessageFormat instances as they are accessed
-			if (locale == null)
-				locale = defaultLocale;
-			MessageFormat format = null;
-			String formatKey = messageKey(locale, code);
-			synchronized (formats) {
-				format = (MessageFormat) formats.get(formatKey);
-				if (format == null) {
-					format = new MessageFormat(escape(mesg));
-					formats.put(formatKey, format);
-				}
-			}
-			return (format.format(args));
-		} catch (NoSuchMessageException ex) {
-			throw ex;
-		} catch (Exception ex) {
-			throw new NoSuchMessageException(code, locale);
+		String mesg = resolve(code, locale);
+		if (mesg == null) {
+			if (parent != null)
+				mesg = parent.getMessage(code, args, locale);
+			else
+				throw new NoSuchMessageException(code, locale);
 		}
+
+		// Cache MessageFormat instances as they are accessed
+		if (locale == null)
+			locale = defaultLocale;
+		MessageFormat format = null;
+		String formatKey = messageKey(locale, code);
+		synchronized (formats) {
+			format = (MessageFormat) formats.get(formatKey);
+			if (format == null) {
+				format = new MessageFormat(escape(mesg));
+				formats.put(formatKey, format);
+			}
+		}
+		return (format.format(args));
 	}
 
 
 	/**
 	 * Subclasses must implement this method to resolve a message
 	 * @return the message, or null if not found
-	 * @throws Exception if there's an error resolving the message.
-	 * Note that failure to find a message for the code is not an error.
 	 * @param code code of the message to resolve
 	 * @param locale locale to resolve the code for. Subclasses
 	 * are encouraged to support internationalization.
 	 */
-	protected abstract String resolve(String code, Locale locale) throws Exception;
+	protected abstract String resolve(String code, Locale locale);
 
 
 	protected Locale getDefaultLocale() {
