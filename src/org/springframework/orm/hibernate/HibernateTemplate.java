@@ -186,7 +186,7 @@ public class HibernateTemplate extends HibernateAccessor {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or null if not found.
-	 * Obtain the specified lock mode if the instance exists.
+	 * Obtains the specified lock mode if the instance exists.
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.get.
 	 * @param entityClass a persistent class
@@ -227,7 +227,7 @@ public class HibernateTemplate extends HibernateAccessor {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
-	 * Obtain the specified lock mode if the instance exists.
+	 * Obtains the specified lock mode if the instance exists.
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.load.
 	 * @param entityClass a persistent class
@@ -242,6 +242,43 @@ public class HibernateTemplate extends HibernateAccessor {
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.load(entityClass, id, lockMode);
+			}
+		});
+	}
+
+	/**
+	 * Remove the given object from the Session cache.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.evict.
+	 * @param entity the persistent instance to lock
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#evict(Object)
+	 */
+	public void evict(final Object entity) {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.evict(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Obtain the specified lock level upon the given object, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.lock.
+	 * @param entity the persistent instance to lock
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#lock(Object, LockMode)
+	 */
+	public void lock(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.lock(entity, lockMode);
+				return null;
 			}
 		});
 	}
@@ -282,23 +319,6 @@ public class HibernateTemplate extends HibernateAccessor {
 	}
 
 	/**
-	 * Update the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.update.
-	 * @param entity the persistent instance to update
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#update(Object)
-	 */
-	public void update(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				session.update(entity);
-				return null;
-			}
-		});
-	}
-
-	/**
 	 * Save respectively update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
 	 * <p>This is a convenience method for single step actions,
@@ -317,34 +337,41 @@ public class HibernateTemplate extends HibernateAccessor {
 	}
 
 	/**
-	 * Obtain the specified lock level upon the given object.
+	 * Update the given persistent instance.
 	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.lock.
-	 * @param entity the persistent instance to lock
+	 * mirroring Session.update.
+	 * @param entity the persistent instance to update
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#lock(Object, LockMode)
+	 * @see net.sf.hibernate.Session#update(Object)
 	 */
-	public void lock(final Object entity, final LockMode lockMode) throws DataAccessException {
+	public void update(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				session.lock(entity, lockMode);
+				session.update(entity);
 				return null;
 			}
 		});
 	}
 
 	/**
-	 * Remove the given object from the Session cache.
+	 * Update the given persistent instance.
+	 * Obtains the specified lock mode if the instance exists, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
 	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.evict.
-	 * @param entity the persistent instance to lock
+	 * mirroring Session.update.
+	 * <p>Implementation note: Invokes Session.update <i>before</i> Session.lock,
+	 * as an initial lock would reassociate the given entity as <i>unmodified</i>. 
+	 * @param entity the persistent instance to update
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#evict(Object)
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#update(Object)
 	 */
-	public void evict(final Object entity) {
+	public void update(final Object entity, final LockMode lockMode) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				session.evict(entity);
+				session.update(entity);
+				session.lock(entity, lockMode);
 				return null;
 			}
 		});
@@ -361,6 +388,28 @@ public class HibernateTemplate extends HibernateAccessor {
 	public void delete(final Object entity) throws DataAccessException {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
+				session.delete(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Delete the given persistent instance.
+	 * Obtains the specified lock mode if the instance exists, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.delete.
+	 * @param entity the persistent instance to delete
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#delete(Object)
+	 */
+	public void delete(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.lock(entity, lockMode);
 				session.delete(entity);
 				return null;
 			}

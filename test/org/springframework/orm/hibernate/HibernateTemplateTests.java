@@ -324,6 +324,52 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testEvict() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.evict(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.evict(tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testLock() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.lock(tb, LockMode.WRITE);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.lock(tb, LockMode.WRITE);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testSave() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -370,29 +416,6 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testUpdate() throws HibernateException {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		TestBean tb = new TestBean();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.update(tb);
-		sessionControl.setVoidCallable(1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-			sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.update(tb);
-		sfControl.verify();
-		sessionControl.verify();
-	}
-
 	public void testSaveOrUpdate() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -416,7 +439,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testLock() throws HibernateException {
+	public void testUpdate() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -424,7 +447,7 @@ public class HibernateTemplateTests extends TestCase {
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		session.lock(tb, LockMode.WRITE);
+		session.update(tb);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
@@ -434,12 +457,12 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.lock(tb, LockMode.WRITE);
+		ht.update(tb);
 		sfControl.verify();
 		sessionControl.verify();
 	}
 
-	public void testEvict() throws HibernateException {
+	public void testUpdateWithLockMode() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -447,7 +470,9 @@ public class HibernateTemplateTests extends TestCase {
 		TestBean tb = new TestBean();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		session.evict(tb);
+		session.update(tb);
+		sessionControl.setVoidCallable(1);
+		session.lock(tb, LockMode.UPGRADE);
 		sessionControl.setVoidCallable(1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
@@ -457,7 +482,7 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.evict(tb);
+		ht.update(tb, LockMode.UPGRADE);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -475,12 +500,37 @@ public class HibernateTemplateTests extends TestCase {
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
-			sessionControl.setReturnValue(null, 1);
+		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.delete(tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testDeleteWithLock() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.lock(tb, LockMode.UPGRADE);
+		sessionControl.setVoidCallable(1);
+		session.delete(tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.delete(tb, LockMode.UPGRADE);
 		sfControl.verify();
 		sessionControl.verify();
 	}
