@@ -20,7 +20,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.6 2003-11-12 20:57:13 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.7 2003-11-14 08:51:30 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -28,23 +28,20 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 * Interface this invocation is against.
 	 * May not be the same as the method's declaring interface. 
 	 */
-	private final Class targetInterface;
+	private Class targetInterface;
 
-	private final Method method;
+	private Method method;
 	
-	private final Object[] arguments;
+	private Object[] arguments;
 	
-	/**
-	 * Not final as it can be set during invocations
-	 */
 	private Object target;
 	
-	private final Object proxy;
+	private Object proxy;
 	
 	/** 
 	 * Interceptors and any InterceptionAdvice that needs dynamic checks.
 	 **/
-	public final List interceptorsAndDynamicMethodMatchers;
+	public List interceptorsAndDynamicMethodMatchers;
 	
 	/** 
 	 * Any resources attached to this invocation.
@@ -59,7 +56,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 	 */
 	private int currentInterceptor = -1;
 	
-	private final Class targetClass;
+	private Class targetClass;
 	
 	
 	/**
@@ -76,13 +73,36 @@ public class MethodInvocationImpl implements MethodInvocation {
 					Class targetClass,
 					List interceptorsAndDynamicMethodMatchers) {			
 						
+		populate(proxy, target, targetInterface, m, arguments,
+				targetClass, interceptorsAndDynamicMethodMatchers);
+	}
+	
+	protected MethodInvocationImpl() {
+	}
+	
+	protected void populate(Object proxy, Object target, 
+						Class targetInterface, Method m, Object[] arguments,
+						Class targetClass,
+						List interceptorsAndDynamicMethodMatchers) {			
+					
 		this.proxy = proxy;
+		this.target = target;
 		this.targetInterface = targetInterface;
 		this.targetClass = targetClass;
-		this.target = target;
 		this.method = m;
 		this.arguments = arguments;
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
+		this.currentInterceptor = -1;
+	}
+	
+	public void clear() {
+		this.proxy = null;
+		this.targetInterface = null;
+		this.targetClass = null;
+		this.target = null;
+		this.method = null;
+		this.arguments = null;
+		this.interceptorsAndDynamicMethodMatchers = null;
 	}
 	
 	
