@@ -11,6 +11,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.support.BeanFactoryLoader;
 import org.springframework.beans.factory.support.BootstrapException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Implementation of the BeanFactoryLoader interface useful in EJBs
@@ -29,7 +31,7 @@ import org.springframework.jndi.JndiTemplate;
  *
  * @author Rod Johnson
  * @since 20-Jul-2003
- * @version $Id: XmlBeanFactoryLoader.java,v 1.1.1.1 2003-08-14 16:20:26 trisberg Exp $
+ * @version $Id: XmlBeanFactoryLoader.java,v 1.2 2003-08-18 20:19:23 jhoeller Exp $
  */
 public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	
@@ -48,7 +50,7 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 		try {
 			beanFactoryPath = (String) jt.lookup(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
 			logger.info("BeanFactoryPath from JNDI is '" + beanFactoryPath + "'");			
-			InputStream is = getClass().getResourceAsStream(beanFactoryPath);
+			InputStream is = ClassLoaderUtils.getResourceAsStream(getClass(), beanFactoryPath);
 			if (is == null)
 				throw new BootstrapException("Cannot load bean factory path '" + beanFactoryPath + "'", null);
 			ListableBeanFactory beanFactory = new XmlBeanFactory(is);

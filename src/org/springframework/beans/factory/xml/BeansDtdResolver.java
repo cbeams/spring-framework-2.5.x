@@ -8,6 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
+import org.springframework.util.ClassLoaderUtils;
+
 /**
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring classpath resp. JAR file.
@@ -35,7 +37,7 @@ public class BeansDtdResolver implements EntityResolver {
 			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
 			// Search for DTD
 			logger.debug("Trying to locate [" + dtdFile + "] under " + SEARCH_PACKAGE);
-			InputStream is = getClass().getResourceAsStream(SEARCH_PACKAGE + dtdFile);
+			InputStream is = ClassLoaderUtils.getResourceAsStream(getClass(), SEARCH_PACKAGE + dtdFile);
 			if (is != null) {
 				logger.debug("Found beans DTD [" + systemId + "] is classpath");
 				InputSource source = new InputSource(is);
