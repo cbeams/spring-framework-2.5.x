@@ -20,8 +20,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Parameter extraction methods, for an approach distinct from data binding, in which
- * parameters of specific types are required. This is very useful for simple submissions.
+ * Parameter extraction methods, for an approach distinct from data binding,
+ * in which parameters of specific types are required.
+ *
+ * <p>This approach is very useful for simple submissions, where binding
+ * request parameters to a command object would be overkill.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
