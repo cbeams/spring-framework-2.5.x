@@ -137,6 +137,12 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
+	public static final String FLOW_SESSION_ID_PARAMETER_NAME = "_flowId";
+
+	public static final String EVENT_ID_PARAMETER_NAME = "_eventId";
+
+	public static final String CURRENT_STATE_PARAMETER_NAME = "_currentStateId";
+
 	/**
 	 * The <code>ADD</code> action state/event identifier.
 	 */
@@ -241,6 +247,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * The <code>UNLINK</code> action state/event identifier.
 	 */
 	public static final String UNLINK = "unlink";
+
+	/**
+	 * The <code>BIND</code> action state/event identifier.
+	 */
+	public static final String BIND = "bind";
 
 	/**
 	 * The <code>VALIDATE</code> action state/event identifier.
@@ -1547,6 +1558,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return buildStateId(bindAndValidateStateIdPrefix, BIND_AND_VALIDATE);
 	}
 
+	public String bind(String bindActionStateIdPrefix) {
+		return buildStateId(bindActionStateIdPrefix, BIND);
+	}
+	
 	/**
 	 * @param validateActionStateIdPrefix
 	 * @return
