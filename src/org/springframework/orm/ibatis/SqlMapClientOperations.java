@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
+import org.springframework.dao.DataAccessException;
+
 /**
  * Interface that specifies a basic set of iBATIS SqlMapClient operations.
  * Implemented by SqlMapClientTemplate. Not often used, but a useful option
@@ -23,29 +25,29 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  */
 public interface SqlMapClientOperations {
 
-	Object queryForObject(String statementName, Object parameterObject);
+	Object queryForObject(String statementName, Object parameterObject) throws DataAccessException;
 
-	Object queryForObject(String statementName, Object parameterObject,
-															 Object resultObject);
+	Object queryForObject(String statementName, Object parameterObject,	Object resultObject)
+			throws DataAccessException;
 
-	List queryForList(String statementName, Object parameterObject);
+	List queryForList(String statementName, Object parameterObject) throws DataAccessException;
 
-	List queryForList(String statementName, Object parameterObject,
-													 int skipResults, int maxResults);
+	List queryForList(String statementName, Object parameterObject, int skipResults,
+										int maxResults) throws DataAccessException;
 
-	List queryForList(String statementName, Object parameterObject,
-													 RowHandler rowHandler);
+	List queryForList(String statementName, Object parameterObject, RowHandler rowHandler)
+			throws DataAccessException;
 
-	Map queryForMap(String statementName, Object parameterObject,
-												 String keyProperty);
+	Map queryForMap(String statementName, Object parameterObject, String keyProperty)
+			throws DataAccessException;
 
-	Map queryForMap(String statementName, Object parameterObject,
-												 String keyProperty, String valueProperty);
+	Map queryForMap(String statementName, Object parameterObject, String keyProperty,
+									String valueProperty) throws DataAccessException;
 
-	Object insert(String statementName, Object parameterObject);
+	Object insert(String statementName, Object parameterObject) throws DataAccessException;
 
-	int update(String statementName, Object parameterObject);
+	int update(String statementName, Object parameterObject) throws DataAccessException;
 
-	int delete(String statementName, Object parameterObject);
+	int delete(String statementName, Object parameterObject) throws DataAccessException;
 
 }
