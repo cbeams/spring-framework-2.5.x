@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.5 2004-01-06 00:31:52 davison Exp $
+	$Id: build.xml,v 1.6 2004-01-08 01:32:06 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -17,10 +17,10 @@
 	<!-- autobuilds properties - these should not need amending -->
 	<property name="autobuilds.dir" value=".." />
 	<property name="spring.root.dir" value="../.." />
-	<property name="spring.samples.dir" value="${spring.root.dir}/samples"/>
 	<property name="spring.lib.dir" value="${spring.root.dir}/lib"/>
 	<property name="spring.dist.dir" value="${spring.root.dir}/dist"/>
-	<property name="target.root.dir" value="${spring.root.dir}/target/autobuilds" />
+	<property name="target.root.dir" value="${spring.root.dir}/target/autobuilds" />	
+	<property name="autobuilds.samples.dir" value="${autobuilds.dir}/apps"/>
 	<property name="servers.conf.dir" value="${autobuilds.dir}/conf/servers" />
 	<property name="servers.install.dir" value="${target.root.dir}/server-installs" />
 	<property name="src.dir" value="${autobuilds.dir}/src" />
@@ -29,6 +29,7 @@
 	<property name="dev.mail.list" value="springframework-developer@lists.sourceforge.net" />
 	<property name="autobuilds.mail.from" value="autobuilds@springframework.org"/>
 	<property name="autobuilds.mail.failure.subject" value="Spring Autobuilds Failure Report"/>
+	
 	
 	<!-- build.properties is local per user -->
 	<property file="build.properties"/>
@@ -129,7 +130,7 @@
 	    </tstamp>
 	    
 	    <property name="autobuilds.unittest.outfile" value="${target.app}_${target.server}_unittests_${TODAY_UK}"/>
-		
+		<property name="autobuilds.buildlog" value="${target.app}_${target.server}_build_${TODAY_UK}.log"/>
 	</target>
 	
 	
@@ -180,22 +181,27 @@ realclean       --> delete ALL build products and sandbox.
 	-->
 	<target name="main" depends="setup,taskdefs,init">
 		
+		<record name="${reports.dir}/${autobuilds.buildlog}"/>
+		
 		<echo message="     #  ----------------------------------------------------------------" />
 		<echo message="     #" />
 		<echo message="     #  Spring Autobuilds - automatic application deployment and testing" />			
 		<echo message="     # " />
 		<echo message="     #  target application: ${target.app}" />
 		<echo message="     #  target server: ${target.server}" />
+		<echo message="     # " />
+		<echo message="     #  this output is recorded in the file:" />
+		<echo message="     #  ${reports.dir}/${autobuilds.buildlog}" />
 		<echo message="     #  ----------------------------------------------------------------" />
 		
 		<antcall target="spring-update" />
 		<ant dir="${spring.root.dir}" target="build" inheritall="false" />
 		<ant dir="${spring.root.dir}" target="fulljar" inheritall="false" />
-		<ant dir="${spring.samples.dir}/${target.app}" target="dist" inheritall="false" />
+		<ant dir="${autobuilds.samples.dir}/${target.app}" target="dist" inheritall="false" />
 		
 		<ant dir="." antfile="${target.server}-build.xml" target="deploy" />
 		
-		<ant dir="${spring.samples.dir}/${target.app}" target="clean" inheritall="false" />	
+		<ant dir="${autobuilds.samples.dir}/${target.app}" target="clean" inheritall="false" />	
 		
 		<parallel>
 			<antcall target="start-hsql" />
@@ -205,9 +211,11 @@ realclean       --> delete ALL build products and sandbox.
 				<sleep seconds="${autobuilds.server.timewait}"/>
 				
 				<antcall target="tests"/>
-				
-				<!-- separate target so they can be called manually -->
-				<antcall target="stop-server"/>
+								
+				<!-- keep alive? -->
+				<antcall target="check-stopserver"/>
+				<antcall target="stop-hsql"/>
+				<ant dir="." antfile="${target.server}-build.xml" target="stop-server" />	
 			</sequential>
 		</parallel>
 		
@@ -222,7 +230,7 @@ realclean       --> delete ALL build products and sandbox.
 		
 		create required environment
 	-->
-	<target name="setup">
+	<target name="setup" depends="clean">
 		<mkdir dir="${target.root.dir}" />
 		<mkdir dir="${bin.dir}" />
 		<mkdir dir="${reports.dir}" />
@@ -292,7 +300,7 @@ realclean       --> delete ALL build products and sandbox.
 		<echo message="#  Starting HSQLDB" />
 		<echo message="#  ----------------------------------------------------------------" />		
 		<copy todir="${target.root.dir}" overwrite="true">
-			<fileset dir="${spring.samples.dir}/${target.app}/db">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/db">
 				<include name="**/${target.app}.*" />
 			</fileset>
 		</copy>
@@ -348,7 +356,7 @@ realclean       --> delete ALL build products and sandbox.
 		
 		stop hsql gracefully
 	-->
-	<target name="stop-hsql" unless="autobuilds.keepalive" if="hsql.required" depends="taskdefs">
+	<target name="stop-hsql" if="hsql.required" depends="taskdefs">
 		<echo message="#  ----------------------------------------------------------------" />
 		<echo message="#  Stopping HSQLDB" />
 		<echo message="#  ----------------------------------------------------------------" />	
@@ -362,12 +370,15 @@ realclean       --> delete ALL build products and sandbox.
 	
 	
 	<!--
-		stop-server
+		check-stopserver
 		
 		close all servers
 	-->
-	<target name="stop-server" unless="autobuilds.keepalive" depends="stop-hsql">
-		<ant dir="." antfile="${target.server}-build.xml" target="stop-server" />		
+	<target name="check-stopserver" if="autobuilds.keepalive">
+		<input>
+		Servers have been left running for manual examination.
+		Press [Return] to quit the server(s) when ready...
+		</input>
 	</target>
 	
 	
@@ -384,6 +395,8 @@ realclean       --> delete ALL build products and sandbox.
 			mailhost="${autobuilds.mail.host}"
 			subject="${autobuilds.mail.failure.subject}"
 			message="Please see attached reports"
+			encoding="plain"
+			messagemimetype="text/plain"
 		>
 			<fileset dir="${reports.dir}">
 				<include name="**/${autobuilds.unittest.outfile}*"/>
@@ -400,7 +413,6 @@ realclean       --> delete ALL build products and sandbox.
 		<delete dir="${bin.dir}" />
 		<delete dir="${servers.install.dir}" />
 		<delete dir="${target.root.dir}/hsqldb" />
-		<antcall target="setup"/>
 	</target>	
 	
 	

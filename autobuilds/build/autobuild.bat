@@ -8,25 +8,11 @@
 ::    application    - the sample app to build and test
 ::    server         - the target server to deploy upon
 ::
-:: $Id: autobuild.bat,v 1.2 2004-01-05 00:29:25 davison Exp $
+:: $Id: autobuild.bat,v 1.3 2004-01-08 01:32:06 davison Exp $
 ::
 :: ---------------------------------------------------------------------------
 
-for /f "tokens=2-4 skip=1 delims=(-)" %%g in ('echo.^|date') do (
-  for /f "tokens=2 delims= " %%a in ('date /t') do (
-     set v_first=%%g
-     set v_second=%%h
-     set v_third=%%i
-     set v_all=%%a
-  )
-)
-set %v_first%=%v_all:~0,2%
-set %v_second%=%v_all:~3,2%
-set %v_third%=%v_all:~6,4%
-
 set USAGE="Usage: %0 [-u] sample-app target-server"
-set LOGGER=org.apache.tools.ant.DefaultLogger
-set LISTENER=org.apache.tools.ant.XmlLogger
 
 :: ---------------------------------------------------------------------------
 
@@ -57,12 +43,11 @@ set LISTENER=org.apache.tools.ant.XmlLogger
     if (%APP%) == () goto usage
     if not exist %SERVER%-build.xml goto noserver
     if not exist ..\..\samples\%APP%\.autobuilds goto noapp
-    set BUILDLOG=..\..\target\autobuilds\reports\%APP%_%SERVER%_build_%yy%-%mm%-%dd%.log
-
+    
 ::  ensure environment exists for 1st use
     ant -q setup
     echo Please see the file %BUILDLOG% for build logging and unit test results
-    ant -logger %LOGGER% -logfile %BUILDLOG% %ALLPROPS% main
+    ant %ALLPROPS% main
     goto end
     
 :noserver
@@ -79,9 +64,6 @@ set LISTENER=org.apache.tools.ant.XmlLogger
     
 :end
     set USAGE=
-    set BUILDLOG=
-    set LOGGER=
-    set LISTENER=
     set NEWARG=
     set APP=
     set SERVER=

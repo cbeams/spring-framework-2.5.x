@@ -8,14 +8,12 @@
 #    application    - the sample app to build and test
 #    server         - the target server to deploy upon
 #
-# $Id: autobuild,v 1.3 2004-01-05 00:29:25 davison Exp $
+# $Id: autobuild,v 1.4 2004-01-08 01:32:06 davison Exp $
 #
 # ---------------------------------------------------------------------------
 
 ANT=ant
 USAGE="Usage: $0 [-u] sample-app target-server"
-LOGGER=org.apache.tools.ant.DefaultLogger
-LISTENER=org.apache.tools.ant.XmlLogger
 PARAMS=$@
 
 # ---------------------------------------------------------------------------
@@ -39,7 +37,6 @@ for p in $PARAMS; do
         fi
     fi
 done
-BUILDLOG=../../target/autobuilds/reports/${APP}_${SERVER}_build_`(date +"%Y-%m-%d")`.log
 
 if [ ! -f build.properties ]; then
 	echo "*** NO build.properties FILE!  DEFAULT VALUES WILL BE USED ***"
@@ -50,14 +47,13 @@ if [ ! -f $SERVER-build.xml ]; then
 	exit 2
 fi
 
-if [ ! -f ../../samples/$APP/.autobuilds ]; then
+if [ ! -d ../apps/$APP ]; then
     echo "Don't know about application $APP or application is not configured for autobuilds"
     exit 3
 fi
 
 # ensure environment exists for 1st use
 $ANT -q setup > /dev/null
-echo Please see the file $BUILDLOG for build logging and unit test results
-$ANT -logger $LOGGER -logfile $BUILDLOG $DOCVS $KEEPALIVE -Dtarget.app=$APP -Dtarget.server=$SERVER main
+$ANT $DOCVS $KEEPALIVE -Dtarget.app=$APP -Dtarget.server=$SERVER main
 
 exit 0

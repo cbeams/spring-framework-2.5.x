@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: tomcat4-build.xml,v 1.3 2004-01-05 00:29:25 davison Exp $
+	$Id: tomcat4-build.xml,v 1.4 2004-01-08 01:32:06 davison Exp $
 -->
 <project name="autobuilds-tomcat4" basedir="." default="usage">
 
@@ -74,7 +74,7 @@ autobuilds directory for information.
 	-->
 	<target name="deploy" depends="extract-server">
 		<copy todir="${servers.install.dir}/${appserver.distname}/${deploy.dir}">
-			<fileset dir="${spring.samples.dir}/${target.app}/dist">
+			<fileset dir="${autobuilds.samples.dir}/${target.app}/dist">
 				<include name="*" />
 				<exclude name="**/autobuild*" />
 			</fileset>
