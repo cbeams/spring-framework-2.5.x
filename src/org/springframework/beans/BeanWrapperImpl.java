@@ -56,6 +56,7 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -1046,6 +1047,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * Returns null if not found rather than throwing an exception.
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
+		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
