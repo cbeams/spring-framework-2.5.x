@@ -124,8 +124,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String VIEW_ATTRIBUTE = "view";
 
-	private static final String MARKER_ATTRIBUTE = "marker";
-
 	private static final String SUB_FLOW_STATE_ELEMENT = "sub-flow-state";
 
 	private static final String FLOW_ATTRIBUTE = "flow";
@@ -324,9 +322,14 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddViewState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		String viewName = parseViewName(element);
 		Transition[] transitions = parseTransitions(element);
-		new ViewState(flow, id, viewName, transitions);
+		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
+			String viewName = element.getAttribute(VIEW_ATTRIBUTE);
+			new ViewState(flow, id, viewName, transitions);
+		}
+		else {
+			new ViewState(flow, id, transitions);
+		}
 	}
 
 	/**
@@ -351,8 +354,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddEndState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		String viewName = parseViewName(element);
-		new EndState(flow, id, viewName);
+		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
+			String viewName = element.getAttribute(VIEW_ATTRIBUTE);
+			new EndState(flow, id, viewName);
+		}
+		else {
+			new EndState(flow, id);
+		}
 	}
 
 	/**
@@ -440,20 +448,4 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return new Transition(event, to);
 	}
 
-	/**
-	 * Obtain a logical view name from given state definition. Could return null
-	 * if there is no logical view name specified (that is, the state definition
-	 * defines a <i>marker </i> state).
-	 */
-	protected String parseViewName(Element element) {
-		String viewName = element.getAttribute(ID_ATTRIBUTE);
-		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			viewName = element.getAttribute(VIEW_ATTRIBUTE);
-		}
-		boolean marker = new Boolean(element.getAttribute(MARKER_ATTRIBUTE)).booleanValue();
-		if (marker) {
-			viewName = null;
-		}
-		return viewName;
-	}
 }

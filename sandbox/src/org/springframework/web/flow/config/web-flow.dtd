@@ -60,17 +60,12 @@
 
 <!--
 	Name of the view that will be rendered. This is optional. When
-	not present, the view name will default to the id of the view state.
--->
-<!ATTLIST view-state view CDATA #IMPLIED>
-
-<!--
-	Indicates whether or not this view state is a marker view state.
+	not present, this view state will be a marker view state.
 	A marker view state does not actually render a view, but just returns
 	control to the client. Use this when an action has already generated
 	the response.
 -->
-<!ATTLIST view-state marker (true | false) "false">
+<!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state where a sub flow is spawned. When the
@@ -110,17 +105,12 @@
 <!--
 	Name of the view that will be rendered when this state is reached
 	and when there is no parent flow to continue. This is optional. When
-	not present, the view name will default to the id of the end state.
--->
-<!ATTLIST end-state view CDATA #IMPLIED>
-
-<!--
-	Indicates whether or not this end state is a marker end state.
+	not present, this state will be a market end state.
 	A marker end state does not actually render a view, but just returns
-	controll to the client. Use this when an action has already generated
+	control to the client. Use this when an action has already generated
 	the response.
 -->
-<!ATTLIST end-state marker (true | false) "false">
+<!ATTLIST end-state view CDATA #IMPLIED>
 
 <!--
 	Defines a transition to another state.

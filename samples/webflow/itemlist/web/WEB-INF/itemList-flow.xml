@@ -5,7 +5,7 @@
 
 <web-flow id="itemList" start-state="itemList.view">
 
-	<view-state id="itemList.view">
+	<view-state id="itemList.view" view="itemList.view">
 		<transition event="add" to="item.create"/>
 	</view-state>
 
@@ -14,7 +14,7 @@
 		<transition event="success" to="item.view"/>
 	</action-state>
 	
-	<view-state id="item.view">
+	<view-state id="item.view" view="item.view">
 		<transition event="submit" to="item.add"/>
 	</view-state>
 	

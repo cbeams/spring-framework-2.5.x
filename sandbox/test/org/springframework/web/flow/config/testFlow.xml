@@ -16,12 +16,8 @@
 		<transition event="event1" to="subFlowState1"/>
 	</view-state>
 	
-	<view-state id="viewState2" marker="true">
+	<view-state id="viewState2">
 		<transition event="event2" to="subFlowState2"/>
-	</view-state>
-	
-	<view-state id="viewState3">
-		<transition event="event3" to="endState3"/>
 	</view-state>
 	
 	<sub-flow-state id="subFlowState1" flow="subFlow1" model-mapper="modelMapper1">
@@ -34,8 +30,6 @@
 	
 	<end-state id="endState1" view="endView1"/>
 	
-	<end-state id="endState2" marker="true"/>
-	
-	<end-state id="endState3"/>
+	<end-state id="endState2"/>
 
 </web-flow>

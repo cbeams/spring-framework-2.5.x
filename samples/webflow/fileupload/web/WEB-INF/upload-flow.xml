@@ -5,7 +5,7 @@
 
 <web-flow id="Upload" start-state="selectFile.view">
 
-	<view-state id="selectFile.view">
+	<view-state id="selectFile.view" view="selectFile.view">
 		<transition event="submit" to="processUpload"/>
 	</view-state>
 
@@ -15,7 +15,7 @@
 		<transition event="error" to="selectFile.view"/>
 	</action-state>
 	
-	<view-state id="confirmation.view">
+	<view-state id="confirmation.view" view="confirmation.view">
 		<transition event="back" to="selectFile.view"/>
 	</view-state>
 	
