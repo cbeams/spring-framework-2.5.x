@@ -16,6 +16,9 @@
  
 package org.springframework.jms;
 
+import java.util.Properties;
+
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
 import org.springframework.jms.support.JmsAdmin;
@@ -25,7 +28,7 @@ import org.springframework.jms.support.JmsAdmin;
  * Implemented by JmsTemplate102 that uses the JMS 1.0.2 specification and
  * JmsTemplate11 that uses the JMS 1.1 specification.   
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  * 
  */
 public interface JmsTemplate {
@@ -148,8 +151,51 @@ public interface JmsTemplate {
      */
     public boolean isExplicitQosEnabled();
     
-    
-    //TODO  send(Object), send(Destination, Object) send(Dest, Object, Map, map)
+	/**
+	 * Configure the JmsTemplate with knowledge of the JMS Domain used.
+	 * For the JMS 1.0.2 based senders this tells the JMS 1.0.2 which
+	 * class hierarchy to use in the implementation of the various
+	 * send and execute methods.  For the JMS 1.1 based senders it
+	 * does not affect send methods.  In both implementations it 
+	 * tells what type of destination to create if dynamic destinations
+	 * are enabled.
+	 * @return true if the Publish/Subscribe domain (Topics) are used.
+	 * otherwise the Point-to-Point domain (Queues) are used.
+	 */
+	public boolean isPubSubDomain();
+
+	/**
+	 * Set the type of domain the sender is configured for.  See 
+	 * {@link #isPubSubDomain() isPubSubDomain} for more information.
+	 * @param b true for Publish/Subscribe domain (Topics) false for
+	 * Point-to-Point domain (Queues)
+	 */
+	public void setPubSubDomain(boolean b);
+
+	/**
+	 * Set the JNDI environment to configure the lookup of JNDI
+	 * resources.
+	 * @param jndiEnvironment Properties to configure JNDI.
+	 */
+	void setJndiEnvironment(Properties jndiEnvironment);
+	
+	/**
+	 * Set the connection factory used for sending messages.
+	 * @param cf the connection factory.
+	 */
+	public void setConnectionFactory(ConnectionFactory c);
+	
+	/**
+	 * Send an object, converting to a jms message, to the given
+	 * destination
+     * @param d the destination to send this message to
+	 * @param o the object to use to convert to a messsage.
+     * @throws JmsException converted checked JMSException to unchecked.
+	 */
+	public void send(Destination d, Object o);
+	
+	
+    //TODO  send(Object), send(Dest, Object, Map, map)
     
     //TODO  receive(Destination, timeout)
     
