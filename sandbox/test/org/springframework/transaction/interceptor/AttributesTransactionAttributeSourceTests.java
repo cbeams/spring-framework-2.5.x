@@ -5,24 +5,12 @@
  
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
-
-import javax.servlet.ServletException;
-
 import junit.framework.TestCase;
-
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.easymock.MockControl;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.enterpriseservices.MapAttributes;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AttributesTransactionAttributeSourceTests.java,v 1.2 2003-12-05 17:54:24 johnsonr Exp $
+ * @version $Id: AttributesTransactionAttributeSourceTests.java,v 1.3 2003-12-08 23:17:19 colins Exp $
  */
 public class AttributesTransactionAttributeSourceTests extends TestCase {
 

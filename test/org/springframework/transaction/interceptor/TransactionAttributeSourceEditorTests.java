@@ -9,8 +9,6 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -18,7 +16,7 @@ import org.springframework.transaction.TransactionDefinition;
  * FQN.Method=tx attribute representation
  * @author Rod Johnson
  * @since 26-Apr-2003
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 

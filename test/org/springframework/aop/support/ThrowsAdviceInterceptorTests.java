@@ -15,14 +15,13 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-import org.springframework.aop.framework.AbstractAopProxyTests;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.MethodCounter;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.3 2003-12-08 11:23:53 johnsonr Exp $
+ * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.4 2003-12-08 23:17:18 colins Exp $
  */
 public class ThrowsAdviceInterceptorTests extends TestCase {
 

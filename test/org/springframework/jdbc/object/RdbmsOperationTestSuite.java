@@ -4,17 +4,14 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
-import com.mockobjects.sql.MockDataSource;
 import junit.framework.TestCase;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+
+import com.mockobjects.sql.MockDataSource;
 
 /**
  * @author Trevor D. Cook

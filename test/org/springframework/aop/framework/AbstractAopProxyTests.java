@@ -20,7 +20,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
-import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvisor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
@@ -39,7 +38,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.10 2003-12-08 11:23:51 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.11 2003-12-08 23:17:17 colins Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	

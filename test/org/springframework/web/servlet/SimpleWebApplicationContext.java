@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.context.support.StaticMessageSource;
@@ -16,9 +15,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.SimpleTheme;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.web.context.NestedWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;

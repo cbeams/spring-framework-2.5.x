@@ -8,9 +8,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
-import org.springframework.context.ApplicationContextException;
+import org.easymock.MockControl;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockRequestDispatcher;

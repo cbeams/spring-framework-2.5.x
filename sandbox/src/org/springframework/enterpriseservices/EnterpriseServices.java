@@ -7,14 +7,9 @@ package org.springframework.enterpriseservices;
 
 import java.util.List;
 
-import org.aopalliance.intercept.Interceptor;
-
 import org.springframework.aop.framework.support.AdvisorAutoProxyCreator;
 import org.springframework.aop.target.AbstractPoolingTargetSource;
 import org.springframework.aop.target.CommonsPoolTargetSource;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.metadata.Attributes;
 import org.springframework.metadata.bcel.BcelAttributes;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -26,7 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * use Spring Metadata.
  * Has knowledge of pooling and other specific enterprise aspects.
  * @author Rod Johnson
- * @version $Id: EnterpriseServices.java,v 1.4 2003-12-05 17:54:31 johnsonr Exp $
+ * @version $Id: EnterpriseServices.java,v 1.5 2003-12-08 23:17:17 colins Exp $
  */
 public class EnterpriseServices extends AdvisorAutoProxyCreator  {
 

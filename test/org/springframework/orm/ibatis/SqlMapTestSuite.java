@@ -1,16 +1,17 @@
 package org.springframework.orm.ibatis;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import junit.framework.TestCase;
+
+import org.easymock.MockControl;
+
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.SqlMap;
-import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 /**
  * @author Juergen Hoeller
