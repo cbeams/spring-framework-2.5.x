@@ -25,6 +25,7 @@ import org.springframework.rules.RulesSource;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
+import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
@@ -99,6 +100,9 @@ public class ValidatingFormModel extends DefaultFormModel implements
 
     protected void onNewFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
+        Assert
+                .notNull(rulesSource,
+                        "No rules source has been configured; please set a valid reference.");
         BeanPropertyExpression constraint = rulesSource.getRules(
                 getFormObjectClass(), domainObjectProperty);
         if (constraint != null) {
