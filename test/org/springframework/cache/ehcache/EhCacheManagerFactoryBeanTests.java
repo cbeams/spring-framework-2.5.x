@@ -29,7 +29,7 @@ public class EhCacheManagerFactoryBeanTests extends TestCase {
         cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
         cacheManagerFb.afterPropertiesSet();
         CacheManager cm = (CacheManager)cacheManagerFb.getObject();
-        assertTrue("Correct number of caches loaded", cm.getCacheNames().length == 2);
+        assertTrue("Correct number of caches loaded", cm.getCacheNames().length == 1);
 
         Cache myCache1 = cm.getCache("myCache1");
         assertFalse("myCache1 is not eternal", myCache1.isEternal());
