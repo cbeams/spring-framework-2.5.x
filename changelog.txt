@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.98 2004-02-27 09:01:44 jhoeller Exp $
+$Id: changelog.txt,v 1.99 2004-02-27 16:54:29 luke_t Exp $
 
 
 Changes in version 1.0 RC2 (29.2.2003)
@@ -102,6 +102,7 @@ Package org.springframework.web
 * added "velocityFormatter" property to VelocityView, for exposing a VelocityFormatter (part of standard Velocity)
 * relaxed exceptions for null models/null root tag name in AbstractXsltView
 * added stylesheet parameters to AbstractXsltView which subclasses can create
+* AbstractPdfView now sets the content type correctly on the response
 
 
 Changes in version 1.0 RC1 (11.2.2003)

@@ -27,7 +27,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * <br>NB: Internet Explorer requires a .pdf extension, as
  * it doesn't always respect the declared content type.
  * <br>Exposes page width and height as bean properties.
- * @version $Id: AbstractPdfView.java,v 1.6 2003-12-12 19:46:13 jhoeller Exp $
+ * @version $Id: AbstractPdfView.java,v 1.7 2004-02-27 16:54:18 luke_t Exp $
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
  */
@@ -66,6 +66,7 @@ public abstract class AbstractPdfView extends AbstractView {
 		document.close();
 
 		response.setContentLength(baos.size());
+		response.setContentType(getContentType());
 		ServletOutputStream out = response.getOutputStream();
 		baos.writeTo(out);
 		out.flush();
@@ -100,3 +101,4 @@ public abstract class AbstractPdfView extends AbstractView {
 																					 HttpServletResponse response) throws Exception;
 
 }
+
