@@ -205,7 +205,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		catch (RuntimeException ex2) {
 			// expected
 			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-			ex2.printStackTrace();
+			//ex2.printStackTrace();
 			assertEquals("Correct exception thrown", ex, ex2);
 		}
 		finally {
