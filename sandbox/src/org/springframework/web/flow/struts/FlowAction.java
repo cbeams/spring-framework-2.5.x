@@ -91,7 +91,7 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected String getFlowSessionExecutionInfoAttributeName() {
-		return FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME;
+		return FlowSessionExecutionInfo.ATTRIBUTE_NAME;
 	}
 
 	protected String getActionPathAttributeName() {

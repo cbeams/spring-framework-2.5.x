@@ -202,7 +202,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 	}
 
 	public Object getAttribute(String attributeName) {
-		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+		if (attributeName.equals(ATTRIBUTE_NAME)) {
 			return this;
 		}
 		else {
@@ -211,7 +211,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 	}
 
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+		if (attributeName.equals(ATTRIBUTE_NAME)) {
 			Assert.isInstanceOf(requiredType, this);
 			return this;
 		}
@@ -221,7 +221,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 	}
 
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
-		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+		if (attributeName.equals(ATTRIBUTE_NAME)) {
 			return this;
 		}
 		else {
@@ -230,7 +230,7 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 	}
 
 	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+		if (attributeName.equals(ATTRIBUTE_NAME)) {
 			Assert.isInstanceOf(requiredType, this);
 			return this;
 		}
@@ -272,8 +272,8 @@ public class FlowSessionExecutionStack implements FlowSessionExecution, Serializ
 	}
 
 	public void setAttribute(String attributeName, Object attributeValue) {
-		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
-			throw new IllegalArgumentException("Attribute name '" + FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME
+		if (attributeName.equals(ATTRIBUTE_NAME)) {
+			throw new IllegalArgumentException("Attribute name '" + ATTRIBUTE_NAME
 					+ "' is reserved for internal use only");
 		}
 		getActiveFlowSession().setAttribute(attributeName, attributeValue);

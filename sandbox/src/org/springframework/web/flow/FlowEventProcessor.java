@@ -41,15 +41,17 @@ import javax.servlet.http.HttpServletResponse;
 public interface FlowEventProcessor {
 
 	/**
-	 * Start a new session for this flow. This will cause the flow session to
-	 * enter its start state.
+	 * Start a new session for this flow. This will cause a flow session
+	 * execution for the root flow managed by this event processor to be created
+	 * and enter its start state.
 	 * 
 	 * @param request the client http request
 	 * @param response the server http response
 	 * @param input optional input attributes to be passed to the new flow
 	 *        session, placed in 'flow scope'
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the start event execution.
+	 * @return A start result, containing the new flow session execution object
+	 *         and a view descriptor containing model and view information
+	 *         needed to render the results of the start event execution.
 	 * @throws IllegalStateException if the event processor has not been
 	 *         configured with a valid start state.
 	 */
@@ -66,12 +68,11 @@ public interface FlowEventProcessor {
 	 * @param response the server http response
 	 * @param input optional input attributes to be passed to the new flow
 	 *        session, placed in 'flow scope'
-	 * @return A view descriptor containing model and view information needed to
-	 *         render the results of the start event execution.
+	 * @return A start result, containing the new flow session execution object
+	 *         and a view descriptor containing model and view information
+	 *         needed to render the results of the start event execution.
 	 * @throws IllegalStateException if the event processor has not been
 	 *         configured with a valid start state.
-	 * @throws IllegalArgumentException if the stateId is not a
-	 *         TransitionableState
 	 */
 	public FlowSessionExecutionStartResult resume(String stateId, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) throws IllegalStateException;
@@ -83,8 +84,8 @@ public interface FlowEventProcessor {
 	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
 	 *        'back')
 	 * @param stateId The id of the state to execute this event in (e.g
-	 *        'viewDetails')
-	 * @param sessionExecutionStack The session execution stack, tracking any
+	 *        'personDetails.view')
+	 * @param sessionExecutionInfo A active flow session execution, tracking any
 	 *        suspended parent flows that spawned this flow (as a subflow)
 	 * @param request the client http request
 	 * @param response the server http response

@@ -40,11 +40,13 @@ public class NoSuchFlowAttributesMapperException extends FlowServiceLookupExcept
 
 	public String getMessage() {
 		if (isServiceIdLookupFailure()) {
-			return "No attributes mapper was found with id '" + getServiceId()
+			return "No attributes mapper was found with id '"
+					+ getServiceId()
 					+ "' -- make sure there is a single FlowAttributesMapper implementation exported in the context with this id";
 		}
 		else {
-			return "No attributes mapper was found of implementation '" + getServiceImplementationClass()
+			return "No attributes mapper was found of implementation '"
+					+ getServiceImplementationClass()
 					+ "'; make sure there is a single FlowAttributesMapper implementation of this type exported in the context";
 		}
 	}

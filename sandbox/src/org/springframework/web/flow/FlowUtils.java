@@ -9,7 +9,6 @@ package org.springframework.web.flow;
 public class FlowUtils {
 	public static FlowSessionExecutionInfo getFlowSessionExecutionInfo(AttributesAccessor model)
 			throws IllegalStateException {
-		return (FlowSessionExecutionInfo)model
-				.getRequiredAttribute(FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME);
+		return (FlowSessionExecutionInfo)model.getRequiredAttribute(FlowSessionExecutionInfo.ATTRIBUTE_NAME);
 	}
 }

@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializable {
 
-	public static String FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME = "flowSessionExecutionInfo";
+	public static String ATTRIBUTE_NAME = "flowSessionExecutionInfo";
 
 	/**
 	 * Return the id of this flow session execution. This is not a human
