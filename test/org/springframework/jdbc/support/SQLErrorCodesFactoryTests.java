@@ -305,7 +305,27 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertIsDB2(sec);
 		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2", factory);
 		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2/", factory);
+		assertIsDB2(sec);
 		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2", factory);
+		assertIsEmpty(sec);
+
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB1", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB1/", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB1", factory);
+		assertIsEmpty(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB1/", factory);
+		assertIsEmpty(sec);
+
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB0", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB0", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB0/", factory);
+		assertIsEmpty(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB0/", factory);
 		assertIsEmpty(sec);
 	}
 }
