@@ -29,7 +29,9 @@ import com.caucho.hessian.server.HessianSkeleton;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.bind.RequestUtils;
 
 /**
  * Web controller that exports the specified service bean as Hessian service
@@ -57,13 +59,13 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 		try {
 			// try Hessian 3.x (with service interface argument)
 			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+			checkService();
+			checkServiceInterface();
 			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
 		}
 		catch (NoSuchMethodException ex) {
 			// fall back to Hessian 2.x (without service interface argument)
 			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
-			checkService();
-			checkServiceInterface();
 			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
 		}
 	}
@@ -72,10 +74,15 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 	 * Process the incoming Hessian request and create a Hessian response.
 	 */
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
+			throw new ServletException("HessianServiceExporter only supports POST requests");
+		}
+
 		HessianInput in = new HessianInput(request.getInputStream());
 		HessianOutput out = new HessianOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
+			return null;
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -86,7 +93,6 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 		catch (Throwable ex) {
 		  throw new ServletException(ex);
 		}
-		return null;
 	}
 
 }

@@ -26,10 +26,11 @@ import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
 import com.caucho.burlap.server.BurlapSkeleton;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
  * Web controller that exports the specified service bean as Burlap service
@@ -72,10 +73,15 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 	 * Process the incoming Burlap request and create a Burlap response.
 	 */
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
+			throw new ServletException("BurlapServiceExporter only supports POST requests");
+		}
+
 		BurlapInput in = new BurlapInput(request.getInputStream());
 		BurlapOutput out = new BurlapOutput(response.getOutputStream());
 		try {
 		  this.skeleton.invoke(in, out);
+			return null;
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -86,7 +92,6 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller,
 		catch (Throwable ex) {
 		  throw new ServletException(ex);
 		}
-		return null;
 	}
 
 }
