@@ -29,7 +29,7 @@ import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.flow.config.BaseFlowBuilder;
+import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.util.WebUtils;
 
@@ -74,7 +74,7 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	protected ActionBeanEvent success() {
-		return new ActionBeanEvent(this, BaseFlowBuilder.SUCCESS);
+		return new ActionBeanEvent(this, AbstractFlowBuilder.SUCCESS);
 	}
 
 	protected ActionBeanEvent error() {

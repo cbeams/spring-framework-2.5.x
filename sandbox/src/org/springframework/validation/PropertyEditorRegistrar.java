@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.validation.support;
+package org.springframework.validation;
 
 import org.springframework.validation.DataBinder;
 
