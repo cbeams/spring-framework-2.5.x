@@ -42,6 +42,11 @@ import org.springframework.functor.predicates.UnaryOr;
  */
 public class PredicateFactory {
 
+    // static utility class
+    private PredicateFactory() {
+
+    }
+
     /**
      * Bind the specified parameter to the second argument of a
      * BinaryPredicate, returning a UnaryPredicate which will test a single
@@ -338,7 +343,7 @@ public class PredicateFactory {
     }
 
     /**
-     * Apply a "range" constraint to a bean property.
+     * Apply a inclusive "range" constraint to a bean property.
      * 
      * @param propertyName
      *            the property with the range constraint.
@@ -359,8 +364,8 @@ public class PredicateFactory {
     }
 
     /**
-     * Apply a "range" constraint between two other properties to a bean
-     * property.
+     * Apply a inclusive "range" constraint between two other properties to a
+     * bean property.
      * 
      * @param propertyName
      *            the property with the range constraint.
@@ -382,7 +387,7 @@ public class PredicateFactory {
         BeanPropertyExpression max =
             new BeanPropertyExpression(
                 propertyName,
-                minPropertyName,
+                maxPropertyName,
                 LessThanEqualTo.instance());
         return and(min, max);
     }
