@@ -125,7 +125,7 @@ public class OpenSessionInViewTests extends TestCase {
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.getListableBeanFactory().registerSingleton(OpenSessionInViewFilter.DEFAULT_SESSION_FACTORY_BEAN_NAME, sf);
+		wac.getDefaultListableBeanFactory().registerSingleton(OpenSessionInViewFilter.DEFAULT_SESSION_FACTORY_BEAN_NAME, sf);
 		wac.refresh();
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
@@ -168,7 +168,7 @@ public class OpenSessionInViewTests extends TestCase {
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.getListableBeanFactory().registerSingleton("mySessionFactory", sf);
+		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sf);
 		wac.refresh();
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");

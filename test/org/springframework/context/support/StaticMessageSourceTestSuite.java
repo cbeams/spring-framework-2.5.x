@@ -9,13 +9,14 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.LBIInit;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATest;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson/Tony Falabella
@@ -240,7 +241,8 @@ public class StaticMessageSourceTestSuite
 		                      new MutablePropertyValues());
 
 
-		LBIInit.createTestBeans(sac.getListableBeanFactory());
+		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
+		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(

@@ -13,18 +13,18 @@ import java.lang.reflect.Method;
  * metadata attributes at source level, or anywhere else.
  * @author Rod Johnson
  * @since 15-Apr-2003
- * @version $Id: TransactionAttributeSource.java,v 1.2 2003-11-28 11:57:28 johnsonr Exp $
+ * @version $Id: TransactionAttributeSource.java,v 1.3 2004-01-01 23:40:31 jhoeller Exp $
  */
 public interface TransactionAttributeSource {
 
 	/**
 	 * Return the transaction attribute for this method.
 	 * Return null if the method is non-transactional.
-	 * @param m method
+	 * @param method method
 	 * @param targetClass target class. May be null, in which case the declaring
 	 * class of the method must be used.
 	 * @return TransactionAttribute transaction attribute or null.
 	 */
-	TransactionAttribute getTransactionAttribute(Method m, Class targetClass);
+	TransactionAttribute getTransactionAttribute(Method method, Class targetClass);
 
 }

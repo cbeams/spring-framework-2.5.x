@@ -43,7 +43,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	/**
 	 * Return the underlying bean factory of this context.
 	 */
-	public DefaultListableBeanFactory getListableBeanFactory() {
+	public DefaultListableBeanFactory getDefaultListableBeanFactory() {
 		return beanFactory;
 	}
 
