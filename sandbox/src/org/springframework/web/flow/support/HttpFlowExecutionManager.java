@@ -123,7 +123,7 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Create a new flow execution manager.
 	 * @param flow the default flow for which executions will be managed
-	 * @param flowLocator the flow locator to use for flow lookup of possible
+	 * @param flowLocator the flow locator to use for lookup of possible
 	 *        other flows specified using the "_flowId" request parameter
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
@@ -134,11 +134,15 @@ public class HttpFlowExecutionManager {
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	// subclassing hooks
-
+	/**
+	 * Returns the flow locator to use for lookup of possible
+	 * other flows specified using the "_flowId" request parameter
+	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
 	}
+
+	// subclassing hooks
 
 	/**
 	 * Returns the name of the flow id parameter in the request ("_flowId").
@@ -208,6 +212,20 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
+	 * Create a map of input attributes for new flow executions started by the
+	 * execution manager.
+	 * <p>
+	 * Default implementation returns null. Subclasses can override if needed.
+	 * @param request current HTTP request
+	 * @return a Map with reference data entries, or null if none
+	 */
+	protected Map getFlowExecutionInput(HttpServletRequest request) {
+		return null;
+	}
+	
+	// internal worker methods
+
+	/**
 	 * The main entry point into managed HTTP-based flow executions.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
@@ -272,7 +290,7 @@ public class HttpFlowExecutionManager {
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
-			// execute the signaled event within the current state
+			// signal the event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
 		if (!flowExecution.isActive()) {
@@ -283,18 +301,6 @@ public class HttpFlowExecutionManager {
 			logger.debug("Returning selected model and view " + modelAndView);
 		}
 		return modelAndView;
-	}
-
-	/**
-	 * Create a map of input attributes for new flow executions started by the
-	 * execution manager.
-	 * <p>
-	 * Default implementation returns null. Subclasses can override if needed.
-	 * @param request current HTTP request
-	 * @return a Map with reference data entries, or null if none
-	 */
-	protected Map getFlowExecutionInput(HttpServletRequest request) {
-		return null;
 	}
 
 	/**
