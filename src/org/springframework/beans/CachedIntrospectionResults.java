@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 final class CachedIntrospectionResults {
 
@@ -87,7 +87,7 @@ final class CachedIntrospectionResults {
 			// This call is slow so we do it once
 			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
-				logger.debug("Found property [" + pds[i].getName() + "] of type [" + pds[i].getPropertyType() + "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
+				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() + "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
 				propertyDescriptorMap.put(pds[i].getName(), pds[i]);
 			}
 
@@ -96,7 +96,7 @@ final class CachedIntrospectionResults {
 			// This call is slow so we do it once
 			MethodDescriptor[] mds = beanInfo.getMethodDescriptors();
 			for (int i = 0; i < mds.length; i++) {
-				logger.debug("Found method [" + mds[i].getName() + "] of type [" + mds[i].getMethod().getReturnType() + "]");
+				logger.debug("Found method '" + mds[i].getName() + "' of type [" + mds[i].getMethod().getReturnType() + "]");
 				methodDescriptorMap.put(mds[i].getName(), mds[i]);
 			}
 		}
@@ -116,14 +116,14 @@ final class CachedIntrospectionResults {
 	protected PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		PropertyDescriptor pd = (PropertyDescriptor) propertyDescriptorMap.get(propertyName);
 		if (pd == null)
-			throw new FatalBeanException("No property [" + propertyName + "] in class [" + getBeanClass() + "]", null);
+			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass() + "]", null);
 		return pd;
 	}
 
 	protected MethodDescriptor getMethodDescriptor(String methodName) throws BeansException {
 		MethodDescriptor md = (MethodDescriptor) methodDescriptorMap.get(methodName);
 		if (md == null)
-			throw new FatalBeanException("No method [" + methodName + "] in class [" + getBeanClass() + "]", null);
+			throw new FatalBeanException("No method '" + methodName + "' in class [" + getBeanClass() + "]", null);
 		return md;
 	}
 

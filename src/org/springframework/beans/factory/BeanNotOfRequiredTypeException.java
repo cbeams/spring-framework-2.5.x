@@ -30,7 +30,8 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * class did not match the expected type.
 	 */
 	public BeanNotOfRequiredTypeException(String name, Class requiredType, Object actualInstance) {
-		super("Bean named [" + name + "] must be of type " + requiredType.getName() + ", but was actually of type " + actualInstance.getClass().getName(), null);
+		super("Bean named '" + name + "' must be of type [" + requiredType.getName() +
+					"], but was actually of type [" + actualInstance.getClass().getName() + "]", null);
 		this.name = name;
 		this.requiredType = requiredType;
 		this.actualInstance = actualInstance;

@@ -11,7 +11,7 @@ public class NotWritablePropertyException extends BeansException {
 	 * Creates new NotWritablePropertyException.
 	 */
 	public NotWritablePropertyException(String propertyName, Class beanClass) {
-		super("Property [" + propertyName + "] is not writable in bean class [" + beanClass.getName() + "]");
+		super("Property '" + propertyName + "' is not writable in bean class [" + beanClass.getName() + "]");
 	}
 
 }

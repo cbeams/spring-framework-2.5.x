@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.7 2003-10-16 18:59:41 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.8 2003-10-23 10:21:02 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -522,7 +522,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 
 			if (pd.getPropertyType().isPrimitive() && (pv.getValue() == null || "".equals(pv.getValue()))) {
-				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property [" + pd.getName() + "] of primitive type [" + pd.getPropertyType() + "]");
+				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" + pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 			}
 
 			// Make the change
@@ -631,10 +631,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 			return readMethod.invoke(object, null);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Getter for property [" + propertyName + "] threw exception", ex);
+			throw new FatalBeanException("Getter for property '" + propertyName + "' threw exception", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to get property [" + propertyName + "] threw exception", ex);
+			throw new FatalBeanException("Illegal attempt to get property '" + propertyName + "' threw exception", ex);
 		}
 	}
 
@@ -648,20 +648,20 @@ public class BeanWrapperImpl implements BeanWrapper {
 	public Object getIndexedPropertyValue(String propertyName, int index) throws BeansException {
 		PropertyDescriptor pd = getPropertyDescriptor(propertyName);
 		if (!(pd instanceof IndexedPropertyDescriptor))
-			throw new FatalBeanException("Cannot get indexed property value for [" + propertyName
-																	 + "]: this property is not an indexed property", null);
+			throw new FatalBeanException("Cannot get indexed property value for '" + propertyName
+																	 + "': this property is not an indexed property", null);
 		Method m = ((IndexedPropertyDescriptor) pd).getIndexedReadMethod();
 		if (m == null)
-			throw new FatalBeanException("Cannot get indexed property [" + propertyName
-																	 + "]: not readable", null);
+			throw new FatalBeanException("Cannot get indexed property '" + propertyName
+																	 + "': not readable", null);
 		try {
 			return m.invoke(object, new Object[]{new Integer(index)});
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Getter for indexed property [" + propertyName + "] threw exception", ex);
+			throw new FatalBeanException("Getter for indexed property '" + propertyName + "' threw exception", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to get indexed property [" + propertyName + "] threw exception", ex);
+			throw new FatalBeanException("Illegal attempt to get indexed property '" + propertyName + "' threw exception", ex);
 		}
 	}
 
@@ -706,10 +706,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 		try {
 			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
 			if (logger.isDebugEnabled())
-				logger.debug("About to invoke method [" + methodName + "]");
+				logger.debug("About to invoke method '" + methodName + "'");
 			Object returnVal = md.getMethod().invoke(this.object, args);
 			if (logger.isDebugEnabled())
-				logger.debug("Successfully invoked method [" + methodName + "]");
+				logger.debug("Successfully invoked method '" + methodName + "'");
 			return returnVal;
 		}
 		catch (InvocationTargetException ex) {
@@ -718,10 +718,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 			throw new MethodInvocationException(ex.getTargetException(), methodName);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to invoke method [" + methodName + "] threw exception", ex);
+			throw new FatalBeanException("Illegal attempt to invoke method '" + methodName + "' threw exception", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Illegal argument to method [" + methodName + "] threw exception", ex);
+			throw new FatalBeanException("Illegal argument to method '" + methodName + "' threw exception", ex);
 		}
 	}
 

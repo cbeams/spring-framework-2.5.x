@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.10 2003-10-21 16:03:10 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.11 2003-10-23 10:21:03 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -330,7 +330,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			if (el.hasAttribute(PARENT_ATTRIBUTE))
 				parent = el.getAttribute(PARENT_ATTRIBUTE);
 			if (className == null && parent == null)
-				throw new FatalBeanException("No className or parent in bean definition [" + beanName + "]", null);
+				throw new FatalBeanException("No className or parent in bean definition '" + beanName + "'", null);
 			if (className != null) {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				String initMethodName = el.getAttribute(INIT_METHOD_ATTRIBUTE);
@@ -351,7 +351,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException("Error creating bean with name [" + beanName + "]", ex);
+			throw new FatalBeanException("Error creating bean with name '" + beanName + "'", ex);
 		}
 	}
 
