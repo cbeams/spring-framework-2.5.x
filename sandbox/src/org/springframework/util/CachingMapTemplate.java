@@ -16,48 +16,43 @@
 package org.springframework.util;
 
 import java.io.Serializable;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A template encapsulating the workflow for caching expensive values in a map.
- * Supports caching weak or strong keys with soft values.
+ * A simple template encapsulating the workflow for caching expensive values in
+ * a map. Supports caching weak or strong keys.
  * <p>
  * <p>
- * This class is abstract template; cache implementations should subclass and
- * override the create(key) method which encapsulates new expensive object
+ * This class is abstract template; caching map implementations should subclass
+ * and override the create(key) method which encapsulates new expensive object
  * creation.
  * 
  * @author Keith Donald
  */
-public abstract class CachingMapTemplate implements Serializable {
+public abstract class CachingMapTemplate implements Map, Serializable {
     private static Object NULL_VALUE = new Object();
 
     private transient final Log logger = LogFactory.getLog(getClass());
 
     private Map map;
 
-    private transient ReferenceQueue queue = new ReferenceQueue();
-
     /**
-     * Creates cache; defaults to weak keys.
+     * Creates a caching map template; defaults to strong keys.
      */
     public CachingMapTemplate() {
-        this(true);
+        this(false);
     }
 
     /**
-     * Creates cache.
+     * Creates a caching map template.
      * 
      * @param weakKeys
      *            Use weak references for keys.
@@ -68,7 +63,7 @@ public abstract class CachingMapTemplate implements Serializable {
     }
 
     /**
-     * Creates cache with initial size.
+     * Creates a caching map template with an initial size.
      * 
      * @param weakKeys
      *            Use weak references for keys.
@@ -81,11 +76,22 @@ public abstract class CachingMapTemplate implements Serializable {
     }
 
     /**
+     * Creates a caching template decorating the provided map.
+     * 
+     * @param map
+     *            The map
+     */
+    public CachingMapTemplate(Map map) {
+        Assert.notNull(map, "Map cannot be null");
+        this.map = map;
+    }
+
+    /**
      * Gets value for key. Creates and caches value if it doesn't already exist
      * in the cache.
      */
     public Object get(Object key) {
-        Object value = internalGet(key);
+        Object value = map.get(key);
         if (value == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating new expensive value with key '" + key
@@ -96,13 +102,14 @@ public abstract class CachingMapTemplate implements Serializable {
                 value = NULL_VALUE;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Caching value '" + value + "'");
+                logger.debug("Caching key value pair '" + key + "' -> '"
+                        + value + "'");
             }
             put(key, value);
         }
         else {
             if (logger.isDebugEnabled()) {
-                logger.debug("Returning cached value with key '" + key);
+                logger.debug("Returning cached value with key '" + key + "'");
             }
         }
         return (value == NULL_VALUE) ? null : value;
@@ -113,8 +120,8 @@ public abstract class CachingMapTemplate implements Serializable {
      */
     protected abstract Object create(Object key);
 
-    private void put(Object key, Object value) {
-        this.map.put(key, new ValueReference(key, value));
+    public Object put(Object key, Object value) {
+        return this.map.put(key, value);
     }
 
     /**
@@ -133,80 +140,36 @@ public abstract class CachingMapTemplate implements Serializable {
         map.clear();
     }
 
-    /**
-     * @return An iterator over the keys in this map.
-     */
-    public Iterator keys() {
-        return map.keySet().iterator();
+    public boolean containsKey(Object key) {
+        return map.containsKey(key);
     }
 
-    /**
-     * @return An iterator over the values in this map.
-     */
-    public Iterator values() {
-        return new ValuesIterator(map.values().iterator());
+    public boolean containsValue(Object value) {
+        return map.containsValue(value);
     }
 
-    /**
-     * Delegates to the underlying values iterator, retrieving the object stored
-     * at each value reference.
-     */
-    static class ValuesIterator implements Iterator {
-        private Iterator it;
-
-        public ValuesIterator(Iterator it) {
-            this.it = it;
-        }
-
-        public boolean hasNext() {
-            return it.hasNext();
-        }
-
-        public Object next() {
-            return ((ValueReference)it.next()).get();
-        }
-
-        public void remove() {
-            it.remove();
-        }
+    public Set entrySet() {
+        return map.entrySet();
     }
 
-    public Iterator entries() {
-        return map.entrySet().iterator();
+    public boolean isEmpty() {
+        return map.isEmpty();
     }
 
-    private Object internalGet(Object key) {
-        cleanUp();
-        Reference reference = (Reference)map.get(key);
-        return (reference == null) ? null : reference.get();
+    public Set keySet() {
+        return map.keySet();
     }
 
-    private void cleanUp() {
-        Reference reference;
-        while ((reference = this.queue.poll()) != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removing claimed soft reference '" + reference
-                        + "'");
-            }
-            map.remove(((ValueReference)reference).getKey());
-        }
+    public void putAll(Map t) {
+        map.putAll(t);
     }
 
-    private class ValueReference extends SoftReference {
-        WeakReference keyReference;
+    public Object remove(Object key) {
+        return map.remove(key);
+    }
 
-        public ValueReference(Object key, Object value) {
-            super(value, queue);
-            this.keyReference = new WeakReference(key);
-        }
-
-        public Object getKey() {
-            return this.keyReference.get();
-        }
-
-        public String toString() {
-            return String.valueOf(super.get());
-        }
+    public Collection values() {
+        return map.values();
     }
 
     public String toString() {
