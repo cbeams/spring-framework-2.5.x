@@ -44,14 +44,16 @@ distribution/website before using any of them in your own applications.
 - EasyMock 1.1 (http://www.easymock.org)
 - required for building the test suite
 
+* ehcache/ehcache-1.0.jar
+- EHCache 1.0 (http://ehcache.sourceforge.net)
+- required for building the framework
+- required at runtime when using Spring's EHCache support
+- required for running Petclinic (by Hibernate)
+
 * freemarker/freemarker.jar
 - FreeMarker 2.3 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
-
-* hibernate/ehcache.jar
-- EHCache 0.9 (http://ehcache.sourceforge.net)
-- required for running Petclinic (by Hibernate)
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
 - Hibernate 2.1.6 (http://www.hibernate.org)
