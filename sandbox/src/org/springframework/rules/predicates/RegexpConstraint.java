@@ -41,11 +41,10 @@ public class RegexpConstraint extends TypeResolvableSupport implements
         pattern = Pattern.compile(regex);
     }
 
-    /**
-     * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
-     */
     public boolean test(Object argument) {
+        if (argument == null) { return false; }
         Matcher m = pattern.matcher((CharSequence)argument);
         return m.matches();
     }
+
 }

@@ -15,11 +15,10 @@
  */
 package org.springframework.rules.predicates;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.UnaryPredicate;
@@ -32,7 +31,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public abstract class CompoundUnaryPredicate implements UnaryPredicate {
-    private Set predicates = new LinkedHashSet();
+    private List predicates = new ArrayList();
 
     /**
      * Constructs a compound predicate with no initial members. It is expected
@@ -101,6 +100,14 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
         predicates.remove(predicate);
     }
 
+    public int indexOf(UnaryPredicate child) {
+        return predicates.indexOf(child);
+    }
+    
+    public UnaryPredicate get(int index) {
+        return (UnaryPredicate)predicates.get(index);
+    }
+    
     /**
      * Return an iterator over the aggregated predicates.
      * 
@@ -108,6 +115,15 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
      */
     public Iterator iterator() {
         return predicates.iterator();
+    }
+
+    /**
+     * Returns the number of predicates aggregated by this compound predicate.
+     * 
+     * @return The size.
+     */
+    public int size() {
+        return predicates.size();
     }
 
     public abstract boolean test(Object argument);
@@ -128,10 +144,9 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
         };
         Object violator = Algorithms.instance()
                 .findFirst(predicates, predicate);
-        if (violator != null) {
-            throw new IllegalArgumentException(violator.getClass()
-                    + " class not allowed");
-        }
+        if (violator != null) { throw new IllegalArgumentException(violator
+                .getClass()
+                + " class not allowed"); }
     }
 
 }
