@@ -18,18 +18,23 @@ import java.io.OutputStream;
  */
 public abstract class FileCopyUtils {
 
+	public static final int BLOCK_SIZE = 1024;
+
 	/**
 	 * Copy the contents of the given InputStream to the given OutputStream.
+	 * Closes both streams when done.
 	 * @param in the stream to copy from
 	 * @param out the stream to copy to
 	 * @throws IOException in case of I/O errors
 	 */
 	public static void copy(InputStream in, OutputStream out) throws IOException {
 		try {
-			int b;
-			while ((b = in.read()) != -1) {
-				out.write(b);
+			byte[] buffer = new byte[BLOCK_SIZE];
+			int nrOfBytes = -1;
+			while ((nrOfBytes = in.read(buffer)) != -1) {
+				out.write(buffer, 0, nrOfBytes);
 			}
+			out.flush();
 		}
 		finally {
 			try {
