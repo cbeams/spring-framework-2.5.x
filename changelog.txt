@@ -1,7 +1,7 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.30 2003-10-22 17:10:33 jhoeller Exp $
+$Id: changelog.txt,v 1.31 2003-10-23 10:24:24 jhoeller Exp $
 
 Changes in version 1.0 M2 (23.10.2003)
 --------------------------------------
@@ -20,6 +20,7 @@ Changes in version 1.0 M2 (23.10.2003)
 * reworked AbstractXmlApplicationContext's "getInputStreamForBeanFactory" into "loadBeanDefinitions(BeanFactory)"
 * added support for multiple file paths in FileSystemXmlApplicationContext and ClassPathXmlApplicationContext
 * added support for multiple basenames in a ResourceBundleMessageSource, getting checked sequentially
+* added getMessage convenience methods to ApplicationObjectSupport, with all combinations of arguments
 * reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
 * introduced generic mail infrastructure in org.springframework.mail package, around the MailSender interface
 * introduced JavaMailSender and JavaMailSenderImpl in org.springframework.mail.javamail package
