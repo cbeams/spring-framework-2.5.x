@@ -1,38 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-	Spring XML BeanFactory DTD.
+	Spring XML Beans DTD
 	Authors: Rod Johnson, Juergen Hoeller
 
 	This defines a simple and consistent way of creating a namespace
-	of JavaBeans configured by a Spring XmlBeanFactory.
+	of JavaBeans objects, configured by a Spring BeanFactory, read by
+	a DefaultXmlBeanDefinitionReader.
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
 
-	Each <bean> element in this document defines a JavaBean.
-	Typically the bean class is specified, along with JavaBean properties.
+	Each "bean" element in this document defines a JavaBean.
+	Typically the bean class is specified, along with JavaBean properties
+	and/or constructor arguments.
 
 	Bean instances can be "singletons" (shared instances) or "prototypes"
-	(independent instances).
+	(independent instances). Further scopes are supposed to be built on top
+	of the core BeanFactory infrastructure and are therefore not part of it.
 
 	References among beans are supported, i.e. setting a JavaBean property
-	to refer to another bean in the same factory or an ancestor factory.
+	or a constructor argument to refer to another bean in the same factory
+	(or an ancestor factory).
 
 	As alternative to bean references, "inner bean definitions" can be used.
-	Singleton flags and names of such "inner beans" are always ignored:
-	Inner beans are anonymous prototypes.
+	Singleton flags of such inner bean definitions are effectively ignored:
+	Inner beans are typically anonymous prototypes.
 
-	There is also support for lists, maps, and java.util.Properties types.
+	There is also support for lists, sets, maps, and java.util.Properties
+	as bean property types respectively constructor argument types.
 
 	As the format is simple, a DTD is sufficient, and there's no need
 	for a schema at this point.
 
-  XML documents that conform to this DTD should declare the following doctype:
-	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+	XML documents that conform to this DTD should declare the following doctype:
 
-	$Id: spring-beans.dtd,v 1.20 2004/01/21 23:13:18 jhoeller Exp $
+	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+		"http://www.springframework.org/dtd/spring-beans.dtd">
+
+	$Id: spring-beans.dtd,v 1.27 2004/05/27 17:07:17 jhoeller Exp $
 -->
+
 
 <!--
 	Element containing informative text describing the purpose of the enclosing
@@ -46,13 +54,13 @@
 	At least one bean definition is required.
 -->
 <!ELEMENT beans (
-		description?,
+        description?,
         bean+
 )>
 
 <!--
-  Default values for all bean definitions. Can be overridden at
-  the "bean" level. See those attribute definitions for details.
+	Default values for all bean definitions. Can be overridden at
+	the "bean" level. See those attribute definitions for details.
 -->
 <!ATTLIST beans default-lazy-init (true | false) "false">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
@@ -62,8 +70,8 @@
 	Defines a single named bean.
 -->
 <!ELEMENT bean (
-	description?,
-    (constructor-arg | property)*
+        description?,
+        (constructor-arg | property)*
 )>
 
 <!--
@@ -104,7 +112,7 @@
 <!ATTLIST bean singleton (true | false) "true">
 
 <!--
-  If this bean should be lazily initialized.
+	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
 -->
@@ -162,12 +170,12 @@
 <!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
 <!--
-  The names of the beans that this bean depends on being initialized.
-  The bean factory will guarantee that these beans get initialized before.
+	The names of the beans that this bean depends on being initialized.
+	The bean factory will guarantee that these beans get initialized before.
 
 	Note that dependencies are normally expressed through bean properties or
-  constructor arguments. This property should just be necessary for other kinds
-  of dependencies like statics (*ugh*) or database preparation on startup.
+	constructor arguments. This property should just be necessary for other kinds
+	of dependencies like statics (*ugh*) or database preparation on startup.
 -->
 <!ATTLIST bean depends-on CDATA #IMPLIED>
 
@@ -193,15 +201,23 @@
 -->
 <!ELEMENT constructor-arg (
         description?,
-        (bean | ref | idref | list | set | map | props | value)
+        (bean | ref | idref | list | set | map | props | value | null)
 )>
 
 <!--
-  The constructor-arg than can have an optional index attribute,
+	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
+
+<!--
+	The constructor-arg tag can have an optional type attribute,
+	to specify the exact type of the constructor argument. Only needed
+	to avoid ambiguities, e.g. in case of 2 single argument constructors
+	that can both be converted from a String.
+-->
+<!ATTLIST constructor-arg type CDATA #IMPLIED>
 
 <!--
 	Bean definitions can have zero or more properties.
@@ -211,7 +227,7 @@
 -->
 <!ELEMENT property (
         description?,
-        (bean | ref | idref | list | set | map | props | value)
+        (bean | ref | idref | list | set | map | props | value | null)
 )>
 
 <!--
@@ -263,10 +279,10 @@
 	Java lists are untyped, pending generics support in Java 1.5,
 	although references will be strongly typed.
 	A list can also map to an array type. The necessary conversion
-	is automatically performed by AbstractBeanFactory.
+	is automatically performed by the BeanFactory.
 -->
 <!ELEMENT list (
-        (bean | ref | idref | list | set | map | props | value)*
+        (bean | ref | idref | list | set | map | props | value | null)*
 )>
 
 <!--
@@ -275,7 +291,7 @@
 	although references will be strongly typed.
 -->
 <!ELEMENT set (
-        (bean | ref | idref | list | set | map | props | value)*
+        (bean | ref | idref | list | set | map | props | value | null)*
 )>
 
 <!--
@@ -291,9 +307,12 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (bean | ref | idref | list | set | map | props | value)
+        (bean | ref | idref | list | set | map | props | value | null)
 )>
 
+<!--
+	Each map element must specify its key.
+-->
 <!ATTLIST entry key CDATA #REQUIRED>
 
 <!--
@@ -305,16 +324,16 @@
 )>
 
 <!--
-	Element content is the string value of the property. The "key"
-	attribute is the name of the property.
+	Element content is the string value of the property.
+	Note that whitespace is trimmed off to avoid unwanted whitespace
+	caused by typical XML formatting.
 -->
 <!ELEMENT prop
         (#PCDATA)
 >
 
 <!--
-	Each property element must specify the key. The value
-	is the element content.
+	Each property element must specify its key.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
 
@@ -327,7 +346,14 @@
 	convert strings to objects.
 
 	Note that this is recommended for simple objects only.
-	Configure more complex objects by setting JavaBean
-	properties to references to other beans.
+	Configure more complex objects by populating JavaBean
+	properties with references to other beans.
 -->
 <!ELEMENT value (#PCDATA)>
+
+<!--
+	Denotes a Java null value. Necessary because an empty "value" tag
+	will resolve to an empty String, which will not be resolved to a
+	null value unless a special PropertyEditor does so.
+-->
+<!ELEMENT null (#PCDATA)>
