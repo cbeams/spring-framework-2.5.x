@@ -35,6 +35,7 @@
     <classpathentry kind="src" path="sandbox"/>
     <classpathentry kind="src" path="samples/countries/src"/>
     <classpathentry kind="src" path="samples/petclinic/src"/>
+    <classpathentry kind="src" path="samples/lightcountries/src"/>
     <classpathentry kind="lib" path="lib/tiles/struts-1.1.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
