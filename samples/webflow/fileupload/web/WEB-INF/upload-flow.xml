@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
+	"http://www.springframework.org/dtd/web-flow.dtd">
+
+<web-flow id="Upload" start-state="selectFile.view">
+
+	<view-state id="selectFile.view">
+		<transition event="submit" to="processUpload"/>
+	</view-state>
+
+	<action-state id="processUpload">
+		<action bean="Upload.process"/>
+		<transition event="success" to="confirmation.view"/>
+		<transition event="error" to="selectFile.view"/>
+	</action-state>
+	
+	<view-state id="confirmation.view">
+		<transition event="back" to="selectFile.view"/>
+	</view-state>
+	
+</web-flow>
