@@ -109,21 +109,23 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 	}
 
 
-	public boolean equals(Object obj) {
-		if (!(obj instanceof SortDefinition)) {
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof SortDefinition)) {
 			return false;
 		}
-		SortDefinition sd = (SortDefinition) obj;
-		return (getProperty().equals(sd.getProperty()) &&
-		    isAscending() == sd.isAscending() && isIgnoreCase() == sd.isIgnoreCase());
+		SortDefinition otherSd = (SortDefinition) other;
+		return (getProperty().equals(otherSd.getProperty()) &&
+		    isAscending() == otherSd.isAscending() && isIgnoreCase() == otherSd.isIgnoreCase());
 	}
 
 	public int hashCode() {
-		int result;
-		result = this.property.hashCode();
-		result = 29 * result + (this.ignoreCase ? 1 : 0);
-		result = 29 * result + (this.ascending ? 1 : 0);
-		return result;
+		int hashCode = this.property.hashCode();
+		hashCode = 29 * hashCode + (this.ignoreCase ? 1 : 0);
+		hashCode = 29 * hashCode + (this.ascending ? 1 : 0);
+		return hashCode;
 	}
 
 }

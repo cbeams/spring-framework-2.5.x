@@ -18,6 +18,8 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * Class to hold information and value for an individual property.
  * Using an object here, rather than just storing all properties in a
@@ -81,12 +83,11 @@ public class PropertyValue implements Serializable {
 			return false;
 		}
 		PropertyValue otherPv = (PropertyValue) other;
-		return (this.name.equals(otherPv.name) &&
-				((this.value == null && otherPv.value == null) || this.value.equals(otherPv.value)));
+		return (this.name.equals(otherPv.name) && ObjectUtils.nullSafeEquals(this.value, otherPv.value));
 	}
 
 	public int hashCode() {
-		return this.name.hashCode() * 29 + (this.value != null ? this.value.hashCode() : 0);
+		return this.name.hashCode() * 29 + (this.value == null ? 0 : this.value.hashCode());
 	}
 
 }
