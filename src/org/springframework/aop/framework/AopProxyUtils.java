@@ -12,22 +12,11 @@ import java.util.Arrays;
 import org.aopalliance.intercept.AspectException;
 
 /**
+ * Miscellaneous utilities for AOP proxies
  * @author Rod Johnson
- * @version $Id: AopProxyUtils.java,v 1.3 2003-12-30 01:07:10 jhoeller Exp $
+ * @version $Id: AopProxyUtils.java,v 1.4 2004-03-12 02:49:27 johnsonr Exp $
  */
 public abstract class AopProxyUtils {
-	
-	public static Method EQUALS_METHOD;
-	
-	// We need a static block to handle checked exceptions
-	static {
-		try {
-			EQUALS_METHOD = Object.class.getMethod("equals", new Class[] { Object.class});
-		} 
-		catch (NoSuchMethodException e) {
-			// Cannot happen
-		} 
-	}
 	
 	/**
 	 * Get complete set of interfaces to proxy. This will always add the ProxyConfig interface.
@@ -71,7 +60,7 @@ public abstract class AopProxyUtils {
 			 throw new AspectException("Couldn't access method " + m, ex);
 		 }
 	}
-
+	
 	/**
 	 * Note the same as equality of the AdvisedSupport objects.
 	 */
