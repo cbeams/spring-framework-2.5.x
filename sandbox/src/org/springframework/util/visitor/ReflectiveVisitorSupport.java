@@ -27,14 +27,14 @@ import org.springframework.util.Cache;
 /**
  * Helper implementation of a reflective visitor.
  * <p>
- * <p>
- * To use, call <code>invokeVisitor</code>, passing a Visitor object and the
+ * To use, call <code>invokeVisit</code>, passing a Visitor object and the
  * data argument to accept (double-dispatch.) For example:
  * 
  * <pre>
- * 
- *   public String ToStringStyler.styleValue(Object value) { // visit&lt;valueType&gt; callback will be invoked using reflection reflectiveVistorSupport.invokeVisit(this, value) }
- *  
+ *   public String ToStringStyler.styleValue(Object value) {
+ *       // visit(&lt;valueType&gt; arg) callback will be invoked using reflection
+ *       reflectiveVistorSupport.invokeVisit(this, value)
+ *   }
  * </pre>
  * 
  * @author Keith Donald
