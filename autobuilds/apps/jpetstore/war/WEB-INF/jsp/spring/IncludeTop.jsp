@@ -30,7 +30,7 @@
       <a href="<c:url value="/shop/editAccount.do"/>">MY ACCOUNT</a>
 </c:if>
 
-      |<a href="../help.html">HELP</a>
+      |<a href="<c:url value="/shop/help.do"/>">HELP</a>
     </td>
     <td align="left" valign="bottom">
       <form action="<c:url value="/shop/searchProducts.do"/>" method="post">

@@ -140,6 +140,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/velocity">
 				<include name="*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/freemarker">
+				<include name="*.jar"/>
 			</fileset>					
 		</copy>
 
@@ -168,6 +171,7 @@
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<include name="WEB-INF/velocity/**"/>
+			<include name="WEB-INF/freemarker/**"/>
 			<exclude name="**/.*"/>
 		</war>
 

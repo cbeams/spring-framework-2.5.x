@@ -28,10 +28,16 @@
   		<property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>          
 	</bean>
 
-
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath"><value>/WEB-INF/freemarker/</value></property> 
+	</bean>
+	
+	
 	<!-- ========================= DEFINITIONS OF PUBLIC CONTROLLERS ========================= -->
 
 	<bean id="defaultHandlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+	
+	<bean name="/shop/help.do" class="org.springframework.autobuilds.jpetstore.web.spring.HelpController"/>
 
 	<bean name="/shop/addItemToCart.do" class="org.springframework.autobuilds.jpetstore.web.spring.AddItemToCartController">
 		<property name="petStore"><ref bean="petStore"/></property>
