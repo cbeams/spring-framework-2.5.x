@@ -10,8 +10,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
@@ -28,7 +26,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.9 2003-11-28 11:57:28 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.10 2003-12-10 20:29:29 johnsonr Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -36,13 +34,8 @@ import org.springframework.transaction.TransactionStatus;
  */
 public class TransactionInterceptor implements MethodInterceptor, InitializingBean {
 	
-	/**
-	 * Name of transaction attribute in Invocation.
-	 * Target classes can use this to find TransactionStatus.
-	 * <b>NB: The AOP proxy owning this TransactionInterceptor
-	 * must be set to expose invocations for this to be accessible.</b>
-	 */
-	public static final String TRANSACTION_STATUS_ATTACHMENT_NAME = TransactionInterceptor.class.getName() + "TRANSACTION_STATUS";
+	/** Holder to support the currentTransactionStatus() method */
+	private static ThreadLocal currentTransactionStatus = new ThreadLocal();
 
 	/**
 	 * Return the transaction status of the current method invocation.
@@ -50,11 +43,13 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 * rollback-only but not throw an application exception.
 	 * @throws org.aopalliance.intercept.AspectException
 	 * if the invocation cannot be found, because the method was invoked
-	 * outside an AOP invocation context or because the AOP framework
-	 * has not been configured to expose the invocation context
+	 * outside an AOP invocation context
 	 */
 	public static TransactionStatus currentTransactionStatus() throws AspectException {
-		return (TransactionStatus) AopContext.currentInvocation().getAttachment(TRANSACTION_STATUS_ATTACHMENT_NAME);
+		TransactionStatus status = (TransactionStatus) currentTransactionStatus.get();
+		if (status == null)
+			throw new AspectException("No transaction status in scope");
+		return status;
 	}
 
 
@@ -119,6 +114,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		// If this is null, the method is non-transactional
 		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation.getMethod(), null);
 		TransactionStatus status = null;
+		TransactionStatus oldTransactionStatus = null;
 		
 		// Create transaction if necessary
 		if (transAtt != null) {
@@ -131,7 +127,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			status = this.transactionManager.getTransaction(transAtt);
 			
 			// Make the TransactionStatus available to callees
-			invocation.addAttachment(TRANSACTION_STATUS_ATTACHMENT_NAME, status);
+			oldTransactionStatus = (TransactionStatus) currentTransactionStatus.get();
+			currentTransactionStatus.set(status);
 		}
 		else {
 			// It isn't a transactional method
@@ -155,7 +152,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		}
 		finally {
 			if (transAtt != null) {
-				invocation.addAttachment(TRANSACTION_STATUS_ATTACHMENT_NAME, null);
+				// Use stack to restore old transaction status if one was set
+				currentTransactionStatus.set(oldTransactionStatus);
 			}
 		}
 		if (status != null) {

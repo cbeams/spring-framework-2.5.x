@@ -40,7 +40,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.19 2003-12-09 16:46:11 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.20 2003-12-10 20:29:29 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, Ordered {
 
@@ -154,8 +154,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			}
 			proxyFactory.setTargetSource(getTargetSource(bean, name));
 			
-			// Transaction and other APIs might require this
-			proxyFactory.setExposeInvocation(true);
 			//System.err.print(proxyFactory);
 			return proxyFactory.getProxy();
 		}

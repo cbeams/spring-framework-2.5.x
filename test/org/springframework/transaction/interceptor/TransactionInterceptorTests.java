@@ -26,7 +26,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * testing the helper implementation.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TransactionInterceptorTests extends TestCase {
 
@@ -139,7 +139,7 @@ public class TransactionInterceptorTests extends TestCase {
 
 		ProxyFactory pf = new ProxyFactory(tb);
 		// Need to use programmatic rollback
-		pf.setExposeInvocation(true);
+		//pf.setExposeInvocation(true);
 		//pf.addInterceptor(new DebugInterceptor());
 		pf.addInterceptor(ti);
 		ITestBean itb = (ITestBean) pf.getProxy();
