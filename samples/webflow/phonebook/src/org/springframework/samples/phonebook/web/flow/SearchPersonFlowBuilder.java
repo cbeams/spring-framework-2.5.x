@@ -26,10 +26,12 @@ import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
- * Java-based flow builder that searches for people in the phonebook.
- * 
+ * Java-based flow builder that searches for people in the phonebook. The
+ * flow defined by this class is exactly the same as that defined in the
+ * "search-flow.xml" XML flow definition.
+ * <p>
  * This encapsulates the page flow of searching for some people, selecting a
- * person you care about, and viewing their person's details and thosr of their
+ * person you care about, and viewing their person's details and those of their
  * collegues in a reusable, self-contained module.
  * 
  * @author Keith Donald
@@ -46,14 +48,14 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 	private ConversionService conversionService;
 	
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-	
 	protected ConversionExecutor getConversionExecutor(Class targetClass) {
 		return conversionService.getConversionExecutor(String.class, targetClass);
 	}
 
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+	
 	protected String flowId() {
 		return SEARCH;
 	}
