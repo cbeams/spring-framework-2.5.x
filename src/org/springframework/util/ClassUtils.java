@@ -88,16 +88,6 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Get the class name without the qualified package name.
-	 * @param clazz the class to get the short name for
-	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException if the class is null
-	 */
-	public static String getShortName(Class clazz) {
-		return getShortName(clazz.getName());
-	}
-
-	/**
 	 * Return the uncaptilized short string name of a Java class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
@@ -108,11 +98,22 @@ public abstract class ClassUtils {
 
 	/**
 	 * Get the class name without the qualified package name.
+	 * @param clazz the class to get the short name for
+	 * @return the class name of the class without the package name
+	 * @throws IllegalArgumentException if the class is null
+	 */
+	public static String getShortName(Class clazz) {
+		return getShortName(clazz.getName());
+	}
+
+	/**
+	 * Get the class name without the qualified package name.
 	 * @param className the className to get the short name for
 	 * @return the class name of the class without the package name
 	 * @throws IllegalArgumentException if the className is empty
 	 */
 	public static String getShortName(String className) {
+		Assert.hasText(className, "class name must not be empty");
 		char[] charArray = className.toCharArray();
 		int lastDot = 0;
 		for (int i = 0; i < charArray.length; i++) {
@@ -124,6 +125,17 @@ public abstract class ClassUtils {
 			}
 		}
 		return new String(charArray, lastDot, charArray.length - lastDot);
+	}
+
+	/**
+	 * Return the qualified name of the given method, consisting of
+	 * fully qualified interface/class name + "." + method name.
+	 * @param method the method
+	 * @return the qualified name of the method
+	 */
+	public static String getQualifiedMethodName(Method method) {
+		Assert.notNull(method, "Method must not be empty");
+		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
 	/**
@@ -179,16 +191,14 @@ public abstract class ClassUtils {
 	 * @param clazz the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
-	 * @see java.lang.ClassLoader#getResource(String)
-	 * @see java.lang.Class#getResource(String)
+	 * @see java.lang.ClassLoader#getResource
+	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
 		if (!resourceName.startsWith("/")) {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
 		}
-		else {
-			return classPackageAsResourcePath(clazz) + resourceName;
-		}
+		return classPackageAsResourcePath(clazz) + resourceName;
 	}
 
 	/**
@@ -201,8 +211,8 @@ public abstract class ClassUtils {
 	 * @param clazz the input class. A null value or the default (empty) package
 	 * will result in an empty string ("") being returned.
 	 * @return a path which represents the package name
-	 * @see java.lang.ClassLoader#getResource(String)
-	 * @see java.lang.Class#getResource(String)
+	 * @see java.lang.ClassLoader#getResource
+	 * @see java.lang.Class#getResource
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
 		if (clazz == null || clazz.getPackage() == null) {

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.ClassUtils;
 
 /**
  * Superclass for transactional aspects, such as the AOP Alliance-compatible
@@ -237,9 +238,10 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	 * different identifier for the given method.
 	 * @param method the method we're interested in
 	 * @return log message identifying this method
+	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method) {
-		return method.getDeclaringClass().getName() + "." + method.getName();
+		return ClassUtils.getQualifiedMethodName(method);
 	}
 
 	/**
