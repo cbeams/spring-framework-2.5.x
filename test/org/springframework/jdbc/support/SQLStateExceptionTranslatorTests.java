@@ -12,7 +12,7 @@ import org.springframework.jdbc.UncategorizedSQLException;
  * @author Rod Johnson
  * @since 13-Jan-03
  */
-public class SqlStateExceptionTranslatorTestSuite extends TestCase {
+public class SQLStateExceptionTranslatorTests extends TestCase {
 	
 	private SQLStateSQLExceptionTranslator trans = new SQLStateSQLExceptionTranslator();
 
