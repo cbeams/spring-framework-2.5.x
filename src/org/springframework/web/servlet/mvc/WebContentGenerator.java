@@ -1,23 +1,21 @@
 package org.springframework.web.servlet.mvc;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletContext;
 
 import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Convenient superclass for any kind of web content generator,
  * like AbstractController and MultiActionController.
  * Supports HTTP cache control options.
- *
  * @author Rod Johnson
  */
 public class WebContentGenerator extends ApplicationObjectSupport {
 	
 	/** Use HTTP 1.0 expires header? */
 	private boolean useExpiresHeader = true;
-
-	public WebContentGenerator() {
-	}
 
 	public final void setUseExpiresHeader(boolean useExpiresHeader) {
 		this.useExpiresHeader = useExpiresHeader;
@@ -54,6 +52,13 @@ public class WebContentGenerator extends ApplicationObjectSupport {
 		if (this.useExpiresHeader) {
 			response.setDateHeader("Expires", System.currentTimeMillis() + seconds * 1000L);
 		}
+	}
+
+	/**
+	 * Convenience method for subclasses that returns the current ServletContext.
+	 */
+	protected final ServletContext getServletContext() {
+		return ((WebApplicationContext) getApplicationContext()).getServletContext();
 	}
 
 }
