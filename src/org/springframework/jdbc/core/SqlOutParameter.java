@@ -28,7 +28,7 @@ package org.springframework.jdbc.core;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class SqlOutParameter extends ResultSetAwareSqlParameter {
+public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 
 	/**
 	 * Create a new SqlOutParameter, supplying name and SQL type.

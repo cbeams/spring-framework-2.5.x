@@ -24,12 +24,12 @@ package org.springframework.jdbc.core;
  * No additional properties: instanceof will be used to check
  * for such types.
  *
- * <p>Output parameters - like all stored procedure parameters -
+ * <p>Returned ResultSets - like all stored procedure parameters -
  * must have names.
  *
  * @author Thomas Risberg
  */
-public class SqlReturnResultSet extends ResultSetAwareSqlParameter {
+public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 
 	public SqlReturnResultSet(String name, RowCallbackHandler rch) {
 		super(name, 0, rch);

@@ -83,7 +83,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.42 2004-05-27 14:42:27 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.43 2004-05-28 16:06:39 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -597,7 +597,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @param param the corresponding stored procedure parameter
 	 * @return Map that contains returned results
 	 */
-	protected Map processResultSet(ResultSet rs, ResultSetAwareSqlParameter param) throws SQLException {
+	protected Map processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
 		Map returnedResults = new HashMap();
 		try {
 			ResultSet rsToUse = rs;

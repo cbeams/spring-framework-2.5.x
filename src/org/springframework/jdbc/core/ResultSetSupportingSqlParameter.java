@@ -17,52 +17,52 @@
 package org.springframework.jdbc.core;
 
 /**
- * Base class for ResultSet-aware SqlParameters like
+ * Common base class for ResultSet-supporting SqlParameters like
  * SqlOutParameter and SqlReturnResultSet.
  * @author Juergen Hoeller
  * @since 26.05.2004
  * @see SqlOutParameter
  * @see SqlReturnResultSet
  */
-public class ResultSetAwareSqlParameter extends SqlParameter {
+public class ResultSetSupportingSqlParameter extends SqlParameter {
 
-	private ResultSetExtractor resultSetExtractor;
+	private ResultSetExtractor resultSetExtractor = null;
 
 	private RowCallbackHandler rowCallbackHandler = null;
 
 	private RowMapper rowMapper = null;
 
-	private int rowsExpected = -1;
+	private int rowsExpected = 0;
 
 	/**
-	 * Create a new ResultSetAwareSqlParameter, supplying name and SQL type.
+	 * Create a new ResultSetSupportingSqlParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param type SQL type of the parameter according to java.sql.Types
 	 */
-	public ResultSetAwareSqlParameter(String name, int type) {
+	public ResultSetSupportingSqlParameter(String name, int type) {
 		super(name, type);
 	}
 
-	public ResultSetAwareSqlParameter(String name, int type, String typeName) {
+	public ResultSetSupportingSqlParameter(String name, int type, String typeName) {
 		super(name, type, typeName);
 	}
 
-	public ResultSetAwareSqlParameter(String name, int type, ResultSetExtractor resultSetExtractor) {
+	public ResultSetSupportingSqlParameter(String name, int type, ResultSetExtractor resultSetExtractor) {
 		super(name, type);
 		this.resultSetExtractor = resultSetExtractor;
 	}
 
-	public ResultSetAwareSqlParameter(String name, int type, RowCallbackHandler rch) {
+	public ResultSetSupportingSqlParameter(String name, int type, RowCallbackHandler rch) {
 		super(name, type);
 		this.rowCallbackHandler = rch;
 	}
 
-	public ResultSetAwareSqlParameter(String name, int type, RowMapper rm) {
+	public ResultSetSupportingSqlParameter(String name, int type, RowMapper rm) {
 		super(name, type);
 		this.rowMapper = rm;
 	}
 
-	public ResultSetAwareSqlParameter(String name, int type, RowMapper rm, int rowsExpected) {
+	public ResultSetSupportingSqlParameter(String name, int type, RowMapper rm, int rowsExpected) {
 		super(name, type);
 		this.rowMapper = rm;
 		this.rowsExpected = rowsExpected;
@@ -81,9 +81,10 @@ public class ResultSetAwareSqlParameter extends SqlParameter {
 	}
 
 	/**
-	 * Return new instance of the implementation of a ResultReader usable for
-	 * returned ResultSets. This implementation invokes the RowMapper's
-	 * implementation of the mapRow method, via a RowMapperResultReader adapter.
+	 * Return a new instance of the implementation of a RowCallbackHandler,
+	 * usable for returned ResultSets. This implementation invokes a given
+	 * RowMapper via the RowMapperResultReader adapter, respectively returns
+	 * a given RowCallbackHandler directly.
 	 * @see RowMapperResultReader
 	 */
 	protected RowCallbackHandler getRowCallbackHandler() {
