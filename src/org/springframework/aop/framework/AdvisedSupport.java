@@ -201,9 +201,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param newInterface additional interface to proxy
 	 */
 	public void addInterface(Class newInterface) {
+		if (!newInterface.isInterface()) {
+			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
+		}
 		this.interfaces.add(newInterface);
 		adviceChanged();
-		logger.debug("Added new aspect interface: " + newInterface);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Added new aspect interface: " + newInterface.getName());
+		}
 	}
 
 	public Class[] getProxiedInterfaces() {

@@ -141,7 +141,7 @@ public abstract class AopUtils {
 			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
 			// Check it's an interface
 			if (!interfaces[i].isInterface())
-				throw new IllegalArgumentException("Can proxy only interfaces: " + interfaces[i] + " is a class");
+				throw new IllegalArgumentException("Can proxy only interfaces: [" + interfaces[i].getName() + "] is a class");
 		}
 		return interfaces;
 	}
