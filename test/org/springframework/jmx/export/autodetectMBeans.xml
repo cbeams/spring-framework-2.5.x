@@ -16,4 +16,5 @@
 			<ref local="server"/>
 		</property>
 	</bean>
+
 </beans>

@@ -18,12 +18,13 @@ package org.springframework.jmx.export;
 
 import javax.management.ObjectName;
 
-import org.springframework.jmx.*;
+import org.springframework.jmx.AbstractJmxTests;
+import org.springframework.jmx.IJmxTestBean;
 
 /**
  * @author Rob Harrop
  */
-public class PropertyPlaceholderConfigurerTests extends org.springframework.jmx.AbstractJmxTests {
+public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/propertyPlaceholderConfigurer.xml";

@@ -31,7 +31,8 @@ import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
 
 /**
- * Generic utility methods to support Spring JMX.
+ * Collection of generic utility methods to support Spring JMX.
+ * Includes a convenient method to locate an MBeanServer.
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
@@ -71,7 +72,7 @@ public class JmxUtils {
 	 */
 	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
 		Class[] types = null;
-		if ((paramInfo != null) && (paramInfo.length > 0)) {
+		if (paramInfo != null && paramInfo.length > 0) {
 			types = new Class[paramInfo.length];
 			for (int x = 0; x < paramInfo.length; x++) {
 				types[x] = ClassUtils.forName(paramInfo[x].getType());
