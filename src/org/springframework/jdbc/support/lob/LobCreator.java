@@ -41,7 +41,7 @@ import java.sql.SQLException;
  * @see org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback
  * @see DefaultLobHandler.DefaultLobCreator
  * @see OracleLobHandler.OracleLobCreator
- * @see java.sql.PreparedStatement#setBlob
+ * @see java.sql.PreparedStatement#setBytes
  * @see java.sql.PreparedStatement#setBinaryStream
  * @see java.sql.PreparedStatement#setString
  * @see java.sql.PreparedStatement#setAsciiStream
@@ -55,7 +55,7 @@ public interface LobCreator {
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param content the content as byte array
+	 * @param content the content as byte array, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
@@ -68,7 +68,7 @@ public interface LobCreator {
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param contentStream the content as InputStream
+	 * @param contentStream the content as binary stream, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBinaryStream
 	 */
@@ -82,7 +82,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param content the content as byte array
+	 * @param content the content as String, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
@@ -95,7 +95,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param asciiStream the content as InputStream
+	 * @param asciiStream the content as ASCII stream, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBinaryStream
 	 */
@@ -109,7 +109,7 @@ public interface LobCreator {
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
-	 * @param characterStream the content as InputStream
+	 * @param characterStream the content as character stream, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.PreparedStatement#setBinaryStream
 	 */

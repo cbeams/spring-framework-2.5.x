@@ -66,7 +66,7 @@ public interface LobHandler {
 	 * ResultSet.getBlob, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as byte array
+	 * @return the content as byte array, or null in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException;
@@ -77,7 +77,7 @@ public interface LobHandler {
 	 * ResultSet.getBlob, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as binary stream
+	 * @return the content as binary stream, or null in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException;
@@ -88,7 +88,7 @@ public interface LobHandler {
 	 * ResultSet.getClob, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as String
+	 * @return the content as String, or null in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	String getClobAsString(ResultSet rs, int columnIndex) throws SQLException;
@@ -99,7 +99,7 @@ public interface LobHandler {
 	 * ResultSet.getClob, depending on the database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as ASCII stream
+	 * @return the content as ASCII stream, or null in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException;
