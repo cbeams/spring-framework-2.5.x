@@ -74,24 +74,31 @@ public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 	 * Start this flow execution, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by the
 	 * FlowController, but also in test code.
-	 * @param input Model input attributes to the flow execution
+	 * @param input model input attributes to the flow execution
 	 * @param request The current http request
 	 * @param response The current http response
 	 * @return The starting model and view.
+	 * @throws IllegalStateException if this execution has already been started,
+	 *         or no state is marked as the start state.
 	 */
-	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response);
+	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response)
+			throws IllegalStateException;
 
 	/**
 	 * Signal an occurence of the specified event in the (optionally) provided
 	 * state of this flow execution.
 	 * @param eventId The event that occured
-	 * @param stateId The state the event occured in (can be null)
+	 * @param stateId The state the event occured in (optional, can be null)
 	 * @param request The current http request
 	 * @param response The current http response
 	 * @return The next model and view descriptor to display for this flow
 	 *         execution.
+	 * @throws EventNotSupportedException if the signaled event does not map to
+	 *         any state transitions in the state.
+	 * @throws IllegalStateException if the flow execution is not active and
+	 *         thus no longer processing events.
 	 */
 	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
-			HttpServletResponse response);
+			HttpServletResponse response) throws EventNotSupportedException, IllegalStateException;
 
 }
