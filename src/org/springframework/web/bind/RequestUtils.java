@@ -57,6 +57,24 @@ public abstract class RequestUtils {
 		}
 	}
 
+
+	/**
+	 * Get an Integer parameter, or null if not present.
+	 * Throws an exception if it the parameter value isn't a number.
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the Integer value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static Integer getIntParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return new Integer(getRequiredIntParameter(request, name));
+	}
+
 	/**
 	 * Get an int parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value as default to enable checks of whether it was supplied.
@@ -109,6 +127,24 @@ public abstract class RequestUtils {
 	public static int[] getRequiredIntParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 		return INT_PARSER.parseInts(name, request.getParameterValues(name));
+	}
+
+
+	/**
+	 * Get a Long parameter, or null if not present.
+	 * Throws an exception if it the parameter value isn't a number.
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the Long value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static Long getLongParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return new Long(getRequiredLongParameter(request, name));
 	}
 
 	/**
@@ -165,6 +201,24 @@ public abstract class RequestUtils {
 		return LONG_PARSER.parseLongs(name, request.getParameterValues(name));
 	}
 
+
+	/**
+	 * Get a Float parameter, or null if not present.
+	 * Throws an exception if it the parameter value isn't a number.
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the Float value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static Float getFloatParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return new Float(getRequiredFloatParameter(request, name));
+	}
+
 	/**
 	 * Get a double parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value as default to enable checks of whether it was supplied.
@@ -217,6 +271,24 @@ public abstract class RequestUtils {
 	public static float[] getRequiredFloatParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 		return FLOAT_PARSER.parseFloats(name, request.getParameterValues(name));
+	}
+
+
+	/**
+	 * Get a Double parameter, or null if not present.
+	 * Throws an exception if it the parameter value isn't a number.
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the Double value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static Double getDoubleParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return new Double(getRequiredDoubleParameter(request, name));
 	}
 
 	/**
@@ -273,9 +345,31 @@ public abstract class RequestUtils {
 		return DOUBLE_PARSER.parseDoubles(name, request.getParameterValues(name));
 	}
 
+
+	/**
+	 * Get a Boolean parameter, or null if not present.
+	 * Throws an exception if it the parameter value isn't a boolean.
+	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
+	 * treats every other non-empty value as false (i.e. parses leniently).
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the Boolean value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static Boolean getBooleanParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return (getRequiredBooleanParameter(request, name) ? Boolean.TRUE : Boolean.FALSE);
+	}
+
 	/**
 	 * Get a boolean parameter, with a fallback value. Never throws an exception.
 	 * Can pass a distinguished value as default to enable checks of whether it was supplied.
+	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
+	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @param defaultVal the default value to use as fallback
@@ -291,6 +385,8 @@ public abstract class RequestUtils {
 
 	/**
 	 * Get an array of boolean parameters, return an empty array if not found.
+	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
+	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
 	 */
@@ -304,8 +400,10 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an array of boolean parameters, throwing an exception if it isn't found or isn't a boolean.
-	 * True is "true" or "yes" or "on" (ignoring the case) or "1".
+	 * Get an array of boolean parameters, throwing an exception if it isn't found
+	 * or isn't a boolean.
+	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
+	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException: subclass of ServletException,
@@ -317,8 +415,10 @@ public abstract class RequestUtils {
 	}
 
 	/**
-	 * Get an array of boolean parameters, throwing an exception if not found or one isn't a boolean.
-	 * True is "true" or "yes" or "on" (ignoring the case) or "1".
+	 * Get an array of boolean parameters, throwing an exception if not found
+	 * or one isn't a boolean.
+	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
+	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException: subclass of ServletException,
@@ -327,6 +427,24 @@ public abstract class RequestUtils {
 	public static boolean[] getRequiredBooleanParameters(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 		return BOOLEAN_PARSER.parseBooleans(name, request.getParameterValues(name));
+	}
+
+
+	/**
+	 * Get a String parameter, or null if not present.
+	 * Throws an exception if it the parameter value is empty.
+	 * @param request current HTTP request
+	 * @param name the name of the parameter
+	 * @return the String value, or null if not present
+	 * @throws ServletRequestBindingException: subclass of ServletException,
+	 * so it doesn't need to be caught
+	 */
+	public static String getStringParameter(HttpServletRequest request, String name)
+			throws ServletRequestBindingException {
+		if (request.getParameter(name) == null) {
+			return null;
+		}
+		return getRequiredStringParameter(request, name);
 	}
 
 	/**
@@ -522,8 +640,8 @@ public abstract class RequestUtils {
 		}
 
 		protected Object doParse(String parameter) throws NumberFormatException {
-			return new Boolean(parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("yes")
-					|| parameter.equalsIgnoreCase("on") || parameter.equals("1"));
+			return (parameter.equalsIgnoreCase("true") || parameter.equalsIgnoreCase("on") ||
+					parameter.equalsIgnoreCase("yes") || parameter.equals("1") ? Boolean.TRUE : Boolean.FALSE);
 		}
 
 		public boolean parseBoolean(String name, String parameter) throws ServletRequestBindingException {
