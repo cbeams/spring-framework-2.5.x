@@ -30,7 +30,7 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * <p>
  * <b>Warning:</b> storing state (a flow execution continuation) on the client
  * entails a certain security risk. This implementation does not provide a
- * secure way of storing state on the client, so a mallicious client could
+ * secure way of storing state on the client, so a malicious client could
  * reverse engineer a continuation and get access to possible sensitive data stored
  * in the flow execution. If you need more security and still want to store
  * continuations on the client, subclass this class and override the methods
