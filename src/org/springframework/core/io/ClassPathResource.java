@@ -13,6 +13,7 @@ import java.net.URL;
  *
  * <p>Supports resolution as File if the class path resource
  * resides in the file system, but not for resources in a JAR.
+ * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -21,8 +22,6 @@ import java.net.URL;
  * @see java.lang.Class#getResourceAsStream
  */
 public class ClassPathResource extends AbstractResource {
-
-	private static final String URL_PROTOCOL_FILE = "file";
 
 	private final String path;
 
@@ -70,7 +69,7 @@ public class ClassPathResource extends AbstractResource {
 		return is;
 	}
 
-	public File getFile() throws IOException {
+	public URL getURL() throws IOException {
 		URL url = null;
 		if (this.clazz != null) {
 			url = this.clazz.getResource(this.path);
@@ -80,9 +79,14 @@ public class ClassPathResource extends AbstractResource {
 			url = ccl.getResource(this.path);
 		}
 		if (url == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
+			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL " +
 																			"because it does not exist");
 		}
+		return url;
+	}
+
+	public File getFile() throws IOException {
+		URL url = getURL();
 		if (!URL_PROTOCOL_FILE.equals(url.getProtocol())) {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path " +
 																			"because it does not reside in the file system: URL=[" + url + "]");

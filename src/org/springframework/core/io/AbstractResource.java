@@ -4,19 +4,22 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Convenience base class for Resource implementations,
  * pre-implementing typical behavior.
  *
- * <p>The "exists" method will check whether a File or InputStream
- * can be opened; "isOpen" will always return false; "getFile" throws
- * an exception; and "toString" will return the description.
+ * <p>The "exists" method will check whether a File or InputStream can
+ * be opened; "isOpen" will always return false; "getURL" and "getFile"
+ * throw an exception; and "toString" will return the description.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
  */
 public abstract class AbstractResource implements Resource {
+
+	protected static final String URL_PROTOCOL_FILE = "file";
 
 	/**
 	 * This implementation checks whether a File can be opened,
@@ -46,6 +49,14 @@ public abstract class AbstractResource implements Resource {
 	 */
 	public boolean isOpen() {
 		return false;
+	}
+
+	/**
+	 * This implementation throws a FileNotFoundException, assuming
+	 * that the resource cannot be resolved to a URL.
+	 */
+	public URL getURL() throws IOException {
+		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import javax.servlet.ServletContext;
 
@@ -15,6 +16,7 @@ import org.springframework.core.io.AbstractResource;
  *
  * <p>Always supports stream access, but only allows java.io.File
  * access when the web application archive is expanded.
+ * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -50,6 +52,15 @@ public class ServletContextResource extends AbstractResource {
 		return is;
 	}
 
+	public URL getURL() throws IOException {
+		URL url = this.servletContext.getResource(this.path);
+		if (url == null) {
+			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL " +
+																			"because it does not exist");
+		}
+		return url;
+	}
+
 	/**
 	 * This implementation delegates to ServletContext.getRealPath,
 	 * but throws a FileNotFoundException if not found or not resolvable.
@@ -57,13 +68,11 @@ public class ServletContextResource extends AbstractResource {
 	 */
 	public File getFile() throws IOException {
 		String realPath = this.servletContext.getRealPath(this.path);
-		if (realPath != null) {
-			return new File(realPath);
-		}
-		else {
+		if (realPath == null) {
 			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path - " +
 																			"web application archive not expanded?");
 		}
+		return new File(realPath);
 	}
 
 	public String getDescription() {
