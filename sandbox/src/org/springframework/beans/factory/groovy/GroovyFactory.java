@@ -16,19 +16,13 @@
 
 package org.springframework.beans.factory.groovy;
 
-import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.groovy.control.CompilationFailedException;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.aop.target.HotSwappableTargetSource;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.dynamic.DynamicObjectInterceptor;
+import org.springframework.beans.factory.script.DynamicScriptInterceptor;
 import org.springframework.core.ControlFlowFactory;
 
 /**
@@ -49,8 +43,6 @@ import org.springframework.core.ControlFlowFactory;
  */
 public class GroovyFactory {
 	
-	// TODO className should be a resource
-	
 	protected final static Log log = LogFactory.getLog(GroovyFactory.class);
 	
 	/**
@@ -59,7 +51,7 @@ public class GroovyFactory {
 	 * @return
 	 * @throws GroovyScriptException
 	 */
-	public static GroovyObject dynamicObject(String className) throws GroovyScriptException {
+	public static GroovyObject dynamicObject(String className) throws BeansException {
 		return dynamicObject(className, 0);
 	}
 
@@ -71,10 +63,12 @@ public class GroovyFactory {
 	 * @return
 	 * @throws GroovyScriptException
 	 */
-	public static GroovyObject dynamicObject(String className, int pollIntervalSeconds) throws GroovyScriptException {
-		GroovyObject groovyObject = staticObject(className);
+	public static GroovyObject dynamicObject(String className, int pollIntervalSeconds) throws BeansException {
+		GroovyScript script = new GroovyScript(className);
+		GroovyObject groovyObject = (GroovyObject) script.createObject();
 		
-		if (ControlFlowFactory.createControlFlow().under(DynamicScriptInterceptor.class)) {
+		// TODO args?
+		if (ControlFlowFactory.createControlFlow().under(DynamicObjectInterceptor.class)) {
 			// Tricky...
 			// If the DynamicScriptInterceptor requests this bean,
 			// do NOT wrap it again.
@@ -85,66 +79,15 @@ public class GroovyFactory {
 		// Wrap the bean in an AOP proxy to allow use of the
 		// HotSwappableTargetSource
 		// Requires CGLIB
-		
-		// Need GroovyTargetSource??
-		HotSwappableTargetSource gts = new HotSwappableTargetSource(groovyObject);
-		
-		ProxyFactory pf = new ProxyFactory();
-		
-		// Force the use of CGLIB
-		pf.setProxyTargetClass(true);
-		
-		// Set the HotSwappableTargetSource
-		pf.setTargetSource(gts);
-		
-		// Add the DynamicScript introduction
-		pf.addAdvisor(new DefaultIntroductionAdvisor(new DynamicScriptInterceptor(className, gts, pollIntervalSeconds)));
-		
-		GroovyObject wrapped = (GroovyObject) pf.getProxy();
-		
-		return wrapped;
+		return (GroovyObject) new DynamicScriptInterceptor(script, groovyObject, pollIntervalSeconds).createProxy();
 	}
 		
 	
 	/**
 	 * Create a non-dynamic Groovy bean.
 	 */
-	public static GroovyObject staticObject(String className) throws GroovyScriptException {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		Class groovyClass = null;
-		GroovyClassLoader groovyClassLoader = new GroovyClassLoader(cl);
-		//System.out.println(groovyCl);
-		try {
-			URL url = cl.getResource(className);
-						
-			if (url == null) {
-				throw new ScriptNotFoundException("Script " + className + " not found");
-			}
-			//System.out.println(url.getFile());
-			InputStream is = url.openStream();
-			
-			groovyClass = groovyClassLoader
-					.parseClass(is);
-			log.info("Loaded groovy class " + groovyClass);
-			return (GroovyObject) groovyClass.newInstance();
-
-		} 
-		catch (CompilationFailedException ex) {
-			throw new CompilationException("Error parsing " + className, ex);
-		} 
-		catch (IOException ex) {
-			// TODO diff one
-			throw new ScriptNotFoundException("Error reading " + className, ex);
-		}
-		catch (IllegalAccessException ex) {
-			// TODO break up
-			throw new CannotInstantiateGroovyClassException("Error instantiating" + groovyClass, ex);
-		}
-		catch (InstantiationException ex) {
-			// TODO break up
-			throw new CannotInstantiateGroovyClassException("Error instantiating" + groovyClass, ex);
-		}
-
+	public static GroovyObject staticObject(String className) throws BeansException {
+		return (GroovyObject) new GroovyScript(className).createObject();
 	}
 
 }

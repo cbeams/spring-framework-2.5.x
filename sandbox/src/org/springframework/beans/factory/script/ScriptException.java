@@ -14,18 +14,18 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: GroovyScriptException.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: ScriptException.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
  */
-public abstract class GroovyScriptException extends NestedRuntimeException {
+public abstract class ScriptException extends BeanDefinitionStoreException {
 	
-	public GroovyScriptException(String mesg, Throwable t) {
+	public ScriptException(String mesg, Throwable t) {
 		super(mesg, t);
 	}
 

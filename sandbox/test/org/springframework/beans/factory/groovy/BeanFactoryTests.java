@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.groovy;
 
-import org.springframework.beans.factory.groovy.DynamicScript;
+import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import junit.framework.TestCase;
@@ -24,11 +24,13 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: BeanFactoryTests.java,v 1.2 2004-08-01 15:42:01 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	
 	private static final String SIMPLE_XML = "/org/springframework/beans/factory/groovy/simple.xml";
+	
+	// TODO syntax errors test Bad.groovy
 	
 	public void testSimple() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
@@ -49,7 +51,7 @@ public class BeanFactoryTests extends TestCase {
 		
 		DynamicScript script = (DynamicScript) ac.getBean("property");
 		assertEquals(1, script.getLoads());
-		script.reload();
+		script.refresh();
 		assertEquals(2, script.getLoads());
 		
 		// Reference still works

@@ -16,18 +16,22 @@
 
 package org.springframework.beans.factory.groovy;
 
-
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.springframework.beans.factory.script.CompilationException;
 
 /**
- * TODO use an existing spring class (JAR size?)
- * 
+ * Exception thrown when a Groovy script can't be compiled.
  * @author Rod Johnson
- * @version $Id: CannotInstantiateGroovyClassException.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: GroovyCompilationException.java,v 1.1 2004-08-01 15:42:02 johnsonr Exp $
  */
-public class CannotInstantiateGroovyClassException extends GroovyScriptException {
+public class GroovyCompilationException extends CompilationException {
 	
-	public CannotInstantiateGroovyClassException(String mesg, Exception ex) {
+	public GroovyCompilationException(String mesg, CompilationFailedException ex) {
 		super(mesg, ex);
+	}
+	
+	public CompilationFailedException groovyException() {
+		return (CompilationFailedException) getCause();
 	}
 
 }

@@ -20,14 +20,15 @@ import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.groovy.DynamicScript;
 import org.springframework.beans.factory.groovy.GroovyFactory;
-import org.springframework.beans.factory.groovy.ScriptNotFoundException;
+import org.springframework.beans.factory.script.CompilationException;
+import org.springframework.beans.factory.script.DynamicScript;
+import org.springframework.beans.factory.script.ScriptNotFoundException;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: GroovyFactoryTests.java,v 1.2 2004-07-31 08:57:39 johnsonr Exp $
+ * @version $Id: GroovyFactoryTests.java,v 1.3 2004-08-01 15:42:01 johnsonr Exp $
  */
 public class GroovyFactoryTests extends TestCase {
 	

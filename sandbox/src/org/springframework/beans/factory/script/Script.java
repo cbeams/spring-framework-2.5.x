@@ -14,24 +14,28 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script;
+
+import org.springframework.beans.BeansException;
 
 
 /**
- * Interface to be implemented by dynamic (reloadable)
- * Groovy beans, returned by the dynamicObject() method
- * of GroovyFactory.
+ * 
  * @author Rod Johnson
- * @version $Id: DynamicScript.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: Script.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
  */
-public interface DynamicScript {
+public interface Script {
 	
-	void reload() throws GroovyScriptException;
+	/**
+	 * Resource as a String specifying resource location.
+	 * @return
+	 */
+	String getResourceString(); 
 	
-	int getLoads();
+	Object createObject() throws BeansException;
 	
-	long getLastReloadMillis();
+	boolean isChanged();
 	
-	String getClassName();
+	long getLastReloadTime(); 
 
 }

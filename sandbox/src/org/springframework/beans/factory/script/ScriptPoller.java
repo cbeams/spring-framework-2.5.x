@@ -12,25 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script;
 
-import java.io.IOException;
+import org.springframework.beans.factory.dynamic.AbstractPoller;
 
 /**
- * 
+ * Object to run in the background polling for file
+ * modifications. Works only if we can get to a File--
+ * probably won't work in a Jar.
  * @author Rod Johnson
- * @version $Id: ScriptNotFoundException.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14
+ *          16:20:14 trisberg Exp $
  */
-public class ScriptNotFoundException extends GroovyScriptException {
-	
-	public ScriptNotFoundException(String mesg, IOException ex) {
-		super(mesg, ex);
-	}
-	
-	public ScriptNotFoundException(String mesg) {
-		super(mesg, null);
+public class ScriptPoller extends AbstractPoller {
+
+	public ScriptPoller(DynamicScript script) {
+		super(script);
 	}
 
+	protected boolean isDirty() {
+		return ((DynamicScript) getDynamicObject()).isChanged();
+	}
 }

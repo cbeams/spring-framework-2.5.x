@@ -14,12 +14,15 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.target.HotSwappableTargetSource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -27,7 +30,7 @@ import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Introduction interceptor that provides DynamicScript
- * implementation for all Groovy objects.
+ * implementation for dynamic objects.
  * <br>This class also handles reloads through implementing
  * the BeanFactoryAware and BeanNameAware interfaces, which will
  * cause it to receive callbacks by the BeanFactory.
@@ -35,12 +38,12 @@ import org.springframework.beans.factory.DisposableBean;
  * if the pollIntervalSeconds constructor argument is
  * positive.
  * @author Rod Johnson
- * @version $Id: DynamicScriptInterceptor.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
+ * @version $Id: DynamicObjectInterceptor.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
  */
-class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
-		implements BeanFactoryAware, BeanNameAware, DynamicScript, DisposableBean {
+public class DynamicObjectInterceptor extends DelegatingIntroductionInterceptor
+		implements BeanFactoryAware, BeanNameAware, DisposableBean, DynamicObject {
 	
-	protected final static Log log = LogFactory.getLog(DynamicScriptInterceptor.class);
+	protected final Log log = LogFactory.getLog(getClass());
 
 	/**
 	 * Target used to wrap the Groovy object,
@@ -57,20 +60,62 @@ class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
 	
 	private String beanName;
 	
-	private String className;
 	
 	private int loads = 1;
 	
 	private int pollIntervalSeconds;
 	
-	private ScriptReloader reloader;
+	private AbstractPoller reloader;
 	
 	private long lastReloadMillis = System.currentTimeMillis();
 	
-	public DynamicScriptInterceptor(String className, HotSwappableTargetSource targetSource, int pollIntervalSeconds) {
-		this.className = className;
+	public DynamicObjectInterceptor(HotSwappableTargetSource targetSource, int pollIntervalSeconds) {
 		this.targetSource = targetSource;
 		this.pollIntervalSeconds = pollIntervalSeconds;
+		
+		if (pollIntervalSeconds > 0) {
+			log.info("Will poll for modifications every " + pollIntervalSeconds + " seconds");
+			reloader = createPoller();//this, pollIntervalSeconds);
+		}
+	}
+	
+	public DynamicObjectInterceptor(Object object, int pollIntervalSeconds) {
+		this(new HotSwappableTargetSource(object), pollIntervalSeconds);
+	}
+	
+	/**
+	 * Create a proxy using this advice
+	 * @return
+	 */
+	public Object createProxy() {
+		ProxyFactory pf = new ProxyFactory();
+		
+		// Force the use of CGLIB
+		pf.setProxyTargetClass(true);
+		
+		// Set the HotSwappableTargetSource
+		pf.setTargetSource(this.targetSource);
+		
+		// Add the DynamicScript introduction
+		pf.addAdvisor(new DefaultIntroductionAdvisor(this));
+		
+		Object wrapped = pf.getProxy();		
+		return wrapped;
+	}
+	
+	/**
+	 * No polling if this returns null
+	 * @return
+	 */
+	protected AbstractPoller createPoller() {
+		return null;
+	}
+	
+	public void destroy() {
+		// OR STOP TIMER?
+		if (reloader != null) {
+			reloader.cancel();
+		}
 	}
 	
 	public void setBeanFactory(BeanFactory owningFactory) {
@@ -85,53 +130,51 @@ class DynamicScriptInterceptor extends DelegatingIntroductionInterceptor
 		this.beanName = beanName;
 		logger.info("Configuring dynamic reloadable Groovy bean with name '" + beanName + "'");
 		
-		if (pollIntervalSeconds > 0) {
-			log.info("Will poll for modifications every " + pollIntervalSeconds + " seconds");
-			reloader = new ScriptReloader(this, pollIntervalSeconds);
-		}
+		
 	}
 	
-	public void destroy() {
-		// OR STOP TIMER?
-		if (reloader != null) {
-			reloader.cancel();
-		}
-	}
+	
 	
 	/**
-	 * @see org.springframework.beans.factory.groovy.DynamicScript#reload()
+	 * @see org.springframework.beans.factory.script.DynamicScript#refresh()
 	 */
-	public void reload() throws GroovyScriptException {
+	public void refresh() throws BeansException {
 		//System.out.println(owningFactory);		
 		
 		long startTime = System.currentTimeMillis();
 		
+		// TODO use args?
+		// arg 1 must be given? conflict with parameters!??
 		Object newInstance = owningFactory.getBean(beanName);
 		
 		this.targetSource.swap(newInstance);
 		long et = System.currentTimeMillis() - startTime;
 		
-		logger.info("RELOADED dynamic Groovy bean with name '" + beanName + "' in " + et + "ms");
+		logger.info("RELOADED dynamic bean with name '" + beanName + "' in " + et + "ms");
 		
 		++loads;
 		this.lastReloadMillis = System.currentTimeMillis();
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.groovy.DynamicScript#getLoads()
+	 * @see org.springframework.beans.factory.script.DynamicScript#getLoads()
 	 */
 	public int getLoads() {
 		return loads;
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.groovy.DynamicScript#getLastReloadMillis()
+	 * @see org.springframework.beans.factory.script.DynamicScript#getLastRefreshMillis()
 	 */
-	public long getLastReloadMillis() {
+	public long getLastRefreshMillis() {
 		return lastReloadMillis;
 	}
 
-	public String getClassName() {
-		return className;
+	/**
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getPollIntervalSeconds()
+	 */
+	public int getPollIntervalSeconds() {
+		return pollIntervalSeconds;
 	}
+
 }
