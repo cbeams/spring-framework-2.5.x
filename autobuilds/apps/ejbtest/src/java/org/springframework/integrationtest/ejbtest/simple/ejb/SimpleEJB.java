@@ -30,14 +30,23 @@ import org.springframework.integrationtest.ejbtest.Constants;
 
 /**
  * <p>Simple test EJB.</p>
+ *
+ * <p>Note for XDoclet users. XDoclet is not smart enough to see that this class's
+ * superclass implements SessionBean. If you are using XDoclet (not the case here,
+ * this class would also have to directly implement SessionBean or XDoclet will
+ * complain! Additionally, XDoclet is not smart enough to see the superclass
+ * implements ejbCreate, so it will create its own empty ejbCreate method in the
+ * final EJB class it generates. This will override the one from the superclass,
+ * which means the superclass one will never get called, and the bean factory will
+ * never get loaded. Bad XDoclet! The solution is to yourself add an ejbCreate
+ * method (as per the example below) which just delegates to the superclass one,
+ * and then XDoclet will not generate its own.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleEJB.java,v 1.1 2004-05-19 12:16:29 colins Exp $
+ * @version $Id: SimpleEJB.java,v 1.2 2004-07-12 21:38:16 colins Exp $
  */
 public class SimpleEJB extends AbstractStatelessSessionBean
-		implements
-			SessionBean,
-			SimpleService {
+		implements SimpleService {
 
 	// --- statics
 	public static final String SESSION_FACTORY_ID = "sessionFactory";
