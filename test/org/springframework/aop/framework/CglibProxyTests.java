@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.14 2004-07-23 18:11:01 johnsonr Exp $
+ * @version $Id: CglibProxyTests.java,v 1.15 2004-07-24 14:08:55 robharrop Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
@@ -50,10 +50,10 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	
-	public void testSerializationSerializableTargetAndAdvice() throws Exception {
+	/*public void testSerializationSerializableTargetAndAdvice() throws Exception {
 		// TODO remove override--
 		// it's only to conceal superclass test that fails here
-	}
+	}*/
 	
 	public void testNullConfig() {
 		try {
