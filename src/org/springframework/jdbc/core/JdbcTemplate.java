@@ -20,25 +20,18 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.sun.rowset.CachedRowSetImpl;
-
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -47,8 +40,6 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetImpl;
-import org.springframework.util.NumberUtils;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -326,13 +317,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return query(sql, new RowMapperResultReader(rowMapper));
 	}
 
+	public Map queryForMap(String sql) throws DataAccessException {
+		return (Map) queryForObject(sql, new ColumnMapRowMapper());
+	}
+
 	public Object queryForObject(String sql, RowMapper rowMapper) throws DataAccessException {
 		List results = query(sql, rowMapper);
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
 	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
-		return query(sql, new ObjectResultSetExtractor(requiredType));
+		return queryForObject(sql, new SingleColumnRowMapper(requiredType));
 	}
 
 	public long queryForLong(String sql) throws DataAccessException {
@@ -345,8 +340,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
+	public List queryForList(String sql, Class elementType) throws DataAccessException {
+		return query(sql, new SingleColumnRowMapper(elementType));
+	}
+
 	public List queryForList(String sql) throws DataAccessException {
-		return (List) query(sql, new ListResultSetExtractor());
+		return query(sql, new ColumnMapRowMapper());
 	}
 
 	public SqlRowSet queryForRowSet(String sql) throws DataAccessException {
@@ -511,7 +510,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return query(psc, null, rse);
 	}
 
-	public Object query(final String sql, final PreparedStatementSetter pss, final ResultSetExtractor rse)
+	public Object query(String sql, PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
@@ -532,17 +531,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (List) query(psc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public List query(String sql, final PreparedStatementSetter pss, final RowCallbackHandler rch)
+	public List query(String sql, PreparedStatementSetter pss, final RowCallbackHandler rch)
 			throws DataAccessException {
 		return (List) query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
-	public List query(String sql, final Object[] args, final int[] argTypes, RowCallbackHandler rch)
+	public List query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
 			throws DataAccessException {
 		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
-	public List query(String sql, final Object[] args, RowCallbackHandler rch)
+	public List query(String sql, Object[] args, RowCallbackHandler rch)
 			throws DataAccessException {
 		return query(sql, new ArgPreparedStatementSetter(args), rch);
 	}
@@ -569,26 +568,30 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, RowMapper rowMapper)
 			throws DataAccessException {
-		List results = query(sql, args, argTypes, rowMapper);
+		List results = query(sql, args, argTypes, new RowMapperResultReader(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) throws DataAccessException {
-		List results = query(sql, args, rowMapper);
+		List results = query(sql, args, new RowMapperResultReader(rowMapper, 1));
 		return DataAccessUtils.requiredUniqueResult(results);
 	}
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
 			throws DataAccessException {
-		return query(sql,
-				new ArgTypePreparedStatementSetter(args, argTypes),
-				new ObjectResultSetExtractor(requiredType));
+		return queryForObject(sql, args, argTypes, new SingleColumnRowMapper(requiredType));
 	}
 
 	public Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException {
-		return query(sql,
-				new ArgPreparedStatementSetter(args),
-				new ObjectResultSetExtractor(requiredType));
+		return queryForObject(sql, args, new SingleColumnRowMapper(requiredType));
+	}
+
+	public Map queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException {
+		return (Map) queryForObject(sql, args, argTypes, new ColumnMapRowMapper());
+	}
+
+	public Map queryForMap(String sql, Object[] args) throws DataAccessException {
+		return (Map) queryForObject(sql, args, new ColumnMapRowMapper());
 	}
 
 	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
@@ -596,7 +599,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.longValue() : 0);
 	}
 
-	public long queryForLong(String sql, final Object[] args) throws DataAccessException {
+	public long queryForLong(String sql, Object[] args) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, Number.class);
 		return (number != null ? number.longValue() : 0);
 	}
@@ -606,33 +609,34 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
+	public int queryForInt(String sql, Object[] args) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, Number.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
+	public List queryForList(String sql, Object[] args, int[] argTypes, Class elementType)
+			throws DataAccessException {
+		return query(sql, args, argTypes, new SingleColumnRowMapper(elementType));
+	}
+
+	public List queryForList(String sql, final Object[] args, Class elementType) throws DataAccessException {
+		return query(sql, args, new SingleColumnRowMapper(elementType));
+	}
+
 	public List queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return (List) query(sql,
-				new ArgTypePreparedStatementSetter(args, argTypes),
-				new ListResultSetExtractor());
+		return query(sql, args, argTypes, new ColumnMapRowMapper());
 	}
 
 	public List queryForList(String sql, final Object[] args) throws DataAccessException {
-		return (List) query(sql,
-				new ArgPreparedStatementSetter(args),
-				new ListResultSetExtractor());
+		return query(sql, args, new ColumnMapRowMapper());
 	}
 
 	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
-		return (SqlRowSet) query(sql,
-				new ArgTypePreparedStatementSetter(args, argTypes),
-				new SqlRowSetResultSetExtractor());
+		return (SqlRowSet) query(sql, args, argTypes, new SqlRowSetResultSetExtractor());
 	}
 
 	public SqlRowSet queryForRowSet(String sql, final Object[] args) throws DataAccessException {
-		return (SqlRowSet) query(sql,
-				new ArgPreparedStatementSetter(args),
-				new SqlRowSetResultSetExtractor());
+		return (SqlRowSet) query(sql, args, new SqlRowSetResultSetExtractor());
 	}
 
 	protected int update(final PreparedStatementCreator psc, final PreparedStatementSetter pss)
@@ -682,8 +686,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				generatedKeys.clear();
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {
-					ListResultSetExtractor lrse = new ListResultSetExtractor();
-					generatedKeys.addAll((List) lrse.extractData(keys));
+					ColumnMapRowMapper rowMapper = new ColumnMapRowMapper();
+					RowMapperResultReader resultReader = new RowMapperResultReader(rowMapper, 1);
+					while (keys.next()) {
+						resultReader.processRow(keys);
+					}
+					generatedKeys.addAll(resultReader.getResults());
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("SQL update affected " + rows + " rows and returned " + generatedKeys.size() + " keys");
@@ -926,25 +934,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	/**
-	 * Create a SqlRowSet that wraps the given ResultSet,
-	 * representing its data in a disconnected fashion.
-	 * <p>This implementation creates a Spring SqlRowSetImpl instance
-	 * that wraps an instance of Sun's CachedRowSetImpl class.
-	 * Can be overridden to use a different implementation.
-	 * @param rs the original ResultSet (connected)
-	 * @return the disconnected SqlRowSet
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see #queryForRowSet
-	 * @see org.springframework.jdbc.support.rowset.SqlRowSetImpl
-	 * @see com.sun.rowset.CachedRowSetImpl
-	 */
-	protected SqlRowSet createRowSet(ResultSet rs) throws SQLException {
-		CachedRowSetImpl rowSet = new CachedRowSetImpl();
-		rowSet.populate(rs);
-		return new SqlRowSetImpl(rowSet);
-	}
-
-	/**
 	 * Throw an SQLWarningException if we're not ignoring warnings.
 	 * @param warning warning from current statement. May be null,
 	 * in which case this method does nothing.
@@ -973,22 +962,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		else {
 			return null;
 		}
-	}
-
-	/**
-	 * Retrieve a standard JDBC object from a ResultSet using the getObject method.
-	 * This method includes a "hack" to get around Oracle returning a non standard
-	 * object for their TIMESTAMP datatype.
-	 * @param rs is the ResultSet holding the data
-	 * @param index is the column index
-	 * @return the Object returned
-	 */
-	private static Object getJdbcObject(ResultSet rs, int index) throws SQLException {
-		Object obj = rs.getObject(index);
-		if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
-			obj = rs.getTimestamp(index);
-		}
-		return obj;
 	}
 
 
@@ -1119,94 +1092,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			else {
 				return null;
 			}
-		}
-	}
-
-
-	/**
-	 * ResultSetExtractor implementation that returns single result object.
-	 */
-	private static class ObjectResultSetExtractor implements ResultSetExtractor {
-
-		private final Class requiredType;
-
-		public ObjectResultSetExtractor(Class requiredType) {
-			this.requiredType = requiredType;
-		}
-
-		public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
-			if (!rs.next()) {
-				throw new IncorrectResultSizeDataAccessException("Expected single row but found none", 1, 0);
-			}
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int nrOfColumns = rsmd.getColumnCount();
-			if (nrOfColumns != 1) {
-				throw new IncorrectResultSizeDataAccessException(
-						"Expected single column but found " + nrOfColumns, 1, nrOfColumns);
-			}
-			Object result = getJdbcObject(rs, 1);
-			if (rs.next()) {
-				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
-			}
-			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-				if (String.class.equals(this.requiredType)) {
-					result = result.toString();
-				}
-				else if (Number.class.isAssignableFrom(this.requiredType) && Number.class.isInstance(result)) {
-					try {
-						result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);
-					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchDataAccessException(ex.getMessage());
-					}
-				}
-				else {
-					throw new TypeMismatchDataAccessException(
-							"Result object with column type '" + rsmd.getColumnTypeName(1) +
-							"' and value [" + result + "] is of type [" + rsmd.getColumnClassName(1) +
-							"] and could not be converted to required type [" + this.requiredType.getName() + "]");
-				}
-			}
-			return result;
-		}
-	}
-
-
-	/**
-	 * ResultSetExtractor implementation that returns an ArrayList of HashMaps.
-	 */
-	private static class ListResultSetExtractor implements ResultSetExtractor {
-
-		public Object extractData(ResultSet rs) throws SQLException {
-			List listOfRows = new ArrayList();
-			ResultSetMetaData rsmd = null;
-			int numberOfColumns = -1;
-			while (rs.next()) {
-				if (rsmd == null) {
-					// Lazily initialize meta data, to avoid unnecessary fetching
-					// in case of an empty result set.
-					rsmd = rs.getMetaData();
-					numberOfColumns = rsmd.getColumnCount();
-				}
-				Map mapOfColValues = CollectionFactory.createLinkedMapIfPossible(numberOfColumns);
-				for (int i = 1; i <= numberOfColumns; i++) {
-					Object o = getJdbcObject(rs, i);
-					mapOfColValues.put(rsmd.getColumnName(i), o);
-				}
-				listOfRows.add(mapOfColValues);
-			}
-			return listOfRows;
-		}
-	}
-
-
-	/**
-	 * ResultSetExtractor implementation that returns a SqlRowSet.
-	 */
-	private class SqlRowSetResultSetExtractor implements ResultSetExtractor {
-
-		public Object extractData(ResultSet rs) throws SQLException {
-			return createRowSet(rs);
 		}
 	}
 

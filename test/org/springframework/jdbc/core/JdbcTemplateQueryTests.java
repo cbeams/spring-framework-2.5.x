@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
@@ -47,14 +48,14 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
+		ctrlResultSetMetaData.setReturnValue(1, 2);
 		mockResultSetMetaData.getColumnName(1);
 		ctrlResultSetMetaData.setReturnValue("age", 2);
 
 		ctrlResultSet = MockControl.createControl(ResultSet.class);
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 2);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getObject(1);
@@ -194,7 +195,169 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlStatement.verify();
 	}
 
-	public void testQueryForObject() throws Exception {
+	public void testQueryForListWithIntegerElement() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(11));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(Statement.class);
+		mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		List li = template.queryForList(sql, Integer.class);
+		assertEquals("All rows returned", 1, li.size());
+		assertEquals("Element is Integer", 11, ((Integer) li.get(0)).intValue());
+
+		ctrlResultSetMetaData.verify();
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForMapWithSingleRowAndColumn() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+		mockResultSetMetaData.getColumnName(1);
+		ctrlResultSetMetaData.setReturnValue("age", 1);
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(11));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(Statement.class);
+		mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		Map map = template.queryForMap(sql);
+		assertEquals("Wow is Integer", 11, ((Integer) map.get("age")).intValue());
+
+		ctrlResultSetMetaData.verify();
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+
+	public void testQueryForObjectWithRowMapper() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		Statement mockStatement;
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(22);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(Statement.class);
+		mockStatement = (Statement) ctrlStatement.getMock();
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		Object o = template.queryForObject(sql, new RowMapper() {
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new Integer(rs.getInt(1));
+			}
+		});
+		assertTrue("Correct result type", o instanceof Integer);
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForObjectWithInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 
 		MockControl ctrlResultSetMetaData;
@@ -424,14 +587,14 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
+		ctrlResultSetMetaData.setReturnValue(1, 2);
 		mockResultSetMetaData.getColumnName(1);
 		ctrlResultSetMetaData.setReturnValue("age", 2);
 
 		ctrlResultSet = MockControl.createControl(ResultSet.class);
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		ctrlResultSet.setReturnValue(mockResultSetMetaData, 2);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getObject(1);
@@ -578,7 +741,174 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlStatement.verify();
 	}
 
-	public void testQueryForObjectWithArgs() throws Exception {
+	public void testQueryForListWithArgsAndIntegerElementAndSingleRowAndColumn() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		PreparedStatement mockStatement;
+
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(11));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		mockStatement = (PreparedStatement) ctrlStatement.getMock();
+		mockStatement.setObject(1, new Integer(3));
+		ctrlStatement.setVoidCallable();
+		mockStatement.executeQuery();
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		List li = template.queryForList(sql, new Object[] {new Integer(3)}, Integer.class);
+		assertEquals("All rows returned", 1, li.size());
+		assertEquals("First row is Integer", 11, ((Integer) li.get(0)).intValue());
+
+		ctrlResultSetMetaData.verify();
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForMapWithArgsAndSingleRowAndColumn() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
+
+		MockControl ctrlResultSetMetaData;
+		ResultSetMetaData mockResultSetMetaData;
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		PreparedStatement mockStatement;
+
+		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
+		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+		mockResultSetMetaData.getColumnName(1);
+		ctrlResultSetMetaData.setReturnValue("age", 1);
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getObject(1);
+		ctrlResultSet.setReturnValue(new Integer(11));
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		mockStatement = (PreparedStatement) ctrlStatement.getMock();
+		mockStatement.setObject(1, new Integer(3));
+		ctrlStatement.setVoidCallable();
+		mockStatement.executeQuery();
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSetMetaData.replay();
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		Map map = template.queryForMap(sql, new Object[] {new Integer(3)});
+		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
+
+		ctrlResultSetMetaData.verify();
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForObjectWithArgsAndRowMapper() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+
+		MockControl ctrlResultSet;
+		ResultSet mockResultSet;
+		MockControl ctrlStatement;
+		PreparedStatement mockStatement;
+
+		ctrlResultSet = MockControl.createControl(ResultSet.class);
+		mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(22);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		mockStatement = (PreparedStatement) ctrlStatement.getMock();
+		mockStatement.setObject(1, new Integer(3));
+		ctrlStatement.setVoidCallable();
+		mockStatement.executeQuery();
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockStatement);
+
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		Object o = template.queryForObject(sql, new Object[] {new Integer(3)}, new RowMapper() {
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new Integer(rs.getInt(1));
+			}
+		});
+		assertTrue("Correct result type", o instanceof Integer);
+
+		ctrlResultSet.verify();
+		ctrlStatement.verify();
+	}
+
+	public void testQueryForObjectWithArgsAndInteger() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 
 		MockControl ctrlResultSetMetaData;
