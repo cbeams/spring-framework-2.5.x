@@ -65,7 +65,7 @@ public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 			beanFactoryPath = (String) (new JndiTemplate()).lookup(factoryKey);
 			logger.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
 			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath,
-																												 BEAN_FACTORY_PATH_DELIMITERS, true, true);
+					BEAN_FACTORY_PATH_DELIMITERS, true, true);
 			return createBeanFactory(paths);
 		}
 		catch (NamingException ex) {
