@@ -26,9 +26,6 @@
     <classpathentry exported="true" kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
     <classpathentry kind="src" path="test"/>
     <classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/mockobjects/mockobjects-0.07-core.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/mockobjects/mockobjects-0.07-j1.3-j2ee1.3.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/mockobjects/mockobjects-0.07-jdk1.3.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
     <classpathentry kind="src" path="load"/>
     <classpathentry kind="src" path="sandbox"/>
@@ -43,5 +40,8 @@
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-lang.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-logging.jar"/>
     <classpathentry kind="lib" path="lib/j2ee/mail.jar"/>
+    <classpathentry kind="lib" path="lib/mockobjects/mockobjects-0.07-core.jar"/>
+    <classpathentry kind="lib" path="lib/mockobjects/mockobjects-0.07-j1.3-j2ee1.3.jar"/>
+    <classpathentry kind="lib" path="lib/mockobjects/mockobjects-0.07-jdk1.3.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
