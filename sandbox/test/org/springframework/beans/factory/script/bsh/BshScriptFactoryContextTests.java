@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.script.bsh;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.script.AbstractScriptFactoryTests;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -31,34 +32,18 @@ public class BshScriptFactoryContextTests extends AbstractScriptFactoryTests {
 		applicationContext = new ClassPathXmlApplicationContext(SIMPLE_XML);
 	}
 	
-//	public void testStringProperty() {
-//		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-//		Hello hello = (Hello) ac.getBean("property");
-//		assertEquals("hello world property", hello.sayHello());
-//		System.out.println(((DynamicScript) hello).getResourceString() );
+//	public void testStringPropertySingleton() {
+//		System.err.println("beanshell only provides dynamic proxies, so we can't populate properties unless they're on interfaces");
 //	}
-//	
-//	public void testDependencyOnReloadedGroovyBean() throws Exception {
-//		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-//		Hello delegatingHello = (Hello) ac.getBean("dependsOnProperty");
-//		assertEquals("hello world property", delegatingHello.sayHello());
-//		
-//		DynamicScript script = (DynamicScript) ac.getBean("property");
-//		assertEquals(1, script.getLoads());
-//		script.refresh();
-//		assertEquals(2, script.getLoads());
-//		
-//		// Reference still works
-//		assertEquals("hello world property", delegatingHello.sayHello());
-//		
-//		// Give reloading a chance
-//		// We need to change this file while the test is running :-)
-//		//Thread.sleep(60 * 1000);
-//		
-//		// This assertion only works if the file is changed
-//		// and reloaded
-//		//assertTrue("Reloaded in background thread", 2 < script.getLoads());
-//		
-//	}
+	
+	public void testInterfacesRequired() {
+		try {
+			applicationContext.getBean("noInterfaces");
+			fail("Interfaces are required");
+		}
+		catch (BeansException ex) {
+			ex.printStackTrace();
+		}
+	}
 
 }

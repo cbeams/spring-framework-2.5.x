@@ -34,4 +34,11 @@ public class BshScriptFactory extends AbstractScriptFactory {
 		return new BshScript(location, this);
 	}
 
+	/**
+	 * @see org.springframework.beans.factory.script.AbstractScriptFactory#requiresConfigInterface()
+	 */
+	protected boolean requiresConfigInterface() {
+		return true;
+	}
+
 }

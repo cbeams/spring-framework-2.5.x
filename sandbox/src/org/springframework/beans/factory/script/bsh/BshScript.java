@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.script.AbstractScript;
 import org.springframework.beans.factory.script.CompilationException;
 import org.springframework.beans.factory.script.ScriptContext;
@@ -50,17 +52,29 @@ public class BshScript extends AbstractScript {
 			
 			bsh.eval(new InputStreamReader(is));
 			
-			if (getInterfaces().length != 1) {
-				throw new BeanDefinitionStoreException("bsh script must implement exactly one interface");
+			// TODO pull up into createProxy() method (not needed for Groovy)
+			ProxyFactory pf = new ProxyFactory();
+			for (int i = 0; i < getInterfaces().length; i++) {
+				pf.addInterface(getInterfaces()[i]);
 			}
 			
-			// Get a reference to the script object (implementing the interface)
-			return bsh.eval("return (" + getInterfaces()[0].getName() + ")this");
+			// We must use delegation for all but the 0th interface
+			// The target in each case will be the script case to the required interface
+			// This will include the config interface
+			for (int i = 1; i < getInterfaces().length; i++) {
+				DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(bsh.eval("return (" + getInterfaces()[i].getName() + ")this"));
+				pf.addAdvisor(new DefaultIntroductionAdvisor(dii, getInterfaces()[i]));
+			}
+			
+			// Don't need an introduction for the 0th interface
+			pf.setTarget(bsh.eval("return (" + getInterfaces()[0].getName() + ") this"));
+			
+			log.info("Internal proxy for bsh scrip is " + pf.toProxyConfigString());
+			return pf.getProxy();
 		} 
 		catch (EvalError ex) {
 			throw new CompilationException("bsh error", ex);
-		}
-
+		}				
 	}
 
 }

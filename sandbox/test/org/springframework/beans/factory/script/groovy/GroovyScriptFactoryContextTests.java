@@ -56,14 +56,6 @@ public class GroovyScriptFactoryContextTests extends AbstractScriptFactoryTests 
 		assertEquals("propertyPrototype", hello2.sayHello());
 	}
 	
-	public void testStringPropertySingleton() {
-		Hello hello = (Hello) applicationContext.getBean("propertySingleton");
-		Advised a = (Advised) hello;
-		System.err.println(a.toProxyConfigString());
-		assertEquals("hello world property", hello.sayHello());
-		System.out.println(((DynamicScript) hello).getResourceString() );
-	}
-	
 	public void testCanCastToGroovyObject() {		
 		GroovyObject groovyObj = (GroovyObject) applicationContext.getBean("propertySingleton");
 		GroovyObject groovyObj2 = (GroovyObject) applicationContext.getBean("propertyPrototype");
@@ -99,6 +91,12 @@ public class GroovyScriptFactoryContextTests extends AbstractScriptFactoryTests 
 		//assertTrue("Reloaded in background thread", 3 < script.getLoads());
 		
 		//assertEquals("hello world property2", delegatingHello.sayHello());
+	}
+	
+	public void testScriptDependsOnJava() throws Throwable {
+		
+		Hello delegatingHello = (Hello) applicationContext.getBean("scriptDependsOnJava");
+		assertEquals("hello world property", delegatingHello.sayHello());
 	}
 
 }

@@ -59,9 +59,53 @@
 		<!-- Property on created Groovy object -->
 		<property name="message"><value>propertyPrototype</value></property>
 	</bean>
+	<bean id="twoInterfaces"
+		singleton="true"
+		factory-bean="groovyScriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				class TwoInterfaces implements org.springframework.beans.factory.script.Hello, org.springframework.aop.framework.TimeStamped {
+
+				String sayHello() {
+					return "hello world two interfaces"
+				}
+				
+				long getTimeStamp() {
+					return 1000
+				}
+			} 
+			</value>
+		</constructor-arg>
+	</bean>
+	
+	
+	<bean id="scriptDependsOnJava"
+		singleton="true"
+		factory-bean="groovyScriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				class D implements org.springframework.beans.factory.script.Hello {
+				
+				property delegate
+
+				String sayHello() {
+					System.out.println("this is " + this + "; delegate is " + delegate)
+					return delegate.sayHello()
+				}
+			} 
+			</value>
+		</constructor-arg>
+		
+		<!-- Property on created Groovy object -->
+		<property name="delegate"><ref local="dependsOnProperty"></ref></property>
+	</bean>
 	
 	<bean id="dependsOnProperty" 
-		class="org.springframework.beans.factory.script.groovy.DelegatingHello">
+		class="org.springframework.beans.factory.script.DelegatingHello">
 		<!-- Depends on dynamic hello -->
 		<property name="hello"><ref local="propertySingleton"></ref></property>
 	</bean>

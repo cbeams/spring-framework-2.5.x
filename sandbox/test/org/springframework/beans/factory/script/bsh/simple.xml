@@ -24,6 +24,54 @@
 		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
 	</bean>
 	
+	<bean id="propertySingleton"
+		singleton="true"
+		factory-bean="scriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				String message;
+				public void setMessage(String pmessage) {
+					message = pmessage;
+					System.out.println("Message set is " + message);
+					
+				}
+				String sayHello() {
+				System.out.println("Still here...");
+				   return message;
+				}
+			</value>
+		</constructor-arg>
+		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
+		
+		<!-- Property on created script object -->
+		<property name="message"><value>hello world property</value></property>
+	</bean>
+	
+	<bean id="twoInterfaces"
+		singleton="true"
+		factory-bean="scriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				String sayHello() {
+					return "hello world two interfaces";
+				}
+				long getTimeStamp() {
+				    return 1000;
+				}
+			</value>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<list>
+			<value>org.springframework.beans.factory.script.Hello</value>
+			<value>org.springframework.aop.framework.TimeStamped</value>
+			</list>
+		</constructor-arg>
+	</bean>
+	
 	<bean id="bad"
 		factory-bean="scriptFactory"
 		factory-method="create"
@@ -33,6 +81,15 @@
 				complete and utter rubbish
 			</value></constructor-arg>
 		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
+	</bean>
+	
+	<!-- Invalid: must define interfaces -->
+	<bean id="noInterfaces"
+		singleton="false"
+		factory-bean="scriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0"><value>classpath:/org/springframework/beans/factory/script/bsh/SimpleHello.bsh</value></constructor-arg>
 	</bean>
 	
 	

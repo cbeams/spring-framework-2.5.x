@@ -14,9 +14,8 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.script.groovy;
+package org.springframework.beans.factory.script;
 
-import org.springframework.beans.factory.script.Hello;
 
 /**
  * 

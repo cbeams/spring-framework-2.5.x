@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.script;
 
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.TimeStamped;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.dynamic.DynamicObject;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -55,6 +57,15 @@ public class AbstractScriptFactoryTests extends TestCase {
 		assertSame(hello, hello2);
 		assertTrue("Is dynamic script", hello instanceof DynamicScript);
 	}
+	
+	public void testTwoInterfaces() {		
+		Hello hello = (Hello) applicationContext.getBean("twoInterfaces");
+		assertEquals("hello world two interfaces", hello.sayHello());
+		
+		TimeStamped ts = (TimeStamped) hello;
+		assertEquals(1000, ts.getTimeStamp());
+		assertTrue("Is dynamic script", hello instanceof DynamicScript);
+	}
 
 	public void testInlineScriptDefinition() {
 		Hello hello = (Hello) applicationContext.getBean("inline");
@@ -64,6 +75,14 @@ public class AbstractScriptFactoryTests extends TestCase {
 		System.err.println(((DynamicScript) hello).getResourceString());
 		DynamicObject dobj = (DynamicObject) hello;
 		assertFalse("An inline script can't be modified", dobj.isModified());
+	}
+
+	public void testStringPropertySingleton() {
+		Hello hello = (Hello) applicationContext.getBean("propertySingleton");
+		Advised a = (Advised) hello;
+		System.err.println(a.toProxyConfigString());
+		assertEquals("hello world property", hello.sayHello());
+		System.out.println(((DynamicScript) hello).getResourceString() );
 	}
 
 }

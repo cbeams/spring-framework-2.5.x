@@ -40,5 +40,12 @@ public class GroovyScriptFactory extends AbstractScriptFactory {
 	protected Script createScript(String location) throws BeansException {
 		return new GroovyScript(location, this);
 	}
+	
+	/**
+	 * @see org.springframework.beans.factory.script.AbstractScriptFactory#requiresConfigInterface()
+	 */
+	protected boolean requiresConfigInterface() {
+		return false;
+	}
 
 }
