@@ -59,7 +59,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.29 2004-06-30 15:48:37 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.30 2004-07-02 09:20:51 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -149,9 +149,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Set if a rollback should be performed on failure of the commit call.
+	 * Set if doRollback should be performed on failure of the doCommit call.
 	 * Typically not necessary and thus to be avoided as it can override the
 	 * commit exception with a subsequent rollback exception. Default is false.
+	 * @see #doCommit
+	 * @see #doRollback
 	 */
 	public void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
 		this.rollbackOnCommitFailure = rollbackOnCommitFailure;
@@ -164,6 +166,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		return rollbackOnCommitFailure;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of PlatformTransactionManager
+	//---------------------------------------------------------------------
 
 	/**
 	 * This implementation of getTransaction handles propagation behavior.
@@ -222,7 +228,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 				DefaultTransactionStatus status = newTransactionStatus(transaction, true, newSynchronization,
 																															 definition.isReadOnly(), debugEnabled, null);
-				status.createAndHoldSavepoint();
+				if (useSavepointForNestedTransaction()) {
+					status.createAndHoldSavepoint();
+				}
+				else {
+					doBegin(transaction, definition);
+				}
 				return status;
 			}
 			else {
@@ -565,6 +576,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 
+	//---------------------------------------------------------------------
+	// Template methods to be implemented in subclasses
+	//---------------------------------------------------------------------
+
 	/**
 	 * Return a current transaction object, i.e. a JTA UserTransaction.
 	 * @return the current transaction object
@@ -582,6 +597,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws TransactionException in case of system errors
 	 */
 	protected abstract boolean isExistingTransaction(Object transaction) throws TransactionException;
+
+	/**
+	 * Return whether to use a savepoint for a nested transaction. Default is true,
+	 * which causes delegation to DefaultTransactionStatus for holding a savepoint.
+	 * <p>Subclasses can override this to return false, causing a further
+	 * invocation of doBegin despite an already existing transaction.
+	 * @see DefaultTransactionStatus#createAndHoldSavepoint
+	 * @see DefaultTransactionStatus#rollbackToHeldSavepoint
+	 * @see DefaultTransactionStatus#releaseHeldSavepoint
+	 * @see #doBegin
+	 */
+	protected boolean useSavepointForNestedTransaction() {
+		return true;
+	}
 
 	/**
 	 * Begin a new transaction with the given transaction definition.
@@ -660,9 +689,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Cleanup resources after transaction completion.
 	 * Called after doCommit and doRollback execution on any outcome.
 	 * Should not throw any exceptions but just issue warnings on errors.
+	 * <p>Default implementation does nothing.
 	 * @param transaction transaction object returned by doGetTransaction
 	 */
-	protected abstract void doCleanupAfterCompletion(Object transaction);
+	protected void doCleanupAfterCompletion(Object transaction) {
+	}
 
 
 	/**
