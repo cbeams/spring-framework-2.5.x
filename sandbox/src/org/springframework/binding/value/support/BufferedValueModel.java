@@ -17,6 +17,8 @@ package org.springframework.binding.value.support;
 
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
+import org.springframework.rules.Closure;
+import org.springframework.rules.closure.NoArgBlock;
 import org.springframework.util.ToStringBuilder;
 
 /**
@@ -172,20 +174,22 @@ public class BufferedValueModel extends AbstractValueModel implements
     }
 
     private void commitBufferedValueSilently() {
-        try {
-            wrappedModel.removeValueChangeListener(wrappedModelChangeHandler);
-            doBufferedValueCommit(bufferedValue);
-            this.bufferedValue = NO_VALUE;
-        }
-        finally {
-            wrappedModel.addValueChangeListener(wrappedModelChangeHandler);
-        }
+        doSilently(new NoArgBlock() {
+            protected void handle() {
+                doBufferedValueCommit(bufferedValue);
+                bufferedValue = NO_VALUE;
+            }
+        });
     }
 
     protected void doBufferedValueCommit(Object bufferedValue) {
         wrappedModel.setValue(bufferedValue);
     }
 
+    protected void doSilently(Closure block) {
+        updateSilently(wrappedModel, wrappedModelChangeHandler, block);
+    }
+    
     public final void revert() {
         if (logger.isDebugEnabled()) {
             logger.debug("[Reverting buffered value '" + getValue()

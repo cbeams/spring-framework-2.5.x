@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
+import org.springframework.binding.value.ValueModel;
+import org.springframework.rules.Closure;
 import org.springframework.util.DefaultObjectStyler;
 
 /**
@@ -94,6 +96,17 @@ public abstract class AbstractValueModel extends
     protected void fireValueChanged(Object oldValue, Object newValue) {
         fireValueChanged();
         firePropertyChange(VALUE_PROPERTY, oldValue, newValue);
+    }
+
+    protected void updateSilently(ValueModel valueModel,
+            ValueChangeListener changeHandler, Closure updateBlock) {
+        try {
+            valueModel.removeValueChangeListener(changeHandler);
+            updateBlock.call(null);
+        }
+        finally {
+            valueModel.addValueChangeListener(changeHandler);
+        }
     }
 
 }
