@@ -51,17 +51,21 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 		this.servletContext = servletContext;
 	}
 
-	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof ServletContextAware) {
+			if (this.servletContext == null) {
+				throw new IllegalStateException("Cannot satisfy ServletContextAware for bean '" +
+						beanName + "' because there is no ServletContext");
+			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setServletContext on ServletContextAware bean '" + name + "'");
+				logger.debug("Invoking setServletContext on ServletContextAware bean '" + beanName + "'");
 			}
 			((ServletContextAware) bean).setServletContext(this.servletContext);
 		}
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String name) {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
