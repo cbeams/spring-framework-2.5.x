@@ -110,7 +110,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	 * Create a new Cglib2AopProxy for the given config.
 	 *
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
-	 * exception in this case, rather than let a mysterious failure happen later.
+	 *                            exception in this case, rather than let a mysterious failure happen later.
 	 */
 	protected Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null) {
@@ -130,7 +130,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	/**
 	 * Set constructor arguments to use for creating the proxy.
 	 *
-	 * @param constructorArgs the constructor argument values
+	 * @param constructorArgs     the constructor argument values
 	 * @param constructorArgTypes the constructor argument types
 	 */
 	protected void setConstructorArguments(Object[] constructorArgs, Class[] constructorArgTypes) {
@@ -174,7 +174,11 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 			Callback[] callbacks = getCallbacks(rootClass);
 			enhancer.setCallbacks(callbacks);
-			enhancer.setInterceptDuringConstruction(false);
+
+			if(CglibUtils.canSkipConstructorInterception()) {
+				enhancer.setInterceptDuringConstruction(false);
+			}
+			
 			Class[] types = new Class[callbacks.length];
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
@@ -209,7 +213,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			throw new AspectException("Unexpected AOP exception", ex);
 		}
 	}
-
 
 	private Callback[] getCallbacks(Class rootClass) throws Exception {
 		// parameters used for optimisation choices
@@ -863,4 +866,22 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 	}
 
+	private static class CglibUtils {
+
+		private static boolean canSkipConstructorInterception;
+
+		static {
+			try {
+				Enhancer.class.getMethod("setInterceptDuringConstruction", new Class[]{boolean.class});
+				canSkipConstructorInterception = true;
+			}
+			catch (NoSuchMethodException ex) {
+				canSkipConstructorInterception = false;
+			}
+		}
+
+		public static boolean canSkipConstructorInterception() {
+			return canSkipConstructorInterception;
+		}
+	}
 }
