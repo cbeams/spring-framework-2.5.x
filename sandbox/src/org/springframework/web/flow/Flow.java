@@ -477,7 +477,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param suffix
 	 * @return
 	 */
-	protected String buildEditFlowId(String suffix) {
+	protected static String buildEditFlowId(String suffix) {
 		return EDIT + StringUtils.capitalize(suffix);
 	}
 
