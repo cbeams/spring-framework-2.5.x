@@ -30,7 +30,7 @@ import java.util.List;
  * @author Rod Johnson
  * @since 11.02.2004
  * @see #isMatch
- * @version $Id: NameMatchMethodPointcut.java,v 1.4 2004-07-26 15:37:27 johnsonr Exp $
+ * @version $Id: NameMatchMethodPointcut.java,v 1.5 2004-07-26 15:43:59 johnsonr Exp $
  */
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
@@ -67,11 +67,13 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	 * <b>NB:</b> This method does not work after the proxy is in
 	 * use, as advice chains will be cached.
 	 * @param name name of the additional method that will match
+	 * @return this pointcut to allow for multiple additions in one line
 	 */
-	public void addMethodName(String name) {
+	public NameMatchMethodPointcut addMethodName(String name) {
 		// TODO in a future release, consider a way of letting proxies
 		// cause advice changed events
 		this.mappedNames.add(name);
+		return this;
 	}
 	
 	public boolean matches(Method m, Class targetClass) {
