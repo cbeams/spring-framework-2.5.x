@@ -8,6 +8,10 @@ Changes in version 1.1 final (31.8.2004)
 
 Package org.springframework.beans
 * reworked BeanWrapperImpl's property-specific custom editor handling to allow registration for uninitialized subpaths
+* refined BeanWrapperImpl's "findCustomEditor" to consider editors registered for all path variations without index/key
+
+Package org.springframework.jdbc
+* added support for WebSphere 4 to WebSphereNativeJdbcExtractor, auto-detecting WebSphere 5 and 4 now
 
 Package org.springframework.orm
 * fixed SessionFactoryUtils' synchronization for JtaTransactionManager with a Hibernate TransactionManagerLookup
