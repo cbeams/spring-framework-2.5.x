@@ -1,4 +1,4 @@
-package org.springframework.context.config;
+package org.springframework.context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -37,8 +37,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	/**
 	 * Load or refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
-	 * @throws ApplicationContextException if the config cannot be loaded
-	 * @throws BeansException if the bean factory could not be initialized
+	 * @throws org.springframework.context.ApplicationContextException if the config cannot be loaded
+	 * @throws org.springframework.beans.BeansException if the bean factory could not be initialized
 	 */
 	void refresh() throws BeansException;
 
@@ -46,7 +46,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes disposing all cached singleton beans.
 	 * <p>Note: Does <i>not</i> invoke close on a parent context.
-	 * @throws ApplicationContextException if there were fatal errors
+	 * @throws org.springframework.context.ApplicationContextException if there were fatal errors
 	 */
 	void close() throws ApplicationContextException;
 

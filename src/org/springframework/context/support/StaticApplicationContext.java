@@ -3,7 +3,7 @@ package org.springframework.context.support;
 import java.util.Locale;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -63,14 +63,14 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	/**
 	 * Register a singleton bean with the default bean factory.
 	 */
-	public void registerSingleton(String name, Class clazz, PropertyValues pvs) throws BeansException {
+	public void registerSingleton(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
 		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
 	}
 
 	/**
 	 * Register a prototype bean with the default bean factory.
 	 */
-	public void registerPrototype(String name, Class clazz, PropertyValues pvs) throws BeansException {
+	public void registerPrototype(String name, Class clazz, MutablePropertyValues pvs) throws BeansException {
 		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
 	}
 

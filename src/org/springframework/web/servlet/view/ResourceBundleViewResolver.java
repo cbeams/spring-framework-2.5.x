@@ -15,7 +15,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.config.ContextResourceEditor;
+import org.springframework.context.support.ContextResourceEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.View;
 

@@ -11,7 +11,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 /**
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPathMapHandlerMapping.java,v 1.4 2004-01-14 07:39:07 jhoeller Exp $
+ * @version $Id: AbstractPathMapHandlerMapping.java,v 1.5 2004-02-04 17:35:03 jhoeller Exp $
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 	

@@ -15,13 +15,13 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATest;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.BeanThatListens;
-import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.24 2004-01-14 07:38:00 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.25 2004-02-04 17:30:51 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 

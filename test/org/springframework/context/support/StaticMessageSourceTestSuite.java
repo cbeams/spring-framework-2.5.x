@@ -13,9 +13,9 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATest;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.BeanThatListens;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 /**

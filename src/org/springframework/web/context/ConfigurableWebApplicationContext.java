@@ -2,7 +2,7 @@ package org.springframework.web.context;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Interface to be implemented by configurable web application contexts.

@@ -1,21 +1,20 @@
-package org.springframework.context.config;
-
-import java.beans.PropertyEditorSupport;
+package org.springframework.context.support;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ResourceEditor;
 
 /**
- * ApplicationContext-aware Editor for Resource descriptors.
+ * ApplicationContext-aware PropertyEditor for Resource descriptors.
  *
  * <p>Delegates to the ApplicationContext's getResource method for resolving
- * resource locations to Resource instances. Resource loading behavior is
+ * resource locations to Resource descriptors. Resource loading behavior is
  * specific to the context implementation.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see org.springframework.context.ApplicationContext#getResource
  */
-public class ContextResourceEditor extends PropertyEditorSupport {
+public class ContextResourceEditor extends ResourceEditor {
 
 	private final ApplicationContext applicationContext;
 
@@ -28,7 +27,8 @@ public class ContextResourceEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(this.applicationContext.getResource(text));
+		String resolvedPath = resolvePath(text);
+		setValue(this.applicationContext.getResource(resolvedPath));
 	}
 
 }

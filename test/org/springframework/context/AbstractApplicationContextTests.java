@@ -6,7 +6,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.LifecycleBean;
-import org.springframework.context.config.ConfigurableApplicationContext;
 
 /**
  * @author Rod Johnson

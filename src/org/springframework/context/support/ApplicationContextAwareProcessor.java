@@ -1,4 +1,4 @@
-package org.springframework.context.config;
+package org.springframework.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
