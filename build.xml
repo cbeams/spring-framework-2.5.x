@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.43 2004-03-15 17:45:48 jhoeller Exp $
+    $Id: build.xml,v 1.44 2004-03-21 23:02:25 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -337,7 +337,7 @@
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/ibatis/**"/>
-				<include name="lib/itext-pdf/**"/>
+				<include name="lib/itext/**"/>
 				<include name="lib/jakarta-commons/**"/>
 				<include name="lib/jakarta-taglibs/**"/>
 				<include name="lib/j2ee/**"/>
