@@ -48,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.6 2004-02-02 11:26:57 jhoeller Exp $
+ * @version $Id: AbstractXsltView.java,v 1.7 2004-02-07 00:18:32 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -114,7 +114,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		this.transformerFactory = TransformerFactory.newInstance();
 		
 		if (this.uriResolver != null) {
-			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" + getName() + "'");
+			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" + getBeanName() + "'");
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
 		logger.debug("URL in view is " + this.stylesheetLocation);
@@ -125,11 +125,11 @@ public abstract class AbstractXsltView extends AbstractView {
 		if (this.stylesheetLocation != null && !"".equals(this.stylesheetLocation)) {
 			try {
 				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheetLocation));
-				logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getName() + "'");
+				logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getBeanName() + "'");
 			}
 			catch (TransformerConfigurationException ex) {
 				throw new ApplicationContextException(
-					"Can't load stylesheet from " + this.stylesheetLocation + " in XSLT view '" + getName() + "'", ex);
+					"Can't load stylesheet from " + this.stylesheetLocation + " in XSLT view '" + getBeanName() + "'", ex);
 			}
 		}
 	}
@@ -192,7 +192,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		else {
 			if (this.root == null && docRoot == null) {
 				throw new ServletException(
-					"Cannot domify multiple non-Node objects without a root element name in XSLT view with name='" + getName() + "'");
+					"Cannot domify multiple non-Node objects without a root element name in XSLT view with name='" + getBeanName() + "'");
 			}
 			
 			// docRoot local variable takes precedence
@@ -237,12 +237,12 @@ public abstract class AbstractXsltView extends AbstractView {
 		catch (TransformerConfigurationException ex) {
 			throw new ServletException(
 				"Couldn't create XSLT transformer for stylesheet '" + this.stylesheetLocation +
-				"' in XSLT view with name='" + getName() + "'", ex);
+				"' in XSLT view with name='" + getBeanName() + "'", ex);
 		}
 		catch (TransformerException ex) {
 			throw new ServletException(
 				"Couldn't perform transform with stylesheet '" + this.stylesheetLocation +
-				"' in XSLT view with name='" + getName() + "'", ex);
+				"' in XSLT view with name='" + getBeanName() + "'", ex);
 		}
 	}
 

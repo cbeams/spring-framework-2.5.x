@@ -66,15 +66,18 @@ public class ViewResolverTestSuite extends TestCase {
 		wac.refresh();
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setApplicationContext(wac);
+		vr.setContentType("myContentType");
 		vr.setRequestContextAttribute("rc");
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
 		assertTrue("Correct view class", InternalResourceView.class.equals(view.getClass()));
 		assertTrue("Correct URL", "example1".equals(((InternalResourceView) view).getUrl()));
+		assertTrue("Correct contentType", "myContentType".equals(((InternalResourceView) view).getContentType()));
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertTrue("Correct view class", InternalResourceView.class.equals(view.getClass()));
 		assertTrue("Correct URL", "example2".equals(((InternalResourceView) view).getUrl()));
+		assertTrue("Correct contentType", "myContentType".equals(((InternalResourceView) view).getContentType()));
 
 		HttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/example");
 		HttpServletResponse response = new MockHttpServletResponse();

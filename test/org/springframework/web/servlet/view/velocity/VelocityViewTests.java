@@ -32,7 +32,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.11 2004-02-02 11:26:58 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.12 2004-02-07 00:18:25 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -276,7 +276,7 @@ public class VelocityViewTests extends TestCase {
 		resolver.setSuffix("_suffix");
 		resolver.setApplicationContext(new StaticWebApplicationContext());
 		VelocityView view = (VelocityView) resolver.loadView("test", Locale.CANADA);
-		assertEquals("test", view.getName());
+		assertEquals("test", view.getBeanName());
 		assertEquals("prefix_test_suffix", view.getUrl());
 	}
 

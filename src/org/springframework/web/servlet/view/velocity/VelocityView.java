@@ -56,7 +56,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.18 2004-02-04 17:34:32 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.19 2004-02-07 00:18:32 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
@@ -194,7 +194,7 @@ public class VelocityView extends AbstractUrlBasedView {
 
 		mergeTemplate(this.velocityTemplate, velocityContext, response);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getName() + "'");
+			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getBeanName() + "'");
 		}
 	}
 
@@ -213,13 +213,13 @@ public class VelocityView extends AbstractUrlBasedView {
 				modelName = transformModelNameIfNecessary(modelName);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Added model attribute with name '" + modelName + "' and value [" + modelObject +
-											 "] to Velocity context in view '" + getName() + "'");
+											 "] to Velocity context in view '" + getBeanName() + "'");
 				}
 				velocityContext.put(modelName, modelObject);
 			}
 		}
 		else {
-			logger.debug("Model is null. Nothing to expose to Velocity context in view with name '" + getName() + "'");
+			logger.debug("Model is null. Nothing to expose to Velocity context in view with name '" + getBeanName() + "'");
 		}
 	}
 	

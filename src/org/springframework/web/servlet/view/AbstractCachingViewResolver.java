@@ -55,14 +55,14 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		View view = null;
 		if (!this.cache) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This will severely impair performance");
-			view = loadAndConfigureView(viewName, locale);
+			view = loadAndCacheView(viewName, locale);
 		}
 		else {
 			// we're caching - don't really need synchronization
 			view = (View) this.viewMap.get(getCacheKey(viewName, locale));
 			if (view == null) {
 				// ask the subclass to load the View
-				view = loadAndConfigureView(viewName, locale);
+				view = loadAndCacheView(viewName, locale);
 			}
 		}
 		return view;
@@ -73,9 +73,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Configuration means giving the View its name, and 
 	 * setting the ApplicationContext on the View if necessary.
 	 */
-	private View loadAndConfigureView(String viewName, Locale locale) throws Exception {
+	private View loadAndCacheView(String viewName, Locale locale) throws Exception {
 		View view = loadView(viewName, locale);
-		view.setName(viewName);
 		if (view instanceof ApplicationContextAware) {
 			((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
 		}

@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
@@ -34,23 +35,69 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.6 2004-01-15 18:37:54 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.7 2004-02-07 00:18:27 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
-public abstract class AbstractView extends WebApplicationObjectSupport implements View {
+public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
 
-	/** Map of static attributes, keyed by attribute name (String) */
-	private Map	staticAttributes = new HashMap();
+	/** The name by which this View is known */
+	private String beanName;
+
+	/** Default content type. Overridable as bean property. */
+	private String contentType = "text/html; charset=ISO-8859-1";
 
 	/** Name of request context attribute, or null if not needed */
 	private String requestContextAttribute;
 
-	/** Default content type. Overridable as bean property. */
-	private String contentType = "text/html; charset=ISO-8859-1";
-	
-	/** The name by which this View is known */
-	private String name;
+	/** Map of static attributes, keyed by attribute name (String) */
+	private final Map	staticAttributes = new HashMap();
 
+
+	/**
+	 * Set the view's name. Helpful for traceability.
+	 * Framework code must call this when constructing views.
+	 * @param beanName the view's name. May not be null.
+	 * Views should use this for log messages.
+	 */
+	public final void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	/**
+	 * Return the view's name. Should never be null,
+	 * if the view was correctly configured.
+	 * @return the view's name
+	 */
+	public final String getBeanName() {
+		return beanName;
+	}
+
+	/**
+	 * Set the content type for this view.
+	 * May be ignored by subclasses if the view itself is assumed
+	 * to set the content type, e.g. in case of JSPs.
+	 * @param contentType content type for this view
+	 */
+	public final void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type for this view.
+	 * @return content type for this view
+	 */
+	protected final String getContentType() {
+		return this.contentType;
+	}
+
+	/**
+	 * Set the name of the RequestContext attribute for this view,
+	 * or null if not needed.
+	 * @param requestContextAttribute name of the RequestContext attribute
+	 */
+	public final void setRequestContextAttribute(String requestContextAttribute) {
+		this.requestContextAttribute = requestContextAttribute;
+	}
 
 	/**
 	 * Set static attributes from a java.util.Properties object. This is
@@ -136,52 +183,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		return Collections.unmodifiableMap(this.staticAttributes);
 	}
 
-	/**
-	 * Set the name of the RequestContext attribute for this view,
-	 * or null if not needed.
-	 * @param requestContextAttribute name of the RequestContext attribute
-	 */
-	public final void setRequestContextAttribute(String requestContextAttribute) {
-		this.requestContextAttribute = requestContextAttribute;
-	}
-
-	/**
-	 * Set the content type for this view.
-	 * May be ignored by subclasses if the view itself is assumed
-	 * to set the content type, e.g. in case of JSPs.
-	 * @param contentType content type for this view
-	 */
-	public final void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	/**
-	 * Return the content type for this view.
-	 * @return content type for this view
-	 */
-	protected final String getContentType() {
-		return this.contentType;
-	}
-
-	/**
-	 * Set the view's name. Helpful for traceability.
-	 * Framework code must call this when constructing views.
-	 * @param name the view's name. May not be null.
-	 * Views should use this for log messages.
-	 */
-	public final void setName(String name) {
-		this.name = name;
-	}
-	
-	/** 
-	 * Return the view's name. Should never be null,
-	 * if the view was correctly configured.
-	 * @return the view's name
-	 */
-	public final String getName() {
-		return name;
-	}
-
 
 	/**
 	 * Prepares the view given the specified model, merging it with static
@@ -191,7 +192,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Rendering view with name '" + this.name + "' with model=[" + model +
+			logger.debug("Rendering view with name '" + this.beanName + "' with model=[" + model +
 				"] and static attributes=[" + this.staticAttributes + "]");
 		}
 

@@ -26,7 +26,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: InternalResourceView.java,v 1.8 2004-01-14 22:05:35 jhoeller Exp $
+ * @version $Id: InternalResourceView.java,v 1.9 2004-02-07 00:18:27 jhoeller Exp $
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  */
@@ -66,11 +66,11 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// if already included, include again, else forward
 		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
 			rd.include(request, response);
-			logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getName() + "'");
+			logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 		}
 		else {
 			rd.forward(request, response);
-			logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getName() + "'");
+			logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 		}
 	}
 
@@ -95,7 +95,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 					request.setAttribute(modelName, modelValue);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
-						    "] to request in InternalResourceView '" + getName() + "' ");
+						    "] to request in InternalResourceView '" + getBeanName() + "' ");
 					}
 				}
 			}

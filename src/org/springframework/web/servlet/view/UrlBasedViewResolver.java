@@ -41,6 +41,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	private String suffix = "";
 
+	private String contentType;
+
 	private String requestContextAttribute;
 
 	/**
@@ -49,7 +51,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	public void setViewClass(Class viewClass) {
 		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
-			throw new IllegalArgumentException("Fiven View class [" + viewClass.getName() + "] is not of type [" +
+			throw new IllegalArgumentException("Given View class [" + viewClass.getName() + "] is not of type [" +
 																				 requiredViewClass().getName() + "]");
 		}
 		this.viewClass = viewClass;
@@ -81,8 +83,17 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
-	 * Set the name of the RequestContext attribute for all views,
-	 * or null if not needed.
+	 * Set the content type for all views.
+	 * May be ignored by view classes if the view itself is assumed
+	 * to set the content type, e.g. in case of JSPs.
+	 * @param contentType the content type
+	 */
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Set the name of the RequestContext attribute for all views.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 */
 	public void setRequestContextAttribute(String requestContextAttribute) {
@@ -99,8 +110,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 
 	protected View loadView(String viewName, Locale locale) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
-		view.setName(viewName);
+		view.setBeanName(viewName);
 		view.setUrl(this.prefix + viewName + this.suffix);
+		if (this.contentType != null) {
+			view.setContentType(this.contentType);
+		}
 		view.setRequestContextAttribute(this.requestContextAttribute);
 		return view;
 	}

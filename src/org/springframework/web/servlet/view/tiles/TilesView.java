@@ -58,7 +58,7 @@ public class TilesView extends InternalResourceView {
 		ComponentDefinition definition = factory.getDefinition(getUrl(), request, getServletContext());
 		if (definition == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND,
-												 "Tile with name '" + getName() + "' not found");
+												 "Tile with name '" + getBeanName() + "' not found");
 			return;
 		}
 
