@@ -252,16 +252,24 @@
       <title>The bean identifiers (<literal>id</literal> and
       <literal>name</literal>)</title>
 
-      <para>The bean is named with an id or name. This is essentially the same
-      thing; in an XmlBeanFactory you can actually use either the
-      <literal>id</literal> or <literal>name</literal> attribute to identify
-      the bean. However, the former is marked in the DTD as a real XML element
-      ID attribute, which means the XML parser can do some extra validation on
-      references, but which also means that there are a few special reserved
-      characters which are not legal for the name; this restriction does not
-      exist when using the <literal>name</literal> attribute. Generally you
-      should use <literal>id</literal> unless you need to use these special
-      characters.</para>
+      <para>Every bean has one or more ids (also called identifiers, or
+	  names, these terms refer to the same thing). These ids must be unique
+	  within the BeanFactory or ApplicationContext the bean is hosted in.
+	  A bean will almost always have only one id, but if a bean has more than
+	  one id, the extra ones can essentially be considered aliases.</para>
+      <para>In an XmlBeanFactory (including ApplicationContext variants), you
+	  user the <literal>id</literal> or <literal>name</literal> attributes to
+	  specify the bean id(s), and at least one id must be specified in one or
+	  both of these attributes. The <literal>id</literal> attribute allows
+	  you to specify one id, and as it is marked in the XML DTD (definition
+	  document) as a real XML element ID attribute, the parser is able to do
+	  some extra validation when other elements point back to this one. As such,
+	  it is the preferred way to specify a bean id. However, the XML spec does
+	  limit the charactes which are legal in XML IDs. This is usually not really
+	  a constraint, but if you have a need to use one of these characters, or
+	  want to introduce other aliases to the bean, you may also or instead
+	  specify one or more bean ids (separated by a comma (,) or semicolon (;)
+	  via the <literal>name</literal> attribute.</para>
     </sect2>
 
     <sect2 id="beans-factory-modes">
