@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+	<display-name>Spring Image Database</display-name>
+
+	<description>Spring Image Database sample application</description>
+
+	<!--
+	  - Loads the root application context of this web app at startup,
+	  - by default from "/WEB-INF/applicationContext.xml".
+		- Note that it is preferable to use ContextLoaderListener in a servlet container
+		- that follows the Servlet 2.4 initialization order (most Servlet 2.3 containers do).
+		-
+	  - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
+	  - to access it anywhere in the web application, outside of the framework.
+	  -
+	  - The root context is the parent of all servlet-specific contexts.
+	  - This means that its beans are automatically available in these child contexts,
+	  - both for getBean(name) calls and (external) bean references.
+    -->
+	<servlet>
+		<servlet-name>context</servlet-name>
+		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!--
+	  - Spring web MVC servlet that dispatches request to registered handlers.
+	  - Has its own application context, by default defined in "{servlet-name}-servlet.xml",
+	  - i.e. "image-servlet.xml" in this case.
+	  -
+	  - A web app can contain any number of such servlets.
+	  - Note that this web app has a shared root application context, serving as parent
+	  - of all DispatcherServlet contexts.
+	  -->
+	<servlet>
+		<servlet-name>image</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<!--
+		- Dispatcher servlet mapping for the web user interface,
+		- refering to the "image" servlet above.
+		-->
+	<servlet-mapping>
+		<servlet-name>image</servlet-name>
+		<url-pattern>/image/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+</web-app>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+  - DispatcherServlet application context for the image database.
+	-->
+<beans>
+
+	<!-- MultipartResolver for parsing file uploads, implementation for Commons FileUpload -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
+	<!-- MultipartResolver for parsing file uploads, implementation for Jason Hunter's COS -->
+	<!-- Uncomment this and comment out the above to switch to COS as multipart parsing strategy -->
+	<!--
+	<bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver"/>
+	-->
+
+	<!-- Configurer that sets up a VelocityEngine for Velocity views -->
+	<bean id="velocityConfigurer" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+		<property name="resourceLoaderPath"><value>WEB-INF/views/</value></property>
+	</bean>
+
+	<!-- Simple ViewResolver for Velocity, appending ".vm" to logical view names -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+		<property name="suffix"><value>.vm</value></property>
+	</bean>
+
+	<!-- Simple ViewResolver for JSP, prepending "/WEB-INF/views" and appending ".jsp" to logical view names -->
+	<!-- Uncomment this and comment out the above to switch to the JSP view -->
+	<!--
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/views/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+	-->
+
+	<!-- HandlerMapping that dispatches all request to the MultiActionController below -->
+	<bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="defaultHandler"><ref local="imageController"/></property>
+	</bean>
+
+	<!-- MultiActionController that defines user interface actions as separate methods -->
+	<bean id="imageController" class="org.springframework.samples.imagedb.web.ImageController">
+		<property name="methodNameResolver"><ref local="imageControllerResolver"/></property>
+		<property name="imageDatabase"><ref bean="imageDatabase"/></property>
+	</bean>
+
+	<!-- Method resolution strategy for the MultiActionController above -->
+	<bean id="imageControllerResolver" class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
+		<property name="mappings">
+			<props>
+				<prop key="/imageList">showImageList</prop>
+				<prop key="/imageContent">streamImageContent</prop>
+				<prop key="/imageUpload">processImageUpload</prop>
+				<prop key="/clearDatabase">clearDatabase</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

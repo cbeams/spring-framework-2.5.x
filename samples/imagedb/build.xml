@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+
+<project name="imagedb" basedir="." default="usage">
+
+	<property name="name" value="imagedb"/>
+
+	<property name="war.dir" value="war"/>
+	<property name="src.dir" value="src"/>
+	<property name="build.dir" value=".classes"/>
+	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
+	<property name="dist.dir" value="dist"/>
+
+	<property name="spring.root" value="../.."/>
+
+
+	<path id="master-classpath">
+
+		<fileset dir="${spring.root}/lib/aop-alliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist">
+			<include name="spring.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="Spring Image Database build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Available targets are:"/>
+		<echo message=""/>
+		<echo message="clean    --> Clean output dirs"/>
+		<echo message="build    --> Compile main Java sources and copy libraries"/>
+		<echo message="warfile  --> Build the web application archive"/>
+		<echo message="all      --> Clean, build, warfile"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean output dirs (build, weblib, dist)">
+
+		<delete dir="${build.dir}"/>
+		<delete dir="${weblib.dir}"/>
+		<delete dir="${dist.dir}"/>
+
+	</target>
+
+
+	<target name="build" description="Compile main source tree java files into class files, generate jar files">
+
+		<mkdir dir="${build.dir}"/>
+
+		<javac destdir="${build.dir}" target="1.3" debug="true"
+			deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${weblib.dir}"/>
+
+		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
+
+		<copy todir="${weblib.dir}" preservelastmodified="true">
+			<fileset dir="${spring.root}/lib/aop-alliance">
+				<include name="aopalliance.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-collections.jar"/>
+				<include name="commons-dbcp.jar"/>
+				<include name="commons-fileupload.jar"/>
+				<include name="commons-logging.jar"/>
+				<include name="commons-pool.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/velocity">
+				<include name="velocity-1.3.1.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist">
+				<include name="spring.jar"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="dist" depends="warfile">
+		<!-- 
+			delegate to warfile target by depending on it.  dist is just to offer
+			a generic target name across all Spring sample apps that may be used
+			for autobuilds testing
+		-->
+	</target>
+
+
+	<target name="warfile" depends="build" description="Build the web application archive">
+
+		<mkdir dir="${dist.dir}"/>
+
+		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
+			<include name="*"/>
+			<include name="WEB-INF/applicationContext.xml"/>
+			<include name="WEB-INF/image-servlet.xml"/>
+			<include name="WEB-INF/*.properties"/>
+			<include name="WEB-INF/lib/**"/>
+			<include name="WEB-INF/views/**"/>
+			<exclude name="**/.*"/>
+		</war>
+
+	</target>
+
+
+	<target name="all" depends="clean,build,warfile" description="Clean,build,warfile"/>
+
+</project>
