@@ -269,11 +269,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse constructor argument subelements of the given bean element.
 	 */
 	protected ConstructorArgumentValues getConstructorArgSubElements(Element beanEle) {
-		NodeList nl = beanEle.getElementsByTagName(CONSTRUCTOR_ARG_ELEMENT);
+		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
-			Element cargEle = (Element) nl.item(i);
-			parseConstructorArgElement(cargs, cargEle);
+			Node node = nl.item(i);
+			if (node instanceof Element && CONSTRUCTOR_ARG_ELEMENT.equals(node.getNodeName())) {
+				parseConstructorArgElement(cargs, (Element) node);
+			}
 		}
 		return cargs;
 	}

@@ -39,8 +39,8 @@
 	</bean>
 
 	<bean id="hasInnerBeans" class="org.springframework.beans.TestBean">
-		<property name="name"><value>hasInner</value></property>
-		<property name="age"><value>5</value></property>
+		<constructor-arg index="0"><value>hasInner</value></constructor-arg>
+		<constructor-arg index="1"><value>5</value></constructor-arg>
 		<property name="spouse">
 			<bean id="innerBean" class="org.springframework.beans.TestBean">
 				<property name="name"><value>inner1</value></property>
@@ -59,8 +59,8 @@
 			<map>
 				<entry key="someKey">
 					<bean class="org.springframework.beans.TestBean">
-						<property name="name"><value>inner3</value></property>
-						<property name="age"><value>8</value></property>
+						<constructor-arg index="0"><value>inner3</value></constructor-arg>
+						<constructor-arg index="1"><value>8</value></constructor-arg>
 					</bean>
 				</entry>
 			</map>
