@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -42,7 +42,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 /**
  * Helper class that simplifies Hibernate data access code, and converts
  * checked HibernateExceptions into unchecked DataAccessExceptions,
- * compatible to the org.springframework.dao exception hierarchy.
+ * following the <code>org.springframework.dao</code> exception hierarchy.
  * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
  * <p>Typically used to implement data access or business logic services that
@@ -446,7 +446,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	public boolean contains(final Object entity) throws DataAccessException {
 		Boolean result = (Boolean) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
+			public Object doInHibernate(Session session) {
 				return new Boolean(session.contains(entity));
 			}
 		}, true);
