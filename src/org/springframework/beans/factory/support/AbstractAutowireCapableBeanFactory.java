@@ -42,6 +42,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -74,6 +75,7 @@ import org.springframework.core.JdkVersion;
  * @author Juergen Hoeller
  * @since 13.02.2004
  * @see #findMatchingBeans
+ * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.23 2004-06-23 21:18:48 johnsonr Exp $
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
@@ -95,12 +97,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #destroySingletons
 	 */
 	private final Set disposableInnerBeans = Collections.synchronizedSet(new HashSet());
+	
+	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
 	public AbstractAutowireCapableBeanFactory() {
 	}
 
 	public AbstractAutowireCapableBeanFactory(BeanFactory parentBeanFactory) {
 		super(parentBeanFactory);
+	}
+	
+	protected void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
+		this.instantiationStrategy = instantiationStrategy;
 	}
 
 
@@ -115,7 +123,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
 		}
 		else {
-			Object bean = BeanUtils.instantiateClass(beanClass);
+			Object bean = instantiationStrategy.instantiate(bd, this);
 			populateBean(bean.getClass().getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -211,12 +219,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// instantiate bean
 			errorMessage = "Instantiation of bean failed";
 
-			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-					mergedBeanDefinition.hasConstructorArgumentValues()) {
+			if (mergedBeanDefinition.getStaticFactoryMethod() != null)  { 
+				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition);
+			}
+			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+					mergedBeanDefinition.hasConstructorArgumentValues() )  { 
 				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
 			}
 			else {
-				instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
+				// Use no-arg constructor
+				Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this);
+				instanceWrapper = new BeanWrapperImpl(beanInstance);
 				initBeanWrapper(instanceWrapper);
 			}
 			bean = instanceWrapper.getWrappedInstance();
@@ -267,7 +280,56 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		return bean;
 	}
+	
+	/**
+	 * Instantiate the bean using a named factory method. This involves iterating over the static
+	 * methods with the name specified in the RootBeanDefinition (the method may be overloaded)
+	 * and trying to match with the parameters. Unfortunately we don't have the types attached to
+	 * constructor args, so trial and error is the only way to go here.
+	 */
+	protected BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition) throws BeansException {
+		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
+		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
+		resolveConstructorArgs(beanName, mergedBeanDefinition, cargs, resolvedValues);
+		
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		initBeanWrapper(bw);
 
+		// Try all methods with this name to see if they match constructor arguments
+		for (int i = 0; i < mergedBeanDefinition.getBeanClass().getMethods().length; i++) {
+			Method factoryMethod = mergedBeanDefinition.getBeanClass().getMethods()[i];
+			if (Modifier.isStatic(factoryMethod.getModifiers()) && 
+					factoryMethod.getName().equals(mergedBeanDefinition.getStaticFactoryMethod()) &&
+					factoryMethod.getParameterTypes().length == cargs.getNrOfArguments()) {
+				
+				Class[] argTypes = factoryMethod.getParameterTypes();
+								
+				try {
+					Object[] args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+					
+					Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this, factoryMethod, args);
+					
+					// TODO if we got to here, we could cache the resolved Method in the RootBeanDefinition for
+					// efficiency on future creation, but that would need to be synchronized
+					
+					bw.setWrappedInstance(beanInstance);
+					if (logger.isInfoEnabled()) {
+						logger.info("Bean '" + beanName + "' instantiated via factory method [" + factoryMethod + "]");
+					}
+					return bw;
+				}
+				catch (Exception ex) {
+					// If we failed to match this method, swallow the exception and keep trying new overloaded
+					// factory methods...
+				}
+			}
+		}	// for each method
+		
+		// If we get here, we didn't match any method
+		throw new BeanDefinitionStoreException("Cannot find matching factory method " + mergedBeanDefinition.getStaticFactoryMethod());
+	}
+	
+	
 	/**
 	 * "autowire constructor" (with constructor arguments by type) behavior.
 	 * Also applied if explicit constructor argument values are specified,
@@ -284,31 +346,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
+		
+		BeanWrapperImpl bw = new BeanWrapperImpl();
+		initBeanWrapper(bw);
 
 		int minNrOfArgs = 0;
 		if (cargs != null) {
-			minNrOfArgs = cargs.getNrOfArguments();
-			for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				int index = ((Integer) entry.getKey()).intValue();
-				if (index < 0) {
-					throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																					"Invalid constructor argument index: " + index);
-				}
-				if (index > minNrOfArgs) {
-					minNrOfArgs = index + 1;
-				}
-				String argName = "constructor argument with index " + index;
-				ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) entry.getValue();
-				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
-				resolvedValues.addIndexedArgumentValue(index, resolvedValue, valueHolder.getType());
-			}
-			for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
-				ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
-				String argName = "constructor argument";
-				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
-				resolvedValues.addGenericArgumentValue(resolvedValue, valueHolder.getType());
-			}
+			minNrOfArgs = resolveConstructorArgs(beanName, mergedBeanDefinition, cargs, resolvedValues);
 		}
 
 		Constructor[] constructors = mergedBeanDefinition.getBeanClass().getDeclaredConstructors();
@@ -326,9 +370,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				return (new Integer(c1pl)).compareTo(new Integer(c2pl)) * -1;
 			}
 		});
-
-		BeanWrapperImpl bw = new BeanWrapperImpl();
-		initBeanWrapper(bw);
+		
 		Constructor constructorToUse = null;
 		Object[] argsToUse = null;
 		int minTypeDiffWeight = Integer.MAX_VALUE;
@@ -341,40 +383,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							beanName + "' (hint: specify index arguments for simple parameters to avoid type ambiguities)");
 				}
 				Class[] argTypes = constructor.getParameterTypes();
-				Object[] args = new Object[argTypes.length];
-				for (int j = 0; j < argTypes.length; j++) {
-					ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
-					if (valueHolder != null) {
-						// Synchronize if custom editors are registered.
-						// Necessary because PropertyEditors are not thread-safe.
-						if (!getCustomEditors().isEmpty()) {
-							synchronized (getCustomEditors()) {
-								args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
-							}
-						}
-						else {
-							args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
-						}
-					}
-					else {
-						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
-							throw new UnsatisfiedDependencyException(
-									mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-									"Did you specify the correct bean references as generic constructor arguments?");
-						}
-						Map matchingBeans = findMatchingBeans(argTypes[j]);
-						if (matchingBeans == null || matchingBeans.size() != 1) {
-							throw new UnsatisfiedDependencyException(
-									mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-									"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] +
-									"] for autowiring constructor. There should have been 1 to be able to " +
-									"autowire constructor of bean '" + beanName + "'.");
-						}
-						args[j] = matchingBeans.values().iterator().next();
-						logger.info("Autowiring by type from bean name '" + beanName +
-												"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
-					}
-				}
+				Object[] args = createArgumentArray(beanName, mergedBeanDefinition, resolvedValues, bw, argTypes);
+				
 				int typeDiffWeight = getTypeDifferenceWeight(argTypes, args);
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = constructor;
@@ -401,13 +411,93 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
 			                                "Could not resolve matching constructor");
 		}
-		bw.setWrappedInstance(BeanUtils.instantiateClass(constructorToUse, argsToUse));
+		
+		Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, this, constructorToUse, argsToUse);
+		bw.setWrappedInstance(beanInstance);
 		if (logger.isInfoEnabled()) {
 			logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
 		}
 		return bw;
 	}
 
+	/**
+	 * Resolve the constructor arguments for this bean into the resolvedValues object.
+	 * This may involve looking up other beans.
+	 * This method is also used for handling invocations of static factory methods.
+	 */
+	private int resolveConstructorArgs(String beanName, RootBeanDefinition mergedBeanDefinition, 
+			ConstructorArgumentValues cargs, ConstructorArgumentValues resolvedValues) {
+		int minNrOfArgs;
+		minNrOfArgs = cargs.getNrOfArguments();
+		for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			int index = ((Integer) entry.getKey()).intValue();
+			if (index < 0) {
+				throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+									"Invalid constructor argument index: " + index);
+			}
+			if (index > minNrOfArgs) {
+				minNrOfArgs = index + 1;
+			}
+			String argName = "constructor argument with index " + index;
+			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) entry.getValue();
+			Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+			resolvedValues.addIndexedArgumentValue(index, resolvedValue, valueHolder.getType());
+		}
+		for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
+			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
+			String argName = "constructor argument";
+			Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+			resolvedValues.addGenericArgumentValue(resolvedValue, valueHolder.getType());
+		}
+		return minNrOfArgs;
+	}
+	
+
+	/**
+	 * Create an array of arguments to invoke a Constructor or static factory method,
+	 * given the resolved constructor arguments values.
+	 */
+	private Object[] createArgumentArray(String beanName, RootBeanDefinition mergedBeanDefinition, 
+			ConstructorArgumentValues resolvedValues, BeanWrapperImpl bw, Class[] argTypes) {
+		Object[] args = new Object[argTypes.length];
+		for (int j = 0; j < argTypes.length; j++) {
+			ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
+			if (valueHolder != null) {
+				// Synchronize if custom editors are registered.
+				// Necessary because PropertyEditors are not thread-safe.
+				if (!getCustomEditors().isEmpty()) {
+					synchronized (getCustomEditors()) {
+						args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+					}
+				}
+				else {
+					args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+				}
+			}
+			else {
+				if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+					throw new UnsatisfiedDependencyException(
+							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+							"Did you specify the correct bean references as generic constructor arguments?");
+				}
+				Map matchingBeans = findMatchingBeans(argTypes[j]);
+				if (matchingBeans == null || matchingBeans.size() != 1) {
+					throw new UnsatisfiedDependencyException(
+							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+							"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] +
+							"] for autowiring constructor. There should have been 1 to be able to " +
+							"autowire constructor of bean '" + beanName + "'.");
+				}
+				args[j] = matchingBeans.values().iterator().next();
+				logger.info("Autowiring by type from bean name '" + beanName +
+										"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
+			}
+		}
+		return args;
+	}	// createArgumentArray
+
+	
 	/**
 	 * Determine a weight that represents the class hierarchy difference between types and
 	 * arguments. A direct match, i.e. type Integer -> arg of class Integer, does not increase

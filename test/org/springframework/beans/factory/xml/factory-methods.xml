@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
+		factory-method="defaultInstance">
+		<!-- No constructor-arg elements -->
+		
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="testBeanOnly" class="org.springframework.beans.factory.xml.FactoryMethods"
+		factory-method="newInstance">
+		<constructor-arg><ref local="juergen"/></constructor-arg>
+	</bean>
+
+	<bean id="full" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance">
+		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+	</bean>
+	
+	<bean id="defaultPrototype" 
+		class="org.springframework.beans.factory.xml.FactoryMethods"
+		singleton="false"
+		factory-method="defaultInstance">
+		<!-- No constructor-arg elements -->
+		
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="testBeanOnlyPrototype" 
+		class="org.springframework.beans.factory.xml.FactoryMethods"
+		factory-method="newInstance"
+		singleton="false"
+	>
+		<constructor-arg><ref local="juergen"/></constructor-arg>
+	</bean>
+
+	<bean id="fullPrototype" 
+			class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance"
+			singleton="false"
+		>
+		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+	</bean>
+
+	
+	<bean id="juergen" class="org.springframework.beans.TestBean">
+		<property name="name">
+			<value>Juergen</value>
+		</property>
+	</bean>
+
+
+	<!--
+		The class is the factory class, not the created class 
+	-->
+	<bean id="externalFactoryMethodWithoutArgs" 
+			class="org.springframework.beans.factory.xml.TestBeanCreator"
+			factory-method="createTestBean">
+	</bean>
+	
+	<bean id="externalFactoryMethodWithArgs" class="org.springframework.beans.factory.xml.TestBeanCreator"
+			factory-method="createTestBean">
+		<constructor-arg index="0"><value>Rod</value></constructor-arg>
+		<constructor-arg index="1"><value>33</value></constructor-arg>
+	</bean>
+
+</beans>

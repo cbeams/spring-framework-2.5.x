@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.47 2004-06-05 14:42:03 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.48 2004-06-23 21:17:45 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -1061,6 +1061,149 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
 		assertEquals("test", writer.toString());
+	}
+	
+	public void testLookupOverrideOneMethodWithSetterInjection() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
+		TestBean jenny1 = oom.getPrototypeDependency();
+		assertEquals("Jenny", jenny1.getName()); 
+		TestBean jenny2 = oom.getPrototypeDependency();
+		assertEquals("Jenny", jenny2.getName());
+		assertNotSame(jenny1, jenny2); 
+		
+		// Check unadvised behaviour
+		String str = "woierowijeiowiej";
+		assertEquals(str, oom.echo(str));
+		
+		/*
+		// Now try protected method, and singleton
+		TestBean dave1 = oom.protectedOverrideSingleton();
+		assertEquals("David", dave1.getName()); 
+		TestBean dave2 = oom.protectedOverrideSingleton();
+		assertEquals("David", dave2.getName());
+		assertSame(dave1, dave2); 
+		
+		// Now test replace
+		String s = "this is not a palindrome";
+		String reverse = new StringBuffer(s).reverse().toString();
+		assertEquals("Should have overridden to reverse, not echo", reverse, oom.replaceMe(s));
+		*/
+	}
+	
+	// TODO make this work: depends on CGLIB supporting
+	// constructor arguments
+	public void testLookupOverrideOneMethodWithConstructorInjection() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
+		try {
+			ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
+			fail("Not yet supported");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getCause() instanceof UnsupportedOperationException);
+		}
+		
+		/*
+		TestBean jenny = (TestBean) xbf.getBean("jenny");
+		assertSame(jenny, cio.getTestBean());
+		assertSame(jenny, cio.getTestBean());
+		DummyBo bo1 = cio.createDummyBo();
+		assertNotNull(bo1);
+		DummyBo bo2 = cio.createDummyBo();
+		assertNotNull(bo2);
+		assertNotSame(bo1, bo2);
+		*/
+	}
+	
+	public void testFactoryMethodsSingletonOnTargetClass() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		FactoryMethods fm = (FactoryMethods) xbf.getBean("default");
+		assertEquals(0, fm.getNum());
+		assertEquals("default", fm.getName());
+		assertEquals("defaultInstance", fm.getTestBean().getName());
+		assertEquals("setterString", fm.getStringValue());
+		
+		fm = (FactoryMethods) xbf.getBean("testBeanOnly");
+		assertEquals(0, fm.getNum());
+		assertEquals("default", fm.getName());
+		// This comes from the test bean
+		assertEquals("Juergen", fm.getTestBean().getName());
+		
+		fm = (FactoryMethods) xbf.getBean("full");
+		assertEquals(27, fm.getNum());
+		assertEquals("gotcha", fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+		
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("full");
+		assertSame(fm, fm2);
+	}
+	
+	public void testFactoryMethodsPrototypeOnTargetClass() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		FactoryMethods fm = (FactoryMethods) xbf.getBean("defaultPrototype");
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("defaultPrototype");
+		assertEquals(0, fm.getNum());
+		assertEquals("default", fm.getName());
+		assertEquals("defaultInstance", fm.getTestBean().getName());
+		assertEquals("setterString", fm.getStringValue());
+		assertEquals(fm.getNum(), fm2.getNum());
+		assertEquals(fm.getStringValue(), fm2.getStringValue());
+		// The TestBean is created separately for each bean
+		assertNotSame(fm.getTestBean(), fm2.getTestBean());
+		assertNotSame(fm, fm2);
+		
+		fm = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype");
+		fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype");
+		assertEquals(0, fm.getNum());
+		assertEquals("default", fm.getName());
+		// This comes from the test bean
+		assertEquals("Juergen", fm.getTestBean().getName());
+		assertEquals(fm.getNum(), fm2.getNum());
+		assertEquals(fm.getStringValue(), fm2.getStringValue());
+		// The TestBean reference is resolved to a prototype in the factory
+		assertSame(fm.getTestBean(), fm2.getTestBean());
+		assertNotSame(fm, fm2);
+		
+		fm = (FactoryMethods) xbf.getBean("fullPrototype");
+		fm2 = (FactoryMethods) xbf.getBean("fullPrototype");
+		assertEquals(27, fm.getNum());
+		assertEquals("gotcha", fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+		assertEquals(fm.getNum(), fm2.getNum());
+		assertEquals(fm.getStringValue(), fm2.getStringValue());
+		// The TestBean reference is resolved to a prototype in the factory
+		assertSame(fm.getTestBean(), fm2.getTestBean());
+		assertNotSame(fm, fm2);
+	}
+	
+	/**
+	 * Tests where the static factory method is on a different class
+	 *
+	 */
+	public void testFactoryMethodsOnExternalClass() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+		TestBean tb = (TestBean) xbf.getBean("externalFactoryMethodWithoutArgs");
+		assertEquals(2, tb.getAge());
+		assertEquals("Tristan", tb.getName());
+		
+		tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
+		assertEquals(33, tb.getAge());
+		assertEquals("Rod", tb.getName());
 	}
 
 

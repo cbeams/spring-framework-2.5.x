@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.28 2004-06-19 08:42:44 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.29 2004-06-23 21:16:02 johnsonr Exp $
 -->
 
 
@@ -71,7 +71,8 @@
 -->
 <!ELEMENT bean (
         description?,
-        (constructor-arg | property)*
+        (constructor-arg | property)*,
+		(lookup-method)*
 )>
 
 <!--
@@ -194,10 +195,34 @@
 <!ATTLIST bean destroy-method CDATA #IMPLIED>
 
 <!--
+	Optional attribute specifying the name of a static factory method to use
+	to create this object. Use constructor-arg elements to specify arguments
+	to the factory method, if it takes arguments. Autowiring does not
+	apply to factory methods.
+	The factory method will be on the class specified by the "class" attribute
+	on this bean definition. Often this will be the same class as that of the
+	constructed object - for example, when the factory method is used as an
+	alternative to a constructor. However, it may be on a different class. In 
+	that case, the created object will *not* be of the class specified in
+	the "class" attribute. This is analogous to FactoryBean behaviour.
+	
+	The factory method can have any number of arguments. Autowiring is not supported.
+	Use indexed constructor-arg elements in conjunction with the factory-method
+	attribute.
+	
+	Setter Injection can be used in conjunction with a factory method.
+	Method Injection cannot, as the factory method returns an instance, which
+	will be used when the container creates the bean.
+-->
+<!ATTLIST bean factory-method CDATA #IMPLIED>
+
+<!--
 	Bean definitions can specify zero or more constructor arguments.
 	They correspond to either a specific index of the constructor argument list
 	or are supposed to be matched generically by type.
 	This is an alternative to "autowire constructor".
+	constructor-arg elements are also used in conjunction with the factory-method
+	element to construct beans using static factory methods.
 -->
 <!ELEMENT constructor-arg (
         description?,
@@ -274,6 +299,29 @@
 -->
 <!ATTLIST idref bean CDATA #IMPLIED>
 <!ATTLIST idref local IDREF #IMPLIED>
+
+<!--
+	A lookup method causes the IoC container to override the given method and return
+	the bean with the name given in the bean attribute. This is a form of Method Injection.
+	It's particularly useful as an alternative to implementing the BeanFactoryAware
+	interface, in order to be able to make getBean() calls for non-singleton instances
+	at runtime. In this case, Method Injection is a less invasive alternative.
+-->
+<!ELEMENT lookup-method EMPTY>
+
+<!--
+	Name of a lookup method. This method should take no arguments.
+-->
+<!ATTLIST lookup-method name CDATA #IMPLIED>
+
+<!--
+	Name of the bean in the current or ancestor factories that the lookup method
+	should resolve to. Often this bean will be a prototype, in which case the
+	lookup method will return a distinct instance on every invocation. This
+	is useful for single-threaded objects.
+-->
+<!ATTLIST lookup-method bean CDATA #IMPLIED>
+
 
 <!--
 	A list can contain multiple inner bean, ref, collection, or value elements.

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.21 2004-06-23 10:39:00 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.22 2004-06-23 21:14:39 johnsonr Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -70,6 +70,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	private String initMethodName;
 
 	private String destroyMethodName;
+	
+	private String staticFactoryMethod;
 
 
 	/**
@@ -319,17 +321,40 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
 	}
+	
+	public void setStaticFactoryMethod(String staticFactoryMethod) {
+		this.staticFactoryMethod = staticFactoryMethod;
+	}
+	
+	/**
+	 * String specifying a factory method, if one is specified.
+	 * The method will be invoked with constructor arguments, or with
+	 * no arguments if none is specified. The static method will be invoked
+	 * on the beanClass specified.
+	 * @return static factory method string, or null if normal
+	 * constructor creation should be used.
+	 */
+	public String getStaticFactoryMethod() {
+		return this.staticFactoryMethod;
+	}
 
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();
+				
 		if (this.beanClass == null) {
 			throw new BeanDefinitionValidationException("beanClass must be set in RootBeanDefinition");
 		}
 		if (this.beanClass instanceof Class) {
 			if (FactoryBean.class.isAssignableFrom(getBeanClass()) && !isSingleton()) {
 				throw new BeanDefinitionValidationException("FactoryBean must be defined as singleton - " +
-																										"FactoryBeans themselves are not allowed to be prototypes");
+						"FactoryBeans themselves are not allowed to be prototypes");
 			}
+		}
+		
+		// Check for illegal combinations of attributes
+		if (!getMethodOverrides().isEmpty() && staticFactoryMethod != null) {
+			throw new  BeanDefinitionValidationException("Cannot combine static factory method with method overrides: " +
+					"the static factory method must create the instance");
 		}
 	}
 

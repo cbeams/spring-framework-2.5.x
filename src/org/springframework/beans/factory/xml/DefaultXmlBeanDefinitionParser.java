@@ -25,13 +25,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -42,14 +35,22 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedLinkedMap;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
+import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
@@ -103,6 +104,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROP_ELEMENT = "prop";
 
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
+	
+	public static final String LOOKUP_METHOD_ELEMENT = "lookup-method";
+	
+	public static final String FACTORY_METHOD_ATTRIBUTE = "factory-method";
 
 	public static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
@@ -252,7 +257,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 			AbstractBeanDefinition bd = null;
 			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
-
+			
 			if (className != null) {
 				ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
 				RootBeanDefinition rbd = null;
@@ -268,6 +273,10 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 					String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 					rbd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));
+				}
+				
+				if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
+					rbd.setStaticFactoryMethod(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
 				}
 
 				String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
@@ -296,6 +305,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			else {
 				bd = new ChildBeanDefinition(parent, pvs);
 			}
+			
+
+			getLookupOverrideSubElements(bd.getMethodOverrides(), beanName, ele);
 
 			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
@@ -314,11 +326,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		catch (ClassNotFoundException ex) {
 			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "Bean class [" + className + "] not found", ex);
+						"Bean class [" + className + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
 			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "Class that bean class [" + className + "] depends on not found", err);
+						"Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
@@ -351,6 +363,22 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		return pvs;
+	}
+	
+	/**
+	 * Parse lookup-override sub elements
+	 */
+	protected void getLookupOverrideSubElements(MethodOverrides overrides, String beanName, Element beanEle) {
+		NodeList nl = beanEle.getChildNodes();		
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element && LOOKUP_METHOD_ELEMENT.equals(node.getNodeName())) {
+				Element ele = (Element) node;
+				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
+				String beanRef = ele.getAttribute(BEAN_ELEMENT);
+				overrides.addOverride(new LookupOverride(methodName, beanRef));
+			}			
+		}
 	}
 
 	/**

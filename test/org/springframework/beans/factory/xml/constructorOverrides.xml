@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	
+	<!-- TODO better checks: is the method name valid? are there no 
+		args for a lookup? (is this appropriate, or just warn?)
+	-->
+
+	<bean id="constructorOverrides" 
+		class="org.springframework.beans.factory.xml.ConstructorInjectedOverrides"
+		autowire="autodetect">
+		
+		<lookup-method name="createDummyBo" bean="dummyBo" />
+		
+		
+	</bean>
+	
+	
+	<bean id="testBean" class="org.springframework.beans.TestBean"
+		singleton="true">	
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+	</bean>
+	
+	<bean id="dummyBo" class="org.springframework.beans.factory.xml.DummyBoImpl"
+		singleton="false">	
+	</bean>
+
+</beans>
