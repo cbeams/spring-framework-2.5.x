@@ -19,19 +19,30 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 
 /**
- * Interface to be implemented by objects that hold a number of bean definitions,
- * each uniquely identified by a String name. An independent instance of any of
- * these objects can be obtained (the Prototype design pattern), or a single
- * shared instance can be obtained (a superior alternative to the Singleton
- * design pattern). Which type of instance will be returned depends on the bean
- * factory configuration - the API is the same. The Singleton approach is much
+ * The root interface for accessing a Spring IoC container.
+ * <p>
+ * This interface is implemented by objects that hold a number of bean definitions,
+ * each uniquely identified by a String name. Depending on the bean definition,
+ * the factory will return either an independent instance of a
+ * contained object (the Prototype design pattern), or a single
+ * shared instance (a superior alternative to the Singleton
+ * design pattern, in which the instance is a singleton in the scope of
+ * the factory). Which type of instance will be returned depends on the bean
+ * factory configuration - the API is the same. The Singleton approach is
  * more useful and more common in practice.
  *
  * <p>The point of this approach is that the BeanFactory is a central registry
- * of application components, and centralizes the configuring of application
+ * of application components, and centralizes configuration of application
  * components (no more do individual objects need to read properties files,
  * for example). See chapters 4 and 11 of "Expert One-on-One J2EE Design and
  * Development" for a discussion of the benefits of this approach.
+ * <p>
+ * Note that it is generally better to rely on Dependency Injection
+ * ("push" configuration) to configure application objects through setters
+ * or constructors, rather than use
+ * any form of "pull" configuration like a BeanFactory lookup. Spring's
+ * Dependency Injection functionality is implemented using BeanFactory
+ * and its subinterfaces.
  *
  * <p>Normally a BeanFactory will load bean definitions stored in a configuration
  * source (such as an XML document), and use the org.springframework.beans package
@@ -47,7 +58,7 @@ import org.springframework.beans.BeansException;
  * Beans in this factory instance are supposed to override beans of the same name
  * in any parent factory.
  *
- * <p>Bean factories are supposed to support the standard bean lifecycle interfaces
+ * <p>Bean factory implementations should support the standard bean lifecycle interfaces
  * as far as possible. The maximum set of initialization methods and their standard
  * order is:<br>
  * 1. BeanNameAware's setBeanName<br>
@@ -79,33 +90,32 @@ import org.springframework.beans.BeansException;
 public interface BeanFactory {
 
 	/**
-	 * Return an instance (possibly shared or independent) of the given bean name.
-	 * This method allows a bean factory to be used as a replacement for
+	 * Return an instance, which may be shared or independent, of the given bean name.
+	 * This method allows a Spring bean factory to be used as a replacement for
 	 * the Singleton or Prototype design pattern.
-	 * <p>Note that callers should retain references to returned objects. There is
-	 * no guarantee that this method will be implemented to be efficient. For example,
-	 * it may be synchronized, or may need to run an RDBMS query.
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * <p>Callers may retain references to returned objects
+	 * in the case of Singleton beans. 
+	 * <p>This method delegates to the parent factory if the 
+	 * bean cannot be found in this factory instance.
 	 * @param name name of the bean to return
 	 * @return the instance of the bean
-	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
-	 * @throws BeansException if the bean could not be created
+	 * @throws NoSuchBeanDefinitionException if there is no bean definition
+	 * with the specified name
+	 * @throws BeansException if the bean could not be obtained
 	 */
 	Object getBean(String name) throws BeansException;
 
 	/**
 	 * Return an instance (possibly shared or independent) of the given bean name.
-	 * Provides a measure of type safety by throwing an exception if the bean is not
-	 * of the required type.
-	 * <p>Note that callers should retain references to returned objects. There is
-	 * no guarantee that this method will be implemented to be efficient. For example,
-	 * it may be synchronized, or may need to run an RDBMS query.
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * Behaves the same as getBean(String), but provides a measure of type safety by 
+	 * throwing a Spring BeansException if the bean is not of the required type.
+	 * This means that ClassCastException can't be thrown on casting the result correctly,
+	 * as can happen with getBean(String). 
 	 * @param name name of the bean to return
-	 * @param requiredType type the bean may match. Can be an interface or superclass
+	 * @param requiredType type the bean must match. Can be an interface or superclass
 	 * of the actual class. For example, if the value is Object.class, this method will
 	 * succeed whatever the class of the returned instance.
-	 * @return the instance of the bean
+	 * @return an instance of the bean
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 * @throws BeansException if the bean could not be created
@@ -113,7 +123,7 @@ public interface BeanFactory {
 	Object getBean(String name, Class requiredType) throws BeansException;
 
 	/**
-	 * Does this bean factory contain a bean with the given name?
+	 * Does this bean factory contain a bean definition with the given name?
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name name of the bean to query
 	 * @return whether a bean with the given name is defined
