@@ -51,6 +51,11 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 	private final MultipartRequest multipartRequest;
 
+	/**
+	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
+	 * @param originalRequest the request to wrap
+	 * @param multipartRequest the COS multipart representation to use
+	 */
 	protected CosMultipartHttpServletRequest(HttpServletRequest originalRequest, MultipartRequest multipartRequest) {
 		super(originalRequest);
 		this.multipartRequest = multipartRequest;
@@ -111,7 +116,7 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		}
 
 		public boolean isEmpty() {
-			return (multipartRequest.getFile(this.name) == null);
+			return getSize() == 0;
 		}
 
 		public String getOriginalFilename() {

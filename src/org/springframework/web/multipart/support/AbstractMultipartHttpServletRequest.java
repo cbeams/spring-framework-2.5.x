@@ -16,6 +16,7 @@
 
 package org.springframework.web.multipart.support;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -41,12 +42,20 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 
 	private Map multipartFiles;
 
+	/**
+	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
+	 * @param request the request to wrap
+	 */
 	protected AbstractMultipartHttpServletRequest(HttpServletRequest request) {
 		super(request);
 	}
 
+	/**
+	 * Set a Map with parameter names as keys and MultipartFile objects as values.
+	 * To be invoked by subclasses on initialization.
+	 */
 	protected void setMultipartFiles(Map multipartFiles) {
-		this.multipartFiles = multipartFiles;
+		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
 	}
 
 	public Iterator getFileNames() {

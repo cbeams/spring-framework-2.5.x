@@ -32,10 +32,10 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private Map parameters;
+	private final Map parameters;
 
 	/**
-	 * Create a wrapped HttpServletRequest.
+	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
 	 * @param request the request to wrap
 	 * @param parameters a map of the parameters,
 	 * with Strings as keys and String arrays as values

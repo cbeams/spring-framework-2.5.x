@@ -62,7 +62,8 @@ public class CommonsMultipartFile implements MultipartFile {
 	}
 
 	public boolean isEmpty() {
-		return (this.fileItem.getName() == null || this.fileItem.getName().length() == 0);
+		return (this.fileItem.getName() == null || this.fileItem.getName().length() == 0 ||
+		    this.fileItem.getSize() == 0);
 	}
 
 	public String getOriginalFilename() {
