@@ -8,8 +8,6 @@ package org.springframework.web.servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.context.ApplicationContextAware;
-
 /**
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
@@ -41,7 +39,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
  * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
  */
-public interface HandlerMapping extends ApplicationContextAware {
+public interface HandlerMapping {
 	
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made

@@ -88,7 +88,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.13 2003-11-13 11:51:26 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.14 2003-11-21 10:19:05 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -274,7 +274,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initDefaultHandlerMapping() throws ServletException {
 		try {
-			HandlerMapping hm = new BeanNameUrlHandlerMapping();
+			BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 			hm.setApplicationContext(getWebApplicationContext());
 			this.handlerMappings.add(hm);
 		}
@@ -309,8 +309,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initDefaultHandlerAdapter() throws ServletException {
 		try {
-			HandlerAdapter ha = new SimpleControllerHandlerAdapter();
-			ha.setApplicationContext(getWebApplicationContext());
+			SimpleControllerHandlerAdapter ha = new SimpleControllerHandlerAdapter();
 			this.handlerAdapters.add(ha);
 		}
 		catch (BeansException ex) {
@@ -330,13 +329,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default
-			this.viewResolver = new InternalResourceViewResolver();
+			InternalResourceViewResolver vr = new InternalResourceViewResolver();
 			try {
-				this.viewResolver.setApplicationContext(getWebApplicationContext());
+				vr.setApplicationContext(getWebApplicationContext());
 			}
 			catch (BeansException ex2) {
 				throw new ServletException("Fatal error initializing default ViewResolver");
 			}
+			this.viewResolver = vr;
 			logger.info("Unable to locate view resolver with name '" + VIEW_RESOLVER_BEAN_NAME +
 									"': using default [" + this.viewResolver + "]");
 		}

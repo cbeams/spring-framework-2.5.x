@@ -21,8 +21,12 @@ import org.springframework.web.servlet.ViewResolver;
  * Convenient superclass for view resolvers. Caches views once resolved.
  * This means that view resolution won't be a performance problem,
  * no matter how costly initial view retrieval is.
- * View retrieval is deferred to subclasses.
+ *
+ * <p>View retrieval is deferred to subclasses via the loadView template method.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see #loadView
  */
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
@@ -57,10 +61,10 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			view = loadAndConfigureView(viewName, locale);
 		}
 		else {
-			// We're caching - don't really need synchronization
+			// we're caching - don't really need synchronization
 			view = (View) this.viewMap.get(getCacheKey(viewName, locale));
 			if (view == null) {
-				// Ask the subclass to load the View
+				// ask the subclass to load the View
 				view = loadAndConfigureView(viewName, locale);
 			}
 		}
@@ -73,15 +77,14 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * setting the ApplicationContext on the View if necessary.
 	 */
 	private View loadAndConfigureView(String viewName, Locale locale) throws ServletException {
-		// Ask the subclass to load the view
+		// ask the subclass to load the view
 		View view = loadView(viewName, locale);
-		if (view == null)
+		if (view == null) {
 			throw new ServletException("Cannot resolve view name '" + viewName + "'");
-			
-		// Configure view
-		view.setName(viewName);
+		}
 
-		// Give the view access to the ApplicationContext if it needs it
+		// configure view
+		view.setName(viewName);
 		if (view instanceof ApplicationContextAware) {
 			try {
 				((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
@@ -89,12 +92,11 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			catch (BeansException ex) {
 				throw new ServletException("Error initializing View '" + viewName + "': " + ex.getMessage(), ex);
 			}
-
-			String cacheKey = getCacheKey(viewName, locale);
-			logger.info("Cached view '" + cacheKey + "'");
-			this.viewMap.put(cacheKey, view);
 		}
 
+		String cacheKey = getCacheKey(viewName, locale);
+		logger.info("Cached view '" + cacheKey + "'");
+		this.viewMap.put(cacheKey, view);
 		return view;
 	}
 

@@ -9,8 +9,6 @@ import java.util.Locale;
 
 import javax.servlet.ServletException;
 
-import org.springframework.context.ApplicationContextAware;
-
 /**
  * Interface to be implemented by objects that can resolve views by name.
  *
@@ -24,7 +22,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.web.servlet.view.InternalResourceViewResolver
  * @see org.springframework.web.servlet.view.ResourceBundleViewResolver
  */
-public interface ViewResolver extends ApplicationContextAware {
+public interface ViewResolver {
 		
 	/** 
 	 * Resolve the given view by name.

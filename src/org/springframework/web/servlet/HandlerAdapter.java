@@ -6,8 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.ApplicationContextAware;
-
 /**
  * MVC framework SPI interface, allowing parameterization of core MVC workflow.
  *
@@ -29,7 +27,7 @@ import org.springframework.context.ApplicationContextAware;
  * @author Rod Johnson
  * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
  */
-public interface HandlerAdapter extends ApplicationContextAware {
+public interface HandlerAdapter {
 	
 	/**
 	 * Given a handler instance, return whether or not this HandlerAdapter can

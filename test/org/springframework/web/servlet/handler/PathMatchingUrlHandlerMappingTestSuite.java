@@ -26,7 +26,6 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 		wac = new XmlWebApplicationContext();
 		wac.setServletContext(sc);
 		hm = (HandlerMapping) wac.getBean("urlMapping");
-		hm.setApplicationContext(wac);
 	}
 
 	public void testRequestsWithHandlers() throws Exception {

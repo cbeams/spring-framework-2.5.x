@@ -108,13 +108,8 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		TestView tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
-		assertTrue("test should have been initialized once, not " + tv.initCount + " times", tv.initCount == 1);
-			
-	} 
-	
-	public void testNameSet() throws Exception {
-		TestView tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		assertTrue("test has correct name", "test".equals(tv.getName()));
+		assertTrue("test should have been initialized once, not " + tv.initCount + " times", tv.initCount == 1);
 			
 	} 
 	
