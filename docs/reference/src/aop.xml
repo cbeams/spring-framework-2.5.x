@@ -124,7 +124,7 @@
         <listitem>
           <para><emphasis>Around advice</emphasis>: Advice that surrounds a
           joinpoint such as a method invocation. This is the most powerful
-          kind of advice. Around advices will perform custom behaviour before
+          kind of advice. Around advices will perform custom behavior before
           and after the method invocation. They are responsible for choosing
           whether to proceed to the joinpoint or to shortcut executing by
           returning their own return value or throwing an exception.</para>
@@ -158,7 +158,7 @@
 
       <para>As Spring, like AspectJ, provides a full range of advice types, we
       recommend that you use the least powerful advice type that can implement
-      the required behaviour. For example, if you need only to update a cache
+      the required behavior. For example, if you need only to update a cache
       with the return value of a method, you are better off implementing an
       after returning advice than an around advice, although an around advice
       can accomplish the same thing. Using the most specific advice type
@@ -239,7 +239,7 @@
       both proxy-based frameworks like Spring and full-blown frameworks such
       as AspectJ are valuable, and that they are complementary, rather than in
       competition. Thus a major priority for Spring 1.1 will be seamlessly
-      integrating Spring AOP and Ioc with AspectJ, to enable all uses of AOP
+      integrating Spring AOP and IoC with AspectJ, to enable all uses of AOP
       to be catered for within a consistent Spring-based application
       architecture. This integration will not affect the Spring AOP API or the
       AOP Alliance API; Spring AOP will remain backward-compatible.</para>
@@ -483,7 +483,7 @@
       <para>Because static pointcuts are most useful, you'll probably subclass
       StaticMethodMatcherPointcut, as shown below. This requires implemented
       just one abstract method (although it's possible to override other
-      methods to customize behaviour):</para>
+      methods to customize behavior):</para>
 
       <para><programlisting>class TestStaticPointcut extends StaticMethodMatcherPointcut {
 
@@ -622,7 +622,7 @@
 }</programlisting>
 
         <para>Note the the return type is <literal>void</literal>. Before
-        advice can insert custom behaviour before the joinpoint executes, but
+        advice can insert custom behavior before the joinpoint executes, but
         cannot change the return value. If a before advice throws an
         exception, this will abort further execution of the interceptor chain.
         The exception will propagate back up the interceptor chain. If it is
@@ -1413,7 +1413,7 @@
     bean definition as <emphasis>abstract</emphasis> by using the
     <emphasis>abstract</emphasis> attribute, as described <link
     linkend="beans-child-bean-definitions">previously</link>, so that it may
-	not actaully ever be instantiated. Application contexts (but not
+	not actually ever be instantiated. Application contexts (but not
     simple bean factories) will by default pre-instantiate all singletons.
     Therefore it is important (at least for singleton beans) that if you have
     a (parent) bean definition which you intend to use only as a template, and
@@ -1437,7 +1437,7 @@ factory.addInterceptor(myMethodInterceptor);
 factory.addAdvisor(myAdvisor);
 MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisting></para>
 
-    <para>The first step is to contruct a object of type
+    <para>The first step is to construct a object of type
     <literal>org.springframework.aop.framework.ProxyFactory</literal>. You can
     create this with a target object, as in the above example, or specify the
     interfaces to be proxied in an alternate constructor.</para>
@@ -1604,7 +1604,7 @@ assertEquals("Added two advisors",
 
         <para>As with <literal>ProxyFactoryBean</literal>, there is an
         interceptorNames property rather than a list of interceptor, to allow
-        correct behaviour for prototype advisors. Named "interceptors" can be
+        correct behavior for prototype advisors. Named "interceptors" can be
         advisors or any advice type.</para>
 
         <para>As with auto proxying in general, the main point of using
@@ -1715,7 +1715,7 @@ assertEquals("Added two advisors",
         <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
         can create your own autoproxy creators by subclassing this class, in
         the unlikely event that advisor definitions offer insufficient
-        customization to the behaviour of the framework
+        customization to the behavior of the framework
         <literal>DefaultAdvisorAutoProxyCreator</literal>.</para>
       </sect3>
     </sect2>
@@ -1784,7 +1784,7 @@ assertEquals("Added two advisors",
       The <literal>AttributesTransactionAttributeSource</literal> depends on
       an implementation of the
       <literal>org.springframework.metadata.Attributes</literal> interface. In
-      this fragement, the "attributes" bean satisfies this, using the Jakarta
+      this fragment, the "attributes" bean satisfies this, using the Jakarta
       Commons Attributes API to obtain attribute information. (The application
       code must have been compiled using the Commons Attributes compilation
       task.)</para>
@@ -2012,7 +2012,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
 
       <remark>Pooling stateless service objects is not usually necessary. We
       don't believe it should be the default choice, as most stateless objects
-      are naturally threadsafe, and instance pooling is problematic if
+      are naturally thread safe, and instance pooling is problematic if
       resources are cached.</remark>
 
       <para>Simpler pooling is available using autoproxying. It's possible to
@@ -2099,7 +2099,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     <para>Spring AOP, like the rest of Spring, is actively developed. The core
     API is stable. Like the rest of Spring, the AOP framework is very modular,
     enabling extension while preserving the fundamental design. Several
-    improvements are planned in the Spring 1.1 timeframe, which will preserve
+    improvements are planned in the Spring 1.1 time frame, which will preserve
     backward compatibility. These include:</para>
 
     <itemizedlist>

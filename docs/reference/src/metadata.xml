@@ -365,8 +365,8 @@ public void echoException(Exception ex) throws Exception {
     <sect2 id="metadata-pool">
       <title>Pooling</title>
 
-      <para>Again, as with .NET, you can enable pooling behaviour via
-      class-level attributes. Spring can apply this behaviour to any POJO. You
+      <para>Again, as with .NET, you can enable pooling behavior via
+      class-level attributes. Spring can apply this behavior to any POJO. You
       simply need to specify a pooling attribute, as follows, in the business
       object to be pooled:</para>
 
@@ -423,7 +423,7 @@ public class MyClass {</programlisting>You&#39;ll need the usual autoproxy
       infrastructure.</para>
 
       <para>We can define custom attributes, to provide any kind of
-      declarative behaviour. To do this, you need to:</para>
+      declarative behavior. To do this, you need to:</para>
 
       <itemizedlist>
         <listitem>
@@ -532,7 +532,7 @@ public class BarController extends AbstractController {
 
 }</programlisting></para>
 
-    <para>For this automapping to work, we need to add the following to the
+    <para>For this auto-mapping to work, we need to add the following to the
     relevant <literal>xxxx-servlet.xml</literal> file, specifying the
     attributes handler mapping. This special handler mapping can handle any
     number of controllers with attributes as shown above. The bean id

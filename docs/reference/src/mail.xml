@@ -21,16 +21,16 @@
     simple mail such as <emphasis>from</emphasis>, <emphasis>to</emphasis>,
     <emphasis>cc</emphasis>, <emphasis>subject</emphasis>,
     <emphasis>text</emphasis> called <literal>SimpleMailMessage</literal>.
-    This package also conatins a hierarchy of checked exceptions which provide
-    a higher level of abstraction over the lower level mail system expetions
+    This package also contains a hierarchy of checked exceptions which provide
+    a higher level of abstraction over the lower level mail system exceptions
     with the root exception being <literal>MailException.</literal>Please
     refer to JavaDocs for more information on mail exception hierarchy.</para>
 
-    <para>Spring also provides a subinterface of <literal>MailSender</literal>
+    <para>Spring also provides a sub-interface of <literal>MailSender</literal>
     for specialized <emphasis>JavaMail</emphasis> features such as MIME
     messages, namely
     <literal>org.springframework.mail.javamail.JavaMailSender</literal> It
-    also provides a callback interface for praparation of JavaMail MIME
+    also provides a callback interface for preparation of JavaMail MIME
     messages, namely
     <literal>org.springframework.mail.javamail.MimeMessagePreparator</literal></para>
 
@@ -114,7 +114,7 @@
   <sect1 id="mail-usage">
     <title>Using Spring mail abstraction</title>
 
-    <para>Let's assume there is a businness interface called
+    <para>Let's assume there is a business interface called
     <literal>OrderManager</literal><programlisting>public interface OrderManager {
 
     void placeOrder(Order order);
@@ -148,10 +148,10 @@ public class OrderManagerImpl implements OrderManager {
 
     public void placeOrder(Order order) {
 
-        //... * Do the businness calculations....
+        //... * Do the business calculations....
         //... * Call the collaborators to persist the order
 
-        //Create a threadsafe "sandbox" of the message
+        //Create a thread safe "sandbox" of the message
         SimpleMailMessage msg = new SimpleMailMessage(this.message);
         msg.setTo(order.getCustomer().getEmailAddress());
         msg.setText(
@@ -211,7 +211,7 @@ public class OrderManagerImpl implements OrderManager {
 
     public void placeOrder(final Order order) {
 
-        //... * Do the businness calculations....
+        //... * Do the business calculations....
         //... * Call the collaborators to persist the order
         
         
@@ -243,7 +243,7 @@ public class OrderManagerImpl implements OrderManager {
     fingertips.</para>
 
     <para><emphasis>Please note that the mail code is a crosscutting concern
-    and is a perfect candidate for refactoring into a custom SpringAOP advice,
+    and is a perfect candidate for refactoring into a custom Spring AOP advice,
     which then could easily be applied to OrderManager target. Please see the
     AOP chapter.</emphasis></para>
 

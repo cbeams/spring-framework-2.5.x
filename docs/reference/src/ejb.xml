@@ -61,7 +61,7 @@
 
       <para>The Spring approach is to allow the creation and use of proxy
       objects, normally configured inside a Spring ApplicationContext or
-      BeanFactory, which act as codeless business delegates. You do not need
+      BeanFactory, which act as code-less business delegates. You do not need
       to write another Service Locator, another JNDI lookup, or duplicate
       methods in a hand-coded Business Delegate unless you’re adding real
       value.</para>
@@ -135,8 +135,8 @@ public void setMyComponent(MyComponent myComponent) {
       application code: The web tier code (or other EJB client code) has no
       dependence on the use of EJB. If we want to replace this EJB reference
       with a POJO or a mock object or other test stub, we could simply change
-      the myComponent bean definition without changing a line of Java code
-      Additonally, we haven’t had to write a single line of JNDI lookup or
+      the myComponent bean definition without changing a line of Java code.
+      Additionally, we haven’t had to write a single line of JNDI lookup or
       other EJB plumbing code as part of our application.</para>
 
       <para>Benchmarks and experience in real applications indicate that the
@@ -146,7 +146,7 @@ public void setMyComponent(MyComponent myComponent) {
       anyway, as there’s a cost associated with the EJB infrastructure in the
       application server.</para>
 
-      <para>There is one caveat wIth regards the JNDI lookup. In a bean
+      <para>There is one caveat with regards to the JNDI lookup. In a bean
       container, this class is normally best used as a singleton (there simply
       is no reason to make it a prototype). However, if that bean container
       pre-instantiates singletons (as do the XML ApplicationContext variants)
@@ -193,7 +193,7 @@ public void setMyComponent(MyComponent myComponent) {
       That is, client code does not have to deal with the checked
       <literal>RemoteException</literal> class. Any actual
       <literal>RemoteException</literal> that is thrown during the EJB
-      invocation will be rethrown as the non-checked
+      invocation will be re-thrown as the non-checked
       <literal>RemoteAccessException</literal> class, which is a subclass of
       <literal>RuntimeException</literal>. The target service can then be
       switched at will between a local EJB or remote EJB (or even plain Java
@@ -218,7 +218,7 @@ public void setMyComponent(MyComponent myComponent) {
     <literal>AbstractMessageDrivenBean</literal>/<literal>AbstractJmsMessageDrivenBean</literal>,
     respectively.</para>
 
-    <para>Consider an example Stateless Session bean which actually delgates
+    <para>Consider an example Stateless Session bean which actually delegates
     the implementation to a plain java service object. We have the business
     interface:</para>
 
@@ -269,7 +269,7 @@ public void setMyComponent(MyComponent myComponent) {
     environment variable (in the case of the EJB classes, at
     <literal>java:comp/env/ejb/BeanFactoryPath</literal>). If there is a need
     to change the BeanFactory/ApplicationContext loading strategy, the default
-    <literal>BeanFactoryLocator</literal> implementation used may be overriden
+    <literal>BeanFactoryLocator</literal> implementation used may be overridden
     by calling the <literal>setBeanFactoryLocator()</literal> method, either
     in <literal>setSessionContext()</literal>, or in the actual constructor of
     the EJB. Please see the JavaDocs for more details.</para>
@@ -288,10 +288,10 @@ public void setMyComponent(MyComponent myComponent) {
     <literal>ContextJndiBeanFactoryLocator</literal> to load an
     ApplicationContext for the use of the EJB is adequate for some situations.
     However, it is problematic when the ApplicationContext is loading a number
-    of beans, or the initializaiton of those beans is time consuming or memory
+    of beans, or the initialization of those beans is time consuming or memory
     intensive (such as a Hibernate SessionFactory initialization, for
     example), since every EJB will have their own copy. In this case, the user
-    may want to override the defualt
+    may want to override the default
     <literal>ContextJndiBeanFactoryLocator</literal> usage and use another
     <literal>BeanFactoryLocator </literal>variant, such as
     <literal>ContextSingleton<literal>BeanFactoryLocator</literal>e</literal>,

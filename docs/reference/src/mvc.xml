@@ -1602,12 +1602,12 @@ public class FileUploadBean {
     handled by a controller which matched the request.
     <literal>HandlerExceptionResolvers</literal> somewhat resemble the
     exception mappings you can define in the web application descriptor
-    <literal>web.xml</literal>. However, they provide a more flexible to
-    handle exceptions. about what handler was executing when the exception was
-    thrown. Furthermore, a programmatic way of handling exception gives you
-    many more options for how to respond appropriately before the request is
-    forwarded to another URL (the same end result as when using the servlet
-    specific exception mappings).</para>
+    <literal>web.xml</literal>. However, they provide a more flexible way to
+    handle exceptions. They provide information about what handler was
+    executing when the exception was thrown. Furthermore, a programmatic way
+    of handling exception gives you many more options for how to respond
+    appropriately before the request is forwarded to another URL (the same
+    end result as when using the servlet specific exception mappings).</para>
 
     <para>Besides implementing the
     <literal>HandlerExceptionResolver</literal>, which is only a matter of
@@ -1617,7 +1617,7 @@ public class FileUploadBean {
     enables you to take the class name of any exception that might be thrown
     and map it to a view name. This is functionally equivalent to the
     exception mapping feature from the Servlet API, but it's also possible to
-    implement more fine grained mappings of exception from different
+    implement more fine grained mappings of exceptions from different
     handlers.</para>
   </sect1>
 

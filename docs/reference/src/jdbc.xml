@@ -23,7 +23,7 @@
 
     <para>Next, the <literal>org.springframework.jdbc.object</literal> package
     contains classes that represent RDBMS queries, updates, and stored
-    procedures as threadsafe, reusable objects. This approach is modelled by
+    procedures as thread safe, reusable objects. This approach is modeled by
     JDO, although of course objects returned by queries are
     <quote>disconnected</quote> from the database. This higher level of JDBC
     abstraction depends on the lower-level abstraction in the
@@ -92,7 +92,7 @@
       and transaction management issues from the application code. As a
       developer, you don't need to know any details about how to connect to
       the database, that is the responsibility for the administrator that sets
-      up the datasource. You will most likely have to fulfil both roles while
+      up the datasource. You will most likely have to fulfill both roles while
       you are developing and testing you code though, but you will not
       necessarily have to know how the production data source is
       configured.</para>
@@ -317,7 +317,7 @@ public class ExecuteAnUpdate {
   </sect1>
 
   <sect1 id="jdbc-datasource">
-    <title>Controling how we connect to the database</title>
+    <title>Controlling how we connect to the database</title>
 
     <sect2 id="jdbc-DataSourceUtils">
       <title>DataSourceUtils</title>
@@ -444,7 +444,7 @@ public class ExecuteAnUpdate {
     <sect2 id="jdbc-SqlQuery">
       <title>SqlQuery</title>
 
-      <para>Reusable threadsafe object to represent an SQL query. Subclasses
+      <para>Reusable thread safe object to represent an SQL query. Subclasses
       must implement the newResultReader() method to provide an object that
       can save the results while iterating over the ResultSet. This class is
       rarely used directly since the <literal>MappingSqlQuery</literal>, that

@@ -47,7 +47,7 @@
 	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 
-	$Id: dtd.xml,v 1.8 2004-12-08 03:45:16 colins Exp $
+	$Id: dtd.xml,v 1.9 2005-01-01 20:04:48 colins Exp $
 --&gt;
 
 
@@ -197,10 +197,10 @@
 
 	The latter two are similar to PicoContainer and make bean factories simple to
 	configure for small namespaces, but doesn't work as well as standard Spring
-	behaviour for bigger applications.
+	behavior for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
-	always override autowiring. Autowire behaviour can be combined with dependency
+	always override autowiring. Autowire behavior can be combined with dependency
 	checking, which will be performed after all autowiring has been completed.
 --&gt;
 &lt;!ATTLIST bean autowire (no | byName | byType | constructor | autodetect | default) "default"&gt;
@@ -304,7 +304,7 @@
 	matching args without an index, to the point of duplicating supplied args
 	to fill in unspecified constructor args, if they are compatible (i.e. one
 	single String arg will match a constructor with two String args, etc.).
-	The matcher should be less agressive in a future version.
+	The matcher should be less aggressive in a future version.
 --&gt;
 &lt;!ATTLIST constructor-arg index CDATA #IMPLIED&gt;
 
@@ -359,8 +359,8 @@
 
 &lt;!--
 	Name of the method whose implementation should be replaced by the IoC container.
-	If this method is not overloaded, there's no need to use arg-type subelements.
-	If this method is overloaded, arg-type subelements must be used for all
+	If this method is not overloaded, there's no need to use arg-type sub-elements.
+	If this method is overloaded, arg-type sub-elements must be used for all
 	override definitions for the method.
 --&gt;
 &lt;!ATTLIST replaced-method name CDATA #IMPLIED&gt;
@@ -374,7 +374,7 @@
 &lt;!ATTLIST replaced-method replacer CDATA #IMPLIED&gt;
 
 &lt;!--
-	Subelement of replaced-method identifying an argument for a replaced method
+	Sub-element of replaced-method identifying an argument for a replaced method
 	in the event of method overloading.
 --&gt;
 &lt;!ELEMENT arg-type (#PCDATA)&gt;

@@ -9,7 +9,7 @@
     <emphasis>business logic</emphasis>. There are pros and cons for both
     answers, and Spring offers a design for validation (and data binding) that
     does not exclude either one of them. Validation should specifically not be
-    tied to the web tier, should be easily localizable and it should be
+    tied to the web tier, should be easy to localize and it should be
     possible to plug in any validator available. Considering the above, Spring
     has come up with a <literal>Validator</literal> interface that's both
     basic and usable in every layer of an application.</para>
@@ -61,11 +61,11 @@
     <literal>BeanWrapper</literal> interface and its corresponding
     implementation (<literal>BeanWrapperImpl</literal>). As quoted from the
     JavaDoc, the BeanWrapper offers functionality to set and get property
-    values (individually or in bulk), get property descriptors and query the
-    readability and writability of properties. Also, the BeanWrapper offers
-    support for nested properties, enabling the setting of properties on
-    subproperties to an unlimited depth. Then, the BeanWrapper support the
-    ability to add standard JavaBeans
+    values (individually or in bulk), get property descriptors, and to query
+    properties to determine if they are readable or writable. Also, the
+    BeanWrapper offers support for nested properties, enabling the setting of
+    properties on sub-properties to an unlimited depth. Then, the BeanWrapper
+    support the ability to add standard JavaBeans
     <literal>PropertyChangeListeners</literal> and
     <literal>VetoableChangeListeners</literal>, without the need for
     supporting code in the target class. Last but not least, the BeanWrapper

@@ -2,7 +2,7 @@
 <chapter id="orm">
   <title>Data Access using O/R Mappers</title>
 
-  <sect1 id="orm-introducion">
+  <sect1 id="orm-introduction">
     <title>Introduction</title>
 
     <para>Spring provides integration with Hibernate, JDO, and iBATIS SQL Maps
@@ -379,7 +379,7 @@
       <classname>HibernateInterceptor</classname> is that it allows any
       checked application exception to be thrown within the data access code,
       while HibernateTemplate is restricted to unchecked exceptions within the
-      callback. Note that one can offen defer the respective checks and
+      callback. Note that one can often defer the respective checks and
       throwing of application exceptions to after the callback, though. The
       interceptor's major drawback is that it requires special setup in the
       context. <classname>HibernateTemplate</classname>'s convenience methods

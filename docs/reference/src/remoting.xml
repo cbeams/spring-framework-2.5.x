@@ -113,7 +113,7 @@ public class AccountServiceImpl implements AccountService {
 			<title>Exporting the service using the <literal>RmiServiceExporter</literal></title>
 			<para>
 				Using the <literal>RmiServiceExporter</literal>, we can expose the interface
-				of our AccountServer object as RMI object. The interface can be accessed by using
+				of our AccountService object as RMI object. The interface can be accessed by using
 				<literal>RmiProxyFactoryBean</literal>, or via plain RMI in case of a traditional
 				RMI service. The <literal>RmiServiceExporter</literal> explicitly supports the
 				exposing of any non-RMI services via RMI invokers.
@@ -403,7 +403,7 @@ public class SimpleObject {
 		</para>
 		<para>
 			Hessian and/or Burlap might provide significant value when operating in a
-			heterogenous environment, because they explicitly allow for non-Java clients.
+			heterogeneous environment, because they explicitly allow for non-Java clients.
 			However, non-Java support is still limited. Known problems include the serialization
 			of Hibernate objects in combination with lazily initializing collections. If you
 			have such a data model, consider using RMI or HTTP invokers instead of Hessian.

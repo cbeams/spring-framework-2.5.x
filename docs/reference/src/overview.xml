@@ -100,7 +100,7 @@
 		<para>
 			Spring's <emphasis>AOP</emphasis> package provides an 
 			<emphasis>AOP Alliance</emphasis> compliant aspect-oriented
-			programming implemention allowing you to define, for example,
+			programming implementation allowing you to define, for example,
 			method-interceptors and pointcuts to cleanly decouple code
 			implementing functionality that should logically speaking be separated.
 			Using source-level metadata functionality you can 
@@ -230,7 +230,7 @@
 		<para>
 			Spring also provides an access layer and abstraction layer for Enterprise JavaBeans,
 			enabling you to reuse your existing POJOs and wrap them in Stateless Session Beans,
-			for use in scalable failsafe webapplications, that might need declarative security.
+			for use in scalable failsafe web applications, that might need declarative security.
 		</para>
 	</sect1>
 	
