@@ -219,6 +219,12 @@ public class Transition {
 		}
 	};
 
+	/**
+	 * Simple, default transition criteria that matches on a eventId and nothing
+	 * else. Specifically, if the last event that occured has id ${eventId},
+	 * this criteria will return true.
+	 * @author Keith Donald
+	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
 		private String eventId;
 
