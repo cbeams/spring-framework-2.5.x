@@ -2,7 +2,7 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 
-import org.springframework.util.ExpiringObject;
+import org.springframework.transaction.support.ResourceHolderSupport;
 
 /**
  * Connection holder, wrapping a JDBC Connection.
@@ -19,11 +19,9 @@ import org.springframework.util.ExpiringObject;
  * @see DataSourceTransactionObject
  * @see DataSourceUtils
  */
-public class ConnectionHolder extends ExpiringObject {
+public class ConnectionHolder extends ResourceHolderSupport {
 
 	private final Connection connection;
-
-	private boolean rollbackOnly;
 
 	public ConnectionHolder(Connection connection) {
 		this.connection = connection;
@@ -31,14 +29,6 @@ public class ConnectionHolder extends ExpiringObject {
 
 	public Connection getConnection() {
 		return connection;
-	}
-
-	public void setRollbackOnly() {
-		this.rollbackOnly = true;
-	}
-
-	public boolean isRollbackOnly() {
-		return rollbackOnly;
 	}
 
 }

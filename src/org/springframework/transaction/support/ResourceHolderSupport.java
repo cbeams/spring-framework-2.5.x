@@ -1,18 +1,37 @@
-package org.springframework.util;
+package org.springframework.transaction.support;
 
 import java.util.Date;
 
 /**
- * Base class for objects that can expire after a certain number of seconds
- * or milliseconds. The main usage is to determine remaining values for
- * transactional timeouts.
+ * Convenient base class for resource holders.
+ *
+ * <p>Features rollback-only support for nested Hibernate transactions.
+ * Can expire after a certain number of seconds or milliseconds,
+ * to determine transactional timeouts.
+ *
  * @author Juergen Hoeller
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager#doBegin
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  */
-public class ExpiringObject {
+public abstract class ResourceHolderSupport {
+
+	private boolean rollbackOnly;
 
 	private Date deadline;
+
+	/**
+	 * Mark the resource transaction as rollback-only.
+	 */
+	public void setRollbackOnly() {
+		this.rollbackOnly = true;
+	}
+
+	/**
+	 * Return whether the resource transaction is marked as rollback-only.
+	 */
+	public boolean isRollbackOnly() {
+		return rollbackOnly;
+	}
 
 	/**
 	 * Set the timeout for this object in seconds.
