@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Rod Johnson
  * @author Rob Harrop
- * @version $Id: Cglib2AopProxy.java,v 1.11 2004-07-24 14:09:02 robharrop Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.12 2004-07-25 14:03:13 johnsonr Exp $
  */
 public class Cglib2AopProxy implements AopProxy, Serializable {
 
@@ -327,7 +327,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
         }
         catch (ClassNotFoundException ex) {
             throw new AopConfigException(AdvisedSupport.class + " missing attempting to deserialize an AOP proxy: " +
-                    "Are the Spring AOP libraries available on the client side?");
+                    "Are the Spring AOP libraries available on the client side?", ex);
         }
     }
 

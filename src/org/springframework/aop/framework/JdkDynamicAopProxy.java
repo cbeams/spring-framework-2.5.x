@@ -51,7 +51,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.16 2004-07-24 09:45:15 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.17 2004-07-25 14:03:13 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -248,7 +248,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 		catch (ClassNotFoundException ex) {
 			throw new AopConfigException(AdvisedSupport.class + " missing attempting to deserialize an AOP proxy: " +
-					"Are the Spring AOP libraries available on the client side?");
+					"Are the Spring AOP libraries available on the client side?", ex);
 		}
 	}
 
