@@ -244,8 +244,10 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
     <sect2 id="beans-factory-class">
       <title>The bean class</title>
 
-      <para>The <literal>class</literal> attribute is mandatory and is used
-      for one of two purposes. In the much more common case where the
+      <para>The <literal>class</literal> attribute is normally mandatory (see
+      <xref linkend="beans-instance-factory-method" /> and <xref
+      linkend="beans-child-bean-definitions" /> for the two exception) and is
+      used for one of two purposes. In the much more common case where the
       BeanFactory itself directly creates the bean by calling its constructor
       (equivalent to Java code calling <emphasis>new</emphasis>), the class
       attribute specifies the class of the bean to be constructed. In the less
@@ -315,6 +317,38 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
         <para>The mechanism for supplying (optional) arguments to the factory
         method, or setting properties of the object instance after it has been
         returned from the factory, will be described shortly.</para>
+      </sect3>
+
+      <sect3 id="beans-instance-factory-method">
+        <title>Bean creation via instance factory method</title>
+
+        <para>Quite similar to using a static factory method to create a bean,
+        is the the use of an instance (non-static) factory method, where a
+        factory method of an existing bean from the factory is called to
+        create the new bean.</para>
+
+        <para>To use this mechanism, the <literal>class</literal> attribute
+        must be left empty, and the <literal>factory-bean</literal> attribute
+        must specify the name of a bean in the current or an ancestor bean
+        factory which contains the factory method. The factory method itself
+        should still be set via the <literal>factory-method</literal>
+        attribute.</para>
+
+        <para>Following is an example:<programlisting>&lt;!-- The factory bean, which contains a method called
+     createInstance --&gt;
+&lt;bean id="myFactoryBean"
+      class="..."&gt;
+  ...
+&lt;/bean&gt;
+&lt;!-- The bean to be created via the factory bean --&gt;
+&lt;bean id="exampleBean"
+      factory-bean="myFactoryBean"
+      factory-method="createInstance"/&gt;</programlisting></para>
+
+        <para>Although the mechanisms for setting bean properties are still to
+        be discussed, one implication of this approach is that the factory
+        bean itself can be managed and configured via Dependency Injection, by
+        the container.</para>
       </sect3>
     </sect2>
 
@@ -653,7 +687,11 @@ BeanFactory factory = (BeanFactory) appContext;</programlisting></para>
       it is important to realize that the type of the class being returned by
       the factory method does not have to be of the same type as the class
       which contains the static factory method, although in this example it
-      is.</para>
+      is. An instance (non-static) factory method, mentioned previously, would
+      be used in an essentially idential fashion (aside from the use of the
+      <literal>factory-bean</literal> attribute instead of the
+      <literal>class</literal> attribute), so will not be detailed
+      here.</para>
     </sect2>
 
     <sect2 id="beans-factory-properties-detailed">
@@ -1383,7 +1421,7 @@ public class AnotherExampleBean implements DisposableBean {
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 id="beans-child-bean-definitions">
     <title>Child bean definitions</title>
 
     <para>A bean definition potentially contains a large amount of
