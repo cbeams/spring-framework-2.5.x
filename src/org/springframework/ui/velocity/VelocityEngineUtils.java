@@ -47,8 +47,9 @@ public abstract class VelocityEngineUtils {
 	 * @param writer the Writer to write the result to
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
-	public static void mergeTemplate(VelocityEngine velocityEngine, String templateLocation, Map model,
-	                                 Writer writer) throws VelocityException {
+	public static void mergeTemplate(
+	    VelocityEngine velocityEngine, String templateLocation, Map model, Writer writer)
+	    throws VelocityException {
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
 			velocityEngine.mergeTemplate(templateLocation, velocityContext, writer);
@@ -77,8 +78,9 @@ public abstract class VelocityEngineUtils {
 	 * @param writer the Writer to write the result to
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
-	public static void mergeTemplate(VelocityEngine velocityEngine, String templateLocation, String encoding,
-																	 Map model, Writer writer) throws VelocityException {
+	public static void mergeTemplate(
+	    VelocityEngine velocityEngine, String templateLocation, String encoding, Map model, Writer writer)
+	    throws VelocityException {
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
 			velocityEngine.mergeTemplate(templateLocation, encoding, velocityContext, writer);
@@ -108,8 +110,9 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 * @see org.springframework.mail.MailPreparationException
 	 */
-	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
-																							 Map model) throws VelocityException {
+	public static String mergeTemplateIntoString(
+	    VelocityEngine velocityEngine, String templateLocation, Map model)
+	    throws VelocityException {
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, model, result);
 		return result.toString();
@@ -129,8 +132,9 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 * @see org.springframework.mail.MailPreparationException
 	 */
-	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
-																							 String encoding, Map model) throws VelocityException {
+	public static String mergeTemplateIntoString(
+	    VelocityEngine velocityEngine, String templateLocation, String encoding, Map model)
+	    throws VelocityException {
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, encoding, model, result);
 		return result.toString();

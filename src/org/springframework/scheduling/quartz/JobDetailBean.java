@@ -41,7 +41,8 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
-public class JobDetailBean extends JobDetail implements BeanNameAware, ApplicationContextAware, InitializingBean {
+public class JobDetailBean extends JobDetail
+    implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
 	private String beanName;
 
@@ -101,8 +102,9 @@ public class JobDetailBean extends JobDetail implements BeanNameAware, Applicati
 		}
 		if (this.applicationContextJobDataKey != null) {
 			if (this.applicationContext == null) {
-				throw new IllegalStateException("JobDetailBean needs to be set up in an ApplicationContext " +
-																				"to be able to handle an 'applicationContextJobDataKey'");
+				throw new IllegalStateException(
+				    "JobDetailBean needs to be set up in an ApplicationContext " +
+				    "to be able to handle an 'applicationContextJobDataKey'");
 			}
 			getJobDataMap().put(this.applicationContextJobDataKey, this.applicationContext);
 		}

@@ -35,6 +35,12 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 
 	private LobHandler lobHandler;
 
+	/**
+	 * Set the LobHandler to use for BLOB/CLOB access.
+	 * Could use a DefaultLobHandler instance as default,
+	 * but relies on a specified LobHandler here.
+	 * @see org.springframework.jdbc.support.lob.DefaultLobHandler
+	 */
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
 	}
@@ -56,8 +62,8 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 				"SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
 				new AbstractLobStreamingResultSetExtractor() {
 					protected void handleNoRowFound() throws LobRetrievalFailureException {
-						throw new IncorrectResultSizeDataAccessException("Image with name '" + name + "' not found in database",
-						                                                 1, 0);
+						throw new IncorrectResultSizeDataAccessException(
+						    "Image with name '" + name + "' not found in database", 1, 0);
 					}
 					public void streamData(ResultSet rs) throws SQLException, IOException {
 						FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
@@ -66,8 +72,9 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		);
 	}
 
-	public void storeImage(final String name, final InputStream contentStream, final int contentLength,
-												 final String description) throws DataAccessException {
+	public void storeImage(
+	    final String name, final InputStream contentStream, final int contentLength, final String description)
+	    throws DataAccessException {
 		getJdbcTemplate().execute(
 				"INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)",
 				new AbstractLobCreatingPreparedStatementCallback(this.lobHandler) {
