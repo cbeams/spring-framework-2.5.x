@@ -11,22 +11,19 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
-import org.springframework.util.ControlFlowFactory;
+
+import org.springframework.core.ControlFlowFactory;
 
 /**
  * Programmatic support classes for compiling with Commons Attributes
  * so that tests can run within Eclipse.
  * @author Rod Johnson
- * @version $Id: CommonsAttributeCompilerUtils.java,v 1.3 2003-12-21 12:00:28 johnsonr Exp $
+ * @version $Id: CommonsAttributeCompilerUtils.java,v 1.4 2004-02-02 11:55:58 jhoeller Exp $
  */
 public class CommonsAttributeCompilerUtils {
 
 	public static final String SPRING_ROOT = "c:\\work\\spring";
 	
-	
-	/**
-	 * 
-	 */
 	public static void compileAttributesIfNecessary(String testWildcards) {
 		if (inIde()) {
 			ideAttributeCompile(testWildcards);
@@ -39,7 +36,7 @@ public class CommonsAttributeCompilerUtils {
 
 	public static boolean inEclipse() {
 		// Use our AOP control flow functionality
-		return ControlFlowFactory.getInstance().createControlFlow().underToken("eclipse.jdt");
+		return ControlFlowFactory.createControlFlow().underToken("eclipse.jdt");
 	}
 
 	public static void ideAttributeCompile(String testWildcards) {
