@@ -243,7 +243,7 @@ public class MockServletContext implements ServletContext {
 	 * The name and type of the servlet log file is specific to the servlet container.
 	 **/
 	public void log(String message) { // XXX change this to use something testable
-		System.out.println("SERVLET LOG --> " + message);
+		//System.out.println("SERVLET LOG --> " + message);
 	}
 
 	/**
