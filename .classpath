@@ -9,7 +9,6 @@
     <classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/hibernate/dom4j.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/burlap-2.1.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/caucho/hessian-2.1.7.jar"/>
@@ -32,7 +31,6 @@
     <classpathentry kind="src" path="samples/lightcountries/src"/>
     <classpathentry kind="src" path="sandbox/src"/>
     <classpathentry kind="src" path="sandbox/test"/>
-    <classpathentry kind="lib" path="lib/tiles/struts-1.1.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-collections.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
@@ -51,5 +49,7 @@
     <classpathentry kind="lib" path="lib/ant/ant.jar"/>
     <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
     <classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
+    <classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
+    <classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
