@@ -10,8 +10,6 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 
 	private Transition transition;
 
-	private String eventId;
-
 	private String stateIdTransitioningFrom;
 
 	/**

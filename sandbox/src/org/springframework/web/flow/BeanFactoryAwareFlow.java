@@ -44,7 +44,8 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 
 	public void setServiceLocator(FlowServiceLocator dao) {
 		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, dao,
-				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows: ");
+				"The FlowServiceLocator must be a BeanFactoryFlowServiceLocator implementation "
+						+ "for BeanFactoryAwareFlows: ");
 		super.setServiceLocator(dao);
 	}
 

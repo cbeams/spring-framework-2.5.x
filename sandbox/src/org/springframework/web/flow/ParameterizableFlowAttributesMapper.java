@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -38,7 +37,7 @@ import org.springframework.util.closure.Constraint;
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
- * <td>toMappingsList</td>
+ * <td>toMappings</td>
  * <td>empty</td>
  * <td>Mappings executed when mapping parent flow data <i>to </i> a newly
  * spawned sub flow. The provided list contains the names of the attributes in
@@ -54,7 +53,7 @@ import org.springframework.util.closure.Constraint;
  * of the target entry that will be placed in the subflow model.</td>
  * </tr>
  * <tr>
- * <td>fromMappingsList</td>
+ * <td>fromMappings</td>
  * <td>empty</td>
  * <td>Mappings executed when mapping subflow data <i>from </i> the subflow
  * back to the parent flow (once the subflow ends and the parent flow resumes).
@@ -111,9 +110,9 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	 * Only <strong>one </strong> of setToMappings or setToMappingsMap must be
 	 * called.
 	 */
-	public void setToMappings(List toMappingsList) {
+	public void setToMappings(Collection toMappings) {
 		this.toMappings = new HashMap();
-		putListMappings(this.toMappings, toMappingsList);
+		putCollectionMappings(this.toMappings, toMappings);
 	}
 
 	/**
@@ -149,9 +148,9 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	 * Only <strong>one </strong> of setFromMappings or setFromMappingsMap must
 	 * be called.
 	 */
-	public void setFromMappings(List fromMappingsList) {
-		this.fromMappings = new HashMap(fromMappingsList.size());
-		putListMappings(this.fromMappings, fromMappingsList);
+	public void setFromMappings(Collection fromMappings) {
+		this.fromMappings = new HashMap(fromMappings.size());
+		putCollectionMappings(this.fromMappings, fromMappings);
 	}
 
 	/**
@@ -173,12 +172,12 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	}
 
 	// internal worker function
-	private void putListMappings(Map map, List mappingsList) {
+	private void putCollectionMappings(Map map, Collection mappingsList) {
 		Iterator it = mappingsList.iterator();
 		while (it.hasNext()) {
 			Object key = it.next();
-			if (key instanceof List) {
-				putListMappings(map, (List)key);
+			if (key instanceof Collection) {
+				putCollectionMappings(map, (Collection)key);
 			}
 			else if (key instanceof Map) {
 				Map internalMap = (Map)key;
@@ -202,7 +201,7 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		}
 	}
 
-	public void setMapMapMissingAttributesToNull(boolean toNull) {
+	public void setMapMissingAttributesToNull(boolean toNull) {
 		this.mapMissingAttributesToNull = toNull;
 	}
 

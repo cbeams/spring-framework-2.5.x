@@ -66,62 +66,58 @@ public abstract class TransitionableState extends AbstractState {
 		return Collections.unmodifiableSet(transitions);
 	}
 
-	protected Transition getTransition(String eventId, Flow flow) throws NoSuchTransitionInStateException {
-		Iterator it = transitions.iterator();
-		while (it.hasNext()) {
-			Transition transition = (Transition)it.next();
-			if (transition.matches(eventId)) {
-				return transition;
-			}
-		}
-		throw new NoSuchTransitionInStateException(flow, this, eventId);
-	}
-
 	/**
-	 * Execute the event identified by <code>eventId</code> in this state
+	 * Execute the event identified by <code>eventId</code> in this state.
 	 * 
 	 * @param eventId The id of the event to execute (e.g 'submit', 'next',
 	 *        'back')
-	 * @param flow The flow definition
 	 * @param sessionExecutionStack A flow session execution stack, tracking any
 	 *        suspended parent flows that spawned this flow (as a subflow)
 	 * @param request the client http request
 	 * @param response the server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
-	 * @throws IllegalArgumentException if the <code>eventId</code> does not
-	 *         map to a valid transition for this state.
+	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
+	 *         does not map to a valid transition for this state.
 	 */
 	public ViewDescriptor execute(String eventId, FlowSessionExecutionStack sessionExecution,
-			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
+			HttpServletRequest request, HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
-		String activeFlowId = null;
 		if (logger.isDebugEnabled()) {
-			activeFlowId = sessionExecution.getQualifiedActiveFlowId();
-			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + activeFlowId
+			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + getFlow().getId()
 					+ "' signaled");
 		}
 		sessionExecution.setLastEventId(eventId);
-		ViewDescriptor viewDescriptor = getTransition(eventId, sessionExecution.getActiveFlow()).execute(
-				sessionExecution, request, response);
+		ViewDescriptor viewDescriptor = getTransition(eventId).execute(sessionExecution, request, response);
 		if (logger.isDebugEnabled()) {
 			if (sessionExecution.isActive()) {
-				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '" + activeFlowId
-						+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
-						+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
+				logger.debug("Event '" + eventId + "' within state '" + this + "' for flow '" + getFlow().getId()
+						+ "' processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
+						+ "' in flow '" + sessionExecution.getActiveFlowId() + "'");
 			}
 			else {
-				logger.debug("Event '" + eventId + "' within last state '" + this + "' for flow '" + activeFlowId
-						+ "' was processed; as a result, flow session execution has ended");
+				logger.debug("Event '" + eventId + "' within state '" + this + "' for flow '" + getFlow().getId()
+						+ "' processed; as a result, the flow session execution has ended");
 			}
 		}
 		return viewDescriptor;
 	}
 
+	protected Transition getTransition(String eventId) throws NoSuchTransitionInStateException {
+		Iterator it = transitions.iterator();
+		while (it.hasNext()) {
+			Transition transition = (Transition)it.next();
+			if (transition.executesOn(eventId)) {
+				return transition;
+			}
+		}
+		throw new NoSuchTransitionInStateException(this, eventId);
+	}
+
 	protected void updateCurrentStateIfNeccessary(String eventId, FlowSessionExecutionStack sessionExecution) {
 		if (!this.equals(sessionExecution.getCurrentState())) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Event '" + eventId + "' in state '" + getId()
+			if (logger.isDebugEnabled()) {
+				logger.debug("Event '" + eventId + "' in state '" + getId()
 						+ "' was signaled by client; however the current flow session execution state is '"
 						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + getId() + "'");
 			}

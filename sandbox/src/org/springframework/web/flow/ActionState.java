@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * A state that executes one or more action beans when entered.
  * @author Keith Donald
  */
 public class ActionState extends TransitionableState {
@@ -170,6 +171,14 @@ public class ActionState extends TransitionableState {
 		return this.actionBeans.remove(new ActionBeanHolder(actionBean));
 	}
 
+	/**
+	 * Hook method implementation that initiates state processing.
+	 * 
+	 * This implementation iterators over each configured ActionBean for this
+	 * state and executes it. If the <code>actionBeanName</code> is provided
+	 * and not the ActionBean instance, the instance is retrieved from the
+	 * <code>FlowServiceLocator</code>
+	 */
 	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		Iterator it = actionBeanIterator();
@@ -204,6 +213,10 @@ public class ActionState extends TransitionableState {
 		}
 	}
 
+	/**
+	 * @return An iterator that returns the set of action beans to execute for
+	 *         this state.
+	 */
 	protected Iterator actionBeanIterator() {
 		final Iterator it = this.actionBeans.iterator();
 		return new Iterator() {
@@ -234,16 +247,5 @@ public class ActionState extends TransitionableState {
 	 */
 	protected String getActionBeanName() {
 		return ((ActionBeanHolder)actionBeans.iterator().next()).actionBeanName;
-	}
-
-	protected boolean triggersTransition(ActionBeanEvent event, Flow flow) {
-		return getTransition(event, flow) != null;
-	}
-
-	protected Transition getTransition(ActionBeanEvent event, Flow flow) {
-		if (event == null) {
-			return null;
-		}
-		return getTransition(event.getId(), flow);
 	}
 }

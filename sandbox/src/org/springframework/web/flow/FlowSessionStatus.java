@@ -18,6 +18,7 @@ package org.springframework.web.flow;
 import org.springframework.enums.ShortCodedEnum;
 
 /**
+ * Flow session statuses.
  * @author Keith Donald
  */
 public class FlowSessionStatus extends ShortCodedEnum {

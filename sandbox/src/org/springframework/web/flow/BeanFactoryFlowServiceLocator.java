@@ -10,6 +10,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
+ * A flow service locator that uses a Spring bean factory to lookup services.
  * @author Keith Donald
  */
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {

@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * DAO interface used by flows to retrieve needed artifacts
+ * Service locator interface used by flows to retrieve needed artifacts
  * <p>
  * Typically implemented via Spring's ServiceLocatorProxyCreator, to get
  * artifacts as beans out of a Spring context.

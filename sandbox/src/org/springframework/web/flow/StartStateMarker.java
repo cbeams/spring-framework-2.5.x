@@ -29,35 +29,39 @@ import org.springframework.util.DefaultObjectStyler;
 /**
  * @author Keith Donald
  */
-public class FlowStartStateMarker implements Serializable {
-	private static final Log logger = LogFactory.getLog(FlowStartStateMarker.class);
+public class StartStateMarker implements Serializable {
+	private static final Log logger = LogFactory.getLog(StartStateMarker.class);
+
+	private Flow flow;
 
 	private TransitionableState state;
 
-	public FlowStartStateMarker(TransitionableState state) {
+	public StartStateMarker(Flow flow, TransitionableState state) {
+		Assert.notNull(flow, "The flow is required");
 		Assert.notNull(state, "The start state is required");
+		this.flow = flow;
 		this.state = state;
 	}
 
-	protected TransitionableState getState() {
+	protected TransitionableState getStartState() {
 		return state;
 	}
 
-	public FlowSessionExecutionStartResult enter(Flow flow, HttpServletRequest request, HttpServletResponse response,
+	public FlowSessionExecutionStartResult start(HttpServletRequest request, HttpServletResponse response,
 			Map inputAttributes) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getState()
+			logger.debug("Starting new session for flow '" + flow.getId() + "' in start state '" + getStartState()
 					+ "' with input attributes '" + DefaultObjectStyler.call(inputAttributes) + "'");
 		}
 		FlowSessionExecutionStack sessionExecution = createFlowSessionExecutionStack();
-		ViewDescriptor startingView = enter(flow, sessionExecution, request, response, inputAttributes);
+		ViewDescriptor startingView = startIn(sessionExecution, request, response, inputAttributes);
 		return new FlowSessionExecutionStartResult(sessionExecution, startingView);
 	}
 
-	public ViewDescriptor enter(Flow flow, FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
+	public ViewDescriptor startIn(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
 		sessionExecution.activate(flow.createSession(inputAttributes));
-		return getState().enter(sessionExecution, request, response);
+		return getStartState().enter(sessionExecution, request, response);
 	}
 
 	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {

@@ -18,6 +18,8 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
+ * Extension of attributes accessor allowing for mutable operations; if you dont
+ * need mutability, pass AttributesAccessor around instead--it's safer.
  * @author Keith Donald
  */
 public interface MutableAttributesAccessor extends AttributesAccessor {

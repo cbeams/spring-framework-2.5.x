@@ -33,14 +33,14 @@ public class NoSuchTransitionInStateException extends FlowNavigationException {
 
 	private String eventId;
 
-	public NoSuchTransitionInStateException(Flow flow, TransitionableState state, String eventId) {
-		super(flow);
+	public NoSuchTransitionInStateException(TransitionableState state, String eventId) {
+		super(state.getFlow());
 		this.state = state;
 		this.eventId = eventId;
 	}
 
-	public NoSuchTransitionInStateException(Flow flow, TransitionableState state, String eventId, Throwable cause) {
-		super(flow, cause);
+	public NoSuchTransitionInStateException(TransitionableState state, String eventId, Throwable cause) {
+		super(state.getFlow(), cause);
 		this.state = state;
 		this.eventId = eventId;
 	}

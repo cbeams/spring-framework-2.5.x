@@ -96,7 +96,7 @@ public class Transition implements Serializable {
 		return targetStateId;
 	}
 
-	public boolean matches(String eventId) {
+	public boolean executesOn(String eventId) {
 		return eventIdCriteria.test(eventId);
 	}
 

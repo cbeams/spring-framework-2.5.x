@@ -30,6 +30,12 @@ import org.springframework.util.ToStringCreator;
  * Flow definitions. Types of states include action states, view states, subflow
  * states, and end states.
  * 
+ * Subclasses of this class capture all the configuration information needed for
+ * a specific type of state associatable with a single Flow definition.
+ * Subclasses should override the <code>doEnterState</code> method to execute
+ * the action that should occur when this state is entered, acting on its
+ * configuration information.
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractState implements Serializable {
@@ -42,13 +48,36 @@ public abstract class AbstractState implements Serializable {
 
 	private Flow flow;
 
+	/**
+	 * Creates a state for the provided <code>flow</code> identified by the
+	 * provided <code>id</code>.
+	 * 
+	 * The id must be locally unique to the owning flow.
+	 * 
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow);
+	 */
 	public AbstractState(Flow flow, String id) {
-		Assert.hasText(id, "The state must have a valid identifier");
+		setId(id);
 		setFlow(flow);
+	}
+
+	protected void setId(String id) {
+		Assert.hasText(id, "The state must have a valid identifier");
 		this.id = id;
 	}
 
+	/**
+	 * Set the owning flow for this state. Each state has exactly one owning
+	 * flow. This property must be non-null.
+	 * @param flow the owning flow
+	 */
 	protected void setFlow(Flow flow) {
+		Assert.notNull(flow, "The owning flow is required");
+		if (!flow.containsState(this.id)) {
+			throw new IllegalArgumentException("This flow '" + flow.getId() + "' already contains a state with id '"
+					+ id + "' - state ids must be locally unique to the flow definition.");
+		}
 		this.flow = flow;
 	}
 
@@ -56,26 +85,57 @@ public abstract class AbstractState implements Serializable {
 		return flow;
 	}
 
+	/**
+	 * Is this state transitionable? Meaning, is it capable of executing a
+	 * transition to another state on the occurence of an event? All subclasses
+	 * of <code>TransitionableState</code> are transitionable.
+	 * @return true or false
+	 */
 	public boolean isTransitionable() {
 		return false;
 	}
 
+	/**
+	 * Is this state a view state? View states return
+	 * <code>View Descriptors</code> that request rendering of a view resource
+	 * with model data.
+	 * @return true or false
+	 */
 	public boolean isViewState() {
 		return false;
 	}
 
+	/**
+	 * Is this state an action state? Action states execute action beans when
+	 * entered.
+	 * @return true or false
+	 */
 	public boolean isActionState() {
 		return false;
 	}
 
+	/**
+	 * Is this state a sub flow state? Sub flow states spawn flows as sub flows
+	 * within a session execution when entered.
+	 * @return true or false
+	 */
 	public boolean isSubFlowState() {
 		return false;
 	}
 
+	/**
+	 * Is this state an end state? End states terminate a flow session when
+	 * entered.
+	 * @return
+	 */
 	public boolean isEndState() {
 		return false;
 	}
 
+	/**
+	 * Returns the state identifier, unique to the owning flow.
+	 * @return The state identifier.
+	 */
 	public String getId() {
 		return id;
 	}
@@ -89,18 +149,16 @@ public abstract class AbstractState implements Serializable {
 			return false;
 		}
 		AbstractState s = (AbstractState)o;
-		return id.equals(s.id);
+		return flow.getId().equals(s.flow.getId()) && id.equals(s.id);
 	}
 
 	public int hashCode() {
-		return id.hashCode();
+		return flow.getId().hashCode() + id.hashCode();
 	}
 
 	/**
 	 * Requesting entering of this state for the active (currently executing)
 	 * flow session.
-	 * @param flow The flow definition associated with the executing flow
-	 *        session
 	 * @param sessionExecutionStack The session execution stack, tracking the
 	 *        current active flow session
 	 * @param request The client http request
@@ -119,8 +177,6 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param flow The flow definition associated with the executing flow
-	 *        session
 	 * @param sessionExecutionStack The session execution stack, tracking the
 	 *        current active flow session
 	 * @param request The client http request

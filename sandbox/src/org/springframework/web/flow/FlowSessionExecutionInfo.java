@@ -6,6 +6,8 @@ package org.springframework.web.flow;
 import java.io.Serializable;
 
 /**
+ * Provides management information about the current state of a ongoing flow
+ * session execution.
  * @author Keith Donald
  */
 public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializable {
@@ -69,7 +71,7 @@ public interface FlowSessionExecutionInfo extends AttributesAccessor, Serializab
 	public boolean isRootFlowActive();
 
 	/**
-	 * @return
+	 * @return The id of the current state of this flow session execution.
 	 */
 	public String getCurrentStateId();
 

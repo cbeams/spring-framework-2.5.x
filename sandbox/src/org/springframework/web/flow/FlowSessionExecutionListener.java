@@ -24,19 +24,54 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface FlowSessionExecutionListener {
 
+	/**
+	 * Called when a new flow session execution was started.
+	 * @param sessionExecution
+	 */
 	public void started(FlowSessionExecution sessionExecution);
 
+	/**
+	 * Called when a new client HTTP request is submitted to manipulate this
+	 * session execution.
+	 * @param sessionExecution
+	 * @param request
+	 */
 	public void requestSubmitted(FlowSessionExecution sessionExecution, HttpServletRequest request);
 
+	/**
+	 * Called when a new client HTTP request is processed.
+	 * @param sessionExecution
+	 * @param request
+	 */
 	public void requestProcessed(FlowSessionExecution sessionExecution, HttpServletRequest request);
 
+	/**
+	 * Called when an event is signaled in a state, prior to a state transition.
+	 * @param sessionExecution
+	 * @param eventId
+	 */
 	public void eventSignaled(FlowSessionExecution sessionExecution, String eventId);
 
+	/**
+	 * Called when a state transitions, after the transition occurs.
+	 * @param sessionExecution
+	 * @param previousState
+	 * @param newState
+	 */
 	public void stateTransitioned(FlowSessionExecution sessionExecution, AbstractState previousState,
 			AbstractState newState);
 
+	/**
+	 * Called when a sub flow is spawned.
+	 * @param sessionExecution
+	 */
 	public void subFlowSpawned(FlowSessionExecution sessionExecution);
 
+	/**
+	 * Called when a sub flow is ended.
+	 * @param sessionExecution
+	 * @param endedSession
+	 */
 	public void subFlowEnded(FlowSessionExecution sessionExecution, FlowSession endedSession);
 
 	public void ended(FlowSessionExecution sessionExecution, FlowSession endedRootFlowSession);

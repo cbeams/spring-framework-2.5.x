@@ -20,6 +20,7 @@ import java.util.EventObject;
 import org.springframework.util.ToStringCreator;
 
 /**
+ * A event object representing the result of an ActionBean execution.
  * @author Keith Donald
  */
 public class ActionBeanEvent extends EventObject {

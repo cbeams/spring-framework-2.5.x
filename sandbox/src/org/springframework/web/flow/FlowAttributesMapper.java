@@ -18,11 +18,28 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
+ * A service interface for mapping attributes of a parent flow session down to a
+ * child flow session, when the child flow is spawned. In addition, this
+ * interface maps attributes of a child flow session back up to a resuming
+ * parent flow, when the child session ends.
  * @author Keith Donald
  */
 public interface FlowAttributesMapper {
+
+	/**
+	 * Create a map of model attributes that should be passed to the child flow.
+	 * @param parentFlowAttributes The parent flow attributes, the possible set
+	 *        to pass down to the child.
+	 * @return A map of attributes to pass to the newly spawned child subflow.
+	 */
 	public Map createSpawnedSubFlowAttributesMap(AttributesAccessor parentFlowAttributes);
 
+	/**
+	 * Map relavent attributes of an ending sub flow model back up to a resuming
+	 * parent flow model.
+	 * @param subFlowAttributes The child's attributes
+	 * @param parentFlowAttributes The parent's attributes.
+	 */
 	public void mapToResumingParentFlow(AttributesAccessor subFlowAttributes,
 			MutableAttributesAccessor parentFlowAttributes);
 }

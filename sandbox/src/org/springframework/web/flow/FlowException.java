@@ -16,6 +16,8 @@
 package org.springframework.web.flow;
 
 /**
+ * Base class for all throwable runtime exceptions of the flow system that
+ * indicate programmer configuration error.
  * @author Keith Donald
  */
 public abstract class FlowException extends RuntimeException {
