@@ -28,7 +28,8 @@ public interface LabeledEnumResolver {
 	 * Returns a set of enumerations of a particular type. Each element in the
 	 * list should be an instance of LabeledEnum.
 	 * @param type the enum type
-	 * @return A list of localized enumeration instances for the provided type.
+	 * @return A list of localized enumeration instances for the provided type
+	 * @throws IllegalArgumentException if the type is not supported
 	 */
 	public Collection getLabeledEnumCollection(String type);
 
@@ -37,7 +38,8 @@ public interface LabeledEnumResolver {
 	 * map should be a key->value pair, where the key is the enum code, and the
 	 * value is the <code>LabeledEnum</code> instance.
 	 * @param type the enum type
-	 * @return A map of localized enumeration instances.
+	 * @return A map of localized enumeration instances
+	 * @throws IllegalArgumentException if the type is not supported
 	 */
 	public Map getLabeledEnumMap(String type);
 
@@ -46,15 +48,19 @@ public interface LabeledEnumResolver {
 	 * @param type the enum type
 	 * @param code the enum code
 	 * @return The enum, or <code>null</code> if not found.
+	 * @throws IllegalArgumentException if the code did not map to a valid
+	 *         instance
 	 */
-	public LabeledEnum getLabeledEnum(String type, Comparable code);
+	public LabeledEnum getLabeledEnum(String type, Comparable code) throws IllegalArgumentException;
 
 	/**
 	 * Resolves a single <code>LabeledEnum</code> by its identifying code.
 	 * @param type the enum type
 	 * @param label the enum label
 	 * @return The enum, or <code>null</code> if not found.
+	 * @throws IllegalArgumentException if the label did not map to a valid
+	 *         instance
 	 */
-	public LabeledEnum getLabeledEnum(String type, String label);
+	public LabeledEnum getLabeledEnum(String type, String label) throws IllegalArgumentException;
 
 }

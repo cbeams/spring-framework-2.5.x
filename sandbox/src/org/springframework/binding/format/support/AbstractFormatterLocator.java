@@ -90,6 +90,6 @@ public abstract class AbstractFormatterLocator implements FormatterLocator {
 	}
 
 	public Formatter getLabeledEnumFormatter(Class valueClass) {
-		return new LabeledEnumFormatter(valueClass, true, labeledEnumResolver);
+		return new LabeledEnumFormatter(valueClass, false, labeledEnumResolver);
 	}
 }

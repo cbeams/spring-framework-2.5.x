@@ -100,10 +100,6 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 		return getLabeledEnum(type.getName(), code);
 	}
 
-	public LabeledEnum getRequiredLabeledEnum(Class type, Comparable code) {
-		return getRequiredEnum(type.getName(), code);
-	}
-
 	public Collection getLabeledEnumCollection(Class type) {
 		return getLabeledEnumCollection(type.getName());
 	}

@@ -38,11 +38,13 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 	private CachingMapTemplate labeledEnumCache = new CachingMapTemplate() {
 		protected Object create(Object key) {
 			Map typeEnums = findLabeledEnums((String)key);
-			if (typeEnums != null) {
+			if (typeEnums != null && !typeEnums.isEmpty()) {
 				return typeEnums;
 			}
 			else {
-				return Collections.EMPTY_MAP;
+				throw new IllegalArgumentException("Unsupported labeled enumeration type '" + key + "'"
+						+ " make sure you've properly defined this enumeration: "
+						+ "if it's static, are the class and its fields public/static/final?");
 			}
 		}
 	};
@@ -50,46 +52,42 @@ public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver
 	protected AbstractLabeledEnumResolver() {
 	}
 
-	public Collection getLabeledEnumCollection(String type) {
+	public Collection getLabeledEnumCollection(String type) throws IllegalArgumentException {
 		return Collections.unmodifiableSet(new TreeSet(getLabeledEnumMap(type).values()));
 	}
 
-	public Map getLabeledEnumMap(String type) {
+	public Map getLabeledEnumMap(String type) throws IllegalArgumentException {
 		Assert.notNull(type, "No type specified");
 		Map typeEnums = (Map)labeledEnumCache.get(type);
 		return Collections.unmodifiableMap(typeEnums);
 	}
 
-	public LabeledEnum getLabeledEnum(String type, Comparable code) {
+	public LabeledEnum getLabeledEnum(String type, Comparable code) throws IllegalArgumentException {
 		Assert.notNull(code, "No enum code specified");
 		Map typeEnums = getLabeledEnumMap(type);
 		LabeledEnum codedEnum = (LabeledEnum)typeEnums.get(code);
+
 		if (codedEnum == null) {
-			logger.info("No enum found of type '" + type + "' with '" + code.getClass() + " code " + code
-					+ "', returning null.");
+			throw new IllegalArgumentException("No enumeration with code '" + code + "'" + " of type '" + type
+					+ "' exists--this is likely a configuration error;"
+					+ " make sure the code value matches a valid instance's code property");
 		}
 		return codedEnum;
 	}
 
-	public LabeledEnum getLabeledEnum(String type, String label) {
+	public LabeledEnum getLabeledEnum(String type, String label) throws IllegalArgumentException {
 		Map typeEnums = getLabeledEnumMap(type);
 		Iterator it = typeEnums.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry)it.next();
 			LabeledEnum value = (LabeledEnum)entry.getValue();
-			if (value.getLabel().equals(label)) {
+			if (value.getLabel().equalsIgnoreCase(label)) {
 				return value;
 			}
 		}
-		return null;
-	}
-
-	public LabeledEnum getRequiredEnum(String type, Comparable code) throws IllegalStateException {
-		LabeledEnum codedEnum = getLabeledEnum(type, code);
-		if (codedEnum == null) {
-			throw new IllegalStateException("Enum does not exist with type '" + type + "', code " + code);
-		}
-		return codedEnum;
+		throw new IllegalArgumentException("No enumeration with label '" + label + "'" + " of type '" + type
+				+ "' exists--this is likely a configuration error;"
+				+ " make sure the label string matches a valid instance's label property");
 	}
 
 	protected Map findLabeledEnums(String type) {

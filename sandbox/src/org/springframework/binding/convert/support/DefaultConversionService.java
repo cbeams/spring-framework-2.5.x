@@ -16,6 +16,7 @@
 package org.springframework.binding.convert.support;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,8 +37,8 @@ import org.springframework.binding.support.TextToMappingConverter;
  * Default, local implementation of a conversion service.
  * <p>
  * Acts as bean factory post processor, registering property editor adapters for
- * each supported conversion with a <code>java.lang.String sourceClass</code>. This makes for very
- * convenient use with the Spring container.
+ * each supported conversion with a <code>java.lang.String sourceClass</code>.
+ * This makes for very convenient use with the Spring container.
  * @author Keith Donald
  */
 public class DefaultConversionService implements ConversionService, BeanFactoryPostProcessor, InitializingBean {
@@ -95,6 +96,13 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
 		if (this.sourceClassConverters == null || this.sourceClassConverters.isEmpty()) {
 			throw new IllegalStateException("No converters have been added to this service's registry");
+		}
+		int modifiers = targetClass.getModifiers();
+		if (Modifier.isAbstract(modifiers)) {
+			throw new IllegalArgumentException("Target class for conversion must not be abstract");
+		}
+		if (Modifier.isInterface(modifiers)) {
+			throw new IllegalArgumentException("Target class for conversion must not be an interface");
 		}
 		Map sourceTargetConverters = (Map)findConvertersForSource(sourceClass);
 		Converter converter = (Converter)sourceTargetConverters.get(targetClass);

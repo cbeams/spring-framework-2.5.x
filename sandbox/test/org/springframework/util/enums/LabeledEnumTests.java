@@ -44,9 +44,7 @@ public class LabeledEnumTests extends TestCase {
 		assertFalse("Code inequality means notEquals", Dog.GOLDEN_RETRIEVER.equals(new Dog(12, "Golden Retriever")));
 	}
 
-
 	public static class Other extends ShortCodedLabeledEnum {
-
 		public static Other THING1 = new Other(1, "Thing1");
 
 		public static Other THING2 = new Other(2, "Thing2");
@@ -81,5 +79,4 @@ public class LabeledEnumTests extends TestCase {
 			super(code, name);
 		}
 	}
-
 }
