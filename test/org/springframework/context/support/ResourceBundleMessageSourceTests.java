@@ -17,11 +17,17 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 	                                   boolean expectGermanFallback, boolean useCodeAsDefaultMessage) {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		String basename = "org/springframework/context/support/messages";
+		String basepath = "org/springframework/context/support/";
+		String[] basenames = null;
 		if (reloadable) {
-			basename = "classpath:" + basename;
+			basenames = new String[] {"classpath:" + basepath + "messages",
+																"classpath:" + basepath + "more-messages"};
 		}
-		pvs.addPropertyValue("basename", basename);
+		else {
+			basenames = new String[] {basepath + "messages",
+																basepath + "more-messages"};
+		}
+		pvs.addPropertyValue("basenames", basenames);
 		if (!fallbackToSystemLocale) {
 			pvs.addPropertyValue("fallbackToSystemLocale", Boolean.FALSE);
 		}
@@ -39,9 +45,10 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nachricht2", ac.getMessage("code2", null, Locale.GERMAN));
 		assertEquals("nochricht2", ac.getMessage("code2", null, new Locale("DE", "at")));
 		assertEquals("noochricht2", ac.getMessage("code2", null, new Locale("DE", "at", "oo")));
+		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
 
 		try {
-			assertEquals("code3", ac.getMessage("code3", null, Locale.GERMAN));
+			assertEquals("code4", ac.getMessage("code4", null, Locale.GERMAN));
 			if (!useCodeAsDefaultMessage) {
 				fail("Should have thrown NoSuchMessageException");
 			}

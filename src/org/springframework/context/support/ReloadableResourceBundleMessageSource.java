@@ -155,20 +155,30 @@ public class ReloadableResourceBundleMessageSource extends AbstractNestingMessag
 	 * @see #calculateFilenamesForLocale
 	 */
 	protected List calculateAllFilenames(String basename, Locale locale) {
-		List filenames = null;
 		synchronized (this.cachedFilenames) {
-			filenames = (List) this.cachedFilenames.get(locale);
-			if (filenames == null) {
-				filenames = new ArrayList(7);
-				filenames.addAll(calculateFilenamesForLocale(basename, locale));
-				if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
-					filenames.addAll(calculateFilenamesForLocale(basename, Locale.getDefault()));
+			Map localeMap = (Map) this.cachedFilenames.get(basename);
+			if (localeMap != null) {
+				List filenames = (List) localeMap.get(locale);
+				if (filenames != null) {
+					return filenames;
 				}
-				filenames.add(basename);
-				this.cachedFilenames.put(locale, filenames);
 			}
+			List filenames = new ArrayList(7);
+			filenames.addAll(calculateFilenamesForLocale(basename, locale));
+			if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
+				filenames.addAll(calculateFilenamesForLocale(basename, Locale.getDefault()));
+			}
+			filenames.add(basename);
+			if (localeMap != null) {
+				localeMap.put(locale, filenames);
+			}
+			else {
+				localeMap = new HashMap();
+				localeMap.put(locale, filenames);
+				this.cachedFilenames.put(basename, localeMap);
+			}
+			return filenames;
 		}
-		return filenames;
 	}
 
 	/**
