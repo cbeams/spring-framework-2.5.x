@@ -16,10 +16,13 @@ public class CglibProxyTests extends AbstractProxyTests {
     public CglibProxyTests(String name) {
         super(name);
     }
-
-    protected JmxTestBean getProxy() throws Exception {
-        JmxObjectProxyFactory pf = new CglibJmxObjectProxyFactory();
-        ObjectName objectName = ObjectName.getInstance("bean:name=testBean1");
-        return (JmxTestBean) pf.createProxy(server, objectName);
+    
+    protected ObjectName getObjectNameForProxy() throws Exception{
+        return ObjectName.getInstance("bean:name=testBean3");
     }
+    
+    protected JmxObjectProxyFactory getProxyFactory() throws Exception{
+        return new CglibJmxObjectProxyFactory();
+    }
+    
 }

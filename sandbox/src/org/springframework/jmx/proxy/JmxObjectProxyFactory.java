@@ -25,4 +25,10 @@ import javax.management.ObjectName;
 public interface JmxObjectProxyFactory {
 
     public Object createProxy(MBeanServer server, ObjectName objectName);
+    
+    public void setIgnoreInvalidInvocations(boolean ignoreInvalidInvocatios);
+    public boolean getIgnoreInvalidInvocations();
+    
+    public void setProxyInterfaces(Class[] interfaces);
+    public Class[] getProxyInterfaces();
 }

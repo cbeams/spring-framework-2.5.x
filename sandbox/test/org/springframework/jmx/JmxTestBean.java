@@ -16,13 +16,14 @@ public class JmxTestBean {
     private int age;
 
     /**
-     * @@org.springframework.jmx.metadata.support.ManagedAttribute()
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Age Attribute")
      */
     public int getAge() {
         return age;
     }
 
     /**
+     * 
      * @param age
      *            The age to set.
      */
@@ -37,6 +38,9 @@ public class JmxTestBean {
         return 1L;
     }
 
+    /**
+     * @@org.springframework.jmx.metadata.support.ManagedAttribute(description="The Name Attribute")
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -53,5 +57,13 @@ public class JmxTestBean {
      */
     public int add(int x, int y) {
         return x + y;
+    }
+    
+    /**
+     * Test method that is not exposed by the MetadataAssembler
+     *
+     */
+    public void dontExposeMe() {
+        throw new RuntimeException();
     }
 }

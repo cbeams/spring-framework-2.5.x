@@ -24,7 +24,8 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
     private Attributes attributes = new CommonsAttributes();
 
     /**
-     * Reads the ObjectName from
+     * Reads the ObjectName from the attribute's associated
+     * with the managed resource's Class.
      */
     public ObjectName getObjectName(Object managedResource, String key)
             throws ObjectNamingException {

@@ -26,15 +26,30 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
+ * <tt>ObjectNamingStrategy</tt> implementation that reads
+ * object names from a properties file. The key used to look up
+ * an ObjectName for a bean if the key used to in the <tt>Map</tt> of beans
+ * passed to <tt>JmxMBeanAdapter</tt>.
  * @author Rob Harrop
  */
 public class PropertiesNamingStrategy implements ObjectNamingStrategy,
         InitializingBean {
 
+    /**
+     * The default properties file name.
+     */
     private String propertiesFile = "objectnames.properties";
 
+    /**
+     * Store the properties
+     */
     private Properties properties;
 
+    /**
+     * Loads the properties from the file
+     * after the all properties on the bean have
+     * been set.
+     */
     public void afterPropertiesSet() throws Exception {
         properties = new Properties();
         try {
@@ -46,6 +61,10 @@ public class PropertiesNamingStrategy implements ObjectNamingStrategy,
         }
     }
 
+    /**
+     * Attempts to retreive the ObjectName from the 
+     * properties file.
+     */
     public ObjectName getObjectName(Object managedResource, String key)
             throws ObjectNamingException {
         
@@ -59,10 +78,18 @@ public class PropertiesNamingStrategy implements ObjectNamingStrategy,
         }
     }
 
+    /**
+     * Specify the path to the properties file.
+     * @param propertiesFile
+     */
     public void setPropertiesFile(String propertiesFile) {
         this.propertiesFile = propertiesFile;
     }
 
+    /**
+     * Retrieve the path to the properties file.
+     * @return
+     */
     public String getPropertiesFile() {
         return this.propertiesFile;
     }

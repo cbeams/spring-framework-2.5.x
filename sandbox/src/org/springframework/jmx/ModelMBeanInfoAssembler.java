@@ -18,9 +18,16 @@ package org.springframework.jmx;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 /**
+ * Interface to be implemented by all classes that can 
+ * create management interface metadata for a managed resource.
  * @author Rob Harrop
  */
 public interface ModelMBeanInfoAssembler {
 
+    /**
+     * Creates the ModelMBeanInfo for the given managed resource.
+     * @param bean The resource that is to be managed.
+     * @return The ModelMBeanInfo metadata.
+     */
     public ModelMBeanInfo getMBeanInfo(Object bean);
 }

@@ -20,8 +20,8 @@ import javax.management.AttributeList;
 import javax.management.JMException;
 import javax.management.MBeanException;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.jmx.MBeanInvoker;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract MBeanInvoker providing basic services for all MBeanInvoker
@@ -83,9 +83,8 @@ public abstract class AbstractMBeanInvoker implements MBeanInvoker {
 	 */
 	protected void checkForInvalidAttributeInvoke(String methodName)
 			throws MBeanException {
-		//TODO: This is probably not a good idea - would be useful to be able
-		// to turn this off.
-		if ((methodName.startsWith("get")) || (methodName.startsWith("set"))) {
+        // TODO: this check isn't very accurate - make it more so
+		if ((methodName.startsWith("get") || (methodName.startsWith("set")))) {
 			throw new MBeanException(
 					null,
 					"Cannot access an attribute using invoke. Please use the appropriate get/setAttribute method");
@@ -135,5 +134,4 @@ public abstract class AbstractMBeanInvoker implements MBeanInvoker {
 	
 		return al;
 	}
-
 }

@@ -3,6 +3,8 @@
  */
 package org.springframework.jmx;
 
+import org.springframework.jmx.assemblers.reflection.ReflectiveModelMBeanInfoAssembler;
+
 
 /**
  * @author robh
@@ -20,10 +22,14 @@ public class ReflectiveAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 	
 	protected int getExpectedOperationCount() {
-	    return 2;
+	    return 3;
 	}
 	
 	protected int getExpectedAttributeCount() {
 	    return 2;
+	}
+	
+	protected ModelMBeanInfoAssembler getAssembler() {
+	    return new ReflectiveModelMBeanInfoAssembler();
 	}
 }

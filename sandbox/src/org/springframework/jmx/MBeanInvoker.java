@@ -43,10 +43,24 @@ public interface MBeanInvoker {
      */
     public Object getManagedResource();
 
+    /**
+     * Retreive the value of the specified attribute
+     * @param attributeName The name of the attribute to retreive
+     * @return The attribute value
+     * @throws AttributeNotFoundException
+     * @throws MBeanException
+     * @throws ReflectionException
+     */
     public Object getAttribute(String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException;
 
+    /**
+     * Retreive an <tt>AttributeList</tt> for the specified
+     * attribute names.
+     * @param attributeNames The names of the attribute to retreive
+     * @return
+     */
     public AttributeList getAttributes(String[] attributeNames);
 
     public void setAttribute(Attribute attribute)
@@ -55,6 +69,15 @@ public interface MBeanInvoker {
 
     public AttributeList setAttributes(AttributeList attributes);
 
+    /**
+     * Invoke a method on a managed resource
+     * @param method The <tt>Method</tt> to invoke.
+     * @param args The arguments to pass to the method
+     * @param signature The method signature
+     * @return The result of the method invocation.
+     * @throws MBeanException
+     * @throws ReflectionException
+     */
     public Object invoke(String method, Object[] args, String[] signature)
             throws MBeanException, ReflectionException;
 }

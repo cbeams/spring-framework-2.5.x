@@ -18,6 +18,9 @@ package org.springframework.jmx.metadata.support;
 /**
  * @author Rob Harrop
  */
-public class ManagedAttribute {
+public class ManagedAttribute extends AbstractJmxAttribute {
 
+    public ManagedAttribute() {
+        description = "";
+    }
 }

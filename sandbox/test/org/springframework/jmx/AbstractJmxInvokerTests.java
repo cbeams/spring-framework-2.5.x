@@ -102,8 +102,8 @@ public abstract class AbstractJmxInvokerTests extends AbstractJmxTests {
 		}
 		
 		sw.stop();
-		System.err.println("testMultiInvoke() took:" + sw.getTotalTime() + "ms");
-		assertTrue("testMultiInvoke() took too long", (sw.getTotalTimeSecs() < 20.0));
+		System.err.println("testMultiInvoke() took:" + sw.getTotalTimeSeconds() + "ms");
+		assertTrue("testMultiInvoke() took too long", (sw.getTotalTimeSeconds() < 20.0));
 	}
 	
 	public void testInvalidAttributeInvoke() throws Exception {

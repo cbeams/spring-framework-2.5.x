@@ -18,19 +18,12 @@ package org.springframework.jmx.metadata.support;
 /**
  * @author Rob Harrop
  */
-public class ManagedOperation {
+public class ManagedOperation extends AbstractJmxAttribute {
 
-    private String description;
     
     public ManagedOperation() {
         description = "";
     }
     
-    public String getDescription() {
-        return this.description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
+
 }

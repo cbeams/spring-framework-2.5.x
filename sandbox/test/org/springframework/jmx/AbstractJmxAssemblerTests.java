@@ -3,9 +3,12 @@
  */
 package org.springframework.jmx;
 
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.modelmbean.ModelMBeanInfo;
 
 /**
  * @author robh
@@ -27,7 +30,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     }
 
     public void testRegisterOperations() throws Exception {
-        JmxTestBean bean = (JmxTestBean) getContext().getBean("testBean");
+        JmxTestBean bean = getBean();
 
         MBeanInfo inf = getMBeanInfo();
 
@@ -36,12 +39,64 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     }
 
     public void testRegisterAttributes() throws Exception {
-        JmxTestBean bean = (JmxTestBean) getContext().getBean("testBean");
+        JmxTestBean bean = getBean();
 
         MBeanInfo inf = getMBeanInfo();
 
         assertEquals("Incorrect number of attributes registered",
                 getExpectedAttributeCount(), inf.getAttributes().length);
+    }
+    
+    private JmxTestBean getBean() {
+        return (JmxTestBean) getContext().getBean("testBean");
+    }
+
+    public void testGetMBeanInfo() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        assertNotNull("MBeanInfo should not be null", info);
+    }
+    
+    public void testGetMBeanAttributeInfo() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        MBeanAttributeInfo[] inf = info.getAttributes();
+        
+        assertEquals("Invalid number of Attributes returned", getExpectedAttributeCount(), inf.length);
+        
+        for(int x = 0; x < inf.length; x++) {
+            assertNotNull("MBeanAttributeInfo should not be null", inf[x]);
+            assertNotNull("Description for MBeanAttributeInfo should not be null", inf[x].getDescription());
+        }
+        
+    }
+    
+    public void testGetMBeanOperationInfo() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        MBeanOperationInfo[] inf = info.getOperations();
+        
+        assertEquals("Invalid number of Operations returned", getExpectedOperationCount(), inf.length);
+        
+        for(int x = 0; x < inf.length; x++) {
+            assertNotNull("MBeanOperationInfo should not be null", inf[x]);
+            assertNotNull("Description for MBeanOperationInfo should not be null", inf[x].getDescription());
+        }
+    }
+    
+    public void testDescriptionNotNull() throws Exception {
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
+        
+        assertNotNull("The MBean description should not be null", info.getDescription());
+    }
+
+    /**
+     * @return
+     */
+    protected ModelMBeanInfo getMBeanInfoFromAssembler() {
+        JmxTestBean bean = getBean();
+        ModelMBeanInfo info = getAssembler().getMBeanInfo(bean);
+        return info;
     }
 
     protected MBeanInfo getMBeanInfo() throws Exception {
@@ -55,4 +110,6 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     protected abstract int getExpectedOperationCount();
 
     protected abstract int getExpectedAttributeCount();
+    
+    protected abstract ModelMBeanInfoAssembler getAssembler();
 }

@@ -80,7 +80,8 @@ public class MetadataModelMBeanInfoAssembler extends
                     // if both getter and setter are null
                     // then this does not need exposing
                     ModelMBeanAttributeInfo inf = new ModelMBeanAttributeInfo(
-                            props[x].getName(), props[x].getDisplayName(),
+                            props[x].getName(), 
+                            getDescription(props[x]),
                             getter, setter);
 
                     info[attrCount++] = inf;
@@ -102,6 +103,30 @@ public class MetadataModelMBeanInfoAssembler extends
         return result;
     }
 
+    /**
+     * Creates a description for the attribute corresponding
+     * to this property descriptor. Attempts to 
+     * create the description using metadata from either the getter
+     * or setter attributes, otherwise uses the property name.
+     * @param pd
+     * @return
+     */
+    private String getDescription(PropertyDescriptor pd) {
+        
+        ManagedAttribute getter = MetadataReader.getManagedAttribute(attributes, pd.getReadMethod());
+        ManagedAttribute setter = MetadataReader.getManagedAttribute(attributes, pd.getWriteMethod());
+        
+        StringBuffer sb = new StringBuffer();
+        
+        if((getter.getDescription() != null) && (getter.getDescription().length() > 0)) {
+            return getter.getDescription();
+        } else if((setter.getDescription() != null) && (setter.getDescription().length() > 0)) {
+            return setter.getDescription();
+        } else {
+            return pd.getDisplayName();
+        }
+    }
+    
     /**
      * Checks to see if a method has a ManagedAttribute defined. If so then
      * the method is returned back to the caller, otherwise null is returned.

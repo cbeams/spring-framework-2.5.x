@@ -21,6 +21,8 @@ import javax.management.ObjectName;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
+ * <tt>ObjectNamingStrategy</tt> that uses the key passed to JmxMBeanAdapter
+ * when registering the bean for JMX exposure.
  * @author Rob Harrop
  */
 public class KeyNamingStrategy implements ObjectNamingStrategy {

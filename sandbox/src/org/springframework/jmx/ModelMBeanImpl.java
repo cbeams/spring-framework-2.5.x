@@ -113,151 +113,82 @@ public class ModelMBeanImpl implements ModelMBean {
         return invoker.setAttributes(attributes);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.DynamicMBean#invoke(java.lang.String,
-     *      java.lang.Object[], java.lang.String[])
-     */
+
     public Object invoke(String method, Object[] args, String[] signature)
             throws MBeanException, ReflectionException {
         return invoker.invoke(method, args, signature);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.DynamicMBean#getMBeanInfo()
-     */
+
     public MBeanInfo getMBeanInfo() {
         return this.beanInfo;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.PersistentMBean#load()
-     */
+
     public void load() throws MBeanException, RuntimeOperationsException,
             InstanceNotFoundException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.PersistentMBean#store()
-     */
     public void store() throws MBeanException, RuntimeOperationsException,
             InstanceNotFoundException {
-        // TODO Auto-generated method stub
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#sendNotification(javax.management.Notification)
-     */
+
     public void sendNotification(Notification notification)
             throws MBeanException, RuntimeOperationsException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#sendNotification(java.lang.String)
-     */
+
     public void sendNotification(String notification) throws MBeanException,
             RuntimeOperationsException {
-        // TODO Auto-generated method stub
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#sendAttributeChangeNotification(javax.management.AttributeChangeNotification)
-     */
+
     public void sendAttributeChangeNotification(AttributeChangeNotification arg0)
             throws MBeanException, RuntimeOperationsException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#sendAttributeChangeNotification(javax.management.Attribute,
-     *      javax.management.Attribute)
-     */
+
     public void sendAttributeChangeNotification(Attribute arg0, Attribute arg1)
             throws MBeanException, RuntimeOperationsException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#addAttributeChangeNotificationListener(javax.management.NotificationListener,
-     *      java.lang.String, java.lang.Object)
-     */
+
     public void addAttributeChangeNotificationListener(
             NotificationListener arg0, String arg1, Object arg2)
             throws MBeanException, RuntimeOperationsException,
             IllegalArgumentException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.modelmbean.ModelMBeanNotificationBroadcaster#removeAttributeChangeNotificationListener(javax.management.NotificationListener,
-     *      java.lang.String)
-     */
+
     public void removeAttributeChangeNotificationListener(
             NotificationListener arg0, String arg1) throws MBeanException,
             RuntimeOperationsException, ListenerNotFoundException {
-        // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.NotificationBroadcaster#addNotificationListener(javax.management.NotificationListener,
-     *      javax.management.NotificationFilter, java.lang.Object)
-     */
+
     public void addNotificationListener(NotificationListener arg0,
             NotificationFilter arg1, Object arg2)
             throws IllegalArgumentException {
-        // TODO Auto-generated method stub
+
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.NotificationBroadcaster#removeNotificationListener(javax.management.NotificationListener)
-     */
+
     public void removeNotificationListener(NotificationListener arg0)
             throws ListenerNotFoundException {
-        // TODO Auto-generated method stub
+
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.NotificationBroadcaster#getNotificationInfo()
-     */
+
     public MBeanNotificationInfo[] getNotificationInfo() {
-        // TODO Auto-generated method stub
         return null;
     }
 }

@@ -23,19 +23,14 @@ package org.springframework.jmx.metadata.support;
  * @see org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler
  * @see org.springframework.jmx.naming.MetadataNamingStrategy
  */
-public class ManagedResource {
+public class ManagedResource extends AbstractJmxAttribute {
 
-	private String description;
 	private String objectName;
 	
-	public String getDescription() {
-		return this.description;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
+    public ManagedResource() {
+        description = "";
+    }
+    
 	public String getObjectName() {
 	    return this.objectName;
 	}

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx;
 
 import java.lang.reflect.Method;
@@ -20,7 +20,11 @@ import java.lang.reflect.Method;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
+import org.springframework.jmx.exceptions.MethodNameTooShortException;
+
 /**
+ * Generic utility methods to support Spring JMX.
+ * 
  * @author Rob Harrop
  */
 public class JmxUtils {
@@ -38,30 +42,108 @@ public class JmxUtils {
      */
     public static boolean isProperty(Method method) {
 
-        String name = method.getName();
+        if (!meetsPropertyCriteria(method)) {
+            return false;
+        }
 
-        // name should be at least four chars to be a property
-        if(name.length() < 4) {
+        // check if this method is a getter or a setter
+        if (isGetterInternal(method)) {
+            return true;
+        } else if (isSetterInternal(method)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Check to see if the supplied <tt>Method</tt> is a JavaBean getter
+     * @param method The <tt>Method</tt> to check
+     * @return True if the <tt>Method</tt> is a getter, otherwise false.
+     */
+    public static boolean isGetter(Method method) {
+        if(!meetsPropertyCriteria(method)) {
             return false;
         }
         
-        // the fourth character should be uppercase
-        if (!Character.isUpperCase(name.charAt(3))) {
+        return isGetterInternal(method);
+    }
+    
+    /**
+     * Check to see if the supplied Method is a JavaBean setter
+     * @param method The <tt>Method</tt> to check
+     * @return True if the <tt>Method</tt> is a setter, otherwise false.
+     */
+    public static boolean isSetter(Method method) {
+        if(!meetsPropertyCriteria(method)) {
             return false;
         }
+        
+        return isSetterInternal(method);
+    }
 
-        // check that method name starts
-        // with either get or set
-        if (name.startsWith(GET)) {
+    /**
+     * Checks to see if the specified method is a JavaBean property "getter"
+     * 
+     * @param method
+     * @return
+     */
+    private static boolean isGetterInternal(Method method) {
+        if (method.getName().startsWith(GET)) {
             return ((method.getReturnType() != void.class) && (method.getParameterTypes().length == 0));
-        } else if (name.startsWith(SET)) {
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks to see if the specified method is a JavaBean property "setter"
+     * 
+     * @param method
+     * @return
+     */
+    private static boolean isSetterInternal(Method method) {
+        if (method.getName().startsWith(SET)) {
             return ((method.getReturnType() == void.class) && (method.getParameterTypes().length == 1));
         } else {
             return false;
         }
     }
 
-    public static ModelMBeanOperationInfo[] shrink(ModelMBeanOperationInfo[] source, int count) {
+    /**
+     * Checks to see if the specified method meets the criteria to be a
+     * property. That is the method name is at least 4 characters long and the 4
+     * character is uppercase.
+     * 
+     * @param method
+     * @return
+     */
+    private static boolean meetsPropertyCriteria(Method method) {
+        String name = method.getName();
+
+        // name should be at least four chars to be a property
+        if (name.length() < 4) {
+            return false;
+        }
+
+        // the fourth character should be uppercase
+        if (!Character.isUpperCase(name.charAt(3))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Shrinks an array of ModelMBeanOperationInfo objects to the specified
+     * size.
+     * 
+     * @param source
+     * @param count
+     * @return
+     */
+    public static ModelMBeanOperationInfo[] shrink(
+            ModelMBeanOperationInfo[] source, int count) {
         ModelMBeanOperationInfo[] dest = new ModelMBeanOperationInfo[count];
         for (int x = 0; x < count; x++) {
             dest[x] = source[x];
@@ -69,11 +151,40 @@ public class JmxUtils {
         return dest;
     }
 
-    public static ModelMBeanAttributeInfo[] shrink(ModelMBeanAttributeInfo[] source, int count) {
+    /**
+     * Shrinks an array of ModelMBeanAttributeInfo objects to the specified size
+     * 
+     * @param source
+     * @param count
+     * @return
+     */
+    public static ModelMBeanAttributeInfo[] shrink(
+            ModelMBeanAttributeInfo[] source, int count) {
         ModelMBeanAttributeInfo[] dest = new ModelMBeanAttributeInfo[count];
         for (int x = 0; x < count; x++) {
             dest[x] = source[x];
         }
         return dest;
+    }
+    
+    /**
+     * Given a getter/setter this method returns the
+     * name of the attribute. Does not check that 
+     * the method is actually a getter/setter
+     * @param method The method to retrieve the attribute name from.
+     * @return The attribute name
+     */
+    public static String getAttributeName(Method method) {
+        
+        int length = method.getName().length();
+        
+        if(length <= 3) {
+          throw new MethodNameTooShortException("Method name " + method.getName() + " is too short to be an attribute name");
+        }
+        
+        char[] attributeName = new char[length - 3];
+        method.getName().getChars(3, length, attributeName, 0);
+        attributeName[0] = Character.toLowerCase(attributeName[0]);
+        return new String(attributeName);
     }
 }

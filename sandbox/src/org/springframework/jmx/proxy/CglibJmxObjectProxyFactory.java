@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.proxy;
 
 import java.lang.reflect.Method;
@@ -35,14 +35,26 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
+import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
-import org.springframework.util.StringUtils;
+import org.springframework.jmx.invokers.cglib.InvalidInvocationException;
 
 /**
+ * Proxy to a JMX managed resource. Uses CGLIB to capture invocations and
+ * reroutes them to the managed resource via the MBeanServer. By default ths
+ * proxy will obtain the Class of the resource and attempt to proxy that.
+ * However, if you want to use a different interface or set of interfaces then
+ * set the proxyInterfaces property and CGLIB will generate a proxy that
+ * implements those interfaces.
+ * 
+ * Attempting to invoke a method on a proxy that is not exposed by the managed
+ * resources remote interface will by default, result in NoOp. However setting
+ * the ignoreInvalidInvocations property to false will cause the proxy to throw
+ * an Exception.
+ * 
  * @author Rob Harrop
- *  
  */
-public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
+public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory{
 
     /**
      * The MBeanServer instance to redirect calls to
@@ -54,21 +66,38 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
      */
     private ObjectName objectName;
 
+    /**
+     * Index for the ReadAttributeInterceptor
+     */
     private static final int READ_ATTRIBUTE_INTERCEPTOR = 0;
 
+    /**
+     * Index for the WriteAttributeInterceptor
+     */
     private static final int WRITE_ATTRIBUTE_INTERCEPTOR = 1;
 
+    /**
+     * Index for the OperationInterceptor
+     */
     private static final int OPERATION_INTERCEPTOR = 2;
 
+    /**
+     * Index for the NoOpInterceptor/InvalidInvocationInterceptor
+     */
     private static final int NON_EXPOSED_INTERCEPTOR = 3;
 
+    /**
+     * Creates a proxy for the managed resource specified by objectName.
+     * @param objectName The ObjectName of the resource to proxy
+     * @param server The MBeanServer that the resource is registered with
+     */
     public Object createProxy(final MBeanServer server,
             final ObjectName objectName) {
 
         // store server and name
         this.server = server;
         this.objectName = objectName;
-        
+
         ObjectInstance instance = null;
         MBeanInfo info = null;
 
@@ -82,19 +111,31 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
 
             // now make the proxy
             Enhancer e = new Enhancer();
-            e.setSuperclass(instanceClass);
-            e.setCallbackFilter(new JmxProxyCallbackFilter(info));
             
+            e.setSuperclass(instanceClass);
+            
+            if(proxyInterfaces != null) {
+                e.setInterfaces(proxyInterfaces);
+            }
+            
+            e.setCallbackFilter(new JmxProxyCallbackFilter(info));
+
             Callback[] callbacks = new Callback[4];
             callbacks[0] = new ReadAttributeInterceptor();
             callbacks[1] = new WriteAttributeInterceptor();
             callbacks[2] = new OperationInvokeInterceptor();
-            callbacks[3] = new NoOpInterceptor();
             
+            if(ignoreInvalidInvocations) {
+                callbacks[3] = new NoOpInterceptor();
+            } else {
+                callbacks[3] = new InvalidInvocationInterceptor();
+            }
+             
+
             e.setCallbacks(callbacks);
-            
+
             return e.create();
-            
+
         } catch (InstanceNotFoundException ex) {
             // invalid ObjectName provided
             throw new ProxyCreationException(
@@ -115,20 +156,14 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
     }
 
     /**
-     * Given a get/set method this will return the appropriate
-     * property/attribute name
+     * CallbackFilter to assign Interceptors to methods. JMX attributes are
+     * assigned a Read/Write AttributeInterceptor as appropriate and operations
+     * are assigned an OperationInterceptor. All invalid invocations are
+     * assigned either NoOpInterceptor or InvalidInvocationInterceptor dependent
+     * on the setting of the ignoreInvalidInvocations flag.
      * 
-     * @param method
-     *            The Method instance representing the attribute
-     * @return The attribute name
+     * @author robh
      */
-    private String getAttributeName(Method method) {
-        String attribName = StringUtils.delete(method.getName(), "get");
-        attribName = StringUtils.delete(attribName, "set");
-
-        return StringUtils.uncapitalize(attribName);
-    }
-
     private class JmxProxyCallbackFilter implements CallbackFilter {
 
         /**
@@ -186,7 +221,7 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
          * @return
          */
         private int acceptGetter(Method method) {
-            String attribName = getAttributeName(method);
+            String attribName = JmxUtils.getAttributeName(method);
 
             MBeanAttributeInfo[] inf = info.getAttributes();
 
@@ -214,7 +249,7 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
          * @return
          */
         private int acceptSetter(Method method) {
-            String attribName = getAttributeName(method);
+            String attribName = JmxUtils.getAttributeName(method);
 
             MBeanAttributeInfo[] inf = info.getAttributes();
 
@@ -277,7 +312,7 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
         public Object intercept(Object target, Method method, Object[] args,
                 MethodProxy proxy) throws Throwable {
 
-            String attribName = getAttributeName(method);
+            String attribName = JmxUtils.getAttributeName(method);
             return server.getAttribute(objectName, attribName);
         }
     }
@@ -292,7 +327,7 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
         public Object intercept(Object target, Method method, Object[] args,
                 MethodProxy proxy) throws Throwable {
 
-            String attribName = getAttributeName(method);
+            String attribName = JmxUtils.getAttributeName(method);
             server.setAttribute(objectName, new Attribute(attribName, args[0]));
             return null;
         }
@@ -345,10 +380,30 @@ public class CglibJmxObjectProxyFactory implements JmxObjectProxyFactory {
         }
     }
 
+    /**
+     * Interceptor used to ignore invalid invocations.
+     * 
+     * @author Rob Harrop
+     */
     private class NoOpInterceptor implements MethodInterceptor {
         public Object intercept(Object target, Method method, Object[] args,
                 MethodProxy proxy) throws Throwable {
             return null;
+        }
+    }
+
+    /**
+     * Interceptor used to handle invalid invocations.
+     * 
+     * @author robh
+     */
+    private class InvalidInvocationInterceptor implements MethodInterceptor {
+
+        public Object intercept(Object target, Method method, Object[] args,
+                MethodProxy proxy) throws Throwable {
+            throw new InvalidInvocationException("Operation/Attribute "
+                    + method.getName()
+                    + " is not exposed on the management interface");
         }
     }
 }
