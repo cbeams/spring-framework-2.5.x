@@ -920,9 +920,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * implementation be exported in the backing service locator registry under
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * <p>
-	 * As this method adds an action state intended to execute creational logic,
-	 * it also establishes several naming conventions and relavent defaults. For
-	 * example, the usage:
+	 * As the various flavors of this method add an action state intended to
+	 * execute creational logic, they also establishes several naming
+	 * conventions and relavent defaults. For example, the usage:
 	 * <p>
 	 * <code>ActionState createState = addCreateState("person");</code>
 	 * <p>
@@ -974,39 +974,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * indicates this action state, when entered, executes an action that
 	 * invokes object creational logic.
 	 * <p>
-	 * As this method adds a action state intended to execute creational logic,
-	 * it also establishes several naming conventions and relavent defaults. For
-	 * example, the usage:
-	 * 
-	 * <pre>
-	 * ActionState createState = addCreateState(&quot;person&quot;, myCreateAction);
-	 * </pre>
-	 * 
-	 * ... builds an action state with the following properties: <table
-	 * border="1">
-	 * <tr>
-	 * <th>Property</th>
-	 * <th>Value</th>
-	 * <th>Notes</th>
-	 * <tr>
-	 * <td>id</td>
-	 * <td>person.create</td>
-	 * <td>The create action qualifier is appended in a hierarchical fashion to
-	 * the 'person' prefix</td>
-	 * <tr>
-	 * <td>action</td>
-	 * <td>myCreateAction</td>
-	 * <td></td>
-	 * </table>
-	 * <p>
-	 * In addition, the create action state will be configured with the
-	 * following default state transitions:
+	 * By default, the create action state will be configured with the following
+	 * state transitions:
 	 * <ul>
-	 * <li>on event 'success', transition to the '${stateIdPrefix}.view' state
-	 * (e.g <code>person.view</code>) This assumes, after successfully
-	 * executing some object creational logic you will wish to view the results
-	 * of that creation.
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g <code>person.view</code>)
 	 * </ul>
+	 * <p>
+	 * This default assumes, after successfully executing some object creational
+	 * logic you will wish to view the results of that creation.
+	 * <p>
 	 * If these defaults do not fit your needs, use one of the more generic
 	 * action state builder methods. This method is provided as a convenience to
 	 * help reduce repetive configuration code for common situations.
@@ -1024,38 +1001,88 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>create</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.create). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param transition The single supported transition for this state, mapping
+	 *        a path from this state to another state (triggered by an event).
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Transition transition) {
 		return addCreateState(stateIdPrefix, new Transition[] { transition });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @param transition
-	 * @return
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>create</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.create).
+	 * @param action The action that will execute when this state is entered
+	 * @param transition The single supported transition for this state, mapping
+	 *        a path from this state to another state (triggered by an event).
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Action action, Transition transition) {
 		return addCreateState(stateIdPrefix, action, new Transition[] { transition });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>create</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.create). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param transitions The supported transitions for this state, where each
+	 *        maps a path from this state to another state (triggered by an
+	 *        event).
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Transition[] transitions) {
 		return addActionState(create(stateIdPrefix), transitions);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @param transitions
-	 * @return
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>create</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.create).
+	 * @param action The action that will execute when this state is entered
+	 * @param transitions The supported transitions for this state, where each
+	 *        maps a path from this state to another state (triggered by an
+	 *        event).
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Action action, Transition[] transitions) {
 		return addActionState(create(stateIdPrefix), action, transitions);
