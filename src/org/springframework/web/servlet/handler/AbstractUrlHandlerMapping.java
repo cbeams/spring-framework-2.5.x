@@ -46,7 +46,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) {
 		String lookupPath = WebUtils.getLookupPathForRequest(request, this.alwaysUseFullPath);
-		logger.debug("Looking up handler for: " + lookupPath);
+		logger.debug("Looking up handler for [" + lookupPath + "]");
 		return lookupHandler(lookupPath);
 	}
 
