@@ -95,11 +95,11 @@ import org.springframework.web.flow.ViewState;
  * </ol>
  * 
  * The third state, an action state, will be indentified as <code>
- * customerDetails.bindAndValidate</code>. This action state will automatically
- * be configured with the following defaults:
+ * customerDetails.bindAndValidate</code>. This action state will
+ * automatically be configured with the following defaults:
  * <ol>
- * <li>A action bean named <code>customerDetails.bindAndValidate</code>- this
- * is the name of the <code>Action</code> implementation exported in the
+ * <li>A action bean named <code>customerDetails.bindAndValidate</code>-
+ * this is the name of the <code>Action</code> implementation exported in the
  * application context that will execute when this state is entered. In this
  * example, the <code>Action</code> will bind form input in the HTTP request
  * to a backing Customer form object, validate it, and update the DB.
@@ -478,7 +478,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @return The view marker state
 	 * @throws IllegalStateException the stateId was not unique after
 	 *         qualificaion
@@ -549,6 +550,40 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered. This method
+	 * is intended as a convenience when there is only one logical view state
+	 * for the flow, and the <code>flow.id</code> can be used as the
+	 * qualifying stateIdPrefix.
+	 * <p>
+	 * By default, the view state will be configured with a logical
+	 * <code>viewName</code> equal to its qualified state ID. The qualified
+	 * state ID is built by appending the VIEW action constant to the provided
+	 * ${flow.id} argument. This means, for example, a provided
+	 * <code>${flow.id}</code> of "customerDetails" would result in a
+	 * qualified stateId of "customerDetails.view" and a <code>viewName</code>
+	 * also of "customerDetails.view". This view name will be mapped to a
+	 * physical view resource to render a response when the view state is
+	 * entered during a flow execution.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the '${flow.id}.bindAndValidate'
+	 * state
+	 * </ul>
+	 * @return The view state
+	 * @throws IllegalArgumentException the stateId was not unique after
+	 *         qualificaion
+	 */
+	protected ViewState addViewState() throws IllegalArgumentException {
+		return addViewState(getFlow().getId(), new Transition[] { onBackEnd(), onCancelEnd(),
+				onSubmitBindAndValidate(getFlow().getId()) });
+	}
+
+	/**
+	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
 	 * state triggers the rendering of a view template when entered.
 	 * <p>
 	 * By default, the view state will be configured with a logical
@@ -557,9 +592,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * stateIdPrefix argument. This means, for example, a provided
 	 * <code>stateIdPrefix</code> of "customerDetails" would result in a
 	 * qualified stateId of "customerDetails.view" and a <code>viewName</code>
-	 * also of "customerDetails.view". This view name will be mapped to a physical
-	 * view resource to render a response when the view state is entered during
-	 * a flow execution.
+	 * also of "customerDetails.view". This view name will be mapped to a
+	 * physical view resource to render a response when the view state is
+	 * entered during a flow execution.
 	 * <p>
 	 * The view state will be configured with the following default state
 	 * transitions:
@@ -571,7 +606,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @return The view state
 	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
@@ -591,12 +627,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * stateIdPrefix argument. This means, for example, a provided
 	 * <code>stateIdPrefix</code> of "customerDetails" would result in a
 	 * qualified stateId of "customerDetails.view" and a <code>viewName</code>
-	 * also of "customerDetails.view". This view name will be mapped to a physical
-	 * view resource to render a response when the view state is entered during
-	 * a flow execution.
+	 * also of "customerDetails.view". This view name will be mapped to a
+	 * physical view resource to render a response when the view state is
+	 * entered during a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view state
@@ -628,12 +665,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * stateIdPrefix argument. This means, for example, a provided
 	 * <code>stateIdPrefix</code> of "customerDetails" would result in a
 	 * qualified stateId of "customerDetails.view" and a <code>viewName</code>
-	 * also of "customerDetails.view". This view name will be mapped to a physical
-	 * view resource to render a response when the view state is entered during
-	 * a flow execution.
+	 * also of "customerDetails.view". This view name will be mapped to a
+	 * physical view resource to render a response when the view state is
+	 * entered during a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
@@ -659,7 +697,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -679,7 +718,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @param viewName The name of the logical view name to render. This name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -701,7 +741,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        {@link FlowConstants#VIEW}action constant will be appended to
-	 *        this prefix to build a qualified state id (e.g customerDetails.view)
+	 *        this prefix to build a qualified state id (e.g
+	 *        customerDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -949,7 +990,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * following default state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g.
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing some object creational logic
@@ -961,8 +1003,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>create</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.create). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.create).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
@@ -980,7 +1022,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This default assumes, after successfully executing some object creational
@@ -992,8 +1035,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
 	 *        <code>create</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.create). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.create).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @param action The action that will execute the creational logic.
 	 * @return The action state
@@ -1017,8 +1060,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>create</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.create). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.create).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
@@ -1045,6 +1088,64 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Action action, Transition[] transitions) {
 		return addActionState(create(stateIdPrefix), action, transitions);
+	}
+
+	/**
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical get state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>get </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that invokes object retrieval logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * <p>
+	 * As the various flavors of this method add an action state intended to
+	 * execute retrieval logic, they establish several naming conventions and
+	 * relavent defaults. For example, the usage:
+	 * <p>
+	 * <code>ActionState getState = addGetState();</code>
+	 * <p>
+	 * ... builds an action state with the following properties: <table
+	 * border="1">
+	 * <tr>
+	 * <th>Property</th>
+	 * <th>Value</th>
+	 * <th>Notes</th>
+	 * <tr>
+	 * <td>id</td>
+	 * <td>${flow.id}.get</td>
+	 * <td>The get action qualifier is appended in a hierarchical fashion to
+	 * the ${flow.id} prefix (e.g customer.get)</td>
+	 * <tr>
+	 * <td>action</td>
+	 * <td colspan="2">The <code>Action</code> implementation in the registry
+	 * exported with the id <code>${flow.id}.get</code></td>
+	 * </table>
+	 * <p>
+	 * In addition, the get action state will be configured with the following
+	 * default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${flow.id}.view</code> state (e.g. <code>customer.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing some object retrieval logic
+	 * you will wish to view the results of that retrieval.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @return The action state
+	 */
+	protected ActionState addGetState() {
+		return addGetState(getFlow().getId(), onSuccessView(getFlow().getId()));
 	}
 
 	/**
@@ -1088,7 +1189,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * default state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g.
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing some object retrieval logic
@@ -1119,7 +1221,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This default assumes, after successfully executing some object retrieval
@@ -1231,6 +1334,64 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. This method is intended as a convenience when there is only one
+	 * logical setup state for the flow, and the <code>flow.id</code> can be
+	 * used as the qualifying stateIdPrefix. The <i>setup </i> stereotype is a
+	 * simple qualifier that indicates this action state, when entered, executes
+	 * an action that invokes view (often a form) setup logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * <p>
+	 * As the various flavors of this method add an action state intended to
+	 * execute retrieval logic, they establish several naming conventions and
+	 * relavent defaults. For example, the usage:
+	 * <p>
+	 * <code>ActionState setupState = addSetupState();</code>
+	 * <p>
+	 * ... builds an action state with the following properties: <table
+	 * border="1">
+	 * <tr>
+	 * <th>Property</th>
+	 * <th>Value</th>
+	 * <th>Notes</th>
+	 * <tr>
+	 * <td>id</td>
+	 * <td>${flow.id}.setup</td>
+	 * <td>The setup action qualifier is appended in a hierarchical fashion to
+	 * the ${flow.id} prefix (e.g customer.setup)</td>
+	 * <tr>
+	 * <td>action</td>
+	 * <td colspan="2">The <code>Action</code> implementation in the registry
+	 * exported with the id <code>${flow.id}.setup</code></td>
+	 * </table>
+	 * <p>
+	 * In addition, the setup action state will be configured with the following
+	 * default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${flow.id}.view</code> state (e.g. <code>customer.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing view setup logic, you wish to
+	 * display the view.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * @return The action state
+	 */
+	protected ActionState addSetupState() {
+		return addSetupState(getFlow().getId(), onSuccessView(getFlow().getId()));
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
 	 * builder. The <i>setup </i> stereotype is a simple qualifier that
 	 * indicates this action state, when entered, executes an action that
 	 * prepares a view (often a form) for display.
@@ -1270,7 +1431,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * default state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g.
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing view setup logic, you wish to
@@ -1301,7 +1463,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing view setup logic, you wish to
@@ -1452,7 +1615,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * default state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g.
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing some object retrieval logic
@@ -1483,7 +1647,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This default assumes, after successfully executing some object retrieval
@@ -1591,7 +1756,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * following default state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g.
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This assumes, after successfully executing some object retrieval logic
@@ -1603,8 +1769,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>search</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.search). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.search).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
@@ -1622,7 +1788,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state transitions:
 	 * <ul>
 	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>customer.view</code>)
+	 * <code>${stateIdPrefix}.view</code> state (e.g
+	 * <code>customer.view</code>)
 	 * </ul>
 	 * <p>
 	 * This default assumes, after successfully executing some object retrieval
@@ -1634,8 +1801,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
 	 *        <code>search</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.search). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.search).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @param action The action that will execute the retrieval logic.
 	 * @return The action state
@@ -1659,8 +1826,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>search</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.search). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.search).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
@@ -1814,8 +1981,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>bindAndValidate</code> action constant will be appended to
 	 *        this prefix to build the qualified state id (e.g
-	 *        customer.bindAndValidate). Note: the qualified state ID will also be
-	 *        used as the actionId, to lookup in the locator's registry.
+	 *        customer.bindAndValidate). Note: the qualified state ID will also
+	 *        be used as the actionId, to lookup in the locator's registry.
 	 * @return The action state
 	 */
 	protected ActionState addBindAndValidateState(String stateIdPrefix) {
@@ -1874,8 +2041,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>bindAndValidate</code> action constant will be appended to
 	 *        this prefix to build the qualified state id (e.g
-	 *        customer.bindAndValidate). Note: the qualified state ID will also be
-	 *        used as the actionId, to lookup in the locator's registry.
+	 *        customer.bindAndValidate). Note: the qualified state ID will also
+	 *        be used as the actionId, to lookup in the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
@@ -2102,8 +2269,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * help reduce repetitive configuration code for common situations.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>delete</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.delete). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.delete).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @return The action state
 	 */
@@ -2159,8 +2326,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
 	 *        <code>delete</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g customer.delete). Note:
-	 *        the qualified state ID will also be used as the actionId, to
+	 *        prefix to build the qualified state id (e.g customer.delete).
+	 *        Note: the qualified state ID will also be used as the actionId, to
 	 *        lookup in the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
