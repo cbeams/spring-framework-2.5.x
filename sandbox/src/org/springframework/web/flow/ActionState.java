@@ -40,12 +40,10 @@ public class ActionState extends TransitionableState {
 
 	public ActionState(String id, Transition transition) {
 		super(id, transition);
-		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
 	public ActionState(String id, Transition[] transitions) {
 		super(id, transitions);
-		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
 	public ActionState(String id, ActionBean actionBean, Transition transition) {
@@ -84,12 +82,10 @@ public class ActionState extends TransitionableState {
 
 	public ActionState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
-		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
 	public ActionState(Flow flow, String id, Transition[] transitions) {
 		super(flow, id, transitions);
-		setActionBeanName(buildActionBeanNameFromStateId(id));
 	}
 
 	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
@@ -120,11 +116,6 @@ public class ActionState extends TransitionableState {
 	public ActionState(Flow flow, String id, String[] actionBeanNames, Transition[] transitions) {
 		super(flow, id, transitions);
 		setActionBeanNames(actionBeanNames);
-	}
-
-	protected String buildActionBeanNameFromStateId(String stateId) {
-		// do nothing, subclasses may override
-		return stateId;
 	}
 
 	private static class ActionBeanHolder {

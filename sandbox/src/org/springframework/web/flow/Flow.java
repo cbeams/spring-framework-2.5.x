@@ -812,7 +812,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, Transition transition) {
-		return new ViewState(this, view(stateIdPrefix), transition);
+		return new ViewState(this, view(stateIdPrefix), createViewName(stateIdPrefix), transition);
+	}
+
+	protected String createViewName(String stateIdPrefix) {
+		return view(stateIdPrefix);
 	}
 
 	/**
@@ -831,7 +835,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
-		return new ViewState(this, view(stateIdPrefix), transitions);
+		return new ViewState(this, view(stateIdPrefix), createViewName(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -849,8 +853,12 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transition
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, Transition transition) {
-		return new ActionState(this, actionStateId, transition);
+	public ActionState createActionState(String stateId, Transition transition) {
+		return new ActionState(this, stateId, createActionBeanName(stateId), transition);
+	}
+
+	protected String createActionBeanName(String stateId) {
+		return stateId;
 	}
 
 	/**
@@ -859,67 +867,67 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transition
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition transition) {
-		return new ActionState(this, actionStateId, actionBean, transition);
+	public ActionState createActionState(String stateId, ActionBean actionBean, Transition transition) {
+		return new ActionState(this, stateId, actionBean, transition);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param actionBeanName
 	 * @param transition
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, String actionBeanName, Transition transition) {
-		return new ActionState(this, actionStateId, actionBeanName, transition);
+	public ActionState createActionState(String stateId, String actionBeanName, Transition transition) {
+		return new ActionState(this, stateId, actionBeanName, transition);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, Transition[] transitions) {
-		return new ActionState(this, actionStateId, transitions);
+	public ActionState createActionState(String stateId, Transition[] transitions) {
+		return new ActionState(this, stateId, createActionBeanName(stateId), transitions);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param actionBean
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition[] transitions) {
-		return new ActionState(this, actionStateId, actionBean, transitions);
+	public ActionState createActionState(String stateId, ActionBean actionBean, Transition[] transitions) {
+		return new ActionState(this, stateId, actionBean, transitions);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param actionBeanName
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, String actionBeanName, Transition[] transitions) {
-		return new ActionState(this, actionStateId, actionBeanName, transitions);
+	public ActionState createActionState(String stateId, String actionBeanName, Transition[] transitions) {
+		return new ActionState(this, stateId, actionBeanName, transitions);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param actionBeans
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, ActionBean[] actionBeans, Transition[] transitions) {
-		return new ActionState(this, actionStateId, actionBeans, transitions);
+	public ActionState createActionState(String stateId, ActionBean[] actionBeans, Transition[] transitions) {
+		return new ActionState(this, stateId, actionBeans, transitions);
 	}
 
 	/**
-	 * @param actionStateId
+	 * @param stateId
 	 * @param actionBeanNames
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String actionStateId, String[] actionBeanNames, Transition[] transitions) {
-		return new ActionState(this, actionStateId, actionBeanNames, transitions);
+	public ActionState createActionState(String stateId, String[] actionBeanNames, Transition[] transitions) {
+		return new ActionState(this, stateId, actionBeanNames, transitions);
 	}
 
 	/**

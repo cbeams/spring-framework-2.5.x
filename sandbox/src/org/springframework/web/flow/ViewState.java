@@ -38,7 +38,6 @@ public class ViewState extends TransitionableState {
 
 	public ViewState(String id) {
 		super(id);
-		setViewName(id);
 	}
 	
 	public ViewState(String id, String viewName) {
@@ -58,7 +57,6 @@ public class ViewState extends TransitionableState {
 
 	public ViewState(Flow flow, String id) {
 		super(flow, id);
-		setViewName(id);
 	}
 
 	public ViewState(Flow flow, String id, String viewName) {
@@ -68,12 +66,10 @@ public class ViewState extends TransitionableState {
 
 	public ViewState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
-		setViewName(id);
 	}
 
 	public ViewState(Flow flow, String id, Transition[] transitions) {
 		super(flow, id, transitions);
-		setViewName(id);
 	}
 
 	public ViewState(Flow flow, String id, String viewName, Transition transition) {
