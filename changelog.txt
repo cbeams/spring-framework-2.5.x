@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.135 2004-04-29 09:57:20 jhoeller Exp $
+$Id: changelog.txt,v 1.136 2004-04-30 10:30:51 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
@@ -33,10 +33,21 @@ Package org.springframework.mock
 * factored out JNDI mock objects from org.springframework.jndi.support (source tree) to separate mock source tree
 * factored out Servlet API mock objects from org.springframework.web.mock (test tree) to separate mock source tree
 * reworked Servlet API mock objects to provide comprehensive support for request/response-driven testing
+* reworked framework test suite to solely use Spring-provided mocks rather than ones from the MockObjects project
+
+Package org.springframework.remoting
+* exposed HessianProxyFactory's "overloadEnabled" property in HessianClientInterceptor
+* factored out Hessian proxy creation into "createHessianProxy" method in HessianClientInterceptor
+* exposed BurlapProxyFactory's "overloadEnabled" property in BurlapClientInterceptor
+* factored out Burlap proxy creation into "createBurlapProxy" method in BurlapClientInterceptor
 
 Package org.springframework.samples
 * reworked DefaultImageDatabase's "streamImage" implementation to leverage AbstractLobStreamingResultSetExtractor
 * reworked DefaultImageDatabase's "storeImage" implementation to leverage AbstractLobCreatingPreparedStatementCallback
+
+Package org.springframework.scheduling
+* changed MethodInvokingTimerTaskFactoryBean to log an invocation exception at error level rather than rethrowing it
+* deprecated TimerTaskExecutionException, as it's generally recommendable to not throw an exception from a TimerTask
 
 Package org.springframework.ui
 * added "velocityPropertiesMap" property to VelocityEngineFactory, to allow for passing non-String values to Velocity
