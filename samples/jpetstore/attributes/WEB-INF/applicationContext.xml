@@ -5,7 +5,7 @@
 
 	<description>
 		This file illustrates reliance on declarative transaction management
-		provided by the autoproxy definitions in declarativeServices.xml.
+		provided by the auto-proxy definitions in declarativeServices.xml.
 		There's no need to use a TransactionFactoryProxyBean: Any bean with
 		source-level transaction attributes will automatically benefit from
 		declarative transaction management.
@@ -38,7 +38,7 @@
 		JPetStore primary business object: default implementation,
 		Note that this is just a POJO definition in this file:
 		there's no need to use a TransactionFactoryProxyBean if the class has
-		source-level transaction attributes; the inherited autoproxy
+		source-level transaction attributes; the inherited auto-proxy
 		bean definition will apply transaction advice automatically.
 	-->
 	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
