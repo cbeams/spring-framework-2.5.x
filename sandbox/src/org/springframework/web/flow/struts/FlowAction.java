@@ -36,16 +36,84 @@ import org.springframework.web.util.WebUtils;
 /**
  * Struts Action that acts a front controller entry point into the web flow
  * system. Typically, a FlowAction exists per top-level (root) flow definition
- * in the application. Alternatively, a single FlowController may manage all
- * flow executions by parameterization with the appropriate <code>flowId</code>
- * in views that start new flow executions.
+ * in the application. Alternatively, a single FlowAction may manage all flow
+ * executions by parameterization with the appropriate <code>flowId</code> in
+ * views that start new flow executions.
  * <p>
- * Requests are managed using an {@link HttpFlowExecutionManager}. Consult
- * the JavaDoc of that class for more information on how requests are processed.
+ * Requests are managed by and delegated to a {@link HttpFlowExecutionManager},
+ * allowing reuse of common front flow controller logic in other environments.
+ * Consult the JavaDoc of that class for more information on how requests are
+ * processed.
+ * <p>
+ * This class also has aware of the <code>BindingActionForm</code> adapter,
+ * which adapts Spring's data binding infrastructure (based on POJO binding, a
+ * standard Errors interface, and property editor type conversion) to the Struts
+ * action form model. This gives backend web-tier developers full support for
+ * POJO-based binding with minimal hassel, while still providing a consistency
+ * to view developers who have a lot of experience with Struts for markup and
+ * request dispatch.
+ * <p>
+ * Below is an example <code>struts-config.xml</code> configuration for a
+ * Flow-action that fronts a single top-level flow:
+ * 
+ * <pre>
+ * 
+ *  &lt;action path=&quot;/userRegistration&quot;
+ *      type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *      name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *      className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *          &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *  &lt;/action&gt;
+ *  
+ * </pre>
+ * 
+ * This example associates the logical request URL
+ * <code>/userRegistration.do</code> with the <code>Flow</code> indentified
+ * by the id <code>user.Registration</code>. Alternatively, the
+ * <code>flowId</code> could have been left blank and provided in dynamic
+ * fashion by the views (allowing a single <code>FlowAction</code> to manage
+ * any number of flow executions). A binding action form instance is set in
+ * request scope, acting as an adapter enabling POJO-based binding and
+ * validation with Spring.
+ * <p>
+ * Other notes regarding web-flow Struts integration:
+ * <ul>
+ * <li>Logical view names returned when <code>ViewStates</code> and
+ * <code>EndStates</code> are entered are mapped to physical view templates
+ * using standard Struts action forwards (typically global forwards.)
+ * <li>Use of the BindingActionForm requires some minor setup in
+ * <code>struts-config.xml</code>. Specifically:
+ * <ol>
+ * <li>A custom BindingActionForm-aware request processor is needed, to defer
+ * form population:
+ * 
+ * <pre>
+ * 
+ *    &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
+ *  
+ * </pre>
+ * 
+ * <li>A <code>BindingPlugin</code> is needed, to plugin a Errors-aware
+ * <code>jakarta-commons-beanutils</code> adapter:
+ * 
+ * <pre>
+ * 
+ *       &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
+ *  
+ * </pre>
+ * 
+ * </ol>
+ * </ul>
+ * The benefits here are substantial--developers now have a powerful webflow
+ * capability integrated with Struts, with a consistent-approach to
+ * POJO-based binding and validation that addresses the proliferation of
+ * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.support.HttpFlowExecutionManager
+ * @see org.springframework.web.struts.BindingActionForm
  * @author Keith Donald
  * @author Erwin Vervaet
+ *  
  */
 public class FlowAction extends TemplateAction {
 
@@ -54,7 +122,8 @@ public class FlowAction extends TemplateAction {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
 		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
 		ModelAndView modelAndView = executionManager.handleRequest(request, response);
-		//TODO: this is not extremely clean (pulling a attribute from hard coded name that is configurable elsewhere)
+		//TODO: this is not extremely clean (pulling a attribute from hard
+		// coded name that is configurable elsewhere)
 		FlowExecution flowExecution = (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
 		if (flowExecution != null && flowExecution.isActive()) {
 			if (form instanceof BindingActionForm) {
@@ -68,8 +137,8 @@ public class FlowAction extends TemplateAction {
 	}
 
 	/**
-	 * Get the flow id from given action mapping, which should be of
-	 * type <code>FlowActionMapping</code>.
+	 * Get the flow id from given action mapping, which should be of type
+	 * <code>FlowActionMapping</code>.
 	 */
 	private String getFlowId(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
