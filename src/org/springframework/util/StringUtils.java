@@ -330,11 +330,11 @@ public abstract class StringUtils {
 	 * String. E.g. useful for toString() implementations.
 	 * @param arr array to display. Elements may be of any type (toString
 	 * will be called on each element).
-	 * @param delim delimiter to use (probably a ,)
+	 * @param delim delimiter to use (probably a ",")
 	 */
 	public static String arrayToDelimitedString(Object[] arr, String delim) {
 		if (arr == null) {
-			return "null";
+			return "";
 		}
 		else {
 			StringBuffer sb = new StringBuffer();
@@ -351,24 +351,25 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a delimited (e.g. CSV)
 	 * String. E.g. useful for toString() implementations.
-	 * @param c Collection to display
+	 * @param coll Collection to display
 	 * @param delim delimiter to use (probably a ",")
 	 * @param prefix string to start each element with
 	 * @param suffix string to end each element with
 	 */
 	public static String collectionToDelimitedString(
-			Collection c, String delim, String prefix, String suffix) {
-		if (c == null) {
-			return "null";
+			Collection coll, String delim, String prefix, String suffix) {
+		if (coll == null) {
+			return "";
 		}
 		StringBuffer sb = new StringBuffer();
-		Iterator it = c.iterator();
+		Iterator it = coll.iterator();
 		int i = 0;
 		while (it.hasNext()) {
-			if (i++ > 0) {
+			if (i > 0) {
 				sb.append(delim);
 			}
-			sb.append(prefix + it.next() + suffix);
+			sb.append(prefix).append(it.next()).append(suffix);
+			i++;
 		}
 		return sb.toString();
 	}
