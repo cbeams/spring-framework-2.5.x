@@ -31,8 +31,6 @@ import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
-import uk.co.voca.refdata.ui.form.PropertyEditorRegistrar;
-
 /**
  * Base binding and validation action, which may be used as is, or specialized
  * as needed.
