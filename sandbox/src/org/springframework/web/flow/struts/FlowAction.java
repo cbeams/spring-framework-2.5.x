@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowEventProcessor;
-import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionExecutionInfo;
 import org.springframework.web.flow.FlowSessionExecutionStartResult;
 import org.springframework.web.flow.NoSuchFlowSessionException;
@@ -45,29 +44,62 @@ import org.springframework.web.struts.TemplateAction;
  */
 public class FlowAction extends TemplateAction {
 
-	private static final String ACTION_PATH_NAME_ATTRIBUTE = "actionFormBeanName";
+	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
 
-	public static String FLOW_SESSION_ID_PARAMETER = "_flowSessionId";
+	public static final String FLOW_SESSION_ID_ATTRIBUTE = "flowSessionId";
+
+	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
+
+	public static final String FLOW_SESSION_ID_PARAMETER = "_flowSessionId";
 
 	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
 
 	public static final String EVENT_ID_PARAMETER = "_eventId";
 
-	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
-
-	public static String ACTION_FORM_ATTRIBUTE_NAME = "_bindingActionForm";
-
 	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
 
-	// made final as these attribute keys are needed elsewhere, so they cant
-	// change for now
+	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
 
-	protected final String getFlowSessionIdAttributeName() {
-		return FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME;
+	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
+
+	protected String getFlowSessionIdParameterName() {
+		return FLOW_SESSION_ID_PARAMETER;
 	}
 
-	protected final String getCurrentStateIdAttributeName() {
-		return FlowSession.CURRENT_STATE_ID_ATTRIBUTE_NAME;
+	protected String getCurrentStateIdParameterName() {
+		return CURRENT_STATE_ID_PARAMETER;
+	}
+
+	protected String getEventIdParameterName() {
+		return EVENT_ID_PARAMETER;
+	}
+
+	protected String getNotSetEventIdParameterMarker() {
+		return NOT_SET_EVENT_ID;
+	}
+
+	protected String getFlowSessionIdAttributeName() {
+		return FLOW_SESSION_ID_ATTRIBUTE;
+	}
+
+	protected String getCurrentStateIdAttributeName() {
+		return CURRENT_STATE_ID_ATTRIBUTE;
+	}
+
+	private String getEventIdAttributeName() {
+		return EVENT_ID_ATTRIBUTE;
+	}
+
+	protected String getFlowSessionExecutionInfoAttributeName() {
+		return FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME;
+	}
+
+	protected String getActionPathAttributeName() {
+		return ACTION_PATH_ATTRIBUTE;
+	}
+
+	protected String getActionFormAttributeName() {
+		return ACTION_FORM_ATTRIBUTE;
 	}
 
 	protected FlowEventProcessor getEventProcessor(ActionMapping mapping) {
@@ -102,18 +134,18 @@ public class FlowAction extends TemplateAction {
 		// struts specific
 		if (form instanceof BindingActionForm) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Setting binding action form key '" + ACTION_FORM_ATTRIBUTE_NAME + "' to form " + form);
+				logger.debug("Setting binding action form key '" + getActionFormAttributeName() + "' to form " + form);
 			}
 			// our form is a 'special' BindingActionForm, set under a generic
 			// attribute so it'll be accessible to binding flow action beans
-			request.setAttribute(ACTION_FORM_ATTRIBUTE_NAME, form);
+			request.setAttribute(getActionFormAttributeName(), form);
 		}
 		// end struts specific
 
 		FlowSessionExecutionInfo sessionExecution;
 		ViewDescriptor viewDescriptor = null;
 
-		if (getStringParameter(request, FLOW_SESSION_ID_PARAMETER) == null) {
+		if (getStringParameter(request, getFlowSessionIdParameterName()) == null) {
 			// No existing flow session execution to lookup as no _flowSessionId
 			// was provided - start a new one
 			FlowSessionExecutionStartResult startResult = getEventProcessor(mapping).start(request, response, null);
@@ -125,9 +157,9 @@ public class FlowAction extends TemplateAction {
 			// Client is participating in an existing flow session execution,
 			// retrieve information about it
 			sessionExecution = getRequiredFlowSessionExecution(getRequiredStringParameter(request,
-					FLOW_SESSION_ID_PARAMETER), request);
+					getFlowSessionIdParameterName()), request);
 			// let client tell you what state they are in (if possible)
-			String currentStateIdParam = getStringParameter(request, CURRENT_STATE_ID_PARAMETER);
+			String currentStateIdParam = getStringParameter(request, getCurrentStateIdParameterName());
 			if (currentStateIdParam == null) {
 				if (logger.isWarnEnabled()) {
 					logger
@@ -139,26 +171,27 @@ public class FlowAction extends TemplateAction {
 				currentStateIdParam = sessionExecution.getCurrentStateId();
 			}
 			// let client tell you what event was signaled in the current state
-			String eventId = getStringParameter(request, EVENT_ID_PARAMETER);
+			String eventId = getStringParameter(request, getEventIdParameterName());
 			if (eventId == null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("No '" + EVENT_ID_PARAMETER
+					logger.debug("No '" + getEventIdParameterName()
 							+ "' parameter was found; falling back to request attribute");
 				}
-				eventId = (String)request.getAttribute(EVENT_ID_ATTRIBUTE);
+				eventId = (String)request.getAttribute(getEventIdAttributeName());
 			}
 			if (eventId == null) {
 				throw new IllegalArgumentException(
 						"The '"
-								+ EVENT_ID_PARAMETER
+								+ getEventIdParameterName()
 								+ "' request parameter (or '"
-								+ EVENT_ID_ATTRIBUTE
+								+ getEventIdAttributeName()
 								+ "' request attribute) is required to signal an event in the current state of this executing flow '"
 								+ sessionExecution.getCaption() + "' -- programmer error?");
 			}
-			if (eventId.equals(NOT_SET_EVENT_ID)) {
-				logger.error("The event submitted by the browser was '" + NOT_SET_EVENT_ID
-						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '" + EVENT_ID_PARAMETER
+			if (eventId.equals(getNotSetEventIdParameterMarker())) {
+				logger.error("The event submitted by the browser was '" + getNotSetEventIdParameterMarker()
+						+ "' - this is likely a view (jsp, etc) configuration error - " + "the '"
+						+ getEventIdParameterName()
 						+ "' parameter must be set to a valid event to execute within the current state '"
 						+ currentStateIdParam + "' of this flow '" + sessionExecution.getCaption()
 						+ "' - else I don't know what to do!");
@@ -185,8 +218,7 @@ public class FlowAction extends TemplateAction {
 				}
 				request.setAttribute(getFlowSessionIdAttributeName(), sessionExecution.getId());
 				request.setAttribute(getCurrentStateIdAttributeName(), sessionExecution.getCurrentStateId());
-				request.setAttribute(FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME,
-						sessionExecution);
+				request.setAttribute(getFlowSessionExecutionInfoAttributeName(), sessionExecution);
 
 				// struts specific
 				String mappingFlowId = getFlowId(mapping);
@@ -194,12 +226,12 @@ public class FlowAction extends TemplateAction {
 					String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
 					String actionFormBeanName = actionPathName + "Form";
 					if (logger.isDebugEnabled()) {
-						logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '"
+						logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '"
 								+ actionPathName + "' in request scope.");
 						logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
 								+ "' in request scope.");
 					}
-					request.setAttribute(ACTION_PATH_NAME_ATTRIBUTE, actionPathName);
+					request.setAttribute(getActionPathAttributeName(), actionPathName);
 					request.setAttribute(actionFormBeanName, form);
 				}
 				if (form instanceof BindingActionForm) {

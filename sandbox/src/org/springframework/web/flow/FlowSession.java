@@ -38,10 +38,6 @@ import org.springframework.util.closure.Constraint;
 public class FlowSession implements MutableAttributesAccessor, Serializable {
 	private static final Log logger = LogFactory.getLog(FlowSession.class);
 
-	public static final String CURRENT_STATE_ID_ATTRIBUTE_NAME = "currentStateId";
-
-	public static final String FLOW_SESSION_ID_ATTRIBUTE_NAME = "flowSessionId";
-
 	private Flow flow;
 
 	private AbstractState currentState;
@@ -81,7 +77,7 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	public AbstractState getCurrentState() {
 		return currentState;
 	}
-	
+
 	public String getCurrentStateId() {
 		return currentState.getId();
 	}
