@@ -1,12 +1,14 @@
 /*
- *	$Id: TestBean.java,v 1.2 2003-09-30 19:37:52 beanie42 Exp $
+ *	$Id: TestBean.java,v 1.3 2003-10-30 07:52:36 jhoeller Exp $
  */
 
 package org.springframework.beans;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Simple test bean used for testing bean factories,
@@ -27,6 +29,8 @@ public class TestBean implements ITestBean, IOther {
 	private String touchy;
 
 	private Collection friends = new LinkedList();
+
+	private Map someMap = new HashMap();
 
 	private Date date = new Date();
 
@@ -165,6 +169,14 @@ public class TestBean implements ITestBean, IOther {
 	 */
 	public void setFriends(Collection friends) {
 		this.friends = friends;
+	}
+
+	public Map getSomeMap() {
+		return someMap;
+	}
+
+	public void setSomeMap(Map someMap) {
+		this.someMap = someMap;
 	}
 
 	public INestedTestBean getDoctor() {
