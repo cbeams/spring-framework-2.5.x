@@ -41,6 +41,9 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	 * @return true if yes, false otherwise
 	 */
 	public boolean buildsWith(Class requiredBuilderImplementationClass) throws IllegalArgumentException {
+		if (requiredBuilderImplementationClass == null) {
+			return false;
+		}
 		if (!FlowBuilder.class.isAssignableFrom(requiredBuilderImplementationClass)) {
 			throw new IllegalArgumentException("The flow builder implementation class '"
 					+ requiredBuilderImplementationClass + "' you provided to this method does not implement the '"
