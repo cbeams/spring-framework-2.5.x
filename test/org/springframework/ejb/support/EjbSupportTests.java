@@ -30,7 +30,7 @@ import org.springframework.jndi.support.SimpleNamingContextBuilder;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.8 2004-02-13 17:54:51 jhoeller Exp $
+ * @version $Id: EjbSupportTests.java,v 1.9 2004-02-25 00:56:49 kdonald Exp $
  */
 public class EjbSupportTests extends TestCase {
 
@@ -67,7 +67,7 @@ public class EjbSupportTests extends TestCase {
 				throw new UnsupportedOperationException("ejbPassivate");
 			}
 
-		};
+		}
 		
 		MySfsb sfsb = new MySfsb();
 		sfsb.setBeanFactoryLocator(bfl);

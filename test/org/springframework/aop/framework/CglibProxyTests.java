@@ -18,7 +18,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.4 2003-12-19 10:19:50 johnsonr Exp $
+ * @version $Id: CglibProxyTests.java,v 1.5 2004-02-25 00:56:48 kdonald Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 	
@@ -93,7 +93,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		class YouCantSeeThis {
 			void hidden() {
 			}
-		};
+		}
 		YouCantSeeThis mine = new YouCantSeeThis();
 		try {
 			ProxyFactory pf = new ProxyFactory(mine);

@@ -167,7 +167,7 @@ public class JaxRpcTestSuite extends TestCase {
 				if (!(new URL("http://myUrl1")).equals(url) || !"myNamespace1".equals(qName.getNamespaceURI()) ||
 						!"myService1".equals(qName.getLocalPart())) {
 					throw new ServiceException("not supported");
-				};
+				}
 			}
 			catch (MalformedURLException ex) {
 			}
@@ -177,7 +177,7 @@ public class JaxRpcTestSuite extends TestCase {
 		public Service createService(QName qName) throws ServiceException {
 			if (!"".equals(qName.getNamespaceURI()) || !"myService2".equals(qName.getLocalPart())) {
 				throw new ServiceException("not supported");
-			};
+			}
 			return service2;
 		}
 	}

@@ -20,7 +20,7 @@ import org.easymock.MockControl;
  * Uses mock objects.
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: RedirectViewTests.java,v 1.3 2003-11-21 22:34:58 jhoeller Exp $
+ * @version $Id: RedirectViewTests.java,v 1.4 2004-02-25 00:56:49 kdonald Exp $
  */
 public class RedirectViewTests extends TestCase {
 
@@ -38,7 +38,7 @@ public class RedirectViewTests extends TestCase {
 				return super.queryProperties(model);
 			}
 
-		};
+		}
 		TestRedirectView rv = new TestRedirectView();
 		rv.setUrl(url);
 		

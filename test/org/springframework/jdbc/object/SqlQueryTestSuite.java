@@ -428,7 +428,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			public Customer findCustomer(int id, int otherNum) {
 				return (Customer) findObject(id, otherNum);
 			}
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer(1, 1);
 
@@ -488,7 +488,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			public Customer findCustomer(String id) {
 				return (Customer) findObject(id);
 			}
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer("rod");
 
@@ -586,7 +586,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				return (Customer) findObject(
 					new Object[] { new Integer(id), name });
 			}
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 
 		Customer cust1 = query.findCustomer(1, "rod");
@@ -653,7 +653,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			public Customer findCustomer(String id) {
 				return (Customer) findObject(id);
 			}
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		try {
 			Customer cust = query.findCustomer("rod");
@@ -720,7 +720,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				return cust;
 			}
 
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 
 		List list = query.execute(1, 1);
@@ -783,7 +783,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				return cust;
 			}
 
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 
 		List list = query.execute("one");
@@ -842,7 +842,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 			public Customer findCustomer(int id) {
 				return (Customer) findObject(id);
 			}
-		};
+		}
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer(1);
 
@@ -928,7 +928,7 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 				rs.updateString(2, "" + context.get(new Integer(rs.getInt(COLUMN_NAMES[0]))));
 				return null;
 			}
-		};
+		}
 		CustomerUpdateQuery query = new CustomerUpdateQuery(mockDataSource);
 		Map values = new HashMap(2);
 		values.put(new Integer(1), "Rod");

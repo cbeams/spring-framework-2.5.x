@@ -383,7 +383,7 @@ public class FormControllerTestSuite extends TestCase {
 			else if (tb.getName().length() < 5)
 				errors.rejectValue("name", TOOSHORT, null, "need full name");
 		}
-	};
+	}
 
 
 	private static class TestController extends SimpleFormController {

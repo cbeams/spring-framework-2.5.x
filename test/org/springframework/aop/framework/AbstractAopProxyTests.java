@@ -35,7 +35,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.19 2004-02-22 09:48:54 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.20 2004-02-25 00:56:48 kdonald Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -260,14 +260,14 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		public void increment() {
 			++count;
 		}
-	};
+	}
 	
 	public static class TargetChecker extends NeedsToSeeProxy {
 		protected void checkAdvised(Advised advised) {
 			// TODO replace this check: no longer possible
 			//assertEquals(advised.getTarget(), this);
 		}
-	};
+	}
 	
 	public void testTargetCanGetProxy() {
 		NopInterceptor di = new NopInterceptor();
@@ -492,7 +492,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		protected void assertions(MethodInvocation invocation) {
 			assertTrue(invocation.getThis() == this);
 			assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
-					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));;
+					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
 		}
 	}
 
@@ -1038,7 +1038,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		public ITestBean getSpouse() {
 			return this;
 		}
-	};
+	}
 	
 	
 	public static class AllInstancesAreEqual implements IOther {
@@ -1156,7 +1156,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			public void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable {
 				sum += ((Integer) returnValue).intValue();
 			}
-		};
+		}
 		SummingAfterAdvice aa = new SummingAfterAdvice();
 		Advisor matchesInt = new StaticMethodMatcherPointcutAdvisor(aa) {
 			public boolean matches(Method m, Class targetClass) {

@@ -190,7 +190,7 @@ public class CommandControllerTestSuite extends TestCase {
 			public long getLastModified(HttpServletRequest request) {
 				return 0;
 			}
-		};
+		}
 		LastModifiedTestController mc = new LastModifiedTestController();
 		mc.setCacheSeconds(10);
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");

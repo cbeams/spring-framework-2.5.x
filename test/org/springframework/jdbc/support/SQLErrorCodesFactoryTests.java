@@ -80,7 +80,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 					return null;
 				}
 			}
-		};
+		}
 		
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
@@ -97,7 +97,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
 				return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
 			}
-		};
+		}
 	
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
@@ -113,7 +113,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				// Guaranteed to be on the classpath, but most certainly NOT XML
 				return new ClassPathResource("SQLExceptionTranslator.class", SQLErrorCodesFactoryTests.class);
 			}
-		};
+		}
 
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();

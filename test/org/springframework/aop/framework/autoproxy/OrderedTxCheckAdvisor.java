@@ -21,7 +21,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * method invocations and check for presence of transaction context.
  * <br>Matches setters.
  * @author Rod Johnson
- * @version $Id: OrderedTxCheckAdvisor.java,v 1.2 2004-02-22 09:48:55 johnsonr Exp $
+ * @version $Id: OrderedTxCheckAdvisor.java,v 1.3 2004-02-25 00:56:48 kdonald Exp $
  */
 public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements Ordered, InitializingBean {
 
@@ -51,7 +51,7 @@ public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor im
 			}
 			super.before(m, args, target);
 		}
-	};
+	}
 
 
 	public void setOrder(int order) {

@@ -16,7 +16,7 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PointcutsTests.java,v 1.3 2004-01-13 09:41:01 johnsonr Exp $
+ * @version $Id: PointcutsTests.java,v 1.4 2004-02-25 00:56:48 kdonald Exp $
  */
 public class PointcutsTests extends TestCase {
 	
@@ -62,7 +62,7 @@ public class PointcutsTests extends TestCase {
 	
 	// Subclass used for matching
 	public static class MyTestBean extends TestBean {
-	};
+	}
 	
 	public static Pointcut myTestBeanSetterPointcut = new StaticMethodMatcherPointcut() {
 		public ClassFilter getClassFilter() {
@@ -87,7 +87,7 @@ public class PointcutsTests extends TestCase {
 	
 	// Still more specific class
 	public static class MyTestBeanSubclass extends MyTestBean {
-	};
+	}
 	
 	public static Pointcut myTestBeanSubclassGetterPointcut = new StaticMethodMatcherPointcut() {
 		public ClassFilter getClassFilter() {

@@ -81,7 +81,7 @@ public class AbstractTestTests extends TestCase {
 				//assertTrue("Failure callback had correct argument", ex == failure);
 				++callbacks;
 			}
-		};
+		}
 		final Fails fails = new Fails();
 		AbstractTestSuite ats = new AbstractTestSuite() {
 			protected Test[] createTests() {
@@ -170,7 +170,7 @@ public class AbstractTestTests extends TestCase {
 			private Object fixture;
 			public void setFixture(Object o) { this.fixture = o; }
 			public Object getFixture() { return this.fixture; }
-		};
+		}
 		final Test maxPauseTest = new FixtureTest();
 		maxPauseTest.setMaxPause(11L);
 		final Test noMaxPauseTest = new FixtureTest();

@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.15 2004-02-20 12:04:40 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.16 2004-02-25 00:56:49 kdonald Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -477,19 +477,19 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		final String sql =
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setThrowable(sex);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
+		MockControl ctrlStatement =
+			MockControl.createControl(Statement.class);
+		Statement mockStatement =
+			(Statement) ctrlStatement.getMock();
+		mockStatement.executeUpdate(sql);
+		ctrlStatement.setThrowable(sex);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
 
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
 
-		ctrlPreparedStatement.replay();
+		ctrlStatement.replay();
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
@@ -500,7 +500,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			assertTrue("root cause is correct", ex.getCause() == sex);
 		}
 
-		ctrlPreparedStatement.verify();
+		ctrlStatement.verify();
 	}
 
 	public void testSqlUpdate() throws Exception {
@@ -508,19 +508,19 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
+		MockControl ctrlStatement =
+			MockControl.createControl(Statement.class);
+		Statement mockStatement =
+			(Statement) ctrlStatement.getMock();
+		mockStatement.executeUpdate(sql);
+		ctrlStatement.setReturnValue(rowsAffected);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
 
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
 
-		ctrlPreparedStatement.replay();
+		ctrlStatement.replay();
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
@@ -530,7 +530,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			"Actual rows affected is correct",
 			actualRowsAffected == rowsAffected);
 
-		ctrlPreparedStatement.verify();
+		ctrlStatement.verify();
 	}
 
 	public void testSqlUpdateWithThreadConnection() throws Exception {
@@ -538,19 +538,19 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
+		MockControl ctrlStatement =
+			MockControl.createControl(Statement.class);
+		Statement mockStatement =
+			(Statement) ctrlStatement.getMock();
+		mockStatement.executeUpdate(sql);
+		ctrlStatement.setReturnValue(rowsAffected);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
 
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
 
-		ctrlPreparedStatement.replay();
+		ctrlStatement.replay();
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
@@ -560,7 +560,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			"Actual rows affected is correct",
 			actualRowsAffected == rowsAffected);
 
-		ctrlPreparedStatement.verify();
+		ctrlStatement.verify();
 	}
 
 	/**
@@ -1449,6 +1449,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			ps.setInt(1, id);
 			return ps;
 		}
-	};
+	}
 
 }

@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.13 2004-02-22 09:48:54 johnsonr Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.14 2004-02-25 00:56:48 kdonald Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -186,7 +186,7 @@ public class ProxyFactoryTests extends TestCase {
 			public int compareTo(Object arg0) {
 				throw new UnsupportedOperationException("compareTo");
 			}
-		};
+		}
 		TestBeanSubclass raw = new TestBeanSubclass();
 		ProxyFactory factory = new ProxyFactory(raw);
 		assertEquals("Found correct number of interfaces", 4, factory.getProxiedInterfaces().length);

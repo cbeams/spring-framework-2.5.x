@@ -26,7 +26,7 @@ import org.springframework.util.StopWatch;
  * 
  * @author  Rod Johnson
  * @since February 9, 2001
- * @version $Id: AbstractTest.java,v 1.7 2003-12-07 18:57:46 johnsonr Exp $
+ * @version $Id: AbstractTest.java,v 1.8 2004-02-25 00:56:47 kdonald Exp $
  */
 public abstract class AbstractTest implements Test, BeanNameAware {
 
@@ -212,7 +212,7 @@ public abstract class AbstractTest implements Test, BeanNameAware {
 	public final double getTestsPerSecondCount() {
 		double res = 0.0;
 		double totalTime = runningTimer.getTotalTime();
-		double testCompleted = (double) getTestsCompletedCount();
+		double testCompleted = getTestsCompletedCount();
 		
 		if (testCompleted == 0.0) 
 			return 0.0;
