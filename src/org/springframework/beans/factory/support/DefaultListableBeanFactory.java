@@ -232,8 +232,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (type == null) {
 			return true;
 		}
-		Class beanType = getType(beanName);
-		return (beanType != null && type.isAssignableFrom(beanType));
+
+		try {
+			Class beanType = getType(beanName);
+			return (beanType != null && type.isAssignableFrom(beanType));
+		}
+		
+		catch (BeanCreationException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Looking for match to type [" + type.getName() +
+						"]: ignoring bean '" + beanName + "' that couldn't be created properly", ex);
+			}
+
+			// Ignore: probably indicates a circular reference when autowiring constructors.
+			// We want to find matches that do not cause circular references with FactoryBean.
+
+			// Could also be caused by a "lazy-init" bean that cannot be instantiated.
+			// Use "abstract" for such beans that are not meant to be instantiated at all.
+
+			return false;
+		}
 	}
 
 

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.Serializable;
+
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
 
@@ -24,7 +26,7 @@ import org.springframework.beans.TestBean;
  * @author Juergen Hoeller
  * @since 09.11.2003
  */
-public class ConstructorDependenciesBean {
+public class ConstructorDependenciesBean implements Serializable {
 	
 	private int age;
 	

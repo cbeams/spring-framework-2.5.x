@@ -269,8 +269,8 @@ public class XmlBeanFactoryTests extends TestCase {
 			fail();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// Ok
-			// Check exception message contains the name
+			// OK
+			// check exception message contains the name
 			assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
 		}
 	}
@@ -325,6 +325,16 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
 		DummyFactory db = (DummyFactory) xbf.getBean("&singletonFactory");
 		assertTrue(tb == db.getOtherTestBean());
+	}
+
+	public void testComplexFactoryReferenceCircle() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("complexFactoryCircle.xml", getClass()));
+		xbf.getBean("proxy1");
+		// check that unused instances from autowiring got removed
+		assertEquals(5, xbf.getSingletonCount());
+		// properly create the remaining two instances
+		xbf.getBean("proxy2");
+		assertEquals(7, xbf.getSingletonCount());
 	}
 
 	public void testInitMethodIsInvoked() throws Exception {
