@@ -24,6 +24,11 @@ import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Transtition criteria that tests the value of a OGNL expression.
+ * <a href="http://www.ognl.org">OGNL</a> is the Object Graph
+ * Navigation Language: an expression language for getting and setting
+ * the properties of Java objects. In this case, it is used to express
+ * a condition that guards transition execution in a web flow.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -31,6 +36,12 @@ public class OgnlTransitionCriteria implements TransitionCriteria {
 
 	private String expressionString;
 
+	/**
+	 * Create a new OGNL based transition criteria object.
+	 * 
+	 * @param expressionString the OGNL expression testing the criteria, this
+	 *        expression should be a condition that returns a Boolean value
+	 */
 	public OgnlTransitionCriteria(String expressionString) {
 		this.expressionString = expressionString;
 	}
