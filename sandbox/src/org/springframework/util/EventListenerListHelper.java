@@ -106,16 +106,15 @@ public class EventListenerListHelper implements Serializable {
 
 	private final Class listenerClass;
 
-	private volatile Object[] listeners;
+	private volatile Object[] listeners = EMPTY_OBJECT_ARRAY;
 
 	/**
 	 * Create new <code>ListenerListHelper</code> instance that will maintain
 	 * a list of event listeners of the given class.
 	 */
 	public EventListenerListHelper(Class listenerClass) {
-		Assert.notNull(listenerClass);
+		Assert.notNull(listenerClass, "The listenerClass argument is required");
 		this.listenerClass = listenerClass;
-		this.listeners = EMPTY_OBJECT_ARRAY;
 	}
 
 	/**
@@ -165,7 +164,7 @@ public class EventListenerListHelper implements Serializable {
 			return new ObjectArrayIterator(listeners);
 		}
 	}
-	
+
 	public ProcessTemplate iteratorTemplate() {
 		return new IteratorProcessTemplate(iterator());
 	}
@@ -448,15 +447,17 @@ public class EventListenerListHelper implements Serializable {
 	}
 
 	public Object toArray() {
-		if (listeners == null) {
+		if (listeners == EMPTY_OBJECT_ARRAY) {
 			return Array.newInstance(listenerClass, 0);
-		} else {
-			Object copy = Array.newInstance(listenerClass, listeners.length);
-			System.arraycopy(this.listeners, 0, copy, 0, listeners.length);
+		}
+		else {
+			Object[] listenersCopy = listeners;
+			Object copy = Array.newInstance(listenerClass, listenersCopy.length);
+			System.arraycopy(listenersCopy, 0, copy, 0, listenersCopy.length);
 			return copy;
 		}
 	}
-	
+
 	public String toString() {
 		return new ToStringCreator(this).append("listenerClass", listenerClass).append("listeners", listeners)
 				.toString();

@@ -203,7 +203,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Assert.notNull(resource, "resource is a required property");
 		Assert.notNull(getFlowServiceLocator(), "flowServiceLocator is a required property");
 		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
-
 		try {
 			loadFlowDefinition();
 		}
@@ -216,9 +215,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		catch (SAXException e) {
 			throw new FlowBuilderException("Cannot parse the flow definition XML document", e);
 		}
-
 		parseFlowDefinition();
-
 		return getFlow();
 	}
 
@@ -281,10 +278,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected void parseStateDefinitions() {
 		Element root = doc.getDocumentElement();
 		String startStateId = root.getAttribute(START_STATE_ELEMENT_ATTRIBUTE);
-
 		// get the flow under construction
 		Flow flow = getFlow();
-
 		NodeList nodeList = root.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
@@ -374,7 +369,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected String[] parseActionNames(Element element) {
 		List actionNames = new LinkedList();
-
 		NodeList childNodeList = element.getChildNodes();
 		for (int i = 0; i < childNodeList.getLength(); i++) {
 			Node childNode = childNodeList.item(i);
@@ -426,7 +420,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition[] parseTransitions(Element element) {
 		List transitions = new LinkedList();
-
 		NodeList childNodeList = element.getChildNodes();
 		for (int i = 0; i < childNodeList.getLength(); i++) {
 			Node childNode = childNodeList.item(i);
@@ -449,5 +442,4 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String to = element.getAttribute(TO_ATTRIBUTE);
 		return new Transition(event, to);
 	}
-
 }
