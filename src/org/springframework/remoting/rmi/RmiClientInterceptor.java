@@ -30,8 +30,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.support.RemoteInvocation;
-import org.springframework.remoting.support.UrlBasedRemoteAccessor;
+import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 
 /**
  * Interceptor for accessing conventional RMI services or RMI invokers.
@@ -52,12 +51,14 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see RmiServiceExporter
+ * @see RmiProxyFactoryBean
  * @see RmiInvocationHandler
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
  */
-public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
+public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
+		implements MethodInterceptor, InitializingBean {
 
 	private Remote rmiProxy;
 
@@ -153,7 +154,7 @@ public class RmiClientInterceptor extends UrlBasedRemoteAccessor implements Meth
 	 */
 	protected Object invoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
 	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		return invocationHandler.invoke(new RemoteInvocation(methodInvocation));
+		return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
 	}
 
 }

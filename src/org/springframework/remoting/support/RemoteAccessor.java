@@ -52,7 +52,7 @@ public abstract class RemoteAccessor {
 	/**
 	 * Return the interface of the service to access.
 	 */
-	protected Class getServiceInterface() {
+	public Class getServiceInterface() {
 		return serviceInterface;
 	}
 

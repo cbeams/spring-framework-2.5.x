@@ -17,20 +17,22 @@
 package org.springframework.remoting.support;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * JavaBean that encapsulates a remote invocation.
- * Provides the core method invocation properties.
- * Currently just used for RMI invokers, but not restricted to RMI.
+ * Encapsulates a remote invocation, providing core method invocation properties
+ * in a serializable fashion. Used for RMI and HTTP-based serialization invokers.
  *
  * <p>This is an SPI class, typically not used directly by applications.
  * Can be subclassed for additional invocation parameters.
  *
  * @author Juergen Hoeller
  * @since 25.02.2004
- * @see org.springframework.remoting.rmi.RmiInvocationHandler
+ * @see RemoteInvocationFactory
+ * @see RemoteInvocationExecutor
  */
 public class RemoteInvocation implements Serializable {
 
@@ -39,6 +41,7 @@ public class RemoteInvocation implements Serializable {
 	private Class[] parameterTypes;
 
 	private Object[] arguments;
+
 
 	/**
 	 * Create a new RemoteInvocation for use as JavaBean.
@@ -90,6 +93,23 @@ public class RemoteInvocation implements Serializable {
 
 	public Object[] getArguments() {
 		return arguments;
+	}
+
+
+	/**
+	 * Perform this invocation on the given target object.
+	 * Typically called when a RemoteInvocation is received on the server.
+	 * @param targetObject the target object to apply the invocation to
+	 * @return the invocation result
+	 * @throws NoSuchMethodException if the method name could not be resolved
+	 * @throws IllegalAccessException if the method could not be accessed
+	 * @throws InvocationTargetException if the method invocation resulted in an exception
+	 * @see java.lang.reflect.Method#invoke
+	 */
+	public Object invoke(Object targetObject)
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method method = targetObject.getClass().getMethod(this.methodName, this.parameterTypes);
+		return method.invoke(targetObject, this.arguments);
 	}
 
 }

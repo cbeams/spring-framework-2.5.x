@@ -17,7 +17,6 @@
 package org.springframework.remoting.rmi;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -32,8 +31,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.remoting.support.RemoteInvocation;
+import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 
 /**
  * RMI exporter that exposes the specified service as RMI object with the specified
@@ -50,14 +49,14 @@ import org.springframework.remoting.support.RemoteInvocation;
  * Effectively, any serializable Java object can be transported without hassle.
  * Hessian and Burlap have their own (de-)serialization mechanisms, but are
  * HTTP-based and thus much easier to setup than RMI. 
- * 
- * <p>Note: be careful when exporting objects to servers running on multi-homed machines
- * or when changing from Windows to certain Linux-based environments. Changes might 
- * occur as to where (on what network device or IP-address) objects will be bound.
- * Changing the IP-address can be done by specifying the system property 
- * <code>java.rmi.server.host</code> (in your application server for example).
- * Exceptions resulting from proxies with wrong location information typically include
- * messages like 'Could not connect to 127.0.0.1'.
+ *
+ * <p>Note: RMI makes a best-effort attempt to obtain the fully qualified host name.
+ * If one cannot be determined, it will fall back and use the IP address. Depending
+ * on your network configuration, in some cases it will resolve the IP to the loopback
+ * address. Ensuring that RMI will use the host name bound to the correct network
+ * interface you should pass the <code>java.rmi.server.hostname</code> property to the
+ * JVM that will export the registry and/or the service using the "-D" JVM argument.
+ * For example: <code>-Djava.rmi.server.hostname=myserver.com</code>
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -66,7 +65,7 @@ import org.springframework.remoting.support.RemoteInvocation;
  * @see org.springframework.remoting.caucho.HessianServiceExporter
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
-public class RmiServiceExporter extends RemoteExporter implements InitializingBean, DisposableBean {
+public class RmiServiceExporter extends RemoteInvocationBasedExporter implements InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -147,7 +146,9 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 		}
 
 		Registry registry = null;
-		logger.info("Looking for RMI registry at port '" + this.registryPort + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Looking for RMI registry at port '" + this.registryPort + "'");
+		}
 		try {
 			// retrieve registry
 			registry = LocateRegistry.getRegistry(this.registryPort);
@@ -167,12 +168,17 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 		}
 		else {
 			// RMI invoker
-			logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
+			if (logger.isInfoEnabled()) {
+				logger.info("RMI object '" + this.serviceName + "' is an RMI invoker");
+			}
 			this.exportedObject = new RmiInvocationWrapper(getProxyForService(), this);
 		}
 
 		// export remote object and bind it to registry
-		logger.info("Binding RMI service '" + this.serviceName + "' to registry at port '" + this.registryPort + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Binding RMI service '" + this.serviceName +
+					"' to registry at port '" + this.registryPort + "'");
+		}
 		if (this.clientSocketFactory != null) {
 			UnicastRemoteObject.exportObject(this.exportedObject, this.servicePort,
 																			 this.clientSocketFactory, this.serverSocketFactory);
@@ -184,29 +190,19 @@ public class RmiServiceExporter extends RemoteExporter implements InitializingBe
 	}
 
 	/**
-	 * Apply the given remote invocation to the given target object.
-	 * The default implementation performs a plain method invocation.
-	 * <p>Can be overridden in subclasses for custom invocation behavior,
-	 * possibly for applying additional invocation parameters from a
-	 * custom RemoteInvocation subclass. Will typically match a corresponding
-	 * custom invoke implementation in RmiClientInterceptor/RmiProxyFactoryBean.
-	 * @param invocation the remote invocation
-	 * @param targetObject the target object to apply the invocation to
-	 * @return the invocation result
-	 * @throws NoSuchMethodException if the method name could not be resolved
-	 * @throws IllegalAccessException if the method could not be accessed
-	 * @throws InvocationTargetException if the method invocation resulted in an exception
-	 * @see RmiClientInterceptor#invoke
+	 * Redefined here to be visible to RmiInvocationWrapper.
+	 * Simply delegates to the corresponding superclass method.
 	 */
 	protected Object invoke(RemoteInvocation invocation, Object targetObject)
-	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		Method method = targetObject.getClass().getMethod(invocation.getMethodName(),
-		                                                  invocation.getParameterTypes());
-		return method.invoke(targetObject, invocation.getArguments());
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
+		return super.invoke(invocation, targetObject);
 	}
 
 	public void destroy() throws RemoteException, NotBoundException {
-		logger.info("Unbinding RMI service '" + this.serviceName + "' from registry at port '" + this.registryPort + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Unbinding RMI service '" + this.serviceName +
+					"' from registry at port '" + this.registryPort + "'");
+		}
 		Registry registry = LocateRegistry.getRegistry(this.registryPort);
 		registry.unbind(this.serviceName);
 		UnicastRemoteObject.unexportObject(this.exportedObject, true);

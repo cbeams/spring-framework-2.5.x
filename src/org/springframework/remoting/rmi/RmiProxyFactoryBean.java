@@ -49,6 +49,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @since 13.05.2003
  * @see #setServiceInterface
  * @see #setServiceUrl
+ * @see RmiClientInterceptor
  * @see RmiServiceExporter
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
