@@ -77,8 +77,6 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	 * @param targetObject the target object to apply the invocation to
 	 * @return the invocation result
 	 * @see #invoke
-	 * @see RemoteInvocationResult(Object)
-	 * @see RemoteInvocationResult(Exception)
 	 */
 	protected RemoteInvocationResult invokeAndCreateResult(RemoteInvocation invocation, Object targetObject) {
 		try {

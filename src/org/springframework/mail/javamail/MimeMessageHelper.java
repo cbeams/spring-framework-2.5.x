@@ -161,7 +161,7 @@ public class MimeMessageHelper {
 	/**
 	 * Return whether this helper is in multipart mode,
 	 * i.e. holds a multipart message.
-	 * @see MimeMessageHelper(MimeMessage, boolean)
+	 * @see #MimeMessageHelper(MimeMessage, boolean)
 	 */
 	public final boolean isMultipart() {
 		return (this.mimeMultipart != null);

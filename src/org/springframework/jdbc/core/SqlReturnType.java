@@ -21,17 +21,18 @@ import java.sql.SQLException;
 
 /**
  * Interface to be implemented for retrieving values for more complex database specific
- * types not supported by the standard getObject method. Implementations perform the
- * actual work of getting the actual values. They must implement the callback method
- * <code>getTypeValue</code> which can throw SQLExceptions that will be caught and
- * translated by the calling code. This callback method has access to the underlying
- * Connection via the given CallableStatement object, if that should be needed to create any
- * database-specific objects.
+ * types not supported by the standard <code>getObject</code> method.
+ *
+ * <p>Implementations perform the actual work of getting the actual values. They must
+ * implement the callback method <code>getTypeValue</code> which can throw SQLExceptions
+ * that will be caught and translated by the calling code. This callback method has
+ * access to the underlying Connection via the given CallableStatement object, if that
+ * should be needed to create any database-specific objects.
  *
  * @author Thomas Risberg
  * @since 1.1
+ * @see java.sql.CallableStatement#getObject
  * @see java.sql.Types
- * @see java.sql.PreparedStatement#setObject
  * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
  */
 public interface SqlReturnType {
@@ -47,7 +48,7 @@ public interface SqlReturnType {
 
 	/**
 	 * Get the type value from the specific object.
-	 * @param ps the PreparedStatement to work on
+	 * @param cs the CallableStatement to work on
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
