@@ -57,7 +57,6 @@ public class ClassUtils {
 	 *             if the class is null
 	 */
 	public static String getShortName(Class clazz) {
-		//Assert.notNull(clazz);
 		return getShortName(clazz.getName());
 	}
 
@@ -66,7 +65,7 @@ public class ClassUtils {
 	 * 
 	 * @param clazz
 	 *            The class
-	 * @return The short name rendered as a property.
+	 * @return The short name rendered in a standard javabeans property format.
 	 */
 	public static String getShortNameAsProperty(Class clazz) {
 		return StringUtils.uncapitalize(getShortName(clazz));
@@ -83,7 +82,6 @@ public class ClassUtils {
 	 *             if the className is empty
 	 */
 	public static String getShortName(String className) {
-		//Assert.hasText(className);
 		char[] charArray = className.toCharArray();
 		int lastDot = 0;
 		for (int i = 0; i < charArray.length; i++) {
@@ -113,14 +111,7 @@ public class ClassUtils {
 	 */
 	public static Method getStaticMethod(String methodName, Class clazz,
 			Class[] args) {
-		//Assert.hasText(methodName);
-		//Assert.notNull(clazz);
 		try {
-			//if (logger.isDebugEnabled()) {
-			//	logger.debug("Attempting to get static method '" + methodName
-			//			+ "' on class " + clazz + " with arguments '"
-			//			+ ArrayUtils.toString(args) + "'");
-			//}
 			Method method = clazz.getDeclaredMethod(methodName, args);
 			if ((method.getModifiers() & Modifier.STATIC) != 0) {
 				return method;

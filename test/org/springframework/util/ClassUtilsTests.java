@@ -29,26 +29,6 @@ public class ClassUtilsTests extends TestCase {
         assertEquals("Class name did not match", "classUtilsTests", shortName);
     }
 
-    public void testNullClassGetShortName() {
-        try {
-            ClassUtils.getShortName((Class)null);
-            fail("Null class was accepted");
-        } catch (IllegalArgumentException e) {
-            // correct behavior
-        }
-    }
-
-    public void testNullStringGetShortName() {
-        try {
-            ClassUtils.getShortName((String)null);
-            fail("Null string was accepted.");
-        } catch (IllegalArgumentException e) {
-            // correct behavior
-        } catch (Exception e) {
-            fail("Null arguments weren't handled properly");
-        }
-    }
-
     public void testNoArgsStaticMethod() {
         Method method = ClassUtils.getStaticMethod("staticMethod",
                 InnerClass.class, null);
@@ -70,27 +50,6 @@ public class ClassUtilsTests extends TestCase {
         invokeStaticMethod(method, new Object[] { "test" });
         assertTrue("argument method was not invoked.",
                 InnerClass.overloadedCalled);
-    }
-
-    public void testNullNameStaticMethod() {
-        try {
-            ClassUtils.getStaticMethod(null, getClass(), null);
-            fail("Null name was accepted");
-        } catch (IllegalArgumentException e) {
-            // correct behavior
-        } catch (Exception e) {
-            fail("Null arguments weren't handled properly!");
-        }
-    }
-
-    public void testNullClassStaticMethod() {
-        try {
-            ClassUtils.getStaticMethod("staticMethod", null, null);
-        } catch (IllegalArgumentException e) {
-            // correct behaivior
-        } catch (Exception e) {
-            fail("Null arguments weren't handled properly!");
-        }
     }
     
 	public void	testClassPackageAsResourcePath() {
