@@ -3,11 +3,12 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
+import com.mockobjects.servlet.MockPageContext;
+
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-
-import com.mockobjects.servlet.MockPageContext;
 
 /**
  * @author Juergen Hoeller
@@ -268,6 +269,57 @@ public class BindTestSuite extends AbstractTagTest {
 		assertEquals("name", tag.getProperty());
 	}
 
+	public void testBindTagWithIndexedProperties() throws JspException {
+		MockPageContext pc = createPageContext();
+		IndexedTestBean tb = new IndexedTestBean();
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		errors.rejectValue("array[0]", "code1", "message1");
+		errors.rejectValue("array[0]", "code2", "message2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.array[0]");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "array[0]".equals(status.getExpression()));
+		assertTrue("Value is TestBean", status.getValue() instanceof TestBean);
+		assertTrue("Correct value", "name0".equals(((TestBean) status.getValue()).getName()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 2);
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 2);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
+		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
+	}
+
+	public void testBindTagWithMappedProperties() throws JspException {
+		MockPageContext pc = createPageContext();
+		IndexedTestBean tb = new IndexedTestBean();
+		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
+		errors.rejectValue("map[key1]", "code1", "message1");
+		errors.rejectValue("map[key1]", "code2", "message2");
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
+
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.map[key1]");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertTrue("Has status variable", status != null);
+		assertTrue("Correct expression", "map[key1]".equals(status.getExpression()));
+		assertTrue("Value is TestBean", status.getValue() instanceof TestBean);
+		assertTrue("Correct value", "name4".equals(((TestBean) status.getValue()).getName()));
+		assertTrue("Correct isError", status.isError());
+		assertTrue("Correct errorCodes", status.getErrorCodes().length == 2);
+		assertTrue("Correct errorMessages", status.getErrorMessages().length == 2);
+		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
+		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
+		assertTrue("Correct errorMessage", "message1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
+	}
 
 	public void testBindTagWithoutBean() throws JspException {
 		MockPageContext pc = createPageContext();
