@@ -52,8 +52,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
  * Hibernate query timeouts. To support the latter, application code must either use
- * HibernateTemplate.find or call SessionFactoryUtils' applyTransactionTimeout
- * method for each created Hibernate Query object.
+ * <code>HibernateTemplate.find</code> or call
+ * <code>SessionFactoryUtils.applyTransactionTimeout</code> for each created
+ * Hibernate Query object.
  *
  * <p>This implementation is appropriate for applications that solely use Hibernate
  * for transactional data access, but it also supports direct data source access
@@ -61,7 +62,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * This allows for mixing services that access Hibernate (including transactional
  * caching) and services that use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. DataSourceUtils.getConnection).
+ * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC
  * code, this instance needs to be aware of the DataSource (see setDataSource).
@@ -86,6 +87,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * does not require any special configuration for proper JTA participation.
  * Note that there are special cases with EJB CMT and restrictive JTA subsystems:
  * See JtaTransactionManager's javadoc for details.
+ *
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,
+ * as nested transactions will just apply to the JDBC Connection, not to the
+ * Hibernate Session and its cached objects. You can manually set the flag to true
+ * if you want to use nested transactions for JDBC access code that participates
+ * in Hibernate transactions (provided that your JDBC driver supports Savepoints).
  *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
@@ -249,16 +257,21 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 
 	protected Object doGetTransaction() {
+		HibernateTransactionObject txObject = new HibernateTransactionObject();
+		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
 			logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
 									 "] for Hibernate transaction");
-			return new HibernateTransactionObject(sessionHolder);
+			txObject.setSessionHolder(sessionHolder, false);
+			if (this.dataSource != null) {
+				ConnectionHolder conHolder = (ConnectionHolder)
+						TransactionSynchronizationManager.getResource(this.dataSource);
+				txObject.setConnectionHolder(conHolder);
+			}
 		}
-		else {
-			return new HibernateTransactionObject();
-		}
+		return txObject;
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
@@ -277,7 +290,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (debugEnabled) {
 				logger.debug("Opened new session [" + session + "] for Hibernate transaction");
 			}
-			txObject.setSessionHolder(new SessionHolder(session));
+			txObject.setSessionHolder(new SessionHolder(session), true);
 		}
 
 		txObject.getSessionHolder().setSynchronizedWithTransaction(true);
@@ -340,6 +353,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					logger.debug("Exposing Hibernate transaction [" + session + "] as JDBC transaction [" +
 											 conHolder.getConnection() + "]");
 				}
+				txObject.setConnectionHolder(conHolder);
 				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 			}
 
@@ -363,7 +377,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	protected Object doSuspend(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		txObject.setSessionHolder(null);
+		txObject.setSessionHolder(null, false);
 		SessionHolder sessionHolder =
 				(SessionHolder) TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		ConnectionHolder connectionHolder = null;

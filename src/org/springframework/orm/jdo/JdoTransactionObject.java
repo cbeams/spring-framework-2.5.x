@@ -1,62 +1,45 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.jdo;
+
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 
 /**
  * JDO transaction object, representing a PersistenceManagerHolder.
  * Used as transaction object by JdoTransactionManager.
  *
- * <p>Instances of this class are the transaction objects that
- * JdoTransactionManager returns. They nest the thread-bound
- * PersistenceManagerHolder internally.
- *
+ * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+ * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+ * 
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller
  * @since 13.06.2003
  */
-public class JdoTransactionObject {
+public class JdoTransactionObject extends JdbcTransactionObjectSupport {
 
 	private PersistenceManagerHolder persistenceManagerHolder;
 
 	private boolean newPersistenceManagerHolder;
 
-	private boolean jdbcTransactionExposed;
-
-	/**
-	 * Create JdoTransactionObject for new PersistenceManagerHolder.
-	 */
-	protected JdoTransactionObject() {
-	}
-
-	/**
-	 * Create JdoTransactionObject for existing PersistenceManagerHolder.
-	 */
-	protected JdoTransactionObject(PersistenceManagerHolder persistenceManagerHolder) {
+	protected void setPersistenceManagerHolder(PersistenceManagerHolder persistenceManagerHolder,
+																						 boolean newPersistenceManagerHolder) {
 		this.persistenceManagerHolder = persistenceManagerHolder;
-		this.newPersistenceManagerHolder = false;
-	}
-
-	/**
-	 * Set new PersistenceManagerHolder.
-	 */
-	protected void setPersistenceManagerHolder(PersistenceManagerHolder persistenceManagerHolder) {
-		this.persistenceManagerHolder = persistenceManagerHolder;
-		this.newPersistenceManagerHolder = (persistenceManagerHolder != null);
+		this.newPersistenceManagerHolder = newPersistenceManagerHolder;
 	}
 
 	public PersistenceManagerHolder getPersistenceManagerHolder() {
@@ -68,16 +51,9 @@ public class JdoTransactionObject {
 	}
 
 	public boolean hasTransaction() {
-		return (persistenceManagerHolder != null && persistenceManagerHolder.getPersistenceManager() != null &&
-		    persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
-	}
-
-	protected void setJdbcTransactionExposed(boolean jdbcTransactionExposed) {
-		this.jdbcTransactionExposed = jdbcTransactionExposed;
-	}
-
-	public boolean isJdbcTransactionExposed() {
-		return jdbcTransactionExposed;
+		return (this.persistenceManagerHolder != null &&
+				this.persistenceManagerHolder.getPersistenceManager() != null &&
+		    this.persistenceManagerHolder.getPersistenceManager().currentTransaction().isActive());
 	}
 
 }

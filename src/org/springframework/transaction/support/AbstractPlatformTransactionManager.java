@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Constants;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
+import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -58,7 +59,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.27 2004-06-02 19:57:37 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.28 2004-06-19 10:03:44 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -91,6 +92,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
 
 	private int transactionSynchronization = SYNCHRONIZATION_ALWAYS;
+
+	private boolean nestedTransactionAllowed = false;
 
 	private boolean rollbackOnCommitFailure = false;
 
@@ -127,6 +130,22 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public int getTransactionSynchronization() {
 		return transactionSynchronization;
+	}
+
+	/**
+	 * Set whether nested transactions are allowed. Default is false.
+	 * <p>Typically initialized with an appropriate default by the
+	 * concrete transaction manager subclass.
+	 */
+	public void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
+		this.nestedTransactionAllowed = nestedTransactionAllowed;
+	}
+
+	/**
+	 * Return whether nested transactions are allowed.
+	 */
+	public boolean isNestedTransactionAllowed() {
+		return nestedTransactionAllowed;
 	}
 
 	/**
@@ -181,7 +200,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				return newTransactionStatus(null, false, newSynchronization,
 				                            definition.isReadOnly(), debugEnabled, suspendedResources);
 			}
-			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
+			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
 				if (debugEnabled) {
 					logger.debug("Creating new transaction, suspending current one");
 				}
@@ -190,6 +209,21 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 				return newTransactionStatus(transaction, true, newSynchronization,
 				                            definition.isReadOnly(), debugEnabled, suspendedResources);
+			}
+			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+				if (!isNestedTransactionAllowed()) {
+					throw new NestedTransactionNotSupportedException(
+							"Transaction manager does not allow nested transactions by default - " +
+							"specify 'nestedTransactionAllowed' property with value 'true'");
+				}
+				if (debugEnabled) {
+					logger.debug("Creating nested transaction");
+				}
+				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+				DefaultTransactionStatus status = newTransactionStatus(transaction, true, newSynchronization,
+																															 definition.isReadOnly(), debugEnabled, null);
+				status.createAndHoldSavepoint();
+				return status;
 			}
 			else {
 				if (debugEnabled) {
@@ -209,7 +243,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
-		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
+		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			if (debugEnabled) {
 				logger.debug("Creating new transaction");
 			}
@@ -230,9 +265,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Create a new TransactionStatus for the given arguments,
 	 * initializing transaction synchronization if appropriate.
 	 */
-	private TransactionStatus newTransactionStatus(Object transaction, boolean newTransaction,
-	                                               boolean newSynchronization, boolean readOnly,
-	                                               boolean debug, Object suspendedResources) {
+	private DefaultTransactionStatus newTransactionStatus(Object transaction, boolean newTransaction,
+																												boolean newSynchronization, boolean readOnly,
+																												boolean debug, Object suspendedResources) {
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
 		if (actualNewSynchronization) {
@@ -311,7 +346,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					triggerBeforeCommit(defStatus);
 					triggerBeforeCompletion(defStatus, null);
 					beforeCompletionInvoked = true;
-					if (status.isNewTransaction()) {
+					if (defStatus.hasSavepoint()) {
+						if (defStatus.isDebug()) {
+							logger.debug("Releasing transaction savepoint");
+						}
+						defStatus.releaseHeldSavepoint();
+					}
+					else if (status.isNewTransaction()) {
 						logger.info("Initiating transaction commit");
 						doCommit(defStatus);
 					}
@@ -323,7 +364,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				catch (TransactionException ex) {
 					// can only be caused by doCommit
-					if (this.rollbackOnCommitFailure) {
+					if (isRollbackOnCommitFailure()) {
 						doRollbackOnCommitException(defStatus, ex);
 					}
 					else {
@@ -364,7 +405,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			try {
 				triggerBeforeCompletion(defStatus, null);
-				if (status.isNewTransaction()) {
+				if (defStatus.hasSavepoint()) {
+					if (defStatus.isDebug()) {
+						logger.debug("Rolling back transaction to savepoint");
+					}
+					defStatus.rollbackToHeldSavepoint();
+				}
+				else if (status.isNewTransaction()) {
 					logger.info("Initiating transaction rollback");
 					doRollback(defStatus);
 				}
@@ -506,7 +553,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
-		if (status.isNewTransaction()) {
+		if (status.isNewTransaction() && !status.hasSavepoint()) {
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {

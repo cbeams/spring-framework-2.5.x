@@ -17,7 +17,9 @@
 package org.springframework.orm.hibernate;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -70,6 +73,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Transaction tx = (Transaction) txControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
+
 		final List list = new ArrayList();
 		list.add("test");
 		con.getTransactionIsolation();
@@ -143,6 +147,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -198,6 +203,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -241,7 +247,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testNestedTransactionCommit() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithCommit() throws HibernateException, SQLException {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -250,6 +256,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -295,7 +302,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testNestedTransactionRollback() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithRollback() throws HibernateException, SQLException {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -304,6 +311,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -348,7 +356,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testNestedTransactionRollbackOnly() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithRollbackOnly() throws HibernateException, SQLException {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -357,6 +365,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -400,7 +409,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testNestedTransactionWithRequiresNew() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithWithRequiresNew() throws HibernateException, SQLException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -409,6 +418,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Connection con = (Connection) conControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 2);
 		session.beginTransaction();
@@ -456,7 +466,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testNestedTransactionWithNotSupported() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithWithNotSupported() throws HibernateException, SQLException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -465,6 +475,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Connection con = (Connection) conControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 2);
 		session.getSessionFactory();
@@ -571,6 +582,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.getFlushMode();
@@ -651,6 +663,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -707,6 +720,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -768,6 +782,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
+
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.beginTransaction();
@@ -820,6 +835,114 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
+	public void testExistingTransactionWithPropagationNestedAndRollback() throws SQLException, HibernateException {
+		doTestExistingTransactionWithPropagationNestedAndRollback(false);
+	}
+
+	public void testExistingTransactionWithManualSavepointAndRollback() throws SQLException, HibernateException {
+		doTestExistingTransactionWithPropagationNestedAndRollback(true);
+	}
+
+	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
+			throws SQLException, HibernateException {
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
+		MockControl spControl = MockControl.createControl(Savepoint.class);
+		Savepoint sp = (Savepoint) spControl.getMock();
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		final List list = new ArrayList();
+		list.add("test");
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		session.connection();
+		sessionControl.setReturnValue(con, 2);
+		md.supportsSavepoints();
+		mdControl.setReturnValue(true, 1);
+		con.getMetaData();
+		conControl.setReturnValue(md, 1);
+		con.setSavepoint();
+		conControl.setReturnValue(sp, 1);
+		con.rollback(sp);
+		conControl.setVoidCallable(1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		dsControl.replay();
+		conControl.replay();
+		mdControl.replay();
+		spControl.replay();
+		sfControl.replay();
+		sessionControl.replay();
+		txControl.replay();
+		queryControl.replay();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setNestedTransactionAllowed(true);
+		tm.setSessionFactory(sf);
+		tm.setDataSource(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				if (manualSavepoint) {
+					Object savepoint = status.createSavepoint();
+					status.rollbackToSavepoint(savepoint);
+				}
+				else {
+					tt.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) {
+							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+							status.setRollbackOnly();
+						}
+					});
+				}
+				HibernateTemplate ht = new HibernateTemplate(sf);
+				return ht.find("some query string");
+			}
+		});
+		assertTrue("Correct result list", result == list);
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		dsControl.verify();
+		conControl.verify();
+		mdControl.verify();
+		spControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
+		queryControl.verify();
+	}
 
 	public void testJtaTransactionCommit() throws Exception {
 		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION);

@@ -20,45 +20,23 @@ package org.springframework.jdbc.datasource;
  * DataSource transaction object, representing a ConnectionHolder.
  * Used as transaction object by DataSourceTransactionManager.
  *
+ * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+ * to manage JDBC 3.0 Savepoints.
+ *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see DataSourceTransactionManager
  * @see ConnectionHolder
- * @version $Id: DataSourceTransactionObject.java,v 1.6 2004-03-18 02:46:05 trisberg Exp $
+ * @see org.springframework.transaction.support.DefaultTransactionStatus
+ * @version $Id: DataSourceTransactionObject.java,v 1.7 2004-06-19 10:02:23 jhoeller Exp $
  */
-public class DataSourceTransactionObject {
-
-	private ConnectionHolder connectionHolder;
+public class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 
 	private Integer previousIsolationLevel;
 	
 	private boolean mustRestoreAutoCommit;
-
-	/**
-	 * Create DataSourceTransactionObject for new ConnectionHolder.
-	 */
-	protected DataSourceTransactionObject() {
-	}
-
-	/**
-	 * Create DataSourceTransactionObject for existing ConnectionHolder.
-	 */
-	protected DataSourceTransactionObject(ConnectionHolder connectionHolder) {
-		this.connectionHolder = connectionHolder;
-	}
-
-	/**
-	 * Set new ConnectionHolder.
-	 */
-	protected void setConnectionHolder(ConnectionHolder connectionHolder) {
-		this.connectionHolder = connectionHolder;
-	}
-
-	public ConnectionHolder getConnectionHolder() {
-		return connectionHolder;
-	}
 
 	protected void setPreviousIsolationLevel(Integer previousIsolationLevel) {
 		this.previousIsolationLevel = previousIsolationLevel;
@@ -68,7 +46,7 @@ public class DataSourceTransactionObject {
 		return previousIsolationLevel;
 	}
 
-	public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
+	protected void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
 		this.mustRestoreAutoCommit = mustRestoreAutoCommit;
 	}
 

@@ -1,10 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.165 2004-06-17 09:46:28 jhoeller Exp $
+$Id: changelog.txt,v 1.166 2004-06-19 10:04:48 jhoeller Exp $
 
 
-Changes in version 1.0.3 (27.6.2004)
-------------------------------------
+Changes in version 1.1 RC1 (11.7.2004)
+--------------------------------------
 
 Package org.springframework.aop
 * fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
@@ -20,6 +20,7 @@ Package org.springframework.beans
 * added ArgumentConvertingMethodInvoker subclass of MethodInvoker, converting given arguments via BeanWrapperImpl
 * MethodInvokingFactoryBean derives from ArgumentConvertingMethodInvoker to inherit argument conversion
 * fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
+* added "parent" option to "ref" tag in spring-beans.dtd, allowing to explicitly reference a bean in the parent factory
 
 Package org.springframework.dao
 * fixed DataAccessUtils' "requiredUniqueResult" method, to correctly throw an IncorrectResultSizeDataAccessException
@@ -28,6 +29,8 @@ Package org.springframework.jdbc
 * adapted CommonsDbcpNativeJdbcExtractor for Commons DBCP 1.2, to support both DBCP 1.1 and 1.2
 * added WebSphereNativeJdbcExtractor, using WSJdbcUtil's "getNativeConnection" method (tested with WLS 5.1.0)
 * DataSourceTransactionManager closes JDBC Connection if "doBegin" fails
+* DataSourceTransactionManager manages nested transactions via JDBC 3.0 Savepoints
+* DataSourceTransactionObject implements SavepointManager to allow for savepoint management via TransactionStatus
 * refactored Prepared/CallableStatement.setXxx method invocations into JdbcUtils.setParameters utility method
 * JdbcTemplate always passes SQL string to SQLExceptionTranslator, even for static queries and updates
 * added support for BLOB/CLOB parameters to SqlUpdate and StoredProcedure
@@ -36,12 +39,14 @@ Package org.springframework.jdbc
 Package org.springframework.mail
 * added "replyTo" and "sentDate" bean properties to SimpleMailMessage, understood by JavaMailSenderImpl
 * added "setReplyTo" and "setSentDate" methods to MimeMessageHelper, analogous to SimpleMailMessage
+* added accessors for "session", "protocol", "host", "port", "username", "password" to JavaMailSenderImpl
 
 Package org.springframework.orm
 * added "delete" and "iterate" methods to HibernateOperations/HibernateTemplate, analogous to the Session interface
 * added "cacheQueries" property to HibernateTemplate, for marking all executed queries as cacheable
 * HibernateTransactionManager and HibernateAccessor use SQLErrorCodeSQLExceptionTranslator if DataSource available
 * HibernateTransactionManager and JdoTransactionManager close Session resp. PersistenceManager if "doBegin" fails
+* HibernateTransactionManager and JdoTransactionManager allow to manage nested transactions via JDBC 3.0 Savepoints
 * added "dataSource2" property to LocalPersistenceManagerFactoryBean
 * added JdoObjectRetrievalFailureException and JdoOptimisticLockingFailureException
 * refined PersistenceManagerFactoryUtils' "convertJdoAccessException" implementation to become more fine-granular
@@ -59,6 +64,12 @@ Package org.springframework.scheduling
 * added "dataSource" property to SchedulerFactoryBean, for using a Spring-managed DataSource as Quartz job store
 * added "overwriteExistingJobs" property to SchedulerFactoryBean, to control overwriting of persistent jobs
 * MethodInvokingJobDetail/TimerTaskFactoryBean derive from ArgumentConvertingMethodInvoker to inherit arg conversion
+
+Package org.springframework.transaction
+* added "PROPAGATION_NESTED" to TransactionDefinition, for specifying a nested transacton
+* added SavepointManager interface as superinterface of TransactionStatus, for generic savepoint management
+* DefaultTransactionStatus delegates to transaction object if the latter implements the SavepointManager interface
+* AbstractPlatformTransactionManager applies "PROPAGATION_NESTED", invoking "doBegin" within an active transaction
 
 Package org.springframework.util
 * deprecated ResponseTimeMonitorImpl's "getUptime" method in favor of "getUptimeMillis"

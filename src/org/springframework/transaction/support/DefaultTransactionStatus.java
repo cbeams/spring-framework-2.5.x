@@ -16,7 +16,10 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.transaction.SavepointManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Default implementation of the TransactionStatus interface,
@@ -26,25 +29,36 @@ import org.springframework.transaction.TransactionStatus;
  * needs internally, including a generic transaction object determined by
  * the concrete transaction manager implementation.
  *
+ * <p>Supports delegating savepoint-related methods to a transaction object
+ * that implements the SavepointManager interface.
+ *
  * @author Juergen Hoeller
  * @since 19.01.2004
  * @see AbstractPlatformTransactionManager
+ * @see org.springframework.transaction.SavepointManager
+ * @see #createSavepoint
+ * @see #rollbackToSavepoint
+ * @see #releaseSavepoint
+ * @see #getTransaction
  */
 public class DefaultTransactionStatus implements TransactionStatus {
 
-	private Object transaction;
+	private final Object transaction;
 
-	private boolean newTransaction;
+	private final boolean newTransaction;
 
-	private boolean newSynchronization;
+	private final boolean newSynchronization;
 
-	private boolean readOnly;
+	private final boolean readOnly;
 
-	private boolean debug;
+	private final boolean debug;
 
-	private Object suspendedResources;
+	private final Object suspendedResources;
 
 	private boolean rollbackOnly;
+
+	private Object savepoint;
+
 
 	/**
 	 * Create a new TransactionStatus instance.
@@ -101,9 +115,6 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 * calls to logger.isDebug(). Not really intended for client code.
 	 */
 	public boolean isDebug() {
-		// TODO could consider opening this up so that it escalates logging level
-		// on behalf of clients, as well as for the present efficiency concern. Could
-		// also even provide a transaction log, to ensure that output all appeared together.
 		return debug;
 	}
 
@@ -117,6 +128,106 @@ public class DefaultTransactionStatus implements TransactionStatus {
 
 	public boolean isRollbackOnly() {
 		return rollbackOnly;
+	}
+
+
+	/**
+	 * Set a savepoint for the current transaction. Used for PROPAGATION_NESTED.
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
+	 */
+	protected void setSavepoint(Object savepoint) {
+		this.savepoint = savepoint;
+	}
+
+	/**
+	 * Get the savepoint for the current transaction, if any.
+	 */
+	public Object getSavepoint() {
+		return savepoint;
+	}
+
+	/**
+	 * Return whether the current transaction carries a savepoint.
+	 */
+	public boolean hasSavepoint() {
+		return (savepoint != null);
+	}
+
+
+	/**
+	 * Return whether the underlying transaction implements the
+	 * SavepointManager interface.
+	 * @see #getTransaction
+	 * @see org.springframework.transaction.SavepointManager
+	 */
+	public boolean isTransactionSavepointManager() {
+		return (getTransaction() instanceof SavepointManager);
+	}
+
+	protected SavepointManager getSavepointManager() {
+		if (!isTransactionSavepointManager()) {
+			throw new TransactionUsageException("Transaction object [" + getTransaction() +
+																					"] does not support savepoints");
+		}
+		return (SavepointManager) getTransaction();
+	}
+
+	/**
+	 * This implementation delegates to the transaction object
+	 * if it implements the SavepointManager interface.
+	 * @see #getTransaction
+	 * @see org.springframework.transaction.SavepointManager
+	 */
+	public Object createSavepoint() throws TransactionException {
+		return getSavepointManager().createSavepoint();
+	}
+
+	/**
+	 * This implementation delegates to the transaction object
+	 * if it implements the SavepointManager interface.
+	 * @see #getTransaction
+	 * @see org.springframework.transaction.SavepointManager
+	 */
+	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
+		getSavepointManager().rollbackToSavepoint(savepoint);
+	}
+
+	/**
+	 * This implementation delegates to the transaction object
+	 * if it implements the SavepointManager interface.
+	 * @see #getTransaction
+	 * @see org.springframework.transaction.SavepointManager
+	 */
+	public void releaseSavepoint(Object savepoint) throws TransactionException {
+		getSavepointManager().releaseSavepoint(savepoint);
+	}
+
+
+	/**
+	 * Create a savepoint and hold it for the transaction.
+	 */
+	public void createAndHoldSavepoint() throws TransactionException {
+		setSavepoint(getSavepointManager().createSavepoint());
+	}
+
+	/**
+	 * Roll back to the savepoint that is held for the transaction.
+	 */
+	public void rollbackToHeldSavepoint() throws TransactionException {
+		if (!hasSavepoint()) {
+			throw new TransactionUsageException("No savepoint associated with current transaction");
+		}
+		getSavepointManager().rollbackToSavepoint(getSavepoint());
+	}
+
+	/**
+	 * Release the savepoint that is held for the transaction.
+	 */
+	public void releaseHeldSavepoint() throws TransactionException {
+		if (!hasSavepoint()) {
+			throw new TransactionUsageException("No savepoint associated with current transaction");
+		}
+		getSavepointManager().releaseSavepoint(getSavepoint());
 	}
 
 }

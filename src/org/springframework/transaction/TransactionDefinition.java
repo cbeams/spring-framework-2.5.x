@@ -78,6 +78,12 @@ public interface TransactionDefinition {
 	 */
 	int PROPAGATION_NEVER = 5;
 
+	/**
+	 * Execute within a nested transaction if a current transaction exists, or
+	 * behave like PROPAGATION_REQUIRED else. There is no analogous feature in EJB.
+	 */
+	int PROPAGATION_NESTED = 6;
+
 
 	/**
 	 * Use the default isolation level of the underlying datastore.

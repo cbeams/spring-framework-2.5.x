@@ -17,8 +17,10 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -29,12 +31,12 @@ import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -107,14 +109,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 	
 	public void testTransactionRollbackRestoringAutoCommitToTrue() throws Exception  {
-		testTransactionRollbackRestoringAutoCommit(true);
+		doTestTransactionRollbackRestoringAutoCommit(true);
 	}
 	
 	public void testTransactionRollbackWithAutoCommitFalse() throws Exception  {
-		testTransactionRollbackRestoringAutoCommit(false);
+		doTestTransactionRollbackRestoringAutoCommit(false);
 	}
 
-	private void testTransactionRollbackRestoringAutoCommit(final boolean autoCommit) throws Exception {
+	private void doTestTransactionRollbackRestoringAutoCommit(final boolean autoCommit) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.getAutoCommit();
@@ -765,6 +767,314 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		});
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		dsControl.verify();
+	}
+
+	public void testExistingTransactionWithPropagationNested() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
+		MockControl spControl = MockControl.createControl(Savepoint.class);
+		Savepoint sp = (Savepoint) spControl.getMock();
+
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		md.supportsSavepoints();
+		mdControl.setReturnValue(true, 1);
+		con.getMetaData();
+		conControl.setReturnValue(md, 1);
+		con.setSavepoint();
+		conControl.setReturnValue(sp, 1);
+		con.releaseSavepoint(sp);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+
+		spControl.replay();
+		mdControl.replay();
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				tt.execute(new TransactionCallbackWithoutResult() {
+					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue("Is nested transaction", status.isNewTransaction());
+					}
+				});
+				assertTrue("Is new transaction", status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		spControl.verify();
+		mdControl.verify();
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
+		MockControl spControl = MockControl.createControl(Savepoint.class);
+		Savepoint sp = (Savepoint) spControl.getMock();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		md.supportsSavepoints();
+		mdControl.setReturnValue(true, 1);
+		con.getMetaData();
+		conControl.setReturnValue(md, 1);
+		con.setSavepoint();
+		conControl.setReturnValue(sp, 1);
+		con.rollback(sp);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		spControl.replay();
+		mdControl.replay();
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				tt.execute(new TransactionCallbackWithoutResult() {
+					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue("Is nested transaction", status.isNewTransaction());
+						status.setRollbackOnly();
+					}
+				});
+				assertTrue("Is new transaction", status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		spControl.verify();
+		mdControl.verify();
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testExistingTransactionWithManualSavepoint() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
+		MockControl spControl = MockControl.createControl(Savepoint.class);
+		Savepoint sp = (Savepoint) spControl.getMock();
+
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		md.supportsSavepoints();
+		mdControl.setReturnValue(true, 1);
+		con.getMetaData();
+		conControl.setReturnValue(md, 1);
+		con.setSavepoint();
+		conControl.setReturnValue(sp, 1);
+		con.releaseSavepoint(sp);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+
+		spControl.replay();
+		mdControl.replay();
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				Object savepoint = status.createSavepoint();
+				status.releaseSavepoint(savepoint);
+				assertTrue("Is new transaction", status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		spControl.verify();
+		mdControl.verify();
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
+		MockControl spControl = MockControl.createControl(Savepoint.class);
+		Savepoint sp = (Savepoint) spControl.getMock();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		md.supportsSavepoints();
+		mdControl.setReturnValue(true, 1);
+		con.getMetaData();
+		conControl.setReturnValue(md, 1);
+		con.setSavepoint();
+		conControl.setReturnValue(sp, 1);
+		con.rollback(sp);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		spControl.replay();
+		mdControl.replay();
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				Object savepoint = status.createSavepoint();
+				status.rollbackToSavepoint(savepoint);
+				assertTrue("Is new transaction", status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		spControl.verify();
+		mdControl.verify();
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testTransactionWithPropagationNested() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testTransactionWithPropagationNestedAndRollback() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		con.rollback();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				status.setRollbackOnly();
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
 		dsControl.verify();
 	}
 

@@ -18,13 +18,14 @@ package org.springframework.orm.hibernate;
 
 import net.sf.hibernate.FlushMode;
 
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
+
 /**
  * Hibernate transaction object, representing a SessionHolder.
  * Used as transaction object by HibernateTransactionManager.
  *
- * <p>Instances of this class are the transaction objects that
- * HibernateTransactionManager returns. They nest the thread-bound
- * SessionHolder internally.
+ * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
+ * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -33,7 +34,7 @@ import net.sf.hibernate.FlushMode;
  * @see HibernateTransactionManager
  * @see SessionHolder
  */
-public class HibernateTransactionObject {
+public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
 	private SessionHolder sessionHolder;
 
@@ -43,26 +44,9 @@ public class HibernateTransactionObject {
 
 	private FlushMode previousFlushMode;
 
-	/**
-	 * Create HibernateTransactionObject for new SessionHolder.
-	 */
-	protected HibernateTransactionObject() {
-	}
-
-	/**
-	 * Create HibernateTransactionObject for existing SessionHolder.
-	 */
-	protected HibernateTransactionObject(SessionHolder sessionHolder) {
+	protected void setSessionHolder(SessionHolder sessionHolder, boolean newSessionHolder) {
 		this.sessionHolder = sessionHolder;
-		this.newSessionHolder = false;
-	}
-
-	/**
-	 * Set new SessionHolder.
-	 */
-	protected void setSessionHolder(SessionHolder sessionHolder) {
-		this.sessionHolder = sessionHolder;
-		this.newSessionHolder = (sessionHolder != null);
+		this.newSessionHolder = newSessionHolder;
 	}
 
 	public SessionHolder getSessionHolder() {
@@ -74,7 +58,7 @@ public class HibernateTransactionObject {
 	}
 
 	public boolean hasTransaction() {
-		return (sessionHolder != null && sessionHolder.getTransaction() != null);
+		return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
 	}
 
 	protected void setPreviousIsolationLevel(Integer previousIsolationLevel) {

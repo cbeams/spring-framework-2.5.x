@@ -37,35 +37,42 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * potentially allowing for one thread connection per data source.
  *
  * <p>Application code is required to retrieve the JDBC connection via
- * DataSourceUtils.getConnection(DataSource) instead of J2EE's standard
- * DataSource.getConnection. This is recommended anyway, as it throws
+ * <code>DataSourceUtils.getConnection(DataSource)</code> instead of J2EE's standard
+ * <code>DataSource.getConnection()</code>. This is recommended anyway, as it throws
  * unchecked org.springframework.dao exceptions instead of checked SQLException.
  * All framework classes like JdbcTemplate use this strategy implicitly.
- * If not used with this transaction manager, the lookup strategy
- * behaves exactly like the common one - it can thus be used in any case.
+ * If not used with this transaction manager, the lookup strategy behaves exactly
+ * like the common one - it can thus be used in any case.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
  * appropriate JDBC statement query timeouts. To support the latter,
- * application code must either use JdbcTemplate or call DataSourceUtils'
- * applyTransactionTimeout method for each created statement.
+ * application code must either use JdbcTemplate or call
+ * <code>DataSourceUtils.applyTransactionTimeout</code> for each created statement.
  *
- * <p>This implementation can be used instead of JtaTransactionManager
- * in the single resource case, as it does not require the container to
- * support JTA. Switching between both is just a matter of configuration,
- * if you stick to the required connection lookup pattern. Note that JTA
- * does not support custom isolation levels!
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to true, as nested
+ * transactions work without restrictions on JDBC drivers that support Savepoints
+ * (like Oracle).
+ *
+ * <p>This implementation can be used instead of JtaTransactionManager in the single
+ * resource case, as it does not require the container to support JTA. Switching
+ * between both is just a matter of configuration, if you stick to the required
+ * connection lookup pattern. Note that JTA does not support custom isolation levels!
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
+ * @see #setNestedTransactionAllowed
+ * @see java.sql.Savepoint
  * @see DataSourceUtils#getConnection
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.15 2004-06-14 11:00:00 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.16 2004-06-19 10:02:22 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
 	private DataSource dataSource;
+
 
 	/**
 	 * Create a new DataSourceTransactionManager instance.
@@ -73,6 +80,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * @see #setDataSource
 	 */
 	public DataSourceTransactionManager() {
+		setNestedTransactionAllowed(true);
 	}
 
 	/**
@@ -80,6 +88,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * @param dataSource DataSource to manage transactions for
 	 */
 	public DataSourceTransactionManager(DataSource dataSource) {
+		this();
 		this.dataSource = dataSource;
 		afterPropertiesSet();
 	}
@@ -104,15 +113,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
+
 	protected Object doGetTransaction() {
+		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
+		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-			ConnectionHolder holder =
+			ConnectionHolder conHolder =
 					(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
-			return new DataSourceTransactionObject(holder);
+			txObject.setConnectionHolder(conHolder);
 		}
-		else {
-			return new DataSourceTransactionObject();
-		}
+		return txObject;
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
@@ -215,12 +225,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected void doCommit(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
+		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Committing JDBC transaction on connection [" +
-									 txObject.getConnectionHolder().getConnection() + "]");
+			logger.debug("Committing JDBC transaction on connection [" + con + "]");
 		}
 		try {
-			txObject.getConnectionHolder().getConnection().commit();
+			con.commit();
 		}
 		catch (SQLException ex) {
 			throw new TransactionSystemException("Could not commit JDBC transaction", ex);
@@ -229,12 +239,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected void doRollback(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
+		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Rolling back JDBC transaction on connection [" +
-									 txObject.getConnectionHolder().getConnection() + "]");
+			logger.debug("Rolling back JDBC transaction on connection [" + con + "]");
 		}
 		try {
-			txObject.getConnectionHolder().getConnection().rollback();
+			con.rollback();
 		}
 		catch (SQLException ex) {
 			throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
