@@ -10,8 +10,8 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * <p>Bind tag, supporting evaluation of binding errors for a certain
@@ -106,7 +106,8 @@ public class BindTag extends RequestContextAwareTag {
 		// retrieve Errors object
 		this.errors = getRequestContext().getErrors(name, false);
 		if (this.errors == null) {
-			throw new JspTagException("Could not find Errors instance for bean '" + name + "' in request");
+			throw new JspTagException("Could not find Errors instance for bean '" + name + "' in request: " +
+			                          "add the Errors model to your ModelAndView via errors.getModel()");
 		}
 
 		List fes = null;
