@@ -15,8 +15,10 @@
  */
 package org.springframework.util;
 
-import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.support.DefaultConversionService;
+import org.springframework.binding.convert.ConversionExecutor;
+import org.springframework.binding.convert.Converter;
+import org.springframework.binding.convert.support.ObjectToStringConverter;
+import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
 
 /**
  * Strategy that encapsulates value string styling algorithms according to
@@ -28,15 +30,14 @@ public class Styler {
 
 	private static Styler INSTANCE;
 	static {
-		DefaultConversionService conversionService = new DefaultConversionService();
-		conversionService.afterPropertiesSet();
-		INSTANCE = new Styler(conversionService);
+		Converter converter = new ObjectToStringConverter(new ThreadLocalFormatterLocator());
+		INSTANCE = new Styler(new ConversionExecutor(converter, String.class));
 	}
 
-	private ConversionService conversionService;
+	private ConversionExecutor toStringExecutor;
 
-	public Styler(ConversionService conversionService) {
-		this.conversionService = conversionService;
+	public Styler(ConversionExecutor toStringExecutor) {
+		this.toStringExecutor = toStringExecutor;
 	}
 
 	public static void load(Styler styler) {
@@ -74,6 +75,6 @@ public class Styler {
 		if (source == null) {
 			return "[null]";
 		}
-		return (String)conversionService.getConversionExecutor(source.getClass(), String.class).call(source);
+		return (String)this.toStringExecutor.call(source);
 	}
 }

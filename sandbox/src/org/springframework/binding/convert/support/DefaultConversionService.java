@@ -91,7 +91,6 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		addConverter(new TextToNumberConverter(formatterLocator));
 		addConverter(new TextToLabeledEnumConverter());
 		addConverter(new TextToMappingConverter(this));
-		addConverter(new ObjectToStringConverter(formatterLocator));
 	}
 
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
