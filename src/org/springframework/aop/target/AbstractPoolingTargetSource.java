@@ -16,42 +16,43 @@
 
 package org.springframework.aop.target;
 
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Abstract uperclass for pooling TargetSources that maintains a pool of target instances, 
- * acquiring and releasing a target object from the pool for each method invocation. 
- * This class is independent of pooling technology.
- * <p>
- * Subclasses must implement the getTarget() and releaseTarget() methods
- * to work with their chosen pool. The newPrototypeInstance() method 
- * inherited from AbstractPrototypeTargetSource can be used to create objects 
- * to put in the pool. Subclasses must also implement some of the monitoring methods
- * from the PoolingConfig interface. This class provides the getPoolingConfigMixin()
+ * Abstract superclass for pooling TargetSources that maintains a pool of
+ * target instances, acquiring and releasing a target object from the pool
+ * for each method invocation. This class is independent of pooling technology.
+ *
+ * <p>Subclasses must implement the getTarget() and releaseTarget() methods
+ * to work with their chosen pool. The newPrototypeInstance() method inherited
+ * from AbstractPrototypeBasedTargetSource can be used to create objects to put
+ * in the pool. Subclasses must also implement some of the monitoring methods from
+ * the PoolingConfig interface. This class provides the getPoolingConfigMixin()
  * method to return an IntroductionAdvisor making these stats available on proxied
  * objects.
- * <p>
- * This class implements DisposableBean to force subclasses to implement
+ *
+ * <p>This class implements DisposableBean to force subclasses to implement
  * a destroy() method to close down their pool.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSource.java,v 1.7 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.8 2004-04-20 21:53:58 jhoeller Exp $
+ * @see #getTarget
+ * @see #releaseTarget
+ * @see #destroy
  */
-public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTargetSource implements PoolingConfig, DisposableBean {
+public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBasedTargetSource
+		implements PoolingConfig, DisposableBean {
 	
 	/** The size of the pool */
 	private int maxSize;
-	
-	private int invocations;
 
 	/**
 	 * Set the maximum size of the pool.
-	 * @param maxSize the size for the pool
 	 */
 	public void setMaxSize(int maxSize) {
 		this.maxSize = maxSize;
@@ -59,7 +60,6 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 
 	/**
 	 * Return the maximum size of the pool.
-	 * @return the size of the pool
 	 */
 	public int getMaxSize() {
 		return this.maxSize;
@@ -90,22 +90,22 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 	 * Acquire an object from the pool.
 	 * @return an object from the pool
 	 * @throws Exception we may need to deal with checked exceptions from pool
-	 * APIs, so we're forgiving with our exception signature,
-	 * although we don't like APIs that throw Exception
+	 * APIs, so we're forgiving with our exception signature
 	 */
 	public abstract Object getTarget() throws Exception;
 	
 	/**
 	 * Return the given object to the pool.
 	 * @param target object that must have been acquired from the pool
-	 * via a call to acquireTarget()
+	 * via a call to getTarget()
 	 * @throws Exception to allow pooling APIs to throw exception
+	 * @see #getTarget
 	 */
 	public abstract void releaseTarget(Object target) throws Exception; 
 
 	/**
-	 * @return an IntroductionAdvisor that providing a mixin
-	 * exposing statistics about the pool maintained by this object
+	 * Return an IntroductionAdvisor that providing a mixin
+	 * exposing statistics about the pool maintained by this object.
 	 */
 	public DefaultIntroductionAdvisor getPoolingConfigMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);

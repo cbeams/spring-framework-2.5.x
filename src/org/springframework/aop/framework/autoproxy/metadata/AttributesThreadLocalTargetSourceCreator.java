@@ -19,17 +19,16 @@ package org.springframework.aop.framework.autoproxy.metadata;
 import java.util.Collection;
 
 import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeTargetSourceCreator;
-import org.springframework.aop.target.AbstractPrototypeTargetSource;
+import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.metadata.Attributes;
 
 /**
- * PrototypeTargetSourceCreator driven by metadata.
- * Creates a ThreadLocalTargetSource
+ * PrototypeTargetSourceCreator driven by metadata. Creates a ThreadLocalTargetSource
  * only if there's a ThreadLocalAttribute associated with the class.
  * @author Rod Johnson
- * @version $Id: AttributesThreadLocalTargetSourceCreator.java,v 1.2 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: AttributesThreadLocalTargetSourceCreator.java,v 1.3 2004-04-20 21:53:53 jhoeller Exp $
  */
 public class AttributesThreadLocalTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
@@ -39,7 +38,7 @@ public class AttributesThreadLocalTargetSourceCreator extends AbstractPrototypeT
 		this.attributes = attributes;
 	}
 
-	protected AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory bf) {
+	protected AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory bf) {
 		Class beanClass = bean.getClass();
 		// See if there's a pooling attribute
 		Collection atts = attributes.getAttributes(beanClass, ThreadLocalAttribute.class);

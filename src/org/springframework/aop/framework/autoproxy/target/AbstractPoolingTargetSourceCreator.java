@@ -17,26 +17,26 @@
 package org.springframework.aop.framework.autoproxy.target;
 
 import org.springframework.aop.target.AbstractPoolingTargetSource;
-import org.springframework.aop.target.AbstractPrototypeTargetSource;
+import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Convenient superclass for TargetSource creators that create pooling TargetSources.
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSourceCreator.java,v 1.4 2004-03-18 02:46:16 trisberg Exp $
+ * @version $Id: AbstractPoolingTargetSourceCreator.java,v 1.5 2004-04-20 21:53:56 jhoeller Exp $
  */
 public abstract class AbstractPoolingTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
-	protected final AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory factory) {
+	protected final AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName,
+																																								 BeanFactory factory) {
 		PoolingAttribute poolingAttribute = getPoolingAttribute(bean, beanName, factory);
 		if (poolingAttribute == null) {
-			// No pooling attribute
+			// no pooling attribute
 			return null;
 		}
 		else {
-			AbstractPoolingTargetSource poolingTargetSource = newPoolingTargetSource(poolingAttribute);
-			return poolingTargetSource;
+			return newPoolingTargetSource(poolingAttribute);
 		}
 	}
 	

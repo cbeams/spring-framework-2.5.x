@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy.target;
 
-import org.springframework.aop.target.AbstractPrototypeTargetSource;
+import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
@@ -28,26 +28,29 @@ import org.springframework.beans.factory.BeanFactory;
  * <li>: CommonsPoolTargetSource
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
- * 
  * @author Rod Johnson
- * @version $Id: QuickTargetSourceCreator.java,v 1.3 2004-03-18 02:46:16 trisberg Exp $
+ * @version $Id: QuickTargetSourceCreator.java,v 1.4 2004-04-20 21:53:58 jhoeller Exp $
  */
 public class QuickTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
-	protected final AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory factory) {
-		if (beanName.startsWith(":")) {
+	public static final String PREFIX_COMMONS_POOL = ":";
+
+	public static final String PREFIX_THREAD_LOCAL = "%";
+
+	public static final String PREFIX_PROTOTYPE = "!";
+
+	protected final AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName,
+																																								 BeanFactory factory) {
+		if (beanName.startsWith(PREFIX_COMMONS_POOL)) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();
 			cpts.setMaxSize(25);
 			return cpts;
-			
 		}
-		else if (beanName.startsWith("%")) {
-			ThreadLocalTargetSource tlts = new ThreadLocalTargetSource();
-			return tlts;
+		else if (beanName.startsWith(PREFIX_THREAD_LOCAL)) {
+			return new ThreadLocalTargetSource();
 		}
-		else if (beanName.startsWith("!")) {
-			PrototypeTargetSource pts = new PrototypeTargetSource();
-			return pts;
+		else if (beanName.startsWith(PREFIX_PROTOTYPE)) {
+			return new PrototypeTargetSource();
 		}
 		else {
 			// No match. Don't create a custom target source.
