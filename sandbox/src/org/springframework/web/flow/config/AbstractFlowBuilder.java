@@ -89,7 +89,7 @@ import org.springframework.web.flow.ViewState;
  * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
  * event is signaled by the view (for example, on a submit button click), the
  * bindAndValidate action state will be entered and the '
- * <code>personDetails.bindAndValidate</code>' <code>Action</code>
+ * <code>personDetails.bindAndValidate</code>'<code>Action</code>
  * implementation will be executed.
  * </ol>
  * 
@@ -116,8 +116,8 @@ import org.springframework.web.flow.ViewState;
  * as a root flow in the current flow execution, any flow-allocated resources
  * will be cleaned up. An end state can optionally be configured with a logical
  * view name to forward to when entered. It will also trigger a state transition
- * in a resuming parent flow if this flow was participating as a spawned
- * 'sub flow' within a suspended parent flow.
+ * in a resuming parent flow if this flow was participating as a spawned 'sub
+ * flow' within a suspended parent flow.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -909,9 +909,21 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
 	 * this builder. The <i>create </i> stereotype is a simple qualifier that
-	 * notes this action state executes object creational logic when entered. It
-	 * also used to establish consistent naming conventions and defaults,
-	 * discussed below.
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails.
+	 * <p>
+	 * By default, the Action <code>id</code> to use for lookup will be the
+	 * same as the specified <code>stateId</code>. It is expected that a
+	 * valid <code>Action</code> implementation be exported in the backing
+	 * service locator registry under that ID, or a NoSuchActionException will
+	 * be thrown.
+	 * <p>
+	 * As this method adds a action state intended to execute creational logic,
+	 * it also establishes several naming conventions and relavent defaults:
 	 * <p>
 	 * For example, the usage:
 	 * 
@@ -921,9 +933,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * 
 	 * ... builds an action state with the following properties:
 	 * <ul>
-	 * <li>id: <code>person.create</code>
+	 * <li>id: <code>person.create</code> (note how the {@link CREATE}action
+	 * qualifier is appended in a hierarchical fashion to the 'person' prefix)
 	 * <li>action: set to the <code>Action</code> implementation in the
-	 * registry exported with id '<code>person.create</code>'
+	 * registry exported with the id '<code>person.create</code>'
 	 * </ul>
 	 * <p>
 	 * In addition, the create action state will be configured with the
@@ -934,6 +947,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * executing some object creational logic you will wish to view the results
 	 * of that creation.
 	 * </ul>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetive configuration code for common situations.
+	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
 	 *        {@link CREATE}action constant will be appended to this prefix to
 	 *        build the qualified state id (e.g person.create). Note: the
@@ -946,9 +963,46 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param action
-	 * @return
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object creational logic.
+	 * <p>
+	 * As this method adds a action state intended to execute creational logic,
+	 * it also establishes several naming conventions and relavent defaults:
+	 * <p>
+	 * For example, the usage:
+	 * 
+	 * <pre>
+	 *   ActionState createState = addCreateState("person", myCreateAction);
+	 * </pre>
+	 * 
+	 * ... builds an action state with the following properties:
+	 * <ul>
+	 * <li>id: <code>person.create</code> (note how the {@link CREATE}action
+	 * qualifier is appended in a hierarchical fashion to the 'person' prefix)
+	 * <li>action: set to the 'myCreateAction' <code>Action</code> implementation
+	 * </ul>
+	 * <p>
+	 * In addition, the create action state will be configured with the
+	 * following default state transitions:
+	 * <ul>
+	 * <li>on event 'success', transition to the '${stateIdPrefix}.view' state
+	 * (e.g <code>person.view</code>) This assumes, after successfully
+	 * executing some object creational logic you will wish to view the results
+	 * of that creation.
+	 * </ul>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetive configuration code for common situations.
+	 * 
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
+	 *        {@link CREATE}action constant will be appended to this prefix to
+	 *        build the qualified state id (e.g person.create). Note: the
+	 *        qualified state ID will also be used as the actionId, to lookup in
+	 *        the locator's registry.
+	 * @param action The action that will execute the creational logic.
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix, Action action) {
 		return addCreateState(stateIdPrefix, action, onSuccessView(stateIdPrefix));
@@ -2059,8 +2113,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Returns the delimitor used to seperate identifier parts. E.g. 
-	 * flow id and state id ("personDetails.get"). Detaults to a dot (".").
+	 * Returns the delimitor used to seperate identifier parts. E.g. flow id and
+	 * state id ("personDetails.get"). Detaults to a dot (".").
 	 */
 	protected String getQualifierDelimiter() {
 		return DOT_SEPARATOR;
