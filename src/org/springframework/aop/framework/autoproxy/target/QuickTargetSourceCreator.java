@@ -29,9 +29,12 @@ import org.springframework.beans.factory.BeanFactory;
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
  * @author Rod Johnson
- * @version $Id: QuickTargetSourceCreator.java,v 1.4 2004-04-20 21:53:58 jhoeller Exp $
+ * @version $Id: QuickTargetSourceCreator.java,v 1.5 2004-04-21 11:54:43 jhoeller Exp $
+ * @see org.springframework.aop.target.CommonsPoolTargetSource
+ * @see org.springframework.aop.target.ThreadLocalTargetSource
+ * @see org.springframework.aop.target.PrototypeTargetSource
  */
-public class QuickTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
+public class QuickTargetSourceCreator extends AbstractPrototypeBasedTargetSourceCreator {
 
 	public static final String PREFIX_COMMONS_POOL = ":";
 

@@ -18,7 +18,7 @@ package org.springframework.aop.framework.autoproxy.metadata;
 
 import java.util.Collection;
 
-import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeTargetSourceCreator;
+import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeBasedTargetSourceCreator;
 import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,9 +28,10 @@ import org.springframework.metadata.Attributes;
  * PrototypeTargetSourceCreator driven by metadata. Creates a prototype
  * only if there's a PrototypeAttribute associated with the class.
  * @author Rod Johnson
- * @version $Id: AttributesPrototypeTargetSourceCreator.java,v 1.4 2004-04-20 21:53:52 jhoeller Exp $
+ * @version $Id: AttributesPrototypeTargetSourceCreator.java,v 1.5 2004-04-21 11:54:20 jhoeller Exp $
+ * @see org.springframework.aop.target.PrototypeTargetSource
  */
-public class AttributesPrototypeTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
+public class AttributesPrototypeTargetSourceCreator extends AbstractPrototypeBasedTargetSourceCreator {
 
 	private final Attributes attributes;
 

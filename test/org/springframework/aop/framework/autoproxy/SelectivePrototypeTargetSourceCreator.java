@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeTargetSourceCreator;
+import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeBasedTargetSourceCreator;
 import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.beans.factory.BeanFactory;
@@ -25,9 +25,9 @@ import org.springframework.beans.factory.BeanFactory;
  * Overrides generic PrototypeTargetSourceCreator to create a prototype only for beans
  * with names beginning with "prototype".
  * @author Rod Johnson
- * @version $Id: SelectivePrototypeTargetSourceCreator.java,v 1.4 2004-04-20 21:51:52 jhoeller Exp $
+ * @version $Id: SelectivePrototypeTargetSourceCreator.java,v 1.5 2004-04-21 11:52:29 jhoeller Exp $
  */
-public class SelectivePrototypeTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
+public class SelectivePrototypeTargetSourceCreator extends AbstractPrototypeBasedTargetSourceCreator {
 
 	protected AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory factory) {
 		if (!beanName.startsWith("prototype")) {
