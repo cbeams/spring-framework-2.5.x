@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.validation.Errors;
@@ -43,6 +42,7 @@ public class BindUtilsTestSuite extends TestCase {
 		request.addParameter("age", "myage");
 		request.addParameter("spouse.name", " spousename ");
 		request.addParameter("spouse.age", "spouseage");
+
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
 		assertTrue("Name not set", tb.getName() == null);
@@ -50,6 +50,7 @@ public class BindUtilsTestSuite extends TestCase {
 		assertTrue("Spouse name not set", tb.getSpouse().getName() == null);
 		assertTrue("Spouse age not set", tb.getSpouse().getAge() == 0);
 		Errors errors = BindUtils.bind(request, tb, "tb");
+
 		assertTrue("Name set", " myname ".equals(tb.getName()));
 		assertTrue("No name error", !errors.hasFieldErrors("name"));
 		assertTrue("Age not set", tb.getAge() == 0);
@@ -67,6 +68,7 @@ public class BindUtilsTestSuite extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
+
 		TestBean tb = new TestBean();
 		assertTrue("Name not set", tb.getName() == null);
 		Errors errors = BindUtils.bindAndValidate(request, tb, "tb", new Validator() {
@@ -80,6 +82,7 @@ public class BindUtilsTestSuite extends TestCase {
 				}
 			}
 		});
+
 		assertTrue("Name set", " myname ".equals(tb.getName()));
 		assertTrue("Has name error", errors.hasFieldErrors("name"));
 		assertTrue("Correct name error", "notMyname".equals(errors.getFieldError("name").getCode()));
@@ -93,6 +96,7 @@ public class BindUtilsTestSuite extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
+
 		TestBean tb = new TestBean();
 		assertTrue("Name not set", tb.getName() == null);
 		assertTrue("Age not set", tb.getAge() == 0);
@@ -101,6 +105,7 @@ public class BindUtilsTestSuite extends TestCase {
 				binder.registerCustomEditor(String.class, "name", new StringTrimmerEditor(true));
 			}
 		});
+
 		assertTrue("Name set", "myname".equals(tb.getName()));
 		assertTrue("No name error", !errors.hasFieldErrors("name"));
 		assertTrue("Age not set", tb.getAge() == 0);
@@ -113,6 +118,7 @@ public class BindUtilsTestSuite extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
+
 		TestBean tb = new TestBean();
 		assertTrue("Name not set", tb.getName() == null);
 		Errors errors = BindUtils.bindAndValidate(request, tb, "tb",
@@ -133,6 +139,7 @@ public class BindUtilsTestSuite extends TestCase {
 				}
 			}
 		);
+
 		assertTrue("Name set", "myname".equals(tb.getName()));
 		assertTrue("Has name error", errors.hasFieldErrors("name"));
 		assertTrue("Correct name error", "notMyname".equals(errors.getFieldError("name").getCode()));
