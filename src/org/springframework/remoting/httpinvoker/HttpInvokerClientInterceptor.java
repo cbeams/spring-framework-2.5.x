@@ -27,7 +27,7 @@ import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationResult;
 
 /**
- * Interceptor for accessing an HTTO invoker service.
+ * Interceptor for accessing an HTTP invoker service.
  * The service URL must be an HTTP URL exposing an HTTP invoker service.
  *
  * <p>Simply serializes remote invocation objects and deserializes remote
