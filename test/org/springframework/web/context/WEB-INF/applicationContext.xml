@@ -89,13 +89,13 @@
 
 	&contextInclude;
 
-	<bean id="myOverride" class="org.springframework.context.config.PropertyOverrideConfigurer">
+	<bean id="myOverride" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
 		<property name="location">
 			<value>/org/springframework/web/context/WEB-INF/myoverride.properties</value>
 		</property>
 	</bean>
 
-	<bean id="myPlaceholder" class="org.springframework.context.config.PropertyPlaceholderConfigurer">
+	<bean id="myPlaceholder" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location">
 			<value>classpath:/org/springframework/web/context/WEB-INF/myplaceholder.properties</value>
 		</property>
