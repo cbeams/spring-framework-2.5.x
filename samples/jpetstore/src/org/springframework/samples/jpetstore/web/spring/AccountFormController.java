@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.support.PagedListHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.samples.jpetstore.domain.Account;
 import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
 import org.springframework.validation.BindException;
@@ -48,6 +49,7 @@ public class AccountFormController extends SimpleFormController {
 
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
 			throws Exception {
+
 		AccountForm accountForm = (AccountForm) command;
 		Account account = accountForm.getAccount();
 
@@ -96,13 +98,22 @@ public class AccountFormController extends SimpleFormController {
 	protected ModelAndView onSubmit(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
+
 		AccountForm accountForm = (AccountForm) command;
-		if (accountForm.isNewAccount()) {
-			this.petStore.insertAccount(accountForm.getAccount());
+		try {
+			if (accountForm.isNewAccount()) {
+				this.petStore.insertAccount(accountForm.getAccount());
+			}
+			else {
+				this.petStore.updateAccount(accountForm.getAccount());
+			}
 		}
-		else {
-			this.petStore.updateAccount(accountForm.getAccount());
+		catch (DataIntegrityViolationException ex) {
+			errors.rejectValue("account.username", "USER_ID_ALREADY_EXISTS",
+					"User ID already exists: choose a different ID.");
+			return showForm(request, response, errors);
 		}
+		
 		UserSession userSession = new UserSession(this.petStore.getAccount(accountForm.getAccount().getUsername()));
 		PagedListHolder myList = new PagedListHolder(
 				this.petStore.getProductListByCategory(accountForm.getAccount().getFavouriteCategoryId()));
