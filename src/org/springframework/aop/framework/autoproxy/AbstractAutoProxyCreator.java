@@ -1,7 +1,8 @@
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,8 +14,11 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 
@@ -33,15 +37,22 @@ import org.springframework.core.Ordered;
  * additional interceptors that should just be applied to the specific bean
  * instance. The default concrete implementation is BeanNameAutoProxyCreator,
  * identifying the beans to be proxied via a list of bean names.
+ * 
+ * <p>Any number of TargetSourceCreator implementations can be used with
+ * any subclass, to create a custom target source--for example, to pool prototype
+ * objects. Autoproxying will occur even if there is no advice if a TargetSourceCreator
+ * specifies a custom TargetSource.
+ * If there are no TargetSourceCreators set, or if none matches, a SingletonTargetSource
+ * will be used by default to wrap the bean to be autoproxied.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.21 2003-12-11 14:53:13 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
  */
-public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, Ordered {
+public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -64,6 +75,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	private boolean applyCommonInterceptorsFirst = true;
 	
+	private List targetSourceCreators = Collections.EMPTY_LIST;
+	
+	private BeanFactory owningBeanFactory;
+	
 
 	public final void setOrder(int order) {
 	  this.order = order;
@@ -71,6 +86,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	public final int getOrder() {
 	  return order;
+	}
+	
+	/**
+	 * Set custom TargetSourceCreators, that will be applied in this order.
+	 * If the list is empty, or they all return null, a SingletonTargetSource
+	 * will be created.<br>
+	 * TargetSourceCreators can only be invoked if this post processor is used in
+	 * a BeanFactory, and its BeanFactoryAware callback is used.
+	 * @param l list of TargetSourceCreator. Ordering is significant: the TargetSource
+	 * returned from the first matching TargetSourceCreator (that is, the first that returns non-null)
+	 * will be used.
+	 */
+	public void setCustomTargetSourceCreators(List l) {
+		this.targetSourceCreators = l;
 	}
 
 	/**
@@ -90,6 +119,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	public void setApplyCommonInterceptorsFirst(boolean applyCommonInterceptorsFirst) {
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
 	}
+	
+	/**
+	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.owningBeanFactory = beanFactory;
+	}
+	
+	/**
+	 * Return the owning BeanFactory
+	 * May be null, as this object doesn't need to belong to a bean factory
+	 */
+	protected BeanFactory getBeanFactory() {
+		return this.owningBeanFactory;
+	}
 
 
 	/**
@@ -106,16 +150,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			return bean;
 		}
 		
+		TargetSource targetSource = getTargetSource(bean, name);
+		
 		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
-		if (specificInterceptors != null) {
+		
+		// Proxy if we have advice or if a TargetSourceCreator wants to do some
+		// fancy stuff such as pooling
+		if (specificInterceptors != null || !(targetSource instanceof SingletonTargetSource)) {
 			List allInterceptors = new ArrayList();
-			allInterceptors.addAll(Arrays.asList(specificInterceptors));
-			if (this.interceptors != null) {
-				if (this.applyCommonInterceptorsFirst) {
-					allInterceptors.addAll(0, Arrays.asList(this.interceptors));
-				}
-				else {
-					allInterceptors.addAll(Arrays.asList(this.interceptors));
+			if (specificInterceptors != null) {
+				allInterceptors.addAll(Arrays.asList(specificInterceptors));
+				if (this.interceptors != null) {
+					if (this.applyCommonInterceptorsFirst) {
+						allInterceptors.addAll(0, Arrays.asList(this.interceptors));
+					}
+					else {
+						allInterceptors.addAll(Arrays.asList(this.interceptors));
+					}
 				}
 			}
 			if (logger.isInfoEnabled()) {
@@ -168,14 +219,28 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	/**
 	 * Create a target source to source instances.
-	 * Subclasses can override this if they want to use a custom target source,
-	 * such as a pooling strategy.
+	 * Uses any TargetSourceCreators if set.
 	 * @param bean bean to intercept
 	 * @param beanName name of the bean
 	 * @return an invoker interceptor wrapping this bean.
 	 * This implementation returns a straight reflection InvokerInterceptor
 	 */
-	protected TargetSource getTargetSource(Object bean, String beanName) {
+	private TargetSource getTargetSource(Object bean, String beanName) {
+		
+		// We can't create fancy target sources for singletons
+		if (this.owningBeanFactory != null && !owningBeanFactory.isSingleton(beanName)) {
+			logger.info("Checking for custom TargetSource for bean with name '" + beanName + "'");
+			for (int i = 0; i < targetSourceCreators.size(); i++) {
+				TargetSourceCreator tsc = (TargetSourceCreator) targetSourceCreators.get(i);
+				TargetSource ts = tsc.getTargetSource(bean, beanName, owningBeanFactory);
+				if (ts != null) {
+					// Found a match
+					logger.info("TargetSourceCreator [" + tsc + " found custom TargetSource for bean with name '" + beanName + "'");
+					return ts;
+				}
+			}
+		}
+		// Default is a simple, default target source
 		return new SingletonTargetSource(bean);
 	}
 

@@ -8,7 +8,7 @@
 <beans>
 
 	<bean id="auto_txPP"
-		class="org.springframework.aop.framework.support.AdvisorAutoProxyCreator">
+		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
 	</bean>
 
 
@@ -45,12 +45,12 @@
 	</bean>
 	
 	<bean id="noSetters"
-		class="org.springframework.aop.framework.support.NoSetters">
+		class="org.springframework.aop.framework.autoproxy.NoSetters">
 
 	</bean>
 	
 	<bean id="rollback"
-		class="org.springframework.aop.framework.support.Rollback">
+		class="org.springframework.aop.framework.autoproxy.Rollback">
 
 	</bean>
 	

@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 

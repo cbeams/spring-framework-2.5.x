@@ -3,13 +3,14 @@
  * of the Apache Software License.
  */
 
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import java.io.IOException;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.CountingBeforeAdvice;
+import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -20,7 +21,7 @@ import org.springframework.core.TimeStamped;
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.1 2003-12-09 16:45:45 johnsonr Exp $
+ * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
  */
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 
@@ -37,7 +38,7 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 	protected void setUp() throws IOException {
 		// Note that we need an application context, not just a bean factory,
 		// for post processing and hence auto proxying to work
-		this.bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/support/beanNameAutoProxyCreatorTests.xml");
+		this.bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/beanNameAutoProxyCreatorTests.xml");
 	}
 	
 	public void testNoProxy() {

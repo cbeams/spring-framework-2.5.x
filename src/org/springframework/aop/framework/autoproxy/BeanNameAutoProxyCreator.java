@@ -1,4 +1,4 @@
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import java.util.Arrays;
 import java.util.Iterator;

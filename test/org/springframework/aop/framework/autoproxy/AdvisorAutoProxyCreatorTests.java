@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
 
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.1 2003-12-09 12:58:31 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends AbstractAdvisorAutoProxyCreatorTests {
 

@@ -1,4 +1,4 @@
-package org.springframework.aop.framework.support;
+package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -7,9 +7,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;

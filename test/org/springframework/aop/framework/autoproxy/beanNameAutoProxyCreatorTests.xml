@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="_jdkBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+	<bean id="_jdkBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<description>
 			Automatically proxies using JDK dynamic proxies
 		</description>
@@ -15,7 +15,7 @@
 	  </property>
 	</bean>
 	
-	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 	  <property name="beanNames"><value>cglib*</value></property>
 	  <property name="proxyTargetClass">
 	  	<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
@@ -30,7 +30,7 @@
 		</property>
 	</bean>
 	
-	<bean id="introductionBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+	<bean id="introductionBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<description>
 			Illustrates a JDK introduction
 		</description>

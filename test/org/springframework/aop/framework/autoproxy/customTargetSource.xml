@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	Common bean definitions for EnterpriseServices
+	tests.
+-->
+<beans>
+
+	<bean id="auto_txPP"
+		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
+		<property name="customTargetSourceCreators">
+			<list>
+				<ref local="auto_poolingTargetSourceCreator" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="auto_poolingTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.PoolingTargetSourceCreator">
+	</bean>
+
+
+	<bean id="test" singleton="false"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<bean id="wife"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Kerry</value></property>
+	</bean>
+	
+
+</beans>		
+	
+	
