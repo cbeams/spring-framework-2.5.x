@@ -39,14 +39,6 @@ import org.springframework.web.flow.config.FlowBuilderException;
  */
 public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
-	private static final String SEARCH = "person.Search";
-
-	private static final String CRITERIA = SEARCH + ".criteria";
-
-	private static final String RESULTS = SEARCH + ".results";
-
-	private static final String ID = "id";
-
 	private ConversionService conversionService;
 
 	protected ConversionExecutor getConversionExecutor(Class targetClass) {
@@ -65,9 +57,10 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		// view search criteria
 		addViewState("viewCriteria", "person.Search.criteria.view", on(submit(), "bindAndValidate"));
 
-		// bind and validate search criteria 
+		// bind and validate search criteria
 		// TODO - investigate multi action builder helpers
-		// e.g what i'd like to do here is map this state to a method on a multi action bean...
+		// e.g what i'd like to do here is map this state to a method on a multi
+		// action bean...
 		addActionState("bindAndValidate", action("person.Search.bindAndValidate"), new Transition[] {
 				on(error(), "viewCriteria"), on(success(), "executeQuery") });
 
@@ -80,7 +73,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 				on(select(), "setId") });
 
 		// set a user id in the model (selected from result list)
-		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping(ID,
+		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping("id",
 				getConversionExecutor(Long.class)));
 		setAction.setTargetScope(ScopeType.FLOW);
 		addActionState("setId", setAction, new Transition[] { on(error(), "error"), on(success(), "person.Detail") });
