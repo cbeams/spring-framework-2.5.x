@@ -1,22 +1,35 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.26 2003-10-06 06:51:25 jhoeller Exp $
+$Id: changelog.txt,v 1.27 2003-10-08 14:37:56 jhoeller Exp $
 
 Changes in version 1.0 M2 (XX.10.2003)
 --------------------------------------
 * added optional dependency checking for bean factories, ensuring that all bean properties have been set before use
 * added non-default "autowire" functionality so that bean factories can optionally configure dependencies automatically
 * added PropertyValuesProviderFactoryBean instead of having getPropertyValues() in the FactoryBean interface
+* reworked AopUtils and AOP ProxyFactory configuration options
 * removed "shared object" support in ApplicationContext as part of API simplification
 * restructured org.springframework.context.support package into support, event, and config packages
 * reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
+* introduced generic mail infrastructure in org.springframework.mail package
+* introduced specific JavaMail support in org.springframework.mail.javamail package
 * added support for returning result sets from a stored procedure
-* added support for sending email in the org.springframework.mail package
-* Velocity support in web framework now uses VelocityEngine to allow for different Velocity configs in same web app
+* added preInterceptors/postInterceptors support to TransactionProxyFactoryBean
+* reworked Hessian/Burlap/RMI remoting proxies into interceptors with proxy factory bean subclasses
+* reworked (Authorizable)RemoteProxyFactoryBean into (Authorizable)RemoteProxySupport
+* introduced generic multipart handling aka file upload in org.springframework.web.multipart
+* introduced multipart implementation for Jakarta Commons FileUpload
+* introduced multipart implementation for Jason Hunter's COS (com.oreilly.servlet)
+* added support for automatic multipart resolution to DispatcherServlet
+* fixed context/servlet path detection in WebUtils and AbstractUrlHandlerMapping
+* moved LastModified interface to org.springframework.web.servlet.mvc
+* reworked DispatcherServlet's revalidation support to leverage HttpServlet.getLastModified
 * added spring:transform tag, providing support for transforming reference data
-* added documentation on tags in docs/taglib
+* Velocity support in web framework uses VelocityEngine now to allow for different Velocity configs in same web app
+* fixed TilesView content type handling
 * added tiles-example showing how to use Tiles in conjunction with Spring
+* added documentation on tags in docs/taglib
 * added build scripts and directory structure to webapp-minimal skeleton to allow use as a kickstart for user projects
 
 Changes in version 1.0 M1 (30.8.2003)
