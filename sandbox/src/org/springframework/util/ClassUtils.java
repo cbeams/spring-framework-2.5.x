@@ -102,5 +102,52 @@ public class ClassUtils {
             return null;
         }
     }
+    
+    
+    /**
+     * Return a path suitable for use with ClassLoader.getResource (also suitable
+     * for use with Class.getResource by prepending a slash ('/') to the return
+     * value. Built by taking the package of the specified class file, converting
+     * all dots ('.') to slashes ('/'), adding a trailing slash if necesssary, and
+     * concatenating the specified resource name to this.<br/>
+     * As such, this function may be used to build a path suitable for loading a
+     * resource file that is in the same package as a class file, although {link
+     * org.springframework.core.io.ClassPathResource} is usually even more
+     * convenient.
+     * 
+     * @param clazz the Class whose package will be used as the base.
+     * @param resourceName the resource name to append. A leading slash is optional.
+     * @return the built-up resource path
+     * @see java.lang.ClassLoader#getResource(String)
+     * @see java.lang.Class#getResource(String)
+     */
+    public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
+        if (!resourceName.startsWith("/"))
+          return classPackageAsResourcePath(clazz) + "/" + resourceName;
+        else
+          return classPackageAsResourcePath(clazz) + resourceName;
+    }
+
+    /**
+     * Given an input class object, returns a string which consists of the class's
+     * package name as a pathname, i.e., all dots ('.') are replaced by slashes
+     * ('/'). Neither a leading nor trailing slash is added. The result could be
+     * concatenated with a slash and the name of a resource, and fed directly to
+     * ClassLoader.getResource(). For it to be fed to Class.getResource, a leading
+     * slash would also have to be prepended to the return value.
+     *  
+     * @param clazz the input class. A null value or the default (empty) package
+     * will result in an empty string ("") being returned.
+     * @return a path which represents the package name
+     * @see java.lang.ClassLoader#getResource(String)
+     * @see java.lang.Class#getResource(String)
+     */
+    public static String classPackageAsResourcePath(Class clazz) {
+    
+        if (clazz == null || clazz.getPackage() == null)
+            return "";
+
+        return clazz.getPackage().getName().replace('.', '/');
+    }
 
 }

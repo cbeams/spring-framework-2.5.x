@@ -1,6 +1,7 @@
 package org.springframework.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import junit.framework.TestCase;
 
@@ -85,6 +86,21 @@ public class ClassUtilsTests extends TestCase {
             fail("Null arguments weren't handled properly!");
         }
     }
+    
+	public void	testClassPackageAsResourcePath() {
+		String result =	ClassUtils.classPackageAsResourcePath(Proxy.class);
+		assertTrue(result.equals("java/lang/reflect"));
+	}
+
+	public void	testAddResourcePathToPackagePath() {
+		String result =	"java/lang/reflect/xyzabc.xml";
+		assertEquals(result, ClassUtils.addResourcePathToPackagePath(Proxy.class,	"xyzabc.xml"));
+		assertEquals(result, ClassUtils.addResourcePathToPackagePath(Proxy.class,	"/xyzabc.xml"));
+	
+		assertEquals("java/lang/reflect/a/b/c/d.xml",
+				ClassUtils.addResourcePathToPackagePath(Proxy.class, "a/b/c/d.xml"));
+	}
+    
 
     public void setUp() {
         InnerClass.noArgCalled = false;
