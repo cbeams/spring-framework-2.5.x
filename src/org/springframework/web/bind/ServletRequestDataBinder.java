@@ -63,7 +63,7 @@ public class ServletRequestDataBinder extends DataBinder {
 	 */
 	public void closeNoCatch() throws ServletRequestBindingException {
 		if (getErrors().hasErrors()) {
-			throw new ServletRequestBindingException("Errors binding onto object [" + getErrors().getTarget() + "]",
+			throw new ServletRequestBindingException("Errors binding onto object '" + getErrors().getObjectName() + "'",
 																							 getErrors());
 		}
 	}

@@ -47,7 +47,8 @@ import org.springframework.web.servlet.ModelAndView;
  * </p>
  *
  * @author Rod Johnson
- * @version $Id: Controller.java,v 1.3 2003-11-23 11:58:18 jhoeller Exp $
+ * @version $Id: Controller.java,v 1.4 2003-12-09 08:48:40 jhoeller Exp $
+ * @see SimpleControllerHandlerAdapter
  */
 public interface Controller {
 

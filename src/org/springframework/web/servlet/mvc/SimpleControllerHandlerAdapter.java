@@ -13,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Rod Johnson
- * @version $Id: SimpleControllerHandlerAdapter.java,v 1.5 2003-11-23 11:58:18 jhoeller Exp $
+ * @version $Id: SimpleControllerHandlerAdapter.java,v 1.6 2003-12-09 08:48:40 jhoeller Exp $
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see Controller
  * @see LastModified
@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	
 	public boolean supports(Object handler) {
-		return handler != null && Controller.class.isAssignableFrom(handler.getClass());
+		return (handler instanceof Controller);
 	}
 	
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)

@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>Abstract base class for custom command controllers. Autopopulates a
  * command bean from the request. For command validation, a validator
  * (property inherited from BaseCommandController) can be used.</p>
+ *
  * <p>This command controller should preferrable not be used to handle form
  * submission, because functionality for forms is more offered in more
  * detail by the {@link org.springframework.web.servlet.mvc.AbstractFormController
@@ -70,8 +71,8 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	/**
 	 * Template method for request handling, providing a populated and validated instance
 	 * of the command class, and an Errors object containing binding and validation errors.
-	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
-	 * and the Errors instance, under the specified bean name.
+	 * <p>Can invoke <code>errors.getModel()</code> to populate the ModelAndView model
+	 * with the command and the Errors instance, under the specified command name.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command the populated command object

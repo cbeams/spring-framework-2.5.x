@@ -1,12 +1,12 @@
 package org.springframework.validation;
 
+import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -212,9 +212,10 @@ public class BindException extends Exception implements Errors {
 	/**
 	 * Return a model Map for the obtained state, exposing an Errors
 	 * instance as '{@link #ERROR_KEY_PREFIX ERROR_KEY_PREFIX} + objectName'
-	 * and the object itself.<br>
-	 * Note that the Map is constructed each time you're calling this method,
+	 * and the object itself.
+	 * <p>Note that the Map is constructed each time you're calling this method,
 	 * adding things to the map and then re-calling it will not do...
+	 * @see #getObjectName
 	 * @see #ERROR_KEY_PREFIX
 	 */
 	public final Map getModel() {

@@ -58,7 +58,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.13 2003-11-27 11:28:02 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.14 2003-12-09 08:48:40 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
@@ -302,7 +302,7 @@ public class VelocityView extends AbstractView {
 	 * Based on code from the VelocityServlet.
 	 * Merges the template with the context.
 	 * @param template template object returned by the handleRequest() method
-	 * @param context context created by the createContext() method
+	 * @param context context the Velocity context
 	 * @param response servlet reponse (use this to get the OutputStream or Writer)
 	 */
 	protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {

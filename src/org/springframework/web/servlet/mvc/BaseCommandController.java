@@ -287,11 +287,11 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Initialize the given binder instance, e.g. with custom editors.
-	 * Called by createBinder. This method allows you to register custom
-	 * editors for certain fields of your command class. For instance, you will
-	 * be able to transform Date objects into a String pattern and back, in order
-	 * to allow your JavaBeans to have Date properties and still be able to
-	 * set and display them in for instance an HTML interface.
+	 * Called by createBinder.
+	 * <p>This method allows you to register custom editors for certain fields of your
+	 * command class. For instance, you will be able to transform Date objects into a
+	 * String pattern and back, in order to allow your JavaBeans to have Date properties
+	 * and still be able to set and display them in for instance an HTML interface.
 	 * @param request current request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
