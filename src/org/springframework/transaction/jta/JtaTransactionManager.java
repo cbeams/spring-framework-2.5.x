@@ -31,8 +31,6 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import org.aopalliance.aop.AspectException;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.HeuristicCompletionException;
@@ -569,14 +567,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	//---------------------------------------------------------------------
 
 	private void readObject(ObjectInputStream ois) throws IOException {
-		// rely on default serialization, just initialize state after deserialization
+		// Rely on default serialization, just initialize state after deserialization.
 		try {
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new AspectException(
-					"Failed to deserialize JtaTransactionManager: Check that JTA and Spring transaction " +
-					"libraries are available on the client side", ex);
+			throw new IOException(
+					"Failed to deserialize JtaTransactionManager - check that JTA and Spring transaction " +
+					"libraries are available on the client side: " + ex.getMessage());
 		}
 
 		// do client-side JNDI lookup

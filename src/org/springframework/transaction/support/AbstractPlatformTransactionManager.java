@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -583,6 +582,25 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 
 	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization.
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IOException("Failed to deserialize [" + getClass().getName() + "] - " +
+					"check that Spring transaction libraries are available on the client side: " + ex.getMessage());
+		}
+
+		// initialize transient fields
+		this.logger = LogFactory.getLog(getClass());
+	}
+
+
+	//---------------------------------------------------------------------
 	// Template methods to be implemented in subclasses
 	//---------------------------------------------------------------------
 
@@ -716,23 +734,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		private Object getSuspendedResources() {
 			return suspendedResources;
 		}
-	}
-	
-	// ---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize " + getClass() + 
-					"Check that Spring transaction libraries are available on the client side", ex);
-		}
-		
-		// Initialize transient fields
-		this.logger = LogFactory.getLog(getClass());
 	}
 
 }
