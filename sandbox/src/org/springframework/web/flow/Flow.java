@@ -317,7 +317,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private transient FlowServiceLocator serviceLocator;
 
-	private transient EventListenerListHelper flowSessionExecutionListeners = new EventListenerListHelper(
+	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
 			FlowExecutionListener.class);
 
 	protected Flow() {
@@ -376,55 +376,63 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listener
 	 */
-	public void addFlowSessionExecutionListener(FlowExecutionListener listener) {
-		this.flowSessionExecutionListeners.add(listener);
+	public void setExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.clear();
+		this.flowExecutionListeners.add(listener);
+	}
+
+	/**
+	 * @param listeners
+	 */
+	public void setExecutionListeners(FlowExecutionListener[] listeners) {
+		this.flowExecutionListeners.clear();
+		this.flowExecutionListeners.addAll(listeners);
 	}
 
 	/**
 	 * @param listener
 	 */
-	public void removeFlowSessionExecutionListener(FlowExecutionListener listener) {
-		this.flowSessionExecutionListeners.remove(listener);
+	public void addExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.add(listener);
+	}
+
+	/**
+	 * @param listener
+	 */
+	public void removeExecutionListener(FlowExecutionListener listener) {
+		this.flowExecutionListeners.remove(listener);
 	}
 
 	/**
 	 * @return
 	 */
-	public int getFlowSessionExecutionListenerCount() {
-		return flowSessionExecutionListeners.getListenerCount();
+	public int getExecutionListenerCount() {
+		return flowExecutionListeners.getListenerCount();
 	}
 
 	/**
 	 * @param listenerClass
 	 * @return
 	 */
-	public boolean isFlowSessionExecutionListenerAdded(Class listenerClass) {
+	public boolean isExecutionListenerAdded(Class listenerClass) {
 		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerClass),
 				"Listener class must be a FlowSessionExecutionListener");
-		return this.flowSessionExecutionListeners.isAdded(listenerClass);
+		return this.flowExecutionListeners.isAdded(listenerClass);
 	}
 
 	/**
 	 * @param listener
 	 * @return
 	 */
-	public boolean isFlowSessionExecutionListenerAdded(FlowExecutionListener listener) {
-		return this.flowSessionExecutionListeners.isAdded(listener);
+	public boolean isExecutionListenerAdded(FlowExecutionListener listener) {
+		return this.flowExecutionListeners.isAdded(listener);
 	}
 
 	/**
 	 * @return
 	 */
-	public ProcessTemplate getFlowSessionExecutionListenerIterator() {
-		return flowSessionExecutionListeners;
-	}
-
-	/**
-	 * @param listener
-	 */
-	public void setFlowSessionExecutionListener(FlowExecutionListener listener) {
-		this.flowSessionExecutionListeners.clear();
-		this.flowSessionExecutionListeners.add(listener);
+	public ProcessTemplate getExecutionListenerIteratorTemplate() {
+		return flowExecutionListeners;
 	}
 
 	/**
@@ -785,10 +793,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getFlowSessionExecutionListenerCount()
+			logger.debug("Publishing request submitted event to " + getExecutionListenerCount()
 					+ " listener(s)");
 		}
-		getFlowSessionExecutionListenerIterator().run(new Block() {
+		getExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestSubmitted(sessionExecution, request);
 			}
@@ -797,10 +805,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestProcessed(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getFlowSessionExecutionListenerCount()
+			logger.debug("Publishing request processed event to " + getExecutionListenerCount()
 					+ " listener(s)");
 		}
-		getFlowSessionExecutionListenerIterator().run(new Block() {
+		getExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestProcessed(sessionExecution, request);
 			}
