@@ -41,13 +41,13 @@ public class FlowTests extends TestCase {
 		FlowExecution flowExecution = flow.createExecution();
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
-		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
+		flowExecution.start(new SimpleEvent(this, "start"));
 		assertEquals(1, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(2, flowExecutionListener.stateTransitions);
-		view = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
 		assertEquals(2, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(4, flowExecutionListener.stateTransitions);
-		view = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
 		assertEquals(0, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(6, flowExecutionListener.stateTransitions);
 	}
