@@ -1,31 +1,23 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.25 2003-09-20 21:10:42 johnsonr Exp $
+$Id: changelog.txt,v 1.26 2003-10-06 06:51:25 jhoeller Exp $
 
-Changes in version 1.0 M2 (XX.XX.2003)
--------------------------------------
-* Velocity support in web framework now uses VelocityEngine rather than
-older singleton API. More flexible if different controller servlets require
-different Velocity configuration. Backward compatible.
-* added spring:transform tag, providing support for transforming reference data
-* added documentation on tags (in docs/taglib)
-* added build scripts and directory structure to minimal web application
-skeleton to allow use as a kickstart for user projects
-* added suport for returning result sets from a stored procedure.
-* added support for sending email in the org.springframework.mail package. 
-Provided JavaMail implementation, but underlying API is a pluggable strategy
-to allow for other mail APIs and easy testability without JavaMail configured.
-* added PropertyValuesProviderFactoryBean so that FactoryBean interface no longer
-needs to implement getPropertyValues() method. Significant API
-and conceptual simplification for typical FactoryBean usage
-* added optional dependency checking for BeanFactories, ensuring that all bean properties have been set before use
-* added "autowire" functionality so that BeanFactories can optional check
-dependencies between betweens and configure them automatically.
-Similar to PicoContainer functionality. Autowire is disabled by default.
+Changes in version 1.0 M2 (XX.10.2003)
+--------------------------------------
+* added optional dependency checking for bean factories, ensuring that all bean properties have been set before use
+* added non-default "autowire" functionality so that bean factories can optionally configure dependencies automatically
+* added PropertyValuesProviderFactoryBean instead of having getPropertyValues() in the FactoryBean interface
 * removed "shared object" support in ApplicationContext as part of API simplification
+* restructured org.springframework.context.support package into support, event, and config packages
+* reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
+* added support for returning result sets from a stored procedure
+* added support for sending email in the org.springframework.mail package
+* Velocity support in web framework now uses VelocityEngine to allow for different Velocity configs in same web app
+* added spring:transform tag, providing support for transforming reference data
+* added documentation on tags in docs/taglib
 * added tiles-example showing how to use Tiles in conjunction with Spring
-
+* added build scripts and directory structure to webapp-minimal skeleton to allow use as a kickstart for user projects
 
 Changes in version 1.0 M1 (30.8.2003)
 -------------------------------------
@@ -70,7 +62,7 @@ Changes in version 1.0 M1 (30.8.2003)
 * introduced deprecated Log4jConfigServlet for Servlet 2.2 containers
 * introduced Tiles support through TilesView and TilesConfigurer
 * introduced support for Spring-aware Tiles component controller
-* Adding customization in AbstractPdfView
+* added customization in AbstractPdfView
 
 Changes in version 0.9.1 (8.8.2003)
 -----------------------------------
