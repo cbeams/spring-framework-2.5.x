@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import net.sf.hibernate.Criteria;
@@ -87,7 +88,6 @@ public abstract class SessionFactoryUtils {
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
 	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
 	 * or EJB CMT). See the getSession version with all parameters for details.
-	 * 
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param allowCreate if a new Session should be created if no thread-bound found
 	 * @return the Hibernate Session
@@ -114,7 +114,6 @@ public abstract class SessionFactoryUtils {
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
 	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
 	 * or EJB CMT). See the getSession version with all parameters for details.
-	 * 
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or null if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
@@ -148,7 +147,6 @@ public abstract class SessionFactoryUtils {
 	 * database. Such an interceptor can also be set at the SessionFactory level
 	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, or on
 	 * HibernateInterceptor/HibernateTemplate.
-	 * 
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or null if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
@@ -213,12 +211,13 @@ public abstract class SessionFactoryUtils {
 								sessionHolder.setSynchronizedWithTransaction(true);
 								jtaTm.getTransaction().registerSynchronization(
 										new JtaSessionSynchronization(
-												new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true)));
+												new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true),
+												jtaTm));
 								TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 							}
 						}
 						catch (Exception ex) {
-							throw new DataAccessResourceFailureException("Couldn't register synchronization " +
+							throw new DataAccessResourceFailureException("Could not register synchronization " +
 																													 "with JTA TransactionManager", ex);
 						}
 					}
@@ -228,17 +227,16 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new DataAccessResourceFailureException("Cannot open Hibernate session", ex.getSQLException());
+			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			throw new DataAccessResourceFailureException("Cannot open Hibernate session", ex);
+			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
 		}
 	}
 
 	/**
 	 * Apply the current transaction timeout, if any, to the given
 	 * Hibernate Query object.
-	 * 
 	 * @param query the Hibernate Query object
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
 	 */
@@ -266,7 +264,6 @@ public abstract class SessionFactoryUtils {
 	 * Convert the given HibernateException to an appropriate exception from the
 	 * org.springframework.dao hierarchy. Note that it is advisable to handle JDBCException
 	 * specifically by using an SQLExceptionTranslator for the underlying SQLException.
-	 * 
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateAccessor#convertHibernateAccessException
@@ -310,7 +307,6 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Close the given Session, created via the given factory,
 	 * if it isn't bound to the thread.
-	 * 
 	 * @param session Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
 	 * @throws DataAccessResourceFailureException if the Session couldn't be closed
@@ -326,10 +322,10 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new CleanupFailureDataAccessException("Cannot close Hibernate session", ex.getSQLException());
+			throw new CleanupFailureDataAccessException("Could not close Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			throw new CleanupFailureDataAccessException("Cannot close Hibernate session", ex);
+			throw new CleanupFailureDataAccessException("Could not close Hibernate session", ex);
 		}
 	}
 
@@ -337,7 +333,6 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Callback for resource cleanup at the end of a Spring-managed JTA transaction,
 	 * i.e. when participating in a JtaTransactionManager transaction.
-	 * 
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	private static class SpringSessionSynchronization implements TransactionSynchronization {
@@ -384,7 +379,7 @@ public abstract class SessionFactoryUtils {
 				}
 				catch (JDBCException ex) {
 					if (this.jdbcExceptionTranslator != null) {
-						throw this.jdbcExceptionTranslator.translate("SpringSessionSynchronization", null, ex.getSQLException());
+						throw this.jdbcExceptionTranslator.translate("SessionSynchronization", null, ex.getSQLException());
 					}
 					else {
 						throw new HibernateJdbcException(ex);
@@ -428,21 +423,38 @@ public abstract class SessionFactoryUtils {
 
 		private final SpringSessionSynchronization springSessionSynchronization;
 
-		private JtaSessionSynchronization(SpringSessionSynchronization springSessionSynchronization) {
+		private final TransactionManager jtaTransactionManager;
+
+		private JtaSessionSynchronization(SpringSessionSynchronization springSessionSynchronization,
+		                                  TransactionManager jtaTransactionManager) {
 			this.springSessionSynchronization = springSessionSynchronization;
+			this.jtaTransactionManager = jtaTransactionManager;
 		}
 
 		/**
 		 * JTA beforeCompletion callback: just invoked on commit.
+		 * <p>In case of an exception, the JTA transaction gets set to rollback-only.
+		 * (Synchronization.beforeCompletion is not supposed to throw an exception.)
 		 * @see SpringSessionSynchronization#beforeCommit
 		 */
 		public void beforeCompletion() {
-			this.springSessionSynchronization.beforeCommit(false);
+			try {
+				this.springSessionSynchronization.beforeCommit(false);
+			}
+			catch (Throwable ex) {
+				logger.error("beforeCommit callback threw exception", ex);
+				try {
+					this.jtaTransactionManager.setRollbackOnly();
+				}
+				catch (SystemException ex2) {
+					logger.error("Could not set JTA transaction rollback-only", ex2);
+				}
+			}
 		}
 
 		/**
 		 * JTA afterCompletion callback: invoked after commit/rollback.
-		 * Needs to invoke SpringSessionSynchronization's beforeCompletion
+		 * <p>Needs to invoke SpringSessionSynchronization's beforeCompletion
 		 * at this late stage, as there's no corresponding callback with JTA.
 		 * @see SpringSessionSynchronization#beforeCompletion
 		 * @see SpringSessionSynchronization#afterCompletion
