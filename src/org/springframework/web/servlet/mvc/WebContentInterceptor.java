@@ -25,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -49,6 +51,8 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private Map cacheMappings = new HashMap();
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
 	/**
@@ -98,9 +102,13 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Map specific URL paths to specific cache seconds.
 	 * <p>Overrides the default cache seconds setting of this interceptor.
 	 * Can specify "-1" to exclude an URL path from default caching.
+	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
+	 * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
+	 * both "/test" and "/team". For details, see the AntPathMatcher javadoc.
 	 * @param cacheMappings a mapping between URL paths (as keys) and
 	 * cache seconds (as values, need to be integer-parsable)
 	 * @see #setCacheSeconds
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setCacheMappings(Properties cacheMappings) {
 		this.cacheMappings.clear();
@@ -108,6 +116,18 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			String path = (String) it.next();
 			this.cacheMappings.put(path, Integer.valueOf(cacheMappings.getProperty(path)));
 		}
+	}
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns, for determining cache mappings.
+	 * Default is AntPathMatcher.
+	 * @see #setCacheMappings
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
 	}
 
 
@@ -152,7 +172,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			// pattern match?
 			for (Iterator it = this.cacheMappings.keySet().iterator(); it.hasNext();) {
 				String registeredPath = (String) it.next();
-				if (PathMatcher.match(registeredPath, urlPath)) {
+				if (this.pathMatcher.match(registeredPath, urlPath)) {
 					cacheSeconds = (Integer) this.cacheMappings.get(registeredPath);
 				}
 			}

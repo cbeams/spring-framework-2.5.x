@@ -36,6 +36,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -78,7 +79,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see #CLASSPATH_URL_PREFIX
- * @see org.springframework.util.PathMatcher
+ * @see org.springframework.util.AntPathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
@@ -88,6 +89,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private final ResourceLoader resourceLoader;
 
 	private ClassLoader classLoader;
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
 	/**
@@ -132,6 +135,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * (applying to the thread that does the "getResources" call)
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader, ClassLoader classLoader) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 		this.classLoader = classLoader;
 	}
@@ -152,16 +156,33 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		return classLoader;
 	}
 
+	/**
+	 * Set the PathMatcher implementation to use for this
+	 * resource pattern resolver. Default is AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
+
+	/**
+	 * Return the PathMatcher that this resource pattern resolver uses.
+	 */
+	public PathMatcher getPathMatcher() {
+		return pathMatcher;
+	}
+
 
 	public Resource getResource(String location) {
-		return this.resourceLoader.getResource(location);
+		return getResourceLoader().getResource(location);
 	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
 		Assert.notNull(locationPattern, "locationPattern is required");
 		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
-			if (PathMatcher.isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
+			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
 				// a class path resource pattern
 				return findPathMatchingResources(locationPattern);
 			}
@@ -171,13 +192,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 		else {
-			if (PathMatcher.isPattern(locationPattern)) {
+			if (getPathMatcher().isPattern(locationPattern)) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
 			}
 			else {
 				// a single resource with the given name
-				return new Resource[] {this.resourceLoader.getResource(locationPattern)};
+				return new Resource[] {getResourceLoader().getResource(locationPattern)};
 			}
 		}
 	}
@@ -194,7 +215,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		ClassLoader cl = this.classLoader;
+		ClassLoader cl = getClassLoader();
 		if (cl == null) {
 			// No class loader specified -> use thread context class loader.
 			cl = Thread.currentThread().getContextClassLoader();
@@ -301,7 +322,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			JarEntry entry = (JarEntry) entries.nextElement();
 			String entryPath = entry.getName();
 			if (entryPath.startsWith(rootEntryPath) &&
-					PathMatcher.match(subPattern, entryPath.substring(rootEntryPath.length()))) {
+					getPathMatcher().match(subPattern, entryPath.substring(rootEntryPath.length()))) {
 				result.add(new UrlResource(new URL(jarFileUrlPrefix + entryPath)));
 			}
 		}
@@ -381,7 +402,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
 				doRetrieveMatchingFiles(fullPattern, dirContents[i], result);
 			}
-			if (PathMatcher.match(fullPattern, currPath)) {
+			if (getPathMatcher().match(fullPattern, currPath)) {
 				result.add(dirContents[i]);
 			}
 		}

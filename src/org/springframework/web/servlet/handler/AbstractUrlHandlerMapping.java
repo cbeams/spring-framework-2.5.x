@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -36,17 +38,19 @@ import org.springframework.web.util.UrlPathHelper;
  * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
  * matches both "/test" and "/team", "/test/*" matches all paths in the
  * "/test" directory, "/test/**" matches all paths below "/test".
- * For details, see the PathMatcher class.
+ * For details, see the AntPathMatcher javadoc.
  *
  * @author Juergen Hoeller
  * @since 16.04.2003
  * @see #setAlwaysUseFullPath
  * @see #setUrlDecode
- * @see org.springframework.util.PathMatcher
+ * @see org.springframework.util.AntPathMatcher
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	private boolean lazyInitHandlers = false;
 
@@ -87,6 +91,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
 	}
 
 	/**
@@ -134,7 +148,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			String bestPathMatch = null;
 			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 				String registeredPath = (String) it.next();
-				if (PathMatcher.match(registeredPath, urlPath) &&
+				if (this.pathMatcher.match(registeredPath, urlPath) &&
 						(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
 					handler = this.handlerMap.get(registeredPath);
 					bestPathMatch = registeredPath;

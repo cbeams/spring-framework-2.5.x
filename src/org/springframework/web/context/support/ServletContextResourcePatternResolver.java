@@ -26,7 +26,6 @@ import javax.servlet.ServletContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -107,7 +106,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 						StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
 					doRetrieveMatchingServletContextResources(servletContext, fullPattern, currPath, result);
 				}
-				if (PathMatcher.match(fullPattern, currPath)) {
+				if (getPathMatcher().match(fullPattern, currPath)) {
 					result.add(new ServletContextResource(servletContext, currPath));
 				}
 			}

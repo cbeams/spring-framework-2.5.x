@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
@@ -110,6 +111,8 @@ public class ResourceServlet extends HttpServletBean {
 
 	private boolean applyLastModified = false;
 
+	private PathMatcher pathMatcher;
+
 	private long startupTime;
 
 
@@ -128,8 +131,8 @@ public class ResourceServlet extends HttpServletBean {
 
 	/**
 	 * Set allowed resources as URL pattern, e.g. "/WEB-INF/res/*.jsp",
-	 * The parameter can be any Ant-style pattern parsable by PathMatcher.
-	 * @see org.springframework.util.PathMatcher#match
+	 * The parameter can be any Ant-style pattern parsable by AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setAllowedResources(String allowedResources) {
 		this.allowedResources = allowedResources;
@@ -167,8 +170,20 @@ public class ResourceServlet extends HttpServletBean {
 	 * Remember the startup time, using no last-modified time before it.
 	 */
 	protected void initServletBean() {
+		this.pathMatcher = getPathMatcher();
 		this.startupTime = System.currentTimeMillis();
 	}
+
+	/**
+	 * Return a PathMatcher to use for matching the "allowedResources" URL pattern.
+	 * Default is AntPathMatcher.
+	 * @see #setAllowedResources
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	protected PathMatcher getPathMatcher() {
+		return new AntPathMatcher();
+	}
+
 
 	/**
 	 * Determine the URL of the target resource and include it.
@@ -249,6 +264,7 @@ public class ResourceServlet extends HttpServletBean {
 	 */
 	private void doInclude(HttpServletRequest request, HttpServletResponse response, String resourceUrl)
 	    throws ServletException, IOException {
+
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
@@ -256,7 +272,7 @@ public class ResourceServlet extends HttpServletBean {
 		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 		for (int i = 0; i < resourceUrls.length; i++) {
 			// check whether URL matches allowed resources
-			if (this.allowedResources != null && !PathMatcher.match(this.allowedResources, resourceUrls[i])) {
+			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {
 				throw new ServletException("Resource [" + resourceUrls[i] +
 						"] does not match allowed pattern [" + this.allowedResources + "]");
 			}

@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 
 /**
@@ -37,17 +39,20 @@ import org.springframework.util.PathMatcher;
  *
  * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
  * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
- * both "/test" and "/team". For details, see the PathMatcher class.
+ * both "/test" and "/team". For details, see the AntPathMatcher javadoc.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see java.util.Properties
- * @see org.springframework.util.PathMatcher
+ * @see org.springframework.util.AntPathMatcher
  */
 public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		implements InitializingBean {
 	
 	private Properties mappings;
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
+
 
 	/**
 	 * Set explicit URL to method name mappings through a Properties object.
@@ -57,11 +62,22 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		this.mappings = mappings;
 	}
 
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
+
 	public void afterPropertiesSet() {
 		if (this.mappings == null || this.mappings.isEmpty()) {
 			throw new IllegalArgumentException("'mappings' property is required");
 		}
 	}
+
 
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
 		String methodName = this.mappings.getProperty(urlPath);
@@ -70,7 +86,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		}
 		for (Iterator it = this.mappings.keySet().iterator(); it.hasNext();) {
 			String registeredPath = (String) it.next();
-			if (PathMatcher.match(registeredPath, urlPath)) {
+			if (this.pathMatcher.match(registeredPath, urlPath)) {
 				return (String) this.mappings.get(registeredPath);
 			}
 		}
