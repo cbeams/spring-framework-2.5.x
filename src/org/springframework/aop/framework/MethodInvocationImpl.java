@@ -19,7 +19,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface 
  * @author Rod Johnson
- * @version $Id: MethodInvocationImpl.java,v 1.10 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: MethodInvocationImpl.java,v 1.11 2003-12-01 15:40:46 johnsonr Exp $
  */
 public class MethodInvocationImpl implements MethodInvocation {
 	
@@ -198,7 +198,7 @@ public class MethodInvocationImpl implements MethodInvocation {
 		
 		if (this.currentInterceptor == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			exhausted = true;
-			return AopProxy.invokeJoinpointUsingReflection(target, method, arguments);
+			return AopProxyUtils.invokeJoinpointUsingReflection(target, method, arguments);
 		}
 		
 		// We begin with -1 and increment early

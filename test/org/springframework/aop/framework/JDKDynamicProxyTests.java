@@ -17,7 +17,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JDKDynamicProxyTests.java,v 1.1 2003-12-01 13:16:06 johnsonr Exp $
+ * @version $Id: JDKDynamicProxyTests.java,v 1.2 2003-12-01 15:40:15 johnsonr Exp $
  */
 public class JDKDynamicProxyTests extends AbstractAopProxyTests {
 
@@ -37,12 +37,12 @@ public class JDKDynamicProxyTests extends AbstractAopProxyTests {
 	}
 	
 	protected AopProxy createAopProxy(AdvisedSupport as) {
-		return new AopProxy(as);
+		return new JdkDynamicAopProxy(as);
 	}
 	
 	public void testNullConfig() {
 		try {
-			AopProxy aop = new AopProxy(null);
+			JdkDynamicAopProxy aop = new JdkDynamicAopProxy(null);
 			aop.getProxy();
 			fail("Shouldn't allow null interceptors");
 		} 
@@ -57,7 +57,7 @@ public class JDKDynamicProxyTests extends AbstractAopProxyTests {
 		raw.setAge(32);
 		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		pc.setTarget(raw);
-		AopProxy aop = new AopProxy(pc);
+		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
 		Object proxy = aop.getProxy();
 		assertTrue(proxy instanceof ITestBean);

@@ -33,10 +33,10 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.9 2003-12-01 10:57:43 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.10 2003-12-01 15:40:46 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
-public class AdvisedSupport implements Advised {
+public class AdvisedSupport extends ProxyConfig implements Advised {
 	
 	/**
 	 * Canonical TargetSource when there's no target, and behaviour is supplied
@@ -89,12 +89,6 @@ public class AdvisedSupport implements Advised {
 	private boolean exposeInvocation;
 	
 	private boolean exposeProxy;
-	
-	/**
-	 * Should we proxy the target class as well as any interfaces?
-	 * Can use this to force CGLIB proxying even if we have interfaces such as introductions.
-	 */
-	private boolean proxyTargetClass;
 	
 	private AdvisorChainFactory advisorChainFactory;
 	
@@ -227,10 +221,6 @@ public class AdvisedSupport implements Advised {
 		this.exposeProxy = exposeProxy;
 	}
 	
-	public boolean getProxyTargetClass() {
-		return this.proxyTargetClass;
-	}
-	
 	/**
 	 * @return true if when there's no advice for a method, a final InvokerInterceptor
 	 * can be optimized out. This can't be done if the proxy or invocation is
@@ -240,15 +230,6 @@ public class AdvisedSupport implements Advised {
 		return !(exposeInvocation || exposeProxy);
 	}
 	
-	/**
-	 * Set whether to proxy the target class directly as well as any interfaces.
-	 * We can set this to true to force CGLIB proxying. Default is false
-	 * @param proxyTargetClass whether to proxy the target class directly as well as any interfaces
-	 */
-	public void setProxyTargetClass(boolean proxyTargetClass) {
-		this.proxyTargetClass = proxyTargetClass;
-	}
-
 	public void addInterceptor(Interceptor interceptor) {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
 		addInterceptor(pos, interceptor);
@@ -473,7 +454,14 @@ public class AdvisedSupport implements Advised {
 		if (!isActive) {
 			activate();
 		}
-		return new AopProxy(this);
+		// TODO
+		boolean useCglib = getProxyTargetClass() || this.interfaces.isEmpty();
+		if (useCglib) {
+			return new Cglib1AopProxy(this);
+		}
+		else {
+			return new JdkDynamicAopProxy(this);
+		}
 	}
 	
 	/**
