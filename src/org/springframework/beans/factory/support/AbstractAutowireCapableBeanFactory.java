@@ -251,7 +251,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				for (int j = 0; j < argTypes.length; j++) {
 					ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
 					if (valueHolder != null) {
-						args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+						// synchronize if custom editors are registered
+						// necessary because PropertyEditors are not thread-safe
+						if (!getCustomEditors().isEmpty()) {
+							synchronized (this) {
+								args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+							}
+						}
+						else {
+							args[j] = bw.doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
+						}
 					}
 					else {
 						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
@@ -503,8 +512,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected void applyPropertyValues(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw,
 																		 PropertyValues pvs) throws BeansException {
-		if (pvs == null)
+		if (pvs == null) {
 			return;
+		}
 
 		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
@@ -519,7 +529,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// set our (possibly massaged) deepCopy
 		try {
-			bw.setPropertyValues(deepCopy);
+			// synchronize if custom editors are registered
+			// necessary because PropertyEditors are not thread-safe
+			if (!getCustomEditors().isEmpty()) {
+				synchronized (this) {
+					bw.setPropertyValues(deepCopy);
+				}
+			}
+			else {
+				bw.setPropertyValues(deepCopy);
+			}
 		}
 		catch (BeansException ex) {
 			// improve the message by showing the context

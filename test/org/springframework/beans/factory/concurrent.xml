@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <bean id="bean1"
+        class="org.springframework.beans.factory.ConcurrentBeanFactoryTests$ConcurrentBean"
+        singleton="false">
+    <property name="date">
+      <value>2004/08/08</value>
+    </property>
+  </bean>
+  <bean id="bean2"
+        class="org.springframework.beans.factory.ConcurrentBeanFactoryTests$ConcurrentBean"
+        singleton="false">
+    <property name="date">
+      <value>2000/02/02</value>
+    </property>
+  </bean>
+  <!--
+  <bean id="customEditorConfigurer"
+        class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+    <property name="customEditors">
+      <map>
+        <entry key="java.util.Date">
+          <bean
+            class="org.springframework.beans.propertyeditors.CustomDateEditor">
+            <constructor-arg>
+
+            </constructor-arg>
+          </bean>
+        </entry>
+      </map>
+    </property>
+  </bean>
+  -->
+</beans>

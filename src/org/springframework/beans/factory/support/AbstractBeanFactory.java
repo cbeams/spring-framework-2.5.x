@@ -7,6 +7,7 @@ package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.47 2004-02-13 17:46:36 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.48 2004-03-10 08:16:11 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  */
@@ -80,11 +81,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	/** Dependency types to ignore on dependency check and autowire */
 	private final Set ignoreDependencyTypes = new HashSet();
 
-	/** Cache of singletons: bean name --> bean instance */
-	private final Map singletonCache = new HashMap();
-
 	/** Map from alias to canonical bean name */
-	private final Map aliasMap = new HashMap();
+	private final Map aliasMap = Collections.synchronizedMap(new HashMap());
+
+	/** Cache of singletons: bean name --> bean instance */
+	private final Map singletonCache = Collections.synchronizedMap(new HashMap());
 
 
 	/**
@@ -116,6 +117,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 	 */
 	public Object getBean(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
+		// eagerly check singleton cache for manually registered singletons
 		Object sharedInstance = this.singletonCache.get(beanName);
 		if (sharedInstance != null) {
 			if (logger.isDebugEnabled()) {
@@ -138,9 +140,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 			}
 			// create bean instance
 			if (mergedBeanDefinition.isSingleton()) {
-				logger.info("Creating shared instance of singleton bean '" + beanName + "'");
-				sharedInstance = createBean(beanName, mergedBeanDefinition);
-				addSingleton(beanName, sharedInstance);
+				synchronized (this.singletonCache) {
+					// re-check singleton cache within synchronized block
+					sharedInstance = this.singletonCache.get(beanName);
+					if (sharedInstance == null) {
+						logger.info("Creating shared instance of singleton bean '" + beanName + "'");
+						sharedInstance = createBean(beanName, mergedBeanDefinition);
+						addSingleton(beanName, sharedInstance);
+					}
+				}
 				return getObjectForSharedInstance(name, sharedInstance);
 			}
 			else {
@@ -297,24 +305,35 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		Object registeredName = this.aliasMap.get(alias);
-		if (registeredName != null) {
-			throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" + beanName +
-			                                       "': it's already registered for bean name '" + registeredName + "'");
+		synchronized (this.aliasMap) {
+			Object registeredName = this.aliasMap.get(alias);
+			if (registeredName != null) {
+				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" + beanName +
+																							 "': it's already registered for bean name '" + registeredName + "'");
+			}
+			this.aliasMap.put(alias, beanName);
 		}
-		this.aliasMap.put(alias, beanName);
 	}
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
-		Object oldObject = this.singletonCache.get(beanName);
-		if (oldObject != null) {
-			throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
-			                                       "] under bean name '" + beanName + "': there's already object [" +
-			                                       oldObject + " bound");
+		synchronized (this.singletonCache) {
+			Object oldObject = this.singletonCache.get(beanName);
+			if (oldObject != null) {
+				throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
+																							 "] under bean name '" + beanName + "': there's already object [" +
+																							 oldObject + " bound");
+			}
+			addSingleton(beanName, singletonObject);
 		}
-		addSingleton(beanName, singletonObject);
 	}
 
+	/**
+	 * Add the given singleton object to the singleton cache of this factory.
+	 * <p>To be called for eager registration of singletons, e.g. to be able to
+	 * resolve circular references.
+	 * @param beanName the name of the bean
+	 * @param singletonObject the singleton object
+	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		this.singletonCache.put(beanName, singletonObject);
 	}
@@ -323,14 +342,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
 		}
-		Set singletonCacheKeys = new HashSet(this.singletonCache.keySet());
-		for (Iterator it = singletonCacheKeys.iterator(); it.hasNext();) {
-			destroySingleton((String) it.next());
+		synchronized (this.singletonCache) {
+			Set singletonCacheKeys = new HashSet(this.singletonCache.keySet());
+			for (Iterator it = singletonCacheKeys.iterator(); it.hasNext();) {
+				destroySingleton((String) it.next());
+			}
 		}
 	}
 
 	/**
-	 * Destroy the giben bean. Delegates to destroyBean if a corresponding
+	 * Destroy the given bean. Delegates to destroyBean if a corresponding
 	 * singleton instance is found.
 	 * @param beanName name of the bean
 	 * @see #destroyBean
