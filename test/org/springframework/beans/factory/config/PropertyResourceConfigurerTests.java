@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.config;
 
@@ -126,6 +126,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		Set someSet = new ManagedSet();
 		someSet.add("na${age}me");
 		someSet.add(new RuntimeBeanReference("${ref}"));
+		someSet.add(new TypedStringValue("${age}", Integer.class));
 		pvs.addPropertyValue("someSet", someSet);
 
 		Map someMap = new ManagedMap();
@@ -156,9 +157,10 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());
 		assertEquals(tb2, ((List) tb2.getFriends()).get(1));
-		assertEquals(2, tb2.getSomeSet().size());
+		assertEquals(3, tb2.getSomeSet().size());
 		assertTrue(tb2.getSomeSet().contains("na98me"));
 		assertTrue(tb2.getSomeSet().contains(tb2));
+		assertTrue(tb2.getSomeSet().contains(new Integer(98)));
 		assertEquals(4, tb2.getSomeMap().size());
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));

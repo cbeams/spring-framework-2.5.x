@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,10 @@ import java.util.TreeSet;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -51,6 +49,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
 
 /**
@@ -175,7 +174,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
 		RootBeanDefinition bd = getMergedBeanDefinition(beanName, true);
-		applyPropertyValues(beanName, bd, createBeanWrapper(existingBean), bd.getPropertyValues());
+		BeanWrapper bw = createBeanWrapper(existingBean);
+		initBeanWrapper(bw);
+		applyPropertyValues(beanName, bd, bw, bd.getPropertyValues());
 	}
 
 	/**
@@ -599,43 +600,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (valueHolder != null && !usedValueHolders.contains(valueHolder)) {
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
-
-				if (bw instanceof BeanWrapperImpl) {
-					try {
-						// Synchronize if custom editors are registered.
-						// Necessary because PropertyEditors are not thread-safe.
-						if (!getCustomEditors().isEmpty()) {
-							synchronized (getCustomEditors()) {
-								args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
-							}
-						}
-						else {
-							args[j] = ((BeanWrapperImpl) bw).doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j]);
-						}
-					}
-					catch (TypeMismatchException ex) {
-						throw new UnsatisfiedDependencyException(
-								mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-								"Could not convert constructor argument value [" + valueHolder.getValue() +
-						    "] to required type [" + argTypes[j].getName() + "]: " + ex.getMessage());
-					}
+				try {
+					args[j] = doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j], bw);
 				}
-				else {
-					// Fallback: a BeanWrapper that does not support type conversion
-					// for given values (currently BeanWrapperImpl is needed for this).
-					if (argTypes[j].isInstance(valueHolder.getValue())) {
-						args[j] = valueHolder.getValue();
-					}
-					else {
-						throw new UnsatisfiedDependencyException(
-								mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-								"Could not convert constructor argument value [" + valueHolder.getValue() +
-						    "] to required type [" + argTypes[j].getName() + "] because BeanWrapper [" + bw +
-						    "] does not support type conversion for given values (BeanWrapperImpl needed)");
-					}
+				catch (BeansException ex) {
+					throw new UnsatisfiedDependencyException(
+							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
+							"Could not convert constructor argument value [" + valueHolder.getValue() +
+							"] to required type [" + argTypes[j].getName() + "]: " + ex.getMessage());
 				}
 			}
-
 			else {
 				if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 					throw new UnsatisfiedDependencyException(
@@ -942,6 +916,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// May need to resolve contained runtime references.
 			return resolveManagedMap(beanName, mergedBeanDefinition, argName, (Map) value);
 		}
+		else if (value instanceof TypedStringValue) {
+			// Convert value to target type here.
+			TypedStringValue typedStringValue = (TypedStringValue) value;
+			BeanWrapper bw = createBeanWrapper(null);
+			initBeanWrapper(bw);
+			try {
+				return doTypeConversionIfNecessary(typedStringValue.getValue(), typedStringValue.getTargetType(), bw);
+			}
+			catch (BeansException ex) {
+				// Improve the message by showing the context.
+				throw new BeanCreationException(
+						mergedBeanDefinition.getResourceDescription(), beanName,
+						"Error converting typed String value for " + argName, ex);
+			}
+		}
 		else {
 			// no need to resolve value
 			return value;
@@ -1051,7 +1040,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			resolved.put(
-			    entry.getKey(),
+					resolveValueIfNecessary(
+							beanName, mergedBeanDefinition, argName, entry.getKey()),
 			    resolveValueIfNecessary(
 							beanName, mergedBeanDefinition,
 							argName + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() + BeanWrapper.PROPERTY_KEY_SUFFIX,

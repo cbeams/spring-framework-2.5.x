@@ -36,6 +36,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -432,32 +433,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return this.hasDestructionAwareBeanPostProcessors;
 	}
 
-
-	/**
-	 * Create a new BeanWrapper for the given bean instance.
-	 * <p>Default implementation creates a BeanWrapperImpl.
-	 * Can be overridden for custom BeanWrapper adaptations.
-	 * @param beanInstance the bean instance to create the BeanWrapper for,
-	 * or null for a BeanWrapper that does not yet contain a target object
-	 * @return the BeanWrapper
-	 */
-	protected BeanWrapper createBeanWrapper(Object beanInstance) {
-		return (beanInstance != null ? new BeanWrapperImpl(beanInstance) : new BeanWrapperImpl());
-	}
-
-	/**
-	 * Initialize the given BeanWrapper with the custom editors registered
-	 * with this factory. To be called for BeanWrappers that will create
-	 * and populate bean instances.
-	 * @param bw the BeanWrapper to initialize
-	 */
-	protected void initBeanWrapper(BeanWrapper bw) {
-		for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-			Class clazz = (Class) it.next();
-			bw.registerCustomEditor(clazz, (PropertyEditor) this.customEditors.get(clazz));
-		}
-	}
-
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.hasText(alias, "Alias must not be empty");
@@ -569,6 +544,68 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		String canonicalName = (String) this.aliasMap.get(beanName);
 		return canonicalName != null ? canonicalName : beanName;
 	}
+
+	/**
+	 * Create a new BeanWrapper for the given bean instance.
+	 * <p>Default implementation creates a BeanWrapperImpl.
+	 * Can be overridden for custom BeanWrapper adaptations.
+	 * @param beanInstance the bean instance to create the BeanWrapper for,
+	 * or null for a BeanWrapper that does not yet contain a target object
+	 * @return the BeanWrapper
+	 */
+	protected BeanWrapper createBeanWrapper(Object beanInstance) {
+		return (beanInstance != null ? new BeanWrapperImpl(beanInstance) : new BeanWrapperImpl());
+	}
+
+	/**
+	 * Initialize the given BeanWrapper with the custom editors registered
+	 * with this factory. To be called for BeanWrappers that will create
+	 * and populate bean instances.
+	 * @param bw the BeanWrapper to initialize
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) {
+		for (Iterator it = getCustomEditors().entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Class clazz = (Class) entry.getKey();
+			PropertyEditor editor = (PropertyEditor) entry.getValue();
+			bw.registerCustomEditor(clazz, editor);
+		}
+	}
+
+	/**
+	 * Convert the given value into the specified target type.
+	 * @param value the original value
+	 * @param targetType the target type
+	 * @param bw the BeanWrapper to work on
+	 * @return the converted value, matching the target type
+	 * @throws BeansException in case of errors
+	 */
+	protected Object doTypeConversionIfNecessary(Object value, Class targetType, BeanWrapper bw)
+			throws BeansException {
+
+		// We need BeanWrapperImpl for separate type conversion.
+		if (!(bw instanceof BeanWrapperImpl)) {
+			// Don't complain if the value matches anyway.
+			if (targetType.isInstance(value)) {
+				return value;
+			}
+			throw new FatalBeanException(
+					"Type conversion is only available with BeanWrapperImpl, not with: " + bw);
+		}
+		BeanWrapperImpl bwi = (BeanWrapperImpl) bw;
+
+		// Synchronize if custom editors are registered.
+		// Necessary because PropertyEditors are not thread-safe.
+		if (!getCustomEditors().isEmpty()) {
+			synchronized (getCustomEditors()) {
+				return bwi.doTypeConversionIfNecessary(value, targetType);
+			}
+		}
+		else {
+			return bwi.doTypeConversionIfNecessary(value, targetType);
+		}
+	}
+
 
 	/**
 	 * Return a RootBeanDefinition for the given bean name,
