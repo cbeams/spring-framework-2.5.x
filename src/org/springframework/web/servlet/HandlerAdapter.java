@@ -34,7 +34,7 @@ public interface HandlerAdapter extends ApplicationContextAware {
 	 * Given a handler instance, return whether or not this HandlerAdapter can
 	 * support it. Usually HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will normally support only one handler type.
-	 * <p>A typical implementation:
+	 * <p>A typical implementation:<br><br>
 	 * <code>
 	 * return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
 	 * </code>
@@ -46,7 +46,6 @@ public interface HandlerAdapter extends ApplicationContextAware {
 	/**
 	 * Use the given handler to handle this request.
 	 * The workflow that is required may vary widely.
-	 * Can also perform authorization checks.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler handler to use. This object must have previously been passed
@@ -56,7 +55,7 @@ public interface HandlerAdapter extends ApplicationContextAware {
 	 * @throws ServletException if there is a general error
 	 * @throws IOException in case of I/O errors
 	 * @return ModelAndView object with the name of the view and the required
-	 * model data, or null if the request has been handled directly.
+	 * model data, or null if the request has been handled directly
 	 */
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 	    throws ServletException, IOException;
@@ -68,6 +67,7 @@ public interface HandlerAdapter extends ApplicationContextAware {
 	 * @param handler handler to use
 	 * @return the lastModified value for the given handler
 	 * @see javax.servlet.http.HttpServlet#getLastModified
+	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
 	 */
 	long getLastModified(HttpServletRequest request, Object handler);
 

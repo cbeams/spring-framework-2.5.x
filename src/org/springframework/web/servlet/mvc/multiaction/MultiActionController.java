@@ -27,9 +27,9 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.servlet.LastModified;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SessionRequiredException;
 import org.springframework.web.servlet.mvc.WebContentGenerator;
 
@@ -239,7 +239,7 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	/**
 	 * Try to find an XXXXLastModified method, where XXXX is the name of a handler.
 	 * Return -1, indicating that content must be updated, if there's no such handler.
-	 * @see LastModified#getLastModified(HttpServletRequest)
+	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified(HttpServletRequest)
 	 */
 	public final long getLastModified(HttpServletRequest request) {
 		try {

@@ -8,16 +8,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.LastModified;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Adapter to use the Controller workflow interface with the generic
- * DispatcherServlet. This is an SPI class, not used directly by
- * application code.
+ * Adapter to use the Controller workflow interface with the generic DispatcherServlet.
+ * Supports controllers that implement the LastModified interface.
+ *
+ * <p>This is an SPI class, not used directly by application code.
+ *
  * @author Rod Johnson
+ * @version $Id: SimpleControllerHandlerAdapter.java,v 1.3 2003-10-06 14:24:22 jhoeller Exp $
  * @see org.springframework.web.servlet.DispatcherServlet
- * @version $Id: SimpleControllerHandlerAdapter.java,v 1.2 2003-08-28 15:23:32 jhoeller Exp $
+ * @see Controller
+ * @see LastModified
  */
 public class SimpleControllerHandlerAdapter extends WebApplicationObjectSupport implements HandlerAdapter {
 	

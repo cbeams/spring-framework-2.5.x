@@ -23,7 +23,6 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockHttpSession;
-import org.springframework.web.servlet.LastModified;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
