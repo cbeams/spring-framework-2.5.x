@@ -58,8 +58,8 @@ public class EventNotSupportedException extends FlowNavigationException {
 		else {
 			events = Collections.EMPTY_SET;
 		}
-		return "No such transition for event '" + eventId + "' in state '" + state.getId() + "' in flow '"
-				+ getFlow().getId() + "' -- valid transition event criteria are " + DefaultObjectStyler.call(events)
+		return "No transition found for event '" + eventId + "' in state '" + state.getId() + "' of flow '"
+				+ getFlow().getId() + "' -- valid transitional event criteria are " + DefaultObjectStyler.call(events)
 				+ " -- programmer error?";
 	}
 }

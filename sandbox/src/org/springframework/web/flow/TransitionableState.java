@@ -103,7 +103,7 @@ public abstract class TransitionableState extends AbstractState {
 		return viewDescriptor;
 	}
 
-	protected Transition getTransition(String eventId) throws NoSuchTransitionInStateException {
+	protected Transition getTransition(String eventId) throws EventNotSupportedException {
 		Iterator it = transitions.iterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
@@ -111,7 +111,7 @@ public abstract class TransitionableState extends AbstractState {
 				return transition;
 			}
 		}
-		throw new NoSuchTransitionInStateException(this, eventId);
+		throw new EventNotSupportedException(this, eventId);
 	}
 
 	protected void updateCurrentStateIfNeccessary(String eventId, FlowSessionExecutionStack sessionExecution) {
