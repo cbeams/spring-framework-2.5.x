@@ -57,3 +57,6 @@ Note on enabling Log4J:
 - rename "WEB-INF/classes/log4j.properties.rename" to "log4j.properties"
 - uncomment the Log4J listener in "WEB-INF/web.xml"
 
+3. Additional documentation can be found in the file "petclinic.html" which is
+in the "war/html" directory. This file is available in the running application through
+the "Tutorial" link.
