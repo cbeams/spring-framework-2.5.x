@@ -388,7 +388,7 @@ public class Constraints {
                 propertyName,
                 LessThanEqualTo.instance(),
                 maxPropertyName);
-        return new CompoundBeanPropertyExpression(and(min, max));
+        return new CompoundBeanPropertyExpression(new UnaryAnd(min, max));
     }
 
     /**

@@ -17,9 +17,7 @@ package org.springframework.rules.predicates;
 
 import java.util.Iterator;
 
-import org.springframework.rules.*;
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.util.Assert;
+import org.springframework.rules.BeanPropertyExpression;
 
 /**
  * Abstract base class for unary predicates which compose other predicates.
@@ -39,9 +37,8 @@ public class CompoundBeanPropertyExpression implements BeanPropertyExpression {
      * Constructs a compound predicate with no initial members. It is expected
      * the client will call "add" to add individual predicates.
      */
-    public CompoundBeanPropertyExpression(UnaryPredicate compoundPredicate) {
-        Assert.isTrue(compoundPredicate instanceof CompoundUnaryPredicate);
-        this.compoundPredicate = (CompoundUnaryPredicate)compoundPredicate;
+    public CompoundBeanPropertyExpression(CompoundUnaryPredicate compoundPredicate) {
+        this.compoundPredicate = compoundPredicate;
     }
 
     /**
