@@ -51,7 +51,7 @@ distribution/website before using any of them in your own applications.
 - required for running Petclinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3 (http://www.freemarker.org)
+- FreeMarker 2.3.1 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -64,14 +64,14 @@ distribution/website before using any of them in your own applications.
 - HSQLDB 1.7.2.7 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and Petclinic
 
-* ibatis/ibatis-sqlmap.jar, ibatis/ibatis-common.jar
+* ibatis/ibatis-sqlmap.jar
 - iBATIS SQL Maps 1.3.1 (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.8 (http://www.ibatis.com)
-- ibatis-sqlmap-2.jar is required for building the framework
+- iBATIS SQL Maps 2.0.9 (http://www.ibatis.com)
+- required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
 * itext/itext-1.1.4.jar
@@ -104,7 +104,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's JDBC support on J2SE 1.3
 
 * j2ee/jms.jar
-- Java Message Service API 1.0.2b (java.sun.com/products/jms)
+- Java Message Service API 1.1 (java.sun.com/products/jms)
 - required for building the framework
 - required at runtime when using Spring's AbstractJmsMessageDrivenBean
 
@@ -207,10 +207,6 @@ distribution/website before using any of them in your own applications.
 - JDO API 1.0.1 (http://access1.sun.com/jdo)
 - required for building the framework
 - required at runtime when using Spring's JDO support
-
-* jdom/jdom.jar
-- JDOM 1.0 beta 9 (http://www.jdom.org)
-- required at runtime by iBATIS SQL Maps 1.3.1
 
 * jotm/jotm.jar
 - JOTM 1.5.3 (http://jotm.objectweb.org)
