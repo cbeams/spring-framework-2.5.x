@@ -27,14 +27,14 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Spring implementation of AOP Alliance MethodInvocation interface.
  *
- * <p>Invokes target using reflection. Subclasses can override the
+ * <p>Invokes the target object using reflection. Subclasses can override the
  * invokeJoinpoint() method to change this behaviour, so this is a
- * useful base class for MethodInvocation implementations.
+ * useful base class for more specialized MethodInvocation implementations.
  * <p>
  * It's possible to clone an invocation, to invoke proceed() repeatedly
  * (once per clone), using the invocableClone() method.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.7 2004-07-26 14:25:44 johnsonr Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.8 2004-07-26 16:11:38 johnsonr Exp $
  * @see #invokeJoinpoint
  */
 public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
@@ -48,7 +48,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	protected Object proxy;
 	
 	/** 
-	 * List of Methodnterceptor and InterceptorAndDynamicMethodMatcher
+	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
 	 * that need dynamic checks.
 	 */
 	protected List interceptorsAndDynamicMethodMatchers;
@@ -105,8 +105,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	}
 	
 	/**
-	 * Private optimization method
-	 * @return Object[]
+	 * @see org.aopalliance.intercept.Invocation#getArguments()
 	 */
 	public final Object[] getArguments() {
 		return this.arguments;
