@@ -91,9 +91,8 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		// Now msg better be as expected
 		assertTrue("2nd search within MsgFormat cache returned expected message for Locale.US",
-		           sac.getMessage("message.format.example1", arguments, Locale.US
-		           )
-		           .indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.US).indexOf(
+						"there was \"a disturbance in the Force\" on planet 7.") != -1);
 
 		Object[] newArguments = {
 			new Integer(8), new Date(System.currentTimeMillis()),
@@ -145,7 +144,8 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 			sac.getMessage("bogus.message", null, Locale.US);
 
 			fail("bogus msg from staticMsgSource for Locale.US without default msg should have thrown exception");
-		} catch (NoSuchMessageException tExcept) {
+		}
+		catch (NoSuchMessageException tExcept) {
 			assertTrue("bogus msg from staticMsgSource for Locale.US without default msg threw expected exception", true);
 		}
 	}
