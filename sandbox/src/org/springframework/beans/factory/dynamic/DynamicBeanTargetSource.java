@@ -8,31 +8,43 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * TargetSource that can apply to singletons,
  * reloading them on request from a child factory.
  * @author Rod Johnson
- * @version $Id: DynamicBeanTargetSource.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
+ * @version $Id: DynamicBeanTargetSource.java,v 1.3 2004-08-05 13:52:21 johnsonr Exp $
  */
 public class DynamicBeanTargetSource extends AbstractRefreshableTargetSource {
 
-	private DefaultListableBeanFactory childFactory;
-	
 	private String beanName;
+	
+	private DefaultListableBeanFactory childFactory;
 
-	public DynamicBeanTargetSource(Object initialTarget, BeanFactory factory, String beanName) {
+	/**
+	 * 
+	 * @param initialTarget
+	 * @param factory
+	 * @param beanName
+	 * @param childFactory optional, must be a child of factory.
+	 * Allows shared child factory.
+	 */
+	public DynamicBeanTargetSource(Object initialTarget, BeanFactory factory, String beanName, DefaultListableBeanFactory childFactory) {
 		super(initialTarget);
 		this.beanName = beanName;
-		this.childFactory = new DefaultListableBeanFactory(factory);
+		this.childFactory = (childFactory == null) ? 
+			new DefaultListableBeanFactory(factory) :
+			childFactory;
 		
 		ChildBeanDefinition definition = new ChildBeanDefinition(beanName, null);
 		
 		definition.setSingleton(false);
 
-		childFactory.registerBeanDefinition(beanName, definition);	
+		this.childFactory.registerBeanDefinition(beanName, definition);	
 	}
+	
 	
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource#refreshedTarget()
 	 */
 	protected Object refreshedTarget() {
+		// TODO synching?
 		Object o = childFactory.getBean(beanName);
 		return o;
 	}

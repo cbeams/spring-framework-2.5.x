@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * Helper that regularly polls a resource
  * @author Rod Johnson
- * @version $Id: DynamicObjectPoller.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
+ * @version $Id: DynamicObjectPoller.java,v 1.2 2004-08-05 13:52:21 johnsonr Exp $
  */
 public abstract class DynamicObjectPoller extends TimerTask {
 	
@@ -60,14 +60,12 @@ public abstract class DynamicObjectPoller extends TimerTask {
 	 * @see java.util.TimerTask#run()
 	 */
 	public void run() {
-		if (isDirty()) {
+		if (dynamicObject.isModified()) {
 			dynamicObject.refresh();
 		} 
 		else {
 			//log.info("File '" + script.getClassName() + "' unchanged");
 		}
 	}
-	
-	protected abstract boolean isDirty();
 
 }
