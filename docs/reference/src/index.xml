@@ -6,7 +6,7 @@
 <!ENTITY beans						SYSTEM "beans.xml">
 <!ENTITY mail						SYSTEM "mail.xml">
 <!ENTITY validation					SYSTEM "validation.xml">
-<!ENTITY transaction					SYSTEM "transaction.xml">
+<!ENTITY transaction				SYSTEM "transaction.xml">
 <!ENTITY aop						SYSTEM "aop.xml">
 <!ENTITY metadata					SYSTEM "metadata.xml">
 <!ENTITY jdbc						SYSTEM "jdbc.xml">
@@ -34,6 +34,18 @@
             <author>
                 <firstname>Alef</firstname>
                 <surname>Arendsen</surname>
+            </author>
+            <author>
+            	<firstname>Dmitriy</firstname>
+            	<surname>Kopylenko</surname>
+            </author>
+            <author>
+            	<firstname>Thomas</firstname>
+            	<surname>Risberg</surname>
+            </author>
+			<author>
+            	<firstname>Darren</firstname>
+            	<surname>Davison</surname>
             </author>
         </authorgroup>            
     </bookinfo>
