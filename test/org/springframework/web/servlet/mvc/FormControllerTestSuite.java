@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
 import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -21,9 +21,8 @@ import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
+ * @author Juergen Hoeller
  */
 public class FormControllerTestSuite extends TestCase {
 	
@@ -133,16 +132,33 @@ public class FormControllerTestSuite extends TestCase {
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
-		assertTrue("returned correct view name: expected '" + successView + "', not '" + mv.getViewName() + "'",
-			mv.getViewName().equals(successView));
-		
-		// Has bean
+		assertEquals("returned correct view name", successView, mv.getViewName());
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
+		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
+		assertTrue("errors is non null", errors != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age bound ok", person.getAge() == age);
 	}
 	
+	public void testSubmitWithCustomOnSubmit() throws Exception {
+		String formView = "f";
+
+		TestControllerWithCustomOnSubmit mc = new TestControllerWithCustomOnSubmit();
+		mc.setFormView(formView);
+
+		String name = "Rod";
+		int age = 32;
+
+		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		request.addParameter("name", name);
+		request.addParameter("age", "" + age);
+		HttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+		assertEquals("returned correct view name", "mySuccess", mv.getViewName());
+		assertTrue("no model", mv.getModel().isEmpty());
+	}
+
 	public void testSubmitPassedByValidator() throws Exception {
 		String formView = "f";
 		String successView = "s";
@@ -385,6 +401,14 @@ public class FormControllerTestSuite extends TestCase {
 			TestBean person = new TestBean();
 			person.setAge(DEFAULT_AGE);
 			return person;
+		}
+	}
+
+
+	private static class TestControllerWithCustomOnSubmit extends TestController {
+
+		protected ModelAndView onSubmit(Object command) throws Exception {
+			return new ModelAndView("mySuccess");
 		}
 	}
 

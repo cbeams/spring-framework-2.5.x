@@ -48,7 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      using all parameters is done which (in case of the default implementation)
  *      calls {@link #onSubmit(Object) onSubmit()} with just the command object.
  *      This allows for convenient overriding of custom hooks</li>
- *  <li>After that has finished, the successview is returned (which again,
+ *  <li>After that has finished, the successView is returned (which again,
  *      is configurable through the exposed configuration properties)</li>
  *  </ol>
  * </p>
@@ -194,12 +194,16 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * Submit callback with all parameters. Called in case of submit without errors
-	 * reported by the registered validator resp. on every submit if no validator.
-	 * <p>Default implementation delegates to onSubmit(command, errors). Subclasses can
-	 * override this to provide custom submission handling like triggering a custom action.
-	 * They can also provide custom validation and call showForm/super.onSubmit accordingly.
-	 * <p>Can call errors.getModel() to populate the ModelAndView model with the command
-	 * and the Errors instance, under the specified bean name.
+	 * reported by the registered validator respectively on every submit if no validator.
+	 * <p>Default implementation calls onSubmit(command), using the returned ModelAndView
+	 * if actually implemented in a subclass. Else, the default behavior is applied:
+	 * rendering the success view with the command and Errors instance as model.
+	 * <p>Subclasses can override this to provide custom submission handling like storing
+	 * the object to the database. Implementations can also perform custom validation and
+	 * call showForm to return to the form. Do <i>not</i> implement both onSubmit template
+	 * methods: In that case, just this method will be called by the controller.
+	 * <p>Call errors.getModel() to populate the ModelAndView model with the command and
+	 * the Errors instance, under the command name, as expected by the "spring:bind" tag.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -212,26 +216,34 @@ public class SimpleFormController extends AbstractFormController {
 	 */
 	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
 																	Object command,	BindException errors) throws Exception {
-		return onSubmit(command);
+		ModelAndView mv = onSubmit(command);
+		if (mv != null) {
+			// simple onSubmit version implemented in custom subclass
+			return mv;
+		}
+		else {
+			// default behavior: render success view
+			if (getSuccessView() == null) {
+				throw new ServletException("successView isn't set");
+			}
+			return new ModelAndView(getSuccessView(), errors.getModel());
+		}
 	}
 
 	/**
 	 * Simple onSubmit version. Called by the default implementation of the onSubmit
 	 * version with all parameters.
-	 * <p>Default implementation prepares success view, with command object as model
-	 * attribute. Does <i>not</i> put an Errors instance into the model: Override the
-	 * all-parameter onSubmit and take the model from <code>errors.getModel()</code>
-	 * to provide an Errors instance, as expected by the "spring:bind" tag.
+	 * <p>This implementation returns null, making the calling onSubmit method perform
+	 * its default rendering of the success view.
+	 * <p>Subclasses can override this to provide custom submission handling that
+	 * just needs the command object.
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
-	 * @see #setSuccessView
+	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 */
 	protected ModelAndView onSubmit(Object command) throws Exception {
-		if (getSuccessView() == null) {
-			throw new ServletException("successView isn't set");
-		}
-		return new ModelAndView(getSuccessView(), getCommandName(), command);
+		return null;
 	}
 
 }
