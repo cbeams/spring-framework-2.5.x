@@ -28,7 +28,7 @@ public class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
 	 * @see org.springframework.aop.SimpleBeforeAdvice#before()
 	 */
 	public void before() throws Throwable {
-		System.out.println("before() method is called on " + getClass().getName());
+		//System.out.println("before() method is called on " + getClass().getName());
 		++invocationCounter;
 	}
 
