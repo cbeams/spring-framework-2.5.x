@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.jdbc.core.support;
+package org.springframework.jdbc.support;
 
 import java.util.List;
 import java.util.Map;

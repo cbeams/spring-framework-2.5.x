@@ -47,6 +47,7 @@ import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
@@ -84,7 +85,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.55 2004-07-13 17:14:52 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.56 2004-07-18 23:20:32 trisberg Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -488,7 +489,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return update(psc, (PreparedStatementSetter)null);
 	}
 
-	public int update(final PreparedStatementCreator psc, final List generatedKeys)
+	public int update(final PreparedStatementCreator psc, final KeyHolder generatedKeyHolder)
 			throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
@@ -497,6 +498,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int rows = ps.executeUpdate();
+				List generatedKeys = generatedKeyHolder.getKeyList();
 				generatedKeys.clear();
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {

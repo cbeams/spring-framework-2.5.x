@@ -21,18 +21,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import net.sf.hibernate.util.GetGeneratedKeysHelper;
 
 import org.easymock.MockControl;
-
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.mock.web.MockRequestDispatcher;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 public class SqlUpdateTestSuite extends AbstractJdbcTests {
 
@@ -219,12 +214,11 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 		ctrlResultSetMetaData.replay();
 
 		GeneratedKeysUpdater pc = new GeneratedKeysUpdater();
-		List generatedKeys = new LinkedList();
-		int rowsAffected = pc.run("rod", generatedKeys);
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int rowsAffected = pc.run("rod", generatedKeyHolder);
 		assertEquals(1, rowsAffected);
-		assertEquals(1, generatedKeys.size());
-		Map keys = (Map)generatedKeys.get(0);
-		assertEquals(11, ((Integer)keys.get("1")).intValue());
+		assertEquals(1, generatedKeyHolder.getKeyList().size());
+		assertEquals(11, generatedKeyHolder.getKey().intValue());
 	}
 
 	public void testUpdateConstructor() throws SQLException {
@@ -441,10 +435,10 @@ public class SqlUpdateTestSuite extends AbstractJdbcTests {
 			compile();
 		}
 
-		public int run(String name, List generatedKeys) {
+		public int run(String name, KeyHolder generatedKeyHolder) {
 			Object[] params =
 				new Object[] {name};
-			return update(params, generatedKeys);
+			return update(params, generatedKeyHolder);
 		}
 	}
 
