@@ -20,7 +20,6 @@ import org.apache.struts.tiles.DefinitionsFactory;
 import org.apache.struts.tiles.DefinitionsFactoryConfig;
 import org.apache.struts.tiles.DefinitionsFactoryException;
 import org.apache.struts.tiles.TilesUtil;
-import org.apache.struts.tiles.TilesUtilImpl;
 import org.apache.struts.tiles.xmlDefinition.I18nFactorySet;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -70,6 +69,7 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	/** definition URLs mapped to descriptions */
 	private String[] definitions;
 
+
 	/**
 	 * Set the factory class for Tiles. Default is I18nFactorySet.
 	 * @see org.apache.struts.tiles.xmlDefinition.I18nFactorySet
@@ -79,21 +79,19 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	}
 
 	/**
-	 * Validate the Tiles definitions? Default is false.
-	 * @param validateDefinitions <code>true</code> to validate,
-	 * <code>false</code> otherwise
+	 * Set whether to validate the Tiles definitions. Default is true.
 	 */
 	public void setValidateDefinitions(boolean validateDefinitions) {
 		this.validateDefinitions = validateDefinitions;
 	}
 
 	/**
-	 * Set the Tiles definitions, i.e. the list of files.
-	 * @param definitions the files containing the definitions
+	 * Set the Tiles definitions, i.e. the list of files containing the definitions.
 	 */
 	public void setDefinitions(String[] definitions) {
 		this.definitions = definitions;
 	}
+
 
 	/**
 	 * Initialize the Tiles definition factory.
@@ -102,7 +100,7 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	 * @see #createDefinitionsFactory
 	 */
 	public void afterPropertiesSet() throws DefinitionsFactoryException {
-		logger.info("TilesConfigurer: initializion started");
+		logger.debug("TilesConfigurer: initializion started");
 
 		// initialize the configuration for the definitions factory
 		DefinitionsFactoryConfig factoryConfig = new DefinitionsFactoryConfig();
@@ -111,19 +109,20 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 
 		if (this.definitions != null) {
 			String defs = StringUtils.arrayToCommaDelimitedString(this.definitions);
-			logger.info("TilesConfigurer: adding definitions [" + defs + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("TilesConfigurer: adding definitions [" + defs + "]");
+			}
 			factoryConfig.setDefinitionConfigFiles(defs);
 		}
 
 		// initialize the definitions factory
-		DefinitionsFactory factory = createDefinitionsFactory(factoryConfig);
-		getServletContext().setAttribute(TilesUtilImpl.DEFINITIONS_FACTORY, factory);
+		createDefinitionsFactory(factoryConfig);
 
-		logger.info("TilesConfigurer: initialization completed");
+		logger.debug("TilesConfigurer: initialization completed");
 	}
 
 	/**
-	 * Create the Tiles DefinitionsFactory.
+	 * Create the Tiles DefinitionsFactory and expose it to the ServletContext.
 	 * @param factoryConfig the configuration for the DefinitionsFactory
 	 * @return the DefinitionsFactory
 	 * @throws DefinitionsFactoryException if an error occurs
