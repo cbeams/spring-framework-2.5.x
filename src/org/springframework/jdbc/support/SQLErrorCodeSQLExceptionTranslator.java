@@ -14,7 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
@@ -38,7 +41,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @see org.springframework.jdbc.support.SQLErrorCodesFactory
- * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.1 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SQLErrorCodeSQLExceptionTranslator.java,v 1.2 2004-02-14 19:17:39 trisberg Exp $
  */
 public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslator {
 
@@ -127,6 +130,18 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 			else if (Arrays.binarySearch(sqlErrorCodes.getDataIntegrityViolationCodes() , errorCode) >= 0) {
 				logTranslation(task, sql, sqlex);
 				return new DataIntegrityViolationException(task + ": " + sqlex.getMessage(), sqlex);
+			}
+			else if (Arrays.binarySearch(sqlErrorCodes.getDataRetrievalFailureCodes() , errorCode) >= 0) {
+				logTranslation(task, sql, sqlex);
+				return new DataRetrievalFailureException(task + ": " + sqlex.getMessage(), sqlex);
+			}
+			else if (Arrays.binarySearch(sqlErrorCodes.getOptimisticLockingFailureCodes() , errorCode) >= 0) {
+				logTranslation(task, sql, sqlex);
+				return new OptimisticLockingFailureException(task + ": " + sqlex.getMessage(), sqlex);
+			}
+			else if (Arrays.binarySearch(sqlErrorCodes.getDataAccessResourceFailureCodes() , errorCode) >= 0) {
+				logTranslation(task, sql, sqlex);
+				return new DataAccessResourceFailureException(task + ": " + sqlex.getMessage(), sqlex);
 			}
 		}
 

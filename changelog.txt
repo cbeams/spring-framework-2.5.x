@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.89 2004-02-13 17:56:22 jhoeller Exp $
+$Id: changelog.txt,v 1.90 2004-02-14 19:18:46 trisberg Exp $
 
 
 Changes in version 1.0 (01.03.2003)
@@ -19,6 +19,9 @@ Package org.springframework.context
 
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
+
+Package org..springframework.jdbc.support
+* added support for new SQL Error Code categories - DataRetrievalFailureException, OptimisticLockingFailureException and DataAccessResourceFailureException
 
 Package org.springframework.util
 * removed package path utility methods from ClassLoaderUtils

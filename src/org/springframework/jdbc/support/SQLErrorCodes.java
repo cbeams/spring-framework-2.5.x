@@ -10,7 +10,7 @@ package org.springframework.jdbc.support;
  * Normally loaded through a BeanFactory
  * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
- * @version $Id: SQLErrorCodes.java,v 1.2 2003-12-10 02:15:17 trisberg Exp $
+ * @version $Id: SQLErrorCodes.java,v 1.3 2004-02-14 19:17:39 trisberg Exp $
  */
 public class SQLErrorCodes {
 
@@ -19,6 +19,12 @@ public class SQLErrorCodes {
 	private String[] badSqlGrammarCodes = new String[0];
 
 	private String[] dataIntegrityViolationCodes = new String[0];
+	
+	private String[] dataRetrievalFailureCodes = new String[0];
+	
+	private String[] optimisticLockingFailureCodes = new String[0];
+	
+	private String[] dataAccessResourceFailureCodes = new String[0];
 
 	/**
 	 * Sets the badSqlGrammarCodes.
@@ -46,6 +52,49 @@ public class SQLErrorCodes {
 	 */
 	public String[] getDataIntegrityViolationCodes() {
 		return dataIntegrityViolationCodes;
+	}
+
+	/**
+	 * @return Returns the dataRetrievalFailureCodes.
+	 */
+	public String[] getDataRetrievalFailureCodes() {
+		return dataRetrievalFailureCodes;
+	}
+	/**
+	 * @param dataRetrievalFailureCodes The dataRetrievalFailureCodes to set.
+	 */
+	public void setDataRetrievalFailureCodes(String[] dataRetrievalFailureCodes) {
+		this.dataRetrievalFailureCodes = dataRetrievalFailureCodes;
+	}
+
+	/**
+	 * @return Returns the dataAccessResourceFailureCodes.
+	 */
+	public String[] getDataAccessResourceFailureCodes() {
+		return dataAccessResourceFailureCodes;
+	}
+
+	/**
+	 * @param dataAccessResourceFailureCodes The dataAccessResourceFailureCodes to set.
+	 */
+	public void setDataAccessResourceFailureCodes(
+			String[] dataAccessResourceFailureCodes) {
+		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+	}
+
+	/**
+	 * @return Returns the optimisticLockingFailureCodes.
+	 */
+	public String[] getOptimisticLockingFailureCodes() {
+		return optimisticLockingFailureCodes;
+	}
+	
+	/**
+	 * @param optimisticLockingFailureCodes The optimisticLockingFailureCodes to set.
+	 */
+	public void setOptimisticLockingFailureCodes(
+			String[] optimisticLockingFailureCodes) {
+		this.optimisticLockingFailureCodes = optimisticLockingFailureCodes;
 	}
 
 	/**
