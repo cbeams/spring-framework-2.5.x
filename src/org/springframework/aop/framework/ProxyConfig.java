@@ -22,14 +22,15 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
- * <br>
- * Note that it is no longer possible to configure subclasses to 
- * expose the MethodInvocation. Interceptors should normally manage their own
+ *
+ * <p>Note that it is no longer possible to configure subclasses to expose
+ * the MethodInvocation. Interceptors should normally manage their own
  * ThreadLocals if they need to make resources available to advised objects.
  * If it's absolutely necessary to expose the MethodInvocation, use an
  * interceptor to do so.
+ *
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.9 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: ProxyConfig.java,v 1.10 2004-04-30 15:39:01 jhoeller Exp $
  */
 public class ProxyConfig {
 	
@@ -38,8 +39,8 @@ public class ProxyConfig {
 	 * are protected, rather than private, as is usually preferred in Spring
 	 * (following "Expert One-on-One J2EE Design and Development", Chapter 4).
 	 * This allows direct field access in the AopProxy implementations, which
-	 * produces a 10-20% reduction in AOP performance overhead compared with method
-	 * access. - RJ, December 10, 2003.
+	 * produces a 10-20% reduction in AOP performance overhead compared with
+	 * method access. - RJ, December 10, 2003.
 	 */
 	
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -47,7 +48,14 @@ public class ProxyConfig {
 	private boolean proxyTargetClass;
 	
 	private boolean optimize;
-	
+
+	/**
+	 * Should proxies obtained from this configuration expose
+	 * the AOP proxy for the AopContext class to retrieve for targets?
+	 * The default is false, as enabling this property may impair performance.
+	 */
+	protected boolean exposeProxy;
+
 	/**
 	 * Is this config frozen: that is, should it be impossible
 	 * to change advice. Default is not frozen.
@@ -57,64 +65,36 @@ public class ProxyConfig {
 	/** Factory used to create AopProxy's. */
 	private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 
-	
-	/**
-	 * Should proxies obtained from this configuration expose
-	 * the AOP proxy for the AopContext class to retrieve for targets?
-	 * The default is false, as enabling this property may
-	 * impair performance.
-	 */
-	protected boolean exposeProxy;
 
 	
-	public ProxyConfig() {
-	}
-
-	/**
-	 * Copy configuration from the other config
-	 * @param other object to copy configuration from
-	 */
-	public void copyFrom(ProxyConfig other) {
-		this.optimize = other.getOptimize();
-		this.proxyTargetClass = other.proxyTargetClass;
-		this.exposeProxy = other.exposeProxy;
-		this.frozen = other.frozen;
-		this.aopProxyFactory = other.aopProxyFactory;
-	}
-
-	public boolean getProxyTargetClass() {
-		return this.proxyTargetClass;
-	}
-
 	/**
 	 * Set whether to proxy the target class directly as well as any interfaces.
-	 * We can set this to true to force CGLIB proxying. Default is false
-	 * @param proxyTargetClass whether to proxy the target class directly as well as any interfaces
+	 * We can set this to true to force CGLIB proxying. Default is false.
 	 */
 	public void setProxyTargetClass(boolean proxyTargetClass) {
 		this.proxyTargetClass = proxyTargetClass;
 	}
-	
+
 	/**
-	 * @return whether proxies should perform agressive optimizations.
+	 * Return whether to proxy the target class directly as well as any interfaces.
 	 */
-	public boolean getOptimize() {
-		return this.optimize;
+	public boolean getProxyTargetClass() {
+		return this.proxyTargetClass;
 	}
 
 	/**
 	 * Set whether proxies should perform agressive optimizations.
 	 * The exact meaning of "agressive optimizations" will differ
 	 * between proxies, but there is usually some tradeoff. 
-	 * For example, optimization will usually mean that advice changes won't take
-	 * effect after a proxy has been created. For this reason, optimization
+	 * <p>For example, optimization will usually mean that advice changes won't
+	 * take effect after a proxy has been created. For this reason, optimization
 	 * is disabled by default. An optimize value of true may be ignored
 	 * if other settings preclude optimization: for example, if exposeProxy
 	 * is set to true and that's not compatible with the optimization.
-	 * <br>For example, CGLIB-enhanced proxies may optimize out.
-	 * overriding methods with no advice chain. This can produce 2.5x performance
-	 * improvement for methods with no advice. 
-	 * <br><b>Warning:</b> Setting this to true can produce large performance
+	 * <p>For example, CGLIB-enhanced proxies may optimize out.
+	 * overriding methods with no advice chain. This can produce 2.5x
+	 * performance improvement for methods with no advice.
+	 * <p><b>Warning:</b> Setting this to true can produce large performance
 	 * gains when using CGLIB (also set proxyTargetClass to true), so it's
 	 * a good setting for performance-critical proxies. However, enabling this
 	 * will mean that advice cannot be changed after a proxy has been obtained
@@ -126,71 +106,87 @@ public class ProxyConfig {
 		this.optimize = optimize;
 	}
 
+	/**
+	 * Return whether proxies should perform agressive optimizations.
+	 */
+	public boolean getOptimize() {
+		return this.optimize;
+	}
 
 	/**
-	 * @return whether the AOP proxy will expose the AOP proxy for
+	 * Set whether the proxy should be exposed by the AOP framework as a
+	 * ThreadLocal for retrieval via the AopContext class. This is useful
+	 * if an advised object needs to call another advised method on itself.
+	 * (If it uses <code>this</code>, the invocation will not be advised).
+	 * <p>Default is false, for optimal performance.
+	 */
+	public void setExposeProxy(boolean exposeProxy) {
+		this.exposeProxy = exposeProxy;
+	}
+	
+	/**
+	 * Return whether the AOP proxy will expose the AOP proxy for
 	 * each invocation.
 	 */
-	public final boolean getExposeProxy() {
+	public boolean getExposeProxy() {
 		return this.exposeProxy;
 	}
 
 	/**
-	 * Set whether the proxy should be exposed by the AOP framework as a ThreadLocal for
-	 * retrieval via the AopContext class. This is useful if an advised object needs
-	 * to call another advised method on itself. (If it uses <code>this</code>, the invocation
-	 * will not be advised).
-	 * @param exposeProxy whether the proxy should be exposed. Default
-	 * is false, for optimal pe3rformance.
+	 * Set whether this config should be frozen.
+	 * <p>When a config is frozen, no advice changes can be made. This is
+	 * useful for optimization, and useful when we don't want callers to
+	 * be able to manipulate configuration after casting to Advised.
 	 */
-	public final void setExposeProxy(boolean exposeProxy) {
-		this.exposeProxy = exposeProxy;
+	public void setFrozen(boolean frozen) {
+		this.frozen = frozen;
 	}
-	
-	
-	/**
-	 * Customise the AopProxyFactory, allowing different strategies
-	 * to be dropped in without changing the core framework.
-	 * For example, an AopProxyFactory could return an AopProxy using
-	 * dynamic proxies, CGLIB or code generation strategy. 
-	 * @param apf AopProxyFactory to use. The default uses dynamic
-	 * proxies or CGLIB.
-	 */
-	public void setAopProxyFactory(AopProxyFactory apf) {
-		this.aopProxyFactory = apf;
-	}
-	
-	public AopProxyFactory getAopProxyFactory() {
-		return this.aopProxyFactory;
-	}
-	
 
 	/**
-	 * @return whether the config is frozen, and no
-	 * advice changes can be made
+	 * Return whether the config is frozen, and no advice changes can be made.
 	 */
 	public boolean isFrozen() {
 		return frozen;
 	}
 
 	/**
-	 * Set whether this config should be frozen.
-	 * When a config is frozen, no advice changes can be
-	 * made. This is useful for optimization, and useful
-	 * when we don't want callers to be able to manipulate
-	 * configuration after casting to Advised.
-	 * @param frozen is this config frozen?
+	 * Customize the AopProxyFactory, allowing different strategies
+	 * to be dropped in without changing the core framework.
+	 * Default is DefaultAopProxyFactory, using dynamic proxies or CGLIB.
+	 * <p>For example, an AopProxyFactory could return an AopProxy using
+	 * dynamic proxies, CGLIB or code generation strategy.
 	 */
-	public void setFrozen(boolean frozen) {
-		this.frozen = frozen;
+	public void setAopProxyFactory(AopProxyFactory apf) {
+		this.aopProxyFactory = apf;
 	}
-	
+
+	/**
+	 * Return the AopProxyFactory that this ProxyConfig uses.
+	 */
+	public AopProxyFactory getAopProxyFactory() {
+		return this.aopProxyFactory;
+	}
+
+
+	/**
+	 * Copy configuration from the other config object.
+	 * @param other object to copy configuration from
+	 */
+	public void copyFrom(ProxyConfig other) {
+		this.proxyTargetClass = other.proxyTargetClass;
+		this.optimize = other.getOptimize();
+		this.exposeProxy = other.exposeProxy;
+		this.frozen = other.frozen;
+		this.aopProxyFactory = other.aopProxyFactory;
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("exposeProxy=" + exposeProxy + "; ");
-		sb.append("frozen=" + frozen + "; ");
-		sb.append("enableCglibSubclassOptimizations=" + optimize + "; ");
-		sb.append("aopProxyFactory=" + aopProxyFactory + "; ");
+		sb.append("proxyTargetClass=" + this.proxyTargetClass + "; ");
+		sb.append("optimize=" + this.optimize + "; ");
+		sb.append("exposeProxy=" + this.exposeProxy + "; ");
+		sb.append("frozen=" + this.frozen + "; ");
+		sb.append("aopProxyFactory=" + this.aopProxyFactory + "; ");
 		return sb.toString();
 	}
 
