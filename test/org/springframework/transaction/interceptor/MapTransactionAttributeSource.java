@@ -17,29 +17,49 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * 
+ * Inherits fallback behaviour from AbstractFallbackTransactionAttributeSource
  * @author Rod Johnson
- * @version $Id: MapTransactionAttributeSource.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: MapTransactionAttributeSource.java,v 1.4 2004-07-01 16:44:53 johnsonr Exp $
  */
-public class MapTransactionAttributeSource implements TransactionAttributeSource {
+public class MapTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
 	
 	/**
-	 * Map from Method to TransactionAttribute
+	 * Map from Method or Clazz to TransactionAttribute
 	 */
-	private HashMap methodMap = new HashMap();
+	private HashMap attributeMap = new HashMap();
 	
 	public void register(Method m, TransactionAttribute txAtt) {
-		methodMap.put(m, txAtt);
+		attributeMap.put(m, txAtt);
 	}
-
+	
+	public void register(Class clazz, TransactionAttribute txAtt) {
+		attributeMap.put(clazz, txAtt);
+	}
+	
 	/**
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
+	 * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource#findAllAttributes(java.lang.Class)
 	 */
-	public TransactionAttribute getTransactionAttribute(Method m, Class clazz) {
-		return (TransactionAttribute) methodMap.get(m);
+	protected Collection findAllAttributes(Class clazz) {
+		return doFindAllAttributes(clazz);
 	}
+	
+	/**
+	 * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource#findAllAttributes(java.lang.reflect.Method)
+	 */
+	protected Collection findAllAttributes(Method m) {
+		return doFindAllAttributes(m);
+	}
+	
+	private Collection doFindAllAttributes(Object what) {
+		System.out.println("Trying key " + what);
+		Object att = attributeMap.get(what);		
+		return att != null ? Collections.singleton(att) : null;
+	}
+	
 
 }
