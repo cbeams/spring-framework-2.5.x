@@ -88,5 +88,6 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
 	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
