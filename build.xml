@@ -1347,6 +1347,7 @@
 				<include name="META-INF/**"/>
 				<include name="org/springframework/binding/**"/>
 				<include name="org/springframework/util/**"/>
+				<include name="org/springframework/validation/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/test/**"/>
 			</fileset>
@@ -1409,6 +1410,7 @@
             <include name="sandbox/test/org/springframework/web/struts/**"/>
             <include name="sandbox/test/org/springframework/util/**"/>
             <include name="sandbox/test/org/springframework/binding/**"/>
+            <include name="sandbox/test/org/springframework/validation/**"/>
 			<include name="samples/webflow/**"/>
 			<include name="notice.txt"/>
 			<include name="license.txt"/>
