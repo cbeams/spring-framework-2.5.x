@@ -103,5 +103,6 @@
 	<classpathentry kind="lib" path="lib/j2ee/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/xmlc/xmlc.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
