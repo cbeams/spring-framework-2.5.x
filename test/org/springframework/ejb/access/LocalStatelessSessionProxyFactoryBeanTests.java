@@ -22,7 +22,7 @@ import org.springframework.jndi.JndiTemplate;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.4 2003-12-19 11:28:17 jhoeller Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.5 2004-02-02 11:53:43 jhoeller Exp $
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -110,7 +110,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 			fail("Should have failed to create EJB");
 		}
 		catch (MethodInvocationException ex) {
-			assertTrue(ex.getRootCause() == cex);
+			assertTrue(ex.getCause() == cex);
 		}
 		
 		mc.verify();	

@@ -13,7 +13,7 @@ import org.easymock.MockControl;
 
 /**
 * @author Rod Johnson
-* @version $Id: DriverManagerDataSourceTests.java,v 1.4 2003-12-05 17:03:16 jhoeller Exp $
+* @version $Id: DriverManagerDataSourceTests.java,v 1.5 2004-02-02 11:53:57 jhoeller Exp $
 */
 public class DriverManagerDataSourceTests extends TestCase {
 
@@ -71,7 +71,7 @@ public class DriverManagerDataSourceTests extends TestCase {
 		} catch (CannotGetJdbcConnectionException ex) {
 			// Check the message helpfully included the classname
 			assertTrue(ex.getMessage().indexOf(bogusClassname) != -1);
-			assertTrue(ex.getRootCause() instanceof ClassNotFoundException);
+			assertTrue(ex.getCause() instanceof ClassNotFoundException);
 		}
 	}
 

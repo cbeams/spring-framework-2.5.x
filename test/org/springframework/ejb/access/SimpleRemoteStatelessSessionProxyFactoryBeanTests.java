@@ -23,7 +23,7 @@ import org.springframework.remoting.RemoteAccessException;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.5 2003-12-30 01:11:54 jhoeller Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBeanTests.java,v 1.6 2004-02-02 11:53:43 jhoeller Exp $
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -191,7 +191,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends TestCase 
 			fail("Should have failed to create EJB");
 		}
 		catch (RemoteAccessException ex) {
-			assertTrue(ex.getRootCause() == cex);
+			assertTrue(ex.getCause() == cex);
 		}
 
 		mc.verify();

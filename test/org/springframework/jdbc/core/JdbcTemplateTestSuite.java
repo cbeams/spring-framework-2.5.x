@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.10 2003-12-18 18:51:48 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.11 2004-02-02 11:53:57 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -138,7 +138,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			assertTrue(
 				"Correct exception",
 				ex instanceof UncategorizedSQLException);
-			assertTrue("Root cause is correct", ex.getRootCause() == sex);
+			assertTrue("Root cause is correct", ex.getCause() == sex);
 			//assertTrue("no update occurred", !je.getDataWasUpdated());
 		}
 
@@ -412,7 +412,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 				 fail("Exceptioo should be translated");
 			 }
 			 catch (DataAccessException ex) {
-				 SQLException se2 = (SQLException) ex.getRootCause();
+				 SQLException se2 = (SQLException) ex.getCause();
 				 assertTrue("Found SQL exception", se2 == sex);
 				 //System.out.println("VENDOR CODE IS " + sex.getErrorCode());
 				 //System.out.println("SQLSTATE IS " + sex.getSQLState());
@@ -499,7 +499,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		try {
 			template.update(sql);
 		} catch (DataAccessException ex) {
-			assertTrue("root cause is correct", ex.getRootCause() == sex);
+			assertTrue("root cause is correct", ex.getCause() == sex);
 		}
 
 		ctrlPreparedStatement.verify();
@@ -665,7 +665,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			template.batchUpdate(sql, setter);
 			fail("Should have failed because of SQLException in bulk update");
 		} catch (DataAccessException ex) {
-			assertTrue("Root cause is SQLException", ex.getRootCause() == sex);
+			assertTrue("Root cause is SQLException", ex.getCause() == sex);
 		}
 
 		ctrlPreparedStatement.verify();
@@ -693,7 +693,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		} 
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
-			assertTrue("Check root cause", ex.getRootCause() == sex);
+			assertTrue("Check root cause", ex.getCause() == sex);
 		}
 		
 		ctrlDataSource.verify();
@@ -738,7 +738,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		} 
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
-			assertTrue("Check root cause", ex.getRootCause() == sex);
+			assertTrue("Check root cause", ex.getCause() == sex);
 		}
 	
 		ctrlDataSource.verify();
@@ -803,7 +803,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		} 
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
-			assertTrue("Check root cause", ex.getRootCause() == sex);
+			assertTrue("Check root cause", ex.getCause() == sex);
 		}
 
 		ctrlDataSource.verify();
@@ -900,7 +900,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			new JdbcTemplate(mockDataSource).update(sql, pss);
 			fail("Should have failed with SQLException");
 		} catch (DataAccessException ex) {
-			assertTrue("root cause was preserved", ex.getRootCause() == sex);
+			assertTrue("root cause was preserved", ex.getCause() == sex);
 		}
 
 		ctrlPreparedStatement.verify();
@@ -922,7 +922,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			fail("Should throw exception on failure to close");
 		} catch (CleanupFailureDataAccessException ex) {
 			// pass
-			assertTrue("Check root cause", ex.getRootCause() == sex);
+			assertTrue("Check root cause", ex.getCause() == sex);
 		}
 	}
 
@@ -973,7 +973,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			// Pass
 			assertTrue(
 				"Root cause of warning was correct",
-				ex.getRootCause() == warnings);
+				ex.getCause() == warnings);
 		}
 
 		ctrlResultSet.verify();
@@ -1080,7 +1080,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		} catch (BadSqlGrammarException ex) {
 			assertTrue(
 				"Wanted same exception back, not " + ex,
-				sex == ex.getRootCause());
+				sex == ex.getCause());
 		} catch (Exception ex) {
 			fail(
 				"Should have thrown BadSqlGrammarException exception, not "
@@ -1164,7 +1164,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		} catch (BadSqlGrammarException ex) {
 			assertTrue(
 				"Wanted same exception back, not " + ex,
-				sex == ex.getRootCause());
+				sex == ex.getCause());
 		} 
 
 		ctrlResultSet.verify();

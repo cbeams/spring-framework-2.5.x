@@ -30,7 +30,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.11 2003-11-13 11:51:27 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.12 2004-02-02 11:54:44 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -245,7 +245,7 @@ public class MailTestSuite extends TestCase {
 		}
 		catch (MailParseException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof AddressException);
+			assertTrue(ex.getCause() instanceof AddressException);
 		}
 	}
 
@@ -261,7 +261,7 @@ public class MailTestSuite extends TestCase {
 		}
 		catch (MailParseException ex) {
 			// expected
-			assertTrue(ex.getRootCause() instanceof AddressException);
+			assertTrue(ex.getCause() instanceof AddressException);
 		}
 	}
 

@@ -49,7 +49,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertEquals("SQL", ex.getSql());
 		assertEquals(BAD_SQL_EX, ex.getSQLException());
 		DataIntegrityViolationException diex = (DataIntegrityViolationException) sext.translate("task", "SQL", INTEG_VIOLATION_EX);
-		assertEquals(INTEG_VIOLATION_EX, diex.getRootCause());
+		assertEquals(INTEG_VIOLATION_EX, diex.getCause());
 		
 		// Test fallback. We assume that no database will ever return this error code,
 		// but 07xxx will be bad grammar picked up by the fallback SQLState translator
@@ -85,7 +85,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		// Shouldn't custom translate this
 		assertEquals(customDex, sext.translate(TASK, SQL, BAD_SQL_EX));
 		DataIntegrityViolationException diex = (DataIntegrityViolationException) sext.translate(TASK, SQL, INTEG_VIOLATION_EX);
-		assertEquals(INTEG_VIOLATION_EX, diex.getRootCause());
+		assertEquals(INTEG_VIOLATION_EX, diex.getCause());
 	}
 	
 
