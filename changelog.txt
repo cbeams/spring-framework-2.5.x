@@ -1,12 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.39 2003-11-07 16:59:10 jhoeller Exp $
+$Id: changelog.txt,v 1.40 2003-11-09 21:50:42 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
 * fixed empty-value-on-primitive-property check in BeanWrapperImpl to allow a custom editor to modify the value first
-* redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
-* ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
 * introduced "getBeansOfType" method in ListableBeanFactory, retrieving both normal beans and FactoryBean-created beans
 * introduced "getObjectType" method in FactoryBean, to avoid unnecessary bean creation on autowire checks
 * reworked BeanFactoryUtils' beanNamesIncludingAncestors and beansOfTypeIncludingAncestors methods
@@ -17,8 +15,13 @@ Changes in version 1.0 M3 (XX.11.2003)
 * made AbstractBeanFactory and ListableBeanFactoryImpl methods non-final
 * reworked AbstractBeanDefinition/RootBeanDefinition/ChildBeanDefinition for more consistency
 * added support for lazy initialization of singleton beans in AbstractBeanFactory and subclasses
-* added "lazy-init" attribute to "bean" tag in XML bean definition format, default being "false"
+* redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
+* ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
+* added autowire="constructor" mode for PicoContainer-style Type 3 IoC, resolving constructor arguments by type
+* added ConstructorArgumentValues support to RootBeanDefinition, for resolving arguments to specific beans or values
 * made "id" attribute of "bean" tag in XML bean definition format optional, using the first given name as primary name
+* added "lazy-init" attribute to "bean" tag in XML bean definition format, default being "false"
+* added "constructor-arg" tag to "bean" tag in XML format, analogous to "property" tag, with optional "index" attribute
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * reworked PropertiesFactoryBean to allow for loaded and local properties
 * added "targetClass" argument to StaticMethodPointcut.applies()
@@ -28,7 +31,8 @@ Changes in version 1.0 M3 (XX.11.2003)
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
 * added support for placeholders in bean reference names to PropertyPlaceholderConfigurer
 * added support for cross-referencing placeholders in placeholder values to PropertyPlaceholderConfigurer
-* added "port" property to JavaMailSenderImpl
+* added "port" bean property to JavaMailSenderImpl, for setting a non-default mail server port
+* added "session" bean property to JavaMailSenderImpl, for setting a custom JavaMail Session (possibly pulled from JNDI)
 * moved commit exception handling from concrete implementations up to the generic AbstractPlatformTransactionManager
 * added "rollbackOnCommitFailure" bean property to AbstractPlatformTransactionManager
 * added "cleanupAfterCompletion" template method to AbstractPlatformTransactionManager
@@ -50,8 +54,9 @@ Changes in version 1.0 M3 (XX.11.2003)
 * introduced JdoAccessor as common base class for JdoTemplate and JdoInterceptor
 * introduced JdoDialect interface with getJdbcConnection and flush methods
 * added support for JdoDialect in JdoTransactionManager and JdoAccessor/JdoTemplate/JdoInterceptor
-* renamed BaseCommandController's "userObject" method to "getCommand" for clearer naming
+* reworked VelocityEngineFactory to allow VelocityEngineFactoryBean to run outside of application context
 * fixed potential NPE in debug log statement of VelocityView
+* renamed BaseCommandController's "userObject" method to "getCommand" for clearer naming
 
 Changes in version 1.0 M2 (23.10.2003)
 --------------------------------------
