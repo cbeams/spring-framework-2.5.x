@@ -3,7 +3,7 @@
 
 <taglib>
 
-	<tlib-version>1.1</tlib-version>
+	<tlib-version>1.1.1</tlib-version>
 
 	<jsp-version>1.2</jsp-version>
 
@@ -22,11 +22,39 @@
 
 		<description>
 			Sets default HTML escape value for the current page.
+			Overrides a "defaultHtmlEscape" context-param in web.xml, if any.
 		</description>
 
 		<attribute>
 			<name>defaultHtmlEscape</name>
 			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+	</tag>
+
+
+	<tag>
+
+		<name>escapeBody</name>
+		<tag-class>org.springframework.web.servlet.tags.EscapeBodyTag</tag-class>
+		<body-content>JSP</body-content>
+
+		<description>
+			Escapes its enclosed body content, applying HTML escaping and/or JavaScript escaping.
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
+		</description>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<name>javaScriptEscape</name>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 
@@ -41,6 +69,8 @@
 
 		<description>
 			Retrieves the message with the given code, or text if code isn't resolvable.
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 		</description>
 
 		<attribute>
@@ -96,6 +126,8 @@
 
 		<description>
 			Retrieves the theme message with the given code, or text if code isn't resolvable.
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 		</description>
 
 		<attribute>
@@ -145,6 +177,8 @@
 
 		<description>
 			Provides Errors instance in case of bind errors.
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 		</description>
 
 		<variable>
@@ -199,6 +233,8 @@
 
 		<description>
 			Provides BindStatus object for the given bind path.
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 		</description>
 
 		<variable>
@@ -234,8 +270,10 @@
 		<body-content>JSP</body-content>
 
 		<description>
-			Provides transformation of variables to Strings, using appropriate
+			Provides transformation of variables to Strings, using an appropriate
 			custom PropertyEditor from BindTag (can only be used inside BindTag).
+			The HTML escaping flag participates in a page-wide or application-wide setting
+			(i.e. by HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 		</description>
 
 		<attribute>
