@@ -19,6 +19,7 @@ Package org.springframework.beans
 * refined internal structure and visibilities of AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
 * DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
+* added PropertyPathFactoryBean, allowing to evaluate the property path of a target bean and expose the result
 
 Package org.springframework.web
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
