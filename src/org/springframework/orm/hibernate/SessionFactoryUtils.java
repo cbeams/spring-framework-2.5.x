@@ -14,6 +14,8 @@ import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
 import net.sf.hibernate.WrongClassException;
+import net.sf.hibernate.engine.SessionFactoryImplementor;
+import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,6 +36,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * e.g. in combination with HibernateInterceptor.
  *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
+ * This class' SessionSynchronization mechanism requires Hibernate 2.1 because
+ * of its JTA TransactionManagerLookup check.
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -203,11 +207,21 @@ public abstract class SessionFactoryUtils {
 
 		private SQLExceptionTranslator jdbcExceptionTranslator;
 
-		public SessionSynchronization(Session session, SessionFactory sessionFactory,
+		/**
+		 * Whether Hibernate has a looked-up JTA TransactionManager that it will
+		 * automatically register CacheSynchronizations with on Session connect.
+		 */
+		private boolean hibernateTransactionCompletion;
+
+		private SessionSynchronization(Session session, SessionFactory sessionFactory,
 																	SQLExceptionTranslator jdbcExceptionTranslator) {
 			this.session = session;
 			this.sessionFactory = sessionFactory;
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+			// check whether the SessionFactory has a looked-up JTA TransactionManager
+			this.hibernateTransactionCompletion =
+					(sessionFactory instanceof SessionFactoryImplementor &&
+					 ((SessionFactoryImplementor) sessionFactory).getTransactionManager() != null);
 		}
 
 		public void beforeCommit() throws DataAccessException {
@@ -230,12 +244,20 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 
-		public void beforeCompletion() {
+		public void beforeCompletion() throws CleanupFailureDataAccessException {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			if (this.hibernateTransactionCompletion) {
+				closeSessionIfNecessary(this.session, this.sessionFactory);
+			}
 		}
 
-		public void afterCompletion(int status) throws CleanupFailureDataAccessException {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			closeSessionIfNecessary(this.session, this.sessionFactory);
+		public void afterCompletion(int status) {
+			if (!this.hibernateTransactionCompletion) {
+				if (this.session instanceof SessionImplementor) {
+					((SessionImplementor) this.session).afterTransactionCompletion(status == STATUS_COMMITTED);
+				}
+				closeSessionIfNecessary(this.session, this.sessionFactory);
+			}
 		}
 	}
 
