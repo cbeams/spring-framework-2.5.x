@@ -1,6 +1,7 @@
 package org.springframework.web.multipart.commons;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.multipart.MultipartException;
@@ -120,14 +122,15 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 	/**
 	 * Set the temporary directory where uploaded files get stored.
 	 * Default is the servlet container's temporary directory for the web application.
+	 * @see org.springframework.web.util.WebUtils#TEMP_DIR_CONTEXT_ATTRIBUTE
 	 */
-	public void setUploadTempDir(File uploadTempDir) {
-		if (!uploadTempDir.exists() && !uploadTempDir.mkdirs()) {
-			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir.getAbsolutePath() +
+	public void setUploadTempDir(Resource uploadTempDir) throws IOException {
+		if (!uploadTempDir.exists() && !uploadTempDir.getFile().mkdirs()) {
+			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir +
 																				 "] could not be created");
 		}
-		this.fileUpload.setRepositoryPath(uploadTempDir.getAbsolutePath());
-		this.uploadTempDir = uploadTempDir;
+		this.fileUpload.setRepositoryPath(uploadTempDir.getFile().getAbsolutePath());
+		this.uploadTempDir = uploadTempDir.getFile();
 	}
 
 	protected void initApplicationContext() {

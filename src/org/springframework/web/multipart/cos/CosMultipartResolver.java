@@ -11,6 +11,7 @@ import com.oreilly.servlet.MultipartRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -89,10 +90,15 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 
 	/**
 	 * Set the temporary directory where uploaded files get stored.
-	 * Default is the servlet container's temporary directory for the web application.  
+	 * Default is the servlet container's temporary directory for the web application.
+	 * @see org.springframework.web.util.WebUtils#TEMP_DIR_CONTEXT_ATTRIBUTE
 	 */
-	public void setUploadTempDir(File uploadTempDir) {
-		this.uploadTempDir = uploadTempDir;
+	public void setUploadTempDir(Resource uploadTempDir) throws IOException {
+		if (!uploadTempDir.exists() && !uploadTempDir.getFile().mkdirs()) {
+			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir +
+																				 "] could not be created");
+		}
+		this.uploadTempDir = uploadTempDir.getFile();
 	}
 
 	protected File getUploadTempDir() {
@@ -138,9 +144,10 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 	 * @throws IOException if thrown by the MultipartRequest constructor
 	 */
 	protected MultipartRequest newMultipartRequest(HttpServletRequest request) throws IOException {
+		String tempPath = this.uploadTempDir.getAbsolutePath();
 		return this.headerEncoding != null ?
-		    new MultipartRequest(request, this.uploadTempDir.getAbsolutePath(), this.maxUploadSize, this.headerEncoding) :
-				new MultipartRequest(request, this.uploadTempDir.getAbsolutePath(), this.maxUploadSize);
+		    new MultipartRequest(request, tempPath, this.maxUploadSize, this.headerEncoding) :
+				new MultipartRequest(request, tempPath, this.maxUploadSize);
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
