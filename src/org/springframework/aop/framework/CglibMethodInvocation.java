@@ -11,19 +11,14 @@ import java.util.List;
 import net.sf.cglib.MethodProxy;
 
 /**
- * 
+ * Invocation for CGLIB that invokes the target using the
+ * CGLIB MethodProxy.
  * @author Rod Johnson
- * @version $Id: CglibMethodInvocation.java,v 1.1 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: CglibMethodInvocation.java,v 1.2 2003-12-03 11:32:32 johnsonr Exp $
  */
-public class CglibMethodInvocation extends ReflectiveMethodInvocation {
+final class CglibMethodInvocation extends ReflectiveMethodInvocation {
 	
 	private MethodProxy methodProxy;
-
-	/**
-	 * 
-	 */
-	public CglibMethodInvocation() {
-	}
 	
 	/**
 	 * @param proxy
@@ -46,7 +41,7 @@ public class CglibMethodInvocation extends ReflectiveMethodInvocation {
 	 * @see org.springframework.aop.framework.ReflectiveMethodInvocation#invokeJoinpoint()
 	 */
 	protected Object invokeJoinpoint() throws Throwable {
-		return Cglib1AopProxy.invokeJoinpointUsingMethodProxy(target, method, arguments, methodProxy);
+		return methodProxy.invoke(target, arguments);
 	}
 
 }

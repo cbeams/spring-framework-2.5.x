@@ -5,14 +5,13 @@
  
 package org.springframework.aop.framework;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.List;
 
 import net.sf.cglib.CodeGenerationException;
 import net.sf.cglib.Enhancer;
+import net.sf.cglib.Factory;
 import net.sf.cglib.MethodFilter;
 import net.sf.cglib.MethodInterceptor;
 import net.sf.cglib.MethodProxy;
@@ -37,24 +36,10 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.3 2003-12-02 22:15:03 johnsonr Exp $
+ * @version $Id: Cglib1AopProxy.java,v 1.4 2003-12-03 11:32:32 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
-	
-	/**
-	 * Invoke the target using CGLIB MethodProxy
-	 * @return
-	 */
-	public static Object invokeJoinpointUsingMethodProxy(Object target, Method m, Object[] args, MethodProxy methodProxy) throws Throwable {
-		 try {
-			 Object rval = methodProxy.invoke(target, args);
-			 return rval;
-		 }
-		 catch (IllegalAccessException ex) {
-			 throw new AspectException("Couldn't access method " + m, ex);
-		 }
-	}
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -100,7 +85,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		try {
 			// Try special rules for equals() method and implementation of the
 			// ProxyConfig AOP configuration interface
-			if (AopProxyUtils.EQUALS_METHOD.equals(method)) {
+			if (isEqualsMethod(method)) {
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
@@ -131,7 +116,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
 				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
-				retVal = invokeJoinpointUsingMethodProxy(target, method, args, methodProxy);
+				retVal = methodProxy.invoke(target, args);
 			}
 			else {
 				// We need to create a method invocation...
@@ -189,6 +174,12 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		}
 	}	// intercept
 	
+	protected final boolean isEqualsMethod(Method m) {
+		return "equals".equals(m.getName()) && 
+				m.getParameterTypes().length == 1 && 
+				m.getParameterTypes()[0] == Object.class;
+	}
+	
 
 	/**
 	 * Creates a new Proxy object for the given object, proxying
@@ -214,7 +205,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		try {
 			return Enhancer.enhance(advised.getTargetSource().getTargetClass(), 
 				AopProxyUtils.completeProxiedInterfaces(advised),
-				this,
+				this,	// MethodInterceptor
 				null, 	// ClassLoader: use default
 				null,	// Don't worry about serialization and writeReplace for now
 				this	// MethodFilter
@@ -253,11 +244,11 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 		if (other instanceof Cglib1AopProxy) {
 			otherCglibProxy = (Cglib1AopProxy) other;
 		}
-		else if (Proxy.isProxyClass(other.getClass())) {
-			InvocationHandler ih = Proxy.getInvocationHandler(other);
-			if (!(ih instanceof Cglib1AopProxy))
+		else if (other instanceof Factory) {
+			MethodInterceptor mi = ((Factory) other).interceptor();
+			if (!(mi instanceof Cglib1AopProxy))
 				return false;
-			otherCglibProxy = (Cglib1AopProxy) ih; 
+			otherCglibProxy = (Cglib1AopProxy) mi; 
 		}
 		else {
 			// Not a valid comparison

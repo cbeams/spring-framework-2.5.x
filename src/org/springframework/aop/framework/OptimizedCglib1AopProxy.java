@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: OptimizedCglib1AopProxy.java,v 1.1 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: OptimizedCglib1AopProxy.java,v 1.2 2003-12-03 11:32:32 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilter {
@@ -97,11 +97,11 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 		try {
 			// Try special rules for equals() method and implementation of the
 			// ProxyConfig AOP configuration interface
-			if (AopProxyUtils.EQUALS_METHOD.equals(method)) {
+			if (isEqualsMethod(method)) {
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
-				return method.invoke(this, args);
+				return new Boolean(equals(args[0]));
 			}
 			else if (Advised.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
@@ -109,7 +109,6 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 			}
 			
 			Object retVal = null;
-			
 			
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
 			
@@ -201,6 +200,14 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 	 * @see net.sf.cglib.MethodFilter#accept(java.lang.reflect.Member)
 	 */
 	public boolean accept(Member member) {
+		if (!(member instanceof Method))
+			return false;
+		Method method = (Method) member;
+		
+		// We must always proxy equals, to direct calls to this
+		if (isEqualsMethod(method))
+			return true;
+		
 		// Proxy is not yet available, but that shouldn't matter
 		List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(advised, null, (Method) member, targetClass);
 		boolean  haveAdvice = !chain.isEmpty();
