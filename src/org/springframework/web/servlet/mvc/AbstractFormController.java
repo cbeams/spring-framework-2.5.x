@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -163,6 +163,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * or via a BeanFactory: commandName, commandClass, bindOnNewForm, sessionForm.
 	 * Note that commandClass doesn't need to be set when overriding
 	 * <code>formBackingObject</code>, as the latter determines the class anyway.
+	 * <p>"cacheSeconds" is by default set to 0 (-> no caching for all form controllers).
 	 * @see #setCommandName
 	 * @see #setCommandClass
 	 * @see #setBindOnNewForm
@@ -170,7 +171,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #formBackingObject
 	 */
 	public AbstractFormController() {
-		super();
+		setCacheSeconds(0);
 	}
 
 	/**
@@ -206,7 +207,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	public final boolean isSessionForm() {
 		return sessionForm;
 	}
-	
+
 
 	/**
 	 * Handles two cases: form submissions and showing a new form.
@@ -217,8 +218,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		if (isFormSubmission(request)) {
-			if (isSessionForm() && request.getSession().getAttribute(getFormSessionAttributeName()) == null) {
-				// cannot submit a session form if no form object is in the session
+			HttpSession session = request.getSession(false);
+			if (isSessionForm() &&
+					(session == null || session.getAttribute(getFormSessionAttributeName()) == null)) {
+				// Cannot submit a session form if no form object is in the session.
 				return handleInvalidSubmit(request, response);
 			}
 			// process submit
@@ -266,26 +269,71 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param response current HTTP response
 	 * @return the prepared form view
 	 * @throws Exception in case of an invalid new form object
+	 * @see #getErrorsForNewForm
 	 */
 	protected final ModelAndView showNewForm(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		// show new form
 		logger.debug("Displaying new form");
-		Object formObject = formBackingObject(request);
-		if (formObject == null) {
+		return showForm(request, response, getErrorsForNewForm(request));
+	}
+
+	/**
+	 * Create a BindException instance for a new form.
+	 * Called by <code>showNewForm</code>.
+	 * <p>Can be used directly when intending to show a new form but with
+	 * special errors registered on it (for example, on invalid submit).
+	 * Usually, the resulting BindException will be passed to
+	 * <code>showForm</code>, after registering the errors on it.
+	 * @param request current HTTP request
+	 * @return the BindException instance
+	 * @throws Exception in case of an invalid new form object
+	 * @see #showNewForm
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
+	 * @see #handleInvalidSubmit
+	 */
+	protected final BindException getErrorsForNewForm(HttpServletRequest request) throws Exception {
+		Object command = formBackingObject(request);
+		if (command == null) {
 			throw new ServletException("Form object returned by formBackingObject() may not be null");
 		}
-		if (!checkCommand(formObject)) {
+		if (!checkCommand(command)) {
 			throw new ServletException("Form object returned by formBackingObject() must match commandClass");
 		}
-		// bind without validation, to allow for prepopulating a form, and for
-		// convenient error evaluation in views (on both first attempt and resubmit)
-		ServletRequestDataBinder binder = createBinder(request, formObject);
+		// Bind without validation, to allow for prepopulating a form, and for
+		// convenient error evaluation in views (on both first attempt and resubmit).
+		ServletRequestDataBinder binder = createBinder(request, command);
 		if (isBindOnNewForm()) {
 			logger.debug("Binding to new form");
 			binder.bind(request);
 		}
-		return showForm(request, response, binder.getErrors());
+		return binder.getErrors();
+	}
+
+	/**
+	 * Return the form object for the given request.
+	 * <p>Calls <code>formBackingObject</code> if not in session form mode.
+	 * Else, retrieves the form object from the session. Note that the form object
+	 * gets removed from the session, but it will be re-added when showing the
+	 * form for resubmission.
+	 * @param request current HTTP request
+	 * @return object form to bind onto
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #formBackingObject
+	 */
+	protected final Object getCommand(HttpServletRequest request) throws Exception {
+		if (!isSessionForm()) {
+			return formBackingObject(request);
+		}
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			throw new ServletException("Must have session when trying to bind");
+		}
+		Object sessionFormObject = session.getAttribute(getFormSessionAttributeName());
+		if (sessionFormObject == null) {
+			throw new ServletException("Form object not found in session");
+		}
+		session.removeAttribute(getFormSessionAttributeName());
+		return sessionFormObject;
 	}
 
 	/**
@@ -298,11 +346,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * object across the entire form workflow. Else, a new instance of the command
 	 * class will be created for each submission attempt, just using this backing
 	 * object as template for the initial form.
-	 * <p>Default implementation calls BaseCommandController.createCommand,
+	 * <p>Default implementation calls <code>BaseCommandController.createCommand</code>,
 	 * creating a new empty instance of the command class.
 	 * Subclasses can override this to provide a preinitialized backing object.
 	 * @param request current HTTP request
-	 * @return the backing objact
+	 * @return the backing object
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #setCommandName
 	 * @see #setCommandClass
@@ -360,8 +408,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @return the prepared form view
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ModelAndView showForm(HttpServletRequest request, BindException errors,
-			String viewName, Map controlModel) throws Exception {
+	protected final ModelAndView showForm(
+			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
 		if (isSessionForm()) {
 			request.getSession().setAttribute(getFormSessionAttributeName(), errors.getTarget());
 		}
@@ -393,56 +441,6 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Handle an invalid submit request, e.g. when in session form mode but no form object
-	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation simply tries to resubmit the form with a new form object.
-	 * This should also work if the user hit the back button, changed some form data,
-	 * and resubmitted the form.
-	 * <p>Note: To avoid duplicate submissions, you need to override this method.
-	 * Either show some "invalid submit" message, or call showNewForm for resetting the
-	 * form (prepopulating it with the current values if "bindOnNewForm" is true).
-	 * In this case, the form object in the session serves as transaction token.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @return a prepared view, or null if handled directly
-	 * @throws Exception in case of errors
-	 * @see #showNewForm
-	 * @see #setBindOnNewForm
-	 */
-	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		Object command = formBackingObject(request);
-		ServletRequestDataBinder binder = bindAndValidate(request, command);
-		return processFormSubmission(request, response, command, binder.getErrors());
-	}
-
-	/**
-	 * Return the form object for the given request.
-	 * <p>Calls formBackingObject if not in session form mode. Else, retrieves the
-	 * form object from the session. Note that the form object gets removed from
-	 * the session, but it will be re-added when showing the form for resubmission.
-	 * @param request current HTTP request
-	 * @return object form to bind onto
-	 * @throws Exception in case of invalid state or arguments
-	 * @see #formBackingObject
-	 */
-	protected final Object getCommand(HttpServletRequest request) throws Exception {
-		if (!isSessionForm()) {
-			return formBackingObject(request);
-		}
-		HttpSession session = request.getSession(false);
-		if (session == null) {
-			throw new ServletException("Must have session when trying to bind");
-		}
-		Object formObject = session.getAttribute(getFormSessionAttributeName());
-		session.removeAttribute(getFormSessionAttributeName());
-		if (formObject == null) {
-			throw new ServletException("Form object not found in session");
-		}
-		return formObject;
-	}
-
-	/**
 	 * Process form submission request. Called by handleRequestInternal in case
 	 * of a form submission, with or without binding errors. Implementations
 	 * need to proceed properly, typically showing a form view in case of
@@ -465,8 +463,45 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,
-			HttpServletResponse response, Object command, BindException errors)
+	protected abstract ModelAndView processFormSubmission(
+			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception;
+
+	/**
+	 * Handle an invalid submit request, e.g. when in session form mode but no form object
+	 * was found in the session (like in case of an invalid resubmit by the browser).
+	 * <p>Default implementation simply tries to resubmit the form with a new form object.
+	 * This should also work if the user hit the back button, changed some form data,
+	 * and resubmitted the form.
+	 * <p>Note: To avoid duplicate submissions, you need to override this method.
+	 * Either show some "invalid submit" message, or call <code>showNewForm</code> for
+	 * resetting the form (prepopulating it with the current values if "bindOnNewForm"
+	 * is true). In this case, the form object in the session serves as transaction token.
+	 * <pre>
+	 * protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	 *   return showNewForm(request, response);
+	 * }</pre>
+	 * You can also show a new form but with special errors registered on it:
+	 * <pre>
+	 * protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	 *   BindException errors = getErrorsForNewForm(request);
+	 *   errors.reject("duplicateFormSubmission", "Duplicate form submission");
+	 *   return showForm(request, response, errors);
+	 * }</pre>
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @return a prepared view, or null if handled directly
+	 * @throws Exception in case of errors
+	 * @see #showNewForm
+	 * @see #getErrorsForNewForm
+	 * @see #showForm(HttpServletRequest, HttpServletResponse, BindException)
+	 * @see #setBindOnNewForm
+	 */
+	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		Object command = formBackingObject(request);
+		ServletRequestDataBinder binder = bindAndValidate(request, command);
+		return processFormSubmission(request, response, command, binder.getErrors());
+	}
 
 }

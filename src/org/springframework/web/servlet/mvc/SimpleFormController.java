@@ -116,6 +116,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #formBackingObject
 	 */
 	public SimpleFormController() {
+		// AbstractFormController sets default cache seconds to 0.
 		super();
 	}
 
@@ -185,8 +186,8 @@ public class SimpleFormController extends AbstractFormController {
 	 * in case of custom validation errors (i.e. not determined by the validator).
 	 * @see #setFormView
 	 */
-	protected ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
-			BindException errors) throws Exception {
+	protected ModelAndView showForm(
+			HttpServletRequest request, HttpServletResponse response, BindException errors) throws Exception {
 		return showForm(request, errors, getFormView());
 	}
 
@@ -266,8 +267,8 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see org.springframework.validation.Errors
 	 * @see org.springframework.validation.BindException#getModel
 	 */
-	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
-			Object command,	BindException errors)
+	protected ModelAndView onSubmit(
+			HttpServletRequest request,	HttpServletResponse response, Object command,	BindException errors)
 			throws Exception {
 		return onSubmit(command, errors);
 	}

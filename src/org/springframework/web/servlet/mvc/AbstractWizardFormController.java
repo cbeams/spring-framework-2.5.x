@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc;
 
@@ -114,12 +114,19 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Create a new AbstractWizardFormController.
+	 * <p>"sessionForm" is automatically turned on, "validateOnBinding"
+	 * turned off, and "cacheSeconds" set to 0 by the base class
+	 * (-> no caching for all form controllers).
 	 */
 	public AbstractWizardFormController() {
-		// always needs session to keep data from all pages
+		// AbstractFormController sets default cache seconds to 0.
+		super();
+
+		// Always needs session to keep data from all pages.
 		setSessionForm(true);
-		// never validate everything on binding ->
-		// wizards validate individual pages
+
+		// Never validate everything on binding ->
+		// wizards validate individual pages.
 		setValidateOnBinding(false);
 	}
 
@@ -314,11 +321,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			}
-			// set page session attribute, expose overriding request attribute
+			// Set page session attribute, expose overriding request attribute.
 			Integer pageInteger = new Integer(page);
 			request.getSession().setAttribute(getPageSessionAttributeName(), pageInteger);
 			request.setAttribute(getPageSessionAttributeName(), pageInteger);
-			// set page request attribute for evaluation by views
+			// Set page request attribute for evaluation by views.
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
 				controlModel.put(this.pageAttribute, new Integer(page));
@@ -429,9 +436,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 					(this.allowDirtyForward && targetPage > currentPage)) {
 				// allowed to go to target page
 				return showPage(request, errors, targetPage);
-			}		
+			}
 		}
-		
+
 		// show current page again
 		return showPage(request, errors, currentPage);
 	}
@@ -444,7 +451,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #getPageSessionAttributeName
 	 */
 	protected int getCurrentPage(HttpServletRequest request) {
-		// checking for overriding attribute in request
+		// check for overriding attribute in request
 		Integer pageAttr = (Integer) request.getAttribute(getPageSessionAttributeName());
 		if (pageAttr != null) {
 			return pageAttr.intValue();
