@@ -722,18 +722,22 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * Restore this <code>FlowExecution</code> for use after deserialization
 	 * @param flowLocator the flow locator
 	 */
-	protected void restore(FlowLocator flowLocator, FlowExecutionListener[] listeners) {
-		Assert.state(this.rootFlow == null, "The root flow is already set");
+	public synchronized void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners) {
+		if (this.rootFlow != null) {
+			// nothing to do, we're already hydrated
+			return;
+		}
 		Iterator it = this.executingFlowSessions.iterator();
 		while (it.hasNext()) {
 			FlowSession session = (FlowSession)it.next();
-			session.restore(flowLocator);
+			session.rehydrate(flowLocator);
 		}
 		this.rootFlow = getRootFlowSession().getFlow();
 		this.listenerList = new FlowExecutionListenerList();
+		this.listenerList.add(this.rootFlow.getFlowExecutionListenerList());
 		this.listenerList.add(listeners);
 	}
-
+	
 	public String toString() {
 		return executingFlowSessions.isEmpty() ? "[Empty FlowExecutionStack " + getId() + "; no flows are active]"
 				: new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId()).append(

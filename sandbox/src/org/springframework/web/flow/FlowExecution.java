@@ -101,4 +101,11 @@ public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response) throws EventNotSupportedException, IllegalStateException;
 
+	/**
+	 * Called by a controller to restore this execution's state after
+	 * deserialization if neccessary.
+	 * @param flowLocator the locator
+	 */
+	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
+
 }

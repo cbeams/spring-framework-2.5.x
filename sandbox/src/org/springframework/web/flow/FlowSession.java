@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.support.FlowUtils;
@@ -350,15 +349,17 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	 * Restore this <code>Flow Session</code> for use after deserialization
 	 * @param flowLocator the flow locator
 	 */
-	protected void restore(FlowLocator flowLocator) {
+	protected void rehydrate(FlowLocator flowLocator) {
 		Assert.state(this.flow == null, "The flow is already set - already restored");
 		Assert.state(this.currentState == null, "The current state is already set - already restored");
-		Assert.notNull(flowId,
-				"The flow id was not set during deserialization: cannot restore--was this session deserialized?");
+		Assert
+				.notNull(flowId,
+						"The flow id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
 		this.flow = flowLocator.getFlow(this.flowId);
-		if (!StringUtils.hasText(this.currentStateId)) {
-			this.currentState = this.flow.getRequiredState(this.currentStateId);
-		}
+		Assert
+				.notNull(flowId,
+						"The current state id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
+		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.flowId = null;
 		this.currentStateId = null;
 	}
