@@ -5,6 +5,7 @@
 
 package org.springframework.util;
 
+import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @since May 2, 2001
- * @version $Id: StopWatch.java,v 1.3 2003-11-14 08:24:06 johnsonr Exp $
+ * @version $Id: StopWatch.java,v 1.4 2003-12-30 01:18:51 jhoeller Exp $
  */
 public class StopWatch {
 
@@ -198,12 +199,17 @@ public class StopWatch {
 		else {
 			TaskInfo[] tasks = getTaskInfo();
 			sb.append("-----------------------------------------\n");
-			sb.append("ms\t%\tTask name\n");
+			sb.append("ms     %     Task name\n");
 			sb.append("-----------------------------------------\n");
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			nf.setMinimumIntegerDigits(5);
+			nf.setGroupingUsed(false);
+			NumberFormat pf = NumberFormat.getPercentInstance();
+			pf.setMinimumIntegerDigits(3);
+			pf.setGroupingUsed(false);
 			for (int i = 0; i < tasks.length; i++) {
-				sb.append(tasks[i].getTime() + "\t");
-				long percent = Math.round((100.0 * tasks[i].getTimeSecs()) / getTotalTimeSecs());
-				sb.append(percent + "%\t");
+				sb.append(nf.format(tasks[i].getTime()) + "  ");
+				sb.append(pf.format(tasks[i].getTimeSecs() / getTotalTimeSecs()) + "  ");
 				sb.append(tasks[i].getTaskName() + "\n");
 			}
 		}
