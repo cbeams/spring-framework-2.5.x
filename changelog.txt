@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.1.2 (15.11.2004)
+-------------------------------------
+
+Package org.springframework.aop
+* reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
+
+Package org.springframework.web
+* added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
+
+
 Changes in version 1.1.1 (30.9.2004)
 ------------------------------------
 
