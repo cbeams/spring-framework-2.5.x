@@ -1159,7 +1159,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public Transition onEdit(String editStateId) {
-		return onEvent(getSuccessEventId(), editStateId);
+		return onEvent(getEditEventId(), editStateId);
+	}
+	
+	/**
+	 * @return
+	 */
+	protected String getEditEventId() {
+		return EDIT;
 	}
 
 	/**
