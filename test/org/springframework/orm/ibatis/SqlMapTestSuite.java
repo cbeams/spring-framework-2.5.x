@@ -6,12 +6,14 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import junit.framework.TestCase;
+
+import org.easymock.MockControl;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
+
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.SqlMap;
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
@@ -77,6 +79,55 @@ public class SqlMapTestSuite extends TestCase {
 		assertEquals("done", result);
 		dsControl.verify();
 		conControl.verify();
+	}
+	
+	public void testSqlMapDaoSupport() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		DaoSupportTest testDao = new DaoSupportTest();
+
+		testDao.setDataSource(ds);
+		assertEquals(ds,testDao.getDSource());
+
+		final MappedStatement stmt = new MappedStatement();
+		SqlMap map = new SqlMap() {
+			public MappedStatement getMappedStatement(String name) {
+				if ("stmt".equals(name)) {
+					return stmt;
+				}
+				return null;
+			}
+		};
+		testDao.setSqlMap(map);
+		assertEquals(map,testDao.getSMap());
+
+		SqlMapTemplate template = new SqlMapTemplate();
+		template.setDataSource(ds);
+		template.setSqlMap(map);
+		testDao.setSqlMapTemplate(template);
+		assertEquals(template,testDao.getSMTemplate());
+
+		testDao.afterPropertiesSet();
+	}
+	
+	
+	private class DaoSupportTest extends SqlMapDaoSupport{
+	
+		public DaoSupportTest(){
+			super();
+		}
+	
+		public DataSource getDSource(){
+			return super.getDataSource();
+		}
+	
+		public SqlMap getSMap() {
+			return super.getSqlMap();
+		}
+	
+		public SqlMapTemplate getSMTemplate(){
+			return super.getSqlMapTemplate();
+		}
 	}
 
 }
