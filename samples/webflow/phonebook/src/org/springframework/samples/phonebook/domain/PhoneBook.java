@@ -77,6 +77,12 @@ public class PhoneBook {
 		persons.add(kd);
 		persons.add(ev);
 		persons.add(cs);
+		persons.add(jh);
+		persons.add(rj);
+		persons.add(tr);
+		persons.add(aa);
+		persons.add(mp);
+
 		persons.add(sa);
 		persons.add(dj);
 	}
