@@ -1,17 +1,33 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.102 2004-03-03 10:47:12 jhoeller Exp $
+$Id: changelog.txt,v 1.103 2004-03-08 10:14:02 jhoeller Exp $
 
 
 Changes in version 1.0 final (xx.3.2003)
 ----------------------------------------
 
+Package org.springframework.beans
+* fixed custom editor detection for indexed and mapped properties
+* fixed default editor registration to use classes rather than instances, for thread-safety
+
+Package org.springframework.core
+* fixed CLASSPATH_URL_PREFIX check in ResourceEditor
+* decode URL file path before using it to construct a File in UrlResource and ClassPathResource
+
 Package org.springframework.jdbc
 * added "queryForLong" methods to JdbcTemplate class and JdbcOperations interface
+* changed "queryForInt" to expect a Number value, calling "intValue" on it
+
+Package org.springframework.jndi
+* added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
 
 Package org.springframework.orm
+* allow for ClobStringType to be instantiated without LobHandler, for use with Hibernate's SchemaExport tool
 * adapted iBATIS SQL Maps 2 support to SQL Maps 2.0 beta 4, calling the new SqlMapSession.close method
 * changed SqlMapClientCallback's "doInSqlMapSession(SqlMapSession)" method to "doInSqlMapClient(SqlMapExecutor)"
+
+Package org.springframework.web
+* fixed AbstractCachingViewResolver's caching to use appropriate synchronization
 
 
 Changes in version 1.0 RC2 (1.3.2003)
