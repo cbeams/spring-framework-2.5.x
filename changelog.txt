@@ -1,22 +1,30 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.103 2004-03-08 10:14:02 jhoeller Exp $
+$Id: changelog.txt,v 1.104 2004-03-09 18:27:21 jhoeller Exp $
 
 
-Changes in version 1.0 final (xx.3.2003)
+Changes in version 1.0 final (20.3.2003)
 ----------------------------------------
 
 Package org.springframework.beans
 * fixed custom editor detection for indexed and mapped properties
 * fixed default editor registration to use classes rather than instances, for thread-safety
+* fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
+* added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
+
+Package org.springframework.context
+* AbstractMessageSource supports resolution of message arguments that are MessageSourceResolvables themselves
+* renamed AbstractMessageSource's "resolve" method to "resolveCode"
 
 Package org.springframework.core
 * fixed CLASSPATH_URL_PREFIX check in ResourceEditor
+* log warning message rather than throw an exception if ResourceEditor cannot resolve a system property
 * decode URL file path before using it to construct a File in UrlResource and ClassPathResource
 
 Package org.springframework.jdbc
 * added "queryForLong" methods to JdbcTemplate class and JdbcOperations interface
-* changed "queryForInt" to expect a Number value, calling "intValue" on it
+* fixed number detection for JdbcTemplate's "queryForInt" and "queryForLong"
+* added ResultSet type support to PreparedStatementCreatorFactory and SqlOperation
 
 Package org.springframework.jndi
 * added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
@@ -26,8 +34,17 @@ Package org.springframework.orm
 * adapted iBATIS SQL Maps 2 support to SQL Maps 2.0 beta 4, calling the new SqlMapSession.close method
 * changed SqlMapClientCallback's "doInSqlMapSession(SqlMapSession)" method to "doInSqlMapClient(SqlMapExecutor)"
 
+Package org.springframework.scheduling
+* fixed SchedulerFactoryBean's JobDetail auto-registration when multiple triggers refer to the same JobDetail
+
+Package org.springframework.validation
+* added "getNestedPath" method to Errors interface
+* Errors allows paths that end with a dot as "setNestedPath" arguments
+
 Package org.springframework.web
+* updated HtmlUtils to more efficient implementation by Chris Wilson
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
+* fetch DefinitionsFactory on initialization of TilesView, throwing a proper exception if not found
 
 
 Changes in version 1.0 RC2 (1.3.2003)
