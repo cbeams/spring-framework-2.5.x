@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -37,6 +38,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.config.BeanFactoryPostProcessor;
+import org.springframework.context.event.ApplicationEventMulticasterImpl;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.StringUtils;
 
 
@@ -57,7 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -241,14 +247,19 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	}
 
 	/**
-	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans.
+	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
+	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
 	private void invokeContextConfigurers() {
 		String[] beanNames = getBeanDefinitionNames(BeanFactoryPostProcessor.class);
+		BeanFactoryPostProcessor[] configurers = new BeanFactoryPostProcessor[beanNames.length];
 		for (int i = 0; i < beanNames.length; i++) {
-			String beanName = beanNames[i];
-			BeanFactoryPostProcessor configurer = (BeanFactoryPostProcessor) getBean(beanName);
+			configurers[i] = (BeanFactoryPostProcessor) getBean(beanNames[i]);
+		}
+		Arrays.sort(configurers, new OrderComparator());
+		for (int i = 0; i < configurers.length; i++) {
+			BeanFactoryPostProcessor configurer = configurers[i];
 			configurer.postProcessBeanFactory(getBeanFactory());
 		}
 	}

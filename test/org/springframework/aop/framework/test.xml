@@ -143,7 +143,7 @@
 	</bean>
 	
 	<bean id="target2"
-		class="org.springframework.context.support.ConsoleListener">
+		class="org.springframework.context.event.ConsoleListener">
 	</bean>
 	
 

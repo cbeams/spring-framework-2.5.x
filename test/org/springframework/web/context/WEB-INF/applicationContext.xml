@@ -11,13 +11,13 @@
 
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename">
-			<value>org/springframework/web/context/WEB-INF/context-messages</value>
+			<value>org/springframework/web/context/WEB-INF/${message-file}</value>
 		</property>
 	</bean>
 
 	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
 		<property name="basenamePrefix">
-			<value>org/springframework/web/context/WEB-INF/</value>
+			<value>${theme-base}</value>
 		</property>
 	</bean>
 
@@ -86,9 +86,15 @@
 
 	&contextInclude;
 
-	<bean id="myinit" class="org.springframework.context.support.PropertyResourceConfigurer">
+	<bean id="myOverride" class="org.springframework.context.config.PropertyOverrideConfigurer">
 		<property name="location">
-			<value>/org/springframework/web/context/WEB-INF/myinit.properties</value>
+			<value>/org/springframework/web/context/WEB-INF/myoverride.properties</value>
+		</property>
+	</bean>
+
+	<bean id="myPlaceholder" class="org.springframework.context.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>/org/springframework/web/context/WEB-INF/myplaceholder.properties</value>
 		</property>
 	</bean>
 

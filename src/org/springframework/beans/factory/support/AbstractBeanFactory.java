@@ -51,7 +51,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.4 2003-09-06 17:06:21 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.5 2003-10-04 15:58:28 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -636,6 +636,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		}
 		
 		this.singletonCache.clear();
+	}
+
+	public PropertyValues getPropertyValues(String beanName) {
+		return getBeanDefinition(beanName).getPropertyValues();
 	}
 
 
