@@ -99,6 +99,35 @@ public class BatchSqlUpdate extends SqlUpdate {
 			this.batchSize = batchSize;
 	}
 
+	/**
+	 * Return the current number of statements respectively statement
+	 * parameters in the queue.
+	 */
+	public int getQueueCount() {
+		return this.parameterQueue.size();
+	}
+
+	/**
+	 * Return the number of affected rows for all already executed statements.
+	 * Accumulates all of <code>flush</code>'s return values until
+	 * <code>clear</code> is invoked.
+	 * @return an array of the number of rows affected by each statement
+	 */
+	public int[] getRowsAffected() {
+		int[] result = new int[this.rowsAffected.size()];
+		for (int i = 0; i < this.rowsAffected.size(); i++) {
+			Integer rowCount = (Integer) this.rowsAffected.get(i);
+			result[i] = rowCount.intValue();
+		}
+		return result;
+	}
+
+	/**
+	 * Return the number of already executed statements.
+	 */
+	public int getExecutionCount() {
+		return this.rowsAffected.size();
+	}
 
 	/**
 	 * Overridden version of update that adds the given statement
@@ -122,16 +151,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 			}
 			flush();
 		}
-
 		return -1;
-	}
-
-	/**
-	 * Return the current number of statements respectively statement
-	 * parameters in the queue.
-	 */
-	public int getQueueCount() {
-		return this.parameterQueue.size();
 	}
 
 	/**
@@ -165,28 +185,6 @@ public class BatchSqlUpdate extends SqlUpdate {
 			checkRowsAffected(rowsAffected[i]);
 		}
 		return rowsAffected;
-	}
-
-	/**
-	 * Return the number of affected rows for all already executed statements.
-	 * Accumulates all of <code>flush</code>'s return values until
-	 * <code>clear</code> is invoked.
-	 * @return an array of the number of rows affected by each statement
-	 */
-	public int[] getRowsAffected() {
-		int[] result = new int[this.rowsAffected.size()];
-		for (int i = 0; i < this.rowsAffected.size(); i++) {
-			Integer rowCount = (Integer) this.rowsAffected.get(i);
-			result[i] = rowCount.intValue();
-		}
-		return result;
-	}
-
-	/**
-	 * Return the number of already executed statements.
-	 */
-	public int getExecutionCount() {
-		return this.rowsAffected.size();
 	}
 
 	/**
