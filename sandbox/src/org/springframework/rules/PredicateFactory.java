@@ -266,8 +266,8 @@ public class PredicateFactory {
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            otherPropertyName,
-            GreaterThan.instance());
+            GreaterThan.instance(),
+            otherPropertyName);
     }
 
     /**
@@ -284,8 +284,8 @@ public class PredicateFactory {
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            otherPropertyName,
-            EqualTo.instance());
+            EqualTo.instance(),            
+            otherPropertyName);
     }
 
     /**
@@ -302,8 +302,8 @@ public class PredicateFactory {
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            otherPropertyName,
-            GreaterThanEqualTo.instance());
+            GreaterThanEqualTo.instance(),
+            otherPropertyName);
     }
 
     /**
@@ -320,8 +320,8 @@ public class PredicateFactory {
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            otherPropertyName,
-            LessThan.instance());
+            LessThan.instance(),
+            otherPropertyName);
     }
 
     /**
@@ -338,8 +338,8 @@ public class PredicateFactory {
         String otherPropertyName) {
         return new BeanPropertiesExpression(
             propertyName,
-            otherPropertyName,
-            LessThanEqualTo.instance());
+            LessThanEqualTo.instance(),
+            otherPropertyName);
     }
 
     /**
@@ -380,13 +380,13 @@ public class PredicateFactory {
         BeanPropertiesExpression min =
             new BeanPropertiesExpression(
                 propertyName,
-                minPropertyName,
-                GreaterThanEqualTo.instance());
+                GreaterThanEqualTo.instance(),
+                minPropertyName);
         BeanPropertiesExpression max =
             new BeanPropertiesExpression(
                 propertyName,
-                maxPropertyName,
-                LessThanEqualTo.instance());
+                LessThanEqualTo.instance(),
+                maxPropertyName);
         return and(min, max);
     }
 

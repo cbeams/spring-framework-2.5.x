@@ -22,6 +22,11 @@ public class ClassUtilsTests extends TestCase {
         assertEquals("Class name did not match", "ClassUtilsTests.InnerClass",
                 className);
     }
+    
+    public void testGetShortNameAsProperty() {
+        String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
+        assertEquals("Class name did not match", "classUtilsTests", shortName);
+    }
 
     public void testNullClassGetShortName() {
         try {

@@ -21,7 +21,6 @@ import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.util.Assert;
 import org.springframework.util.Cache;
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

@@ -34,16 +34,16 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
      * 
      * @param propertyName
      *            The first property participating in the expression.
-     * @param otherPropertyName
-     *            The second property participating in the expression.
      * @param beanPropertyExpression
      *            The expression predicate that will test the two bean property
      *            values.
+     * @param otherPropertyName
+     *            The second property participating in the expression.
      */
     public BeanPropertiesExpression(
         String propertyName,
-        String otherPropertyName,
-        BinaryPredicate beanPropertyExpression) {
+        BinaryPredicate beanPropertyExpression,
+        String otherPropertyName) {
         super(propertyName);
         Assert.notNull(otherPropertyName);
         Assert.notNull(beanPropertyExpression);

@@ -19,7 +19,6 @@ import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.PredicateFactory;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
-import org.springframework.util.Assert;
 
 /**
  * Predicate that tests if the specified bean property is "present" - that is,
@@ -28,8 +27,9 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @see Required
  */
-public class PropertyPresent implements UnaryPredicate {
-    private String propertyName;
+public class PropertyPresent
+    extends AbstractBeanPropertyExpression
+    implements UnaryPredicate {
     private static final BinaryPredicate propertyPresentTester =
         PredicateFactory.attachResultConstraint(
             Required.instance(),
@@ -42,8 +42,7 @@ public class PropertyPresent implements UnaryPredicate {
      *            The bean property name.
      */
     public PropertyPresent(String propertyName) {
-        Assert.notNull(propertyName);
-        this.propertyName = propertyName;
+        super(propertyName);
     }
 
     /**
@@ -53,7 +52,7 @@ public class PropertyPresent implements UnaryPredicate {
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object bean) {
-        return propertyPresentTester.test(bean, propertyName);
+        return propertyPresentTester.test(bean, getPropertyName());
     }
 
 }

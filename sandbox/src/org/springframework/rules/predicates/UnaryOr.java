@@ -63,7 +63,7 @@ public class UnaryOr extends CompoundUnaryPredicate implements UnaryPredicate {
      */
     public boolean test(Object value) {
         for (Iterator i = iterator(); i.hasNext();) {
-            if (!((UnaryPredicate)i.next()).test(value)) {
+            if (((UnaryPredicate)i.next()).test(value))  {
                 return true;
             }
         }

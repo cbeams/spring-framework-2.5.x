@@ -34,8 +34,8 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
      * @param otherPropertyNames
      *            one or more other properties, delimited by commas.
      */
-    public RequiredIfOthersPresent(String otherPropertyNames) {
-        this(otherPropertyNames, LogicalOperator.AND);
+    public RequiredIfOthersPresent(String propertyName, String otherPropertyNames) {
+        this(propertyName, otherPropertyNames, LogicalOperator.AND);
     }
 
     /**
@@ -47,9 +47,9 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
      * @param operator
      *            the logical operator, either AND or OR.
      */
-    public RequiredIfOthersPresent(String otherPropertyNames,
+    public RequiredIfOthersPresent(String propertyName, String otherPropertyNames,
             LogicalOperator operator) {
-        super();
+        super(propertyName);
         Assert.notNull(otherPropertyNames);
         Assert.notNull(operator);
         Set set = StringUtils.commaDelimitedListToSet(otherPropertyNames);
@@ -63,6 +63,7 @@ public class RequiredIfOthersPresent extends RequiredIfTrue {
         for (Iterator i = set.iterator(); i.hasNext();) {
             compoundPredicate.add(new PropertyPresent((String)i.next()));
         }
+        setPredicate(compoundPredicate);
     }
 
 }
