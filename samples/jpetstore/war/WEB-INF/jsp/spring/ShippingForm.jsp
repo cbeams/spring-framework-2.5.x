@@ -1,5 +1,4 @@
 <%@ include file="IncludeTop.jsp" %>
-<%@ taglib prefix="html" uri="http://jakarta.apache.org/struts/tags-html" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <!-- Support for Spring errors holder -->
