@@ -90,7 +90,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.29 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: DispatcherServlet.java,v 1.30 2004-04-01 14:54:55 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -154,7 +154,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Additional logger for use when no mapping handlers are found for a request.
 	 */
-	protected final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
+	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -339,39 +339,39 @@ public class DispatcherServlet extends FrameworkServlet {
 		logger.debug("DispatcherServlet with name '" + getServletName() + "' received request for [" +
 		             request.getRequestURI() + "]");
 
-		// Make framework objects available for handlers
+		// make framework objects available for handlers
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 
-		// Convert the request into a multipart request, and make multipart resolver available.
-		// If no multipart resolver is set, simply use the existing request.
 		HttpServletRequest processedRequest = request;
-		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
-			if (request instanceof MultipartHttpServletRequest) {
-				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
-										"this typically results from an additional MultipartFilter in web.xml");
-			}
-			else {
-				request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
-				processedRequest = this.multipartResolver.resolveMultipart(request);
-			}
-		}
-
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
 		try {
-			mappedHandler = getHandler(processedRequest);
-			if (mappedHandler == null || mappedHandler.getHandler() == null) {
-				// if we didn't find a handler
-				pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
-																"] in DispatcherServlet with name '" + getServletName() + "'");
-				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				return;
-			}
-
 			ModelAndView mv = null;
 			try {
+				// Convert the request into a multipart request, and make multipart resolver available.
+				// If no multipart resolver is set, simply use the existing request.
+				if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+					if (request instanceof MultipartHttpServletRequest) {
+						logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
+												"this typically results from an additional MultipartFilter in web.xml");
+					}
+					else {
+						request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
+						processedRequest = this.multipartResolver.resolveMultipart(request);
+					}
+				}
+
+				mappedHandler = getHandler(processedRequest);
+				if (mappedHandler == null || mappedHandler.getHandler() == null) {
+					// if we didn't find a handler
+					pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
+																	"] in DispatcherServlet with name '" + getServletName() + "'");
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
+				}
+
 				// apply preHandle methods of registered interceptors
 				if (mappedHandler.getInterceptors() != null) {
 					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
@@ -402,9 +402,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			catch (Exception ex) {
 				ModelAndView exMv = null;
+				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
 				for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
 					HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();
-					exMv = resolver.resolveException(request, response, mappedHandler.getHandler(), ex);
+					exMv = resolver.resolveException(request, response, handler, ex);
 				}
 				if (exMv != null) {
 					if (logger.isDebugEnabled()) {
@@ -433,9 +434,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
 		catch (Exception ex) {
-			if (mappedHandler != null) {
-				triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
-			}
+			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 		}
 		finally {
 			// clean up any resources used by a multipart request
@@ -542,17 +541,19 @@ public class DispatcherServlet extends FrameworkServlet {
 																					 Exception ex) throws Exception {
 		// apply afterCompletion methods of registered interceptors
 		Exception currEx = ex;
-		if (mappedHandler.getInterceptors() != null) {
-			for (int i = interceptorIndex; i >=0; i--) {
-				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-				try {
-					interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
-				}
-				catch (Exception ex2) {
-					if (currEx != null) {
-						logger.error("Exception overridden by HandlerInterceptor.afterCompletion exception", currEx);
+		if (mappedHandler != null) {
+			if (mappedHandler.getInterceptors() != null) {
+				for (int i = interceptorIndex; i >=0; i--) {
+					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					try {
+						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
-					currEx = ex2;
+					catch (Exception ex2) {
+						if (currEx != null) {
+							logger.error("Exception overridden by HandlerInterceptor.afterCompletion exception", currEx);
+						}
+						currEx = ex2;
+					}
 				}
 			}
 		}
