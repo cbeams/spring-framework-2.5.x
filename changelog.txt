@@ -21,6 +21,13 @@ Package org.springframework.beans
 * DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
 * added PropertyPathFactoryBean, allowing to evaluate the property path of a target bean and expose the result
 
+Package org.springframework.orm
+* fixed LocalSessionFactoryBean to call "configure" after "setNamingStrategy" (in case of a specified "configLocation")
+
+Package org.springframework.scheduling
+* moved "configTimeDataSourceHolder" from LocalDataSourceJobStore to SchedulerFactoryBean
+* fixed LocalDataSourceJobStore to suppress a shutdown attempt on a Spring-provided DataSource
+
 Package org.springframework.web
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
