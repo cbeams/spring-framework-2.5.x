@@ -18,7 +18,7 @@ public class ResourcePropertiesFactoryBeanTests extends PropertiesFactoryBeanTes
 	protected PropertiesFactoryBean getPropertiesFactoryBean() {
 		ApplicationContext ac = new StaticApplicationContext() {
 			protected InputStream getResourceByPath(String path) throws IOException {
-				return ClassLoaderUtils.getResourceAsStream(getClass(), path);
+				return ClassLoaderUtils.getResourceAsStream(path);
 			}
 		};
 		ResourcePropertiesFactoryBean pfb = new ResourcePropertiesFactoryBean();

@@ -52,7 +52,6 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 		super(configLocations, parent);
 	}
 
-
 	/**
 	 * This implementation treats paths as class path resources.
 	 * Only supports full class path names including package specification,
@@ -60,11 +59,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * the path if not already contained.
 	 */
 	protected InputStream getResourceByPath(String path) throws IOException {
-		if (!path.startsWith("/")) {
-			// always use root, as relative loading doesn't make sense
-			path = "/" + path;
-		}
-		return ClassLoaderUtils.getResourceAsStream(getClass(), path);
+		return ClassLoaderUtils.getResourceAsStream(path);
 	}
 
 	/**

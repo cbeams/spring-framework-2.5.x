@@ -10,9 +10,7 @@ import java.util.Arrays;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
-import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Tests for SQLErrorCode loading.
@@ -89,14 +87,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 	
 	/**
-	 * Check that custom error codes take precedence
-	 *
+	 * Check that custom error codes take precedence.
 	 */
 	public void testFindCustomCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected InputStream loadInputStream(String resourcePath) {
 				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, resourcePath);
-				return ClassLoaderUtils.getResourceAsStream(getClass(), "test-error-codes.xml");	
+				return getClass().getResourceAsStream("test-error-codes.xml");
 			}
 		};
 	
@@ -112,7 +109,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 			protected InputStream loadInputStream(String resourcePath) {
 				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, resourcePath);
 				// Guaranteed to be on the classpath, but most certainly NOT XML
-				return ClassLoaderUtils.getResourceAsStream(getClass(), "JdbcTemplate.class");	
+				return getClass().getResourceAsStream("JdbcTemplate.class");
 			}
 		};
 

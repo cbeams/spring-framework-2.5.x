@@ -13,25 +13,19 @@ import java.io.InputStream;
 public abstract class ClassLoaderUtils {
 
 	/**
-	 * Load a resource from the class path, first trying the thread context
-	 * class loader, then the class loader of the given class.
-	 * @param clazz a class to try the class loader of
+	 * Load a resource from the class path, via the thread context class loader.
+	 * Will always load relative to the class path root. Accepts path with or
+	 * without leading slashes, i.e. "/a/b/myresource" and "a/b/myresource".
 	 * @param name the resource name
-	 * @return an input stream for reading the resource,
-	 * or null if not found
+	 * @return an input stream for reading the resource, or null if not found
 	 * @see ClassLoader#getResourceAsStream
-	 * @see Class#getResourceAsStream
 	 */
-	public static InputStream getResourceAsStream(Class clazz, String name) {
+	public static InputStream getResourceAsStream(String name) {
+		if (name.startsWith("/")) {
+			name = name.substring(1);
+		}
 		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-		InputStream in = null;
-		if (ccl != null) {
-			in = ccl.getResourceAsStream(name);
-		}
-		if (in == null) {
-			in = clazz.getResourceAsStream(name);
-		}
-		return in;
+		return ccl.getResourceAsStream(name);
 	}
 
 	/**

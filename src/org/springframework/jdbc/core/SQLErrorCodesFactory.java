@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -35,7 +36,7 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.1 2003-11-03 15:12:57 johnsonr Exp $
+   @version $Id: SQLErrorCodesFactory.java,v 1.2 2003-11-23 22:57:51 jhoeller Exp $
  */
 public class SQLErrorCodesFactory {
 
@@ -43,15 +44,14 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Name of custom SQL error codes file, loading from the root
-	 * of the classpath (e.g. in the WEB-INF/classes directory).
+	 * of the class path (e.g. in the WEB-INF/classes directory).
 	 */
-	public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "/sql-error-codes.xml";
+	public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "sql-error-codes.xml";
 
 	/**
-	 * Name of SQL error code files, loading from the classpath.
-	 * Will look in the package of this class (no leading /).
+	 * Name of default SQL error code files, loading from the class path.
 	 */
-	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "sql-error-codes.xml";
+	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/core/sql-error-codes.xml";
 
 	/**
 	* Keep track of this instance so we can return it to classes that request it.
@@ -117,7 +117,7 @@ public class SQLErrorCodesFactory {
 	}
 	
 	/**
-	 * Protected for testability. Load the given input stream from the classpath.
+	 * Protected for testability. Load the given input stream from the class path.
 	 * @param resourcePath classpath syntax for input stream. SQL_ERROR_CODE_DEFAULT_PATH
 	 * or SQL_ERROR_CODE_OVERRIDE_PATH.
 	 * <b>Not to be overriden by application developers, who should obtain instances
@@ -125,7 +125,7 @@ public class SQLErrorCodesFactory {
 	 * @return the input stream or null if the resource wasn't found
 	 */
 	protected InputStream loadInputStream(String resourcePath) {
-		return ClassLoaderUtils.getResourceAsStream(getClass(), resourcePath);
+		return ClassLoaderUtils.getResourceAsStream(resourcePath);
 	}
 
 	/**

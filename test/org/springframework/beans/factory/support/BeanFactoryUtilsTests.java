@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.beans.factory.support;
 
 import java.util.Arrays;
@@ -22,36 +22,36 @@ import org.springframework.util.ClassLoaderUtils;
 import org.springframework.web.servlet.HandlerAdapter;
 
 /**
- * 
+ *
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.5 2003-11-23 13:44:10 jhoeller Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.6 2003-11-23 22:57:51 jhoeller Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
 	private final static String BASE_PATH = "org/springframework/beans/factory/support/";
-	
+
 	private ListableBeanFactory listableFactory;
 
 	protected void setUp() {
 		// Interesting hierarchical factory to test counts
 		// Slow to read so we cache it
 		XmlBeanFactory grandParent = new XmlBeanFactory();
-		grandParent.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), BASE_PATH + "root.xml"));
+		grandParent.loadBeanDefinitions(getClass().getResourceAsStream("root.xml"));
 		XmlBeanFactory parent = new XmlBeanFactory(grandParent);
-		parent.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), "middle.xml"));
+		parent.loadBeanDefinitions(getClass().getResourceAsStream("middle.xml"));
 		XmlBeanFactory child = new XmlBeanFactory(parent);
-		child.loadBeanDefinitions(ClassLoaderUtils.getResourceAsStream(getClass(), "leaf.xml"));
+		child.loadBeanDefinitions(getClass().getResourceAsStream("leaf.xml"));
 		this.listableFactory = child;
 	}
-	
+
 	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("t1", new TestBean());
 		lbf.addBean("t2", new TestBean());
 		assertTrue(BeanFactoryUtils.countBeansIncludingAncestors(lbf) == 2);
 	}
-	
+
 	/**
 	 * Check that override doesn't count as too separate beans
 	 * @throws Exception
@@ -63,7 +63,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableFactory),
 			BeanFactoryUtils.countBeansIncludingAncestors(this.listableFactory) == 7);
 	}
-	
+
 	public void testHierarchicalNamesWithOverride() throws Exception {
 		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, ITestBean.class));
 		assertEquals(2, names.size());

@@ -88,13 +88,9 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 		if (this.configLocation != null) {
 			// load JDO properties from given location
 			String resourceLocation = this.configLocation;
-			if (!resourceLocation.startsWith("/")) {
-				// always use root, as relative loading doesn't make sense
-				resourceLocation = "/" + resourceLocation;
-			}
-			InputStream in = ClassLoaderUtils.getResourceAsStream(getClass(), resourceLocation);
+			InputStream in = ClassLoaderUtils.getResourceAsStream(resourceLocation);
 			if (in == null) {
-				throw new DataAccessResourceFailureException("Cannot open config location: " + resourceLocation, null);
+				throw new DataAccessResourceFailureException("Cannot open config location: " + resourceLocation);
 			}
 			prop.load(in);
 		}

@@ -26,7 +26,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 	private static final String DTD_NAME = "spring-beans";
 
-	private static final String SEARCH_PACKAGE = "/org/springframework/beans/factory/xml/";
+	private static final String SEARCH_PACKAGE = "org/springframework/beans/factory/xml/";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -38,7 +38,7 @@ public class BeansDtdResolver implements EntityResolver {
 			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
 			// Search for DTD
 			logger.debug("Trying to locate [" + dtdFile + "] under [" + SEARCH_PACKAGE + "]");
-			InputStream is = ClassLoaderUtils.getResourceAsStream(getClass(), SEARCH_PACKAGE + dtdFile);
+			InputStream is = ClassLoaderUtils.getResourceAsStream(SEARCH_PACKAGE + dtdFile);
 			if (is != null) {
 				logger.debug("Found beans DTD [" + systemId + "] in class path");
 				InputSource source = new InputSource(is);

@@ -105,7 +105,7 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	protected Properties loadProperties() throws IOException {
 		logger.info("Loading properties file from class path location [" + this.location + "]");
 		Properties properties = new Properties();
-		properties.load(ClassLoaderUtils.getResourceAsStream(getClass(), this.location));
+		properties.load(ClassLoaderUtils.getResourceAsStream(this.location));
 		return properties;
 	}
 
