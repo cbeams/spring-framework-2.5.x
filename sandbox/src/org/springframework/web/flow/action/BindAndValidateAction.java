@@ -35,26 +35,62 @@ import org.springframework.web.flow.MutableFlowModel;
  * Base binding and validation action, which may be used as is, or specialized
  * as needed.
  * 
+ * <p>
+ * <b>Exposed configuration properties:</b><br>
+ * <table border="1">
+ *  <tr>
+ *      <td><b>name</b></td>
+ *      <td><b>default</b></td>
+ *      <td><b>description</b></td>
+ *  </tr>
+ *  <tr>
+ *      <td>formObjectName</td>
+ *      <td><i>{@link AbstractAction#FORM_OBJECT_ATTRIBUTE}</i></td>
+ *      <td>The name of the formObject in the model.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>formObjectClass</td>
+ *      <td><i>null</i></td>
+ *      <td>Set the formObject class for this controller. An instance of this class
+ *      gets populated and validated on each request.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>propertyEditorRegistrar</td>
+ *      <td><i>null</i></td>
+ *      <td>Set a property editor registration strategy for this action's data
+ *      binders.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>validator(s)</td>
+ *      <td><i>empty</i></td>
+ *      <td>Set the validator(s) for this controller. Each validator must support the
+ *      specified formObject class.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>validateOnBinding</td>
+ *      <td><i>true</i></td>
+ *      <td>Set if the Validator should get applied when binding.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>createFormObjectPerRequest</td>
+ *      <td><i>false</i></td>
+ *      <td>Set if we create a new form object instance everytime this action is
+ *      invoked.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>messageCodesResolver</td>
+ *      <td><i>null</i></td>
+ *      <td>Set the strategy to use for resolving errors into message codes.</td>
+ *  </tr>
+ * </table>
+ * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  */
 public class BindAndValidateAction extends AbstractAction {
 
-	/**
-	 * Default name used for a form object in flow scope.
-	 */
-	public static final String DEFAULT_FORM_OBJECT_NAME = "formObject";
-
-	/**
-	 * Constant result marker that indicates to the base BindAndValidate action
-	 * that it should attempt to return a default <code>success</code> or
-	 * <code>error</code> event. What event to return is calculated based on
-	 * whether any errors were generated during the bind and validate process.
-	 */
-	protected static final String USE_DEFAULT_EVENT = null;
-
-	private String formObjectName = DEFAULT_FORM_OBJECT_NAME;
+	private String formObjectName = FORM_OBJECT_ATTRIBUTE;
 
 	private Class formObjectClass;
 
@@ -64,9 +100,16 @@ public class BindAndValidateAction extends AbstractAction {
 
 	private boolean validateOnBinding = true;
 
-	private boolean createFormObjectPerRequest;
+	private boolean createFormObjectPerRequest = false;
 
 	private MessageCodesResolver messageCodesResolver;
+
+	/**
+	 * Return the name of the formObject in the model.
+	 */
+	public String getFormObjectName() {
+		return this.formObjectName;
+	}
 
 	/**
 	 * Set the name of the formObject in the model. The formObject object will
@@ -77,10 +120,10 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * Return the name of the formObject in the model.
+	 * Return the formObject class for this controller.
 	 */
-	public String getFormObjectName() {
-		return this.formObjectName;
+	public Class getFormObjectClass() {
+		return this.formObjectClass;
 	}
 
 	/**
@@ -92,26 +135,25 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * Return the formObject class for this controller.
-	 */
-	public Class getFormObjectClass() {
-		return this.formObjectClass;
-	}
-
-	/**
 	 * Set a property editor registration strategy for this action's data
 	 * binders.
-	 * @param propertyEditorRegistrar
 	 */
 	public void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
 		this.propertyEditorRegistrar = propertyEditorRegistrar;
 	}
 
 	/**
-	 * Set the primary Validator for this action. The Validator must support the
+	 * Returns the primary validator for this controller.
+	 */
+	public Validator getValidator() {
+		return (validators != null && validators.length > 0 ? validators[0] : null);
+	}
+
+	/**
+	 * Set the primary validator for this action. The Validator must support the
 	 * specified formObject class. If there are one or more existing validators
 	 * set already when this method is called, only the specified validator will
-	 * be kept. Use {@link #setValidators(Validator[])}to set multiple
+	 * be kept. Use {@link #setValidators(Validator[])} to set multiple
 	 * validators.
 	 */
 	public void setValidator(Validator validator) {
@@ -119,14 +161,14 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * @return the Validators for this controller.
+	 * Returns the validators for this controller.
 	 */
-	public Validator getValidator() {
-		return (validators != null && validators.length > 0 ? validators[0] : null);
+	public final Validator[] getValidators() {
+		return validators;
 	}
 
 	/**
-	 * Set the Validators for this controller. The Validator must support the
+	 * Set the Validators for this controller. Each validator must support the
 	 * specified formObject class.
 	 */
 	public void setValidators(Validator[] validators) {
@@ -134,10 +176,10 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * @return the primary Validator for this controller.
+	 * Return if the Validator should get applied when binding.
 	 */
-	public final Validator[] getValidators() {
-		return validators;
+	public boolean isValidateOnBinding() {
+		return validateOnBinding;
 	}
 
 	/**
@@ -145,13 +187,6 @@ public class BindAndValidateAction extends AbstractAction {
 	 */
 	public void setValidateOnBinding(boolean validateOnBinding) {
 		this.validateOnBinding = validateOnBinding;
-	}
-
-	/**
-	 * Return if the Validator should get applied when binding.
-	 */
-	public boolean isValidateOnBinding() {
-		return validateOnBinding;
 	}
 
 	/**
@@ -167,10 +202,16 @@ public class BindAndValidateAction extends AbstractAction {
 	/**
 	 * Set if we create a new form object instance everytime this action is
 	 * invoked.
-	 * @param createNewFormObjectPerRequest
 	 */
 	public final void setCreateFormObjectPerRequest(boolean createNewFormObjectPerRequest) {
 		this.createFormObjectPerRequest = createNewFormObjectPerRequest;
+	}
+
+	/**
+	 * Return the strategy to use for resolving errors into message codes.
+	 */
+	public final MessageCodesResolver getMessageCodesResolver() {
+		return messageCodesResolver;
 	}
 
 	/**
@@ -183,13 +224,6 @@ public class BindAndValidateAction extends AbstractAction {
 	 */
 	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
 		this.messageCodesResolver = messageCodesResolver;
-	}
-
-	/**
-	 * Return the strategy to use for resolving errors into message codes.
-	 */
-	public final MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
 	}
 
 	public void afterPropertiesSet() {
@@ -262,7 +296,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * Load the backing form object that should be updated from incoming request
 	 * input and validated. By default, will attempt to instantiate a new form
 	 * object instance transiently in memory if not already present in the flow
-	 * model (and the crateFormObjectPerRequest parameter is marked as false,
+	 * model (and the createFormObjectPerRequest parameter is marked as false,
 	 * the default.)
 	 * <p>
 	 * Subclasses should override if they need to load the form object from a
@@ -307,6 +341,10 @@ public class BindAndValidateAction extends AbstractAction {
 	/**
 	 * Create a new formObject instance for the formObject class of this
 	 * controller.
+	 * @param request The http request, allowing access to input
+	 *        parameters/attributes needed to retrieve the form object.
+	 * @param model The flow data model, allowing access to attributes needed to
+	 *        retrieve the form object.
 	 * @return the new formObject instance
 	 * @throws InstantiationException if the formObject class could not be
 	 *         instantiated
@@ -314,7 +352,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *         accessible
 	 */
 	protected Object createFormObject(HttpServletRequest request, FlowModel model) throws InstantiationException,
-			IllegalAccessException, ServletRequestBindingException {
+			IllegalAccessException {
 		if (this.formObjectClass == null) {
 			throw new IllegalStateException("Cannot create formObject without formObjectClass being set - "
 					+ "either set formObjectClass, override loadFormObject, or override this method");
@@ -323,33 +361,6 @@ public class BindAndValidateAction extends AbstractAction {
 			logger.debug("Creating new formObject of class [" + this.formObjectClass.getName() + "]");
 		}
 		return this.formObjectClass.newInstance();
-	}
-
-	/**
-	 * Bind the parameters of the given request to the form object in the model.
-	 * @param request current HTTP request
-	 * @param model the flow data model
-	 * @param binder the binder to use for binding
-	 * @return the action result outcome
-	 * @throws Exception in case of invalid state or arguments
-	 */
-	protected final String bindAndValidate(HttpServletRequest request, MutableFlowModel model,
-			ServletRequestDataBinder binder) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
-					+ "', details='" + binder.getTarget() + "'");
-		}
-		binder.bind(request);
-		onBind(request, model, binder.getTarget(), binder.getErrors());
-		if (logger.isDebugEnabled()) {
-			logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");
-		}
-		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
-			for (int i = 0; i < this.validators.length; i++) {
-				ValidationUtils.invokeValidator(this.validators[i], binder.getTarget(), binder.getErrors());
-			}
-		}
-		return onBindAndValidate(request, model, binder.getTarget(), binder.getErrors());
 	}
 
 	/**
@@ -376,25 +387,21 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * <p>
 	 * Initialize the given binder instance, for example with custom editors.
 	 * Called by createBinder.
-	 * </p>
 	 * <p>
 	 * This method allows you to register custom editors for certain fields of
 	 * your form object. For instance, you will be able to transform Date
 	 * objects into a String pattern and back, in order to allow your JavaBeans
 	 * to have Date properties and still be able to set and display them in an
 	 * HTML interface.
-	 * </p>
 	 * <p>
 	 * Default implementation will simply call registerCustomEditors on any
 	 * propertyEditorRegistrar object that has been set for the action.
 	 * <p>
 	 * The flow model may be used to feed reference data to any property
 	 * editors, although it may be better (in the interest of not bloating the
-	 * session, to put have the editors get this from somewhere else
-	 * </p>
+	 * session, to have the editors get this from somewhere else).
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 * @param binder new binder instance
@@ -413,10 +420,36 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
+	 * Bind the parameters of the given request to the form object in the model.
+	 * @param request current HTTP request
+	 * @param model the flow data model
+	 * @param binder the binder to use for binding
+	 * @return the action result outcome
+	 */
+	protected final String bindAndValidate(HttpServletRequest request, MutableFlowModel model,
+			ServletRequestDataBinder binder) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
+					+ "', details='" + binder.getTarget() + "'");
+		}
+		binder.bind(request);
+		onBind(request, model, binder.getTarget(), binder.getErrors());
+		if (logger.isDebugEnabled()) {
+			logger.debug("After bind of object '" + binder.getObjectName() + "', details='" + binder.getTarget() + "'");
+		}
+		if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
+			for (int i = 0; i < this.validators.length; i++) {
+				ValidationUtils.invokeValidator(this.validators[i], binder.getTarget(), binder.getErrors());
+			}
+		}
+		return onBindAndValidate(request, model, binder.getTarget(), binder.getErrors());
+	}
+
+	/**
 	 * Callback for custom post-processing in terms of binding. Called on each
 	 * submit, after standard binding but before validation.
 	 * <p>
-	 * Default implementation delegates to onBind(request, formObject).
+	 * Default implementation delegates to onBind(request, model, formObject).
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 * @param formObject the formObject object to perform further binding on
@@ -453,15 +486,18 @@ public class BindAndValidateAction extends AbstractAction {
 
 	/**
 	 * Callback for custom post-processing in terms of binding and validation.
-	 * Called on each submit, after standard binding and validation, but before
-	 * error evaluation.
+	 * Called on each submit, after standard binding and validation.
 	 * <p>
-	 * Default implementation is empty.
+	 * Default implementation will call onBindAndValidateSuccess() if given
+	 * errors instance does not have errors. Otherwise [null] will be returned,
+	 * which indicates that the default action result calculated by the
+	 * getDefaultActionResult() method will be used.
 	 * @param request current HTTP request
 	 * @param formObject the formObject object, still allowing for further
 	 *        binding
 	 * @param errors validation errors holder, allowing for additional custom
 	 *        validation
+	 * @return the action result outcome
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
@@ -474,8 +510,8 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * Hook called when binding and validation completes successfully;
-	 * subclasses may optionally return a ActionBeanEvent to supercede the
+	 * Hook called when binding and validation completed successfully;
+	 * subclasses may optionally return an action result to supercede the
 	 * default result event, which will be success().
 	 * @param request the http request
 	 * @param model the flow data model
@@ -489,10 +525,11 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	/**
-	 * Hook called when binding and validation completes successfully;
-	 * subclasses may optionally return a ActionBeanEvent to supercede the
+	 * Hook called when binding and validation completed successfully;
+	 * subclasses may optionally return an action result to supercede the
 	 * default result event, which will be success().
-	 * 
+	 * <p>
+	 * This implementation returns [null].
 	 * @param request the http request
 	 * @param model the flow data model
 	 * @param formObject the form object

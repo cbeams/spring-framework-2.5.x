@@ -52,13 +52,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * The form object instance is aliased under this attribute name in the flow
 	 * model by the default form setup and bind and validate actions.
 	 */
-	public static final String FORM_OBJECT_ATTRIBUTE = "localFormObject";
+	public static final String FORM_OBJECT_ATTRIBUTE = "formObject";
 
 	/**
 	 * The form object errors instance is aliased under this attribute name in
 	 * the flow model by the default form setup and bind and validate actions.
 	 */
-	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE = "localFormObjectErrors";
+	public static final String FORM_OBJECT_ERRORS_ATTRIBUTE = "formObjectErrors";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
