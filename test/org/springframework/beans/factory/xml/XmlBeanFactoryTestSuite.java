@@ -32,7 +32,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.11 2003-11-05 11:28:15 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.12 2003-11-07 16:06:55 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -216,9 +216,15 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 	}
 
 	public void testPrototypeReferences() {
-		DummyReferencer ref = (DummyReferencer) getBeanFactory().getBean("prototypeReferencer");
 		// check that not broken by circular reference resolution mechanism
-		assertTrue("Not referencing same bean twice", ref.getTestBean1() != ref.getTestBean2());
+		DummyReferencer ref1 = (DummyReferencer) getBeanFactory().getBean("prototypeReferencer");
+		assertTrue("Not referencing same bean twice", ref1.getTestBean1() != ref1.getTestBean2());
+		DummyReferencer ref2 = (DummyReferencer) getBeanFactory().getBean("prototypeReferencer");
+		assertTrue("Not the same referencer", ref1 != ref2);
+		assertTrue("Not referencing same bean twice", ref2.getTestBean1() != ref2.getTestBean2());
+		assertTrue("Not referencing same bean twice", ref1.getTestBean1() != ref2.getTestBean1());
+		assertTrue("Not referencing same bean twice", ref1.getTestBean2() != ref2.getTestBean2());
+		assertTrue("Not referencing same bean twice", ref1.getTestBean1() != ref2.getTestBean2());
 	}
 
 	public void testFactoryReferenceCircle() {

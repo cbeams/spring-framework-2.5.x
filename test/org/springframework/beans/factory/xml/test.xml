@@ -65,7 +65,7 @@
 
 	<!-- Check that the circular reference resolution mechanism doesn't break
 	     prototype instantiation -->
-	<bean id="prototypeReferencer" class="org.springframework.beans.factory.xml.DummyReferencer">
+	<bean id="prototypeReferencer" class="org.springframework.beans.factory.xml.DummyReferencer" singleton="false">
 		<property name="testBean1"><ref local="kathy"/></property>
 		<property name="testBean2"><ref bean="kathy"/></property>
 	</bean>
