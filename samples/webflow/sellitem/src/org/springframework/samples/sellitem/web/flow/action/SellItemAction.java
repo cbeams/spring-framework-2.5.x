@@ -20,18 +20,17 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.action.FormAction;
 
-public class SellItemFlowAction extends FormAction {
-	
-	public SellItemFlowAction() {
-		setFormObjectName("pos");
+public class SellItemAction extends FormAction {
+
+	public SellItemAction() {
+		setFormObjectName("sale");
 		setFormObjectClass(Sale.class);
 		setFormObjectScope(ScopeType.FLOW);
 	}
 
-	public Event processShippingDetails(RequestContext context) throws Exception {
+	public Event isShipping(RequestContext context) throws Exception {
 		//TODO: improve this with conditional transitions
-		Sale pos=(Sale)context.getFlowScope().getAttribute("pos");
-		return pos.isShipping() ? result("shipping") : result("pickedUp");
+		Sale sale = (Sale)context.getFlowScope().getAttribute("sale");
+		return sale.isShipping() ? result("yes") : result("no");
 	}
-
 }

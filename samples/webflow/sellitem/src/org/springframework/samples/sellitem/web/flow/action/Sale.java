@@ -20,53 +20,57 @@ import java.io.Serializable;
 public class Sale implements Serializable {
 
 	private double price;
+
 	private int itemCount;
+
 	private String category;
+
 	private boolean shipping;
+
 	private String shippingType;
 
 	public String getCategory() {
 		return category;
 	}
-	
+
 	public void setCategory(String category) {
 		this.category = category;
 	}
-	
+
 	public int getItemCount() {
 		return itemCount;
 	}
-	
+
 	public void setItemCount(int itemCount) {
 		this.itemCount = itemCount;
 	}
-	
+
 	public double getPrice() {
 		return price;
 	}
-	
+
 	public void setPrice(double price) {
 		this.price = price;
 	}
-	
+
 	public boolean isShipping() {
 		return shipping;
 	}
-	
+
 	public void setShipping(boolean shipping) {
 		this.shipping = shipping;
 	}
-	
+
 	public String getShippingType() {
 		return shippingType;
 	}
-	
+
 	public void setShippingType(String shippingType) {
 		this.shippingType = shippingType;
 	}
-	
+
 	// business logic methods
-	
+
 	/**
 	 * Returns the base amount of the sale, without discount
 	 * or delivery costs.
@@ -74,46 +78,46 @@ public class Sale implements Serializable {
 	public double getAmount() {
 		return price * itemCount;
 	}
-	
+
 	/**
 	 * Returns the discount rate to apply.
 	 */
 	public double getDiscountRate() {
-		double discount=0.02;
+		double discount = 0.02;
 		if ("A".equals(category)) {
-			if (itemCount>=100) {
-				discount=0.1;
+			if (itemCount >= 100) {
+				discount = 0.1;
 			}
 		}
 		else if ("B".equals(category)) {
-			if (itemCount>=200) {
-				discount=0.2;
+			if (itemCount >= 200) {
+				discount = 0.2;
 			}
 		}
 		return discount;
 	}
-	
+
 	/**
 	 * Returns the savings because of the discount.
 	 */
 	public double getSavings() {
-		return getDiscountRate()*getAmount();
+		return getDiscountRate() * getAmount();
 	}
-	
+
 	/**
 	 * Returns the delivery cost.
 	 */
 	public double getDeliveryCost() {
-		double delCost=0.0;
+		double delCost = 0.0;
 		if ("S".equals(shippingType)) {
-			delCost=10.0;
+			delCost = 10.0;
 		}
 		else if ("E".equals(shippingType)) {
-			delCost=20.0;
+			delCost = 20.0;
 		}
 		return delCost;
 	}
-	
+
 	/**
 	 * Returns the total cost of the sale, including
 	 * discount and delivery cost.
