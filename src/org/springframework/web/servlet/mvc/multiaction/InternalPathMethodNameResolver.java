@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc.multiaction;
 
@@ -25,27 +25,53 @@ package org.springframework.web.servlet.mvc.multiaction;
  *
  * <p>Maps the resource name after the last slash, ignoring an extension.
  * E.g. "/foo/bar/baz.html" to "baz", assuming a "/foo/bar/baz.html"
- * controller mapping to the respective MultiActionController.
- * Doesn't support wildcards.
+ * controller mapping to the corresponding MultiActionController handler.
+ * method. Doesn't support wildcards.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
 */
 public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolver {
 
+	private String prefix = "";
+
+	private String suffix = "";
+
+	/**
+	 * Specify a common prefix for handler method names.
+	 * Will be prepended to the internal path found in the URL:
+	 * e.g. internal path "baz", prefix "my" -> method name "mybaz".
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	/**
+	 * Specify a common suffix for handler method names.
+	 * Will be appended to the internal path found in the URL:
+	 * e.g. internal path "baz", suffix "Handler" -> method name "bazHandler".
+	 */
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
-		String name = urlPath;
-		// look at resource name after last slash
-		int slashIndex = name.lastIndexOf('/');
+		String methodName = urlPath;
+
+		// Look at resource name after last slash in the URL path.
+		int slashIndex = methodName.lastIndexOf('/');
 		if (slashIndex != -1) {
-			name = name.substring(slashIndex+1);
+			methodName = methodName.substring(slashIndex+1);
 		}
-		// ignore extension
-		int dotIndex = name.lastIndexOf('.');
+
+		// Ignore extension, if any.
+		int dotIndex = methodName.lastIndexOf('.');
 		if (dotIndex != -1) {
-			name = name.substring(0, dotIndex);
+			methodName = methodName.substring(0, dotIndex);
 		}
-		return name;
+
+		// Prepend prefix and append suffix.
+		return (this.prefix + methodName + this.suffix);
 	}
 
 }
