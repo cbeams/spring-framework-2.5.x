@@ -138,7 +138,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected boolean isExistingTransaction(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-		// consider a pre-bound Connection as transaction
+		// Consider a pre-bound connection as transaction.
 		return (txObject.getConnectionHolder() != null);
 	}
 
@@ -226,19 +226,19 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() +
-									 "] rollback-only");
+					"] rollback-only");
 		}
-		txObject.getConnectionHolder().setRollbackOnly();
+		txObject.setRollbackOnly();
 	}
 
 	protected void doCleanupAfterCompletion(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
-		// remove the connection holder from the thread
+		// Remove the connection holder from the thread.
 		TransactionSynchronizationManager.unbindResource(this.dataSource);
 		txObject.getConnectionHolder().clear();
 
-		// reset connection
+		// Reset connection.
 		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
 			if (txObject.isMustRestoreAutoCommit()) {
@@ -270,12 +270,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		private boolean mustRestoreAutoCommit;
 
-		private void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
+		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
 			this.mustRestoreAutoCommit = mustRestoreAutoCommit;
 		}
 
-		private boolean isMustRestoreAutoCommit() {
+		public boolean isMustRestoreAutoCommit() {
 			return mustRestoreAutoCommit;
+		}
+
+		public void setRollbackOnly() {
+			getConnectionHolder().setRollbackOnly();
 		}
 
 		public boolean isRollbackOnly() {
