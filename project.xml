@@ -11,7 +11,7 @@
    <name>Spring Framework</name>
 
    <!-- The version of the project under development, e.g. 1.1, 1.2, 2.0-dev -->
-   <currentVersion>1.1.1</currentVersion>
+   <currentVersion>1.1.2</currentVersion>
 
    <organization>
       <name>Spring Framework Project</name>
