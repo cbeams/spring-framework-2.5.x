@@ -33,7 +33,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.10 2004-03-09 07:44:24 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.11 2004-03-12 02:54:20 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -96,7 +96,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			}
 			else if (Advised.class == method.getDeclaringClass()) {
 				// Service invocations on ProxyConfig with the proxy config
-				return method.invoke(this.advised, args);
+				return AopProxyUtils.invokeJoinpointUsingReflection(this.advised, method, args);
 			}
 			
 			Object retVal = null;

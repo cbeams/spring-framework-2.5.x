@@ -37,7 +37,7 @@ import org.springframework.aop.TargetSource;
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: Cglib2AopProxy.java,v 1.2 2004-02-19 18:25:11 colins Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.3 2004-03-12 02:54:20 johnsonr Exp $
  */
 class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
@@ -90,15 +90,13 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 			// Try special rules for equals() method and implementation of the
 			// ProxyConfig AOP configuration interface
 			if (isEqualsMethod(method)) {
-				// What if equals throws exception!?
-
 				// This class implements the equals() method itself
 				// We don't need to use reflection
 				return new Boolean(equals(args[0]));
 			}
-			else if (Advised.class.equals(method.getDeclaringClass())) {
+			else if (Advised.class == method.getDeclaringClass()) {
 				// Service invocations on ProxyConfig with the proxy config
-				return method.invoke(this.advised, args);
+				return AopProxyUtils.invokeJoinpointUsingReflection(this.advised, method, args);
 			}
 			
 			Object retVal = null;
