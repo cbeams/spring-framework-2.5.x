@@ -523,28 +523,7 @@
 			<formatter type="xml"/>
 
 			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${target.testclasses.dir}"
-							includes="${test.includes}"
-							excludes="${test.excludes}">
-					<exclude name="**/JmsTemplate102Tests.class"/>
-					<exclude name="**/JmsTemplate11Tests.class"/>
-					<exclude name="**/TransactionTestSuite.class"/>
-				</fileset>
-
-			</batchtest>
-			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${target.testclasses.dir}"
-						includes="**/JmsTemplate102Tests.class"
-						excludes="${test.excludes}"/>
-			</batchtest>
-			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${target.testclasses.dir}"
-						includes="**/JmsTemplate11Tests.class"
-						excludes="${test.excludes}"/>
-			</batchtest>
-			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${target.testclasses.dir}"
-						includes="**/TransactionTestSuite.class"/>
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 		</junit>
 
