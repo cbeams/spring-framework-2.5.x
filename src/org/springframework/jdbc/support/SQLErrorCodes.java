@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
  * Normally loaded through a BeanFactory implementation.
  * Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @see SQLErrorCodeSQLExceptionTranslator
  * @see SQLErrorCodesFactory
  */
@@ -39,20 +40,12 @@ public class SQLErrorCodes {
 
 	private String[] dataIntegrityViolationCodes = new String[0];
 	
-	private String[] dataRetrievalFailureCodes = new String[0];
-	
-	private String[] optimisticLockingFailureCodes = new String[0];
-	
-	private String[] pessimisticLockingFailureCodes = new String[0];
-
 	private String[] cannotAcquireLockCodes = new String[0];
 
-	private String[] deadlockLoserDataAccessCodes = new String[0];
-	
+	private String[] deadlockLoserCodes = new String[0];
+
 	private String[] cannotSerializeTransactionCodes = new String[0];
-	
-	private String[] dataAccessResourceFailureCodes = new String[0];
-	
+
 	private List customTranslations = new LinkedList();
 
 
@@ -93,6 +86,7 @@ public class SQLErrorCodes {
 		return useSqlStateForTranslation;
 	}
 
+
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
 		this.badSqlGrammarCodes = StringUtils.sortStringArray(badSqlGrammarCodes);
 	}
@@ -109,31 +103,6 @@ public class SQLErrorCodes {
 		return dataIntegrityViolationCodes;
 	}
 
-	public void setDataRetrievalFailureCodes(String[] dataRetrievalFailureCodes) {
-		this.dataRetrievalFailureCodes = StringUtils.sortStringArray(dataRetrievalFailureCodes);
-	}
-
-	public String[] getDataRetrievalFailureCodes() {
-		return dataRetrievalFailureCodes;
-	}
-
-	public void setOptimisticLockingFailureCodes(String[] optimisticLockingFailureCodes) {
-		this.optimisticLockingFailureCodes = StringUtils.sortStringArray(optimisticLockingFailureCodes);
-	}
-
-	public String[] getOptimisticLockingFailureCodes() {
-		return optimisticLockingFailureCodes;
-	}
-
-	public String[] getPessimisticLockingFailureCodes() {
-		return pessimisticLockingFailureCodes;
-	}
-	
-	public void setPessimisticLockingFailureCodes(
-			String[] pessimisticLockingFailureCodes) {
-		this.pessimisticLockingFailureCodes = pessimisticLockingFailureCodes;
-	}
-	
 	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
 		this.cannotAcquireLockCodes = StringUtils.sortStringArray(cannotAcquireLockCodes);
 	}
@@ -141,32 +110,23 @@ public class SQLErrorCodes {
 	public String[] getCannotAcquireLockCodes() {
 		return cannotAcquireLockCodes;
 	}
+
+	public void setDeadlockLoserCodes(String[] deadlockLoserCodes) {
+		this.deadlockLoserCodes = deadlockLoserCodes;
+	}
+
+	public String[] getDeadlockLoserCodes() {
+		return deadlockLoserCodes;
+	}
+
+	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
+		this.cannotSerializeTransactionCodes = cannotSerializeTransactionCodes;
+	}
 	
 	public String[] getCannotSerializeTransactionCodes() {
 		return cannotSerializeTransactionCodes;
 	}
-	
-	public void setCannotSerializeTransactionCodes(
-			String[] cannotSerializeTransactionCodes) {
-		this.cannotSerializeTransactionCodes = cannotSerializeTransactionCodes;
-	}
-	
-	public String[] getDeadlockLoserDataAccessCodes() {
-		return deadlockLoserDataAccessCodes;
-	}
-	
-	public void setDeadlockLoserDataAccessCodes(
-			String[] deadlockLoserDataAccessCodes) {
-		this.deadlockLoserDataAccessCodes = deadlockLoserDataAccessCodes;
-	}
-	
-	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
-		this.dataAccessResourceFailureCodes = StringUtils.sortStringArray(dataAccessResourceFailureCodes);
-	}
 
-	public String[] getDataAccessResourceFailureCodes() {
-		return dataAccessResourceFailureCodes;
-	}
 
 	/**
 	 * @param customTranslations List of CustomSQLErrorCodesTranslation objects

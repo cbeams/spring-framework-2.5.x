@@ -57,7 +57,7 @@
 		<property name="dataIntegrityViolationCodes">
 			<value>1062</value>
 		</property>
-		<property name="cannotAcquireLockCodes">
+		<property name="deadlockLoserCodes">
 			<value>1213</value>
 		</property>
 	</bean>
