@@ -26,6 +26,7 @@ import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -41,9 +42,11 @@ public class DataBinderTests extends TestCase {
 	public void testBindingNoErrors() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
+		assertTrue(binder.isIgnoreUnknownFields());
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
 
 		binder.bind(pvs);
 		binder.close();
@@ -55,6 +58,24 @@ public class DataBinderTests extends TestCase {
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
+	}
+
+	public void testBindingNoErrorsNotIgnoreUnknown() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		binder.setIgnoreUnknownFields(false);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
+
+		try {
+			binder.bind(pvs);
+			fail("Should have thrown NotWritablePropertyException");
+		}
+		catch (NotWritablePropertyException ex) {
+			// expected
+		}
 	}
 
 	public void testBindingWithErrors() throws Exception {

@@ -115,6 +115,8 @@ public class DataBinder {
 
 	private final BindException errors;
 
+	private boolean ignoreUnknownFields = true;
+
 	private String[] allowedFields;
 
 	private String[] requiredFields;
@@ -171,6 +173,22 @@ public class DataBinder {
 	 */
 	protected BeanWrapper getBeanWrapper() {
 		return this.errors.getBeanWrapper();
+	}
+
+	/**
+	 * Set whether to ignore unknown fields, i.e. whether to ignore request
+	 * parameters that don't have corresponding fields in the target object.
+	 */
+	public void setIgnoreUnknownFields(boolean ignoreUnknownFields) {
+		this.ignoreUnknownFields = ignoreUnknownFields;
+	}
+
+	/**
+	 * Return whether to ignore unknown fields, i.e. whether to ignore request
+	 * parameters that don't have corresponding fields in the target object.
+	 */
+	public boolean isIgnoreUnknownFields() {
+		return ignoreUnknownFields;
 	}
 
 	/**
@@ -310,8 +328,8 @@ public class DataBinder {
 		}
 
 		try {
-			// bind request parameters onto params, ignoring unknown properties
-			this.errors.getBeanWrapper().setPropertyValues(pvs, true);
+			// bind request parameters onto target object
+			this.errors.getBeanWrapper().setPropertyValues(pvs, this.ignoreUnknownFields);
 		}
 		catch (PropertyAccessExceptionsException ex) {
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
