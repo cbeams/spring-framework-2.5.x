@@ -11,6 +11,12 @@ package org.springframework.binding.format;
 public interface Formatter {
 
 	/**
+	 * Return the intrinsic value type formatted by this formatter.
+	 * @return The value class
+	 */
+	public Class getValueClass();
+
+	/**
 	 * Format the value.
 	 * @param value the value to format
 	 * @return The formatted string, fit for display in a UI
@@ -26,4 +32,5 @@ public interface Formatter {
 	 * @throws InvalidFormatException The string was in an invalid form
 	 */
 	public Object parseValue(String formattedValue) throws InvalidFormatException;
+
 }

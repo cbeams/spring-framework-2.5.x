@@ -26,6 +26,14 @@ public class TypeConverterFormatterAdapter implements Converter, Closure {
 		this.formatter = formatter;
 	}
 
+	public Class[] getSourceClasses() {
+		return new Class[] { String.class, formatter.getValueClass() };
+	}
+
+	public Class[] getTargetClasses() {
+		return new Class[] { String.class, formatter.getValueClass() };
+	}
+
 	public Object convert(Object o) throws ConversionException {
 		if (String.class.isInstance(o)) {
 			try {

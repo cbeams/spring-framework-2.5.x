@@ -25,6 +25,16 @@ package org.springframework.binding.convert;
 public interface Converter {
 
 	/**
+	 * @return
+	 */
+	public Class[] getSourceClasses();
+
+	/**
+	 * @return
+	 */
+	public Class[] getTargetClasses();
+
+	/**
 	 * Convert the provided object argument to another type.
 	 * <p>
 	 * A typical type converter implementation is capable of converting from one

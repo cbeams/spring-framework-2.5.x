@@ -80,14 +80,18 @@
 	<!-- java flow builder definition for the detail flow -->
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
-			<bean class="org.springframework.samples.phonebook.web.flow.PersonDetailFlowBuilder"/>
+			<bean class="org.springframework.samples.phonebook.web.flow.PersonDetailFlowBuilder" autowire="byType"/>
 		</property>
 	</bean>
 
-	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction">
+	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType">
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
+	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterRegistry"/>
+
+	<bean id="converter.locator" class="org.springframework.binding.convert.support.DefaultConverterLocator" autowire="byType"/>
+	
 	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.SetAction">
 		<property name="mappingsMap">
 			<map>
