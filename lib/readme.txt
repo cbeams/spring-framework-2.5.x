@@ -44,19 +44,19 @@ distribution/website before using any of them in your own applications.
 - EasyMock 1.1 (http://www.easymock.org)
 - required for building the test suite
 
-* ehcache/ehcache-1.0.jar
-- EHCache 1.0 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.1.jar
+- EHCache 1.1 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running Petclinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.1 (http://www.freemarker.org)
+- FreeMarker 2.3.2 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.7c (http://www.hibernate.org)
+- Hibernate 2.1.8 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
@@ -199,8 +199,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-0.6.3.jar
-- JasperReports 0.6.3 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-0.6.4.jar
+- JasperReports 0.6.4 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
@@ -249,7 +249,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's AbstractExcelView
 
 * quartz/quartz.jar
-- Quartz 1.4.2 (http://www.opensymphony.org/quartz)
+- Quartz 1.4.3 (http://www.opensymphony.org/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
