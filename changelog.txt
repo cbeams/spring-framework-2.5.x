@@ -1,18 +1,20 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.117 2004-03-22 10:35:18 jhoeller Exp $
+$Id: changelog.txt,v 1.118 2004-03-24 22:08:32 jhoeller Exp $
 
 
-Changes in version 1.0 final (22.3.2003)
+Changes in version 1.0 final (24.3.2003)
 ----------------------------------------
 
 Package org.springframework.aop
-* upgraded to release 1.0 version of AOP Alliance interfaces
+* upgraded to release 1.0 of the AOP Alliance interfaces
 * removed attachment feature on MethodInvocation
 * all Spring advices extend org.aopalliance.aop.Advice tag interface
 * introduced frozen flag on ProxyConfig, to be used to disable advice changes
 * deleted MethodAfterReturningAdvice, as AfterReturningAdvice superclass is sufficient
 * fixed too eager initialization of common interceptors in AbstractAutoProxyCreator, potentially causing circular refs
+* renamed AdvisorAutoProxyCreator to DefaultAdvisorAutoProxyCreator, to distinguish it from its abstract superclass
+* all pre-built Advisors implement the Ordered interface, offering a "order" bean property for specifying a value
 
 Package org.springframework.beans
 * added support for directly setting array, List and Map elements to BeanWrapperImpl
@@ -28,13 +30,15 @@ Package org.springframework.beans
 * refined AbstractAutowireCapableBeanFactory's "destroyBean" implementation to detect "shutdown(boolean force)" methods
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
 * reworked DefaultListableBeanFactory's bean definition registry to respect the order of registration
+* fixed DefaultListableBeanFactory's "getBeanDefinitionNames" implementation to ignore directly registered singletons
 * CustomEditorConfigurer implements Ordered interface, to support ordered invocation of BeanFactoryPostProcessors
 * added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
 * reworked PropertiesFactoryBean to work with PropertiesPersister strategy
-* trim the text value of a <prop> tag to avoid unwanted whitespace caused by typical XML formatting
+* trim the text value of a "prop" tag to avoid unwanted whitespace caused by typical XML formatting
 
 Package org.springframework.context
 * ApplicationContext interface extends ResourceLoader interface
+* added "addBeanFactoryPostProcessor" method to ConfigurableApplicationContext interface
 * AbstractApplicationContext implements resource loading through extending DefaultResourceLoader
 * reworked AbstractXmlApplicationContext to use a "getConfigLocations" template method
 * ClassPathXmlApplicationContext extends AbstractXmlApplicationContext rather than FileSystemXmlApplicationContext
@@ -80,6 +84,7 @@ Package org.springframework.orm
 * LocalSessionFactoryBean keeps the Hibernate Configuration object, allowing access via the "getConfiguration" method
 * added "createCriteria" method to HibernateTemplate, for creating Criteria objects that respect transaction timeouts
 * added "loadAll(Class)" method to HibernateTemplate and HibernateOperations, for retrieving all instances of a class
+* added overloaded "findByNamedQuery" methods for named parameters to HibernateTemplate and HibernateOperations
 * added HibernateTemplate's "execute" and "executeFind" methods to HibernateOperations interface
 * allow for ClobStringType to be instantiated without LobHandler, for use with Hibernate's SchemaExport tool
 * adapted iBATIS SQL Maps 2 support to SQL Maps 2.0 RC1, calling the new SqlMapSession.close method
@@ -92,6 +97,8 @@ Package org.springframework.scheduling
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager does not attempt rollback when afterCompletion callback throws an exception
 * added "transactionAttributeSource" property to TransactionProxyFactoryBean, for specifying any attribute source
+* renamed TransactionAttributeSourceTransactionAroundAdvisor to TransactionAttributeSourceAdvisor
+* TransactionAttributeSourceAdvisor has default ordering behavior rather than an order value of 10
 * JotmFactoryBean implements DisposableBean to stop a locally created JOTM instance on context shutdown
 
 Package org.springframework.ui
@@ -125,10 +132,15 @@ Package org.springframework.web
 * reworked ContextLoader and WebApplicationContextUtils to remember exceptions thrown on root context initialization
 * added "bindEmptyMultipartFiles" setting to ServletRequestDataBinder
 * added "onBind" callback to BaseCommandController, for customized processing after binding but before validation
+* AbstractFormController invokes "formBackingObject" on submission rather than "getCommand", if no session form
 * added "setView" and "setViewName" mutators to ModelAndView, to allow for post-processing in a HandlerInterceptor
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
 * added "contextRelative" flag to RedirectView, to automatically prepend the context path to a given URL
+* refactored TilesView to delegate to various protected methods, for easy subclassing
 * fetch DefinitionsFactory on initialization of TilesView, throwing a proper exception if not found
+* do not set content type in TilesView, not even if the response is not committed yet
+* do not try to send HTTP errors in TilesView but rather throw ServletExceptions
+* added support for path attribute to TilesView, for overriding the path of the layout page in a component controller
 * removed default config location from VelocityConfigurer (specify a custom config location instead)
 * removed unused "writerPoolSize" property from VelocityView
 * added "encoding" property to VelocityView, for specifying a view-specific file encoding
