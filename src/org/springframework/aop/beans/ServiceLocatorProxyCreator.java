@@ -49,6 +49,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * beanfactory.getBean(id)call.</p>
  * 
  * @author Colin Sampaleanu
+ * @since 1.1.4
  */
 
 public class ServiceLocatorProxyCreator implements FactoryBean, InitializingBean,
@@ -64,7 +65,9 @@ public class ServiceLocatorProxyCreator implements FactoryBean, InitializingBean
 		this.serviceLocatorInterface = interfaceName;
 	}
 
-	// javadoc in superclass!
+	/**
+	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 */
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory))
 			throw new FatalBeanException(
@@ -72,7 +75,9 @@ public class ServiceLocatorProxyCreator implements FactoryBean, InitializingBean
 		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
-	// javadoc in superclass!
+	/**
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 */
 	public void afterPropertiesSet() throws BeansException {
 		if (serviceLocatorInterface == null)
 			throw new FatalBeanException("'factoryInterface' not set");
@@ -131,17 +136,24 @@ public class ServiceLocatorProxyCreator implements FactoryBean, InitializingBean
 		proxy = proxyFactory.getProxy();
 	}
 
-	// javadoc in superclass!
+	
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#getObject()
+	 */
 	public Object getObject() throws Exception {
 		return proxy;
 	}
 
-	// javadoc in superclass!
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 */
 	public Class getObjectType() {
 		return serviceLocatorInterface;
 	}
 
-	// javadoc in superclass!
+	/**
+	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
+	 */
 	public boolean isSingleton() {
 		return false;
 	}
