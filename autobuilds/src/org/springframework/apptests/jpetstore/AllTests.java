@@ -21,13 +21,13 @@ import com.meterware.httpunit.WebResponse;
 /**
  * AllTests
  * 
- * Not every use case is covered here since the point is to exrcise the 
+ * Not every use case is covered here since the point is to exercise the 
  * Spring code rather than the application code.  Tests implemented here 
  * are sufficient to check all aspects of Spring that the sample app
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.7 2004-05-27 04:04:41 davison Exp $
+ * @version $Id: AllTests.java,v 1.8 2004-06-22 20:38:58 colins Exp $
  */
 public class AllTests extends AbstractTestCase {
 
