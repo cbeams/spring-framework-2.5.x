@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
@@ -87,13 +87,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 			protected Resource loadResource(String path) {
 				++lookups;
 				if (lookups == 1) {
-					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
+					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_DEFAULT_PATH, path);
 					return null;
 				}
 				else {
 					// Should have only one more lookup
 					assertEquals(2, lookups);
-					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_DEFAULT_PATH, path);
+					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
 					return null;
 				}
 			}
@@ -111,8 +111,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	public void testFindUserDefinedCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
-				return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
+					return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				}
+				return null;
 			}
 		}
 	
@@ -121,14 +123,17 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertTrue(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0);
 		assertEquals(2, sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length);
 		assertEquals("1", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]);
+		assertEquals("2", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]);
 	}
 	
 	public void testInvalidUserDefinedCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
-				// Guaranteed to be on the classpath, but most certainly NOT XML
-				return new ClassPathResource("SQLExceptionTranslator.class", SQLErrorCodesFactoryTests.class);
+				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
+					// Guaranteed to be on the classpath, but most certainly NOT XML
+					return new ClassPathResource("SQLExceptionTranslator.class", SQLErrorCodesFactoryTests.class);
+				}
+				return null;
 			}
 		}
 
@@ -144,18 +149,20 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	public void testFindCustomCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
-				return new ClassPathResource("custom-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
+					return new ClassPathResource("custom-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				}
+				return null;
 			}
 		}
 	
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().size());
-		assertEquals("org.springframework.jdbc.support.CustomErrorCodeException", 
-				((CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getExceptionClass());
-		assertEquals(1,
-				((CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getErrorCodes().length);
+		CustomSQLErrorCodesTranslation translation =
+				(CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0);
+		assertEquals(CustomErrorCodeException.class, translation.getExceptionClass());
+		assertEquals(1, translation.getErrorCodes().length);
 	}
 	
 	public void testDataSourceWithNullMetadata() throws Exception {
@@ -286,11 +293,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	/**
 	 * Check that wild card database name works.
 	 */
-	public void testWildCardNameReconized() throws Exception {
+	public void testWildCardNameRecognized() throws Exception {
 		class WildcardSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
-				return new ClassPathResource("wildcard-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
+					return new ClassPathResource("wildcard-error-codes.xml", SQLErrorCodesFactoryTests.class);
+				}
+				return null;
 			}
 		}
 	

@@ -12,9 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.util.StringUtils;
 
 /**
  * JavaBean for holding Custom JDBC Error Codes translation for a particular
@@ -25,20 +28,20 @@ package org.springframework.jdbc.support;
  * Used by the SQLErrorCodeSQLExceptionTranslator.
  *
  * @author Thomas Risberg
- * @since 30.06.2004
+ * @since 1.1
  * @see SQLErrorCodeSQLExceptionTranslator
  */
 public class CustomSQLErrorCodesTranslation {
 
 	private String[] errorCodes = new String[0];
 
-	private String exceptionClass = null;
+	private Class exceptionClass;
 	
 	/**
 	 * Set the SQL error codes to match.
 	 */
 	public void setErrorCodes(String[] errorCodes) {
-		this.errorCodes = errorCodes;
+		this.errorCodes = StringUtils.sortStringArray(errorCodes);
 	}
 
 	/**
@@ -51,14 +54,18 @@ public class CustomSQLErrorCodesTranslation {
 	/**
 	 * Set the exception class for the specified error codes.
 	 */
-	public void setExceptionClass(String exceptionClass) {
+	public void setExceptionClass(Class exceptionClass) {
+		if (!DataAccessException.class.isAssignableFrom(exceptionClass)) {
+			throw new IllegalArgumentException("Invalid exception class [" + exceptionClass +
+					"]: needs to be a subclass of [org.springframework.dao.DataAccessException]");
+		}
 		this.exceptionClass = exceptionClass;
 	}
 
 	/**
 	 * Return the exception class for the specified error codes.
 	 */
-	public String getExceptionClass() {
+	public Class getExceptionClass() {
 		return exceptionClass;
 	}
 

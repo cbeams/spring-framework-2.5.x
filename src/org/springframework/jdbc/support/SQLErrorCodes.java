@@ -12,12 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.util.StringUtils;
 
 /**
  * JavaBean for holding JDBC error codes for a particular database.
@@ -29,7 +31,7 @@ import java.util.List;
  */
 public class SQLErrorCodes {
 
-	private String databaseProductName = null;
+	private String[] databaseProductNames;
 
 	private boolean useSqlStateForTranslation = false;
 
@@ -49,19 +51,32 @@ public class SQLErrorCodes {
 
 
 	/**
-	 * Set this property if the database name contains spaces, in which case
-	 * we can not use the bean name for lookup.
+	 * Set this property if the database name contains spaces,
+	 * in which case we can not use the bean name for lookup.
 	 */
 	public void setDatabaseProductName(String databaseProductName) {
-		this.databaseProductName = databaseProductName;
+		this.databaseProductNames = new String[] {databaseProductName};
 	}
 
 	public String getDatabaseProductName() {
-		return databaseProductName;
+		return (this.databaseProductNames != null && this.databaseProductNames.length > 0 ?
+				this.databaseProductNames[0] : null);
 	}
 
 	/**
-	 * Set this propert to true for databases that do not provide an error code
+	 * Set this property to specify multiple database names that contains spaces,
+	 * in which case we can not use bean names for lookup.
+	 */
+	public void setDatabaseProductNames(String[] databaseProductNames) {
+		this.databaseProductNames = databaseProductNames;
+	}
+
+	public String[] getDatabaseProductNames() {
+		return databaseProductNames;
+	}
+
+	/**
+	 * Set this property to true for databases that do not provide an error code
 	 * but that do provide SQL State (this includes PostgreSQL).
 	 */
 	public void setUseSqlStateForTranslation(boolean useStateCodeForTranslation) {
@@ -73,7 +88,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
-		this.badSqlGrammarCodes = badSqlGrammarCodes;
+		this.badSqlGrammarCodes = StringUtils.sortStringArray(badSqlGrammarCodes);
 	}
 
 	public String[] getBadSqlGrammarCodes() {
@@ -81,7 +96,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
-		this.dataIntegrityViolationCodes = dataIntegrityViolationCodes;
+		this.dataIntegrityViolationCodes = StringUtils.sortStringArray(dataIntegrityViolationCodes);
 	}
 
 	public String[] getDataIntegrityViolationCodes() {
@@ -89,7 +104,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setDataRetrievalFailureCodes(String[] dataRetrievalFailureCodes) {
-		this.dataRetrievalFailureCodes = dataRetrievalFailureCodes;
+		this.dataRetrievalFailureCodes = StringUtils.sortStringArray(dataRetrievalFailureCodes);
 	}
 
 	public String[] getDataRetrievalFailureCodes() {
@@ -97,7 +112,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setOptimisticLockingFailureCodes(String[] optimisticLockingFailureCodes) {
-		this.optimisticLockingFailureCodes = optimisticLockingFailureCodes;
+		this.optimisticLockingFailureCodes = StringUtils.sortStringArray(optimisticLockingFailureCodes);
 	}
 
 	public String[] getOptimisticLockingFailureCodes() {
@@ -105,7 +120,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
-		this.cannotAcquireLockCodes = cannotAcquireLockCodes;
+		this.cannotAcquireLockCodes = StringUtils.sortStringArray(cannotAcquireLockCodes);
 	}
 
 	public String[] getCannotAcquireLockCodes() {
@@ -113,17 +128,25 @@ public class SQLErrorCodes {
 	}
 
 	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
-		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+		this.dataAccessResourceFailureCodes = StringUtils.sortStringArray(dataAccessResourceFailureCodes);
 	}
 
 	public String[] getDataAccessResourceFailureCodes() {
 		return dataAccessResourceFailureCodes;
 	}
 
-	public void setCustomTranslations(List customExceptions) {
-		this.customTranslations = customExceptions;
+	/**
+	 * @param customTranslations List of CustomSQLErrorCodesTranslation objects
+	 * @see CustomSQLErrorCodesTranslation
+	 */
+	public void setCustomTranslations(List customTranslations) {
+		this.customTranslations = customTranslations;
 	}
 
+	/**
+	 * @return List of CustomSQLErrorCodesTranslation objects
+	 * @see CustomSQLErrorCodesTranslation
+	 */
 	public List getCustomTranslations() {
 		return customTranslations;
 	}

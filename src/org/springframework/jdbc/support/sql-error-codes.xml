@@ -1,66 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-	
+
+<!--
+	- Default SQL error codes for well-known databases.
+	- Can be overridden by definitions in a sql-error-codes.xml file
+	- in the root of the class path.
+	-
+	- If the Database Product Name contains characters that are invalid
+	- to use in the id attribute (like a space) then we need to add a property
+	- named "databaseProductName"/"databaseProductNames" that holds this value.
+	- If this property is present, then it will be used instead of the id for
+	- looking up the error codes based on the current database.
+	-->
+
 <beans>
 
-  <!--
-    -  If the Database Product Name contains characters that are invalid
-    -  to use in the id attribute (like a space) then we need to 
-    -  add a property named "databaseProductName" that holds this value.
-    -  If this property is present, then it will be used instead of the id for
-    -  looking up the error codes based on the current database.
-    -->
+	<bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>DB2*</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-204,-206,-301,-408</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-803</value>
+		</property>
+	</bean>
 
-  <bean id="DB2" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="databaseProductName"><value>DB2*</value></property>
-    <property name="badSqlGrammarCodes"><value>-204,-206,-301,-408</value></property>
-    <property name="dataIntegrityViolationCodes"><value>-803</value></property>
-  </bean>
+	<bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>HSQL Database Engine</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-22,-28</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-9</value>
+		</property>
+	</bean>
 
-  <bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="databaseProductName"><value>HSQL Database Engine</value></property>
-    <property name="badSqlGrammarCodes"><value>-22,-28</value></property>
-    <property name="dataIntegrityViolationCodes"><value>-9</value></property>
-  </bean>
+	<bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Microsoft SQL Server</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>207,208</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>2627,8114,8115</value>
+		</property>
+	</bean>
 
-  <bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="databaseProductName"><value>Microsoft SQL Server</value></property>
-    <property name="badSqlGrammarCodes"><value>207,208</value></property>
-    <property name="dataIntegrityViolationCodes"><value>2627,8114,8115</value></property>
-  </bean>
+	<bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="badSqlGrammarCodes">
+			<value>1054,1064,1146</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>1062</value>
+		</property>
+	</bean>
 
-  <bean id="MySQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="badSqlGrammarCodes"><value>1054,1064,1146</value></property>
-    <property name="dataIntegrityViolationCodes"><value>1062</value></property>
-  </bean>
+	<bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="badSqlGrammarCodes">
+			<value>900,903,904,917,936,942,17006</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>1,1400,1722,2291</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>54</value>
+		</property>
+	</bean>
 
-  <bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="badSqlGrammarCodes"><value>900,903,904,917,936,942,17006</value></property>
-    <property name="dataIntegrityViolationCodes"><value>1,1400,1722,2291</value></property>
-    <property name="cannotAcquireLockCodes"><value>54</value></property>
-  </bean>
+	<bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Informix Dynamic Server</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-201,-217,-696</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-239,-268,-692,-11030</value>
+		</property>
+	</bean>
 
-  <bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="databaseProductName"><value>Informix Dynamic Server</value></property>
-    <property name="badSqlGrammarCodes"><value>-201,-217,-696</value></property>
-    <property name="dataIntegrityViolationCodes"><value>-239,-268,-692,-11030</value></property>
-  </bean>
+	<bean id="PostgreSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="useSqlStateForTranslation">
+			<value>true</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>03000,42000,42601,42803,42602,42622,42939,42804,42P18,42809,42703,42883,42P01,42P02,42704</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>23000,23001,23502,23503,23505,23514</value>
+		</property>
+	</bean>
 
-  <bean id="PostgreSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="useSqlStateForTranslation"><value>true</value></property>
-    <property name="badSqlGrammarCodes"><value>03000,42000,42601,42803,42602,42622,42939,42804,42P18,42809,42703,42883,42P01,42P02,42704</value></property>
-    <property name="dataIntegrityViolationCodes"><value>23000,23001,23502,23503,23505,23514</value></property>
-  </bean>
-
-  <bean id="Sybase" class="org.springframework.jdbc.support.SQLErrorCodes">
-    <property name="databaseProductName"><value>Sybase SQL Server</value></property>
-    <property name="badSqlGrammarCodes"><value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value></property>
-    <property name="dataIntegrityViolationCodes"><value>423,511,515,530,547,2601,2615,2714</value></property>
-  </bean>
-
-	<bean id="Sybase-jConnect" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductName"><value>Adaptive Server Enterprise</value></property>
-		<property name="badSqlGrammarCodes"><value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value></property>
-		<property name="dataIntegrityViolationCodes"><value>423,511,515,530,547,2601,2615,2714</value></property>
+	<bean id="Sybase" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductNames">
+			<list>
+				<value>Sybase SQL Server</value>
+				<value>Adaptive Server Enterprise</value>
+			</list>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>423,511,515,530,547,2601,2615,2714</value>
+		</property>
 	</bean>
 
 </beans>

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2004 the original author or authors.
  * 
@@ -13,13 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collections;
 
 import junit.framework.TestCase;
 
@@ -38,13 +36,13 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		ERROR_CODES.setDataIntegrityViolationCodes(new String[] { "3", "4" });
 	}
 	
-	static SQLException BAD_SQL_EX = new SQLException() {
+	private static SQLException BAD_SQL_EX = new SQLException() {
 		public int getErrorCode() {
 			return 1;
 		}
 	};
 	
-	static SQLException INTEG_VIOLATION_EX = new SQLException() {
+	private static SQLException INTEG_VIOLATION_EX = new SQLException() {
 		public int getErrorCode() {
 			return 3;
 		}
@@ -99,17 +97,14 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 	public void testCustomExceptionTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
-		final DataAccessException customDex = new CustomErrorCodeException("") {};
 		final SQLErrorCodes customErrorCodes = new SQLErrorCodes();
 		final CustomSQLErrorCodesTranslation customTranslation = new CustomSQLErrorCodesTranslation();
 		
-		customErrorCodes.setBadSqlGrammarCodes(new String[] { "1", "2" });
-		customErrorCodes.setDataIntegrityViolationCodes(new String[] { "3", "4" });
-		customTranslation.setErrorCodes(new String[] { "1" });
-		customTranslation.setExceptionClass("org.springframework.jdbc.support.CustomErrorCodeException");
-		List l = new LinkedList();
-		l.add(customTranslation);
-		customErrorCodes.setCustomTranslations(l);
+		customErrorCodes.setBadSqlGrammarCodes(new String[] {"1", "2"});
+		customErrorCodes.setDataIntegrityViolationCodes(new String[] {"3", "4"});
+		customTranslation.setErrorCodes(new String[] {"1"});
+		customTranslation.setExceptionClass(CustomErrorCodeException.class);
+		customErrorCodes.setCustomTranslations(Collections.singletonList(customTranslation));
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator();
 		sext.setSqlErrorCodes(customErrorCodes);
@@ -120,9 +115,14 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		// Shouldn't custom translate this
 		DataIntegrityViolationException diex = (DataIntegrityViolationException) sext.translate(TASK, SQL, INTEG_VIOLATION_EX);
 		assertEquals(INTEG_VIOLATION_EX, diex.getCause());
-		// Shouldn't custom translate this - class not found
-		customTranslation.setExceptionClass("org.springframework.jdbc.support.NoSuchException");
-		assertEquals(BadSqlGrammarException.class, sext.translate(TASK, SQL, BAD_SQL_EX).getClass());
+		// Shouldn't custom translate this - invalid class
+		try {
+			customTranslation.setExceptionClass(String.class);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 }

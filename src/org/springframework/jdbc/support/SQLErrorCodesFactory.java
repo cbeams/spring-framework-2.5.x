@@ -12,11 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,8 +25,9 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -95,82 +95,51 @@ public class SQLErrorCodesFactory {
 		Map errorCodes = null;
 
 		try {
-			String path = SQL_ERROR_CODE_OVERRIDE_PATH;
-			Resource resource = loadResource(path);
-			if (resource == null || !resource.exists()) {
-				path = SQL_ERROR_CODE_DEFAULT_PATH;
-				resource = loadResource(path);
-				if (resource == null || !resource.exists()) {
-					throw new BeanDefinitionStoreException(
-							"Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH  + "]");
-				}
+			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader bdr = new XmlBeanDefinitionReader(lbf);
+
+			// Load default SQL error codes.
+			Resource resource = loadResource(SQL_ERROR_CODE_DEFAULT_PATH);
+			if (resource != null && resource.exists()) {
+				bdr.loadBeanDefinitions(resource);
 			}
-			XmlBeanFactory bf = new XmlBeanFactory(resource);
-			Map errorCodeBeans = bf.getBeansOfType(SQLErrorCodes.class, true, false);
+			else {
+				logger.warn("Default sql-error-codes.xml not found (should be included in spring.jar)");
+			}
+
+			// Load custom SQL error codes, overriding defaults.
+			resource = loadResource(SQL_ERROR_CODE_OVERRIDE_PATH);
+			if (resource != null && resource.exists()) {
+				bdr.loadBeanDefinitions(resource);
+				logger.info("Found custom sql-error-codes.xml file at the root of the classpath");
+			}
+
+			// Check all beans of type SQLErrorCodes.
+			Map errorCodeBeans = lbf.getBeansOfType(SQLErrorCodes.class, true, false);
+			if (logger.isInfoEnabled()) {
+				logger.info("SQLErrorCodes loaded: " + errorCodeBeans.keySet());
+			}
 			errorCodes = new HashMap(errorCodeBeans.size());
 
 			for (Iterator it = errorCodeBeans.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				String rdbmsName = (String) entry.getKey();
+				String beanName = (String) entry.getKey();
 				SQLErrorCodes ec = (SQLErrorCodes) entry.getValue();
 
-				if (ec.getBadSqlGrammarCodes() == null) {
-					ec.setBadSqlGrammarCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getBadSqlGrammarCodes());
-				}
-				if (ec.getDataIntegrityViolationCodes() == null) {
-					ec.setDataIntegrityViolationCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getDataIntegrityViolationCodes());
-				}
-				if (ec.getDataRetrievalFailureCodes() == null) {
-					ec.setDataRetrievalFailureCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getDataRetrievalFailureCodes());
-				}
-				if (ec.getOptimisticLockingFailureCodes() == null) {
-					ec.setOptimisticLockingFailureCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getOptimisticLockingFailureCodes());
-				}
-				if (ec.getCannotAcquireLockCodes() == null) {
-					ec.setCannotAcquireLockCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getCannotAcquireLockCodes());
-				}
-				if (ec.getDataAccessResourceFailureCodes() == null) {
-					ec.setDataAccessResourceFailureCodes(new String[0]);
-				}
-				else {
-					Arrays.sort(ec.getDataAccessResourceFailureCodes());
-				}
-				if (!ec.getCustomTranslations().isEmpty()) {
-					Iterator customIter = ec.getCustomTranslations().iterator();
-					while (customIter.hasNext()) {
-						CustomSQLErrorCodesTranslation customCode = (CustomSQLErrorCodesTranslation) customIter.next();
-						Arrays.sort(customCode.getErrorCodes());
+				// If explicit database product names specified, expose error codes for those names.
+				String[] names = ec.getDatabaseProductNames();
+				if (names != null) {
+					for (int i = 0; i < names.length; i++) {
+						errorCodes.put(names[i], ec);
 					}
 				}
-
-				if (ec.getDatabaseProductName() == null) {
-					errorCodes.put(rdbmsName, ec);
-				}
 				else {
-					errorCodes.put(ec.getDatabaseProductName(), ec);
+					errorCodes.put(beanName, ec);
 				}
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
 			}
 		}
-		catch (BeanDefinitionStoreException ex) {
-			logger.warn("Error loading error codes from config file. Message: " + ex.getMessage());
+		catch (BeansException ex) {
+			logger.warn("Error loading SQL error codes from config file", ex);
 			errorCodes = new HashMap(0);
 		}
 
@@ -182,8 +151,8 @@ public class SQLErrorCodesFactory {
 	 * @param path resource path. SQL_ERROR_CODE_DEFAULT_PATH or
 	 * SQL_ERROR_CODE_OVERRIDE_PATH.
 	 * <b>Not to be overridden by application developers, who should obtain instances
-	 * of this class from the static getInstance() method.</b>
-	 * @return the input stream or null if the resource wasn't found
+	 * of this class from the static <code>getInstance()</code> method.</b>
+	 * @return the resource, or null if the resource wasn't found
 	 * @see #getInstance
 	 */
 	protected Resource loadResource(String path) {
@@ -260,10 +229,10 @@ public class SQLErrorCodesFactory {
 			}
 		}
 		catch (MetaDataAccessException ex) {
-			logger.warn("Error while extracting database product name - falling back to empty error codes");
+			logger.warn("Error while extracting database product name - falling back to empty error codes", ex);
 		}
 
-		// fallback is to return an empty ErrorCodes instance
+		// Fallback is to return an empty ErrorCodes instance.
 		return new SQLErrorCodes();
 	}
 
@@ -279,11 +248,13 @@ public class SQLErrorCodesFactory {
 			}
 			return sec;
 		}
-		// could not find the database among the defined ones
-		if (logger.isInfoEnabled()) {
-			logger.info("SQL error codes for '" + dbName + "' not found");
+		else {
+			// Could not find the database among the defined ones.
+			if (logger.isDebugEnabled()) {
+				logger.debug("SQL error codes for '" + dbName + "' not found");
+			}
+			return new SQLErrorCodes();
 		}
-		return new SQLErrorCodes();
 	}
 
 }
