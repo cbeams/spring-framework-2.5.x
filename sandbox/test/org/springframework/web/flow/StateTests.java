@@ -3,6 +3,9 @@
  */
 package org.springframework.web.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -85,11 +88,85 @@ public class StateTests extends TestCase {
 	}
 
 	public void testViewState() {
-
+		Flow flow = new Flow("myFlow");
+		ViewState state = new ViewState(flow, "viewState", "myViewName", new Transition("submit", "finish"));
+		assertTrue(state.isTransitionable());
+		assertTrue(!state.isMarker());
+		new EndState(flow, "finish");
+		FlowExecution flowExecution = flow.createExecution();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ModelAndView view = flowExecution.start(null, request, null);
+		assertEquals("viewState", flowExecution.getCurrentStateId());
+		assertNotNull(view);
+		assertEquals("myViewName", view.getViewName());
 	}
 
 	public void testViewStateMarker() {
+		Flow flow = new Flow("myFlow");
+		ViewState state = new ViewState(flow, "viewState", null, new Transition("submit", "finish"));
+		assertTrue(state.isMarker());
+		new EndState(flow, "finish");
+		FlowExecution flowExecution = flow.createExecution();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ModelAndView view = flowExecution.start(null, request, null);
+		assertEquals("viewState", flowExecution.getCurrentStateId());
+		assertNull(view);
+	}
 
+	public void testSubFlowState() {
+		Flow subFlow = new Flow("mySubFlow");
+		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+				"submit", "finish"));
+		new EndState(subFlow, "finish");
+		Flow flow = new Flow("myFlow");
+		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new Transition("finish", "finish"));
+		new EndState(flow, "finish", "myParentFlowEndingViewName");
+		FlowExecution flowExecution = flow.createExecution();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ModelAndView view = flowExecution.start(null, request, null);
+		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
+		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
+		assertEquals("mySubFlowViewName", view.getViewName());
+		view = flowExecution.signalEvent("submit", null, request, null);
+		assertEquals("myParentFlowEndingViewName", view.getViewName());
+		assertTrue(!flowExecution.isActive());
+	}
+
+	public void testSubFlowStateAttributesMapping() {
+		Flow subFlow = new Flow("mySubFlow");
+		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+				"submit", "finish"));
+		new EndState(subFlow, "finish");
+		Flow flow = new Flow("myFlow");
+		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(
+				"finish", "finish"));
+		new EndState(flow, "finish", "myParentFlowEndingViewName");
+		FlowExecution flowExecution = flow.createExecution();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		Map input = new HashMap();
+		input.put("parentInputAttribute", "attributeValue");
+		ModelAndView view = flowExecution.start(input, request, null);
+		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
+		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
+		assertEquals("mySubFlowViewName", view.getViewName());
+		assertEquals("attributeValue", flowExecution.getAttribute("childInputAttribute"));
+		view = flowExecution.signalEvent("submit", null, request, null);
+		assertEquals("myParentFlowEndingViewName", view.getViewName());
+		assertTrue(!flowExecution.isActive());
+		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
+	}
+
+	public static class InputOutputMapper implements FlowAttributesMapper {
+		public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+			Map inputMap = new HashMap(1);
+			inputMap.put("childInputAttribute", parentFlowModel.getAttribute("parentInputAttribute"));
+			return inputMap;
+		}
+
+		public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel,
+				MutableAttributesAccessor parentFlowModel) {
+			parentFlowModel.setAttribute("parentOutputAttribute", subFlowModel.getAttribute("childInputAttribute"));
+		}
 	}
 
 	public static class ExecutionCounterAction implements Action {
