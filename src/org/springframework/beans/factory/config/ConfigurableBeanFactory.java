@@ -71,17 +71,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
 	/**
-	 * Return the registered BeanDefinition for the given bean, allowing
-	 * access to its property values and constructor argument values.
-	 * @param beanName name of the bean
-	 * @return the registered BeanDefinition
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
-	 * @throws BeansException in case of errors
-	 */
-	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
-
-	/**
 	 * Given a bean name, create an alias. We typically use this method to
 	 * support names that are illegal within XML ids (used for bean names).
 	 * <p>Typically invoked during factory configuration, but can also be

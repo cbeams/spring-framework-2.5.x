@@ -21,7 +21,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * SPI interface to be implemented by most if not all listable bean factories.
- * In addition to ConfigurableBeanFactory, provides a way to pre-instantiate singletons.
+ * In addition to ConfigurableBeanFactory, it provides means to evaluate bean
+ * definitions and to pre-instantiate singletons.
  *
  * <p>Allows for framework-internal plug'n'play, e.g. in AbstractApplicationContext.
  *
@@ -30,7 +31,22 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory
  */
 public interface ConfigurableListableBeanFactory
-		extends ListableBeanFactory, ConfigurableBeanFactory, AutowireCapableBeanFactory {
+		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
+
+	/**
+	 * Return the registered BeanDefinition for the given bean, allowing access
+	 * to its property values and constructor argument value (which can be
+	 * modified during bean factory post-processing).
+	 * <p>A returned BeanDefinition object should not be a copy but the original
+	 * definition object as registered in the factory. This means that it should
+	 * be castable to a more specific implementation type, if necessary.
+	 * @param beanName name of the bean
+	 * @return the registered BeanDefinition
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
+	 * @throws BeansException in case of errors
+	 */
+	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering

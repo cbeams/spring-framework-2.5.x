@@ -29,7 +29,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * Base class for dynamic TargetSources that can create new prototype bean
@@ -38,11 +38,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * <p>Such TargetSources must run in a BeanFactory, as it needs to call the
  * getBean() method to create a new prototype instance.
  * 
- * <p>
- * PrototypeBasedTargetSources are serializable. This involves disconnecting the current target
- * and turning into a SingletonTargetSource.
+ * <p>PrototypeBasedTargetSources are serializable. This involves disconnecting
+ * the current target and turning into a SingletonTargetSource.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public abstract class AbstractPrototypeBasedTargetSource
@@ -95,9 +95,9 @@ public abstract class AbstractPrototypeBasedTargetSource
 		}
 
 		// determine type of the target bean
-		if (beanFactory instanceof ConfigurableBeanFactory) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			this.targetClass =
-			    ((ConfigurableBeanFactory) beanFactory).getBeanDefinition(this.targetBeanName).getBeanClass();
+			    ((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(this.targetBeanName).getBeanClass();
 		}
 		else {
 			if (logger.isInfoEnabled()) {
