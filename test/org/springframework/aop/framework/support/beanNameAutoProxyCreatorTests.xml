@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="_jdkBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+		<description>
+			Automatically proxies using JDK dynamic proxies
+		</description>
+	  <property name="beanNames"><value>jdk*,onlyJdk</value></property>
+	  <property name="interceptors">
+		<list>
+		  <ref local="nopInterceptor"/>
+		</list>
+	  </property>
+	</bean>
+	
+	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+	  <property name="beanNames"><value>cglib*</value></property>
+	  <property name="proxyTargetClass">
+	  	<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
+	  	<value>true</value>
+	  </property>
+		<property name="interceptors">
+		<description>Interceptors and Advisors to apply automatically</description>
+		<list>
+		  <ref local="nopInterceptor"/>
+		  <ref local="countingBeforeAdvice"/>
+		</list>
+		</property>
+	</bean>
+	
+	<bean id="introductionBeanNameProxyCreator" class="org.springframework.aop.framework.support.BeanNameAutoProxyCreator">
+		<description>
+			Illustrates a JDK introduction
+		</description>
+	  <property name="beanNames"><value>introductionUsingJdk</value></property>
+	  <property name="interceptors">
+		<list>
+		  <ref local="introductionNopInterceptor"/>
+		  <ref local="timestampIntroduction"/>
+		</list>
+	  </property>
+	</bean>
+	
+	<bean id="timestampIntroduction"
+		class="org.springframework.aop.framework.TimestampIntroductionAdvisor">
+	</bean>
+	
+	
+	<bean id="countingBeforeAdvice"
+		class="org.springframework.aop.framework.CountingBeforeAdvice"
+	/>
+	
+	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
+	</bean>
+	
+	<bean id="introductionNopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
+	</bean>
+	
+	
+	<bean id="introductionUsingJdk" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>introductionUsingJdk</value></property>
+	</bean>
+	
+	<bean id="jdk1" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>jdk1</value></property>
+	</bean>
+	
+	<bean id="cglib1" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>cglib1</value></property>
+	</bean>
+	
+	<bean id="onlyJdk" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>onlyJdk</value></property>
+	</bean>
+	
+	<bean id="noproxy" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>noproxy</value></property>
+	</bean>
+	
+	
+</beans>		
+	
+	

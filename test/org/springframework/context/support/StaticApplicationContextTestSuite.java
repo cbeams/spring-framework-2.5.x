@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.19 2003-12-09 08:44:27 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.20 2003-12-09 16:46:11 johnsonr Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -119,7 +119,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		public TestInterceptor testInterceptor = new TestInterceptor();
 
 		public TestAutoProxyCreator() {
-			setProxyInterfacesOnly(false);
+			setProxyTargetClass(true);
 			setOrder(0);
 		}
 

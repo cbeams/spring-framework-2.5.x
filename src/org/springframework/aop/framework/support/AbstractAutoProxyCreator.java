@@ -10,7 +10,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
@@ -38,9 +40,9 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.18 2003-11-30 17:17:34 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.19 2003-12-09 16:46:11 johnsonr Exp $
  */
-public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
+public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, Ordered {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -62,8 +64,6 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	private Object[] interceptors;
 
 	private boolean applyCommonInterceptorsFirst = true;
-
-	private boolean proxyInterfacesOnly = true;
 	
 
 	public final void setOrder(int order) {
@@ -75,7 +75,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	}
 
 	/**
-	 * Set the interceptors and pointcuts that the automatic proxies
+	 * Set the MethodInterceptors, MethodBeforeAdvices and pointcuts that the automatic proxies
 	 * should delegate to before invoking the bean itself.
 	 */
 	public void setInterceptors(Object[] interceptors) {
@@ -92,14 +92,6 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
 	}
 
-	/**
-	 * Set if the proxy should only implement the interfaces of the target.
-	 * If this is false, a dynamic runtime subclass of the target will be
-	 * created via CGLIB, castable to the target class. Default is true.
-	 */
-	public void setProxyInterfacesOnly(boolean proxyInterfacesOnly) {
-		this.proxyInterfacesOnly = proxyInterfacesOnly;
-	}
 
 	/**
 	 * Create a proxy with the configured interceptors if the bean is
@@ -133,6 +125,17 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 										" common interceptors and " + specificInterceptors.length + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
+			// Copy our properties (proxyTargetClass) inherited from ProxyConfig
+			proxyFactory.copyFrom(this);
+			
+			if (!getProxyTargetClass()) {
+				// Must allow for introductions; can't just set interfaces to
+				// the target's interfaces only
+				Class[] targetsInterfaces = AopUtils.getAllInterfaces(bean);
+				for (int i = 0; i < targetsInterfaces.length; i++) {
+					proxyFactory.addInterface(targetsInterfaces[i]);
+				}
+			}
 			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
 				Object interceptorOrAdvice = it.next();
@@ -144,19 +147,16 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 					//System.err.println("Found interceptor " + interceptorOrAdvice);
 					proxyFactory.addInterceptor((Interceptor) interceptorOrAdvice);
 				}
-			}
-			proxyFactory.setTargetSource(getTargetSource(bean, name));
-			if (this.proxyInterfacesOnly) {
-				// Must allow for introductions; can't just set interfaces to
-				// the target's interfaces only
-				Class[] targetsInterfaces = AopUtils.getAllInterfaces(bean);
-				for (int i = 0; i < targetsInterfaces.length; i++) {
-					proxyFactory.addInterface(targetsInterfaces[i]);
+				else if (interceptorOrAdvice instanceof MethodBeforeAdvice) {
+					//System.err.println("Found interceptor " + interceptorOrAdvice);
+					proxyFactory.addBeforeAdvice((MethodBeforeAdvice) interceptorOrAdvice);
 				}
 			}
+			proxyFactory.setTargetSource(getTargetSource(bean, name));
 			
 			// Transaction and other APIs might require this
 			proxyFactory.setExposeInvocation(true);
+			//System.err.print(proxyFactory);
 			return proxyFactory.getProxy();
 		}
 		else {
@@ -170,6 +170,12 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 			AbstractAutoProxyCreator.class.isAssignableFrom(bean.getClass());
 	}
 	
+	/**
+	 * Subclasses should override this method to return true if this
+	 * bean should not be considered for autoproxying by this post processor. 
+	 * Sometimes we need to be able to avoid this happening if it will lead to
+	 * a circular reference. This implementation returns true.
+	 */
 	protected boolean shouldSkip(Object bean, String name) {
 		return false;
 	}
