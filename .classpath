@@ -39,7 +39,6 @@
 	<classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/ant/ant.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/struts/struts-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j/dom4j.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
 	<classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
@@ -94,5 +93,6 @@
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jamon/JAMon.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
+	<classpathentry kind="lib" path="lib/struts/struts.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
