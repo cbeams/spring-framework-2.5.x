@@ -13,6 +13,7 @@ import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
+import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
@@ -28,6 +29,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * @author Juergen Hoeller
@@ -753,7 +755,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		tx.commit();
-		txControl.setThrowable(new HibernateException("ex"), 1);
+		txControl.setThrowable(new JDBCException(new SQLException("argh", "27")), 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -786,9 +788,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("Should have thrown HibernateSystemException");
+			fail("Should have thrown DataIntegrityViolationException");
 		}
-		catch (HibernateSystemException ex) {
+		catch (DataIntegrityViolationException ex) {
 			// expected
 		}
 

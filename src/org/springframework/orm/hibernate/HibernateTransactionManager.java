@@ -10,11 +10,15 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.JDBCException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
+import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -92,6 +96,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private Interceptor entityInterceptor;
 
+	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+
 	/**
 	 * Create a new HibernateTransactionManager instance.
 	 * A SessionFactory has to be set to be able to use it.
@@ -163,6 +169,26 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public Interceptor getEntityInterceptor() {
 		return entityInterceptor;
+	}
+
+	/**
+	 * Set the JDBC exception translator for this transaction manager.
+	 * Applied to SQLExceptions (wrapped by Hibernate's JDBCException)
+	 * thrown by flushing on commit.
+	 * <p>The default exception translator evaluates the exception's SQLState.
+	 * @param jdbcExceptionTranslator exception translator
+	 * @see org.springframework.jdbc.core.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.jdbc.core.SQLErrorCodeSQLExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+	}
+
+	/**
+	 * Return the JDBC exception translator for this transaction manager.
+	 */
+	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+		return this.jdbcExceptionTranslator;
 	}
 
 	public void afterPropertiesSet() {
@@ -262,9 +288,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// assumably from commit call to underlying JDBC connection
 			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
 		}
+		catch (JDBCException ex) {
+			// assumably failed to flush changes to database
+			throw convertJdbcAccessException(ex.getSQLException());
+		}
 		catch (HibernateException ex) {
 			// assumably failed to flush changes to database
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+			throw convertHibernateAccessException(ex);
 		}
 	}
 
@@ -277,9 +307,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		catch (net.sf.hibernate.TransactionException ex) {
 			throw new TransactionSystemException("Could not rollback Hibernate transaction", ex);
 		}
+		catch (JDBCException ex) {
+			// shouldn't really happen, as a rollback doesn't cause a flush
+			throw convertJdbcAccessException(ex.getSQLException());
+		}
 		catch (HibernateException ex) {
 			// shouldn't really happen, as a rollback doesn't cause a flush
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+			throw convertHibernateAccessException(ex);
 		}
 	}
 
@@ -336,4 +370,31 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 	
+	/**
+	 * Convert the given HibernateException to an appropriate exception from
+	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * @param ex HibernateException that occured
+	 * @return the corresponding DataAccessException instance
+	 */
+	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
+	}
+
+	/**
+	 * Convert the given SQLException to an appropriate exception from the
+	 * org.springframework.dao hierarchy. Uses a JDBC exception translater if set,
+	 * and a generic HibernateJdbcException else. Can be overridden in subclasses.
+	 * @param ex SQLException that occured
+	 * @return the corresponding DataAccessException instance
+	 * @see #setJdbcExceptionTranslator
+	 */
+	protected DataAccessException convertJdbcAccessException(SQLException ex) {
+		if (this.jdbcExceptionTranslator != null) {
+			return this.jdbcExceptionTranslator.translate("HibernateTemplate", null, ex);
+		}
+		else {
+			return new HibernateJdbcException(ex);
+		}
+	}
+
 }
