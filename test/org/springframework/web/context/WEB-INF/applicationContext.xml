@@ -69,7 +69,7 @@
 	</bean>
 
 	<bean id="init-and-ib"
-		class="org.springframework.web.context.WebApplicationContextTestSuite$InitAndIB"
+		class="org.springframework.web.context.XmlWebApplicationContextTests$InitAndIB"
 		lazy-init="true"
 		init-method="customInit"
 		destroy-method="customDestroy"

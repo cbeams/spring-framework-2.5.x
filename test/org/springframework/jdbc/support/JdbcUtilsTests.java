@@ -28,16 +28,6 @@ import junit.framework.TestCase;
  */
 public class JdbcUtilsTests extends TestCase {
 
-	/**
-	 * Constructor for JdbcUtilsTests.
-	 * @param arg0
-	 */
-	public JdbcUtilsTests(String arg0) {
-		super(arg0);
-	}
-
-	/**
-	 */
 	public void testCountParameterPlaceholders() {
 		assertTrue(JdbcUtils.countParameterPlaceholders(null, '?', '\'') == 0);
 

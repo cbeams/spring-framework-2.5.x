@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="example1" class="org.springframework.web.servlet.view.ViewResolverTestSuite$TestView">
+	<bean id="example1" class="org.springframework.web.servlet.view.ViewResolverTests$TestView">
 		<property name="url"><value>/example1.jsp</value></property>
 		<property name="attributesMap">
 			<map>

@@ -51,16 +51,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 	};
 
 	/**
-	 * Constructor for SQLErrorCodeSQLExceptionTranslatorTests.
-	 * @param arg0
-	 */
-	public SQLErrorCodeSQLExceptionTranslatorTests(String arg0) {
-		super(arg0);
-	}
-	
-	/**
-	 * Run tests on this translator
-	 * @param sext
+	 * Run tests on this translator.
 	 */
 	private void runTests(SQLExceptionTranslator sext) {
 		BadSqlGrammarException ex = (BadSqlGrammarException) sext.translate("task", "SQL", BAD_SQL_EX);
@@ -79,7 +70,6 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		ex = (BadSqlGrammarException) sext.translate("task", "SQL2", sex);
 		assertEquals("SQL2", ex.getSql());
 		assertEquals(sex, ex.getSQLException());
-
 	}
 	
 	public void testErrorCodesProvidedInConstructor() {
