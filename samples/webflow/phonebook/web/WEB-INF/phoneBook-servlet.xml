@@ -45,9 +45,8 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
-	<bean id="person.Search.userId.set" class="org.springframework.web.flow.action.BindAndValidateAction">
-		<property name="formObjectName"><value>id</value></property>
-		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
+	<bean id="person.Search.userId.set" class="org.springframework.web.flow.action.SetAction">
+		<property name="mapping"><value>id,java.lang.Long</value></property>
 	</bean>
 
 	<bean id="id.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
@@ -89,9 +88,8 @@
 		<property name="phoneBook"><ref bean="phoneBook"/></property>
 	</bean>
 
-	<bean id="person.Detail.collegueId.set" class="org.springframework.web.flow.action.BindAndValidateAction">
-		<property name="formObjectName"><value>colleagueId</value></property>
-		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
+	<bean id="person.Detail.collegueId.set" class="org.springframework.web.flow.action.SetAction">
+		<property name="mapping"><value>collegueId,java.lang.Long<value></property>
 	</bean>
 
 	<bean id="collegueId.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">

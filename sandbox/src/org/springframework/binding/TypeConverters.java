@@ -16,7 +16,7 @@ import org.springframework.core.io.Resource;
  * Registry for type converters
  * @author Keith Donald
  */
-public class TypeConverters {
+public class TypeConverters implements TypeConverterRegistry {
 	private static TypeConverters instance;
 
 	private BeanFactory typeConverterRegistry;
@@ -76,5 +76,4 @@ public class TypeConverters {
 	public TypeConverter getDateToString() {
 		return getTypeConverter(Date.class);
 	}
-
 }
