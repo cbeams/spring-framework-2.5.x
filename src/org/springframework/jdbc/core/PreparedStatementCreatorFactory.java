@@ -33,7 +33,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.10 2004-05-27 11:56:24 jhoeller Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.11 2004-05-28 14:11:41 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory {
 
@@ -106,7 +106,7 @@ public class PreparedStatementCreatorFactory {
 	}
 
 	/**
-	 * Return a new PreparedStatementCreator given these parameters.
+	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params parameter array. May be null.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
@@ -114,10 +114,26 @@ public class PreparedStatementCreatorFactory {
 	}
 	
 	/**
-	 * Return a new PreparedStatementCreator instance given this parameters.
+	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params List of parameters. May be null.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
+		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Return a new PreparedStatementSetter for the given parameters.
+	 * @param params parameter array. May be null.
+	 */
+	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+		return new PreparedStatementCreatorImpl((params != null) ? Arrays.asList(params) : Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Return a new PreparedStatementSetter for the given parameters.
+	 * @param params List of parameters. May be null.
+	 */
+	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
 	}
 
@@ -125,16 +141,17 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * PreparedStatementCreator implementation returned by this class.
 	 */
-	private class PreparedStatementCreatorImpl implements PreparedStatementCreator, SqlProvider {
+	private class PreparedStatementCreatorImpl
+			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider {
 
 		private final List parameters;
 		
 		/**
 		 * Create a new PreparedStatementCreatorImpl.
-		 * @param params list of SqlParameter objects. May not be null.
+		 * @param parameters list of parameter objects
 		 */
-		public PreparedStatementCreatorImpl(List params) {
-			this.parameters = params;
+		public PreparedStatementCreatorImpl(List parameters) {
+			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size())
 				throw new InvalidDataAccessApiUsageException("SQL=[" + sql + "]: given " + this.parameters.size() +
 				                                             " parameter but expected " + declaredParameters.size());
@@ -150,19 +167,22 @@ public class PreparedStatementCreatorFactory {
 																	updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
 
-			// Set arguments: does nothing if there are no parameters
+			setValues(ps);
+			return ps;
+		}
+
+		public void setValues(PreparedStatement ps) throws SQLException {
+			// Set arguments: Does nothing if there are no parameters.
 			for (int i = 0; i < this.parameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
-				// We need SQL type to be able to set null
+				// we need SQL type to be able to set null
 				if (this.parameters.get(i) == null) {
 					ps.setNull(i + 1, declaredParameter.getSqlType());
 				}
 				else {
-					// Documentation?
-					// PARAMETERIZE THIS TO A TYPE MAP INTERFACE?
 					switch (declaredParameter.getSqlType()) {
-						case Types.VARCHAR : 
-							ps.setString(i + 1, (String) this.parameters.get(i));
+						case Types.VARCHAR:
+							ps.setString(i + 1, this.parameters.get(i).toString());
 							break;
 						default :
 							ps.setObject(i + 1, this.parameters.get(i), declaredParameter.getSqlType());
@@ -170,7 +190,6 @@ public class PreparedStatementCreatorFactory {
 					}
 				}
 			}
-			return ps;
 		}
 
 		public String getSql() {

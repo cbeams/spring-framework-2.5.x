@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SqlOperation.java,v 1.10 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: SqlOperation.java,v 1.11 2004-05-28 14:11:41 jhoeller Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 
@@ -86,7 +87,6 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Overridden method to configure the PreparedStatementCreatorFactory
 	 * based on our declared parameters.
-	 * @see RdbmsOperation#compileInternal()
 	 */
 	protected final void compileInternal() {
 		// validate parameter count
@@ -110,19 +110,29 @@ public abstract class SqlOperation extends RdbmsOperation {
 	}
 
 	/**
-	 * Hook method that subclasses may override to react to compilation.
+	 * Hook method that subclasses may override to post-process compilation.
 	 * This implementation does nothing.
+	 * @see #compileInternal
 	 */
 	protected void onCompileInternal() {
 	}
 
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
-	 * with this parameters.
-	 * @param params parameters. May be null.
+	 * with the given parameters.
+	 * @param params parameter array. May be null.
 	 */
-	protected PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
+	}
+
+	/**
+	 * Return a PreparedStatementSetter to perform an operation
+	 * with thhe given parameters.
+	 * @param params parameter array. May be null.
+	 */
+	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+		return this.preparedStatementFactory.newPreparedStatementSetter(params);
 	}
 
 }
