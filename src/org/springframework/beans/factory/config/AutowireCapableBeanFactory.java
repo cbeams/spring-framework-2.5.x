@@ -4,11 +4,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Extension of the ListableBeanFactory interface to be implemented by bean
+ * Extension of the BeanFactory interface to be implemented by bean
  * factories that are capable of autowiring and expose this functionality
  * for existing bean instances.
  * @author Juergen Hoeller
  * @since 04.12.2003
+ * $Id: AutowireCapableBeanFactory.java,v 1.2 2004-02-05 01:14:00 dkopylenko Exp $
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
