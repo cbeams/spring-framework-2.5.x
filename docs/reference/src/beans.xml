@@ -2497,6 +2497,57 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </sect1>
 
   <sect1 id="context-create">
+    <title>Importing Bean Definitions from One File Into Another</title>
+
+    <para>It's often useful to split up container defintions into multiple XML
+    files. One way to then load an application context which is configured
+    from all these XML fragments is to use the application context constructor
+    which takes multiple Resource locations. With a bean factory, a bean
+    definition reader can be used multiple times to read definitions from each
+    file in turn.</para>
+
+    <para>Generally, the Spring team prefers the above approach, since it
+    keeps container configurations files unaware of the fact that they are
+    being combined with others. However, an alternate approach is to from one
+    XML bean definition file, use one or more instances of the
+    <literal>import</literal> element to load definitions from one or more
+    other files. Any <literal>import</literal> elements must be placed before
+    <literal>bean</literal> elements in the file doing the importing. Let's
+    look at a sample:</para>
+
+    <para><programlisting>&lt;beans&gt;
+
+  &lt;import resource="services.xml"/&gt;
+
+  &lt;import resource="resources/messageSource.xml"/&gt;
+
+  &lt;import resource="/resources/themeSource.xml"/&gt;
+
+  &lt;bean id="bean1" class="..."/&gt;
+
+  &lt;bean id="bean2" class="..."/&gt;
+  . . .</programlisting></para>
+
+    <para>In this example, external bean definitions are being loaded from 3
+    files, <literal>services.xml</literal>,
+    <literal>messageSource.xml</literal>, and
+    <literal>themeSource.xml</literal>. All location paths are considered
+    relative to the definition file doing the importing, so
+    <literal>services.xml</literal> in this case must be in the same directory
+    or classpath location as the file doing the importing, while
+    <literal>messageSource.xml</literal> and
+    <literal>themeSource.xml</literal> must be in a
+    <literal>resources</literal> location below the location of the importing
+    file. As you can see, a leading slash is actually ignored, but given that
+    these are considered relative paths, it is probably better form not to use
+    the slash at all.</para>
+
+    <para>The contents of the files being imported must be fully valid XML
+    bean definition files according to the DTD, including the top level
+    <literal>beans</literal> element.</para>
+  </sect1>
+
+  <sect1 id="context-create">
     <title>Creating an ApplicationContext from a web application</title>
 
     <para>As opposed to the BeanFactory, which will often be created
