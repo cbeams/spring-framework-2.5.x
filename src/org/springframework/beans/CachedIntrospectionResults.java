@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -21,6 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -44,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
-*  @version $Id: CachedIntrospectionResults.java,v 1.10 2004-05-24 09:52:22 jhoeller Exp $
+*  @version $Id: CachedIntrospectionResults.java,v 1.11 2004-05-30 15:34:17 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 
@@ -52,17 +53,17 @@ final class CachedIntrospectionResults {
 
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
-	 * Needs to be a WeakHashMap with WeakReferences as values
-	 * to allow for proper garbage collection on shutdown!
+	 * Needs to be a WeakHashMap with WeakReferences as values to allow
+	 * for proper garbage collection in case of multiple classloaders.
 	 */
-	private static final Map classCache = new WeakHashMap();
+	private static final Map classCache = Collections.synchronizedMap(new WeakHashMap());
 
 	/**
 	 * We might use this from the EJB tier, so we don't want to use synchronization.
 	 * Object references are atomic, so we can live with doing the occasional
 	 * unnecessary lookup at startup only.
 	 */
-	protected static synchronized CachedIntrospectionResults forClass(Class clazz) throws BeansException {
+	static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
 		WeakReference weakRef = (WeakReference) classCache.get(clazz);
 		CachedIntrospectionResults results = (weakRef != null) ? (CachedIntrospectionResults) weakRef.get() : null;
 		if (results == null) {
@@ -94,6 +95,17 @@ final class CachedIntrospectionResults {
 			}
 			this.beanInfo = Introspector.getBeanInfo(clazz);
 
+			// Immediately remove class from Introspector cache, to allow for proper
+			// garbage collection on class loader shutdown - we cache it here anyway,
+			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
+			// Introspector does not use WeakReferences as values of its WeakHashMap!
+			Class classToFlush = clazz;
+			do {
+				Introspector.flushFromCaches(classToFlush);
+				classToFlush = classToFlush.getSuperclass();
+			}
+			while (classToFlush != null);
+
 			if (logger.isDebugEnabled()) {
 				logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
 			}
@@ -114,15 +126,15 @@ final class CachedIntrospectionResults {
 		}
 	}
 
-	protected BeanInfo getBeanInfo() {
+	BeanInfo getBeanInfo() {
 		return this.beanInfo;
 	}
 
-	protected Class getBeanClass() {
+	Class getBeanClass() {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
-	protected PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
+	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 		if (pd == null) {
 			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]");
