@@ -21,6 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
@@ -69,6 +71,27 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
+	private static ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+
+	/**
+	 * Return the LobHandler for the currently configured Hibernate SessionFactory,
+	 * to be used by Type implementations like ClobStringType.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SessionFactory, and reset immediately afterwards. It is thus only available
+	 * in constructors of UserType implementations.
+	 * @see #setLobHandler
+	 * @see org.springframework.orm.hibernate.support.ClobStringType
+	 * @see net.sf.hibernate.type.Type
+	 */
+	public static LobHandler getConfigTimeLobHandler() {
+		LobHandler result = (LobHandler) configTimeLobHandlerHolder.get();
+		if (result == null) {
+			throw new IllegalStateException("No LobHandler found for configuration - lobHandler property must be set on LocalSessionFactoryBean");
+		}
+		return result;
+	}
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String configLocation;
@@ -81,6 +104,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private DataSource dataSource;
 
+	private LobHandler lobHandler;
+
 	private Interceptor entityInterceptor;
 
 	private boolean schemaUpdate = false;
@@ -92,9 +117,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * A typical value is "/hibernate.cfg.xml", in the case of web applications
 	 * normally to be found in WEB-INF/classes.
 	 * <p>Note: Can be omitted when all necessary properties and mapping resources
-	 * are specified locally via this bean. If neither a location nor any mapping
-	 * resources are set, default Hibernate configuration will be performed,
-	 * using "/hibernate.cfg.xml".
+	 * are specified locally via this bean.
 	 */
 	public void setConfigLocation(String configLocation) {
 		this.configLocation = configLocation;
@@ -144,6 +167,17 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * Set the LobHandler to be used by the SessionFactory.
+	 * Will be exposed at config time for Type implementations.
+	 * @see #getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate.support.ClobStringType
+	 * @see net.sf.hibernate.type.Type
+	 */
+	public void setLobHandler(LobHandler lobHandler) {
+		this.lobHandler = lobHandler;
+	}
+
+	/**
 	 * Set a Hibernate entity interceptor that allows to inspect and change
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this factory.
@@ -181,10 +215,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// create Configuration instance
 		Configuration config = newConfiguration();
 
-		if (this.configLocation == null && this.mappingResources == null &&
-				this.mappingResourceJars == null) {
-			// default Hibernate configuration from "/hibernate.cfg.xml"
-			config.configure();
+		if (this.lobHandler != null) {
+			// make given LobHandler available for SessionFactory configuration
+			// do early because because mapping resource might refer to custom types
+			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
 		if (this.configLocation != null) {
@@ -243,6 +277,16 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		// build SessionFactory instance
 		logger.info("Building new Hibernate SessionFactory");
 		this.sessionFactory = newSessionFactory(config);
+
+		if (this.dataSource != null) {
+			// reset DataSource holder
+			LocalDataSourceConnectionProvider.configTimeDataSourceHolder.set(null);
+		}
+
+		if (this.lobHandler != null) {
+			// reset LobHandler holder
+			configTimeLobHandlerHolder.set(null);
+		}
 
 		// execute schema update if requested
 		if (this.schemaUpdate) {
@@ -322,11 +366,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 						}
 					}
 					finally {
-						try {
-							stmt.close();
-						}
-						catch (SQLException ignore) {
-						}
+						JdbcUtils.closeStatement(stmt);
 					}
 					return null;
 				}
