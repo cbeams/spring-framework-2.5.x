@@ -351,7 +351,7 @@
 		<mkdir dir="${javadocs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${javadocs.dir}" windowtitle="Spring Framework"
-				source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
+				additionalparam="-breakiterator" source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
@@ -361,6 +361,58 @@
 			<packageset dir="${mock.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
+			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
+			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+			<link href="http://aopalliance.sourceforge.net/doc"/>
+			<!-- BSH -->
+			<!-- BURLAP -->
+			<!-- HESSIAN -->
+			<link href="http://cglib.sourceforge.net/apidocs"/>
+			<!-- Clover -->
+			<!-- COS -->
+			<link href="http://www.dom4j.org/apidocs/"/>
+			<!-- EasyMock -->
+			<!-- EhCache -->
+			<!-- FOP -->
+			<link href="http://www.freemarker.org/docs/api/"/>
+			<!-- Groovy -->
+			<link href="http://www.hibernate.org/hib_docs/api/"/>
+			<link href="http://httpunit.sourceforge.net/doc/api/"/>
+			<!-- iBatis -->
+			<!-- Commons Attributes (api + compiler -->
+			<!-- iText -->
+			<link href="http://jakarta.apache.org/commons/beanutils/commons-beanutils-1.7.0/docs/api"/>
+			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
+			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/digester/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/discovery/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/lang/api/"/>
+			<link href="http://jakarta.apache.org/commons/logging/api/"/>	
+			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
+			<link href="http://jakarta.apache.org/commons/discovery/apidocs/"/>
+			<!-- JasperReports -->
+			<!-- JDO -->
+			<link href="http://www.jdom.org/docs/apidocs/"/>
+			<!-- jexcelapi will be part of the libs for 1.2  -->
+			<link href="http://www.jmock.org/docs/javadoc/"/>
+			<!-- JMX -->
+			<!-- JOTM -->
+			<!-- JSF -->
+			<link href="http://www.junit.org/junit/javadoc/"/>
+			<link href="http://logging.apache.org/log4j/docs/api/"/>
+			<!-- ojb -->
+			<link href="http://jakarta.apache.org/poi/apidocs/"/>
+			<!-- portlet -->
+			<!-- qdox -->
+			<link href="http://quartz.sourceforge.net/javadoc/"/>
+			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
+			<link href="http://struts.apache.org/api/"/>
+			<link href="http://jakarta.apache.org/velocity/api/"/>
+			<link href="http://xml.apache.org/xerces2-j/javadocs/api/"/>
 		</javadoc>
 
 	</target>
