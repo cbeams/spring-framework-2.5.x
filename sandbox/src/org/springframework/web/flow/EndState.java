@@ -127,7 +127,7 @@ public class EndState extends State {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Returning view descriptor '" + viewName + "' to render");
 				}
-				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
+				viewDescriptor = new ViewDescriptor(viewName, context.getModel(false));
 			}
 			// actually end the subflow
 			// note that we do this at the here to make sure we can call context.getModel()

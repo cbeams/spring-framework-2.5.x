@@ -119,9 +119,12 @@ public interface RequestContext {
 	 * Returns the data model for this context, suitable for exposing to clients
 	 * (e.g. web views). Typically the model will contain the data available in
 	 * request scope and flow scope.
+	 * @param includeInfrastructureAttributes indicates whether or not to include
+	 *        infrastructure attributes, e.g. flow execution id, in the generated
+	 *        model map
 	 * @return the model that can be exposed to a client
 	 */
-	public Map getModel();
+	public Map getModel(boolean includeInfrastructureAttributes);
 
 	/**
 	 * Returns a synchronizer for demarcating application transactions within

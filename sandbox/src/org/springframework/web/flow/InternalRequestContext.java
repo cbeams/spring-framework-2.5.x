@@ -99,17 +99,19 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return getActiveFlowSession().getFlowScope();
 	}
 
-	public Map getModel() {
+	public Map getModel(boolean includeInfrastructureAttributes) {
 		// merge request and flow scope
 		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
 		model.putAll(getFlowScope().getAttributeMap());
 		model.putAll(getRequestScope().getAttributeMap());
-		// make the flow execution itself available in the model
-		model.put(FlowConstants.FLOW_EXECUTION_ATTRIBUTE, this.flowExecution);
-		// add some convenience values for views that aren't easily
-		// javabean aware
-		model.put(FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE, this.flowExecution.getId());
-		model.put(FlowConstants.CURRENT_STATE_ID_ATTRIBUTE, this.flowExecution.getCurrentStateId());
+		if (includeInfrastructureAttributes) {
+			// make the flow execution itself available in the model
+			model.put(FlowConstants.FLOW_EXECUTION_ATTRIBUTE, this.flowExecution);
+			// add some convenience values for views that aren't easily
+			// javabean aware
+			model.put(FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE, this.flowExecution.getId());
+			model.put(FlowConstants.CURRENT_STATE_ID_ATTRIBUTE, this.flowExecution.getCurrentStateId());
+		}
 		return model;
 	}
 
