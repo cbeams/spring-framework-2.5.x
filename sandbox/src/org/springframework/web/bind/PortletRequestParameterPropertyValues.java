@@ -17,10 +17,8 @@
 package org.springframework.web.bind;
 
 import javax.portlet.PortletRequest;
-import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.web.util.WebUtils;
 
 /**
  * PropertyValues implementation created from parameters in a PortlettRequest.
@@ -35,7 +33,10 @@ public class PortletRequestParameterPropertyValues extends MutablePropertyValues
 	//public static final String DEFAULT_PREFIX_SEPARATOR = "_";
 
 	public PortletRequestParameterPropertyValues(PortletRequest request) {
-		this(request, null, null);
+	    // Nick Lothian: I don't understand why the functionality in these
+	    // constructors was/is commented out.
+		//this(request, null, null);
+	    super(request.getParameterMap());
 	}
 
 	public PortletRequestParameterPropertyValues(PortletRequest request, String prefix) {

@@ -80,6 +80,7 @@ import org.springframework.web.portlet.context.support.XmlPortletApplicationCont
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author Nick Lothian
  * @see #doService
  * @see #initFrameworkPortlet
  * @see #setContextClass
@@ -257,6 +258,9 @@ public abstract class FrameworkPortlet extends PortletBean {
 		WebApplicationContext parent = PortletWebApplicationContextUtils.getWebApplicationContext(portletContext);
 
 		PortletApplicationContext pac = createPortletApplicationContext(parent);
+		// Set the Servlet Context. This is required by the Spring Tag Libraries
+		pac.setServletContext(parent.getServletContext());
+				
 		if (logger.isInfoEnabled()) {
 			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" + getPortletName() + "'");
 		}

@@ -43,6 +43,7 @@ import org.springframework.web.servlet.ModelAndViewDefiningException;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -71,6 +72,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author Nick Lothian
  * @see PortletControllerMapping
  * @see ViewResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext
@@ -279,6 +281,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
 		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, mv.getModel());
 		request.setAttribute(ViewRendererServlet.DISPATCHER_PORTLET_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+		
+		// This attribute is required by the Spring Tag Libraries
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+		// This attribute is required by the Spring Tag Libraries
+		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
+		
 		PortletRequestDispatcher prd = getPortletContext().getRequestDispatcher(getViewRendererServlet());
 		prd.include(request, response);
 	}

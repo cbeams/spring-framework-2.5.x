@@ -16,11 +16,15 @@
 package org.springframework.web.portlet.context.support;
 
 import javax.portlet.PortletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.ui.context.Theme;
+import org.springframework.ui.context.ThemeSource;
+import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 
@@ -49,6 +53,7 @@ import org.springframework.web.portlet.context.ConfigurablePortletApplicationCon
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author Nick Lothian
  * @see #setNamespace
  * @see #setConfigLocations
  * @see org.springframework.web.portlet.FrameworkPortlet#initPortletApplicationContext
@@ -77,7 +82,12 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 
 	/** Paths to XML configuration files */
 	private String[] configLocations;
-
+	
+	/** the ThemeSource for this ApplicationContext. Required for Spring TagLibs */
+	private ThemeSource themeSource;
+	
+	private ServletContext servletContext;
+	
 
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
@@ -149,5 +159,33 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 		return sb.toString();
 	}
 
-
+	/**
+	 * <p>This is required to use the Spring Tag Libraries. Should be used with
+	 * caution as a Portal will normally supply equivalent functionality</p>
+	 *
+	 * @see org.springframework.ui.context.ThemeSource#getTheme(java.lang.String)
+	 */
+	public Theme getTheme(String themeName) {
+		return this.themeSource.getTheme(themeName);
+	}
+	
+	/**
+	 * <p>Required by Spring Tag Libraries</p>
+	 *
+	 * @see org.springframework.web.context.WebApplicationContext#getServletContext()
+	 */
+	public ServletContext getServletContext() {
+		return this.servletContext;
+	}
+	
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+	
+	/**
+	 * @see org.springframework.context.support.AbstractApplicationContext#onRefresh()
+	 */
+	   protected void onRefresh() throws BeansException {
+	       this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+	   }
 }

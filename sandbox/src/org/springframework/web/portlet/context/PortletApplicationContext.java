@@ -17,8 +17,9 @@
 package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
+import javax.servlet.ServletContext;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 
 /** 
  * Interface to provide configuration for a portlet application. This is read-only while
@@ -40,13 +41,23 @@ import org.springframework.context.ApplicationContext;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
+ * @author Nick Lothian
  * @see PortletContextAware#setPortletContext
  */
-public interface PortletApplicationContext extends ApplicationContext {
+public interface PortletApplicationContext extends WebApplicationContext {
 
 	/**
 	 * Return the standard Portlet API PorletContext for this application.
 	 */
 	PortletContext getPortletContext();
+	
+	/**
+	 * <p>Set the servlet context of this portlet application</p>
+	 *
+	 * <p>This is required to use the Spring tag library</p>
+	 */
+	void setServletContext(ServletContext servletContext);
+
+	ServletContext getServletContext();
 	
 }
