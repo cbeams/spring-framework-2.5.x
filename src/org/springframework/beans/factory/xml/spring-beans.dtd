@@ -77,13 +77,16 @@
 <!ATTLIST import resource CDATA #IMPLIED>
 
 <!--
-	Defines a single named bean.
+	Defines a single (usually named) bean.
+
+	A bean definition may contain nested tags for constructor arguments,
+	property values, lookup methods, and replaced methods. Mixing constructor
+	injection and setter injection on the same bean is explicitly supported.
 -->
 <!ELEMENT bean (
 	description?,
 	(constructor-arg | property)*,
-	(lookup-method)*,
-	(replaced-method)*
+	(lookup-method | replaced-method)*
 )>
 
 <!--
