@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: OptimizedCglib1AopProxy.java,v 1.2 2003-12-03 11:32:32 johnsonr Exp $
+ * @version $Id: OptimizedCglib1AopProxy.java,v 1.3 2003-12-05 15:19:24 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilter {
@@ -72,8 +72,7 @@ final class OptimizedCglib1AopProxy extends Cglib1AopProxy implements MethodFilt
 			this.target = advised.getTargetSource().getTarget();
 		}
 		catch (Exception ex) {
-			// TODO fix exception
-			throw new AopConfigException("Fix me");
+			throw new AopConfigException("Cannot get target from static TargetSource", ex);
 		}
 	}
 	
