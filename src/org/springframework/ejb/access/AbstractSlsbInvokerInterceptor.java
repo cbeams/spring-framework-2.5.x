@@ -27,10 +27,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.jndi.JndiObjectLocator;
 
 /**
- * Superclass for AOP interceptors invoking remote or local Stateless Session Beans.
+ * Superclass for AOP interceptors invoking local or remote Stateless Session Beans.
  *
  * <p>Such an interceptor must be the last interceptor in the advice chain.
- * In this case, there is no target object.
+ * In this case, there is no direct target object: The call is handled in a
+ * special way, getting executed on an EJB instance retrieved via an EJB home.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -166,12 +167,12 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	protected Object create() throws NamingException, InvocationTargetException {
 		try {
 			Object home = getHome();
-			Method createMethod = this.createMethod;
-			if (createMethod == null) {
-				createMethod = getCreateMethod(home);
+			Method createMethodToUse = this.createMethod;
+			if (createMethodToUse == null) {
+				createMethodToUse = getCreateMethod(home);
 			}
 			// invoke cached EJB home object
-			return this.createMethod.invoke(home, null);
+			return createMethodToUse.invoke(home, null);
 		}
 		catch (IllegalAccessException ex) {
 			throw new AspectException("Could not access EJB home create() method", ex);
