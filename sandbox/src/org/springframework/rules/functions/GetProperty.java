@@ -20,7 +20,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.rules.UnaryFunction;
 
 /**
- * Binary function that gets a bean property.
+ * Function that gets a bean property.
  * 
  * @author Keith Donald
  */
@@ -28,9 +28,13 @@ public class GetProperty implements UnaryFunction {
     private BeanWrapper beanWrapper;
 
     public GetProperty(Object bean) {
-        this.beanWrapper = new BeanWrapperImpl(bean);
+        this(new BeanWrapperImpl(bean));
     }
 
+    public GetProperty(BeanWrapper beanWrapper) {
+        this.beanWrapper = beanWrapper;
+    }
+    
     /**
      * Returns a bean's property value.
      * 

@@ -18,10 +18,9 @@ package org.springframework.rules.functions;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.rules.BinaryProcedure;
-import org.springframework.util.Assert;
 
 /**
- * Binary function that sets a bean property.
+ * Procedure that sets a bean property.
  * 
  * @author Keith Donald
  */
@@ -29,8 +28,11 @@ public class SetProperty implements BinaryProcedure {
     private BeanWrapper beanWrapper;
 
     public SetProperty(Object bean) {
-        Assert.notNull(bean);
-        this.beanWrapper = new BeanWrapperImpl(bean);
+        this(new BeanWrapperImpl(bean));
+    }
+
+    public SetProperty(BeanWrapper beanWrapper) {
+        this.beanWrapper = beanWrapper;
     }
 
     /**
