@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow.mvc;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -106,7 +108,23 @@ public class FlowController extends AbstractController implements InitializingBe
 	 */
 	protected HttpFlowExecutionManager createHttpFlowExecutionManager() {
 		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
+		return new HttpFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners) {
+			protected Map getFlowExecutionInput(HttpServletRequest request) {
+				return FlowController.this.getFlowExecutionInput(request);
+			}
+		};
+	}
+
+	/**
+	 * Create a map of input attributes for new flow executions started by the
+	 * execution manager.
+	 * <p>
+	 * Default implementation returns null. Subclasses can override if needed.
+	 * @param request current HTTP request
+	 * @return a Map with input data entries, or null if none
+	 */
+	protected Map getFlowExecutionInput(HttpServletRequest request) {
+		return null;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
