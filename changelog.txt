@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.154 2004-05-31 21:54:10 jhoeller Exp $
+$Id: changelog.txt,v 1.155 2004-06-01 10:30:08 trisberg Exp $
 
 
 Changes in version 1.0.2 (31.5.2004)
@@ -61,6 +61,7 @@ Package org.springframework.ejb
 * invoke "remove" on EJB proxy after invocation in LocalSlsbInvokerInterceptor and SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
+* added native jdbc extractor for WebLogic - tested in WLS 8.1 SP2
 * added UserCredentialsDataSourceAdapter, for transparently appying username and password to target DataSource calls
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
 * reworked SimpleNativeJdbcExtractor to use DatabaseMetaData.getConnection() rather than Statement.getConnection()

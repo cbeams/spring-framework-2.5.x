@@ -33,7 +33,6 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * code instead of WebLogic's wrapper implementations.  The returned JDBC classes can 
  * then safely be cast, e.g. to OracleResultSet.
  *
- *
  * @author Thomas Risberg
  * @since 31.05.2004
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
