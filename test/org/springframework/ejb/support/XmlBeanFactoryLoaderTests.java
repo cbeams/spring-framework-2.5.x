@@ -1,4 +1,8 @@
-
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.ejb.support;
 
 
@@ -10,6 +14,7 @@ import org.springframework.jndi.support.SimpleNamingContextBuilder;
 /**
  * 
  * @author Rod Johnson
+ * @version $Id: XmlBeanFactoryLoaderTests.java,v 1.2 2003-10-27 09:04:57 johnsonr Exp $
  */
 public class XmlBeanFactoryLoaderTests extends TestCase {
 
@@ -40,7 +45,7 @@ public class XmlBeanFactoryLoaderTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentNotFound() throws Exception  {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		
-		String bogusPath = "/RUBBISH/com/lch/framework/server/test1.xml";
+		String bogusPath = "/RUBBISH/com/xxxx/framework/server/test1.xml";
 	
 		// Set up initial context
 		sncb.bind(XmlBeanFactoryLoader.BEAN_FACTORY_PATH_ENVIRONMENT_KEY, bogusPath);
@@ -59,7 +64,7 @@ public class XmlBeanFactoryLoaderTests extends TestCase {
 	public void testBeanFactoryPathFromJndiEnvironmentNotValidXml() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 	
-		String nonXmlPath = "/com/lch/framework/server/SlsbEndpointBean.class";
+		String nonXmlPath = "/com/xxxx/framework/server/SlsbEndpointBean.class";
 
 		// Set up initial context
 		sncb.bind(XmlBeanFactoryLoader.BEAN_FACTORY_PATH_ENVIRONMENT_KEY, nonXmlPath);
