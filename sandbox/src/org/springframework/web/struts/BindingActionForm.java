@@ -30,10 +30,8 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
-import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.AttributesAccessor;
@@ -122,14 +120,13 @@ public class BindingActionForm extends ActionForm {
 			ObjectError objectError = (ObjectError)it.next();
 			if (objectError instanceof FieldError) {
 				FieldError fieldError = (FieldError)objectError;
-				String effectiveMessageKey = findEffectiveMessageKey(objectError.getCode(),
-						objectError.getObjectName(), fieldError.getField());
+				String effectiveMessageKey = findEffectiveMessageKey(objectError, objectError.getObjectName(),
+						fieldError.getField());
 				actionErrors.add(fieldError.getField(), new ActionMessage(effectiveMessageKey, resolveArgs(fieldError
 						.getArguments())));
 			}
 			else {
-				String effectiveMessageKey = findEffectiveMessageKey(objectError.getCode(),
-						objectError.getObjectName(), null);
+				String effectiveMessageKey = findEffectiveMessageKey(objectError, objectError.getObjectName(), null);
 				actionErrors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(effectiveMessageKey,
 						resolveArgs(objectError.getArguments())));
 			}
@@ -163,25 +160,18 @@ public class BindingActionForm extends ActionForm {
 		return arguments;
 	}
 
-	private String findEffectiveMessageKey(String errorCode, String objectName, String field) {
+	private String findEffectiveMessageKey(ObjectError error, String objectName, String field) {
 		Assert.notNull(this.locale, "The locale must be set to enable the most specific error message to be resolved");
 		Assert.notNull(this.messageResources,
 				"The message resources must be set to enable the most specific error message to be resolved");
-
-		MessageCodesResolver mcr = new DefaultMessageCodesResolver();
-		String[] possibleMatches = mcr.resolveMessageCodes(errorCode, objectName);
-
-		if (field != null) {
-			possibleMatches = mcr.resolveMessageCodes(errorCode, objectName, field, null);
-		}
-
+		String[] possibleMatches = error.getCodes();
 		for (int i = 0; i < possibleMatches.length; i++) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Testing..: " + possibleMatches[i]);
+				logger.debug("Testing code '" + possibleMatches[i] + "'");
 			}
 			if (this.messageResources.isPresent(this.locale, possibleMatches[i])) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found....: " + possibleMatches[i]);
+					logger.debug("Found code '" + possibleMatches[i] + "' in resource bundle!");
 				}
 				return possibleMatches[i];
 			}
@@ -189,7 +179,7 @@ public class BindingActionForm extends ActionForm {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Could not find a suitable message key");
 		}
-		return objectName + "." + errorCode;
+		return error.getDefaultMessage();
 	}
 
 	/**
