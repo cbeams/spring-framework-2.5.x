@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.jdbc.object;
 
 import java.sql.PreparedStatement;
@@ -25,7 +26,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
 /**
@@ -40,7 +40,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
- * @since 27.04.2004
+ * @since 1.1
  * @see #flush
  * @see #reset
  */
@@ -50,6 +50,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * Default number of inserts to accumulate before commiting a batch (5000).
 	 */
 	public static int DEFAULT_BATCH_SIZE = 5000;
+
 
 	private int batchSize = DEFAULT_BATCH_SIZE;
 
@@ -61,6 +62,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	/**
 	 * Constructor to allow use as a JavaBean. DataSource and SQL
 	 * must be supplied before compilation and use.
+	 * @see #setDataSource
+	 * @see #setSql
 	 */
 	public BatchSqlUpdate() {
 		super();
@@ -137,10 +140,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 */
 	public int update(Object[] args) throws DataAccessException {
 		validateParameters(args);
-		if (!this.parameterQueue.isEmpty() && args.equals(this.parameterQueue.getLast())) {
-			throw new InvalidDataAccessApiUsageException("Object array containing the parameters cannot be reused -- you must create a new object arrray for each call to update");
-		}
-		this.parameterQueue.add(args);
+		this.parameterQueue.add(args.clone());
 
 		if (this.parameterQueue.size() == this.batchSize) {
 			if (logger.isDebugEnabled()) {
@@ -164,13 +164,13 @@ public class BatchSqlUpdate extends SqlUpdate {
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
 				getSql(),
 				new BatchPreparedStatementSetter() {
-				 public int getBatchSize() {
-					 return parameterQueue.size();
-				 }
-				 public void setValues(PreparedStatement ps, int index) throws SQLException {
-					 Object[] params = (Object[]) parameterQueue.removeFirst();
-					 newPreparedStatementSetter(params).setValues(ps);
-				 }
+					public int getBatchSize() {
+						return parameterQueue.size();
+					}
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						Object[] params = (Object[]) parameterQueue.removeFirst();
+						newPreparedStatementSetter(params).setValues(ps);
+					}
 				});
 
 		for (int i = 0; i < rowsAffected.length; i++) {
