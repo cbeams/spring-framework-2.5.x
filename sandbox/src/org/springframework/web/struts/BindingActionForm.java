@@ -37,6 +37,9 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.AttributesAccessor;
 
 /**
+ * A Struts action form adapter that is works with Spring's (more complete and
+ * advanced) data binder and bind exception (errors interface) under neath the
+ * covers, to bind to POJOs and manage rejected values.
  * @author Keith Donald
  * @author Ben Alex
  */

@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecution;
@@ -94,9 +95,9 @@ public class HttpFlowExecutionManager {
 	protected String getFlowIdParameterName() {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
-	
-	protected String getParameterValueSeparator() {
-		return FlowConstants.DOT_SEPARATOR;
+
+	protected String getParameterValueDelimiter() {
+		return "_";
 	}
 
 	/**
@@ -108,8 +109,8 @@ public class HttpFlowExecutionManager {
 	 * Execution will typically result in a state transition.
 	 * @param request the current HTTP request
 	 * @param response the current HTTP response
-	 * @param inputData input data to be passed to the FlowExecution when creating
-	 *        a new FlowExecution
+	 * @param inputData input data to be passed to the FlowExecution when
+	 *        creating a new FlowExecution
 	 * @return the model and view to render
 	 * @throws Exception in case of errors
 	 */
@@ -133,10 +134,10 @@ public class HttpFlowExecutionManager {
 			flowExecution = getRequiredFlowExecution(request);
 
 			// let client tell you what state they are in (if possible)
-			String stateId = getRequestParameter(request, getCurrentStateIdParameterName(), getParameterValueSeparator()); 
+			String stateId = getRequestParameter(request, getCurrentStateIdParameterName());
 
 			// let client tell you what event was signaled in the current state
-			String eventId = getRequestParameter(request, getEventIdParameterName(), getParameterValueSeparator()); 
+			String eventId = getRequestParameter(request, getEventIdParameterName());
 
 			if (eventId == null) {
 				if (logger.isDebugEnabled()) {
@@ -162,7 +163,6 @@ public class HttpFlowExecutionManager {
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
-
 			// execute the signaled event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
@@ -181,12 +181,10 @@ public class HttpFlowExecutionManager {
 				}
 				modelAndView.addObject(getFlowExecutionIdAttributeName(), flowExecution.getId());
 				modelAndView.addObject(getCurrentStateIdAttributeName(), flowExecution.getCurrentStateId());
-				
 				// also make the flow execution itself available in the model
 				modelAndView.addObject(getFlowExecutionAttributeName(), flowExecution);
 			}
 		}
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + modelAndView);
 		}
@@ -198,7 +196,7 @@ public class HttpFlowExecutionManager {
 	 */
 	public Flow createFlow(HttpServletRequest request) {
 		return (Flow)beanFactory.getBean(getRequestParameter(request, getFlowIdParameterName(),
-				getParameterValueSeparator()));
+				getParameterValueDelimiter()));
 	}
 
 	/**
@@ -222,7 +220,7 @@ public class HttpFlowExecutionManager {
 	 * @return true or false
 	 */
 	public boolean isNewFlowExecutionRequest(HttpServletRequest request) {
-		return getRequestParameter(request, getFlowExecutionIdParameterName(), getParameterValueSeparator()) == null;
+		return getRequestParameter(request, getFlowExecutionIdParameterName(), getParameterValueDelimiter()) == null;
 	}
 
 	/**
@@ -237,13 +235,13 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Get an existing flow execution from the HTTP session associated with given request.
+	 * Get an existing flow execution from the HTTP session associated with
+	 * given request.
 	 * @throws NoSuchFlowExecutionException If there is no flow execution in the
 	 *         HTTP session associated with given request.
 	 */
 	public FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
-		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName(),
-				getParameterValueSeparator());
+		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName());
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
 		}
@@ -262,57 +260,62 @@ public class HttpFlowExecutionManager {
 		}
 		request.getSession(false).removeAttribute(flowExecution.getId());
 	}
-	
+
+	protected String getRequestParameter(HttpServletRequest request, String logicalName) {
+		return getRequestParameter(request, logicalName, null);
+	}
+
 	/**
-	 * Obtain a named parameter from an HTTP servlet request. This method will try
-	 * to obtain a parameter value using the following algorithm:
+	 * Obtain a named parameter from an HTTP servlet request. This method will
+	 * try to obtain a parameter value using the following algorithm:
 	 * <ol>
 	 * <li>Try to get the parameter value from the request using just the given
-	 * <i>logical</i> name. This handles request parameters of the form
-	 * <tt>logicalName=value</tt>.
-	 * For normal request parameters, e.g. submitted using a hidden HTML form field,
-	 * this will return the requested value.</li>
+	 * <i>logical </i> name. This handles request parameters of the form
+	 * <tt>logicalName = value</tt>. For normal request parameters, e.g.
+	 * submitted using a hidden HTML form field, this will return the requested
+	 * value.</li>
 	 * <li>Try to obtain the parameter value from the parameter name, where the
-	 * parameter name in the request is of the form <tt>logicalName_value=xyz</tt>
-	 * with "_" the being the specified delimiter. This deals with
-	 * parameter values submitted using an HTML form submit button.</li>
-	 * <li>If the value obtained in the previous step has a ".x" or ".y" suffix,
-	 * remove that. This handles cases where the value was submitted using an
-	 * HTML form image button. In this case the parameter in the request
-	 * would actually be of the form <tt>logicalName_value.x=123</tt>.</li>
+	 * parameter name in the request is of the form
+	 * <tt>logicalName_value = xyz</tt> with "_" the being the specified
+	 * delimiter. This deals with parameter values submitted using an HTML form
+	 * submit button.</li>
+	 * <li>If the value obtained in the previous step has a ".x" or ".y"
+	 * suffix, remove that. This handles cases where the value was submitted
+	 * using an HTML form image button. In this case the parameter in the
+	 * request would actually be of the form <tt>logicalName_value.x = 123</tt>.
+	 * </li>
 	 * </ol>
-	 * 
 	 * @param request the current HTTP request
-	 * @param logicalName the <i>logical</i> name of the request parameter 
+	 * @param logicalName the <i>logical </i> name of the request parameter
 	 * @param delimiter the delimiter to use
-	 * @return the value of the parameter, or <code>null</code> if the parameter
-	 *         does not exist in given request
+	 * @return the value of the parameter, or <code>null</code> if the
+	 *         parameter does not exist in given request
 	 */
-	public String getRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
+	protected String getRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
 		//first try to get it as a normal name=value parameter
-		String value=request.getParameter(logicalName);
-		if (value!=null) return value;
-		
+		String value = request.getParameter(logicalName);
+		if (value != null) {
+			return value;
+		}
+		if (!StringUtils.hasText(delimiter)) {
+			delimiter = getParameterValueDelimiter();
+		}
 		//if no value yet, try to get it as a name_value=xyz parameter
-		String prefix=logicalName + delimiter;
-		
-		Enumeration paramNames=request.getParameterNames();
+		String prefix = logicalName + delimiter;
+		Enumeration paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
-			String paramName=(String)paramNames.nextElement();
+			String paramName = (String)paramNames.nextElement();
 			if (paramName.startsWith(prefix)) {
-				value=paramName.substring(prefix.length());
-				
-				//support images buttons, which would submit parameters as name_value.x=123
+				value = paramName.substring(prefix.length());
+				//support images buttons, which would submit parameters as
+				//name_value.x=123
 				if (value.endsWith(".x") || value.endsWith(".y")) {
-					value=value.substring(0, value.length()-2);
+					value = value.substring(0, value.length() - 2);
 				}
-				
 				return value;
 			}
 		}
-		
 		//we couldn't find the parameter value
 		return null;
 	}
-
 }
