@@ -68,6 +68,13 @@
 				</listitem>
 			</itemizedlist>
 		</para>
+		<para>
+			<emphasis>Note: there has been a lot of confusion about the use of the ApplicationContext as opposed to the 
+			BeanFactory. Basically when building applications in a J2EE-environment you're
+			the better option would be to use the ApplicationContext, since it offers a more framework
+			style usage of the Spring Framework and can be initialized using a ServletContextListener
+			like the <literal>ContextLoaderListener</literal>.</emphasis>
+		</para>
 	</sect1>
 	
 	<sect1 id="beans-basics">
@@ -964,6 +971,7 @@ cfg.postProcessBeanFactory(factory);
 	
 	<sect1 id="beans-factoryimpl">
 		<title>BeanFactory structure and implementations (WIP)</title>
+		<emphasis>From here on, up till the Context stuff, needs an overhaul.</emphasis>
 		<para>
 			The <literal>beans</literal> package contains a couple of different implementations.
 			Concrete BeanFactories include the XmlBeanFactory which is the most popular format
@@ -1145,349 +1153,380 @@ cfg.postProcessBeanFactory(factory);
 		</sect2>
     </sect1>
     
-    
-    <sect1 id="beans-beans">
-    	<title>Bean manipulation and the <literal>BeanWrapper</literal></title>
-    	<para>
-    		The <literal>org.springframework.beans</literal> package adheres to the JavaBeans standard
-    		provided by Sun. A JavaBean is simply a class with a default no-argument constructor, which
-    		follows a naming conventions where a property named <literal>prop</literal> has a setter
-    		<literal>setProp(...)</literal> and a getter <literal>getProp()</literal>. For more
-    		information about JavaBeans and the specification, please refer to Sun website
-    		(<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).
-    	</para>
-    	<para>
-    		One quite important concept of the beans package is the <literal>BeanWrapper</literal>
-    		interface and its corresponding implementation (<literal>BeanWrapperImpl</literal>).
-    		As quoted from the JavaDoc,  the BeanWrapper offers functionality to set and get property 
-    		values (individually or in bulk), get property descriptors and query the readability and
-    		writability of properties. Also, the BeanWrapper offers support for
-    		nested properties, enabling the setting of properties on subproperties to an unlimited
-    		depth. Then, the BeanWrapper support the ability to add standard
-    		JavaBeans <literal>PropertyChangeListeners</literal> and <literal>VetoableChangeListeners</literal>,
-    		without the need for supporting code in the target class. Last but not least, the
-    		BeanWrapper provides support for the setting of indexed properties.	The BeanWrapper 
-    		usually isn't used by application code directly, but by the <literal>DataBinder</literal> 
-    		and the <literal>BeanFactory</literal>.
-    	</para>
-    	<para>
-    		The way the BeanWrapper works is partly indicated by its name: 
-    		<emphasis>it wraps a bean</emphasis> to perform action on that bean, like setting
-    		and retrieving properties.
-    	</para>
-    	
-    	<sect2 id="beans-beans-conventions">
-    		<title>Setting and getting basic and nested properties</title>
-    		<para>
-    			Setting and getting properties is done using the <literal>setPropertyValue(s)</literal>
-    			<literal>getPropertyValue(s)</literal> methods that both come with a couple of
-    			overloaded variants. They're all described in more detail in the JavaDoc Spring
-    			comes with. What's important to know that there's a couple of conventions for 
-    			indicating properties of an object. A couple of examples:
-				<table frame="all">
-		            <title>Examples of properties</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="1*"/>
-		                <colspec colname="c2" colwidth="5*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Expression</entry>
-		                        <entry>Explanation</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry><literal>name</literal></entry>
-				            	<entry>Indicates the property <literal>name</literal> corresponding to the
-				            		methods <literal>getName()</literal> or <literal>isName()</literal> and
-				            		<literal>setName()</literal>
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account.name</literal></entry>
-				            	<entry>Indicates the nested property <literal>name</literal> of the property
-					            	<literal>account</literal> corresponding e.g. to the methods
-					            	<literal>getAccount().setName()</literal> or <literal>getAccount().getName()</literal>
-					            </entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account[2]</literal></entry>
-				            	<entry>Indicates the <emphasis>third</emphasis> element of the indexed property
-					            	<literal>account</literal>. Indexed properties can be of type <literal>array</literal>,
-					            	<literal>list</literal> or other <emphasis>natural ordered</emphasis> collection
-					            </entry>
-				            </row>
-				        </tbody>
-			        </tgroup>
-		        </table>
-    		</para>
-    		
-			<para>
-				Below you'll find some examples of working with the BeanWrapper to get
-				and set properties.
-			</para>
-    		<para><emphasis>Note: this part is not important to you if you're not planning to
-    			work with the BeanWrapper directly. If you're just using the 
-    			<literal>DataBinder</literal> and the <literal>BeanFactory</literal> and their
-    			out-of-the-box implementation, don't mind reading this and go on with
-    			reading about <literal>PropertyEditors</literal>.</emphasis>
-    		</para>
-       		<para>    
-       			Consider the following two classes:			
-				<programlisting><![CDATA[
-public class Company {
-	private String name;
-	private Employee managingDirector;
-	
-	public String getName()	{ 
-		return this.name; 
-	}
-	public void setName(String name) { 
-		this.name = name; 
-	} 
-	public Employee getManagingDirector() { 
-		return this.managingDirector; 
-	}
-	public void setManagingDirector(Employee managingDirector) {
-		this.managingDirector = managingDirector;							
-	}
-}
-				]]></programlisting>
-				<programlisting><![CDATA[
-public class Employee {
-	private float salary;
-	
-	public float getSalary() {
-		return salary;
-	}						
-	public void setSalary(float salary) {
-		this.salary = salary;
-	}
-}					
-				]]></programlisting>
-			</para>
-			<para>
-				The following code snippets show some examples of how to retrieve and
-				manipulate some of the properties of instantiated:
-				<literal>Companies</literal> and <literal>Employees</literal>
-				<programlisting><![CDATA[
-Company c = new Company();
-BeanWrapper bwComp = BeanWrapperImpl(c);
-// setting the company name...
-bwComp.setPropertyValue("name", "Some Company Inc.");
-// ... can also be done like this:
-PropertyValue v = new PropertyValue("name", "Some Company Inc.");
-bwComp.setPropertyValue(v);
-
-// ok, let's create the director and tie it to the company:
-Employee jim = new Employee();
-BeanWrapper bwJim = BeanWrapperImpl(jim);
-bwJim.setPropertyValue("name", "Jim Stravinsky");					
-bwComp.setPropertyValue("managingDirector", jim);
-
-// retrieving the salary of the managingDirector through the company
-Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
-				]]></programlisting>				
-			</para>
-    	</sect2>
-    	
-    	<sect2 id="beans-beans-conversion">
-    		<title>Built-in <literal>PropertyEditors</literal>, converting types</title>
-    		<para>
-    			Spring heavily uses the concept of <literal>PropertyEditors</literal>.
-    			Sometimes it might be handy to be able to represent properties in a different
-    			way than the object itself. For example, a date can be represented in a human
-    			readable way, while we're still able to convert the human readable form back to
-    			the original date (or even better: convert any date entered in a human readable form,
-    			back to Date objects). This behavior can be achieved by <emphasis>registering
-    			custom editors</emphasis>, of type <literal>java.beans.PropertyEditor</literal>.
-    			Registering custom editors to a BeanWrapper gives it the knowledge of how to convert
-    			properties to the desired type. Read more about PropertyEditors in the JavaDoc of the
-    			<literal>java.beans</literal> package provided by Sun.
-    		</para>
-    		<para>
-    			A couple of examples where property editing are used in Spring
-    			<itemizedlist spacing="compact">
-    				<listitem>
-    					<para><emphasis>setting properties on beans</emphasis> is done using
-    						PropertyEditors. When mentioning <literal>java.lang.String</literal>
-    						as the value of a property of some bean you're declaring in XML file,
-    						Spring will (if the setter of the corresponding property has a 
-    						Class-parameter) use the <literal>ClassEditor</literal> to try
-    						to resolve the parameter to a Class object</para>
-    				</listitem>
-    				<listitem>
-    					<para><emphasis>parsing HTTP request parameters</emphasis> is Spring's
-    						MVC framework is done using all kinds of PropertyEditors that you
-    						can manually bind in all subclasses of the <literal>CommandController</literal></para>
-    				</listitem>
-    			</itemizedlist>
-    		</para>
-			<para>
-				Spring has a number of built-in PropertyEditors to make life easy. Each of those is listed below and
-				they are all located in the <literal>org.springframework.beans.propertyeditors</literal> package:
-				<table frame="all">
-		            <title>Built-in PropertyEditors</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="1*"/>
-		                <colspec colname="c2" colwidth="5*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Class</entry>
-		                        <entry>Explanation</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry><literal>ClassEditor</literal></entry>
-				            	<entry>
-				            		Parses Strings representing classes to actual classes and
-				            		the other way around. When a class is not found,
-				            		an IllegalArgumentException is thrown
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>FileEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving String to <literal>File</literal>-objects
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>LocaleEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving Strings to <literal>Locale</literal>-objects
-				            		and vice versa (the String format is [language]_[country]_[variant],
-				            		which is the same thing the toString() method of Locale provides
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>PropertiesEditor</literal></entry>
-				            	<entry>
-				            		Capable of converting Strings (formatted using the 
-				            		format as defined in the JavaDOC for the java.lang.Properties class)
-				            		to <literal>Properties</literal>-objects
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>StringArrayPropertyEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving a comma-delimited list of String to
-				            		a String-array and vice versa
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>URLEditor</literal></entry>
-				            	<entry>
-				            		Capable of resolving a String representation of a URL
-				            		to an actual <literal>URL</literal>-object
-				            	</entry>
-				            </row>				            				            
-				        </tbody>
-			        </tgroup>
-		        </table>
-			</para>
-			<para>
-				Spring uses the <literal>java.beans.PropertyEditorManager</literal> to
-				set the search-path for property editors that might be needed. The search-path
-				also includes <literal>sun.bean.editors</literal>, which includes
-				PropertyEditors for for example Font, Color and all the primitive types.
-			</para>
-			<para>
-				When in need for a custom editor in your BeanFactory (i.e. you have some
-				exotic type that you need express as a property in for instance an XML
-				file containing beans), you can use the <literal>BeanFactoryPostProcessor</literal>
-				infrastructure to do this. TODOOOODOOD reference provides more info on how to use
-				the <literal>BeanFactoryPostProcessor</literal>. The following piece of code
-				show the actual processor that registered a custom editor for use with the
-				BeanFactory:
-				<programlisting><![CDATA[
-public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
-	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-	    beanFactory.registerCustomEditor(Date.class, CustomDateEditor.class);
-	}
-}
-				]]></programlisting>
-
-			</para>
-		</sect2>  
+   
+ 
 		
-		<sect2 id="beans-beans-other">
-			<title>Other features worth mentioning</title>
-			<para>
-				Besides the features you've seen in the previous sections there a couple of
-				features that might be intereseted to you, though not worth an entire section.
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para>
-							<emphasis>determining readability and writability</emphasis>: using
-							the <literal>isReadable()</literal> and <literal>isWritable()</literal>
-							methods, you can determine whether or not a property is readable or
-							writable
-						</para>
-					</listitem>
-					<listitem>
-						<para>
-							<emphasis>retrieving propertydescriptors</emphasis>: using
-							<literal>getPropertyDescriptor(String)</literal> and
-							<literal>getPropertyDescriptors()</literal> you can retrieve
-							objects of type <literal>java.beans.PropertyDescriptor</literal>,
-							that might come in handy sometimes
-						</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-		</sect2>			  		
 
-    </sect1>
     
     <sect1 id="context-introduction">
     	<title>Introduction to the <literal>ApplicationContext</literal></title>
 	    <para>
-			<emphasis>This was just copied from the app.ctx chapter, which has been removed.
-				Work on this will begin from 30th of January on.</emphasis>
+	    	The <literal>context</literal> package is built on top of the <literal>beans</literal>
+	    	package which provides basic functionality for managing and manipulating beans,
+	    	often in a programmatic way. The <literal>ApplicationContext</literal> introduces
+	    	BeanFactory functionality in a more <emphasis>framework-style</emphasis> approach.
+	    	Instead of programmatically loading beans using for example the XmlBeanFactory and
+	    	retrieving them using the <literal>getBean()</literal> method, 
+			with the ApplicationContext you will be able to let the framework you're working
+			in load your beans using for example the <literal>ContextLoader</literal>.
 		</para>
 	    <para>
-	    	On top of the beans package, providing basic functionality for managing and
-	    	manipulating beans, sits the <literal>context</literal> package. The context
-	    	package acts as a registry of objects needed by your application. The functionality
-	    	it offers somewhat resembles the <emphasis>enterprise naming context</emphasis>
-	    	J2EE application servers feature, however there are some key differences. For instance,
-	    	objects bound in a Spring application context (<literal>ApplicationContext</literal>) don't
-	    	need to extend something like a remote interface or object. Second of all, application contexts
-	    	can be used throughout the complete range of layers of your applications, from within
-	    	Swing clients, webapplications, but also in Enterprise JavaBeans.
+			The basis for the context package is the <literal>ApplicationContext</literal> interface,
+			located in the <literal>org.springframework.context</literal> package. First of all
+			it provides all the functionality the BeanFactory also provides. To be able to work in a more
+			framework-oriented way, using layering and hierarchical contexts, the context package
+			also provides the following:
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						<emphasis>MessageSource</emphasis>, providing access to messages in, i18n-style
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Access to resources</emphasis>, like URLs and files
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Event propagation</emphasis> to beans implementing the 
+						<literal>ApplicationListener</literal>
+						interface
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Loading of multiple contexts</emphasis>, allowing some of
+						them to be focussed and used for example only by the web-layer of 
+						an application
+					</para>
+				</listitem>
+			</itemizedlist>	    	
 	    </para>
-	    <para>
-	    	The basis for the context package is the <literal>org.springframework.context.ApplicationContext</literal>
-	    	interface, providing functionality for internationalization, eventhandling and beans being aware
-	    	of the context they're existing in. Also it's possible to create a hierachical structure of
-	    	contexts, enabling beans to be scoped for and only accessible to a certain part of an application.
-	    </para>
-	</sect1>
 	
-	<sect1 id="context-beans">
-		<title>The ApplicationContext managing beans</title>
-		
 		<para>
 			The ApplicationContext includes all the functionality the bean factory has as well. This means
-			you can define beans using the XmlBeanFactory and look up bean by specifying their name or id.
-			All features the BeanFactory offers are available to you, including the the lifecycle interfaces,
-			the initialization and destruction methods, dependency checking and autowiring. The BeanFactory
-			will not be discussed in this chapter, instead the ApplicationContext specific features will
-			be described here. In the previous chapter, there's more information on the specifics of the
-			<literal>BeanFactory</literal>.
+			you can define beans using the XML format as explained in <xref linkend="beans-factoryimpl-xml"/>
+			and <xref linkend="springbeansdtd"/> and look them using their name or id. Also,
+			you will be able to use all other features explained in this chapter, such as <emphasis>autowring</emphasis>,
+			<emphasis>setter-based</emphasis> or <emphasis>constructor-based depenency injection</emphasis>,
+			<emphasis>dependency checking</emphasis>, <emphasis>lifecycle interfaces</emphasis>, etcetera.	
+			All other features the ApplicationContext includes are described below, as well as the
+			ways to access an ApplicationContext, load beans into an ApplicationContext and the ways to 
+			customize existing ApplicationContexts using special beans defined in them.		
 		</para>
 		
 	</sect1>
 	
-	<sect1 id="context-basics">
-		<title>ApplicationContext basics</title>
+	<sect1 id="context-functionality">
+		<title>Added functionality of the <literal>ApplicationContext</literal></title>
 		<para>
-			The ApplicationContext, provides - as described above
+			As already stated in the previous section, the ApplicationContext has a couple of
+			features that distinguishes it from the BeanFactory. Let's review them one-by-one.
+		</para>
+		<sect2 id="context-functionality-messagesource">
+			<title>Using the <literal>MessageSource</literal></title>
+			<para>
+				The ApplicationContext interface extends an interface called <literal>MessageSource</literal>,
+				therefore provided messaging (i18n) functionality. Together with the <literal>NestingMessageSource</literal>,
+				capable of hierarchical message resolving, these are the basic interfaces Spring provides
+				to do message resolving. Let's quickly review the methods defined there:
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para><literal>String getMessage (String code, Object[] args, String default, Locale loc)</literal>:
+							the basic method to retrieve a message from the MessageSource. When no message could be
+							found for the locale specified, the default message is used. Any arguments passed in are
+							used as replacement values, using the <literal>MessageFormat</literal> functionality
+							provided by the JDK
+						</para>						
+					</listitem>
+					<listitem>
+						<para><literal>String getMessage (String code, Object[] args, Locale loc)</literal>:
+							basically the same as the one above with one difference: the fact that no default
+							message can be specified results in a <literal>NoSuchMessageException</literal> being
+							thrown if the message could not be found
+						</para>
+					</listitem>
+					<listitem>
+						<para><literal>String getMessage(MessageSourceResolvable resolvable, Locale locale)</literal>:
+							all properties used in the methods above are also wrapped in a class - the 
+							<literal>MessageSourceResolvable</literal>, which you can use in this method
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>			
+			<para>
+				When an ApplicationContext gets loaded, it automatically searches for a MessageSource bean defined in the
+				context. The bean has to have the name <literal>messageSource</literal>. If such a bean is found,
+				all calls to the methods desribed above will be delegated to the message source that was found.
+				If no message source was found, the ApplicationContext inspects to see if it has a parent containing
+				a similar bean, with a similar name. If so, it uses that bean as the MessageSource. If it can't find
+				any source for messages, an empty <literal>StaticMessageSource</literal> will be
+				instantiated in order to be able to accept calls to the methods defined above.
+			</para>
+			<para>
+				Spring provides two <literal>MessageSource</literal> implementation at the moment. These
+				are the <literal>ResourceBundleMessageSource</literal> and the <literal>StaticMessageSource</literal>.
+				Both impelement <literal>NestingMessageSource</literal> in order to be able to 
+				do nested messaging. The StaticMessageSource is hardly ever used
+				and provided programmatic ways to add messages to the source. The ResourceBundleMessageSource
+				is more interesting and is the one we will provides an example for:
+				<programlisting><![CDATA[
+<beans>
+	<bean id="messageSource" 
+			class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="baseNames">
+			<list>
+				<value>format</value>
+				<value>exceptions</value>
+				<value>windows</value>
+			</list>
+		</property>
+	</bean>
+</beans>
+				]]></programlisting>
+			</para>
+			<para>
+				This assumes you have three resource bundles defined on your classpath called
+				<literal>format</literal>, <literal>exceptions</literal> and <literal>windows</literal>.
+				Using the JDK standard way of resolving messages through ResourceBundles, any request
+				to resolve a message will be handled.
+			</para>
+		</sect2>
+		
+		<sect2 id="context-functionality-events">
+			<title>Propagating events</title>
+			<para>
+				Eventhandling in the ApplicationContext is provided through the <literal>ApplicationEvent</literal>
+				class and <literal>ApplicationListener</literal> interface. When implementing the 
+				<literal>ApplicationListener</literal> in one of your beans, everytime an <literal>ApplicationEvent</literal>
+				gets published to the ApplicationContext, your bean will be notified, based on the
+				standard Observer design pattern implemented by the <literal>java.util</literal> package.
+				Spring provides three standard events:
+				<table frame="all">
+		            <title>Built-in Events</title>
+		            <tgroup cols="2">
+		                <colspec colname="c1" colwidth="2*"/>
+		                <colspec colname="c2" colwidth="5*"/>
+		                <thead>
+		                    <row>
+		                        <entry>Event</entry>
+		                        <entry>Explanation</entry>
+		                    </row>
+		                </thead>
+			            <tbody>
+				            <row>
+				            	<entry><literal>ContextRefreshedEvent</literal></entry>
+				            	<entry>
+				            		Event published when the ApplicationContext is
+				            		initialized or refreshed. Initialized here means that
+				            		all beans are loaded, singletons are pre-instantiated
+				            		and the ApplicationContext is ready for use
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>ContextClosedEvent</literal></entry>
+				            	<entry>
+									Event published when the ApplicationContext is closed,
+									using the <literal>close()</literal> method on the 
+									ApplicationContext. Closed here means that are singletons
+									are destroyed
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>RequestHandledEvent</literal></entry>
+				            	<entry>
+				            		A web-specific event telling all beans that a HTTP request
+				            		has been serviced (so it'll be published <emphasis>after</emphasis>
+				            		the request has been finished). Note that this event is only
+				            		applicable for web applications using Spring's DispatcherServlet
+				            	</entry>
+				            </row>
+				        </tbody>
+			        </tgroup>
+		        </table>
+			</para>
+			<para>
+				Implementing custom events can be done as well. All you need to do is 
+				calling the <literal>publishEvent()</literal> method on the ApplicationContext
+				and you're done. Let's have a look at an example. First, the ApplicationContext:
+				<programlisting><![CDATA[
+<bean id="emailer" class="example.EmailBean">
+	<property name="blackList">
+		<list>
+			<value>black@list.org</value>
+			<value>white@list.org</value>
+			<value>john@doe.org</value>
+		</list>
+	</property>
+</bean>
+
+<bean id="blackListListener" class="example.BlackListNotifier">
+	<property name="notificationAddress">
+		<value>spam@list.org</value>
+	</property>
+</bean>
+				]]></programlisting>
+				
+				and then, the actual beans:
+				
+				<programlisting><![CDATA[
+public class EmailBean implements ApplicationContextAware {
+
+	/** the blacklist, setter ommitted for brevity */
+	private List blackList;
+	
+	public void setApplicationContext(ApplicationContext ctx) {
+		this.ctx = ctx;
+	}
+	
+	public void sendEmail(String address, String text) {
+		if (blackList.contains(address)) {
+			BlackListEvent evt = new BlackListEvent(address, text);
+			ctx.publishEvent(evt);
+			return;
+		}
+		// send email
+	}
+}
+
+public class BlackListNotifier implement ApplicationListener {
+
+	/** notification address, setter left our for brevity */
+	private String notificationAddress;
+
+	public void onApplicationEvent(ApplicationEvent evt) {
+		if (evt instanceof BlackListEvent) {
+			// notify appropriate person
+		}
+	}
+}
+			]]></programlisting>
+			Of course, this behavior could be more cleanly implemented maybe, by using AOP
+			features, but just to illustrate the basic behavior, this should do.
+			</para>
+		</sect2>
+		<sect2 id="context-functionality-resources">
+			<title>Using resources within Spring</title>
+			<para>
+				Emphasis: not sure where to cover this, let's leave it for now (so it's not complete yet).
+			</para>
+			<para>
+				A lot of applications need to access resources. Resources here, might mean
+				files, but also newsfeeds from the Internet or normal webpages. Spring provides
+				a clean and transparent way of accessing resources in a protocol independent
+				way. The ApplicationContext has a method (<literal>getResource(String)</literal>)
+				taking care of this.
+			</para>
+			<para>
+				The Resource class defines a couple of methods that are shared across all
+				Resource implementations:
+				
+				<table frame="all">
+		            <title>Resource functionality</title>
+		            <tgroup cols="2">
+		                <colspec colname="c1" colwidth="2*"/>
+		                <colspec colname="c2" colwidth="5*"/>
+		                <thead>
+		                    <row>
+		                        <entry>Method</entry>
+		                        <entry>Explanation</entry>
+		                    </row>
+		                </thead>
+			            <tbody>
+				            <row>
+				            	<entry><literal>getInputStream()</literal></entry>
+				            	<entry>
+				            		Opens an InputStream on the resource and returns it
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>exists()</literal></entry>
+				            	<entry>
+				            		Checks if the resource exists, returning false if
+				            		it doesn't
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>isOpen()</literal></entry>
+				            	<entry>
+				            		Will return true is multiple streams cannot be opened
+				            		for this resource. This will be false for the some
+				            		resources, but file-based resources for instance, cannot
+				            		be read multiple times concurrently
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>getDescription()</literal></entry>
+				            	<entry>
+				            		Returns a description of the resource, often the 
+				            		fully qualified file name or the actual URL
+				            	</entry>
+				            </row>
+				        </tbody>
+			        </tgroup>
+		        </table>
+			</para>
+			<para>
+				A couple of Resource implementations are provided by Spring. They all need
+				a String representing the actual location of the resource. Based upon that 
+				String, Spring will automatically choose the right Resource implementation for you.
+				When asking an ApplicationContext for a resource first of all Spring will inspect the
+				resource location you're specifying and look for any prefixes. Depending on the implenentation
+				of the ApplicationContext more or less Resource implementations are available.
+				Resources can best be configured by using the ResourceEditor and for example the XmlBeanFactory.
+			</para>
+			
+		</sect2>
+	</sect1>
+	
+	<sect1 id="context-markers">
+		<title>Extra marker interfaces and lifecycle features</title>
+		<para>
+			The BeanFactory already offers you some methods to control the lifecycle of your
+			beans (like <literal>InitializingBean</literal> or <literal>init-method</literal> and
+			its counterpart, <literal>DisposableBean</literal> or <literal>destroy-method</literal>).
+			The <literal>context</literal> package builds on top of the BeanFactory so you can
+			use those features in the context package as well. Besides the lifecycle features, the
+			ApplicationContext has one extra marker interface you can add to your beans, the
+			<literal>ApplicationContextAware</literal> interface. This interface will be used
+			to let the bean know about the ApplicationContext is <emphasis>lives</emphasis> in, using
+			the <literal>setApplicationContext()</literal> method, that takes an ApplicationContext
+			as an argument.
 		</para>
 	</sect1>
-
-    
+	
+	<sect1 id="context-customization">
+		<title>Customization of the ApplicationContext</title>
+		<para>
+			Where the BeanFactory can be customized programmatically using 
+			<literal>BeanFactoryPostProcessor</literal>, the ApplicationContext can be
+			customized using special beans, defined in your ApplicationContext
+		</para>
+		
+		
+	</sect1>
+	
+	
+	
+	
+	
+	<!--<sect1 id="context-create">
+		<title>Creating an ApplicationContext</title>
+		<para>
+			As opposed to the BeanFactory, which is often being created programmatically, ApplicationContexts
+			can be created generically using for example a <literal>ContextLoader</literal>. Of course you can
+			also create ApplicationContexts programmatically using one of the ApplicationContext implementations.
+			First, let's examine the ContextLoader and its implementations.
+		</para>
+		
+		<sect2 id="context-create-contextloader">
+			<title>Using the <literal>ContextLoader</literal> and <literal>ContextLoaderListener</literal></title>
+			<para>
+				The ContextLoader
+			</para>
+		</sect2>
+	</sect1>-->
         	
 </chapter>
 

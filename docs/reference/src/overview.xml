@@ -1,72 +1,119 @@
+<preface id="preface">
+    <title>Preface</title>
+    <para>
+        Developing applications alone is hard already, implementing applications
+        using platforms that promise everything but turn out to be heavy-weight,
+        hard to control and not very efficient during development cycles makes
+        it even harder. Spring provides a light-weight solution to 
+        build enterprise-ready applications, still supporting the possibility
+        of having declarative transaction management, remote access to your
+        logic using RMI or webservices, mailing facilities and a decent way
+        of persisting your data in a database. Spring provides an MVC framework,
+        transparent ways of integrating AOP in your software and a 
+        well-structured exception hierarchy for for example JDBC.
+    </para>
+    <para>
+        Spring could potentially be a one-stop-shop for all your enterprise
+        applications, however, Spring is modular, allowing you to use
+        parts of it, without bothering about the rest. You can use
+        the bean container, with Struts on top, but you could also choose to just
+        use the Hibernate integration or the JDBC abstraction layer.
+        Spring is non-intrusive, meaning you can do without any dependencies
+        on the framework at all, thus not tying yourself in to Spring.
+    </para>
+    <para>
+        This document provides a reference guide to Spring's features.
+        Since this document is still work-in-progress, you if you have any
+        requests, comments, please post them on the userlist or on the
+        forum at the SourceForge project page:
+        <ulink url="http://www.sf.net/projects/springframework"/> 
+    </para>
+    <para>
+        Before we go on a couple some words of gratitude. Chris Bauer
+        (Hibernate) prepared and adapted the DocBook-XSL software in order 
+        to be able to create Hibernate's reference guide, also allowing
+        us to create this one.
+    </para>
+</preface>
+
 <chapter id="overview">
 
-    <title>Introduction</title>
-    
-    <sect1 id="overview-intro">
-    	<title>Introduction</title>
-		<para>
-			In short, Spring is a ligthweight container based upon Inversion of Control (Dependency
-			Injection)
-			principles. Inversion of Control is a design pattern for component based architectures
-			that turns over the responsibilities of resolving of dependencies to the container 
-			instead of letting the components resolve those themselves. The lightweight aspect
-			of the container shows itself when implementing components for use within Spring.
-			Components developed for Spring will not require any external libraries. Furthermore,
-			the container is lightweight in that it does not have some of the major drawbacks of
-			for instance an EJB container; i.e. long startup times, complex testing, deployment
-			and configuration overhead, etcetera.			
-		</para>
-		<para>
-			This chapter first of all describes the overall design of the lightweight container.
-			Furthermore, it provides a quick overview of some of the features Spring has besides
-			the IoC implementation. In short these are:
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						<emphasis>built-in AOP support</emphasis> to for instance facilitate declarative transaction 
-						management outside an EJB container
-					</para>	
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>framework for data access</emphasis>, whether using JDBC or an 
-						O/R mapping product such as Hibernate
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>an MVC web framework</emphasis> completely integrated with the rest of
-						the Spring framework, providing a clean, non-intrusive way for
-						doing MVC implementation, without tying yourself into one specific
-						view
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>support for sending email</emphasis> using JavaMail or any other mailing system
-					</para>
-				</listitem>	
-				<listitem>
-					<para>
-						<emphasis>source level medeta support</emphasis> to model enterprise services 
-						using for example AOP
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<emphasis>JNDI abstraction layer</emphasis> to facilitate for example transparent switching
-						between remote and local services
-					</para>
-				</listitem>
-			</itemizedlist>
-		</para>
-		<para>
-			Also, this chapter gives you some guidelines on when to choose
-			Spring for a specific project and provides an overview of some of the advantages 
-			(and also disadvantages) of Spring and IoC in general.
-		</para>
-    </sect1>
-    
+    <title>Spring Framework - an overview</title>
+    <para>
+        Spring contains a lot of functionality and features, which are
+        well-organized in 6 modules, shown in the diagram below. The rest
+        of this section discusses each the of modules very shortly.
+    </para>
+    <para>
+        <mediaobject>
+            <imageobject role="fo">
+                <imagedata fileref="images/spring-overview.svg" format="SVG" align="center"/>
+            </imageobject>
+            <caption>
+                <para>Overview of the the Spring Framework
+                </para>
+            </caption>
+        </mediaobject>
+    </para>
+    <para>
+        The <emphasis>beans</emphasis> package is the most fundamental part of the framework and
+        provides the Dependency Injection features allowing you to manage
+        beans containing functionality. The basic concept here is the 
+        BeanFactory, which provides a factory pattern preventing you to use
+        programmatic singletons and allowing you to decouple configuration,
+        specification of dependencies from your actual logic.            
+    </para>
+    <para>
+        On top of the <emphasis>beans</emphasis> package sits the 
+        <emphasis>context</emphasis> package,
+        providing you a way to access beans in a more framework-style manner,
+        somewhat resembling an JNDI-registry. The context package inherits
+        its features from the beans package and adds messaging, 
+        event-propagation, resource-loading and transparent
+        creating of contexts by for example a servlet container.
+    </para>
+    <para>
+        The <emphasis>JDBC</emphasis> package provides a JDBC-abstraction
+        layer that takes removes the need to do tedious JDBC coding, parsing
+        database-vendor specific error codes and stuff like that.
+        Also, the JDBC package provides a way to do 
+        programmatic as well as declarative transaction
+        management, not only for classes implementing special interfaces,
+        but for <emphasis>all you POJOs</emphasis> you're coding.
+    </para>
+    <para>
+        The <emphasis>ORM</emphasis> package provides integration layers
+        for popular object-relational mappers, including JDO, Hibernate
+        and iBatis. Using the ORM package you can use all those O/R-mappers
+        in combination with all the other features Spring offers, like
+        simple delcarative transaction management mentioned before.
+    </para>
+    <para>
+        Spring's <emphasis>AOP</emphasis> package provides an 
+        <emphasis>Aop Alliance</emphasis> compliant aspect-oriented
+        programming implementing allowing you to define for example
+        method-interceptors and pointcuts to cleanly decouple code
+        implementing functionality that should logically speaking be separated.
+        Using source-level metadata functionality you can 
+        incorporate all kinds of behavioral information in your code,
+        a little like .NET attributes.
+    </para>
+    <para>
+        Spring's <emphasis>web</emphasis> package provides the basic 
+        web-oriented integration features, like multipart functionality,
+        initialization of contexts using servlet listeners and 
+        a web-oriented application context. When in need of using
+        Spring together with WebWork or Struts, this is the package to 
+        integrate with.
+    </para>
+    <para>
+        Spring <emphasis>web MVC</emphasis> package provides a 
+        Model-View-Controller implementation for web-applications. 
+        Spring's MVC implementation is not just any implementation,
+        it provides a clean separation between domain model code and
+        web forms and allows you to use all the other features of the Spring
+        Framework like validation.
+    </para>
 </chapter>
 
 

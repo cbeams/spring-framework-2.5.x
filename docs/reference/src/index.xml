@@ -25,7 +25,20 @@
         <title>Spring Framework - J2EE Made Easy</title>
         <subtitle>Spring Framework Reference Documentation WORK IN PROGRESS!!!</subtitle>
         <releaseinfo>1.0</releaseinfo>
+        
+        <authorgroup>
+            <author>
+                <firstname>Rod</firstname>
+                <surname>Johnson</surname>
+            </author>
+            <author>
+                <firstname>Alef</firstname>
+                <surname>Arendsen</surname>
+            </author>
+        </authorgroup>            
     </bookinfo>
+    
+    
 
     <toc/>
 
