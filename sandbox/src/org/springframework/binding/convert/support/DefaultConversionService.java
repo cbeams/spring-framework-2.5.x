@@ -30,7 +30,6 @@ import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
 import org.springframework.binding.support.TextToMappingConverter;
-import org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster;
 
 /**
  * Default, local implementation of a conversion service.
@@ -44,7 +43,7 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 
 	private Map sourceClassConverters = new HashMap();
 
-	private FormatterLocator formatterLocator;
+	private FormatterLocator formatterLocator = new ThreadLocalFormatterLocator();
 
 	public DefaultConversionService() {
 
@@ -83,20 +82,7 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 	}
 
 	public void afterPropertiesSet() {
-		initFormatterLocator();
 		addDefaultConverters();
-	}
-
-	protected void initFormatterLocator() {
-		if (this.formatterLocator == null) {
-			final DefaultThreadCleanupBroadcaster cleanupBroadcaster = new DefaultThreadCleanupBroadcaster();
-			this.formatterLocator = new ThreadLocalFormatterLocator(cleanupBroadcaster) {
-				protected void finalize() throws Throwable {
-					cleanupBroadcaster.fireCleanupEvent();
-					super.finalize();
-				}
-			};
-		}
 	}
 
 	protected void addDefaultConverters() {

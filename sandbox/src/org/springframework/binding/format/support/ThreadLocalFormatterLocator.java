@@ -39,6 +39,10 @@ public class ThreadLocalFormatterLocator extends AbstractFormatterLocator {
 
 	private DefaultThreadLocalContext formatterStorage = new DefaultThreadLocalContext();
 
+	public ThreadLocalFormatterLocator() {
+		
+	}
+	
 	public ThreadLocalFormatterLocator(ThreadCleanupBroadcaster broadcaster) {
 		setCleanupBroadcaster(broadcaster);
 	}

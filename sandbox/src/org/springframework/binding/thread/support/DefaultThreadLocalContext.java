@@ -94,4 +94,9 @@ public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadClea
 			return map;
 		}
 	}
+
+	protected void finalize() throws Throwable {
+		clear();
+		super.finalize();
+	}
 }
