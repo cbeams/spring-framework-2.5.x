@@ -1371,7 +1371,7 @@
     <para>First a parent, <emphasis>template</emphasis>, bean definition is
     created for the proxy:</para>
 
-    <para><programlisting>&lt;bean id="txProxyTemplate" lazy-init="true"
+    <para><programlisting>&lt;bean id="txProxyTemplate" abstract="true"
         class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
     &lt;property name="transactionManager"&gt;&lt;ref local="transactionManager"/&gt;&lt;/ref&gt;&lt;/property&gt;
     &lt;property name="transactionAttributes"&gt;
@@ -1409,14 +1409,17 @@
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
-    <para><emphasis>Note</emphasis>: the parent definition has the lazy-init
-    attribute set to true; this is so that Spring does not try to
-    pre-instantiate it in the context as its own bean. Spring’s
-    XMLApplicationConext by default pre-instantiates all singleton beans. The
-    exception to this is if the bean is marked as lazy-init, or there is no
-    class specified for the bean; the latter makes Spring consider the
-    definition a purely abstract one, not able to be instantiated
-    itself.</para>
+    <para>Note that in the example above, we have explicitly marked the parent
+    bean definition as <emphasis>abstract</emphasis> by using the
+    <emphasis>abstract</emphasis> attribute, as described <link
+    linkend="beans-child-bean-definitions">previously</link>, so that it may
+	not actaully ever be instantiated. Application contexts (but not
+    simple bean factories) will by default pre-instantiate all singletons.
+    Therefore it is important (at least for singleton beans) that if you have
+    a (parent) bean definition which you intend to use only as a template, and
+    this definition specifies a class, you must make sure to set the
+    <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
+    otherwise the application context will actually try to pre-instantiate it.</para>
   </sect1>
 
   <sect1 id="aop-prog">
