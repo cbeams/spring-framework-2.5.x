@@ -830,13 +830,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * for the specified property.
 	 * @param propertyName name of the property
 	 * @param oldValue previous value, if available (may be null)
-	 * @param newValue proposed change value.
-	 * @param requiredType type we must convert to
+	 * @param newValue proposed change value
+	 * @param requiredType the type we must convert to
+	 * (or null if not known, for example in case of a collection element)
 	 * @throws BeansException if there is an internal error
 	 * @return converted value (i.e. possibly the result of type conversion)
 	 */
 	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
 			Object oldValue, Object newValue, Class requiredType) throws BeansException {
+
 		Object convertedValue = newValue;
 		if (convertedValue != null) {
 

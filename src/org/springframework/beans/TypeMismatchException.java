@@ -44,15 +44,15 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Create a new TypeMismatchException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
-	 * @param requiredType the required target type
+	 * @param requiredType the required target type (or null if not known)
 	 * @param ex the root cause
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable ex) {
 		super(propertyChangeEvent,
 				"Failed to convert property value of type [" +
 				(propertyChangeEvent.getNewValue() != null ?
-				propertyChangeEvent.getNewValue().getClass().getName() : null) +
-				"] to required type [" + requiredType.getName() + "]" +
+				propertyChangeEvent.getNewValue().getClass().getName() : null) + "]" +
+				(requiredType != null ? " to required type [" + requiredType.getName() + "]" : "")+
 				(propertyChangeEvent.getPropertyName() != null ?
 				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				ex);
