@@ -30,6 +30,7 @@ import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -144,6 +145,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 					// ignore
 				}
+				catch (BeanIsAbstractException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to abstract bean definition '" + beanNames[i] + "'");
+					}
+					// ignore
+				}
 			}
 		}
 
@@ -212,7 +219,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				String beanName = (String) it.next();
 				if (containsBeanDefinition(beanName)) {
 					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-					if (bd.hasBeanClass() && bd.isSingleton() && !bd.isLazyInit()) {
+					if (bd.hasBeanClass() && !bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 						if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
 							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 							if (factory.isSingleton()) {

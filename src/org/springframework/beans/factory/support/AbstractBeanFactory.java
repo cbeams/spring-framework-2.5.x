@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.FactoryBean;
@@ -170,17 +171,22 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 				throw ex;
 			}
-			
+
+			// check if bean definition is not abstract
+			if (mergedBeanDefinition.isAbstract()) {
+				throw new BeanIsAbstractException(name);
+			}
+
 			// Check validity of the usage of the args parameter. This can
 			// only be used for prototypes constructed via a factory method.
 			if (args != null) {
 				if (mergedBeanDefinition.isSingleton()) {			
-					throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when " +
-															"referring to a singleton bean definition");
+					throw new BeanDefinitionStoreException(
+							"Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
 				}
 				else if (mergedBeanDefinition.getFactoryMethodName() == null) {			
-					throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in " +
-															 "conjunction with a factory method");
+					throw new BeanDefinitionStoreException(
+							"Can only specify arguments in the getBean() method in conjunction with a factory method");
 				}
 			}
 			
@@ -207,7 +213,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				return getObjectForSharedInstance(name, sharedInstance);
 			}
 			else {
-				// Non-singleton
+				// prototype
 				return createBean(name, mergedBeanDefinition, args);
 			}
 		}
@@ -361,7 +367,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			Object registeredName = this.aliasMap.get(alias);
 			if (registeredName != null) {
 				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" + beanName +
-																							 "': it's already registered for bean name '" + registeredName + "'");
+						"': it's already registered for bean name '" + registeredName + "'");
 			}
 			this.aliasMap.put(alias, beanName);
 		}
@@ -372,8 +378,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			Object oldObject = this.singletonCache.get(beanName);
 			if (oldObject != null) {
 				throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
-																							 "] under bean name '" + beanName + "': there's already object [" +
-																							 oldObject + " bound");
+						"] under bean name '" + beanName + "': there's already object [" + oldObject + " bound");
 			}
 			addSingleton(beanName, singletonObject);
 		}
@@ -579,9 +584,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 				else {
 					throw new NoSuchBeanDefinitionException(cbd.getParentName(),
-																									"Parent name '" + cbd.getParentName() +
-																									"' is equal to bean name '" + beanName +
-																									"' - cannot be resolved without an AbstractBeanFactory parent");
+							"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
+							"' - cannot be resolved without an AbstractBeanFactory parent");
 				}
 			}
 
@@ -592,7 +596,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 		else {
 			throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-																						 "Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
+					"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
 		}
 	}
 
@@ -622,7 +626,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition
 	 */
-	public abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
 	 * Create a bean instance for the given bean definition.
@@ -638,8 +642,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
-	protected abstract Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition,
-																			 Object[] args) throws BeansException;
+	protected abstract Object createBean(
+			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException;
 
 	/**
 	 * Destroy the given bean. Must destroy beans that depend on the given

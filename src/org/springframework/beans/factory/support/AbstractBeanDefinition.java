@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ClassUtils;
 
 /**
- * Common base class for bean definitions, factoring out common
+ * Base class for bean definition objects, factoring out common
  * properties of RootBeanDefinition and ChildBeanDefinition.
  *
  * <p>The autowire constants match the ones defined in the
@@ -61,6 +61,12 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private Object beanClass;
 
+	private boolean abstractFlag = false;
+
+	private boolean singleton = true;
+
+	private boolean lazyInit = false;
+
 	private ConstructorArgumentValues constructorArgumentValues;
 
 	private MutablePropertyValues propertyValues;
@@ -81,10 +87,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private String[] dependsOn;
 
-	private boolean singleton = true;
-
-	private boolean lazyInit = false;
-
 	private String resourceDescription;
 
 
@@ -99,6 +101,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	protected AbstractBeanDefinition(AbstractBeanDefinition other) {
 		this.beanClass = other.beanClass;
 
+		setAbstract(other.isAbstract());
+		setSingleton(other.isSingleton());
+		setLazyInit(other.isLazyInit());
+
 		setConstructorArgumentValues(new ConstructorArgumentValues(other.getConstructorArgumentValues()));
 		setPropertyValues(new MutablePropertyValues(other.getPropertyValues()));
 		setMethodOverrides(new MethodOverrides(other.getMethodOverrides()));
@@ -112,8 +118,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setAutowireMode(other.getAutowireMode());
 		setDependencyCheck(other.getDependencyCheck());
 
-		setSingleton(other.isSingleton());
-		setLazyInit(other.isLazyInit());
 		setResourceDescription(other.getResourceDescription());
 	}
 
@@ -121,13 +125,12 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Override settings in this bean definition from the given bean definition.
 	 * <p><ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
+	 * <li>Will always take abstract, singleton, lazyInit from the given bean definition.
 	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides to
 	 * existing ones.
 	 * <li>Will override initMethodName, destroyMethodName, staticFactoryMethodName
 	 * if specified.
 	 * <li>Will always take dependsOn, autowireMode, dependencyCheck from the
-	 * given bean definition.
-	 * <li>Will always take singleton, lazyInit, resourceDescription from the
 	 * given bean definition.
 	 * </ul>
 	 */
@@ -135,6 +138,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		if (other.beanClass != null) {
 			this.beanClass = other.beanClass;
 		}
+
+		setAbstract(other.isAbstract());
+		setSingleton(other.isSingleton());
+		setLazyInit(other.isLazyInit());
 
 		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
 		getPropertyValues().addPropertyValues(other.getPropertyValues());
@@ -157,8 +164,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		setAutowireMode(other.getAutowireMode());
 		setDependencyCheck(other.getDependencyCheck());
 
-		setSingleton(other.isSingleton());
-		setLazyInit(other.isLazyInit());
 		setResourceDescription(other.getResourceDescription());
 	}
 
@@ -206,6 +211,61 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		else {
 			return (String) this.beanClass;
 		}
+	}
+
+	/**
+	 * Set if this bean is "abstract", i.e. not meant to be instantiated itself but
+	 * rather just serving as parent for concrete child bean definitions.
+	 * <p>Default is false. Specify true to tell the bean factory to not try to
+	 * instantiate that particular bean in any case.
+	 */
+	public void setAbstract(boolean abstractFlag) {
+		this.abstractFlag = abstractFlag;
+	}
+
+	/**
+	 * Return whether this bean is "abstract", i.e. not meant to be instantiated
+	 * itself but rather just serving as parent for concrete child bean definitions.
+	 */
+	public boolean isAbstract() {
+		return abstractFlag;
+	}
+
+	/**
+	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
+	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>
+	 * design pattern, with each caller requesting an instance getting an
+	 * independent instance. How this is defined will depend on the BeanFactory.
+	 * <p>"Singletons" are the commoner type, so the default is true.
+	 */
+	public void setSingleton(boolean singleton) {
+		this.singleton = singleton;
+	}
+
+	/**
+	 * Return whether this a <b>Singleton</b>, with a single, shared instance
+	 * returned on all calls.
+	 */
+	public boolean isSingleton() {
+		return singleton;
+	}
+
+	/**
+	 * Set whether this bean should be lazily initialized.
+	 * Only applicable to a singleton bean.
+	 * If false, it will get instantiated on startup by bean factories
+	 * that perform eager initialization of singletons.
+	 */
+	public void setLazyInit(boolean lazyInit) {
+		this.lazyInit = lazyInit;
+	}
+
+	/**
+	 * Return whether this bean should be lazily initialized, i.e. not
+	 * eagerly instantiated on startup. Only applicable to a singleton bean.
+	 */
+	public boolean isLazyInit() {
+		return lazyInit;
 	}
 
 	/**
@@ -310,18 +370,19 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * @return Returns the factoryBeanName.
-	 */
-	public String getFactoryBeanName() {
-		return factoryBeanName;
-	}
-	/**
-	 * @param factoryBeanName The factoryBeanName to set.
+	 * Specify the factory bean to use, if any.
 	 */
 	public void setFactoryBeanName(String factoryBeanName) {
 		this.factoryBeanName = factoryBeanName;
 	}
-	
+
+	/**
+	 * Returns the factory bean name, if any.
+	 */
+	public String getFactoryBeanName() {
+		return factoryBeanName;
+	}
+
 	/**
 	 * Set the autowire code. This determines whether any automagical detection
 	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
@@ -406,42 +467,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 */
 	public String[] getDependsOn() {
 		return dependsOn;
-	}
-
-	/**
-	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
-	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>
-	 * design pattern, with each caller requesting an instance getting an
-	 * independent instance. How this is defined will depend on the BeanFactory.
-	 * "Singletons" are the commoner type.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
-
-	/**
-	 * Return whether this a <b>Singleton</b>, with a single, shared instance
-	 * returned on all calls,
-	 */
-	public boolean isSingleton() {
-		return singleton;
-	}
-
-	/**
-	 * Set whether this bean should be lazily initialized.
-	 * Only applicable to a singleton bean.
-	 * If false, it will get instantiated on startup by bean factories
-	 * that perform eager initialization of singletons.
-	 */
-	public void setLazyInit(boolean lazyInit) {
-		this.lazyInit = lazyInit;
-	}
-
-	/**
-	 * Return whether this bean should be lazily initialized.
-	 */
-	public boolean isLazyInit() {
-		return lazyInit;
 	}
 
 	/**
