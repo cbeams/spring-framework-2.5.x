@@ -419,7 +419,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transition
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowStateId, Transition transition) {
+	public boolean addSubFlowState(String subFlowStateId, Transition transition) {
 		return add(new SubFlowState(subFlowStateId, transition));
 	}
 
@@ -429,9 +429,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowDefaultFinishStateId
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowStateId, String subFlowAttributesMapperId,
+	public boolean addSubFlowState(String subFlowStateId, String subFlowAttributesMapperId,
 			String subFlowDefaultFinishStateId) {
-		return addSubFlow(subFlowStateId, subFlowAttributesMapperId, new Transition[] {
+		return addSubFlowState(subFlowStateId, subFlowAttributesMapperId, new Transition[] {
 				onBack(subFlowDefaultFinishStateId), onCancel(subFlowDefaultFinishStateId),
 				onFinish(subFlowDefaultFinishStateId) });
 	}
@@ -441,7 +441,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowStateId, Transition[] transitions) {
+	public boolean addSubFlowState(String subFlowStateId, Transition[] transitions) {
 		return add(new SubFlowState(subFlowStateId, transitions));
 	}
 
@@ -451,7 +451,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param transitions
 	 * @return
 	 */
-	public boolean addSubFlow(String subFlowStateId, String subFlowAttributesMapperId, Transition[] transitions) {
+	public boolean addSubFlowState(String subFlowStateId, String subFlowAttributesMapperId, Transition[] transitions) {
 		return add(new SubFlowState(subFlowStateId, subFlowAttributesMapperId, transitions));
 	}
 
@@ -767,6 +767,32 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(get(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix) {
+		return createSearchState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, Transition transition) {
+		return createSearchState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(search(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -1112,6 +1138,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Transition onSuccessGet(String getActionStateIdPrefix) {
 		return onSuccess(get(getActionStateIdPrefix));
+	}
+
+	/**
+	 * @param searchActionStateIdPrefix
+	 * @return
+	 */
+	public Transition onSuccessSearch(String searchActionStateIdPrefix) {
+		return onSuccess(search(searchActionStateIdPrefix));
 	}
 
 	/**
@@ -1463,6 +1497,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String get(String getActionStateIdPrefix) {
 		return buildStateId(getActionStateIdPrefix, GET);
+	}
+
+	/**
+	 * @param searchActionStateIdPrefix
+	 * @return
+	 */
+	public String search(String getActionStateIdPrefix) {
+		return buildStateId(getActionStateIdPrefix, SEARCH);
 	}
 
 	/**

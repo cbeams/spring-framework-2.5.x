@@ -25,6 +25,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowEventProcessor;
@@ -42,6 +43,8 @@ import org.springframework.web.util.SessionKeyUtils;
  * @author Keith Donald
  */
 public class FlowAction extends TemplateAction {
+
+	private static final String ACTION_PATH_NAME_ATTRIBUTE = "actionFormBeanName";
 
 	public static final String CURRENT_STATE_ID_ATTRIBUTE_NAME = "currentStateId";
 
@@ -147,11 +150,14 @@ public class FlowAction extends TemplateAction {
 				}
 				request.setAttribute(getFlowSessionIdAttributeName(), flowSessionId);
 				request.setAttribute(getCurrentStateIdAttributeName(), executionStack.getCurrentStateId());
-				String actionFormBeanName = executionStack.getActiveFlowId() + "Form";
+				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
+				String actionFormBeanName = actionPathName + "Form";
 				if (logger.isDebugEnabled()) {
-					logger.debug("Setting action form '" + form + "' named '" + actionFormBeanName
+					logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '" + actionPathName + " in request scope.");
+					logger.debug("Setting action form attribute '" + actionFormBeanName + " to form '" + form
 							+ "' in request scope.");
 				}
+				request.setAttribute(ACTION_PATH_NAME_ATTRIBUTE, actionPathName);
 				request.setAttribute(actionFormBeanName, form);
 				if (form instanceof BindingActionForm) {
 					BindingActionForm bindingForm = (BindingActionForm)form;
