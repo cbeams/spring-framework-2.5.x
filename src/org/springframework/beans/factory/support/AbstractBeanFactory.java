@@ -68,7 +68,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.41 2004-01-21 23:13:18 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.42 2004-02-02 11:48:00 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
@@ -610,7 +610,7 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 		}
 		catch (MethodInvocationException ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			"Initialization method of bean failed", ex.getRootCause());
+																			"Initialization method of bean failed", ex.getCause());
 		}
 		catch (Exception ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
@@ -705,7 +705,7 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 				for (int j = 0; j < argTypes.length; j++) {
 					args[j] = resolvedValues.getArgumentValue(j, argTypes[j]);
 					if (args[j] != null) {
-						args[j] = bw.doTypeConversionIfNecessary(null, null, args[j], argTypes[j]);
+						args[j] = bw.doTypeConversionIfNecessary(args[j], argTypes[j]);
 					}
 					else {
 						if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
@@ -1136,7 +1136,7 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 						bw.invoke(bd.getDestroyMethodName(), null);
 					}
 					catch (MethodInvocationException ex) {
-						logger.error(ex.getMessage(), ex.getRootCause());
+						logger.error(ex.getMessage(), ex.getCause());
 					}
 				}
 			}
