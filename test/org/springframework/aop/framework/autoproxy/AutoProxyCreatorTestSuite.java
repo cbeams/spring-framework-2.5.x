@@ -101,17 +101,17 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 			if (beanNames[i].equals("autoProxyTest")) {
 				Object bean = sac.getBean(beanNames[i]);
 				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-				           Proxy.isProxyClass(bean.getClass()));
+						Proxy.isProxyClass(bean.getClass()));
 			}
 			else if (beanNames[i].equals("prototypeFactory")) {
 				Object bean = sac.getBean("&" + beanNames[i]);
 				assertTrue("J2SE proxy for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-				           Proxy.isProxyClass(bean.getClass()));
+						Proxy.isProxyClass(bean.getClass()));
 			}
 			else if (!beanNames[i].equals("messageSource") && !beanNames[i].endsWith("Creator")) {
 				Object bean = sac.getBean(beanNames[i]);
 				assertTrue("Enhanced bean class for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-				           AopUtils.isCglibProxy(bean));
+						AopUtils.isCglibProxy(bean));
 			}
 		}
 		ACATest aca = (ACATest) sac.getBean("aca");
@@ -120,7 +120,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		ACATest acaPr = (ACATest) sac.getBean("aca-prototype");
 		acaPr.getApplicationContext();
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptorForCreator");
-		assertEquals(18, ti.nrOfInvocations);
+		assertEquals(19, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
 	}
@@ -135,8 +135,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 			setOrder(0);
 		}
 
-		protected Object[] getAdvicesAndAdvisorsForBean(
-				Object bean, String name, TargetSource customTargetSource) {
+		protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String name, TargetSource customTargetSource) {
 			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean)
 				return DO_NOT_PROXY;
 			else if (name.startsWith("aca"))
