@@ -16,17 +16,16 @@
 
 package org.springframework.web.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.jsp.PageContext;
 
-import com.mockobjects.servlet.MockPageContext;
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockPageContext;
 
+/**
+ * @author Aled Arendsen
+ * @since 16.09.2003
+ */
 public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 
 	public void testIsExpressionLanguage() {
@@ -50,7 +49,7 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 	}
 
 	public void testEvaluate() throws Exception {
-		PageContext ctx = getMockPageContext();
+		PageContext ctx = new MockPageContext();
 		
 		ctx.setAttribute("bla", "blie");
 		String expr = "${bla}";
@@ -63,7 +62,7 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 	}
 
 	public void testEvaluateString() throws Exception {
-		PageContext ctx = getMockPageContext();
+		PageContext ctx = new MockPageContext();
 		
 		ctx.setAttribute("bla", "blie");
 		String expr = "${bla}";
@@ -74,7 +73,7 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 	}
 
 	public void testEvaluateInteger() throws Exception {
-		PageContext ctx = getMockPageContext();
+		PageContext ctx = new MockPageContext();
 		
 		ctx.setAttribute("bla", new Integer(1));
 		String expr = "${bla}";
@@ -86,7 +85,7 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 	}
 
 	public void testEvaluateBoolean() throws Exception {
-		PageContext ctx = getMockPageContext();
+		PageContext ctx = new MockPageContext();
 		
 		ctx.setAttribute("bla", new Boolean(true));
 		String expr = "${bla}";
@@ -95,23 +94,6 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 		assertEquals(b, true);
 		
 		assertEquals(true, ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
-	}
-	
-	private PageContext getMockPageContext() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null
-		);
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		MockPageContext pageContext = new MockPageContext() {
-			private Map attributes = new HashMap();
-			public void setAttribute(String s, Object o) {
-				attributes.put(s, o);
-			}
-			public Object findAttribute(String s) {
-				return this.attributes.get(s);
-			}
-		};
-		pageContext.initialize(null, request, response, "nope", false, 4096, true);
-		return pageContext;		
 	}
 
 }

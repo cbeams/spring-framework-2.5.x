@@ -21,8 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.jsp.JspException;
-
-import com.mockobjects.servlet.MockPageContext;
+import javax.servlet.jsp.PageContext;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -37,7 +36,7 @@ public class TransformTestSuite extends AbstractTagTest {
 
 	public void testTransformTagCorrectBehavior() throws JspException {
 		// first set up the pagecontext and the bean
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
@@ -84,7 +83,7 @@ public class TransformTestSuite extends AbstractTagTest {
 
 	public void testTransformTagOutsideBindTag() throws JspException {
 		// first set up the pagecontext and the bean
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
@@ -124,7 +123,7 @@ public class TransformTestSuite extends AbstractTagTest {
 
 	public void testTransformTagNonExistingValue() throws JspException {
 		//		first set up the pagecontext and the bean
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
@@ -151,7 +150,7 @@ public class TransformTestSuite extends AbstractTagTest {
 
 	public void testSettingOfScope() throws JspException {
 		// first set up the pagecontext and the bean
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");

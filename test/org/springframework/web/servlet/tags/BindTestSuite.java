@@ -19,9 +19,8 @@ package org.springframework.web.servlet.tags;
 import java.beans.PropertyEditorSupport;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-
-import com.mockobjects.servlet.MockPageContext;
 
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindErrorsTagWithErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("test", null, "test");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
@@ -48,7 +47,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindErrorsTagWithoutErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindErrorsTag tag = new BindErrorsTag();
@@ -59,7 +58,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindErrorsTagWithoutBean() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindErrorsTag tag = new BindErrorsTag();
 		tag.setPageContext(pc);
 		tag.setName("tb");
@@ -67,7 +66,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithoutErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
@@ -88,7 +87,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithGlobalErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("code1", null, "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
@@ -128,7 +127,7 @@ public class BindTestSuite extends AbstractTagTest {
 
 	public void testBindStatusGetErrorMessagesAsString() throws JspException {
 		// one error (should not include delimiter)
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindException errors = new ServletRequestDataBinder(new TestBean(), "tb").getErrors();
 		errors.reject("code1", null, "message1");
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", errors);
@@ -168,7 +167,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithFieldErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
 		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
@@ -237,7 +236,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithNestedFieldErrors() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
 		TestBean spouse = new TestBean();
@@ -265,7 +264,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testPropertyExposing() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
 		tb.setName("name1");
 		BindException errors = new BindException(tb, "tb");
@@ -289,7 +288,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithIndexedProperties() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
 		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
 		errors.rejectValue("array[0]", "code1", "message1");
@@ -315,7 +314,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithMappedProperties() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
 		BindException errors = new ServletRequestDataBinder(tb, "tb").getErrors();
 		errors.rejectValue("map[key1]", "code1", "message1");
@@ -341,7 +340,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithIndexedPropertiesAndCustomEditor() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, null,
@@ -368,7 +367,7 @@ public class BindTestSuite extends AbstractTagTest {
 	}
 
 	public void testBindTagWithoutBean() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");

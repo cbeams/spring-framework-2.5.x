@@ -21,9 +21,8 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-
-import com.mockobjects.servlet.MockPageContext;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -36,7 +35,7 @@ import org.springframework.web.servlet.support.RequestContext;
 public class ThemeTestSuite extends AbstractTagTest {
 
 	public void testThemeTag() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		ThemeTag tag = new ThemeTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -50,7 +49,7 @@ public class ThemeTestSuite extends AbstractTagTest {
 	}
 
 	public void testRequestContext() throws ServletException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
 		assertEquals("theme test message", rc.getThemeMessage("themetest"));
 		assertEquals("theme test message", rc.getThemeMessage("themetest", (String[]) null));

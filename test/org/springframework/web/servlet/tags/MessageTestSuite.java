@@ -20,9 +20,8 @@ import java.io.IOException;
 import java.util.Locale;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-
-import com.mockobjects.servlet.MockPageContext;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -35,7 +34,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class MessageTestSuite extends AbstractTagTest {
 
 	public void testMessageTagWithCode1() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -49,7 +48,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageTagWithCode2() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pc.getRequest();
 		request.addPreferredLocale(Locale.CANADA);
 		final StringBuffer message = new StringBuffer();
@@ -67,7 +66,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageTagWithCodeAndArguments() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -82,7 +81,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageTagWithCodeAndText1() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -97,7 +96,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageTagWithCodeAndText2() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -113,7 +112,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageTagWithText() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
 			protected void writeMessage(String msg) throws IOException {
@@ -128,7 +127,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 	
 	public void testMessageWithVarAndScope() throws JspException {
-		MockPageContext pc = createPageContext();		
+		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
 		tag.setText("text & text");
@@ -150,7 +149,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 
 	public void testMessageWithVar() throws JspException {
-		MockPageContext pc = createPageContext();		
+		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
 		tag.setText("text & text");
@@ -172,7 +171,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	}
 	
 	public void testNullMessageSource() throws JspException {
-		MockPageContext pc = createPageContext();
+		PageContext pc = createPageContext();
 		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext)pc.getRequest().getAttribute(
 			DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		ctx.close();
