@@ -18,6 +18,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.io.IOException;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.CountingBeforeAdvice;
@@ -103,11 +104,25 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		}
 	}
 	
-	/*
-	public void testJdkIntroductionOnFactoryBean() {
+	/**
+	 * This is a test that reproduces a bug/enhancement
+	 * request, while we decide how to address it.
+	 * This one is scheduled to be addressed in 1.1.2.
+	 */
+	public void testIntroductionOnFactoryBean() {
+		try {
+			BUGtestJdkIntroductionAppliesToCreatedObjectsNotFactoryBean();
+			fail();
+		}
+		catch (AssertionFailedError ex) {
+			System.err.println("****** SPR 337: Autoproxying currently applies to FactoryBeans, not objects they create");
+		}
+	}
+	
+	public void BUGtestJdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
 		ITestBean tb = (ITestBean) bf.getBean("factory-introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) bf.getBean("introductionNopInterceptor");
-		assertEquals(0, nop.getCount());
+		assertEquals("NOP should not have done any work yet", 0, nop.getCount());
 		assertTrue(AopUtils.isJdkDynamicProxy(tb));
 		int age = 5;
 		tb.setAge(age);
@@ -141,7 +156,6 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 			// Ok
 		}
 	}
-	*/
 	
 	public void testJdkProxyWithWildcardMatch() {
 		ITestBean tb = (ITestBean) bf.getBean("jdk1");
