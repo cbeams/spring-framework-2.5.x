@@ -299,7 +299,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
-	protected Flow spawnFlow(String flowId) {
+	protected Flow spawnFlow(String flowId) throws NoSuchFlowDefinitionException {
 		return getFlowServiceLocator().getFlow(flowId);
 	}
 
@@ -316,7 +316,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return The flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
-	protected Flow spawnFlow(String flowId, Class flowBuilderImplementationClass) {
+	protected Flow spawnFlow(String flowId, Class flowBuilderImplementationClass) throws NoSuchFlowDefinitionException {
 		return getFlowServiceLocator().getFlow(flowId, flowBuilderImplementationClass);
 	}
 
@@ -385,7 +385,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param attributesMapperBeanNamePrefix The attribute mapper prefix
 	 * @return The attributes mapper
 	 */
-	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix) {
+	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix)
+			throws NoSuchFlowAttributesMapperException {
 		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
 	}
 
@@ -396,244 +397,569 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param flowAttributesMapperImplementationClass
 	 * @return The attributes mapper
 	 */
-	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass) {
+	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass)
+			throws NoSuchFlowAttributesMapperException {
 		return getFlowServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
 	}
 
 	/**
-	 * Add a <code>ViewState</code> marker to the flow built by this builder;
-	 * a marker has a <code>null</code> <code>viewName</code> and assumes
-	 * the HTTP response has already been written when entered. The marker notes
-	 * that control should be returned to the HTTP client.
+	 * Add a <code>ViewState</code> marker to the flow built by this builder.
+	 * <p>
+	 * A view marker has a <code>null</code> <code>viewName</code> and
+	 * assumes the HTTP response has already been written when entered. The
+	 * marker notes that control should be returned to the HTTP client.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the
+	 * '${stateIdPrefix}.bindAndValidate' state
+	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        VIEW action constant will be appended to this prefix to build a
 	 *        qualified state id (e.g personDetails.view)
 	 * @return The view marker state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix) {
+	protected ViewState addViewStateMarker(String stateIdPrefix) throws IllegalStateException {
 		return addViewState(stateIdPrefix, (String)null);
 	}
 
 	/**
-	 * Add a <code>ViewState</code> marker to the flow built by this builder;
-	 * a marker has a <code>null</code> <code>viewName</code> and assumes
+	 * Add a <code>ViewState</code> marker to the flow built by this builder.
+	 * <p>
+	 * A marker has a <code>null</code> <code>viewName</code> and assumes
 	 * the HTTP response has already been written when entered. The marker notes
 	 * that control should be returned to the HTTP client.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the
+	 * '${stateIdPrefix}.bindAndValidate' state
+	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        VIEW action constant will be appended to this prefix to build a
 	 *        qualified state id (e.g. personDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view marker state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix, Transition transition) {
+	protected ViewState addViewStateMarker(String stateIdPrefix, Transition transition) throws IllegalStateException {
 		return addViewState(stateIdPrefix, (String)null, transition);
 	}
 
 	/**
-	 * Add a <code>ViewState</code> marker to the flow built by this builder;
-	 * a marker has a <code>null</code> <code>viewName</code> and assumes
-	 * the HTTP response has already been written when entered. The marker notes
-	 * that control should be returned to the HTTP client.
+	 * Add a <code>ViewState</code> marker to the flow built by this builder.
+	 * <p>
+	 * A view marker has a <code>null</code> <code>viewName</code> and
+	 * assumes the HTTP response has already been written when entered. The
+	 * marker notes that control should be returned to the HTTP client.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the
+	 * '${stateIdPrefix}.bindAndValidate' state
+	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
 	 *        VIEW action constant will be appended to this prefix to build a
 	 *        qualified state id (e.g. personDetails.view)
 	 * @param transitions The supported transitions for this state, where each
-	 *        maps a path from this state to another state (triggered by an
-	 *        event).
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
 	 * @return The view marker state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix, Transition[] transitions) {
+	protected ViewState addViewStateMarker(String stateIdPrefix, Transition[] transitions) throws IllegalStateException {
 		return addViewState(stateIdPrefix, (String)null, transitions);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @return
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * <p>
+	 * By default, the view state will be configured with a logical
+	 * <code>viewName</code> equal to its qualified state ID. The qualified
+	 * state ID is built by appending the VIEW action constant to the provided
+	 * stateIdPrefix argument. This means, for example, a provided
+	 * <code>stateIdPrefix</code> of "personDetails" would result in a
+	 * qualified stateId of "personDetails.view" and a <code>viewName</code>
+	 * also of "personDetails.view". This view name will be mapped to a physical
+	 * view resource to render a response when the view state is entered during
+	 * a flow execution.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the
+	 * '${stateIdPrefix}.bindAndValidate' state
+	 * </ul>
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix) {
+	protected ViewState addViewState(String stateIdPrefix) throws IllegalStateException {
 		return addViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param viewName
-	 * @return
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * <p>
+	 * By default, the view state will be configured with a logical
+	 * <code>viewName</code> equal to its qualified state ID. The qualified
+	 * state ID is built by appending the VIEW action constant to the provided
+	 * stateIdPrefix argument. This means, for example, a provided
+	 * <code>stateIdPrefix</code> of "personDetails" would result in a
+	 * qualified stateId of "personDetails.view" and a <code>viewName</code>
+	 * also of "personDetails.view". This view name will be mapped to a physical
+	 * view resource to render a response when the view state is entered during
+	 * a flow execution.
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, String viewName) {
+	protected ViewState addViewState(String stateIdPrefix, Transition transition) throws IllegalStateException {
+		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transition);
+	}
+
+	/**
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * <p>
+	 * By default, the view state will be configured with a logical
+	 * <code>viewName</code> equal to its qualified state ID. The qualified
+	 * state ID is built by appending the VIEW action constant to the provided
+	 * stateIdPrefix argument. This means, for example, a provided
+	 * <code>stateIdPrefix</code> of "personDetails" would result in a
+	 * qualified stateId of "personDetails.view" and a <code>viewName</code>
+	 * also of "personDetails.view". This view name will be mapped to a physical
+	 * view resource to render a response when the view state is entered during
+	 * a flow execution.
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
+	 */
+	protected ViewState addViewState(String stateIdPrefix, Transition[] transitions) throws IllegalStateException {
+		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * <p>
+	 * The view state will be configured with the following default state
+	 * transitions:
+	 * <ul>
+	 * <li>on event 'cancel', transition to the 'cancel' state
+	 * <li>on event 'back', transition to the 'back' state
+	 * <li>on event 'submit', transition to the
+	 * '${stateIdPrefix}.bindAndValidate' state
+	 * </ul>
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @param viewName The name of the logical view name to render; this name
+	 *        will be mapped to a physical resource template such as a JSP when
+	 *        the ViewState is entered and control returns to the front
+	 *        controller.
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
+	 */
+	protected ViewState addViewState(String stateIdPrefix, String viewName) throws IllegalStateException {
 		return addViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * 
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @param viewName The name of the logical view name to render. This name
+	 *        will be mapped to a physical resource template such as a JSP when
+	 *        the ViewState is entered and control returns to the front
+	 *        controller.
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, Transition[] transitions) {
-		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transitions);
+	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition transition)
+			throws IllegalStateException {
+		return new ViewState(getFlow(), view(stateIdPrefix), viewName, transition);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param viewName
-	 * @param transitions
-	 * @return
+	 * Add a <code>ViewState</code> to the flow built by this builder. A view
+	 * state triggers the rendering of a view template when entered.
+	 * 
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @param viewName The name of the logical view name to render; this name
+	 *        will be mapped to a physical resource template such as a JSP when
+	 *        the ViewState is entered and control returns to the front
+	 *        controller.
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The view state
+	 * @throws IllegalStateException the stateId was not unique after
+	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
+	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition[] transitions)
+			throws IllegalStateException {
 		return new ViewState(getFlow(), view(stateIdPrefix), viewName, transitions);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
+	 * Factory method that generates a viewName from a stateIdPrefix. This
+	 * implementation appends the "view" action constant to the prefix in the
+	 * form ${stateIdPrefix}.view. Subclasses may override.
+	 * @param stateIdPrefix The stateIdPrefix
+	 * @return The view name.
 	 */
-	protected ViewState addViewState(String stateIdPrefix, Transition transition) {
-		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transition);
-	}
-
 	protected String viewName(String stateIdPrefix) {
 		return view(stateIdPrefix);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param viewName
-	 * @param transition
-	 * @return
-	 */
-	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition transition) {
-		return new ViewState(getFlow(), view(stateIdPrefix), viewName, transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @return
+	 * Factory method that returns an action bean identifier given a stateId as
+	 * input. This default implementation simply returns the stateId; because as
+	 * a default, the value of the action state id is also treated as the
+	 * <code>id</code> of the action bean to lookup using the
+	 * <code>FlowServiceLocator</code>.
+	 * @param stateId The stateId
+	 * @return the actionId
 	 */
 	protected String actionId(String stateId) {
 		return stateId;
 	}
 
 	/**
-	 * @param actionStateId
-	 * @param transition
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails.
+	 * <p>
+	 * By default, the <code>id</code> of the Action to use for lookup using
+	 * the <code>FlowServiceLocator</code> will be the same as the provided
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that name, or a NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
-	protected ActionState addActionState(String stateId, Transition transition) {
+	protected ActionState addActionState(String stateId, Transition transition) throws IllegalStateException {
 		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transition);
 	}
 
 	/**
-	 * @param stateId
-	 * @param action
-	 * @param transition
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails.
+	 * <p>
+	 * By default, the <code>id</code> of the Action to use for lookup using
+	 * the <code>FlowServiceLocator</code> will be the same as the provided
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that name, or a NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
-	protected ActionState addActionState(String stateId, Action action, Transition transition) {
-		return new ActionState(getFlow(), stateId, action, transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @param actionName
-	 * @param action
-	 * @param transition
-	 * @return
-	 */
-	protected ActionState addActionState(String stateId, String actionName, Action action, Transition transition) {
-		return new ActionState(getFlow(), stateId, actionName, action, transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @param actionId
-	 * @param transition
-	 * @return
-	 */
-	protected ActionState addActionState(String stateId, String actionId, Transition transition) {
-		return new ActionState(getFlow(), stateId, executeAction(actionId), transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @param actionName
-	 * @param actionId
-	 * @param transition
-	 * @return
-	 */
-	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition transition) {
-		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transition);
-	}
-
-	/**
-	 * @param stateId
-	 * @param transitions
-	 * @return
-	 */
-	protected ActionState addActionState(String stateId, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, Transition[] transitions) throws IllegalStateException,
+			NoSuchActionException {
 		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transitions);
 	}
 
 	/**
-	 * @param stateId
-	 * @param action
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that name, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionId The id of the action service, locatable by the
+	 *        FlowServiceLocator
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
-	protected ActionState addActionState(String stateId, Action action, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, action, transitions);
+	protected ActionState addActionState(String stateId, String actionId, Transition transition)
+			throws IllegalStateException, NoSuchActionException {
+		return new ActionState(getFlow(), stateId, executeAction(actionId), transition);
 	}
 
 	/**
-	 * @param stateId
-	 * @param actionName
-	 * @param action
-	 * @param transitions
-	 * @return
-	 */
-	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, actionName, action, transitions);
-	}
-
-	/**
-	 * @param stateId
-	 * @param actionId
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that name, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionId The id of the action service, locatable by the
+	 *        FlowServiceLocator
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
 	protected ActionState addActionState(String stateId, String actionId, Transition[] transitions) {
 		return new ActionState(getFlow(), stateId, executeAction(actionId), transitions);
 	}
 
 	/**
-	 * @param stateId
-	 * @param actionName
-	 * @param actionId
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param action the action implementation
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, Action action, Transition transition)
+			throws IllegalStateException {
+		return new ActionState(getFlow(), stateId, action, transition);
+	}
+
+	/**
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param action the action implementation
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 */
+	protected ActionState addActionState(String stateId, Action action, Transition[] transitions)
+			throws IllegalStateException {
+		return new ActionState(getFlow(), stateId, action, transitions);
+	}
+
+	/**
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionName a logical name to associate with this action, used to
+	 *        qualify action results (e.g "myAction.success"), so one action can
+	 *        be reused in different flows with other actions that return the
+	 *        same logical result
+	 * @param action the action implementation
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 */
+	protected ActionState addActionState(String stateId, String actionName, Action action, Transition transition)
+			throws IllegalStateException {
+		return new ActionState(getFlow(), stateId, actionName, action, transition);
+	}
+
+	/**
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that name, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionName a logical name to associate with this action, used to
+	 *        qualify action results (e.g "myAction.success"), so one action can
+	 *        be reused in different flows with other actions that return the
+	 *        same logical result
+	 * @param actionId The id of the action service, locatable by the
+	 *        FlowServiceLocator
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
+	 */
+	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition transition)
+			throws IllegalStateException, NoSuchActionException {
+		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transition);
+	}
+
+	/**
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionName a logical name to associate with this action, used to
+	 *        qualify action results (e.g "myAction.success"), so one action can
+	 *        be reused in different flows with other actions that return the
+	 *        same logical result
+	 * @param action the action implementation
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 */
+	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions) {
+		return new ActionState(getFlow(), stateId, actionName, action, transitions);
+	}
+
+	/**
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that name, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionName a logical name to associate with this action, used to
+	 *        qualify action results (e.g "myAction.success"), so one action can
+	 *        be reused in different flows with other actions that return the
+	 *        same logical result
+	 * @param actionId The id of the action service, locatable by the
+	 *        FlowServiceLocator
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
+	 */
+	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition[] transitions)
+			throws IllegalStateException, NoSuchActionException {
 		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transitions);
 	}
 
 	/**
-	 * @param stateId
-	 * @param actions
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes one or more <code>Action</code> implementations
+	 * when entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actions the action implementations, to be executed in order until
+	 *        a valid transitional result is returned (Chain of Responsibility)
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, Action[] actions, Transition[] transitions) {
 		return new ActionState(getFlow(), stateId, actions, transitions);
 	}
 
 	/**
-	 * @param stateId
-	 * @param actionNames
-	 * @param actions
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes one or more <code>Action</code> implementations
+	 * when entered.
+	 * <p>
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionNames the logical names to associate with each action, used
+	 *        to qualify action results (e.g "myAction.success"), so one action
+	 *        can be reused in different flows with other actions that return
+	 *        the same logical result
+	 * @param actions the action implementations, to be executed in order until
+	 *        a valid transitional result is returned (Chain of Responsibility)
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions,
 			Transition[] transitions) {
@@ -641,30 +967,75 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * @param stateId
-	 * @param actionIds
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes one or more <code>Action</code> implementations
+	 * when entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementations by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that ID, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionIds The ids of the action services, locatable by the
+	 *        FlowServiceLocator, and to be resolved and added in order
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
 	protected ActionState addActionState(String stateId, String[] actionIds, Transition[] transitions) {
 		return new ActionState(getFlow(), stateId, executeActions(actionIds), transitions);
 	}
 
 	/**
-	 * @param stateId
-	 * @param actionNames
-	 * @param actionIds
-	 * @param transitions
-	 * @return
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes one or more <code>Action</code> implementations
+	 * when entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementations by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails. It is expected
+	 * that a valid <code>Action</code> implementation be exported in the
+	 * backing service locator registry under that ID, or a
+	 * NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param actionNames the logical names to associate with each action, used
+	 *        to qualify action results (e.g "myAction.success"), so one action
+	 *        can be reused in different flows with other actions that return
+	 *        the same logical result
+	 * @param actionIds The ids of the action services, locatable by the
+	 *        FlowServiceLocator, and to be resolved and added in order
+	 * @param transitions The supported transitions for this state, where each
+	 *        transition maps a path from this state to another state (triggered
+	 *        by an event).
+	 * @return The action state
+	 * @throws IllegalStateException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
 	protected ActionState addActionState(String stateId, String[] actionNames, String[] actionIds,
-			Transition[] transitions) {
+			Transition[] transitions) throws IllegalStateException, NoSuchActionException {
 		return new ActionState(getFlow(), stateId, actionNames, executeActions(actionIds), transitions);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @return
+	 * Adds a 'create' <code>ActionState</code> to the flow built by this
+	 * builder. An action state executes one or more <code>Action</code>
+	 * implementations when entered. 'create' is treated as a qualifier that
+	 * stereotypes this action state as one that executes object creational
+	 * logic when entered.
+	 * 
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
+	 *        CREATE action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g person.create)
+	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix) {
 		return addCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
