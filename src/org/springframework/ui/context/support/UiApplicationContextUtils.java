@@ -4,9 +4,10 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.ui.context.NestingThemeSource;
+import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.ThemeSource;
 
 /**
@@ -37,9 +38,9 @@ public abstract class UiApplicationContextUtils {
 			themeSource = (ThemeSource) applicationContext.getBean(THEME_SOURCE_BEAN_NAME);
 			// set parent theme source if applicable,
 			// and if the theme source is defined in this context, not in a parent
-			if (applicationContext.getParent() instanceof ThemeSource && themeSource instanceof NestingThemeSource &&
+			if (applicationContext.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource &&
 				Arrays.asList(applicationContext.getBeanDefinitionNames()).contains(THEME_SOURCE_BEAN_NAME)) {
-				((NestingThemeSource) themeSource).setParent((ThemeSource) applicationContext.getParent());
+				((HierarchicalThemeSource) themeSource).setParentThemeSource((ThemeSource) applicationContext.getParent());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {

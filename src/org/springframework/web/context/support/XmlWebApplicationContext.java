@@ -11,8 +11,11 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
+import org.springframework.ui.context.Theme;
+import org.springframework.ui.context.ThemeSource;
+import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 
@@ -41,7 +44,7 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
  * @see org.springframework.context.support.AbstractApplicationContext#getResource
  */
-public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
+public class XmlWebApplicationContext extends AbstractXmlApplicationContext
 		implements ConfigurableWebApplicationContext {
 
 	/** Default config location for the root context */
@@ -63,6 +66,8 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 	/** Paths to XML configuration files */
 	private String[] configLocations;
 
+	/** the ThemeSource for this ApplicationContext */
+	private ThemeSource themeSource;
 
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
@@ -127,6 +132,18 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 		}
 		return new ServletContextResource(this.servletContext, path);
 	}
+
+	/**
+	 * Initialize the theme capability.
+	 */
+	protected void onRefresh() {
+		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+	}
+
+	public Theme getTheme(String themeName) {
+		return this.themeSource.getTheme(themeName);
+	}
+
 
 	/**
 	 * Return diagnostic information.

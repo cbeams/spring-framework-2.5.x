@@ -6,8 +6,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.ui.context.NestingThemeSource;
+import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 
@@ -19,23 +20,27 @@ import org.springframework.ui.context.ThemeSource;
  * @author Juergen Hoeller
  * @see #setBasenamePrefix
  */
-public class ResourceBundleThemeSource implements NestingThemeSource {
+public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ThemeSource parent;
+	private ThemeSource parentThemeSource;
 
 	private String basenamePrefix = "";
 
 	/** Map from theme name to Theme instance */
 	private Map themes = new HashMap();
 
-	public void setParent(ThemeSource parent) {
-		this.parent = parent;
+	public void setParentThemeSource(ThemeSource parent) {
+		this.parentThemeSource = parent;
 		Iterator it = this.themes.values().iterator();
 		while (it.hasNext()) {
 			initParent((Theme) it.next());
 		}
+	}
+
+	public ThemeSource getParentThemeSource() {
+		return parentThemeSource;
 	}
 
 	/**
@@ -66,18 +71,18 @@ public class ResourceBundleThemeSource implements NestingThemeSource {
 
 	/**
 	 * Initialize the MessageSource of the given theme with the
-	 * one from the respective parent of this ThemeSource.
+	 * one from the respective parentThemeSource of this ThemeSource.
 	 */
 	protected void initParent(Theme theme) {
 		ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) theme.getMessageSource();
-		if (this.parent != null) {
-			Theme parentTheme = this.parent.getTheme(theme.getName());
+		if (this.parentThemeSource != null) {
+			Theme parentTheme = this.parentThemeSource.getTheme(theme.getName());
 			if (parentTheme != null) {
-				messageSource.setParent(parentTheme.getMessageSource());
+				messageSource.setParentMessageSource(parentTheme.getMessageSource());
 			}
 		}
 		else {
-			messageSource.setParent(null);
+			messageSource.setParentMessageSource(null);
 		}
 	}
 
