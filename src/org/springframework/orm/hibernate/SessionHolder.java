@@ -16,6 +16,9 @@
 
 package org.springframework.orm.hibernate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.sf.hibernate.Session;
 import net.sf.hibernate.Transaction;
 
@@ -36,17 +39,50 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  */
 public class SessionHolder extends ResourceHolderSupport {
 
-	private final Session session;
+	private static final Object DEFAULT_KEY = new Object();
+
+	private final Map sessionMap = new HashMap(1);
 
 	private Transaction transaction;
 
+
 	public SessionHolder(Session session) {
-		this.session = session;
+		addSession(DEFAULT_KEY, session);
 	}
 
-	public Session getSession() {
-		return session;
+	public SessionHolder(Object key, Session session) {
+		addSession(key, session);
 	}
+
+
+	public Session getSession() {
+		return getSession(DEFAULT_KEY);
+	}
+
+	public Session getSession(Object key) {
+		return (Session) this.sessionMap.get(key);
+	}
+
+	public Session getAnySession() {
+		return (Session) this.sessionMap.values().iterator().next();
+	}
+
+	public void addSession(Object key, Session session) {
+		this.sessionMap.put(key, session);
+	}
+
+	public Session removeSession(Object key) {
+		return (Session) this.sessionMap.remove(key);
+	}
+
+	public boolean containsSession(Session session) {
+		return this.sessionMap.containsValue(session);
+	}
+
+	public boolean isEmpty() {
+		return this.sessionMap.isEmpty();
+	}
+
 
 	public void setTransaction(Transaction transaction) {
 		this.transaction = transaction;
