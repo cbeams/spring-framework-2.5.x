@@ -50,6 +50,7 @@ public class JobDetailBean extends JobDetail
 
 	private String applicationContextJobDataKey;
 
+
 	/**
 	 * Register objects in the JobDataMap via a given Map.
 	 * <p>These objects will be available to this Job only,
@@ -63,6 +64,20 @@ public class JobDetailBean extends JobDetail
 	 */
 	public void setJobDataAsMap(Map jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
+	}
+
+	/**
+	 * Set a list of JobListener names for this job, referring to
+	 * non-global JobListeners registered with the Scheduler.
+	 * <p>A JobListener name always refers to the name returned
+	 * by the JobListener implementation.
+	 * @see SchedulerFactoryBean#setJobListeners
+	 * @see org.quartz.JobListener#getName
+	 */
+	public void setJobListenerNames(String[] names) {
+		for (int i = 0; i < names.length; i++) {
+			addJobListener(names[i]);
+		}
 	}
 
 	public void setBeanName(String beanName) {
@@ -92,6 +107,7 @@ public class JobDetailBean extends JobDetail
 	public void setApplicationContextJobDataKey(String applicationContextJobDataKey) {
 		this.applicationContextJobDataKey = applicationContextJobDataKey;
 	}
+
 
 	public void afterPropertiesSet() {
 		if (getName() == null) {
