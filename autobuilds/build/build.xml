@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.6 2004-01-08 01:32:06 davison Exp $
+	$Id: build.xml,v 1.7 2004-01-08 11:31:56 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -52,8 +52,11 @@
 	
 	<!-- 
 		how long to give the app server after starting it before running the tests (seconds)
+		
+		tomcat, resin, jetty are ok with about 15s on my 2.4Ghz P4
+		jboss needs about 60 on the same machine.
 	-->
-	<property name="autobuilds.server.timewait" value="15" />
+	<property name="autobuilds.server.timewait" value="75" />
 	
 	<!-- 
 		directory where the server tarballs are stored locally.  If the relevant 
