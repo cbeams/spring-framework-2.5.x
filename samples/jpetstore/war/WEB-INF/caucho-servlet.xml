@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	- Dispatcher servlet for HTTP remoting via the Caucho protocols,
+	- i.e. Hessian and Burlap (see caucho-servlet.xml for the controllers).
+	-->
+<beans>
+
+	<!-- Hessian exporter for the JPetStore OrderService -->
+	<!-- Hessian is a slim binary HTTP remoting protocol -->
+	<bean name="/OrderService-hessian" class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="service"><ref bean="petStore"/></property>
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+	</bean>
+
+	<!-- Burlap exporter for the JPetStore OrderService -->
+	<!-- Burlap is a slim XML-based HTTP remoting protocol -->
+	<bean name="/OrderService-burlap" class="org.springframework.remoting.caucho.BurlapServiceExporter">
+		<property name="service"><ref bean="petStore"/></property>
+		<property name="serviceInterface">
+			<value>org.springframework.samples.jpetstore.domain.logic.OrderService</value>
+		</property>
+	</bean>
+
+</beans>

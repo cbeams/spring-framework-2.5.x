@@ -8,7 +8,7 @@ Features a Spring-managed middle tier with iBATIS Database Layer as data access
 strategy, in combination with Spring's transaction and DAO abstractions.
 Can work with local JDBC transactions or JTA, with the latter on two databases.
 Uses the same data model and demo contents as the original JPetStore.
-See "WEB-INF/applicationContext.xml" for details.
+See "WEB-INF/dataAccessContext-local/jta.xml" for details.
 
 Offers two alternative web tier implementations with the same user interface:
 one based on Spring's web MVC, and one based on Struts 1.1. The latter is close
@@ -20,13 +20,20 @@ Compared to the original JPetStore, this implementation is significantly
 improved in terms of internal structure and loose coupling: Leveraging Spring's
 application context concept, there's a central place for wiring application
 objects now. The most notable improvement is the former PetStoreLogic, now
-called PetStoreFacade: it is no longer concerned with transaction details.
+called PetStoreFacade: It is no longer concerned with configuration, resource,
+or transaction details.
 
 Note that the Spring-based web tier implementation is deliberately similar to
 the Struts-based one and does not aim to improve in terms of in-place error
 messages or the like. The inclusion of two web tier alternatives outlines the
 differences as well as the similarities in the respective programming model,
 and also illustrates the different configuration styles.
+
+This version of JPetStore also illustrates various remoting options with Spring:
+Hessian, Burlap, RMI, and Web Services via Apache Axis. They are all provided
+out-of-the-box by the default web application (note that RMI is commented out
+to avoid conflicts with EJB containers). The "client" directory contains a simple
+command-line client that invokes the exported OrderService via all protocols.
 
 
 This directory contains the web app source.
@@ -58,4 +65,3 @@ The attribute support is provided by Jakarta Commons Attributes.
 
 Note that three files must be copied into $ANT_HOME/lib for the attribute
 compilation process to work: see /attributes/build.xml for details.
-

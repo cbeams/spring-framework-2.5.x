@@ -14,15 +14,23 @@
 
 
 	<path id="master-classpath">
+
+		<fileset dir="${spring.root}/lib/aop-alliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/axis">
+			<include name="axis.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/ibatis">
 			<include name="ibatis-db.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="jaxrpc.jar"/>
+			<include name="jdbc2_0-stdext.jar"/>
+			<include name="servlet.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
-			<include name="jdbc2_0-stdext.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/struts">
 			<include name="struts-1.1.jar"/>
@@ -30,6 +38,7 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
+
 	</path>
 
 
@@ -55,6 +64,7 @@
 		<delete dir="${build.dir}"/>
 		<delete dir="${weblib.dir}"/>
 		<delete dir="${dist.dir}"/>
+		<delete file="client/jpetstore.jar"/>
 
 	</target>
 
@@ -77,11 +87,20 @@
 
 		<mkdir dir="${weblib.dir}"/>
 
-		<jar jarfile="${weblib.dir}/petstore.jar" compress="true" basedir="${build.dir}"/>
+		<jar jarfile="${weblib.dir}/jpetstore.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${spring.root}/lib/aop-alliance">
 				<include name="aopalliance.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/axis">
+				<include name="axis.jar"/>
+				<include name="saaj.jar"/>
+				<include name="wsdl4j.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/caucho">
+				<include name="burlap*.jar"/>
+				<include name="hessian*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
@@ -89,20 +108,27 @@
 			<fileset dir="${spring.root}/lib/ibatis">
 				<include name="ibatis-db.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/j2ee">
+				<include name="jaxrpc.jar"/>
+				<include name="jstl.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-beanutils.jar"/>
 				<include name="commons-collections.jar"/>
+				<include name="commons-dbcp.jar"/>
 				<include name="commons-digester.jar"/>
+				<include name="commons-collections.jar"/>
+				<include name="commons-discovery.jar"/>
 				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
+				<include name="commons-pool.jar"/>
 				<include name="commons-validator.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-taglibs">
+				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jdom">
 				<include name="jdom.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/jstl">
-				<include name="jstl.jar"/>
-				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/struts">
 				<include name="struts-1.1.jar"/>
@@ -111,6 +137,8 @@
 				<include name="spring.jar"/>
 			</fileset>
 		</copy>
+
+		<copy file="${weblib.dir}/jpetstore.jar" tofile="client/jpetstore.jar"/>
 
 	</target>
 
@@ -130,9 +158,12 @@
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="images/**"/>
+			<include name="WEB-INF/dataAccessContext*.xml"/>
 			<include name="WEB-INF/applicationContext.xml"/>
 			<include name="WEB-INF/petstore-servlet.xml"/>
 			<include name="WEB-INF/struts-config.xml"/>
+			<include name="WEB-INF/caucho-servlet.xml"/>
+			<include name="WEB-INF/server-config.wsdd"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/classes/*.xml"/>
 			<include name="WEB-INF/lib/**"/>
