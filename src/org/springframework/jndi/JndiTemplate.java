@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Juergen Hoeller
  * @see ContextCallback
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @version $Id: JndiTemplate.java,v 1.3 2003-11-20 18:21:27 johnsonr Exp $
  */
 public class JndiTemplate {
 	
@@ -66,16 +67,25 @@ public class JndiTemplate {
 	 * name bound to JNDI
 	 */
 	public Object lookup(final String name) throws NamingException {
-		return execute(new ContextCallback() {
-			public Object doInContext(Context ctx) throws NamingException {
-				logger.debug("Looking up JNDI object with name '" + name + "'");
-				Object lookedUp = ctx.lookup(name);
-				if (lookedUp == null) {
-					throw new NamingException("JNDI object not found: JNDI implementation returned null");
-				}
-				return lookedUp;
+		Context ctx = null;
+		try {
+			ctx = createInitialContext();
+			logger.debug("Looking up JNDI object with name '" + name + "'");
+			Object lookedUp = ctx.lookup(name);
+			if (lookedUp == null) {
+				throw new NamingException("JNDI object not found: JNDI implementation returned null");
 			}
-		});
+			return lookedUp;
+		}
+		finally {
+			try {
+				if (ctx != null)
+					ctx.close();
+			}
+			catch (NamingException ex) {
+				logger.warn("InitialContext threw exception on close", ex);
+			}
+		}
 	}
 
 	/**
