@@ -120,7 +120,7 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 	 * <p>
 	 * Note: only <strong>one </strong> of setInputMappings or
 	 * setInputMappingsMap must be called.
-	 * @link ParameterizableFlowAttributesMapper#setInputMappings(List) with a
+	 * @link ParameterizableFlowModelMapper#setInputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
 	 *       String key naming the attribute in the parent flow, and a String
 	 *       value naming the attribute in the child flow.
@@ -156,7 +156,7 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 	 * Note: Only <strong>one </strong> of setOutputMappings or
 	 * setOutputMappingsMap must be called.
 	 * @param outputMappings The output mappings
-	 * @link ParameterizableFlowAttributesMapper#setOutputMappings(List) with a
+	 * @link ParameterizableFlowModelMapper#setOutputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
 	 *       String key naming the attribute in the sub flow, and a String value
 	 *       naming the attribute in the parent flow.
@@ -185,14 +185,14 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 				while (itMap.hasNext()) {
 					Map.Entry entry = (Map.Entry)itMap.next();
 					Assert.isInstanceOf(String.class, entry.getKey(),
-							"ParameterizableFlowAttributesMapper key or value: ");
+							"ParameterizableFlowModelMapper key: ");
 					Assert.isInstanceOf(String.class, entry.getValue(),
-							"ParameterizableFlowAttributesMapper key or value: ");
+							"ParameterizableFlowModelMapper value: ");
 					map.put(entry.getKey(), entry.getValue());
 				}
 			}
 			else {
-				Assert.isInstanceOf(String.class, key, "ParameterizableFlowAttributesMapper key or value: ");
+				Assert.isInstanceOf(String.class, key, "ParameterizableFlowModelMapper key or value: ");
 				map.put(key, key);
 			}
 		}
@@ -216,7 +216,7 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 
 	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 		Map subFlowAttributes = new HashMap();
-		map(parentFlowModel, new MapAttributesAccessorAdapter(subFlowAttributes), inputMappings);
+		map(parentFlowModel, new MapMutableFlowModelAdapter(subFlowAttributes), inputMappings);
 		return Collections.unmodifiableMap(subFlowAttributes);
 	}
 
@@ -298,12 +298,13 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 	}
 
 	/**
-	 * Helper class that wraps a map in a MutableAttributesAccessor interface.
+	 * Helper class that wraps a map in a MutableFlowModel interface.
 	 */
-	private static class MapAttributesAccessorAdapter implements MutableFlowModel {
+	private static class MapMutableFlowModelAdapter implements MutableFlowModel {
+		
 		private Map map;
 
-		public MapAttributesAccessorAdapter(Map map) {
+		public MapMutableFlowModelAdapter(Map map) {
 			this.map = map;
 		}
 
