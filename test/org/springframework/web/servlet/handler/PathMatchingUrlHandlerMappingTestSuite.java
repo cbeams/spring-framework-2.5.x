@@ -11,9 +11,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- *
  * @author Alef Arendsen
- * @version $RevisionId$
  */
 public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 
@@ -25,7 +23,7 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 
 	public PathMatchingUrlHandlerMappingTestSuite() throws IOException {
 		ac = new ClassPathXmlApplicationContext(CONF);
-		hm = (HandlerMapping) ac.getBean("a.urlMap");
+		hm = (HandlerMapping) ac.getBean("urlMapping");
 		hm.setApplicationContext(ac);
 	}
 

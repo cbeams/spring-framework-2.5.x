@@ -4,8 +4,6 @@
 <beans>
 
 	<bean id="godCtrl" name="/welcome.html /show.html /bookseats.html /reservation.html /payment.html /confirmation.html /test*"
-		class="java.lang.Object" >
-			
-	</bean>
-	
+		class="java.lang.Object"/>
+
 </beans>
