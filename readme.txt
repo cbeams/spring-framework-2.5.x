@@ -86,7 +86,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~255 KB)
+* "spring-core" (~260 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1335 KB)
+* "spring" (~1345 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
