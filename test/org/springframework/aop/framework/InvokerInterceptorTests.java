@@ -12,13 +12,15 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.beans.IOther;
 
 /**
  * 
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InvokerInterceptorTests extends TestCase {
 

@@ -20,6 +20,7 @@ import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyInterceptor;
+import org.springframework.aop.support.*;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,7 +34,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.aop.framework.ProxyConfig
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.2 2003-11-15 16:20:16 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.3 2003-11-16 12:54:58 johnsonr Exp $
  */
 public class AdvisedSupport implements Advised {
 

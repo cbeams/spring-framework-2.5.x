@@ -10,8 +10,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.InvokerInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.interceptor.InvokerInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
@@ -37,7 +37,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.15 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.16 2003-11-16 12:54:57 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 

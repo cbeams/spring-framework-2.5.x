@@ -6,7 +6,7 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.framework.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 
 /**
@@ -16,7 +16,7 @@ import org.springframework.aop.framework.support.DelegatingIntroductionIntercept
  * 
  * @author Rod Johnson
  * @since 10-Jul-2003
- * @version $Id: LockMixin.java,v 1.2 2003-11-11 18:31:53 johnsonr Exp $
+ * @version $Id: LockMixin.java,v 1.3 2003-11-16 12:54:58 johnsonr Exp $
  */
 public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 	

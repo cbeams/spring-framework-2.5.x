@@ -7,10 +7,10 @@ import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.framework.DefaultInterceptionAroundAdvisor;
-import org.springframework.aop.framework.InvokerInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -38,7 +38,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @since 21.08.2003
- * @version $Id: TransactionProxyFactoryBean.java,v 1.9 2003-11-15 15:30:15 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.10 2003-11-16 12:54:58 johnsonr Exp $
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes

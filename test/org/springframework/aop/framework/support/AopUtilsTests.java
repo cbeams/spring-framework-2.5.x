@@ -8,8 +8,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;

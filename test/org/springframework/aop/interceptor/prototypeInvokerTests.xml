@@ -18,7 +18,7 @@
 		Invoker interceptor. Not required: can be added by 
 		default
 	-->
-	<bean id="invokerInterceptor" class="org.springframework.aop.framework.InvokerInterceptor">	
+	<bean id="invokerInterceptor" class="org.springframework.aop.interceptor.InvokerInterceptor">	
 		<property name="target"><ref local="test"/></property>
 	</bean>
 	

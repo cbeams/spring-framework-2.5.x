@@ -17,6 +17,8 @@ import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.interceptor.*;
+import org.springframework.aop.support.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -59,7 +61,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.11 2003-11-15 20:09:36 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.12 2003-11-16 12:54:58 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor

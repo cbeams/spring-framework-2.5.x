@@ -7,6 +7,7 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.interceptor.*;
 
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.aop.framework.support.AopUtils;
  * AOP proxies in code.
  * @since 14-Mar-2003
  * @author Rod Johnson
- * @version $Id: ProxyFactory.java,v 1.7 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: ProxyFactory.java,v 1.8 2003-11-16 12:54:58 johnsonr Exp $
  */
 public class ProxyFactory extends AdvisedSupport {
 

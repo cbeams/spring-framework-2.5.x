@@ -1,7 +1,7 @@
 package org.springframework.aop.framework;
 
 
-import org.springframework.aop.framework.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.core.TimeStamped;
 
 /**

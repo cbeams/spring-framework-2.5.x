@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-import org.springframework.aop.framework.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,7 +27,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.9 2003-11-12 20:14:32 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.10 2003-11-16 12:54:57 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 

@@ -14,13 +14,15 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.beans.TestBean;
 
 /**
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MethodInvocationTests extends TestCase {
 	

@@ -12,16 +12,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.support.DynamicMethodMatcherPointcutAroundAdvisor;
-import org.springframework.aop.framework.support.SimpleIntroductionAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
+import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,7 +36,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.9 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.10 2003-11-16 12:54:58 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -108,7 +108,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 	 * be a prototype
 	 */
 	private void testPrototypeInstancesAreIndependent(String beanName) {
-		try {
 		// Initial count value set in bean factory XML 
 		int INITIAL_COUNT = 10;
 		
@@ -132,11 +131,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
 		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount() );
 		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
-		}
-		catch (Throwable t) {
-			System.err.println("---------------- t");
-			t.printStackTrace();
-		}
 
 	}
 	

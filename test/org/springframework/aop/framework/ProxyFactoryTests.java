@@ -8,9 +8,10 @@ package org.springframework.aop.framework;
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.Interceptor;
-import org.springframework.aop.framework.support.SimpleIntroductionAdvice;
 import org.springframework.aop.interceptor.AbstractQaInterceptor;
 import org.springframework.aop.interceptor.DebugInterceptor;
+import org.springframework.aop.interceptor.InvokerInterceptor;
+import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -21,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Also tests DefaultProxyConfig superclass
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ProxyFactoryTests extends TestCase {
 
