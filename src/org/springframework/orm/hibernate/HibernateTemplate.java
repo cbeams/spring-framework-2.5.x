@@ -880,7 +880,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <b>To be used within a HibernateCallback</b>:
 	 * <pre>
 	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
 	 *     Query query = hibernateTemplate.createQuery(session, "...");
 	 *     ...
 	 *     return query.list();
@@ -908,7 +908,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <b>To be used within a HibernateCallback</b>:
 	 * <pre>
 	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
 	 *     Query query = hibernateTemplate.getNamedQuery(session, "...");
 	 *     ...
 	 *     return query.list();
@@ -954,7 +954,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <b>To be used within a HibernateCallback</b>:
 	 * <pre>
 	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
-	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *   public Object doInHibernate(Session session) throws HibernateException {
 	 *     Criteria criteria = hibernateTemplate.createCriteria(session, MyClass.class);
 	 *     ...
 	 *     return query.list();
