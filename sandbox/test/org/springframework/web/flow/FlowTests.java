@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
 
@@ -54,6 +53,7 @@ public class FlowTests extends TestCase {
 	}
 
 	public class MockFlowExecutionListener implements FlowExecutionListener {
+		
 		private int flowExecutionsStarted;
 
 		private boolean requestSubmitted;
@@ -105,6 +105,22 @@ public class FlowTests extends TestCase {
 		public void subFlowSpawned(RequestContext context) {
 			assertTrue(flowExecutionsStarted > 0);
 			flowExecutionsStarted++;
+		}
+		
+		public boolean wasRequestSubmitted() {
+			return requestSubmitted;
+		}
+		
+		public boolean wasRequestProcessed() {
+			return requestProcessed;
+		}
+		
+		public boolean wasEventSignaled() {
+			return eventSignaled;
+		}
+		
+		public int getStateTransitionsCount() {
+			return stateTransitions;
 		}
 	}
 }
