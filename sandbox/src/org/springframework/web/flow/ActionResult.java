@@ -22,7 +22,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A event object representing the result of an ActionBean execution.
+ * A result parameter object describing the outcome of an Action execution. The
+ * <code>id</code> of the result is treated as a transitional
+ * <code>eventId</code> in the current state of the Action's execution.
  * @author Keith Donald
  */
 public class ActionResult implements Serializable {

@@ -160,20 +160,20 @@ public abstract class AbstractState implements Serializable {
 	/**
 	 * Requesting entering of this state for the active (currently executing)
 	 * flow session.
-	 * @param sessionExecutionStack The session execution stack, tracking the
-	 *        current active flow session
+	 * @param flowExecution The flow execution stack, tracking the current
+	 *        active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected final ModelAndView enter(FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected final ModelAndView enter(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Entering state '" + this + "' in flow '" + sessionExecution.getActiveFlowId() + "'");
+			logger.debug("Entering state '" + this + "' in flow '" + flowExecution.getActiveFlowId() + "'");
 		}
-		sessionExecution.setCurrentState(this);
-		return doEnterState(sessionExecution, request, response);
+		flowExecution.setCurrentState(this);
+		return doEnterState(flowExecution, request, response);
 	}
 
 	/**
@@ -185,8 +185,8 @@ public abstract class AbstractState implements Serializable {
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ModelAndView doEnterState(FlowExecutionStack sessionExecutionStack,
-			HttpServletRequest request, HttpServletResponse response);
+	protected abstract ModelAndView doEnterState(FlowExecutionStack sessionExecutionStack, HttpServletRequest request,
+			HttpServletResponse response);
 
 	public String toString() {
 		ToStringCreator creator = new ToStringCreator(this).append(id, getId());
