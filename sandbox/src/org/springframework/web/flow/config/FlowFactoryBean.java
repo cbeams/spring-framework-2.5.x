@@ -36,7 +36,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Does this factory bean build the specified FlowBuilder implementation?
+	 * Does this factory bean build flows with the specified FlowBuilder implementation?
 	 * @param builderImplementationClass The builder implementation
 	 * @return true if yes, false otherwise
 	 */
@@ -76,7 +76,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 		return true;
 	}
 
-	public static class FlowAssembler {
+	private static class FlowAssembler {
 		private FlowBuilder builder;
 
 		public FlowAssembler(FlowBuilder builder) {
