@@ -28,6 +28,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
+ * Can also work with a locally configured JTA implementation.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
  * i.e. transactions that span multiple resources, and for managing transactions
@@ -38,7 +39,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>Transaction synchronization is active by default, to allow data access support
  * classes to register resources that are opened within the transaction for closing at
- * transaction completion time. Spring's support classes for JDBC, Hibernate, and JDO
+ * transaction completion time. Spring's support classes for JDBC, Hibernate and JDO
  * all perform such registration, allowing for reuse of the same Hibernate Session etc
  * within the transaction. Standard JTA does not even guarantee that for Connections
  * from a transactional JDBC DataSource: Spring's synchronization solves those issues.
@@ -60,7 +61,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with
  * a JTA TransactionManager being registered, via the "transactionManagerName" or
- * "transactionManager" properties. The location of this internal JTA object is
+ * "transactionManager" property. The location of this internal JTA object is
  * <i>not</i> specified by J2EE; it is individual for each J2EE server, often kept
  * in JNDI like the UserTransaction. Some well-known JNDI locations are:
  * <ul>
@@ -83,7 +84,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>The internal JTA TransactionManager can also be used to register custom
  * synchronizations with the JTA transaction itself instead of Spring's
- * transaction manager. LocalSessionFactoryBean supports to plug a given
+ * transaction manager. LocalSessionFactoryBean supports plugging a given
  * TransactionManager into Hibernate's TransactionManagerLookup mechanism,
  * for Hibernate-driven cache synchronization without double configuration.
  *
@@ -91,7 +92,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * Custom subclasses can override applyIsolationLevel for specific JTA
  * implementations. Note that some resource-specific transaction managers like
  * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
- * custom isolation levels, and transaction suspension without any restrictions.
+ * custom isolation levels, and transaction suspension without JTA's restrictions.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -263,7 +264,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	protected boolean isExistingTransaction(Object transaction) {
 		try {
 			int status = ((UserTransaction) transaction).getStatus();
-			return (status != Status.STATUS_NO_TRANSACTION && status != Status.STATUS_MARKED_ROLLBACK);
+			return (status != Status.STATUS_NO_TRANSACTION);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);
