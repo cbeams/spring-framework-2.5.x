@@ -18,6 +18,17 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -33,16 +44,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * Extension of ListableBeanFactoryImpl that reads bean definitions in an XML
@@ -60,7 +61,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.7 2003-10-10 13:56:41 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.8 2003-10-13 16:42:38 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -152,22 +153,22 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	/**
 	 * Create new XmlBeanFactory using java.io to read the XML document
-	 * with the given filename.
-	 * @param filename name of the file containing the XML document
+	 * with the given file name.
+	 * @param fileName name of the file containing the XML document
 	 */
-	public XmlBeanFactory(String filename) throws BeansException {
-		this(filename, null);
+	public XmlBeanFactory(String fileName) throws BeansException {
+		this(fileName, null);
 	}
 
 	/**
 	 * Create new XmlBeanFactory using java.io to read the XML document
-	 * with the given filename.
-	 * @param filename name of the file containing the XML document
+	 * with the given file name.
+	 * @param fileName name of the file containing the XML document
 	 * @param parentBeanFactory parent bean factory
 	 */
-	public XmlBeanFactory(String filename, BeanFactory parentBeanFactory) throws BeansException {
+	public XmlBeanFactory(String fileName, BeanFactory parentBeanFactory) throws BeansException {
 		super(parentBeanFactory);
-		loadBeanDefinitions(filename);
+		loadBeanDefinitions(fileName);
 	}
 
 	/**
@@ -216,15 +217,15 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	/**
 	 * Load definitions from the given file.
-	 * @param filename name of the file containing the XML document
+	 * @param fileName name of the file containing the XML document
 	 */
-	public void loadBeanDefinitions(String filename) throws BeansException {
+	public void loadBeanDefinitions(String fileName) throws BeansException {
 		try {
-			logger.info("Loading XmlBeanFactory from file '" + filename + "'");
-			loadBeanDefinitions(new FileInputStream(filename));
+			logger.info("Loading XmlBeanFactory from file '" + fileName + "'");
+			loadBeanDefinitions(new FileInputStream(fileName));
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("Can't open file [" + filename + "]", ex);
+			throw new BeanDefinitionStoreException("Can't open file [" + fileName + "]", ex);
 		}
 	}
 
