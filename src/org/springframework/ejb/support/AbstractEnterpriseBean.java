@@ -9,11 +9,12 @@ import javax.ejb.EnterpriseBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
-import org.springframework.beans.factory.access.BeanFactoryRef;
-import org.springframework.beans.factory.support.BootstrapException;
+import org.springframework.beans.factory.access.BeanFactoryReference;
+import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.context.access.JndiBeanFactoryLocator;
 
 /** 
@@ -36,7 +37,7 @@ import org.springframework.context.access.JndiBeanFactoryLocator;
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.7 2004-01-27 00:03:45 colins Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.8 2004-02-04 18:01:24 jhoeller Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	
@@ -60,7 +61,7 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	private String factoryKey;
 
 	/** Spring BeanFactory that provides the namespace for this EJB */
-	private BeanFactoryRef beanFactoryRef;
+	private BeanFactoryReference beanFactoryRef;
 
 	/**
 	 * Load a Spring BeanFactory namespace.

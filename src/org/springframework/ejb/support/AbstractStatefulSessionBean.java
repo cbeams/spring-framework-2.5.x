@@ -6,7 +6,7 @@
 package org.springframework.ejb.support;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.support.BootstrapException;
+import org.springframework.beans.factory.access.BootstrapException;
 
 /**
  * Convenient superclass for stateful session beans.
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.BootstrapException;
  * with a corresponding call to setBeanFactoryLoader(xxx) in 
  * ejbActivate unless relying on the default loader.
  * 
- * @version $Id: AbstractStatefulSessionBean.java,v 1.5 2003-12-12 19:23:39 colins Exp $
+ * @version $Id: AbstractStatefulSessionBean.java,v 1.6 2004-02-04 18:01:24 jhoeller Exp $
  * @author Rod Johnson
  * @author Colin Sampaleanu
  */
