@@ -98,14 +98,17 @@ public class PersistenceBrokerDaoSupport {
 
 
 	/**
-	 * Get an OJB PersistenceBroker. Is aware of a corresponding PersistenceBroker
-	 * bound to the current thread, for example when using
-	 * PersistenceBrokerTransactionManager. Will create a new PersistenceBroker else.
+	 * Get an OJB PersistenceBroker. Is aware of a corresponding
+	 * PersistenceBroker bound to the current thread, for example when using
+	 * PersistenceBrokerTransactionManager. Will create a new PersistenceBroker
+	 * else, if allowCreate is true.
 	 * @return the PersistenceBroker
 	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
+	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
 	 */
-	protected final PersistenceBroker getPersistenceBroker() throws DataAccessResourceFailureException {
-		return OjbFactoryUtils.getPersistenceBroker(this.persistenceBrokerTemplate.getPbKey());
+	protected final PersistenceBroker getPersistenceBroker(boolean allowCreate)
+	    throws DataAccessResourceFailureException, IllegalStateException {
+		return OjbFactoryUtils.getPersistenceBroker(this.persistenceBrokerTemplate.getPbKey(), allowCreate);
 	}
 
 	/**

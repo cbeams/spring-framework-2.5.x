@@ -27,11 +27,11 @@ import org.apache.ojb.broker.accesslayer.ConnectionManagerIF;
 import org.apache.ojb.broker.accesslayer.LookupException;
 import org.easymock.MockControl;
 
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Juergen Hoeller
@@ -270,7 +270,6 @@ public class PersistenceBrokerTransactionManagerTests extends TestCase {
 		final PersistenceBroker pb2 = (PersistenceBroker) pb2Control.getMock();
 		MockControl cmControl = MockControl.createControl(ConnectionManagerIF.class);
 		final ConnectionManagerIF cm = (ConnectionManagerIF) cmControl.getMock();
-		final Object entity = new Object();
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 
@@ -314,14 +313,14 @@ public class PersistenceBrokerTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
-				assertEquals(pb1, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey()));
+				assertEquals(pb1, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey(), false));
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) {
 						assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
-						assertEquals(pb2, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey()));
+						assertEquals(pb2, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey(), false));
 					}
 				});
-				assertEquals(pb1, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey()));
+				assertEquals(pb1, OjbFactoryUtils.getPersistenceBroker(tm.getPbKey(), false));
 			}
 		});
 		assertTrue("Hasn't thread broker", !TransactionSynchronizationManager.hasResource(tm.getPbKey()));

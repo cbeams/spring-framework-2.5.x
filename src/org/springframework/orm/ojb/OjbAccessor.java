@@ -19,7 +19,6 @@ package org.springframework.orm.ojb;
 import java.sql.SQLException;
 
 import org.apache.ojb.broker.PBKey;
-import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerException;
 import org.apache.ojb.broker.PersistenceBrokerFactory;
 
@@ -39,7 +38,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
 public class OjbAccessor extends JdbcAccessor {
 
 	private PBKey pbKey = PersistenceBrokerFactory.getDefaultKey();
-	
+
 
 	/**
 	 * Set the JDBC Connection Descriptor alias of the PersistenceBroker
@@ -72,33 +71,6 @@ public class OjbAccessor extends JdbcAccessor {
 		return pbKey;
 	}
 
-
-	/**
-	 * Get an OJB PersistenceBroker for the PBKey of this accessor.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @return the PersistenceBroker
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see OjbFactoryUtils#getPersistenceBroker
-	 */
-	protected PersistenceBroker getPersistenceBroker() {
-		return OjbFactoryUtils.getPersistenceBroker(getPbKey());
-	}
-
-	/**
-	 * Close the given PersistenceBroker, created for the PBKey of this
-	 * accessor, if it isn't bound to the thread.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @param pb PersistenceBroker to close
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
-	 */
-	protected void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
-		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
-	}
 
 	/**
 	 * Convert the given PersistenceBrokerException to an appropriate exception

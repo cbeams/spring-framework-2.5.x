@@ -143,7 +143,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	 * @see OjbFactoryUtils#getPersistenceBroker
 	 */
 	protected PersistenceBroker getPersistenceBroker() {
-		return OjbFactoryUtils.getPersistenceBroker(getPbKey());
+		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), true, false);
 	}
 
 	/**

@@ -51,20 +51,26 @@ import org.springframework.dao.DataAccessResourceFailureException;
  */
 public class PersistenceBrokerTemplate extends OjbAccessor implements PersistenceBrokerOperations {
 
+	private boolean allowCreate = true;
+
+
 	/**
 	 * Create a new PersistenceBrokerTemplate,
-	 * sing the default connection configured for OJB.
+	 * using the default connection configured for OJB.
+	 * Can be further configured via bean properties.
 	 */
 	public PersistenceBrokerTemplate() {
 	}
 
 	/**
-	 * Create a new PersistenceBrokerTemplate.
-	 * @param jcdAlias the JDBC Connection Descriptor alias
-	 * of the PersistenceBroker configuration to use
+	 * Create a new PersistenceBrokerTemplate,
+	 * using the default connection configured for OJB.
+	 * @param allowCreate if a new PersistenceBroker should be created
+	 * if no thread-bound found
 	 */
-	public PersistenceBrokerTemplate(String jcdAlias) {
-		setJcdAlias(jcdAlias);
+	public PersistenceBrokerTemplate(boolean allowCreate) {
+		setAllowCreate(allowCreate);
+		afterPropertiesSet();
 	}
 
 	/**
@@ -73,6 +79,70 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	 */
 	public PersistenceBrokerTemplate(PBKey pbKey) {
 		setPbKey(pbKey);
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Create a new PersistenceBrokerTemplate.
+	 * @param pbKey the PBKey of the PersistenceBroker configuration to use
+	 * @param allowCreate if a new PersistenceBroker should be created
+	 * if no thread-bound found
+	 */
+	public PersistenceBrokerTemplate(PBKey pbKey, boolean allowCreate) {
+		setPbKey(pbKey);
+		setAllowCreate(allowCreate);
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Set if a new PersistenceBroker should be created if no thread-bound found.
+	 * <p>PersistenceBrokerTemplate is aware of a respective PersistenceBroker bound to
+	 * the current thread, for example when using PersistenceBrokerTransactionManager.
+	 * If allowCreate is true, a new PersistenceBroker will be created if none
+	 * found. If false, an IllegalStateException will get thrown in this case.
+	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
+	 */
+	public void setAllowCreate(boolean allowCreate) {
+		this.allowCreate = allowCreate;
+	}
+
+	/**
+	 * Return if a new PersistenceBroker should be created if no thread-bound found.
+	 */
+	public boolean isAllowCreate() {
+		return allowCreate;
+	}
+
+
+	/**
+	 * Get an OJB PersistenceBroker for the PBKey of this template.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @return the PersistenceBroker
+	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
+	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see #setAllowCreate
+	 * @see OjbFactoryUtils#getPersistenceBroker(PBKey, boolean)
+	 */
+	protected PersistenceBroker getPersistenceBroker()
+	    throws DataAccessResourceFailureException, IllegalStateException {
+		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), isAllowCreate());
+	}
+
+	/**
+	 * Close the given PersistenceBroker, created for the PBKey of this
+	 * template, if it isn't bound to the thread.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @param pb PersistenceBroker to close
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
+	 */
+	protected void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
+		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
 	}
 
 
