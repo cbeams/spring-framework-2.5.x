@@ -24,9 +24,9 @@ public interface Generator {
      * Execute the generator, and for each element generated, pass it to the
      * specified procedure.
      * 
-     * @param procedure
+     * @param procedureCallback
      *            The procedure callback that will process each generated
      *            element.
      */
-    public void run(UnaryProcedure procedure);
+    public void run(UnaryProcedure procedureCallback);
 }

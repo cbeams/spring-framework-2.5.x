@@ -19,5 +19,5 @@ package org.springframework.rules;
  * @author Keith Donald
  */
 public interface GeneratorWithResult extends Generator {
-    public Object runWithResult(UnaryProcedure callback);
+    public Object runWithResult(UnaryProcedure procedureCallback);
 }

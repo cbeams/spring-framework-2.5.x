@@ -39,24 +39,29 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
 
     public BeanValidationResultsCollector(Object bean) {
         super();
+        setBean(bean);
+    }
+
+    public void setBean(Object bean) {
+        Assert.notNull(bean);
         this.bean = bean;
         this.getProperty = new GetProperty(bean);
+    }
+
+    private void setResultsBuilder(BeanValidationResultsBuilder builder) {
+        super.setResultsBuilder(builder);
+        this.resultsBuilder = builder;
     }
 
     public BeanValidationResults collectResults(Rules rules) {
         Assert.notNull(rules);
         setResultsBuilder(new BeanValidationResultsBuilder(bean));
-        Algorithms.forEach(rules.iterator(), new UnaryProcedure() {
+        Algorithms.instance().forEach(rules.iterator(), new UnaryProcedure() {
             public void run(Object beanPropertyConstraint) {
                 collectPropertyResultsInternal((BeanPropertyExpression)beanPropertyConstraint);
             }
         });
         return resultsBuilder;
-    }
-
-    public void setResultsBuilder(BeanValidationResultsBuilder builder) {
-        super.setResultsBuilder(builder);
-        this.resultsBuilder = builder;
     }
 
     public PropertyResults collectPropertyResults(

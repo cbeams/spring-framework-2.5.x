@@ -2,16 +2,16 @@
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules.predicates;
 
@@ -50,9 +50,8 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
      * @param predicate2
      *            the second predicate
      */
-    public CompoundUnaryPredicate(
-        UnaryPredicate predicate1,
-        UnaryPredicate predicate2) {
+    public CompoundUnaryPredicate(UnaryPredicate predicate1,
+            UnaryPredicate predicate2) {
         Assert.isTrue(predicate1 != null && predicate2 != null);
         predicates.add(predicate1);
         predicates.add(predicate2);
@@ -90,7 +89,7 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
      * @return A reference to this, to support chaining.
      */
     public CompoundUnaryPredicate addAll(List predicates) {
-        Algorithms.forEach(predicates, new UnaryProcedure() {
+        Algorithms.instance().forEach(predicates, new UnaryProcedure() {
             public void run(Object o) {
                 add((UnaryPredicate)o);
             }
@@ -101,7 +100,7 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
     public void remove(UnaryPredicate predicate) {
         predicates.remove(predicate);
     }
-    
+
     /**
      * Return an iterator over the aggregated predicates.
      * 
@@ -127,10 +126,11 @@ public abstract class CompoundUnaryPredicate implements UnaryPredicate {
                 return clazz.getClass().isAssignableFrom(o.getClass());
             }
         };
-        Object violator = Algorithms.findFirst(predicates, predicate);
+        Object violator = Algorithms.instance()
+                .findFirst(predicates, predicate);
         if (violator != null) {
-            throw new IllegalArgumentException(
-                violator.getClass() + " class not allowed");
+            throw new IllegalArgumentException(violator.getClass()
+                    + " class not allowed");
         }
     }
 

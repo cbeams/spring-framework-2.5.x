@@ -16,7 +16,9 @@
 package org.springframework.rules.factory;
 
 import org.springframework.rules.UnaryFunction;
+import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.UnaryProcedure;
+import org.springframework.rules.functions.ConstrainedUnaryProcedure;
 import org.springframework.rules.functions.UnaryFunctionChain;
 
 /**
@@ -43,14 +45,19 @@ public class Functions {
     public UnaryFunction chain(UnaryFunction[] functionsToChain) {
         return new UnaryFunctionChain(functionsToChain);
     }
-    
-    public static UnaryFunction toFunction(final UnaryProcedure procedure) {
+
+    public UnaryFunction toFunction(final UnaryProcedure procedure) {
         return new UnaryFunction() {
             public Object evaluate(Object argument) {
                 procedure.run(argument);
                 return null;
             }
         };
+    }
+
+    public UnaryProcedure constrain(UnaryProcedure procedure,
+            UnaryPredicate predicate) {
+        return new ConstrainedUnaryProcedure(procedure, predicate);
     }
 
 }
