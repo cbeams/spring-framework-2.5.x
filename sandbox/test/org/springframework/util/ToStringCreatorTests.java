@@ -11,16 +11,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import junit.framework.TestCase;
 
-public class ToStringBuilderTests extends TestCase {
+public class ToStringCreatorTests extends TestCase {
     private SomeObject s1, s2, s3;
 
     public void testDefaultStyleMap() {
         final Map map = getMap();
         Object stringy = new Object() {
             public String toString() {
-                return new ToStringBuilder(this)
+                return new ToStringCreator(this)
                     .append("familyFavoriteSport", map)
                     .toString();
             }
@@ -43,7 +44,7 @@ public class ToStringBuilderTests extends TestCase {
 
     public void testDefaultStyleArray() {
         SomeObject[] array = new SomeObject[] { s1, s2, s3 };
-        String str = new ToStringBuilder(array).toString();
+        String str = new ToStringCreator(array).toString();
         System.out.println(str);
         assertEquals(
             "[@"
@@ -54,7 +55,7 @@ public class ToStringBuilderTests extends TestCase {
 
     public void testPrimitiveArrays() {
         int[] integers = new int[] { 0, 1, 2, 3, 4 };
-        String str = new ToStringBuilder(integers).toString();
+        String str = new ToStringCreator(integers).toString();
         System.out.println(str);
         assertEquals(
             "[@"
@@ -69,7 +70,7 @@ public class ToStringBuilderTests extends TestCase {
         list.add(s2);
         list.add(s3);
         String str =
-            new ToStringBuilder(this).append("myLetters", list).toString();
+            new ToStringCreator(this).append("myLetters", list).toString();
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
@@ -84,7 +85,7 @@ public class ToStringBuilderTests extends TestCase {
         set.add(s2);
         set.add(s3);
         String str =
-            new ToStringBuilder(this).append("myLetters", set).toString();
+            new ToStringCreator(this).append("myLetters", set).toString();
         System.out.println(str);
         assertEquals(
             "[ToStringBuilderTests@"
@@ -95,7 +96,7 @@ public class ToStringBuilderTests extends TestCase {
 
     public void testClass() {
         String str =
-            new ToStringBuilder(this)
+            new ToStringCreator(this)
                 .append("myClass", this.getClass())
                 .toString();
         System.out.println(str);
@@ -108,7 +109,7 @@ public class ToStringBuilderTests extends TestCase {
 
     public void testMethod() throws Exception {
         String str =
-            new ToStringBuilder(this)
+            new ToStringCreator(this)
                 .append(
                     "myMethod",
                     this.getClass().getMethod("testMethod", null))

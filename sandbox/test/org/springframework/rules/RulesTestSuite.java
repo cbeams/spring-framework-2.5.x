@@ -10,6 +10,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.closure.StringLength;
 import org.springframework.rules.constraint.And;
 import org.springframework.rules.constraint.ClosureResultConstraint;
@@ -30,6 +31,7 @@ import org.springframework.rules.constraint.property.ParameterizedPropertyConstr
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.rules.factory.Constraints;
+import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald

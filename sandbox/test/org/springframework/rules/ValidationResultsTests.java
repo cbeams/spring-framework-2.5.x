@@ -12,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.rules.factory.Constraints;
 import org.springframework.rules.reporting.BeanValidationResults;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
+import org.springframework.util.closure.Constraint;
 
 /**
  * @author Keith Donald
