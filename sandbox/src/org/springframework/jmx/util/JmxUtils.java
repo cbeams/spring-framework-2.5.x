@@ -22,6 +22,7 @@ import java.util.List;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.DynamicMBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,6 +92,46 @@ public class JmxUtils {
 			signature[x] = types[x].getName();
 		}
 		return signature;
+	}
+
+	/**
+	 * Tests so see if the supplied <code>Object</code> is a valid
+	 * MBean resource.
+	 *
+	 * @param object the <code>Object</code> to test.
+	 * @return <code>true</code> if the <code>Object</code> is an MBean, otherwise false.
+	 */
+	public static boolean isMBean(Object object) {
+		// TODO: Extend this implementation to cover all user-created MBeans.
+		if (object instanceof DynamicMBean) {
+			return true;
+		}
+
+		Class cls = object.getClass();
+
+		while(cls != Object.class) {
+			if(hasMBeanInterface(cls)) {
+				return true;
+			}
+
+			cls = cls.getSuperclass();
+		}
+
+		return false;
+	}
+
+	private static boolean hasMBeanInterface(Class cls) {
+		Class[] implementedInterfaces = cls.getInterfaces();
+    String mbeanInterfaceName = cls.getName() + "MBean";
+
+		for (int x = 0; x < implementedInterfaces.length; x++) {
+			Class implementedInterface = implementedInterfaces[x];
+			if(implementedInterface.getName().equals(mbeanInterfaceName)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

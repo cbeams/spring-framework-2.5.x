@@ -314,7 +314,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 			}
 		}
 		else {
-			if (isMBean(mapValue)) {
+			if (JmxUtils.isMBean(mapValue)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Located MBean under key [" + beanKey + "] registering with JMX server " +
 							"without Spring intervention.");
@@ -330,17 +330,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		}
 	}
 
-	/**
-	 * Tests so see if the supplied <code>Object</code> is a valid
-	 * MBean resource.
-	 *
-	 * @param object the <code>Object</code> to test.
-	 * @return <code>true</code> if the <code>Object</code> is an MBean, otherwise false.
-	 */
-	private boolean isMBean(Object object) {
-		// TODO: Extend this implementation to cover all user-created MBeans.
-		return (object instanceof DynamicMBean);
-	}
+
 
 	/**
 	 * Registers a plain bean directly with the <code>MBeanServer</code>. The
@@ -377,7 +367,6 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	 * through a proxy.
 	 *
 	 * @param beanKey the key associated with this bean in the <code>beans</code> <code>Map</code>.
-	 * @param bean the bean to register.
 	 * @return the <code>ObjectName</code> under which the bean was registered with the <code>MBeanServer</code>.
 	 * @throws JMException an error in the underlying JMX infrastructure.
 	 * @throws InvalidTargetObjectTypeException
@@ -415,7 +404,6 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	 * @param bean the bean to register.
 	 * @return the <code>ObjectName</code> under which the bean was registered with the <code>MBeanServer</code>.
 	 * @throws JMException an error in the underlying JMX infrastructure.
-	 * @throws InvalidTargetObjectTypeException
 	 *                     an error in the definition of the MBean resource.
 	 */
 	private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
