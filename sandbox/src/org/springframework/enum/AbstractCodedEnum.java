@@ -21,7 +21,7 @@ import java.util.Comparator;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ToStringBuilder;
+import org.springframework.util.comparators.CompoundComparator;
 import org.springframework.util.comparators.NullSafeComparator;
 
 /**
@@ -47,6 +47,13 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         }
     };
 
+    /**
+     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>, then
+     * natural order.
+     */
+    public static final Comparator DEFAULT_ORDER = new CompoundComparator(
+            new Comparator[] { LABEL_ORDER, LABEL_ORDER });
+
     protected AbstractCodedEnum(Comparable code) {
         this(code, null);
     }
@@ -57,23 +64,14 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         this.label = label;
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnum#getCode()
-     */
     public Object getCode() {
         return code;
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnum#getKey()
-     */
     public String getKey() {
         return getType() + "." + getCode();
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnum#getLabel()
-     */
     public String getLabel() {
         return label;
     }
@@ -96,14 +94,8 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     /**
-     * @see org.springframework.context.MessageSourceResolvable#getArguments()
-     */
-    public Object[] getArguments() {
-        return null;
-    }
-
-    /**
-     * The enumeration key is used as the message key for internationalizing enums.
+     * The enumeration key is used as the message key for internationalizing
+     * enums.
      * 
      * @see org.springframework.context.MessageSourceResolvable#getCodes()
      */
@@ -111,16 +103,14 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         return new String[] { getKey() };
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnum#getType()
-     */
+    public Object[] getArguments() {
+        return null;
+    }
+
     public String getType() {
         return ClassUtils.getShortNameAsProperty(getClass());
     }
 
-    /**
-     * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
-     */
     public String getDefaultMessage() {
         if (label != null) {
             return getLabel();
@@ -131,7 +121,7 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     }
 
     public String toString() {
-        return ToStringBuilder.propertiesToString(this);
+        return getKey();
     }
 
 }

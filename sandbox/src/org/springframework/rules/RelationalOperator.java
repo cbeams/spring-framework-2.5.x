@@ -26,12 +26,13 @@ import org.springframework.rules.predicates.LessThanEqualTo;
  * 
  * @author Keith Donald
  */
-public abstract class RelationalOperator {
-    
+public abstract class RelationalOperator extends Operator {
+
     /**
      * The <code>EQUAL_TO (==)</code> operator
      */
-    public static final RelationalOperator EQUAL_TO = new RelationalOperator("==") {
+    public static final RelationalOperator EQUAL_TO = new RelationalOperator(
+            "=") {
         public BinaryPredicate getPredicate() {
             return EqualTo.instance();
         }
@@ -40,7 +41,8 @@ public abstract class RelationalOperator {
     /**
      * The <code>LESS_THAN (<)</code> operator
      */
-    public static final RelationalOperator LESS_THAN = new RelationalOperator("<") {
+    public static final RelationalOperator LESS_THAN = new RelationalOperator(
+            "<") {
         public BinaryPredicate getPredicate() {
             return LessThan.instance();
         }
@@ -55,11 +57,12 @@ public abstract class RelationalOperator {
             return LessThanEqualTo.instance();
         }
     };
-    
+
     /**
      * The <code>GREATER_THAN (>)</code> operator
      */
-    public static final RelationalOperator GREATER_THAN = new RelationalOperator(">") {
+    public static final RelationalOperator GREATER_THAN = new RelationalOperator(
+            ">") {
         public BinaryPredicate getPredicate() {
             return GreaterThan.instance();
         }
@@ -75,10 +78,8 @@ public abstract class RelationalOperator {
         }
     };
 
-    private String name;
-
-    private RelationalOperator(String name) {
-        this.name = name;
+    private RelationalOperator(String code) {
+        super(code);
     }
 
     /**
@@ -88,7 +89,4 @@ public abstract class RelationalOperator {
      */
     public abstract BinaryPredicate getPredicate();
 
-    public String toString() {
-        return name;
-    }
 }

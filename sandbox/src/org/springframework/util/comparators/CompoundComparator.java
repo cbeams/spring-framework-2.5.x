@@ -17,6 +17,7 @@ package org.springframework.util.comparators;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -54,6 +55,9 @@ public class CompoundComparator implements Comparator, Serializable {
         this(new ArrayList(), new BitSet());
     }
 
+    public CompoundComparator(Comparator[] comparators) {
+        this(Arrays.asList(comparators));
+    }
     /**
      * Construct a CompoundComparator from the Comparators in the List. All
      * Comparators will default to the forward sort order.

@@ -15,30 +15,47 @@
  */ 
 package org.springframework.rules;
 
+import org.springframework.rules.predicates.CompoundUnaryPredicate;
+import org.springframework.rules.predicates.UnaryAnd;
+import org.springframework.rules.predicates.UnaryNot;
+import org.springframework.rules.predicates.UnaryOr;
+
 /**
  * Type-safe enums for various conditional or logical operators.
  * 
  * @author Keith Donald
  */
-public class LogicalOperator {
+public class LogicalOperator extends Operator {
     
     /**
      * The <code>AND</code> operator
      */
-    public static final LogicalOperator AND = new LogicalOperator("&&");
+    public static final LogicalOperator AND = new LogicalOperator("&&") {
+        public CompoundUnaryPredicate createPredicate() {
+            return new UnaryAnd();
+        }
+    };
     
     /**
      * The <code>OR</code> operator
      */
-    public static final LogicalOperator OR = new LogicalOperator("||");
+    public static final LogicalOperator OR = new LogicalOperator("||") {
+        public CompoundUnaryPredicate createPredicate() {
+            return new UnaryOr();
+        }
+    };
+
+    /**
+     * The <code>OR</code> operator
+     */
+    public static final LogicalOperator NOT = new LogicalOperator("!") {
+        public UnaryNot createPredicate() {
+            return new UnaryNot();
+        }
+    };
+
+    private LogicalOperator(String code) {
+        super(code);
+    }
     
-    private String name;
-
-    private LogicalOperator(String name) {
-        this.name = name;
-    }
-
-    public String toString() {
-        return name;
-    }
 }
