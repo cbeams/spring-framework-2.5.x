@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
  * Encapsulates properties of a simple mail such as from, to, cc, subject, text.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @version $Id: SimpleMailMessage.java,v 1.4 2003-11-06 13:22:07 dkopylenko Exp $
  */
 public class SimpleMailMessage {
 

@@ -25,6 +25,7 @@ import org.springframework.mail.MailSendException;
  * @since 09.10.2003
  * @see com.oreilly.servlet.MailMessage
  * @see org.springframework.mail.javamail.JavaMailSenderImpl
+ * @version $Id: CosMailSenderImpl.java,v 1.4 2003-11-06 13:19:38 dkopylenko Exp $
  */
 public class CosMailSenderImpl implements MailSender {
 

@@ -10,6 +10,7 @@ import java.util.Map;
  * Can register failed messages with their exceptions.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @version $Id: MailSendException.java,v 1.4 2003-11-06 13:20:42 dkopylenko Exp $
  */
 public class MailSendException extends MailException {
 
