@@ -5,6 +5,7 @@
  
 package org.springframework.web.servlet.view;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -15,9 +16,9 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * Convenient superclass for view resolvers. Caches views once resolved.
- * This means that view resolution won't be a performance problem,
- * no matter how costly initial view retrieval is.
+ * Convenient superclass for view resolvers.
+ * Caches views once resolved: This means that view resolution won't be a
+ * performance problem, no matter how costly initial view retrieval is.
  *
  * <p>View retrieval is deferred to subclasses via the loadView template method.
  *
@@ -28,15 +29,15 @@ import org.springframework.web.servlet.ViewResolver;
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
 	/** View name --> View instance */
-	private Map viewMap = new HashMap();
+	private final Map viewMap = Collections.synchronizedMap(new HashMap());
 
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
 
 	/**
-	 * Enable caching. Disable this only for debugging and development.
-	 * Default is for caching to be enabled.
-	 * <p><b>Warning: Disabling caching severely impacts performance.</b>
+	 * Enable respectively disable caching. Disable this only for debugging
+	 * and development. Default is for caching to be enabled.
+	 * <p><b>Warning: Disabling caching can severely impact performance.</b>
 	 * Tests indicate that turning caching off reduces performance by at least 20%.
 	 * Increased object churn probably eventually makes the problem even worse.
 	 */
@@ -54,33 +55,33 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		View view = null;
 		if (!this.cache) {
-			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This will severely impair performance");
-			view = loadAndCacheView(viewName, locale);
+			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
+			view = loadAndConfigureView(viewName, locale);
 		}
 		else {
-			// we're caching - don't really need synchronization
-			view = (View) this.viewMap.get(getCacheKey(viewName, locale));
+			String cacheKey = getCacheKey(viewName, locale);
+			view = (View) this.viewMap.get(cacheKey);
 			if (view == null) {
 				// ask the subclass to load the View
-				view = loadAndCacheView(viewName, locale);
+				view = loadAndConfigureView(viewName, locale);
+				this.viewMap.put(cacheKey, view);
+				logger.info("Cached view '" + cacheKey + "'");
 			}
 		}
 		return view;
 	}
 
 	/**
-	 * Configure the given View. Only invoked once per View.
-	 * Configuration means giving the View its name, and 
-	 * setting the ApplicationContext on the View if necessary.
+	 * Load and configure the given View. Only invoked once per View.
+	 * Delegates to the loadView template method for actual loading.
+	 * <p>Sets the ApplicationContext on the View if necessary.
+	 * @see #loadView
 	 */
-	private View loadAndCacheView(String viewName, Locale locale) throws Exception {
+	private View loadAndConfigureView(String viewName, Locale locale) throws Exception {
 		View view = loadView(viewName, locale);
 		if (view instanceof ApplicationContextAware) {
 			((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
 		}
-		String cacheKey = getCacheKey(viewName, locale);
-		logger.info("Cached view '" + cacheKey + "'");
-		this.viewMap.put(cacheKey, view);
 		return view;
 	}
 
@@ -96,9 +97,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/**
 	 * Subclasses must implement this method. There need be no concern for efficiency,
 	 * as this class will cache views. Not all subclasses may support internationalization:
-	 * A subclass that doesn't can ignore the locale parameter.
-	 * @param viewName name of the view to retrieve
-	 * @param locale Locale to retrieve the view for
+	 * A subclass that doesn't can simply ignore the locale parameter.
+	 * @param viewName the name of the view to retrieve
+	 * @param locale the Locale to retrieve the view for
 	 * @return the View instance
 	 * @throws Exception if the view couldn't be resolved
 	 */
