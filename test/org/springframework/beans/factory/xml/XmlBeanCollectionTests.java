@@ -206,10 +206,10 @@ public class XmlBeanCollectionTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMap");
 		assertTrue(hasMap.getMap().size() == 3);
-		assertTrue(hasMap.getMap().get("foo").equals("bar"));
+		assertTrue(hasMap.getMap().get("foo").equals(new Integer(10)));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny") == jenny);
-		assertTrue(hasMap.getMap().get("david").equals("david"));
+		assertTrue(hasMap.getMap().get(new Integer(5)).equals("david"));
 	}
 
 	public void testMapWithLiteralsAndPrototypeReferences() throws Exception {

@@ -8,8 +8,8 @@
 	</bean>
 
 	<bean id="rod2" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
-		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
-		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg index="1" ref="kerry1"/>
+		<constructor-arg index="0" ref="kerry2"/>
 		<constructor-arg><ref bean="other"/></constructor-arg>
 	</bean>
 
@@ -103,7 +103,7 @@
 	</bean>
 
 	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
-	   <constructor-arg type="boolean"><value>true</value></constructor-arg>
+	   <constructor-arg type="boolean" value="true"/>
 	</bean>
 
 	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
@@ -112,7 +112,7 @@
 	</bean>
 
 	<bean id="Boolean" class="java.lang.Boolean">
-		<constructor-arg><value>false</value></constructor-arg>
+		<constructor-arg value="false"/>
 	</bean>
 
 	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" singleton="false">

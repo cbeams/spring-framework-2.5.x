@@ -9,9 +9,9 @@
 	</bean>
 	
 	<bean id="david" class="org.springframework.beans.TestBean">	
-		<property name="name"><value>David</value></property>
-		<property name="age"><value>27</value></property>
-		<property name="spouse"><ref local="jenny"/></property>
+		<property name="name" value="David"/>
+		<property name="age" value="27"/>
+		<property name="spouse" ref="jenny"/>
 	</bean>
 	
 	<bean id="jenks" class="org.springframework.beans.TestBean" singleton="false">	
@@ -21,9 +21,9 @@
 	</bean>
 
 	<bean id="emma" class="org.springframework.beans.TestBean">
-		<property name="name"><value>Emma</value></property>
-		<property name="age"><value>31</value></property>
-		<property name="spouse"><ref local="jenks"/></property>
+		<property name="name" value="Emma"/>
+		<property name="age" value="31"/>
+		<property name="spouse" ref="jenks"/>
 	</bean>
 	
 	<bean id="georgia" class="org.springframework.beans.TestBean">	
@@ -33,9 +33,9 @@
 	</bean>
 
 	<bean id="ego" class="org.springframework.beans.TestBean">
-		<property name="name"><value>ego</value></property>
-		<property name="age"><value>1</value></property>
-		<property name="spouse"><ref local="ego"/></property>
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse" ref="ego"/>
 	</bean>
 
 	<bean id="hasInnerBeans" class="org.springframework.beans.TestBean">

@@ -142,13 +142,35 @@
 	<bean id="mixedMap" class="org.springframework.beans.factory.HasMap">	
 		<property name="map">
 			<map>
-				<entry key="foo"><value>bar</value></entry>
-				<entry key="jenny"><ref local="jenny"/></entry>
-				<entry key="david"><idref bean="david"/></entry>
+				<entry key-ref="fooKey">
+					<value type="java.lang.Integer">10</value>
+				</entry>
+				<entry>
+ 					<key>
+						<ref bean="jennyKey"/>
+					</key>
+					<ref local="jenny"/>
+				</entry>
+				<entry>
+ 					<key>
+ 						<bean class="java.lang.Integer">
+ 							<constructor-arg value="5"/>
+						</bean>
+					</key>
+					<idref bean="david"/>
+				</entry>
 			</map>
 		</property>
 	</bean>
-	
+
+	<bean id="fooKey" class="java.lang.String">
+		<constructor-arg value="foo"/>
+	</bean>
+
+	<bean id="jennyKey" class="java.lang.String">
+		<constructor-arg value="jenny"/>
+	</bean>
+
 	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" singleton="false">
 		<property name="map">
 			<map>
