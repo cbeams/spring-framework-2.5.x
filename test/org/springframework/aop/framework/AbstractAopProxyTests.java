@@ -6,24 +6,30 @@
 package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.ThrowsAdvisor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.SimpleIntroductionAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutThrowsAdvisor;
+import org.springframework.aop.support.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -33,7 +39,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.8 2003-12-05 13:23:53 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.9 2003-12-05 16:28:27 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -394,9 +400,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 */
 
-	/**
-	 * TODO also test undeclared: decide what it should do!
-	 */
+
 	public void testDeclaredException() throws Throwable {
 		final Exception expectedException = new Exception();
 		// Test return value
@@ -422,6 +426,42 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		} 
 		catch (Exception thrown) {
 			assertEquals("exception matches", expectedException, thrown);
+		}
+	}
+	
+	/**
+	 * An interceptor throws a checked exception not on the method signature.
+	 * For efficiency, we don't bother unifying java.lang.reflect and
+	 * net.sf.cglib UndeclaredThrowableException
+	 * @throws Throwable
+	 */
+	public void testUndeclaredCheckedException() throws Throwable {
+		final Exception unexpectedException = new Exception();
+		// Test return value
+		MethodInterceptor mi = new MethodInterceptor() {
+			public Object invoke(MethodInvocation invocation) throws Throwable {
+				throw unexpectedException;
+			}
+		};
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		pc.setExposeInvocation(true);
+		pc.addInterceptor(mi);
+	
+		// We don't care about the object
+		pc.setTarget(new TestBean());
+		AopProxy aop = createAopProxy(pc);
+		ITestBean tb = (ITestBean) aop.getProxy();
+		
+		try {
+			// Note: exception param below isn't used
+			tb.getAge();
+			fail("Should have wrapped exception raised by interceptor");
+		} 
+		catch (UndeclaredThrowableException thrown) {			
+			assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
+		}
+		catch (net.sf.cglib.UndeclaredThrowableException thrown) {			
+			assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
 		}
 	}
 	
@@ -1106,16 +1146,95 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(target.getAge(), proxied.getAge());
 	}
 	
+	public void testThrowsAdvisorIsInvoked() throws Throwable {
+		// Reacts to ServletException and RemoteException
+		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+		ThrowsAdvisor matchesEchoInvocations = new StaticMethodMatcherPointcutThrowsAdvisor(th) {
+			public boolean matches(Method m, Class targetClass) {
+				return m.getName().startsWith("echo");
+			}
+		};
+		
+		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
+		target.setA(16);
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(new NopInterceptor());
+		pf.addAdvisor(matchesEchoInvocations);
+		assertEquals("Advisor was added", matchesEchoInvocations, pf.getAdvisors()[1]);
+		ThrowsAdviceInterceptorTests.IEcho proxied = (ThrowsAdviceInterceptorTests.IEcho) createProxy(pf);
+		assertEquals(0, th.getCalls());
+		assertEquals(target.getA(), proxied.getA());
+		assertEquals(0, th.getCalls());
+		Exception ex = new Exception();
+		// Will be advised but doesn't match
+		try {
+			proxied.echoException(1, ex);
+			fail();
+		}
+		catch (Exception caught) {
+			assertEquals(ex, caught);
+		}
 
-	protected static class MethodCounter {
+		ex = new ServletException();
+		try {
+			proxied.echoException(1, ex);
+			fail();
+		}
+		catch (ServletException caught) {
+			assertEquals(ex, caught);
+		}
+		assertEquals(1, th.getCalls("servletException"));
+	}
+	
+	public void testAddThrowsAdviceWithoutAdvisor() throws Throwable {
+		// Reacts to ServletException and RemoteException
+		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+	
+		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
+		target.setA(16);
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addInterceptor(new NopInterceptor());
+		pf.addThrowsAdvice(th);
+		ThrowsAdviceInterceptorTests.IEcho proxied = (ThrowsAdviceInterceptorTests.IEcho) createProxy(pf);
+		assertEquals(0, th.getCalls());
+		assertEquals(target.getA(), proxied.getA());
+		assertEquals(0, th.getCalls());
+		Exception ex = new Exception();
+		// Will be advised but doesn't match
+		try {
+			proxied.echoException(1, ex);
+			fail();
+		}
+		catch (Exception caught) {
+			assertEquals(ex, caught);
+		}
+
+		// Subclass of RemoteException
+		ex = new TransactionRequiredException();
+		try {
+			proxied.echoException(1, ex);
+			fail();
+		}
+		catch (TransactionRequiredException caught) {
+			assertEquals(ex, caught);
+		}
+		assertEquals(1, th.getCalls("remoteException"));
+	}
+
+
+	public static class MethodCounter {
 		/** Method name --> count, does not understand overloading */
 		private HashMap map = new HashMap();
 		private int allCount;
 		
 		protected void count(Method m) {
-			Integer I = (Integer) map.get(m.getName());
+			count(m.getName());
+		}
+		
+		protected void count(String methodName) {
+			Integer I = (Integer) map.get(methodName);
 			I = (I != null) ? new Integer(I.intValue() + 1) : new Integer(1);
-			map.put(m.getName(), I);
+			map.put(methodName, I);
 			++allCount;
 		}
 		

@@ -22,6 +22,7 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.ThrowsAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
@@ -35,7 +36,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.14 2003-12-05 13:23:39 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.15 2003-12-05 16:28:26 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -210,6 +211,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisor(new BeforeAdvisor() {
 			public BeforeAdvice getBeforeAdvice() {
 				return ba;
+			}
+			public Pointcut getPointcut() {
+				return Pointcut.TRUE;
+			}
+			public boolean isPerInstance() {
+				throw new UnsupportedOperationException();
+			}
+		});
+	}
+	
+	public void addThrowsAdvice(final Object throwsAdvice) {
+		addAdvisor(new ThrowsAdvisor() {
+			public Object getThrowsAdvice() {
+				return throwsAdvice;
 			}
 			public Pointcut getPointcut() {
 				return Pointcut.TRUE;
