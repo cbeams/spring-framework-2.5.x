@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.4 2003-11-05 20:30:19 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.5 2003-11-13 11:48:15 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -48,18 +48,6 @@ public abstract class DataSourceUtils {
 	private static final Log logger = LogFactory.getLog(DataSourceUtils.class);
 
 	/**
-	 * Return if the given Connection is bound to the current thread,
-	 * for the given DataSource.
-	 * @param con JDBC Connection that should be checked
-	 * @param ds DataSource that the Connection was created with
-	 * @return if the Connection is bound for the DataSource
-	 */
-	public static boolean isConnectionBoundToThread(Connection con, DataSource ds) {
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
-		return (holder != null && con == holder.getConnection());
-	}
-
-	/**
 	 * Look up the specified DataSource in JNDI, assuming that the lookup
 	 * occurs in a J2EE container, i.e. adding the prefix "java:comp/env/"
 	 * to the JNDI name if it doesn't already contain it.
@@ -67,7 +55,7 @@ public abstract class DataSourceUtils {
 	 * @param jndiName jndiName of the DataSource
 	 * @return the DataSource
 	 * @throws CannotGetJdbcConnectionException if the data source cannot be located
-	 * @see #getDataSourceFromJndi(String,boolean)
+	 * @see #getDataSourceFromJndi(String, boolean)
 	 */
 	public static DataSource getDataSourceFromJndi(String jndiName) throws CannotGetJdbcConnectionException {
 		return getDataSourceFromJndi(jndiName, true);
@@ -102,11 +90,12 @@ public abstract class DataSourceUtils {
 	 * Get a connection from the given DataSource. Changes any SQL exception into
 	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
 	 * calling code and making any exception that is thrown more meaningful.
-	 * <p>Is aware of a respective connection bound to the current thread,
-	 * for example when using DataSourceTransactionManager.
+	 * <p>Is aware of a respective connection bound to the current thread, for example
+	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
+	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * @param ds DataSource to get connection from
-	 * @throws org.springframework.jdbc.datasource.CannotGetJdbcConnectionException if we fail to get a connection from the given DataSource
 	 * @return a JDBC connection from this DataSource
+	 * @throws CannotGetJdbcConnectionException if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
@@ -154,9 +143,10 @@ public abstract class DataSourceUtils {
 	 * @param ds DataSource that the connection came from
 	 * @throws CannotCloseJdbcConnectionException if the attempt to close the
 	 * Connection failed
+	 * @see SmartDataSource#shouldClose
 	 */
 	public static void closeConnectionIfNecessary(Connection con, DataSource ds) throws CannotCloseJdbcConnectionException {
-		if (con == null || isConnectionBoundToThread(con, ds)) {
+		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
 			return;
 		}
 		// leave the connection open only if the DataSource is our

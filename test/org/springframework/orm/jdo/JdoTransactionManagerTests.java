@@ -570,7 +570,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
-				assertTrue("Has thread con", DataSourceUtils.isConnectionBoundToThread(con, ds));
+				assertTrue("Has thread con", TransactionSynchronizationManager.hasResource(ds));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm) {
