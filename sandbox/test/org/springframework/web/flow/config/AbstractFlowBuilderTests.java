@@ -33,7 +33,6 @@ import org.springframework.web.flow.MutableAttributesAccessor;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.action.AbstractAction;
 
 /**
  * Test java based flow builder logic.
@@ -217,10 +216,10 @@ public class AbstractFlowBuilderTests extends TestCase {
 	/**
 	 * Action bean stub that does nothing, just returns a "success" result
 	 */
-	public static final class NoOpAction extends AbstractAction {
-		public String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
+	public static final class NoOpAction implements Action {
+		public String execute(HttpServletRequest request, HttpServletResponse response,
 				MutableAttributesAccessor attributes) throws Exception {
-			return success();
+			return "success";
 		}
 	}
 }

@@ -56,7 +56,7 @@ public class ActionState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param action The unnamed action to execute in this state
-	 * @param transition The sole transition of this state
+	 * @param transition The sole transition (path) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -71,7 +71,7 @@ public class ActionState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actionName The name of the named action
 	 * @param action The named action to execute in this state
-	 * @param transition The sole transition of this state
+	 * @param transition The sole transition (path) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -86,7 +86,7 @@ public class ActionState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param action The unnamed action to execute in this state
-	 * @param transitions The transitions of this state
+	 * @param transitions The transitions out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -101,7 +101,7 @@ public class ActionState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actionName The name of the named action
 	 * @param action The named action to execute in this state
-	 * @param transitions The transitions of this state
+	 * @param transitions The transitions out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -116,7 +116,21 @@ public class ActionState extends TransitionableState {
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actions The unnamed actions to execute in this state
-	 * @param transitions The transitions of this state
+	 * @param transitions The sole transition (path) out of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, Action[] actions, Transition transition) throws IllegalArgumentException {
+		super(flow, id, transition);
+		addActions(actions);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actions The unnamed actions to execute in this state
+	 * @param transitions The transitions (paths) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -132,7 +146,23 @@ public class ActionState extends TransitionableState {
 	 * @param id The state identifier (must be unique to the flow)
 	 * @param actionNames The names of the named actions
 	 * @param actions The named actions to execute in this state
-	 * @param transitions The transitions of this state
+	 * @param transitions The transitions (paths) out of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition transition)
+			throws IllegalArgumentException {
+		super(flow, id, transition);
+		addActions(actionNames, actions);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actionNames The names of the named actions
+	 * @param actions The named actions to execute in this state
+	 * @param transitions The transitions (paths) out of this state
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
@@ -206,7 +236,16 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * @return The list of actions executed by this action state.
+	 * Returns the first action executed by this action state.
+	 * @return The first action;
+	 */
+	public Action getAction() {
+		return getActions()[0];
+	}
+
+	/**
+	 * Returns the list of actions executed by this action state.
+	 * @return The action list, as a typed array
 	 */
 	public Action[] getActions() {
 		Action[] actions = new Action[namedActions.size()];
@@ -218,9 +257,11 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
+	 * Returns the logical name associated with an action instance executed by
+	 * this action state.
 	 * @param action The action for which the name should be looked up
-	 * @return The name of given action or null if the action does not have a
-	 *         name
+	 * @return The name of given action or <code>null</code> O if the action
+	 *         does not have a name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
 	 */
@@ -264,12 +305,14 @@ public class ActionState extends TransitionableState {
 			}
 		}
 		if (executionCount > 0) {
-			throw new CannotExecuteStateTransitionException(this,
-					"No transition was matched to any of the result events " + DefaultObjectStyler.call(eventIds)
-							+ " returned by the " + executionCount + " action(s) that executed in this action state '"
-							+ getId() + "' of flow '" + getFlow().getId()
-							+ "'; a transition must be defined to handle possible action result outcomes -- "
-							+ "possible flow configuration error?");
+			throw new CannotExecuteStateTransitionException(this, "No transition was matched to the event(s)"
+					+ "signaled by the " + executionCount + " action(s) that executed in this action state '" + getId()
+					+ "' of flow '" + getFlow().getId()
+					+ "'; a transition must be defined to handle possible action result outcomes -- "
+					+ "possible flow configuration error?  Note: the eventIds signaled were: '"
+					+ DefaultObjectStyler.call(eventIds)
+					+ "', while the supported set of eventId criteria for this action state is '"
+					+ DefaultObjectStyler.call(getEventIdCriteria()) + "'");
 		}
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
