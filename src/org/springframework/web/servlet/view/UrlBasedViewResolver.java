@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -226,12 +225,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	 */
 	public void setAttributesMap(Map attributes) {
 		if (attributes != null) {
-			Iterator it = attributes.keySet().iterator();
-			while (it.hasNext()) {
-				String name = (String) it.next();
-				Object value = attributes.get(name);
-				this.staticAttributes.put(name, value);
-			}
+			this.staticAttributes.putAll(attributes);
 		}
 	}
 

@@ -257,10 +257,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	protected void parseIndexedArgumentValues(Properties props, Map ias) {
-		for (Iterator it = ias.keySet().iterator(); it.hasNext();) {
-			Integer index = (Integer) it.next();
+		for (Iterator it = ias.values().iterator(); it.hasNext();) {
 			ConstructorArgumentValues.ValueHolder valueHolder =
-					(ConstructorArgumentValues.ValueHolder) ias.get(index);
+					(ConstructorArgumentValues.ValueHolder) it.next();
 			Object newVal = parseValue(props, valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
 				valueHolder.setValue(newVal);
@@ -339,11 +338,12 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * Parse the given Map, resolving its values if necessary.
 	 */
 	protected void parseMap(Properties props, Map mapVal) {
-		for (Iterator it = new HashMap(mapVal).keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
+		for (Iterator it = new HashMap(mapVal).entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Object key = entry.getKey();
 			Object newKey = parseValue(props, key);
 			boolean isNewKey = !ObjectUtils.nullSafeEquals(key, newKey);
-			Object val = mapVal.get(key);
+			Object val = entry.getValue();
 			Object newVal = parseValue(props, val);
 			if (isNewKey) {
 				mapVal.remove(key);

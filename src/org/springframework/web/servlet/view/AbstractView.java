@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view;
 
@@ -174,11 +174,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void setAttributesMap(Map attributes) {
 		if (attributes != null) {
-			Iterator it = attributes.keySet().iterator();
+			Iterator it = attributes.entrySet().iterator();
 			while (it.hasNext()) {
-				String name = (String) it.next();
-				Object value = attributes.get(name);
-				addStaticAttribute(name, value);
+				Map.Entry entry = (Map.Entry) it.next();
+				if (!(entry.getKey() instanceof String)) {
+					throw new IllegalArgumentException(
+							"Illegal attribute key [" + entry.getKey() + "]: only Strings allowed");
+				}
+				addStaticAttribute((String) entry.getKey(), entry.getValue());
 			}
 		}
 	}

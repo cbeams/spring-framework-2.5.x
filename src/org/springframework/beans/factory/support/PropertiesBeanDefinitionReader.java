@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -209,18 +208,21 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 */
 	public int registerBeanDefinitions(ResourceBundle rb, String prefix) throws BeanDefinitionStoreException {
 		// Simply create a map and call overloaded method
-		Map m = new HashMap();
+		Map map = new HashMap();
 		Enumeration keys = rb.getKeys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
-			m.put(key, rb.getObject(key));
+			map.put(key, rb.getObject(key));
 		}
-		return registerBeanDefinitions(m, prefix);
+		return registerBeanDefinitions(map, prefix);
 	}
 
 	/**
 	 * Register bean definitions contained in a Map,
 	 * using all property keys (i.e. not filtering by prefix).
+	 * @param map Map name -> property (String or Object). Property values
+	 * will be strings if coming from a Properties file etc. Property names
+	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.Map, String, String)
@@ -234,7 +236,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Ignore ineligible properties.
 	 * @param map Map name -> property (String or Object). Property values
 	 * will be strings if coming from a Properties file etc. Property names
-	 * (keys) <b>must</b> be strings. Class keys must be Strings.
+	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @param prefix The match or filter within the keys in the map: e.g. 'beans.'
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
@@ -264,13 +266,15 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		}
 		int beanCount = 0;
 
-		Set keys = map.keySet();
-		Iterator it = keys.iterator();
-		while (it.hasNext()) {
-			String key = (String) it.next();
-			if (key.startsWith(prefix)) {
+		for (Iterator it = map.keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			if (!(key instanceof String)) {
+				throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
+			}
+			String keyString = (String) key;
+			if (keyString.startsWith(prefix)) {
 				// key is of form prefix<name>.property
-				String nameAndProperty = key.substring(prefix.length());
+				String nameAndProperty = keyString.substring(prefix.length());
 				int sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
 				if (sepIdx != -1) {
 					String beanName = nameAndProperty.substring(0, sepIdx);
@@ -316,34 +320,34 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		boolean lazyInit = false;
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		Iterator it = map.keySet().iterator();
-		while (it.hasNext()) {
-			String key = (String) it.next();
+		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String key = (String) entry.getKey();
 			if (key.startsWith(prefix + SEPARATOR)) {
 				String property = key.substring(prefix.length() + SEPARATOR.length());
 				if (property.equals(CLASS_KEY)) {
-					className = (String) map.get(key);
+					className = (String) entry.getValue();
 				}
 				else if (property.equals(ABSTRACT_KEY)) {
-					String val = (String) map.get(key);
+					String val = (String) entry.getValue();
 					isAbstract = val.equals(TRUE_VALUE);
 				}
 				else if (property.equals(SINGLETON_KEY)) {
-					String val = (String) map.get(key);
+					String val = (String) entry.getValue();
 					singleton = (val == null) || val.equals(TRUE_VALUE);
 				}
 				else if (property.equals(LAZY_INIT_KEY)) {
-					String val = (String) map.get(key);
+					String val = (String) entry.getValue();
 					lazyInit = val.equals(TRUE_VALUE);
 				}
 				else if (property.equals(PARENT_KEY)) {
-					parent = (String) map.get(key);
+					parent = (String) entry.getValue();
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
 					// This isn't a real property, but a reference to another prototype
 					// Extract property name: property is of form dog(ref)
 					property = property.substring(0, property.length() - REF_SUFFIX.length());
-					String ref = (String) map.get(key);
+					String ref = (String) entry.getValue();
 
 					// It doesn't matter if the referenced bean hasn't yet been registered:
 					// this will ensure that the reference is resolved at rungime
@@ -353,7 +357,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 				else{
 					// normal bean property
-					Object val = map.get(key);
+					Object val = entry.getValue();
 					if (val instanceof String) {
 						String strVal = (String) val;
 						// if it starts with a reference prefix...

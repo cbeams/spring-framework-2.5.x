@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart.commons;
 
@@ -261,9 +261,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		Map multipartFiles = request.getFileMap();
-		for (Iterator i = multipartFiles.keySet().iterator(); i.hasNext();) {
-			String name = (String) i.next();
-			CommonsMultipartFile file = (CommonsMultipartFile) multipartFiles.get(name);
+		for (Iterator it = multipartFiles.values().iterator(); it.hasNext();) {
+			CommonsMultipartFile file = (CommonsMultipartFile) it.next();
 			logger.debug("Cleaning up multipart file [" + file.getName() + "] with original filename [" +
 			    file.getOriginalFilename() + "], stored " + file.getStorageDescription());
 			file.getFileItem().delete();

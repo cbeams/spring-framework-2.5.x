@@ -160,10 +160,10 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				for (Iterator it = parentResult.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					if (!result.containsKey(key)) {
-						result.put(key, parentResult.get((key)));
+				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					if (!result.containsKey(entry.getKey())) {
+						result.put(entry.getKey(), entry.getValue());
 					}
 				}
 			}
@@ -193,10 +193,10 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				Map parentResult = beansOfTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, includeFactoryBeans);
-				for (Iterator it = parentResult.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					if (!result.containsKey(key)) {
-						result.put(key, parentResult.get((key)));
+				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					if (!result.containsKey(entry.getKey())) {
+						result.put(entry.getKey(), entry.getValue());
 					}
 				}
 			}

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.bind;
 
@@ -134,10 +134,10 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * @see org.springframework.web.multipart.MultipartFile
 	 */
 	public void bind(ServletRequest request) {
-		// bind normal HTTP parameters
+		// Bind normal HTTP parameters.
 		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 
-		// check for special field markers
+		// Check for special field markers.
 		if (this.fieldMarkerPrefix != null) {
 			PropertyValue[] pvArray = pvs.getPropertyValues();
 			for (int i = 0; i < pvArray.length; i++) {
@@ -147,15 +147,15 @@ public class ServletRequestDataBinder extends DataBinder {
 					if (getBeanWrapper().isWritableProperty(field) && !pvs.contains(field)) {
 						Class type = getBeanWrapper().getPropertyType(field);
 						if (type != null && boolean.class.equals(type) || Boolean.class.equals(type)) {
-							// special handling of boolean property
+							// Special handling of boolean property.
 							pvs.addPropertyValue(field, Boolean.FALSE);
 						}
 						else if (type != null && type.isArray()) {
-							// special handling of array property
+							// Special handling of array property.
 							pvs.addPropertyValue(field, Array.newInstance(type.getComponentType(), 0));
 						}
 						else {
-							// fallback: try to set to null
+							// Fallback: try to set to null.
 							pvs.addPropertyValue(field, null);
 						}
 					}
@@ -163,13 +163,14 @@ public class ServletRequestDataBinder extends DataBinder {
 			}
 		}
 
-		// bind multipart files
+		// Bind multipart files contained in the request.
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 			Map fileMap = multipartRequest.getFileMap();
-			for (Iterator it = fileMap.keySet().iterator(); it.hasNext();) {
-				String key = (String) it.next();
-				MultipartFile value = (MultipartFile) fileMap.get(key);
+			for (Iterator it = fileMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String key = (String) entry.getKey();
+				MultipartFile value = (MultipartFile) entry.getValue();
 				if (this.bindEmptyMultipartFiles || !value.isEmpty()) {
 					pvs.addPropertyValue(key, value);
 				}

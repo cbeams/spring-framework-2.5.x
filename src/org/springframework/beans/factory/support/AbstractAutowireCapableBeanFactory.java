@@ -640,7 +640,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Autowiring by type from bean name '" + beanName +
-							"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
+							"' via constructor to bean named '" + autowiredBeanName + "'");
 				}
 			}
 		}
@@ -746,9 +746,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					registerDependentBean(autowiredBeanName, beanName);
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Autowiring by type from bean name '" + beanName +
-							"' via property '" + propertyName + "' to bean named '" +
-							matchingBeans.keySet().iterator().next() + "'");
+					logger.debug("Autowiring by type from bean name '" + beanName + "' via property '" +
+							propertyName + "' to bean named '" + autowiredBeanName + "'");
 				}
 			}
 			else if (matchingBeans != null && matchingBeans.size() > 1) {
@@ -1028,15 +1027,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Map resolved = CollectionFactory.createLinkedMapIfPossible(mm.size());
-		Iterator keys = mm.keySet().iterator();
-		while (keys.hasNext()) {
-			Object key = keys.next();
+		Iterator it = mm.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
 			resolved.put(
-			    key,
+			    entry.getKey(),
 			    resolveValueIfNecessary(
 							beanName, mergedBeanDefinition,
-							argName + BeanWrapper.PROPERTY_KEY_PREFIX + key + BeanWrapper.PROPERTY_KEY_SUFFIX,
-							mm.get(key)));
+							argName + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() + BeanWrapper.PROPERTY_KEY_SUFFIX,
+							entry.getValue()));
 		}
 		return resolved;
 	}
