@@ -35,6 +35,10 @@ import org.springframework.util.ToStringCreator;
  */
 public class ActionStateAction {
 
+	public static final String NAME_PROPERTY = "name";
+
+	public static final String DESCRIPTION_PROPERTY = "description";
+
 	/**
 	 * The owning state that executes the action when entered.
 	 */
@@ -120,11 +124,21 @@ public class ActionStateAction {
 	}
 
 	private void setName(String name) {
-		this.properties.put("name", name);
+		if (StringUtils.hasText(name)) {
+			this.properties.put(NAME_PROPERTY, name);
+		}
+		else {
+			this.properties.remove(NAME_PROPERTY);
+		}
 	}
 
 	private void setDescription(String description) {
-		this.properties.put("description", description);
+		if (StringUtils.hasText(description)) {
+			this.properties.put(DESCRIPTION_PROPERTY, description);
+		}
+		else {
+			this.properties.remove(DESCRIPTION_PROPERTY);
+		}
 	}
 
 	/**
@@ -152,7 +166,7 @@ public class ActionStateAction {
 	 * @return the action name
 	 */
 	public String getName() {
-		return (String)getProperty("name");
+		return (String)getProperty(NAME_PROPERTY);
 	}
 
 	/**
@@ -167,7 +181,7 @@ public class ActionStateAction {
 	 * @return
 	 */
 	public String getDescription() {
-		return (String)getProperty("description");
+		return (String)getProperty(DESCRIPTION_PROPERTY);
 	}
 
 	/**
