@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
-
+ 
 package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
@@ -10,40 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.MethodMatcher;
 
 /**
- * Simple method invocation factory that performs no caching.
- * Convenient superclass for smarter implmentations.
- * Exposes a useful static method for subclasses or other implementations.
+ * 
  * @author Rod Johnson
- * @version $Id: MethodInvocationFactorySupport.java,v 1.3 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: AdvisorChainFactoryUtils.java,v 1.1 2003-11-28 11:17:17 johnsonr Exp $
  */
-public class MethodInvocationFactorySupport implements MethodInvocationFactory {
+public abstract class AdvisorChainFactoryUtils {
 
-	public MethodInvocation getMethodInvocation(Advised config, Object proxy, Method method, Object[] args) {
-		Class targetClass = config.getTarget() != null ? config.getTarget().getClass() : method.getDeclaringClass();
-		return new MethodInvocationImpl(
-			proxy,
-			config.getTarget(),
-			method.getDeclaringClass(),
-			method,
-			args,
-			targetClass,
-			getInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass));
-	}
-	
-	/**
-	 * Caching subclasses must override this. This implementation does nothing.
-	 */
-	public void refresh(Advised config) {
-	}
-	
 	/**
 	 * Return the static interceptors and dynamic interception advice that may apply
 	 * to this method invocation.
@@ -54,7 +32,7 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 	 * @return list of MethodInterceptor and InterceptionAdvice (if there's a dynamic
 	 * method matcher that needs evaluation at runtime)
 	 */
-	protected List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
+	public static List calculateInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 		List interceptors = new ArrayList(config.getAdvisors().length);
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
@@ -81,5 +59,16 @@ public class MethodInvocationFactorySupport implements MethodInvocationFactory {
 		}	// for
 		return interceptors;
 	}
+	
+	
+	
+	public static AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY = new AdvisorChainFactory() {
+		public void refresh(Advised config) {
+		}
+
+		public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
+			return AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+		}
+	};
 	
 }

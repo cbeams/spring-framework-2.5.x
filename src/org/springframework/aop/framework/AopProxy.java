@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.List;
 
 import net.sf.cglib.CodeGenerationException;
 import net.sf.cglib.Enhancer;
@@ -38,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.10 2003-11-19 09:57:41 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.11 2003-11-28 11:17:17 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -59,10 +60,7 @@ public class AopProxy implements InvocationHandler {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Config used to configure this proxy */
-	private Advised config;
-	
-	/** Factory for method invocation objects, to allow optimization */
-	private MethodInvocationFactory methodInvocationFactory;
+	private AdvisedSupport advised;
 	
 	/**
 	 * 
@@ -70,13 +68,12 @@ public class AopProxy implements InvocationHandler {
 	 * to throw an informative exception in this case, rather than let
 	 * a mysterious failure happen later.
 	 */
-	public AopProxy(Advised config, MethodInvocationFactory methodInvocationFactory) throws AopConfigException {
+	public AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null)
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
 		if (config.getAdvisors().length == 0)
 			throw new AopConfigException("Cannot create AopProxy with null interceptors");
-		this.config = config;
-		this.methodInvocationFactory = methodInvocationFactory;
+		this.advised = config;
 	}
 	
 	
@@ -104,7 +101,7 @@ public class AopProxy implements InvocationHandler {
 			}
 			else if (Advised.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
-				return method.invoke(this.config, args);
+				return method.invoke(this.advised, args);
 			}
 			/*
 			else if no advice... and have target
@@ -114,9 +111,12 @@ public class AopProxy implements InvocationHandler {
 			*/
 			
 			// Looks like we need to create a method invocation...
-			invocation = this.methodInvocationFactory.getMethodInvocation(this.config, proxy, method, args);
+			Class targetClass = advised.getTarget() != null ? advised.getTarget().getClass() : method.getDeclaringClass();
 		
-			if (this.config.getExposeInvocation()) {
+			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
+			invocation = advised.getMethodInvocationFactory().getMethodInvocation(this.advised, proxy, method, targetClass, args, chain);
+		
+			if (this.advised.getExposeInvocation()) {
 				// Make invocation available if necessary.
 				// Save the old value to reset when this method returns
 				// so that we don't blow away any existing state
@@ -127,7 +127,7 @@ public class AopProxy implements InvocationHandler {
 				setInvocationContext = true;
 			}
 			
-			if (this.config.getExposeProxy()) {
+			if (this.advised.getExposeProxy()) {
 				// Make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;
@@ -154,8 +154,7 @@ public class AopProxy implements InvocationHandler {
 			}
 			
 			if (invocation != null) {
-				// TODO move into AOP Alliance
-				((MethodInvocationImpl) invocation).clear();
+				advised.getMethodInvocationFactory().release(invocation);
 			}
 		}
 	}
@@ -173,21 +172,21 @@ public class AopProxy implements InvocationHandler {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		if (!this.config.getProxyTargetClass() && this.config.getProxiedInterfaces() != null && this.config.getProxiedInterfaces().length > 0) {
+		if (!this.advised.getProxyTargetClass() && this.advised.getProxiedInterfaces() != null && this.advised.getProxiedInterfaces().length > 0) {
 			// Proxy specific interfaces: J2SE dynamic proxy is sufficient
 			if (logger.isInfoEnabled())
-				logger.info("Creating J2SE proxy for [" + this.config.getTarget() + "]");
+				logger.info("Creating J2SE proxy for [" + this.advised.getTarget() + "]");
 			Class[] proxiedInterfaces = completeProxiedInterfaces();
 			return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 		}
 		else {
 			// Use CGLIB
-			if (this.config.getTarget() == null) {
+			if (this.advised.getTarget() == null) {
 				throw new IllegalArgumentException("Either an interface or a target is required for proxy creation");
 			}
 			// proxy the given class itself: CGLIB necessary
 			if (logger.isInfoEnabled())
-				logger.info("Creating CGLIB proxy for [" + this.config.getTarget() + "]");
+				logger.info("Creating CGLIB proxy for [" + this.advised.getTarget() + "]");
 			// delegate to inner class to avoid AopProxy runtime dependency on CGLIB
 			// --> J2SE proxies work without cglib.jar then
 			return (new CglibProxyFactory()).createProxy();
@@ -199,17 +198,17 @@ public class AopProxy implements InvocationHandler {
 	 * @return the complete set of interfaces to proxy
 	 */
 	private Class[] completeProxiedInterfaces() {
-		Class[] proxiedInterfaces = this.config.getProxiedInterfaces();
+		Class[] proxiedInterfaces = this.advised.getProxiedInterfaces();
 		if (proxiedInterfaces == null ||proxiedInterfaces.length == 0) {
 			proxiedInterfaces = new Class[1];
 			proxiedInterfaces[0] = Advised.class;
 		}
 		else {
 			// Don't add the interface twice if it's already there
-			if (!this.config.isInterfaceProxied(Advised.class)) {
-				proxiedInterfaces = new Class[this.config.getProxiedInterfaces().length + 1];
+			if (!this.advised.isInterfaceProxied(Advised.class)) {
+				proxiedInterfaces = new Class[this.advised.getProxiedInterfaces().length + 1];
 				proxiedInterfaces[0] = Advised.class;
-				System.arraycopy(this.config.getProxiedInterfaces(), 0, proxiedInterfaces, 1, this.config.getProxiedInterfaces().length);
+				System.arraycopy(this.advised.getProxiedInterfaces(), 0, proxiedInterfaces, 1, this.advised.getProxiedInterfaces().length);
 			}
 		}
 		return proxiedInterfaces;
@@ -248,10 +247,10 @@ public class AopProxy implements InvocationHandler {
 		if (this == aopr2)
 			return true;
 			
-		if (!Arrays.equals(aopr2.config.getProxiedInterfaces(), this.config.getProxiedInterfaces()))
+		if (!Arrays.equals(aopr2.advised.getProxiedInterfaces(), this.advised.getProxiedInterfaces()))
 			return false;
 		
-		if (!Arrays.equals(aopr2.config.getAdvisors(), this.config.getAdvisors()))
+		if (!Arrays.equals(aopr2.advised.getAdvisors(), this.advised.getAdvisors()))
 			return false;
 			
 		return true;
@@ -266,7 +265,7 @@ public class AopProxy implements InvocationHandler {
 
 		private Object createProxy() {
 			try {
-				return Enhancer.enhance(config.getTarget().getClass(), completeProxiedInterfaces(),
+				return Enhancer.enhance(advised.getTarget().getClass(), completeProxiedInterfaces(),
 					new MethodInterceptor() {
 						public Object intercept(Object handler, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 							return invoke(handler, method, objects);
@@ -275,7 +274,7 @@ public class AopProxy implements InvocationHandler {
 				);
 			}
 			catch (CodeGenerationException ex) {
-				throw new AspectException("Couldn't generate CGLIB subclass of class '" + config.getTarget().getClass() + "': " +
+				throw new AspectException("Couldn't generate CGLIB subclass of class '" + advised.getTarget().getClass() + "': " +
 						"Common causes of this problem include using a final class, or a non-visible class", ex);
 			}
 		}

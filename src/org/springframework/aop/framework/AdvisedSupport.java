@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.4 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: AdvisedSupport.java,v 1.5 2003-11-28 11:17:17 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport implements Advised {
@@ -77,6 +77,8 @@ public class AdvisedSupport implements Advised {
 	 */
 	private boolean proxyTargetClass;
 	
+	private AdvisorChainFactory advisorChainFactory;
+	
 	private MethodInvocationFactory methodInvocationFactory;
 	
 	/**
@@ -89,17 +91,39 @@ public class AdvisedSupport implements Advised {
 	 * No arg constructor to allow use as a Java bean.
 	 */
 	public AdvisedSupport() {
-		setMethodInvocationFactory(new HashMapCachingMethodInvocationFactory());
+		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
+		setMethodInvocationFactory(new SimpleMethodInvocationFactory());
 	}
 	
-	public AdvisedSupport(MethodInvocationFactory methodInvocationFactory) {
+	public AdvisedSupport(AdvisorChainFactory advisorChainFactory, MethodInvocationFactory methodInvocationFactory) {
 		setMethodInvocationFactory(methodInvocationFactory);
+		setAdvisorChainFactory(advisorChainFactory);
 	}
 
+	public void setAdvisorChainFactory(AdvisorChainFactory methodInvocationFactory) {
+		this.advisorChainFactory = methodInvocationFactory;
+	}
+	
+	/**
+	 * Return the AdvisorChainFactory associated with this ProxyConfig.
+	 */
+	public AdvisorChainFactory getAdvisorChainFactory() {
+		return this.advisorChainFactory;
+	}
+
+
+	/**
+	 * @return Returns the methodInvocationFactory.
+	 */
+	public MethodInvocationFactory getMethodInvocationFactory() {
+		return this.methodInvocationFactory;
+	}
+	/**
+	 * @param methodInvocationFactory The methodInvocationFactory to set.
+	 */
 	public void setMethodInvocationFactory(MethodInvocationFactory methodInvocationFactory) {
 		this.methodInvocationFactory = methodInvocationFactory;
 	}
-
 	/**
 	 * Call this method on a new instance created by the no-arg consructor
 	 * to create an independent copy of the configuration
@@ -127,6 +151,8 @@ public class AdvisedSupport implements Advised {
 	 * usable by target objects
 	 */
 	public AdvisedSupport(Class[] interfaces, boolean exposeInvocation) {
+		// Make sure we get default advisor chain and method invocation factories
+		this();
 		setInterfaces(interfaces);
 		setExposeInvocation(exposeInvocation);
 	}
@@ -379,14 +405,14 @@ public class AdvisedSupport implements Advised {
 	 */
 	private synchronized void adviceChanged() {
 		if (this.isActive) {
-			this.methodInvocationFactory.refresh(this);
+			this.advisorChainFactory.refresh(this);
 			onAdviceChanged();
 		}
 	}
 	
 	private void activate() {
 		this.isActive = true;
-		this.methodInvocationFactory.refresh(this);
+		this.advisorChainFactory.refresh(this);
 	}
 
 	/**
@@ -397,7 +423,7 @@ public class AdvisedSupport implements Advised {
 		if (!isActive) {
 			activate();
 		}
-		return new AopProxy(this, getMethodInvocationFactory());
+		return new AopProxy(this);
 	}
 	
 	/**
@@ -413,13 +439,6 @@ public class AdvisedSupport implements Advised {
 	protected final boolean isActive() {
 		return isActive;
 	}
-	
-	/**
-	 * Return the MethodInvocationFactory associated with this ProxyConfig.
-	 */
-	protected MethodInvocationFactory getMethodInvocationFactory() {
-		return this.methodInvocationFactory;
-	}
 
 	public String toProxyConfigString() {
 		return toString();
@@ -434,7 +453,7 @@ public class AdvisedSupport implements Advised {
 		sb.append(this.advisors.size() + " pointcuts=[" + StringUtils.collectionToCommaDelimitedString(this.advisors) + "]; ");
 		sb.append("target=[" + this.target + "]; ");
 		sb.append("exposeInvocation=" + exposeInvocation + "; ");
-		sb.append("methodInvocationFactory=" + this.methodInvocationFactory);
+		sb.append("methodInvocationFactory=" + this.advisorChainFactory);
 		return sb.toString();
 	}
 

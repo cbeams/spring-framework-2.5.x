@@ -10,22 +10,23 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * AdvisorChainFactory implementation that caches by method.
  * @author Rod Johnson
- * @version $Id: HashMapCachingMethodInvocationFactory.java,v 1.3 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.1 2003-11-28 11:17:17 johnsonr Exp $
  */
-public class HashMapCachingMethodInvocationFactory extends MethodInvocationFactorySupport {
+public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
 	
 	private HashMap methodCache = new HashMap();
 	
 	public void refresh(Advised pc) {
-		super.refresh(pc);
 		this.methodCache.clear();
 	}
 	
-	protected List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
+	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
 		List cached = (List) this.methodCache.get(method);
 		if (cached == null) {
-			cached = super.getInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+			// Recalculate
+			cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
 			this.methodCache.put(method, cached);
 		}
 		return cached;

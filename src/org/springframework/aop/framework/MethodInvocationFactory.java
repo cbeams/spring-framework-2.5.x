@@ -5,6 +5,7 @@
  
 package org.springframework.aop.framework;
 
+import java.util.List;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -12,16 +13,15 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Factory for method invocations.
  * @author Rod Johnson
- * @version $Id: MethodInvocationFactory.java,v 1.4 2003-11-15 15:30:14 johnsonr Exp $
+ * @version $Id: MethodInvocationFactory.java,v 1.5 2003-11-28 11:17:17 johnsonr Exp $
  */
 public interface MethodInvocationFactory {
 	
-	MethodInvocation getMethodInvocation(Advised pc, Object proxy, Method method, Object[] args);
+	MethodInvocation getMethodInvocation(Advised pc, Object proxy,
+								Method method, Class targetClass, Object[] args, 
+								List interceptorsAndDynamicInterceptionAdvice);
 	
-	/**
-	 * Cache state based on ProxyConfig.
-	 * Clear any existing state.
-	 */
-	void refresh(Advised pc);
+	void release(MethodInvocation mi);
+	
 
 }
