@@ -267,7 +267,7 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-generic-1.1.jar
+* velocity/velocity-tools-generic-1.1.jar, velocity/velocity-tools-view-1.1.jar
 - Velocity Tools 1.1 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
