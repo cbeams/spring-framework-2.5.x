@@ -5,7 +5,6 @@ import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.JDODataStoreException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
