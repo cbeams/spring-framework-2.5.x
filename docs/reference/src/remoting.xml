@@ -211,16 +211,21 @@ public class SimpleObject {
 				<literal>web.xml</literal>):
 				<programlisting><![CDATA[
 <servlet>
-	<servlet-name>remote</servlet-name>
+	<servlet-name>remoting</servlet-name>
 	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 	<load-on-startup>1</load-on-startup>
 </servlet>
+
+<servlet-mapping>
+	<servlet-name>remoting</servlet-name>
+	<url-pattern>/remoting/*</url-pattern>
+</servlet-mapping>
 				]]></programlisting>
 			</para>
 			<para>
 				You're probably familiar with Spring's DispatcherServlet principles and if so,
 				you know that know you'll have to create an application context named
-				<literal>remote-servlet.xml</literal> (after the name of your servlet) in 
+				<literal>remoting-servlet.xml</literal> (after the name of your servlet) in
 				the <literal>WEB-INF</literal> directory. The application context will be used
 				in the next section.
 			</para>
@@ -228,7 +233,7 @@ public class SimpleObject {
 		<sect2>
 			<title>Exposing your beans by using the HessianServiceExporter</title>
 			<para>
-				In the newly created application context called <literal>remote-servlet.xml</literal>
+				In the newly created application context called <literal>remoting-servlet.xml</literal>,
 				we'll create a HessianServiceExporter exporting your services:
 				<programlisting><![CDATA[
 <bean id="accountService" class="example.AccountServiceImpl">
@@ -242,9 +247,10 @@ public class SimpleObject {
     </property>
 </bean>
 				]]></programlisting>
-				Now we're ready to link in the service at the client. No handler mapping
-				is specified mapping requests (urls) onto services and that's why the BeanNameUrlHandlerMapping
-				will be used, hence the service will be exported at the URL <literal>http://HOST:8080/AccountService</literal>.
+				Now we're ready to link in the service at the client. No explicit handler mapping
+				is specified, mapping request URLs onto services, so BeanNameUrlHandlerMapping
+				will be used: hence, the service will be exported at the URL indicated through
+				its bean name: <literal>http://HOST:8080/remoting/AccountService</literal>.
 			</para>
 		</sect2>
 		<sect2>
