@@ -16,6 +16,8 @@
 
 package org.springframework.orm.ojb;
 
+import javax.sql.DataSource;
+
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBrokerFactory;
 
@@ -31,6 +33,9 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 public abstract class AbstractOjbTransactionManager extends AbstractPlatformTransactionManager {
 
 	private PBKey pbKey = PersistenceBrokerFactory.getDefaultKey();
+
+	private DataSource dataSource;
+
 
 	/**
 	 * Set the JDBC Connection Descriptor alias of the PersistenceBroker
@@ -53,6 +58,27 @@ public abstract class AbstractOjbTransactionManager extends AbstractPlatformTran
 	 */
 	public PBKey getPbKey() {
 		return pbKey;
+	}
+
+	/**
+	 * Set the JDBC DataSource that this instance should manage transactions for.
+	 * The DataSource should match the one configured for the OJB JCD alias:
+	 * for example, you could specify the same JNDI DataSource for both.
+	 * <p>A transactional JDBC Connection for this DataSource will be provided to
+	 * application code accessing this DataSource directly via DataSourceUtils
+	 * or JdbcTemplate. The Connection will be taken from the Hibernate Session.
+	 * @see org.springframework.orm.hibernate.LocalDataSourceConnectionProvider
+	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setDataSource
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Return the JDBC DataSource that this instance manages transactions for.
+	 */
+	public DataSource getDataSource() {
+		return dataSource;
 	}
 
 }

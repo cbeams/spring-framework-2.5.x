@@ -16,6 +16,8 @@
 
 package org.springframework.orm.ojb;
 
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
+
 /**
  * OJB transaction object, representing a setPersistenceBrokerHolder.
  * Used as transaction object by PersistenceBrokerTransactionManager.
@@ -30,11 +32,11 @@ package org.springframework.orm.ojb;
  * @see PersistenceBrokerTransactionManager
  * @see PersistenceBrokerHolder
  */
-public class PersistenceBrokerTransactionObject {
+public class PersistenceBrokerTransactionObject extends JdbcTransactionObjectSupport {
 
 	private PersistenceBrokerHolder persistenceBrokerHolder;
 
-	public void setPersistenceBrokerHolder(PersistenceBrokerHolder persistenceBrokerHolder) {
+	protected void setPersistenceBrokerHolder(PersistenceBrokerHolder persistenceBrokerHolder) {
 		this.persistenceBrokerHolder = persistenceBrokerHolder;
 	}
 
