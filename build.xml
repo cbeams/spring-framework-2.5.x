@@ -1409,14 +1409,12 @@
             <include name="sandbox/test/org/springframework/web/struts/**"/>
             <include name="sandbox/test/org/springframework/util/**"/>
             <include name="sandbox/test/org/springframework/binding/**"/>
-			<include name="samples/webflow/birthdate/**"/>
-			<include name="samples/webflow/fileupload/**"/>
-			<include name="samples/webflow/itemlist/**"/>
-			<include name="samples/webflow/phonebook/**"/>
-			<include name="*.bat"/>
-			<include name="*.txt"/>
-			<include name="*.xml"/>
-			<include name="*.properties"/>
+			<include name="samples/webflow/**"/>
+			<include name="notice.txt"/>
+			<include name="license.txt"/>
+			<include name="build.xml"/>
+			<include name="build.bat"/>
+			<include name="project.properties"/>
 		</fileset>
 
         <fileset id="webflow.javadoc" dir="${sandbox.javadocs.dir}"/>
