@@ -2,6 +2,9 @@ package org.springframework.web.flow;
 
 import junit.framework.TestCase;
 
+import org.springframework.test.web.flow.MockFlowExecutionListener;
+import org.springframework.web.flow.StateTests.ExecutionCounterAction;
+import org.springframework.web.flow.StateTests.InputOutputMapper;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
@@ -10,10 +13,36 @@ import org.springframework.web.flow.config.FlowFactoryBean;
 /**
  * General flow execution tests.
  * 
+ * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowExecutionTests extends TestCase {
 
+	public void testFlowExecutionListener() {
+		Flow subFlow = new Flow("mySubFlow");
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
+				"submit", "finish"));
+		new EndState(subFlow, "finish");
+		Flow flow = new Flow("myFlow");
+		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(
+				"success", "viewState"));
+		new ViewState(flow, "viewState", "myView", new Transition("submit", "subFlowState"));
+		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition("finish", "finish"));
+		new EndState(flow, "finish");
+		FlowExecution flowExecution = flow.createExecution();
+		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
+		flowExecution.getListenerList().add(flowExecutionListener);
+		flowExecution.start(new SimpleEvent(this, "start"));
+		assertEquals(1, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(2, flowExecutionListener.countStateTransitions());
+		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		assertEquals(2, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(4, flowExecutionListener.countStateTransitions());
+		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		assertEquals(0, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(6, flowExecutionListener.countStateTransitions());
+	}
+	
 	public void testLoopInFlow() {
 		AbstractFlowBuilder builder = new AbstractFlowBuilder() {
 			protected String flowId() {
