@@ -34,7 +34,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
- * This controller requires sessions to keep track of flow state. So it will
+ * This controller requires sessions to keep track of flow state, so it will
  * force the "requireSession" attribute defined by the AbstractController to
  * true.
  * <p>
@@ -58,9 +58,11 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * execution lifecycle events.</td>
  * </tr>
  * </table>
+ * 
+ * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
+ * 
  * @author Erwin Vervaet
  * @author Keith Donald
- * @see org.springframework.web.flow.support.HttpServletFlowExecutionManager
  */
 public class FlowController extends AbstractController implements InitializingBean {
 
@@ -77,10 +79,17 @@ public class FlowController extends AbstractController implements InitializingBe
 	private FlowExecutionListener[] flowExecutionListeners;
 
 	/**
-	 * A helper for managed http servlet request-based flow executions in the
-	 * http session.
+	 * A helper for managed HTTP servlet request-based flow executions.
 	 */
 	private HttpServletFlowExecutionManager manager;
+	
+	/**
+	 * Returns the top level flow started by this controller, or <code>null</code>
+	 * if not set.
+	 */
+	public Flow getFlow() {
+		return flow;
+	}
 
 	/**
 	 * Set the top level fow started by this controller. This is optional.
@@ -88,13 +97,21 @@ public class FlowController extends AbstractController implements InitializingBe
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
-
+	
 	/**
 	 * Set the flow execution listener that should be notified of flow execution
 	 * lifecycle events.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
+	}
+	
+	/**
+	 * Returns the flow execution listeners that will be notified of flow
+	 * execution lifecycle events.
+	 */
+	public FlowExecutionListener[] getFlowExecutionListeners() {
+		return flowExecutionListeners;
 	}
 
 	/**
@@ -112,15 +129,6 @@ public class FlowController extends AbstractController implements InitializingBe
 		this.manager = createHttpFlowExecutionManager();
 	}
 
-	/**
-	 * Create a new HTTP flow execution manager. Subclasses can override this to
-	 * return a specialed manager.
-	 */
-	protected HttpServletFlowExecutionManager createHttpFlowExecutionManager() {
-		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
-	}
-
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		// delegate to the flow execution manager to process the request
@@ -128,4 +136,16 @@ public class FlowController extends AbstractController implements InitializingBe
 		ModelAndView mv = new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 		return mv;
 	}
+	
+	// subclassing hooks
+
+	/**
+	 * Create a new HTTP flow execution manager. Subclasses can override this to
+	 * return a specialized manager.
+	 */
+	protected HttpServletFlowExecutionManager createHttpFlowExecutionManager() {
+		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
+		return new HttpServletFlowExecutionManager(this.flow, flowLocator, flowExecutionListeners);
+	}
+
 }
