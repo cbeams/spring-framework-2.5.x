@@ -42,7 +42,7 @@ public class StateGroups implements Serializable {
 	}
 
 	public void add(String groupId, AbstractState state) {
-		getOrCreateGroup(groupId).add(state);
+		addAll(new AbstractState[] { state });
 	}
 
 	public void addAll(AbstractState[] states) {
@@ -50,18 +50,15 @@ public class StateGroups implements Serializable {
 	}
 
 	public void addAll(String groupId, AbstractState[] states) {
-		getOrCreateGroup(groupId).addAll(states);
-	}
-
-	private StateGroup getOrCreateGroup(String groupId) {
 		StateGroup group = getGroup(groupId);
 		if (group == null) {
-			group = new StateGroup(flow, groupId);
+			group = new StateGroup(flow, groupId, states);
 			add(group);
+		} else {
+			group.addAll(states);
 		}
-		return group;
 	}
-
+	
 	public StateGroup getGroup(String groupId) {
 		Iterator it = stateGroups.iterator();
 		while (it.hasNext()) {

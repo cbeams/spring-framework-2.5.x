@@ -170,11 +170,11 @@ public abstract class AbstractState implements Serializable {
 			return false;
 		}
 		AbstractState s = (AbstractState)o;
-		return flow.getId().equals(s.flow.getId()) && id.equals(s.id);
+		return flow.equals(s.flow) && id.equals(s.id);
 	}
 
 	public int hashCode() {
-		return flow.getId().hashCode() + id.hashCode();
+		return flow.hashCode() + id.hashCode();
 	}
 
 	/**

@@ -36,10 +36,11 @@ public class StateGroup implements Serializable {
 
 	private Flow flow;
 
-	public StateGroup(Flow flow, String id) {
+	public StateGroup(Flow flow, String id, AbstractState[] states) {
 		Assert.hasText("The state group is required");
 		this.flow = flow;
 		this.id = id;
+		addAll(states);
 	}
 
 	public String getId() {
@@ -48,7 +49,7 @@ public class StateGroup implements Serializable {
 
 	public void add(AbstractState state) {
 		state.setFlow(flow);
-		states.add(state);
+		this.states.add(state);
 	}
 
 	public void addAll(AbstractState[] states) {
