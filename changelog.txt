@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.148 2004-05-24 10:02:48 jhoeller Exp $
+$Id: changelog.txt,v 1.149 2004-05-26 10:54:44 jhoeller Exp $
 
 
-Changes in version 1.0.2 (25.5.2004)
+Changes in version 1.0.2 (27.5.2004)
 ------------------------------------
 
 Package org.springframework.aop
@@ -45,6 +45,10 @@ Package org.springframework.core
 * added ResourcePatternResolver strategy interface, for resolving a location pattern into Resource objects
 * added PathMatchingResourcePatternResolver implementation, supporting Ant-style path patterns via PathMatcher utility
 
+Package org.springframework.dao
+* added IncorrectResultSizeDataAccessException, thrown when a result was not of the expected size (e.g. <>1)
+* added DataAccessUtils class to support package, providing "uniqueResult" and "requiredUniqueResult" helper methods
+
 Package org.springframework.ejb
 * added "cacheHome" property to AbstractSlsbInvokerInterceptor, for refetching the EJB home on each method invocation
 * invoke "remove" on EJB proxy after invocation in LocalSlsbInvokerInterceptor and SimpleRemoteSlsbInvokerInterceptor
@@ -55,6 +59,7 @@ Package org.springframework.jdbc
 * added "query(sql, args, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
 * added "query(sql, args, argTypes, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
 * changed JdbcTemplate queryForList to return List of LinkedHashMap if JDK version >1.3 (to preserve column order)
+* refactored SqlParameter's inner ResultReaderStoredProcImpl class into reusable RowMapperResultReader adapter
 * added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
 * added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
 * added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
@@ -128,6 +133,7 @@ Package org.springframework.web
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
 * added AbstractTemplateView allowing request and session attributes to be exposed in FreeMarker and Velocity views
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
+* added "cacheMappings" property to WebContentInterceptor, for overriding cache seconds for specific URL paths
 * added "throws Exception" to ParameterizableViewController's "handleRequestInternal" method, for easier subclassing
 * added "validators" property to BaseCommandController, allowing to specify multiple Validators per controller
 * removed final marker from SimpleFormController's "showForm" implementation, allowing to override it for special cases
