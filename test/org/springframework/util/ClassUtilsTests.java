@@ -9,6 +9,7 @@ import junit.framework.TestCase;
  * Tests the various functionality of the ClassUtils class.
  * 
  * @author R.J. Lorimer
+ * @author Colin Sampaleanu
  */
 public class ClassUtilsTests extends TestCase {
 
