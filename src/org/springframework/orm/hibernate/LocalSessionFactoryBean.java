@@ -128,13 +128,14 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	/**
 	 * Return the LobHandler for the currently configured Hibernate SessionFactory,
-	 * to be used by Type implementations like ClobStringType.
+	 * to be used by UserType implementations like ClobStringType.
 	 * <p>This instance will be set before initialization of the corresponding
 	 * SessionFactory, and reset immediately afterwards. It is thus only available
 	 * during configuration.
 	 * @see #setLobHandler
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
 	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
+	 * @see org.springframework.orm.hibernate.support.BlobSerializableType
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
 		return (LobHandler) configTimeLobHandlerHolder.get();
@@ -332,9 +333,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Set the LobHandler to be used by the SessionFactory.
 	 * Will be exposed at config time for UserType implementations.
 	 * @see #getConfigTimeLobHandler
+	 * @see net.sf.hibernate.UserType
 	 * @see org.springframework.orm.hibernate.support.ClobStringType
 	 * @see org.springframework.orm.hibernate.support.BlobByteArrayType
-	 * @see net.sf.hibernate.UserType
+	 * @see org.springframework.orm.hibernate.support.BlobSerializableType
 	 */
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;

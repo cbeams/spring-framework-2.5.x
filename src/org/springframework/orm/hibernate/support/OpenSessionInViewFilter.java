@@ -55,9 +55,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p>Alternatively, turn this filter into deferred close mode, by specifying
  * "singleSession"="false": It will not use a single session per request then,
- * but rather let each data access operation respectively transaction use its own
- * session (like without Open Session in View). Each of those sessions will be
- * registered for deferred close, though, actually processed at request completion.
+ * but rather let each data access operation or transaction use its own session
+ * (like without Open Session in View). Each of those sessions will be registered
+ * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
  * but can cause side effects, for example on saveOrUpdate or if continuing
@@ -118,9 +118,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set whether to use a single session for each request. Default is true.
-	 * <p>If set to false, each data access operation respectively transaction
-	 * will use its own session (like without Open Session in View). Each of
-	 * those sessions will be registered for deferred close, though, actually
+	 * <p>If set to false, each data access operation or transaction will use
+	 * its own session (like without Open Session in View). Each of those
+	 * sessions will be registered for deferred close, though, actually
 	 * processed at request completion.
 	 * @see SessionFactoryUtils#initDeferredClose
 	 * @see SessionFactoryUtils#processDeferredClose

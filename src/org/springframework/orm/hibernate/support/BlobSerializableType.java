@@ -40,13 +40,12 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
- * work with most JDBC-compliant databases respectively drivers. In this case,
- * the field type does not have to be BLOB: For databases like MySQL and MS SQL
- * Server, any large enough binary type will work.
+ * work with most JDBC-compliant database drivers. In this case, the field type
+ * does not have to be BLOB: For databases like MySQL and MS SQL Server, any
+ * large enough binary type will work.
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setLobHandler
  */
 public class BlobSerializableType extends AbstractLobType {

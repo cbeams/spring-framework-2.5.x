@@ -43,15 +43,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Abstract base class for Hibernate UserType implementations that map to LOBs.
  * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
  *
- * <p>Requires either active Spring transaction synchronization or a specified
- * "jtaTransactionManager" on LocalSessionFactoryBean plus an active JTA transaction.
+ * <p>For writing LOBs, either an active Spring transaction synchronization
+ * or an active JTA transaction (with "jtaTransactionManager" specified on
+ * LocalSessionFactoryBean) is required.
  *
- * <p>Offers template methods for getting and setting that pass in the LobHandler
- * respectively LobCreator to use.
+ * <p>Offers template methods for setting parameters and getting result values,
+ * passing in the LobHandler or LobCreator to use.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see org.springframework.jdbc.support.lob.LobHandler
+ * @see org.springframework.jdbc.support.lob.LobCreator
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setLobHandler
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  */
@@ -124,10 +126,12 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
+
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
 			    "lobHandler property must be set on LocalSessionFactoryBean");
 		}
+
 		try {
 			return nullSafeGetInternal(rs, rs.findColumn(names[0]), this.lobHandler);
 		}
@@ -144,10 +148,12 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	public final void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
+
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
 			    "lobHandler property must be set on LocalSessionFactoryBean");
 		}
+
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
 		try {
 			nullSafeSetInternal(st, index, value, lobCreator);
@@ -176,8 +182,8 @@ public abstract class AbstractLobType implements UserType {
 							"Could not register synchronization with JTA TransactionManager", ex);
 				}
 			}
-			throw new IllegalStateException("Active Spring transaction synchronization or " +
-			    "jtaTransactionManager on LocalSessionFactoryBean plus active JTA transaction required");
+			throw new IllegalStateException("Active Spring transaction synchronization or active " +
+			    "JTA transaction with 'jtaTransactionManager' on LocalSessionFactoryBean required");
 		}
 	}
 
@@ -195,7 +201,7 @@ public abstract class AbstractLobType implements UserType {
 			throws SQLException, IOException, HibernateException;
 
 	/**
-	 * Template method to set the given value on the given statement.
+	 * Template method to set the given parameter value on the given statement.
 	 * @param ps the PreparedStatement to set on
 	 * @param index the statement parameter index
 	 * @param value the value to set
@@ -220,7 +226,7 @@ public abstract class AbstractLobType implements UserType {
 
 		private boolean beforeCompletionCalled = false;
 
-		private SpringLobCreatorSynchronization(LobCreator lobCreator) {
+		public SpringLobCreatorSynchronization(LobCreator lobCreator) {
 			this.lobCreator = lobCreator;
 		}
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate.support;
 
@@ -55,9 +55,9 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>Alternatively, turn this interceptor into deferred close mode, by specifying
  * "singleSession"="false": It will not use a single session per request then,
- * but rather let each data access operation respectively transaction use its own
- * session (like without Open Session in View). Each of those sessions will be
- * registered for deferred close, though, actually processed at request completion.
+ * but rather let each data access operation or transaction use its own session
+ * (like without Open Session in View). Each of those sessions will be registered
+ * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
  * but can cause side effects, for example on saveOrUpdate or if continuing
@@ -106,9 +106,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 
 	/**
 	 * Set whether to use a single session for each request. Default is true.
-	 * <p>If set to false, each data access operation respectively transaction
-	 * will use its own session (like without Open Session in View). Each of
-	 * those sessions will be registered for deferred close, though, actually
+	 * <p>If set to false, each data access operation or transaction will use
+	 * its own session (like without Open Session in View). Each of those
+	 * sessions will be registered for deferred close, though, actually
 	 * processed at request completion.
 	 * @see SessionFactoryUtils#initDeferredClose
 	 * @see SessionFactoryUtils#processDeferredClose
@@ -173,6 +173,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	public void postHandle(
 			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 			throws DataAccessException {
+
 		if (isSingleSession()) {
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
@@ -188,9 +189,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	}
 
 	/**
-	 * Unbind the Hibernate Session from the thread and closes it (in single session mode),
-	 * respectively process deferred close for all sessions that have been opened during
-	 * the current request (in deferred close mode).
+	 * Unbind the Hibernate Session from the thread and closes it (in single session
+	 * mode), or process deferred close for all sessions that have been opened
+	 * during the current request (in deferred close mode).
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate.support;
 
@@ -34,13 +34,12 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * Oracle database (only possible via CLOBs), in combination with OracleLobHandler.
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
- * work with most JDBC-compliant databases respectively drivers. In this case,
- * the field type does not have to be CLOB: For databases like MySQL and MS SQL
- * Server, any large enough text type will work.
+ * work with most JDBC-compliant database drivers. In this case, the field type
+ * does not have to be BLOB: For databases like MySQL and MS SQL Server, any
+ * large enough binary type will work.
  *
  * @author Juergen Hoeller
  * @since 12.01.2004
- * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setLobHandler
  */
 public class ClobStringType extends AbstractLobType {

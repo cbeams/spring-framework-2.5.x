@@ -75,7 +75,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * or preferably create the SessionFactory with LocalSessionFactoryBean and
  * a local DataSource (which will be auto-detected by this transaction manager).
  *
- * <p>JTA respectively JtaTransactionManager is necessary for accessing multiple
+ * <p>JTA (usually through JtaTransactionManager) is necessary for accessing multiple
  * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
  * then (see container setup), alternatively the Hibernate JCA connector can be used
  * for direct container integration. Normally, JTA setup for Hibernate is somewhat
