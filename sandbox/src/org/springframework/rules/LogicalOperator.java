@@ -30,7 +30,7 @@ public class LogicalOperator extends Operator {
     /**
      * The <code>AND</code> operator
      */
-    public static final LogicalOperator AND = new LogicalOperator("&&") {
+    public static final LogicalOperator AND = new LogicalOperator("and", "&&") {
         public CompoundUnaryPredicate createPredicate() {
             return new UnaryAnd();
         }
@@ -39,7 +39,7 @@ public class LogicalOperator extends Operator {
     /**
      * The <code>OR</code> operator
      */
-    public static final LogicalOperator OR = new LogicalOperator("||") {
+    public static final LogicalOperator OR = new LogicalOperator("or", "||") {
         public CompoundUnaryPredicate createPredicate() {
             return new UnaryOr();
         }
@@ -48,14 +48,14 @@ public class LogicalOperator extends Operator {
     /**
      * The <code>OR</code> operator
      */
-    public static final LogicalOperator NOT = new LogicalOperator("!") {
+    public static final LogicalOperator NOT = new LogicalOperator("not", "!") {
         public UnaryNot createPredicate() {
             return new UnaryNot();
         }
     };
 
-    private LogicalOperator(String code) {
-        super(code);
+    private LogicalOperator(String code, String symbol) {
+        super(code, symbol);
     }
     
 }

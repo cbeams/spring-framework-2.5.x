@@ -32,7 +32,7 @@ public abstract class RelationalOperator extends Operator {
      * The <code>EQUAL_TO (==)</code> operator
      */
     public static final RelationalOperator EQUAL_TO = new RelationalOperator(
-            "=") {
+            "eq", "=") {
         public BinaryPredicate getPredicate() {
             return EqualTo.instance();
         }
@@ -42,7 +42,11 @@ public abstract class RelationalOperator extends Operator {
      * The <code>LESS_THAN (<)</code> operator
      */
     public static final RelationalOperator LESS_THAN = new RelationalOperator(
-            "<") {
+            "lt", "<") {
+        public Operator negation() {
+            return GREATER_THAN;
+        }
+
         public BinaryPredicate getPredicate() {
             return LessThan.instance();
         }
@@ -52,7 +56,11 @@ public abstract class RelationalOperator extends Operator {
      * The <code>LESS_THAN_EQUAL_TO (<=)</code> operator
      */
     public static final RelationalOperator LESS_THAN_EQUAL_TO = new RelationalOperator(
-            "<=") {
+            "lte", "<=") {
+        public Operator negation() {
+            return GREATER_THAN_EQUAL_TO;
+        }
+
         public BinaryPredicate getPredicate() {
             return LessThanEqualTo.instance();
         }
@@ -62,7 +70,11 @@ public abstract class RelationalOperator extends Operator {
      * The <code>GREATER_THAN (>)</code> operator
      */
     public static final RelationalOperator GREATER_THAN = new RelationalOperator(
-            ">") {
+            "gt", ">") {
+        public Operator negation() {
+            return LESS_THAN;
+        }
+
         public BinaryPredicate getPredicate() {
             return GreaterThan.instance();
         }
@@ -72,14 +84,18 @@ public abstract class RelationalOperator extends Operator {
      * The <code>GREATER_THAN_EQUAL_TO (>=)</code> operator
      */
     public static final RelationalOperator GREATER_THAN_EQUAL_TO = new RelationalOperator(
-            ">=") {
+            "gte", ">=") {
+        public Operator negation() {
+            return LESS_THAN_EQUAL_TO;
+        }
+
         public BinaryPredicate getPredicate() {
             return GreaterThanEqualTo.instance();
         }
     };
 
-    private RelationalOperator(String code) {
-        super(code);
+    private RelationalOperator(String code, String symbol) {
+        super(code, symbol);
     }
 
     /**

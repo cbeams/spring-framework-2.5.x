@@ -21,8 +21,18 @@ import org.springframework.enum.StringCodedEnum;
  * @author keith
  */
 public abstract class Operator extends StringCodedEnum {
-    protected Operator(String name) {
-        super(name);
+    private String symbol;
+    
+    protected Operator(String code, String symbol) {
+        super(code);
+    }
+    
+    public String getSymbol() {
+        return symbol;
+    }
+    
+    public Operator negation() {
+        return null;
     }
     
 }
