@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.17 2003-11-25 16:19:32 johnsonr Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.18 2003-12-05 16:49:14 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -741,13 +741,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 
 	public PropertyDescriptor[] getPropertyDescriptors() {
-		return cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
+		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		if (propertyName == null)
+		if (propertyName == null) {
 			throw new FatalBeanException("Can't find property descriptor for null property");
-			
+		}
 		if (isNestedProperty(propertyName)) {
 			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
 			return nestedBw.getPropertyDescriptor(getFinalPath(propertyName));
@@ -758,9 +758,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	public boolean isReadableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not
-		if (propertyName == null)
+		if (propertyName == null) {
 			throw new FatalBeanException("Can't find readability status for null property");
-		
+		}
 		try {
 			return getPropertyDescriptor(propertyName).getReadMethod() != null;
 		}
@@ -773,9 +773,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	public boolean isWritableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not
-		if (propertyName == null)
+		if (propertyName == null) {
 			throw new FatalBeanException("Can't find writability status for null property");
-			 
+		}
 		try {
 			return getPropertyDescriptor(propertyName).getWriteMethod() != null;
 		}
@@ -789,11 +789,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 	public Object invoke(String methodName, Object[] args) throws BeansException {
 		try {
 			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("About to invoke method '" + methodName + "'");
+			}
 			Object returnVal = md.getMethod().invoke(this.object, args);
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("Successfully invoked method '" + methodName + "'");
+			}
 			return returnVal;
 		}
 		catch (InvocationTargetException ex) {

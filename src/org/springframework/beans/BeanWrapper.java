@@ -32,7 +32,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.5 2003-11-25 14:19:29 johnsonr Exp $
+ * @version $Id: BeanWrapper.java,v 1.6 2003-12-05 16:49:14 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -162,10 +162,9 @@ public interface BeanWrapper {
 
 
 	/**
-	 * Get the PropertyDescriptors standard JavaBeans introspection identified
-	 * on this object.
-	 * @return the PropertyDescriptors standard JavaBeans introspection identified
-	 * on this object
+	 * Get the PropertyDescriptors identified on this object
+	 * (standard JavaBeans introspection).
+	 * @return the PropertyDescriptors identified on this object
 	 */
 	PropertyDescriptor[] getPropertyDescriptors() throws BeansException;
 
@@ -179,15 +178,17 @@ public interface BeanWrapper {
 
 	/**
 	 * Return whether this property is readable.
-	 * @return whether this property is readable
+	 * Returns false if the property doesn't exist.
 	 * @param propertyName property to check status for
+	 * @return whether this property is readable
 	 */
 	boolean isReadableProperty(String propertyName);
 
 	/**
 	 * Return whether this property is writable.
-	 * @return whether this property is writable
+	 * Returns false if the property doesn't exist.
 	 * @param propertyName property to check status for
+	 * @return whether this property is writable
 	 */
 	boolean isWritableProperty(String propertyName);
 
