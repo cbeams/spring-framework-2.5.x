@@ -25,7 +25,6 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
