@@ -9,7 +9,7 @@ The directories have the following purpose:
 * "war": documents such as JSP. Also contains WEB-INF directory containing deployment descriptors.
 * "dist": directory created by build script containing WAR deployment unit
 * "lib": binaries required in the WAR's WEB-INF/lib directory. You'll need to copy spring.jar,
-  commons-logging.jar and servlet.jar here for compilation to succeed (see lib/readme.txt).
+  commons-logging.jar and servlet-api.jar here for compilation to succeed (see lib/readme.txt).
 
 Type "ant warfile" to build a WAR deployment unit.
 

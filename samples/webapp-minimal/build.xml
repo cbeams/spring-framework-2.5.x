@@ -80,7 +80,7 @@
 
 			<lib dir="${lib.dir}">
 				<!-- The servlet container provides the Servlet API -->
-				<exclude name="servlet.jar"/>
+				<exclude name="servlet-api.jar"/>
 			</lib>
 
 		</war>

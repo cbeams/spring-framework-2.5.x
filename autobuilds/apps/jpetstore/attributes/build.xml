@@ -51,7 +51,7 @@
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jaxrpc.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
-			<include name="servlet.jar"/>
+			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-attributes-api.jar"/>

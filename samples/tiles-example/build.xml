@@ -26,7 +26,7 @@
 			<include name="dom4j.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
+			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
@@ -47,7 +47,7 @@
 			<include name="aopalliance.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet.jar"/>
+			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-lang.jar"/>

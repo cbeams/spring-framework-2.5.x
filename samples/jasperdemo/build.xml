@@ -8,7 +8,7 @@
 
 	<fileset id="libs" dir="${spring.root}/lib">
 		<include name="jasperreports/jasperreports-0.6.3.jar"/>
-		<include name="j2ee/servlet.jar"/>
+		<include name="j2ee/servlet-api.jar"/>
 	</fileset>
 
 	<path id="project.classpath">
