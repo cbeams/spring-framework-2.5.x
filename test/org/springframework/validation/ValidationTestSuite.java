@@ -18,7 +18,6 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Map;
-import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -251,8 +250,12 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals(2, errors.getGlobalErrorCount());
 		assertEquals("NAME_TOUCHY_MISMATCH", errors.getGlobalError().getCode());
 		assertEquals("NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCode());
+		assertEquals("NAME_TOUCHY_MISMATCH.tb", ((ObjectError) errors.getGlobalErrors().get(0)).getCodes()[0]);
+		assertEquals("NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCodes()[1]);
 		assertEquals("tb", ((ObjectError) errors.getGlobalErrors().get(0)).getObjectName());
 		assertEquals("GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCode());
+		assertEquals("GENERAL_ERROR.tb", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[0]);
+		assertEquals("GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[1]);
 		assertEquals("msg", ((ObjectError) errors.getGlobalErrors().get(1)).getDefaultMessage());
 		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArguments()[0]);
 		assertEquals(2, errors.getFieldErrorCount("age"));
@@ -266,7 +269,8 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD", errors.getFieldError("name").getCode());
 		assertEquals("NOT_ROD.tb.name", errors.getFieldError("name").getCodes()[0]);
 		assertEquals("NOT_ROD.name", errors.getFieldError("name").getCodes()[1]);
-		assertEquals("NOT_ROD", errors.getFieldError("name").getCodes()[2]);
+		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("name").getCodes()[2]);
+		assertEquals("NOT_ROD", errors.getFieldError("name").getCodes()[3]);
 		assertEquals("name", ((FieldError) errors.getFieldErrors("name").get(0)).getField());
 		assertEquals(null, ((FieldError) errors.getFieldErrors("name").get(0)).getRejectedValue());
 		assertEquals(1, errors.getFieldErrorCount("spouse.age"));
@@ -297,7 +301,8 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.array[0].name", errors.getFieldError("array[0].name").getCodes()[2]);
 		assertEquals("NOT_ROD.array.name", errors.getFieldError("array[0].name").getCodes()[3]);
 		assertEquals("NOT_ROD.name", errors.getFieldError("array[0].name").getCodes()[4]);
-		assertEquals("NOT_ROD", errors.getFieldError("array[0].name").getCodes()[5]);
+		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("array[0].name").getCodes()[5]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].name").getCodes()[6]);
 		assertEquals(1, errors.getFieldErrorCount("map[key1].name"));
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCode());
 		assertEquals("NOT_ROD.tb.map[key1].name", errors.getFieldError("map[key1].name").getCodes()[0]);
@@ -305,7 +310,8 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.map[key1].name", errors.getFieldError("map[key1].name").getCodes()[2]);
 		assertEquals("NOT_ROD.map.name", errors.getFieldError("map[key1].name").getCodes()[3]);
 		assertEquals("NOT_ROD.name", errors.getFieldError("map[key1].name").getCodes()[4]);
-		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCodes()[5]);
+		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("map[key1].name").getCodes()[5]);
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1].name").getCodes()[6]);
 	}
 
 	public void testBindingToNestedIndexedField() {
@@ -333,7 +339,8 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[4]);
 		assertEquals("NOT_ROD.array.nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[5]);
 		assertEquals("NOT_ROD.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[6]);
-		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[7]);
+		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[7]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[8]);
 	}
 
 	public void testDirectBindingToIndexedField() {
@@ -361,14 +368,16 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
 		assertEquals(1, errors.getFieldErrorCount("map[key1]"));
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCode());
 		assertEquals("NOT_ROD.tb.map[key1]", errors.getFieldError("map[key1]").getCodes()[0]);
 		assertEquals("NOT_ROD.tb.map", errors.getFieldError("map[key1]").getCodes()[1]);
 		assertEquals("NOT_ROD.map[key1]", errors.getFieldError("map[key1]").getCodes()[2]);
 		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
-		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
+		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[5]);
 	}
 
 

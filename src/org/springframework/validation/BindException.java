@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.validation;
 
@@ -53,18 +53,22 @@ public class BindException extends Exception implements Errors {
 	 */
 	public static final String ERROR_KEY_PREFIX = BindException.class.getName() + ".";
 
-	private List errors = new ArrayList();
+	private final List errors = new ArrayList();
 
-	private BeanWrapper beanWrapper;
+	private final BeanWrapper beanWrapper;
 
-	private String objectName;
+	private final String objectName;
+
+	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
 	private String nestedPath = "";
+
 
 	/**
 	 * Create a new BindException instance.
 	 * @param target target object to bind onto
 	 * @param name name of the target object
+	 * @see DefaultMessageCodesResolver
 	 */
 	public BindException(Object target, String name) {
 		this.beanWrapper = new BeanWrapperImpl(target);
@@ -80,22 +84,6 @@ public class BindException extends Exception implements Errors {
 	}
 
 	/**
-	 * Transform the given field into its full path,
-	 * regarding the nested path of this instance.
-	 */
-	private String fixedField(String field) {
-		return this.nestedPath + field;
-	}
-
-	/**
-	 * Add a FieldError to the errors list.
-	 * Intended to be used by subclasses like DataBinder.
-	 */
-	protected void addFieldError(FieldError fe) {
-		this.errors.add(fe);
-	}
-
-	/**
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
@@ -106,12 +94,51 @@ public class BindException extends Exception implements Errors {
 		return objectName;
 	}
 
+	/**
+	 * Set the strategy to use for resolving errors into message codes.
+	 * Default is DefaultMessageCodesResolver.
+	 * @see DefaultMessageCodesResolver
+	 */
+	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+		this.messageCodesResolver = messageCodesResolver;
+	}
+
+	/**
+	 * Return the strategy to use for resolving errors into message codes.
+	 */
+	public MessageCodesResolver getMessageCodesResolver() {
+		return messageCodesResolver;
+	}
+
+	public void setNestedPath(String nestedPath) {
+		if (nestedPath == null) {
+			nestedPath = "";
+		}
+		if (nestedPath.length() > 0 && !nestedPath.endsWith(".")) {
+			nestedPath += ".";
+		}
+		this.nestedPath = nestedPath;
+	}
+
+	public String getNestedPath() {
+		return nestedPath;
+	}
+
+	/**
+	 * Transform the given field into its full path,
+	 * regarding the nested path of this instance.
+	 */
+	protected String fixedField(String field) {
+		return this.nestedPath + field;
+	}
+
+
 	public void reject(String errorCode, String defaultMessage) {
 		reject(errorCode, null, defaultMessage);
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
-		this.errors.add(new ObjectError(this.objectName, errorCode, errorArgs, defaultMessage));
+		addError(new ObjectError(this.objectName, resolveMessageCodes(errorCode), errorArgs, defaultMessage));
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {
@@ -119,11 +146,31 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
-		field = fixedField(field);
-		Object newVal = getBeanWrapper().getPropertyValue(field);
-		FieldError fe = new FieldError(this.objectName, field, newVal, false, errorCode, errorArgs, defaultMessage);
-		this.errors.add(fe);
+		String fixedField = fixedField(field);
+		Object newVal = getBeanWrapper().getPropertyValue(fixedField);
+		FieldError fe = new FieldError(this.objectName, fixedField, newVal, false,
+																	 resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
+		addError(fe);
 	}
+
+	protected String[] resolveMessageCodes(String errorCode) {
+		return this.messageCodesResolver.resolveMessageCodes(errorCode, this.objectName);
+	}
+
+	protected String[] resolveMessageCodes(String errorCode, String field) {
+		String fixedField = fixedField(field);
+		Class fieldType = this.beanWrapper.getPropertyType(fixedField);
+		return this.messageCodesResolver.resolveMessageCodes(errorCode, this.objectName, fixedField, fieldType);
+	}
+
+	/**
+	 * Add a FieldError to the errors list.
+	 * Intended to be used by subclasses like DataBinder.
+	 */
+	protected void addError(ObjectError error) {
+		this.errors.add(error);
+	}
+
 
 	public boolean hasErrors() {
 		return !this.errors.isEmpty();
@@ -213,25 +260,17 @@ public class BindException extends Exception implements Errors {
 		return value;
 	}
 
+	/**
+	 * Retrieve the custom PropertyEditor for the given field, if any.
+	 * @param field the field name
+	 * @return the custom PropertyEditor, or null
+	 */
 	public PropertyEditor getCustomEditor(String field) {
 		field = fixedField(field);
 		FieldError fe = getFieldError(field);
 		return (fe == null ? getBeanWrapper().findCustomEditor(null, field) : null);
 	}
 
-	public void setNestedPath(String nestedPath) {
-		if (nestedPath == null) {
-			nestedPath = "";
-		}
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(".")) {
-			nestedPath += ".";
-		}
-		this.nestedPath = nestedPath;
-	}
-
-	public String getNestedPath() {
-		return nestedPath;
-	}
 
 	/**
 	 * Return a model Map for the obtained state, exposing an Errors

@@ -42,6 +42,25 @@ public interface Errors {
 	String getObjectName();
 
 	/**
+	 * Allow context to be changed so that standard validators can validate
+	 * subtrees. Reject calls prepend the given path to the field names.
+	 * <p>For example, an address validator could validate the subobject
+	 * "address" of a customer object.
+	 * @param nestedPath nested path within this object,
+	 * e.g. "address" (defaults to "", null is also acceptable).
+	 * Can end with a dot: both "address" and "address." are valid.
+	 */
+	void setNestedPath(String nestedPath);
+
+	/**
+	 * Return the current nested path of this Errors object.
+	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
+	 * building of concatenated paths. Default is an empty String.
+	 */
+	String getNestedPath();
+
+
+	/**
 	 * Reject the current object, using the given error description.
 	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
@@ -59,7 +78,7 @@ public interface Errors {
 
 	/**
 	 * Reject the given field of the current object, using the given error description.
-	 * @param field field name
+	 * @param field the field name
 	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
 	 */
@@ -67,13 +86,14 @@ public interface Errors {
 
 	/**
 	 * Reject the given field of the current object, using the given error description.
-	 * @param field field name
+	 * @param field the field name
 	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be null)
 	 * @param defaultMessage fallback default message
 	 */
 	void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage);
+
 
 	/**
 	 * Return if there were any errors.
@@ -115,21 +135,21 @@ public interface Errors {
 
 	/**
 	 * Return if there are any errors associated with the given field.
-	 * @param field field name
+	 * @param field the field name
 	 * @return if there were any errors associated with the given field
 	 */
 	boolean hasFieldErrors(String field);
 
 	/**
 	 * Return the number of errors associated with the given field.
-	 * @param field field name
+	 * @param field the field name
 	 * @return the number of errors associated with the given field
 	 */
 	int getFieldErrorCount(String field);
 
 	/**
 	 * Get all errors associated with the given field.
-	 * @param field field name
+	 * @param field the field name
 	 * @return List of FieldError instances
 	 */
 	List getFieldErrors(String field);
@@ -145,27 +165,9 @@ public interface Errors {
 	 * bean property value or a rejected update from the last binding.
 	 * Allows for convenient access to user-specified field values,
 	 * even if there were type mismatches.
-	 * @param field field name
+	 * @param field the field name
 	 * @return the current value of the given field
 	 */
 	Object getFieldValue(String field);
-
-	/**
-	 * Allow context to be changed so that standard validators can validate
-	 * subtrees. Reject calls prepend the given path to the field names.
-	 * <p>For example, an address validator could validate the subobject
-	 * "address" of a customer object.
-	 * @param nestedPath nested path within this object,
-	 * e.g. "address" (defaults to "", null is also acceptable).
-	 * Can end with a dot: both "address" and "address." are valid.
-	 */
-	void setNestedPath(String nestedPath);
-
-	/**
-	 * Return the current nested path of this Errors object.
-	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
-	 * building of concatenated paths. Default is an empty String.
-	 */
-	String getNestedPath();
 
 }

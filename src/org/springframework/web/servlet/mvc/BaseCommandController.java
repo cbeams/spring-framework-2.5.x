@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.validation.BindException;
+import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -134,6 +135,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private boolean validateOnBinding = true;
 
+	private MessageCodesResolver messageCodesResolver;
+
 
 	/**
 	 * Set the name of the command in the model.
@@ -194,6 +197,24 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected final boolean isValidateOnBinding() {
 		return validateOnBinding;
+	}
+
+	/**
+	 * Set the strategy to use for resolving errors into message codes.
+	 * Applies the given strategy to all data binders used by this controller.
+	 * <p>Default is null, i.e. using the default strategy of the data binder.
+	 * @see #createBinder
+	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
+	 */
+	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+		this.messageCodesResolver = messageCodesResolver;
+	}
+
+	/**
+	 * Return the strategy to use for resolving errors into message codes.
+	 */
+	protected final MessageCodesResolver getMessageCodesResolver() {
+		return messageCodesResolver;
 	}
 
 
@@ -267,19 +288,23 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Create a new binder instance for the given command and request.
 	 * Called by bindAndValidate. Can be overridden to plug in custom
 	 * ServletRequestDataBinder subclasses.
-	 * <p>Default implementation creates a standard ServletRequestDataBinder
-	 * and invokes initBinder. Note that initBinder will not be invoked
-	 * automatically if you override this method!
+	 * <p>Default implementation creates a standard ServletRequestDataBinder,
+	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
+	 * Note that initBinder will not be invoked if you override this method!
 	 * @param command command to bind onto
 	 * @param request current request
 	 * @return the new binder instance
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 * @see #initBinder
+	 * @see #setMessageCodesResolver
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 	    throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
+		if (this.messageCodesResolver != null) {
+			binder.setMessageCodesResolver(this.messageCodesResolver);
+		}
 		initBinder(request, binder);
 		return binder;
 	}

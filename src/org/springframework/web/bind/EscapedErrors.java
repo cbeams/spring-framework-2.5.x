@@ -41,7 +41,7 @@ import org.springframework.web.util.HtmlUtils;
  */
 public class EscapedErrors implements Errors {
 
-	private Errors source = null;
+	private final Errors source;
 
 	/**
 	 * Create a new EscapedErrors instance for the given source instance.
@@ -145,9 +145,9 @@ public class EscapedErrors implements Errors {
 				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
 			}
 			return new FieldError(fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
-														fieldError.getCode(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+														fieldError.getCodes(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
-		return new ObjectError(source.getObjectName(), source.getCode(), source.getArguments(),
+		return new ObjectError(source.getObjectName(), source.getCodes(), source.getArguments(),
 													 HtmlUtils.htmlEscape(source.getDefaultMessage()));
 	}
 
