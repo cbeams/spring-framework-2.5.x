@@ -94,10 +94,10 @@ public class NestedPathTag extends TagSupport {
 	 */
 	public int doEndTag() {
 		if (this.previousNestedPath != null) {
-			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath);
+			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
 		}
 		else {
-			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME);
+			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
 		return EVAL_PAGE;
 	}

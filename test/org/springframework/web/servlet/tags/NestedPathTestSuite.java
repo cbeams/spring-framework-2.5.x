@@ -38,7 +38,7 @@ public class NestedPathTestSuite extends AbstractTagTests {
 		tag.doStartTag();
 		int returnValue = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, returnValue);
-		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testDoEndTagWithNesting() throws JspException {
@@ -54,10 +54,10 @@ public class NestedPathTestSuite extends AbstractTagTests {
 		anotherTag.doStartTag();
 		anotherTag.doEndTag();
 
-		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		tag.doEndTag();
-		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testDoStartTagInternal() throws JspException {
@@ -68,7 +68,7 @@ public class NestedPathTestSuite extends AbstractTagTests {
 		int returnValue = tag.doStartTag();
 
 		assertEquals(Tag.EVAL_BODY_INCLUDE, returnValue);
-		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testDoStartTagInternalWithNesting() throws JspException {
@@ -77,21 +77,30 @@ public class NestedPathTestSuite extends AbstractTagTests {
 		tag.setPath("foo");
 		tag.setPageContext(pc);
 		tag.doStartTag();
-		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		NestedPathTag anotherTag = new NestedPathTag();
 		anotherTag.setPageContext(pc);
 		anotherTag.setPath("bar");
 		anotherTag.doStartTag();
 
-		assertEquals("foo.bar.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("foo.bar.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		NestedPathTag yetAnotherTag = new NestedPathTag();
 		yetAnotherTag.setPageContext(pc);
 		yetAnotherTag.setPath("boo");
 		yetAnotherTag.doStartTag();
 
-		assertEquals("foo.bar.boo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME));
+		assertEquals("foo.bar.boo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		yetAnotherTag.doEndTag();
+
+		NestedPathTag andAnotherTag = new NestedPathTag();
+		andAnotherTag.setPageContext(pc);
+		andAnotherTag.setPath("boo2");
+		andAnotherTag.doStartTag();
+
+		assertEquals("foo.bar.boo2.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testWithBindTag() throws JspException {
