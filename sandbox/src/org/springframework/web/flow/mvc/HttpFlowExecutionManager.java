@@ -130,11 +130,7 @@ public class HttpFlowExecutionManager {
 		ModelAndView modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
-			if (this.flow == null) {
-				// try to extract flow definition to use from request
-				this.flow = getFlow(request);
-			}
-			flowExecution = createFlowExecution(flow);
+			flowExecution = createFlowExecution(getFlow(request));
 			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
 			saveInHttpSession(flowExecution, request);
 		}
@@ -186,19 +182,7 @@ public class HttpFlowExecutionManager {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected model and view " + modelAndView);
 		}
-		postProcessRequest(request, response, flowExecution);
 		return modelAndView;
-	}
-
-	/**
-	 * Post process hook subclasses may override
-	 * @param request
-	 * @param response
-	 * @param flowExecution
-	 */
-	protected void postProcessRequest(HttpServletRequest request, HttpServletResponse response,
-			FlowExecution flowExecution) {
-
 	}
 
 	/**
@@ -217,8 +201,15 @@ public class HttpFlowExecutionManager {
 	 * Obtain a flow to use from given request.
 	 */
 	protected Flow getFlow(HttpServletRequest request) throws ServletRequestBindingException {
-		Assert.notNull("The flow service locator is required to lookup flows to execute by id");
-		return flowServiceLocator.getFlow(RequestUtils.getRequiredStringParameter(request, getFlowIdParameterName()));
+		String flowId = request.getParameter(getFlowIdParameterName());
+		if (!StringUtils.hasText(flowId)) {
+			Assert.notNull(this.flow, "This flow execution manager is not configured with a default top-level flow");
+			return this.flow;
+		}
+		else {
+			Assert.notNull("The flow service locator is required to lookup flows to execute by a id parameter");
+			return flowServiceLocator.getFlow(flowId);
+		}
 	}
 
 	/**
