@@ -176,6 +176,15 @@
             <role>Developer</role>
          </roles>
       </developer>
+      <developer>
+         <name>James Strachan</name>
+         <id>jstrachan</id>
+         <email>jstrachan at protique.com</email>
+         <organization>Protique</organization>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
 
    </developers>
 
