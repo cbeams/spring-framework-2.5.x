@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.support;
 
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -73,24 +72,28 @@ public class HttpFlowExecutionManager {
 
 	private FlowLocator flowLocator;
 
-	private Collection flowExecutionListeners;
+	private FlowExecutionListener[] flowExecutionListeners;
 
 	/**
-	 * Create a new flow execution manager.
-	 * @param flow the default flow for which executions will be managed
+	 * Create a new flow execution manager. Since no default flow is specified,
+	 * the id of the flow for which executions will be managed is expected in
+	 * the request parameter "_flowId".
+	 * @param flowLocator the flow locator to use for flow lookup
 	 */
-	public HttpFlowExecutionManager(Flow flow) {
-		this.flow = flow;
+	public HttpFlowExecutionManager(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
 	}
 
 	/**
-	 * Create a new flow execution manager.
-	 * @param flow the default flow for which executions will be managed
+	 * Create a new flow execution manager. Since no default flow is specified,
+	 * the id of the flow for which executions will be managed is expected in
+	 * the request parameter "_flowId".
+	 * @param flowLocator the flow locator to use for flow lookup
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
 	 */
-	public HttpFlowExecutionManager(Flow flow, Collection flowExecutionListeners) {
-		this.flow = flow;
+	public HttpFlowExecutionManager(FlowLocator flowLocator, FlowExecutionListener[] flowExecutionListeners) {
+		this.flowLocator = flowLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
@@ -125,36 +128,17 @@ public class HttpFlowExecutionManager {
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
 	 */
-	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator, Collection flowExecutionListeners) {
+	public HttpFlowExecutionManager(Flow flow, FlowLocator flowLocator, FlowExecutionListener[] flowExecutionListeners) {
 		this.flow = flow;
 		this.flowLocator = flowLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
-	/**
-	 * Create a new flow execution manager. Since no default flow is specified,
-	 * the id of the flow for which executions will be managed is expected in
-	 * the request parameter "_flowId".
-	 * @param flowLocator the flow locator to use for flow lookup
-	 */
-	public HttpFlowExecutionManager(FlowLocator flowLocator) {
-		this.flowLocator = flowLocator;
-	}
+	// subclassing hooks
 
-	/**
-	 * Create a new flow execution manager. Since no default flow is specified,
-	 * the id of the flow for which executions will be managed is expected in
-	 * the request parameter "_flowId".
-	 * @param flowLocator the flow locator to use for flow lookup
-	 * @param flowExecutionListeners the set of listeners that should be
-	 *        notified of lifecycle events in the managed flow execution
-	 */
-	public HttpFlowExecutionManager(FlowLocator flowLocator, Collection flowExecutionListeners) {
-		this.flowLocator = flowLocator;
-		this.flowExecutionListeners = flowExecutionListeners;
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
 	}
-
-	//subclassing hooks
 
 	/**
 	 * Returns the name of the flow id parameter in the request ("_flowId").
@@ -243,6 +227,9 @@ public class HttpFlowExecutionManager {
 			// client is participating in an existing flow execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
+
+			// rehydrate the execution if neccessary (if it had been serialized out)
+			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
 
 			// let client tell you what state they are in (if possible)
 			String stateId = request.getParameter(getCurrentStateIdParameterName());
@@ -336,10 +323,7 @@ public class HttpFlowExecutionManager {
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = flow.createExecution();
-		if (flowExecutionListeners != null && !flowExecutionListeners.isEmpty()) {
-			flowExecution.getListenerList().add(
-					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
-		}
+		flowExecution.getListenerList().add(flowExecutionListeners);
 		return flowExecution;
 	}
 
@@ -449,27 +433,27 @@ public class HttpFlowExecutionManager {
 	 *         parameter does not exist in given request
 	 */
 	protected String searchForRequestParameter(HttpServletRequest request, String logicalName, String delimiter) {
-		//first try to get it as a normal name=value parameter
+		// first try to get it as a normal name=value parameter
 		String value = request.getParameter(logicalName);
 		if (value != null) {
 			return value;
 		}
-		//if no value yet, try to get it as a name_value=xyz parameter
+		// if no value yet, try to get it as a name_value=xyz parameter
 		String prefix = logicalName + delimiter;
 		Enumeration paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
 			String paramName = (String)paramNames.nextElement();
 			if (paramName.startsWith(prefix)) {
 				value = paramName.substring(prefix.length());
-				//support images buttons, which would submit parameters as
-				//name_value.x=123
+				// support images buttons, which would submit parameters as
+				// name_value.x=123
 				if (value.endsWith(".x") || value.endsWith(".y")) {
 					value = value.substring(0, value.length() - 2);
 				}
 				return value;
 			}
 		}
-		//we couldn't find the parameter value
+		// we couldn't find the parameter value
 		return null;
 	}
 }
