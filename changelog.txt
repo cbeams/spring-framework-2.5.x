@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.142 2004-05-12 15:31:48 colins Exp $
+$Id: changelog.txt,v 1.143 2004-05-18 08:17:59 jhoeller Exp $
 
 
-Changes in version 1.0.2 (16.5.2003)
+Changes in version 1.0.2 (23.5.2003)
 ------------------------------------
 
 Package org.springframework.aop
@@ -11,14 +11,18 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
+* added "addPropertyValues(PropertyValues)" and "addPropertyValues(Map)" methods to MutablePropertyValues
+* BeanWrapperImpl applies default PropertyEditors to non-String values too, rather than just custom editors
+* ClassEditor properly handles "java.lang.String[]"-style array class names, converting them to array classes
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
+* PropertiesEditor supports population of java.util.Properties from a java.util.Map, for example from an XML "map" tag
 * added BeanDefinitionHolder class to beans.factory.support package, holding a BeanDefinition plus name and aliases
 * AbstractAutowireCapableBeanFactory detects BeanDefinitionHolder, applying its name to a BeanNameAware inner bean
 * DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
 * renamed PropertiesFactoryBean's "charset" property to "fileEncoding", for consistency with other encoding properties
-* added ObjectFactoryCreatingFactoryBean, usable to avoid having calling getBean() to get prototype beans from the container.
+* added ObjectFactoryCreatingFactoryBean, to avoid having calling "getBean" to get prototype beans from the container
 
 Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
@@ -27,11 +31,16 @@ Package org.springframework.context
 * removed AbstractApplicationContext's "resolveConfigLocations" method, superseded by ResourcePatternResolver mechanism
 * added "getResourcePatternResolver" callback to AbstractXmlApplicationContext, for resolving config location patterns
 * AbstractXmlApplicationContext uses default PathMatchingResourcePatternResolver for Ant-style config location patterns
+* ResourceEntityResolver URL-decodes systemId to allow for proper matching with unencoded system root URL in any case
 
 Package org.springframework.core
 * reworked ResourceEditor to take ResourceLoader argument in overloaded constructor
 * added ResourcePatternResolver strategy interface, for resolving a location pattern into Resource objects
 * added PathMatchingResourcePatternResolver implementation, supporting Ant-style path patterns via PathMatcher utility
+
+Package org.springframework.ejb
+* added "cacheHome" property to AbstractSlsbInvokerInterceptor, for refetching the EJB home on each method invocation
+* invoke "remove" on EJB proxy after invocation in LocalSlsbInvokerInterceptor and SimpleRemoteSlsbInvokerInterceptor
 
 Package org.springframework.jdbc
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
@@ -41,6 +50,9 @@ Package org.springframework.jdbc
 * added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
 * added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
 * added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
+
+Package org.springframework.jndi
+* added protected "lookup" method to AbstractJndiLocator, for refetching the cached JNDI object on demand
 
 Package org.springframework.mock
 * factored out JNDI mock objects from org.springframework.jndi.support (source tree) to separate mock source tree
@@ -64,6 +76,9 @@ Package org.springframework.samples
 Package org.springframework.scheduling
 * changed MethodInvokingTimerTaskFactoryBean to log an invocation exception at error level rather than rethrowing it
 * deprecated TimerTaskExecutionException, as it's generally recommendable to not throw an exception from a TimerTask
+* QuartzJobBean applies SchedulerContext entries as bean properties, just like it also does for JobDataMap entries
+* added "schedulerContextAsMap" property to SchedulerFactoryBean, for specifying parameter entries for all Jobs
+* added "applicationContextSchedulerContextKey" property to SchedulerFactoryBean, for exposing the ApplicationContext
 
 Package org.springframework.ui
 * added "velocityPropertiesMap" property to VelocityEngineFactory, to allow for passing non-String values to Velocity
@@ -71,20 +86,28 @@ Package org.springframework.ui
 Package org.springframework.util
 * added "copy(String, Writer)" and "copyToString(Reader)" methods to FileCopyUtils
 * added "determineRootDir" method to PathMatcher, refined "retrieveMatchingFiles" implementation
+* added "cleanPath" and "pathEquals" methods to StringUtils
 
 Package org.springframework.web
+* WebUtils' "setWebAppRootSystemProperty" method uses StringUtils.pathEquals when checking an existing property value
+* fixed MultipartFile.isEmpty implementation for both Commons FileUpload and COS, also checking the file size
+* fixed ServletRequestDataBinder to correctly check for required fields in case of a multipart request
 * reworked FilterConfigPropertyValues into inner class of GenericFilterBean
 * added implicit registration of ResourceEditor with ServletContextResourceLoader to GenericFilterBean
 * added "initBeanWrapper" callback to GenericFilterBean, to allow for registering custom editors
 * added implicit registration of ResourceEditor with ServletContextResourceLoader to HttpServletBean
 * added "initBeanWrapper" callback to HttpServletBean, to allow for registering custom editors
-* refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * refined ViewResolver's "resolveViewName" to expect null return value if not found, to allow for ViewResolver chaining
 * DispatcherServlet detects ViewResolvers by type to allow for ViewResolver chaining (respecting order values)
 * added "detectAllViewResolvers" property to DispatcherServlet, allowing to enforce a single ViewResolver
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
+* refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
+* added "throws Exception" to ParameterizableViewController's "handleRequestInternal" method, for easier subclassing
+* added "validators" property to BaseCommandController, allowing to specify multiple Validators per controller
+* added "doSubmitAction" template method to SimpleFormController, for submit actions without caring about ModelAndView
 * AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
 * AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations
+* AbstractWizardFormController optionally supports "_page" request parameter, for proper handling of back button usage
 * added "getNrOfPages" method to AbstractWizardFormController, for determining whether last page has been reached
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
 * factored out common Struts Action delegation code from DelegationActionProxy to DelegatingActionUtils
