@@ -24,6 +24,8 @@ import junit.framework.TestCase;
 import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBrokerFactory;
+import org.apache.ojb.broker.Identity;
+import org.apache.ojb.broker.IdentityFactory;
 import org.apache.ojb.broker.query.Query;
 import org.apache.ojb.broker.query.QueryByCriteria;
 import org.easymock.MockControl;
@@ -51,6 +53,34 @@ public class PersistenceBrokerTemplateTests extends TestCase {
 		assertEquals("alias2", template.getPbKey().getAlias());
 		assertEquals("user2", template.getPbKey().getUser());
 		assertEquals("password2", template.getPbKey().getPassword());
+	}
+
+	public void testGetObjectById() {
+		MockControl pbControl = MockControl.createControl(PersistenceBroker.class);
+		final PersistenceBroker pb = (PersistenceBroker) pbControl.getMock();
+		MockControl idfControl = MockControl.createControl(IdentityFactory.class);
+		final IdentityFactory idf = (IdentityFactory) idfControl.getMock();
+
+		Identity identity = new Identity(String.class, Object.class, new Object[] {"id"});
+		pb.serviceIdentity();
+		pbControl.setReturnValue(idf, 1);
+		idf.buildIdentity(String.class, "id");
+		idfControl.setReturnValue(identity, 1);
+		pb.getObjectByIdentity(identity);
+		pbControl.setReturnValue("", 1);
+		pb.close();
+		pbControl.setReturnValue(true, 1);
+		pbControl.replay();
+		idfControl.replay();
+
+		PersistenceBrokerTemplate template = new PersistenceBrokerTemplate() {
+			protected PersistenceBroker getPersistenceBroker() {
+				return pb;
+			}
+		};
+		assertEquals("", template.getObjectById(String.class, "id"));
+		pbControl.verify();
+		idfControl.verify();
 	}
 
 	public void testGetObjectByQuery() {

@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.ojb.broker.Identity;
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerException;
@@ -28,6 +29,7 @@ import org.apache.ojb.broker.query.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.orm.ObjectRetrievalFailureException;
 
 /**
  * Helper class that simplifies OJB PersistenceBroker data access code,
@@ -186,6 +188,19 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 		return (Collection) execute(action);
 	}
 
+
+	public Object getObjectById(final Class entityClass, final Object idValue) throws DataAccessException {
+		return execute(new PersistenceBrokerCallback() {
+			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
+				Identity id = pb.serviceIdentity().buildIdentity(entityClass, idValue);
+				Object result = pb.getObjectByIdentity(id);
+				if (result == null) {
+					throw new ObjectRetrievalFailureException(entityClass, idValue);
+				}
+				return result;
+			}
+		});
+	}
 
 	public Object getObjectByQuery(final Query query) throws DataAccessException {
 		return execute(new PersistenceBrokerCallback() {

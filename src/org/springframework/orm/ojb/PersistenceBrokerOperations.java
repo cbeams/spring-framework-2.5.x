@@ -30,7 +30,8 @@ import org.springframework.dao.DataAccessException;
  *
  * <p>Provides PersistenceBrokerTemplate's data access methods that mirror
  * various PersistenceBroker methods. See the OJB PersistenceBroker javadocs
- * for details on those methods.
+ * for details on those methods. Additionally, there is a convenient
+ * <code>getObjectById</code> method (Hibernate/JDO-style).
  *
  * <p>Note that operations that return an Iterator (that is,
  * <code>getIteratorByQuery</code> and <code>getReportQueryIteratorByQuery</code>)
@@ -82,24 +83,78 @@ public interface PersistenceBrokerOperations {
 	// Convenience methods for load, find, save, delete
 	//-------------------------------------------------------------------------
 
+	/**
+	 * Return the persistent instance of the given entity class
+	 * with the given id value, throwing an exception if not found.
+	 * <p>The given id value is typically just unique within the namespace of the
+	 * persistent class, corresponding to a single primary key in a database table.
+	 * @param entityClass a persistent class
+	 * @param idValue an id value of the persistent instance
+	 * @return the persistent instance
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 * @see org.apache.ojb.broker.IdentityFactory#buildIdentity(Class, Object)
+	 * @see org.apache.ojb.broker.PersistenceBroker#getObjectByIdentity
+	 */
+	Object getObjectById(Class entityClass, Object idValue) throws DataAccessException;
+
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#getObjectByQuery
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	Object getObjectByQuery(Query query) throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#getCollectionByQuery
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	Collection getCollectionByQuery(Query query) throws DataAccessException;
 
-	Iterator getIteratorByQuery(final Query query) throws DataAccessException;
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#getIteratorByQuery
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
+	Iterator getIteratorByQuery(Query query) throws DataAccessException;
 
-	Iterator getReportQueryIteratorByQuery(Query query);
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#getReportQueryIteratorByQuery
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
+	Iterator getReportQueryIteratorByQuery(Query query) throws DataAccessException;
 	
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#getCount
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	int getCount(Query query) throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#removeFromCache
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	void removeFromCache(Object entityOrId) throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#clearCache
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	void clearCache() throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#store
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	void store(Object entity) throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#delete
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	void delete(Object entity) throws DataAccessException;
 
+	/**
+	 * @see org.apache.ojb.broker.PersistenceBroker#deleteByQuery
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	void deleteByQuery(Query query) throws DataAccessException;
 
 }
