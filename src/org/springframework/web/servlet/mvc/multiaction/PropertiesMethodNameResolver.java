@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.mvc.multiaction;
 
@@ -23,17 +23,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.PathMatcher;
 
 /**
- * The most sophisticated and useful framework implementation of 
- * the MethodNameResolver interface. Uses java.util.Properties
- * defining the mapping between the URL of incoming requests and
- * method name. Such properties can be held in an XML document.
+ * The most flexible out-of-the-box implementation of the MethodNameResolver
+ * interface. Uses <code>java.util.Properties</code> to define the mapping
+ * between the URL of incoming requests and the corresponding method name.
+ * Such properties can be held in an XML document.
  *
  * <p>Properties format is
  * <code>
  * /welcome.html=displayGenresPage
  * </code>
- * Note that method overloading isn't allowed, so there's no
- * need to specify arguments.
+ * Note that method overloading isn't allowed, so there's no need to
+ * specify arguments.
  *
  * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
  * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
@@ -50,13 +50,13 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 	private Properties mappings;
 
 	/**
-	 * Set URL to method name mappings from a Properties object.
-	 * @param mappings properties with URL as key and method name as value
+	 * Set explicit URL to method name mappings through a Properties object.
+	 * @param mappings Properties with URL as key and method name as value
 	 */
 	public void setMappings(Properties mappings) {
 		this.mappings = mappings;
 	}
-	
+
 	public void afterPropertiesSet() {
 		if (this.mappings == null || this.mappings.isEmpty()) {
 			throw new IllegalArgumentException("'mappings' property is required");
@@ -64,9 +64,9 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 	}
 
 	protected String getHandlerMethodNameForUrlPath(String urlPath) {
-		String name = this.mappings.getProperty(urlPath);
-		if (name != null) {
-			return name;
+		String methodName = this.mappings.getProperty(urlPath);
+		if (methodName != null) {
+			return methodName;
 		}
 		for (Iterator it = this.mappings.keySet().iterator(); it.hasNext();) {
 			String registeredPath = (String) it.next();

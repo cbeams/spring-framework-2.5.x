@@ -357,39 +357,12 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * We've encountered an exception which may be recoverable
-	 * (InvocationTargetException or SessionRequiredException).
-	 * Allow the subclass a chance to handle it.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param ex the exception that got thrown
-	 * @return a ModelAndView to render the response
-	 */
-	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable ex)
-			throws Exception {
-
-		Method handler = getExceptionHandler(ex);
-		if (handler != null) {
-			return invokeExceptionHandler(handler, request, response, ex);
-		}
-		// If we get here, there was no custom handler
-		if (ex instanceof Exception) {
-			throw (Exception) ex;
-		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
-		}
-		// shouldn't happen
-		throw new ServletException("Unknown Throwable type encountered: " + ex);
-	}
-
-	/**
 	 * Create a new command object of the given class.
-	 * Subclasses can override this implementation if they want.
-	 * This implementation uses class.newInstance(), so commands need to have
-	 * public no arg constructors.
+	 * <p>This implementation uses class.newInstance(), so commands need to
+	 * have public no arg constructors. Subclasses can override this
+	 * implementation if they want.
 	 */
-	protected Object newCommandObject(Class clazz) throws ServletException {
+	protected Object newCommandObject(Class clazz) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Must create new command of class [" + clazz.getName() + "]");
 		}
@@ -407,8 +380,9 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Bind request parameters onto the given command bean
 	 * @param request request from which parameters will be bound
 	 * @param command command object, that must be a JavaBean
+	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected void bind(ServletRequest request, Object command) throws ServletException {
+	protected void bind(ServletRequest request, Object command) throws Exception {
 		logger.debug("Binding request parameters onto MultiActionController command");
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
@@ -426,12 +400,11 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param command the command to bind onto
 	 * @return the new binder instance
 	 * @throws Exception in case of invalid state or arguments
-	 * @see #bindAndValidate
+	 * @see #bind
 	 * @see #initBinder
-	 * @see #setMessageCodesResolver
 	 */
 	protected ServletRequestDataBinder createBinder(ServletRequest request, Object command)
-	    throws ServletException {
+	    throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, "command");
 		initBinder(request, binder);
 		return binder;
@@ -453,7 +426,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
-	    throws ServletException {
+	    throws Exception {
 	}
 	
 	/**
@@ -476,6 +449,33 @@ public class MultiActionController extends AbstractController implements LastMod
 			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		}
 		return handler;
+	}
+
+	/**
+	 * We've encountered an exception which may be recoverable
+	 * (InvocationTargetException or SessionRequiredException).
+	 * Allow the subclass a chance to handle it.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param ex the exception that got thrown
+	 * @return a ModelAndView to render the response
+	 */
+	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable ex)
+			throws Exception {
+
+		Method handler = getExceptionHandler(ex);
+		if (handler != null) {
+			return invokeExceptionHandler(handler, request, response, ex);
+		}
+		// If we get here, there was no custom handler
+		if (ex instanceof Exception) {
+			throw (Exception) ex;
+		}
+		if (ex instanceof Error) {
+			throw (Error) ex;
+		}
+		// Should never happen!
+		throw new ServletException("Unknown Throwable type encountered: " + ex);
 	}
 
 	/**
