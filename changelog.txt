@@ -1,7 +1,7 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.28 2003-10-10 14:31:03 jhoeller Exp $
+$Id: changelog.txt,v 1.29 2003-10-14 16:36:29 jhoeller Exp $
 
 Changes in version 1.0 M2 (XX.10.2003)
 --------------------------------------
@@ -9,12 +9,15 @@ Changes in version 1.0 M2 (XX.10.2003)
 * added non-default "autowire" functionality so that bean factories can optionally configure dependencies automatically
 * added PropertyValuesProviderFactoryBean instead of having getPropertyValues() in the FactoryBean interface
 * added BeanPostProcessor interface and support for it in AbstractBeanFactory and AbstractApplicationContext
+* moved BeanFactoryPostProcessor from context.support to beans.factory.support package
 * reworked AbstractBeanFactory's circular reference detection into eager singleton caching
 * reworked XmlBeanFactory's alias handling to allow for multiple aliases in the "name" attribute of the bean tag
 * reworked AopUtils and AOP ProxyFactory configuration options
+* introduced auto proxy creator classes in org.springframework.aop.framework.support, implementing BeanPostProcessor
 * restructured org.springframework.context.support package into support, event, and config packages
 * removed "shared object" support in ApplicationContext as part of API simplification
 * reworked AbstractXmlApplicationContext's "getInputStreamForBeanFactory" into "loadBeanDefinitions(BeanFactory)"
+* added support for multiple file paths in FileSystemXmlApplicationContext and ClassPathXmlApplicationContext
 * added support for multiple basenames in a ResourceBundleMessageSource, getting checked sequentially
 * reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
 * introduced generic mail infrastructure in org.springframework.mail package, around the MailSender interface
@@ -23,6 +26,7 @@ Changes in version 1.0 M2 (XX.10.2003)
 * added preInterceptors/postInterceptors support to TransactionProxyFactoryBean
 * added support for returning result sets from a stored procedure
 * allow HibernateCallback to throw SQLException on direct JDBC access
+* refined data access exceptions with new ORM-specific and additional Hibernate-specific subclasses
 * reworked Hessian/Burlap/RMI remoting proxies into interceptors with proxy factory bean subclasses
 * reworked (Authorizable)RemoteProxyFactoryBean into (Authorizable)RemoteProxySupport
 * introduced generic multipart handling aka file upload in org.springframework.web.multipart
