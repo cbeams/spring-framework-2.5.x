@@ -20,6 +20,25 @@
  *#
  
 #**
+ * springMessage
+ *
+ * Macro to translate a message code into a message.
+ *#
+#macro( springMessage $code )
+	$springMacroRequestContext.getMessage($code)
+#end
+
+#**
+ * springMessageText
+ *
+ * Macro to translate a message code into a message,
+ * using the given default text if no message found.
+ *#
+#macro( springMessageText $code $text )
+	$springMacroRequestContext.getMessage($code, $text)
+#end
+
+#**
  * springBind
  * 
  * Exposes a BindStatus object for the given bind path, which can be
