@@ -22,24 +22,28 @@ import java.io.PrintWriter;
 /**
  * Handy class for wrapping runtime Exceptions with a root cause. This time-honoured
  * technique is no longer necessary in Java 1.4, which provides built-in support for
- * exception nesting. Thus exceptions in applications written to use Java 1.4 need not
- * extend this class.
+ * exception nesting. Thus exceptions in applications written to use Java 1.4 need
+ * not extend this class.
  *
- * <p>Abstract to force the programmer to extend the class.
- * printStackTrace() etc. are forwarded to the wrapped Exception.
- * The present assumption is that all application-specific exceptions that could be
- * displayed to humans (users, administrators etc.) will implement the ErrorCoded interface.
+ * <p>Abstract to force the programmer to extend the class. getMessage will include
+ * nested exception information; printStackTrace etc will delegate to the wrapped
+ * exception, if any.
  *
- * <p>The similarity between this class and the NestedCheckedException class is unavoidable,
- * as Java forces these two classes to have different superclasses (ah, the inflexibility
- * of concrete inheritance!).
+ * <p>The similarity between this class and the NestedCheckedException class is
+ * unavoidable, as Java forces these two classes to have different superclasses
+ * (ah, the inflexibility of concrete inheritance!).
  *
- * <p>As discussed in <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
- * runtime exceptions are often a better alternative to checked exceptions. However, all exceptions
- * should preserve their stack trace, if caused by a lower-level exception.
+ * <p>As discussed in
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
+ * runtime exceptions are often a better alternative to checked exceptions.
+ * However, all exceptions should preserve their stack trace, if caused by a
+ * lower-level exception.
  *
  * @author Rod Johnson
- * @version $Id: NestedRuntimeException.java,v 1.6 2004-03-18 02:46:06 trisberg Exp $
+ * @author Juergen Hoeller
+ * @version $Id: NestedRuntimeException.java,v 1.7 2004-03-26 16:31:32 jhoeller Exp $
+ * @see #getMessage
+ * @see #printStackTrace
  */
 public abstract class NestedRuntimeException extends RuntimeException {
 
@@ -77,7 +81,11 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		if (this.cause == null) {
+		// Even if you cannot set the cause of this exception other than through
+		// the constructor, we check for the cause being "this" here, as the cause
+		// could still be set to "this" via reflection: for example, by a remoting
+		// deserializer like Hessian's.
+		if (this.cause == null || this.cause == this) {
 			return super.getMessage();
 		}
 		else {
@@ -91,7 +99,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @param ps the print stream
 	 */
 	public void printStackTrace(PrintStream ps) {
-		if (this.cause == null) {
+		if (this.cause == null || this.cause == this) {
 			super.printStackTrace(ps);
 		}
 		else {
@@ -105,7 +113,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @param pw the print writer
 	 */
 	public void printStackTrace(PrintWriter pw) {
-		if (this.cause == null) {
+		if (this.cause == null || this.cause == this) {
 			super.printStackTrace(pw);
 		}
 		else {
