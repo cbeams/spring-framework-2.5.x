@@ -32,50 +32,89 @@ public class SubFlowState extends TransitionableState {
 
 	private String subFlowId;
 
+	private Flow subFlow;
+
 	private String attributesMapperId;
+
+	private FlowAttributesMapper attributesMapper;
 
 	public SubFlowState(String subFlowId, Transition transition) {
 		this(subFlowId, subFlowId, null, new Transition[] { transition });
+	}
+
+	public SubFlowState(String subFlowId, Flow subFlow, Transition transition) {
+		this(subFlowId, subFlow, new Transition[] { transition });
 	}
 
 	public SubFlowState(String subFlowId, Transition[] transitions) {
 		this(subFlowId, subFlowId, null, transitions);
 	}
 
-	public SubFlowState(String subFlowId, String attributesMapperId, Transition transition) {
-		this(subFlowId, subFlowId, attributesMapperId, new Transition[] { transition });
+	public SubFlowState(String subFlowId, Flow subFlow, Transition[] transitions) {
+		this(subFlowId, subFlow, null, transitions);
 	}
 
-	public SubFlowState(String subFlowId, String attributesMapperId, Transition[] transitions) {
-		this(subFlowId, subFlowId, attributesMapperId, transitions);
+	public SubFlowState(String subFlowId, String attributesMapperId, Transition transition) {
+		this(subFlowId, subFlowId, attributesMapperId, new Transition[] { transition });
 	}
 
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition transition) {
 		this(id, subFlowId, attributesMapperId, new Transition[] { transition });
 	}
 
+	public SubFlowState(String subFlowId, Flow subFlow, FlowAttributesMapper attributesMapper, Transition transition) {
+		this(subFlowId, subFlow, attributesMapper, new Transition[] { transition });
+	}
+
+	public SubFlowState(String subFlowId, String attributesMapperId, Transition[] transitions) {
+		this(subFlowId, subFlowId, attributesMapperId, transitions);
+	}
+
 	public SubFlowState(String id, String subFlowId, String attributesMapperId, Transition[] transitions) {
 		super(id);
-		Assert.hasText(subFlowId, "The id of the subflow is required");
+		Assert.hasText(subFlowId, "The id of this subflow state is required");
 		this.subFlowId = subFlowId;
 		this.attributesMapperId = attributesMapperId;
 		addAll(transitions);
 	}
 
-	public String getAttributesMapperId() {
-		return attributesMapperId;
+	public SubFlowState(String id, Flow subFlow, FlowAttributesMapper attributesMapper, Transition[] transitions) {
+		super(id);
+		Assert.hasText(subFlowId, "The id of this subflow state is required");
+		this.subFlow = subFlow;
+		this.attributesMapper = attributesMapper;
+		addAll(transitions);
 	}
 
 	public boolean isSubFlowState() {
 		return true;
 	}
 
-	protected FlowAttributesMapper getAttributesMapper(Flow flow) {
-		if (!StringUtils.hasText(attributesMapperId)) {
+	protected Flow getSubFlow(Flow flow) throws NoSuchFlowDefinitionException {
+		if (this.subFlow != null) {
+			return this.subFlow;
+		}
+		else {
+			try {
+				Flow subFlow = flow.getFlowDao().getFlow(this.subFlowId);
+				Assert.notNull(subFlow, "The subflow is required");
+				return subFlow;
+			}
+			catch (NoSuchBeanDefinitionException e) {
+				throw new NoSuchFlowDefinitionException(this.subFlowId, e);
+			}
+		}
+	}
+
+	protected FlowAttributesMapper getAttributesMapper(Flow flow) throws NoSuchFlowAttributeMapperException {
+		if (this.attributesMapper != null) {
+			return this.attributesMapper;
+		}
+		if (!StringUtils.hasText(this.attributesMapperId)) {
 			return null;
 		}
 		try {
-			return flow.getFlowDao().getSubFlowAttributesMapper(attributesMapperId);
+			return flow.getFlowDao().getFlowAttributesMapper(this.attributesMapperId);
 		}
 		catch (NoSuchBeanDefinitionException e) {
 			throw new NoSuchFlowAttributeMapperException(flow, this, e);
@@ -87,8 +126,7 @@ public class SubFlowState extends TransitionableState {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving sub flow definition with id '" + this.subFlowId + "'");
 		}
-		Flow subFlow = flow.getFlowDao().getFlow(this.subFlowId);
-		Assert.notNull(subFlow, "The subflow is required");
+		Flow subFlow = getSubFlow(flow);
 		if (logger.isInfoEnabled()) {
 			if (!subFlow.getId().equals(this.subFlowId)) {
 				logger.info("The subflow definition exported in the context under ID '" + this.subFlowId + "' has ID '"
