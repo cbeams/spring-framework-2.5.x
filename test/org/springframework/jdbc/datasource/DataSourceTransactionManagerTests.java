@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.datasource;
 
@@ -38,6 +38,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.TransactionTimedOutException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -539,7 +540,15 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.verify();
 	}
 
-	public void testTransactionWithTimeout() throws Exception {
+	public void testTransactionWithLongTimeout() throws Exception {
+		doTestTransactionWithTimeout(10);
+	}
+
+	public void testTransactionWithShortTimeout() throws Exception {
+		doTestTransactionWithTimeout(1);
+	}
+
+	private void doTestTransactionWithTimeout(int timeout) throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -555,9 +564,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setVoidCallable(1);
 		con.prepareStatement("some SQL statement");
 		conControl.setReturnValue(ps, 1);
-		ps.setQueryTimeout(10);
-		psControl.setVoidCallable(1);
-		con.commit();
+		if (timeout >= 2) {
+			ps.setQueryTimeout(timeout - 2);
+			psControl.setVoidCallable(1);
+			con.commit();
+		}
+		else {
+			con.rollback();
+		}
 		conControl.setVoidCallable(1);
 		con.setAutoCommit(true);
 		conControl.setVoidCallable(1);
@@ -572,20 +586,39 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.setTimeout(10);
+		tt.setTimeout(timeout);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
-		tt.execute(new TransactionCallbackWithoutResult() {
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				try {
-					Connection con = DataSourceUtils.getConnection(ds);
-					PreparedStatement ps = con.prepareStatement("some SQL statement");
-					DataSourceUtils.applyTransactionTimeout(ps, ds);
+
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					try {
+						Thread.sleep(2000);
+					}
+					catch (InterruptedException ex) {
+					}
+					try {
+						Connection con = DataSourceUtils.getConnection(ds);
+						PreparedStatement ps = con.prepareStatement("some SQL statement");
+						DataSourceUtils.applyTransactionTimeout(ps, ds);
+					}
+					catch (SQLException ex) {
+						throw new DataAccessResourceFailureException("", ex);
+					}
 				}
-				catch (SQLException ex) {
-					throw new DataAccessResourceFailureException("", ex);
-				}
+			});
+			if (timeout < 2) {
+				fail("Should have thrown TransactionTimedOutException");
 			}
-		});
+		}
+		catch (TransactionTimedOutException ex) {
+			if (timeout < 2) {
+				// expected
+			}
+			else {
+				throw ex;
+			}
+		}
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		conControl.verify();

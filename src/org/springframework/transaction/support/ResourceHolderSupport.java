@@ -18,6 +18,8 @@ package org.springframework.transaction.support;
 
 import java.util.Date;
 
+import org.springframework.transaction.TransactionTimedOutException;
+
 /**
  * Convenient base class for resource holders.
  *
@@ -104,22 +106,38 @@ public abstract class ResourceHolderSupport {
 	 * Return the time to live for this object in seconds.
 	 * Rounds up eagerly, e.g. 9.00001 still to 10.
 	 * @return number of seconds until expiration
+	 * @throws TransactionTimedOutException if the deadline has already been reached
 	 */
 	public int getTimeToLiveInSeconds() {
 		double diff = ((double) getTimeToLiveInMillis()) / 1000;
-		return (int) Math.ceil(diff);
+		int secs = (int) Math.ceil(diff);
+		checkTransactionTimeout(secs <= 0);
+		return secs;
 	}
 
 	/**
 	 * Return the time to live for this object in milliseconds.
 	 * @return number of millseconds until expiration
+	 * @throws TransactionTimedOutException if the deadline has already been reached
 	 */
-	public long getTimeToLiveInMillis() {
+	public long getTimeToLiveInMillis() throws TransactionTimedOutException{
 		if (this.deadline == null) {
 			throw new IllegalStateException("No timeout specified for this resource holder");
 		}
 		long timeToLive = this.deadline.getTime() - System.currentTimeMillis();
-		return (timeToLive >= 0 ? timeToLive : 0);
+		checkTransactionTimeout(timeToLive <= 0);
+		return timeToLive;
+	}
+
+	/**
+	 * Set the transaction rollback-only if the deadline has been reached,
+	 * and throw a TransactionTimedOutException.
+	 */
+	private void checkTransactionTimeout(boolean deadlineReached) throws TransactionTimedOutException {
+		if (deadlineReached) {
+			setRollbackOnly();
+			throw new TransactionTimedOutException("Transaction timed out: deadline was " + this.deadline);
+		}
 	}
 
 	/**
