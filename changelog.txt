@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.65 2003-12-15 08:35:41 jhoeller Exp $
+$Id: changelog.txt,v 1.66 2003-12-18 19:11:17 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
@@ -28,13 +28,15 @@ Package org.springframework.beans
 * fixed potential multithreading issue on nested prototype resolution in AbstractBeanFactory
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * consider arrays of primitive wrappers as "simple" properties in the sense of dependency-check="simple"
+* added support for inner bean definitions, at the same level as bean references and values
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
 * added "beanClassLoader" property to AbstractBeanDefinitionReader, to override the thread context class loader
 * removed bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * added "allowBeanDefinitionOverriding" property in DefaultListableBeanFactory
+* separated XML bean definition reading into XmlBeanDefinitionReader plus (Default)XmlDefinitionParser
 * added optional "description" element in XML bean definition documents to allow for user documentation
-* allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "default-lazy-init" attribute for XML bean definitions
+* allow for "bean/"list"/"map"/"props" as sub-element of "list" and "entry" in XML bean definitions
 * added two "beanOfType" convenience methods to BeanFactoryUtils
 
 Package org.springframework.context
@@ -54,6 +56,7 @@ Package org.springframework.jdbc
 * introduced BlobCreator interface plus DefaultBlobCreator implementation in package jdbc.support.lob
 * added OracleBlobCreator implementation for the peculiar requirements of Oracle's JDBC driver
 * dissolved setExceptionTranslator on RdbmsOperation, set an appropriately configured JdbcTemplate instead
+* added DatabaseStartupValidator that allows to defer the initialization of database-dependent components 
 
 Package org.springframework.orm
 * added OpenSessionInViewInterceptor and OpenSessionInViewFilter to org.springframework.orm.hibernate.support
@@ -73,6 +76,7 @@ Package org.springframework.ui
 
 Package org.springframework.validation
 * removed event propagation support in DataBinder
+* added "getValuesForProperty" and "toCodeForProperty" methods to Constants helper class
 
 Package org.springframework.web
 * added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
@@ -99,6 +103,7 @@ Package org.springframework.web
 * changed ServletExceptions in RequestContextUtils to IllegalStateExceptions
 * InternalResourceViewResolver and XmlViewResolver override getCacheKey for more efficient non-locale-aware caching
 * moved SimpleMappingExceptionResolver from package org.springframework.web.servlet.support to web.servlet.handler
+* added "defaultErrorView" property to SimpleMappingExceptionResolver
 * moved UserRoleAuthorizationInterceptor from package org.springframework.web.servlet.support to web.servlet.handler
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
 * introduced WebContentInterceptor for applying request/response checks and preparations to a set of controllers
