@@ -6,8 +6,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.FatalBeanException;
-
 /**
  * @author Colin Sampaleanu
  * @since 2003-11-21
@@ -21,7 +19,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// singleton, non-static
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(tc1);
+		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
 		Integer i = (Integer) mcfb.getObject();
@@ -32,7 +30,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// non-singleton, non-static
 		tc1 = new TestClass1();
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(tc1);
+		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.setSingleton(false);
 		mcfb.afterPropertiesSet();
@@ -42,10 +40,10 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertTrue(i.intValue() == 2);
 
 		// singleton, static
-		String fqmn = TestClass1.class.getName() + ".staticMethod1";
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("staticMethod1");
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
 		assertTrue(i.intValue() == 1);
@@ -55,7 +53,8 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// non-singleton, static
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("staticMethod1");
 		mcfb.setSingleton(false);
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
@@ -64,30 +63,31 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		assertTrue(i.intValue() == 2);
 
 		// void return value
-		fqmn = TestClass1.class.getName() + ".voidRetvalMethod";
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
 		assertTrue(MethodInvokingFactoryBean.VOID.equals(mcfb.getObject()));
 
 		// now see if we can match methods with arguments that have supertype
 		// arguments
-		fqmn = TestClass1.class.getName() + ".supertypes";
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes");
+		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello"});
 		// should pass
 		mcfb.afterPropertiesSet();
 
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes");
+		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
-			fail("Matched method with wrong number of args: " + fqmn);
+			fail("Matched method with wrong number of args");
 		}
-		catch (FatalBeanException e) {
+		catch (NoSuchMethodException ex) {
 			// expected
 		}
 
@@ -97,27 +97,28 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// fact
 		// we match improper argument types, and then fail on the actual call.
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{"1", "2", "3"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes");
+		mcfb.setArguments(new Object[]{"1", "2", "3"});
 		mcfb.afterPropertiesSet();
 		try {
 			Object x = mcfb.getObject();
 			fail("Should have failed on getObject with mismatched argument types");
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 		
-        // verify fail if two matching methods with the same arg count
-		fqmn = TestClass1.class.getName() + ".supertypes2";
+		// verify fail if two matching methods with the same arg count
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes2");
+		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
-			fail("Matched method when shouldn't have matched: " + fqmn);
+			fail("Matched method when shouldn't have matched");
 		}
-		catch (FatalBeanException e) {
+		catch (NoSuchMethodException ex) {
 			// expected
 		}
 		
@@ -127,26 +128,25 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(tc1);
+		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
 		assertTrue(int.class.equals(mcfb.getObjectType()));
 
-		String fqmn = TestClass1.class.getName() + ".voidRetvalMethod";
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
 		Class objType = mcfb.getObjectType();
 		assertTrue(objType.equals(MethodInvokingFactoryBean.VoidType.class));
 
 		// verify that we can call a method with args that are subtypes of the
-		// target
-		// method arg types
-		fqmn = TestClass1.class.getName() + ".supertypes";
+		// target method arg types
 		TestClass1._staticField1 = 0;
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes");
+		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello"});
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
@@ -157,14 +157,13 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		// improper argument types, and the test for getObject will check for the
 		// runtime failure.
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(fqmn);
-		mcfb.setArgs(new Object[]{"1", "2", "3"});
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("supertypes");
+		mcfb.setArguments(new Object[]{"1", "2", "3"});
 		mcfb.afterPropertiesSet();
-
 	}
 
-	public void testAfterPropertiesSet() {
-
+	public void testAfterPropertiesSet() throws NoSuchMethodException, ClassNotFoundException {
 		String validationError = "improper validation of input properties";
 
 		// assert that only static OR non static are set, but not both or none
@@ -173,80 +172,84 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 			mcfb.afterPropertiesSet();
 			fail(validationError);
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod("whatever");
-		mcfb.setTarget(this);
+		mcfb.setTargetObject(this);
+		mcfb.setTargetMethod("whatever");
 		try {
 			mcfb.afterPropertiesSet();
 			fail(validationError);
 		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
-
-		// bogus static method
-		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod("some.bogus.Method.name");
-		try {
-			mcfb.afterPropertiesSet();
-			fail(validationError);
-		}
-		catch (FatalBeanException e) {
+		catch (NoSuchMethodException ex) {
 			// expected
 		}
 
 		// bogus static method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(TestClass1.class.getName() + ".method1");
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("some.bogus.Method.name");
 		try {
 			mcfb.afterPropertiesSet();
 			fail(validationError);
 		}
-		catch (FatalBeanException e) {
+		catch (NoSuchMethodException ex) {
+			// expected
+		}
+
+		// bogus static method
+		mcfb = new MethodInvokingFactoryBean();
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("method1");
+		try {
+			mcfb.afterPropertiesSet();
+			fail(validationError);
+		}
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 
 		// missing method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(this);
+		mcfb.setTargetObject(this);
 		try {
 			mcfb.afterPropertiesSet();
 			fail(validationError);
 		}
-		catch (FatalBeanException e) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 
 		// bogus method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(this);
+		mcfb.setTargetObject(this);
 		mcfb.setTargetMethod("bogus");
 		try {
 			mcfb.afterPropertiesSet();
 			fail(validationError);
 		}
-		catch (FatalBeanException e) {
+		catch (NoSuchMethodException ex) {
 			// expected
 		}
 
 		// static method
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setStaticMethod(TestClass1.class.getName() + ".staticMethod1");
+		mcfb.setTargetClass(TestClass1.class);
+		mcfb.setTargetMethod("staticMethod1");
 		mcfb.afterPropertiesSet();
 
 		// non-static method
 		TestClass1 tc1 = new TestClass1();
 		mcfb = new MethodInvokingFactoryBean();
-		mcfb.setTarget(tc1);
+		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
 	}
 
+
 	// a test class to work with
-	static class TestClass1 {
+	public static class TestClass1 {
 
 		public static int _staticField1;
 
@@ -270,10 +273,6 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		}
 		public static void supertypes2(Collection c, List l, String s, String s2) {
 		}
-		
-		
-		
-
 	}
 
 }

@@ -19,7 +19,7 @@
 		We want to invoke the getStatsMixin method on our ThreadLocal invoker
 	-->
 	<bean id="statsAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="target"><ref local="threadLocalTs" /></property>
+		<property name="targetObject"><ref local="threadLocalTs" /></property>
 		<property name="targetMethod"><value>getStatsMixin</value></property>
 	</bean>
 	

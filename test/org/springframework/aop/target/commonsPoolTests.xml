@@ -16,7 +16,7 @@
 	
 	
 	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="target"><ref local="poolTargetSource" /></property>
+		<property name="targetObject"><ref local="poolTargetSource" /></property>
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
 	
