@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	
+	<bean id="birthDate" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource" value="/WEB-INF/birthDate-flow.xml"/>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="birthDateFormAction" class="org.springframework.samples.birthdate.web.flow.action.BirthDateFormAction"/>
+
+</beans>
