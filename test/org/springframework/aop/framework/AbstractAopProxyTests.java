@@ -39,7 +39,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.9 2003-12-05 16:28:27 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.10 2003-12-08 11:23:51 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1220,39 +1220,5 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 		assertEquals(1, th.getCalls("remoteException"));
 	}
-
-
-	public static class MethodCounter {
-		/** Method name --> count, does not understand overloading */
-		private HashMap map = new HashMap();
-		private int allCount;
-		
-		protected void count(Method m) {
-			count(m.getName());
-		}
-		
-		protected void count(String methodName) {
-			Integer I = (Integer) map.get(methodName);
-			I = (I != null) ? new Integer(I.intValue() + 1) : new Integer(1);
-			map.put(methodName, I);
-			++allCount;
-		}
-		
-		public int getCalls(String methodName) {
-			Integer I = (Integer) map.get(methodName);
-			return (I != null) ? I.intValue() : 0;
-		}
-		
-		public int getCalls() {
-			return allCount;
-		}
-	}
-	
-	protected static class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
-		public void before(Method m, Object[] args, Object target) throws Throwable {
-			count(m);
-		}
-	}
-	
 
 }
