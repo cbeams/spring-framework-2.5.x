@@ -64,7 +64,8 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 		return bf;
 	}
 
-	private class CountingListener implements FlowLifecycleListener {
+
+	private static class CountingListener implements FlowLifecycleListener {
 
 		public int flowEndedCount;
 
@@ -76,28 +77,33 @@ public class MulticastFlowLifecycleListenerTests extends TestCase {
 
 		public int flowStateTransitionedCount;
 
-		public void flowEnded(Flow source, FlowSession endedFlowSession,
-				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
+		public void flowEnded(
+				Flow source, FlowSession endedFlowSession, FlowSessionExecution sessionExecutionInfo,
+				HttpServletRequest request) {
 			++flowEndedCount;
 		}
 
-		public void flowEventProcessed(Flow source, String eventId, AbstractState state,
-				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
+		public void flowEventProcessed(
+				Flow source, String eventId, AbstractState state, FlowSessionExecution sessionExecutionInfo,
+				HttpServletRequest request) {
 			++flowEventProcessedCount;
 		}
 
-		public void flowEventSignaled(Flow source, String eventId, AbstractState state,
-				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
+		public void flowEventSignaled(
+				Flow source, String eventId, AbstractState state, FlowSessionExecution sessionExecutionInfo,
+				HttpServletRequest request) {
 			++flowEventSignaledCount;
 		}
 
-		public void flowStarted(Flow source, FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
+		public void flowStarted(Flow source, FlowSessionExecution sessionExecutionInfo, HttpServletRequest request) {
 			++flowStartedCount;
 		}
 
-		public void flowStateTransitioned(Flow source, AbstractState oldState, AbstractState newState,
-				FlowSessionExecutionInfo sessionExecutionStack, HttpServletRequest request) {
+		public void flowStateTransitioned(
+				Flow source, AbstractState oldState, AbstractState newState, FlowSessionExecution sessionExecutionInfo,
+				HttpServletRequest request) {
 			++flowStateTransitionedCount;
 		}
 	}
+
 }
