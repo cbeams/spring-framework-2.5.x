@@ -115,15 +115,16 @@ public class MessageTag extends HtmlEscapingAwareTag {
 		try {
 			String msg = null;
 			if (resolvedCode != null) {
-				String resolvedArguments = ExpressionEvaluationUtils.evaluateString("arguments", this.arguments, pageContext);
+				String resolvedArguments =
+				    ExpressionEvaluationUtils.evaluateString("arguments", this.arguments, pageContext);
 				String[] argumentsArray = StringUtils.commaDelimitedListToStringArray(resolvedArguments);
 				if (resolvedText != null) {
-					msg = messageSource.getMessage(resolvedCode, argumentsArray, resolvedText,
-					                               getRequestContext().getLocale());
+					msg = messageSource.getMessage(
+					    resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
 				}
 				else {
-					msg = messageSource.getMessage(resolvedCode, argumentsArray,
-					                               getRequestContext().getLocale());
+					msg = messageSource.getMessage(
+					    resolvedCode, argumentsArray, getRequestContext().getLocale());
 				}
 			}
 			else {
@@ -150,7 +151,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeMessage(String msg) throws IOException {
-		pageContext.getOut().write(msg);
+		pageContext.getOut().write(String.valueOf(msg));
 	}
 
 	/**

@@ -37,7 +37,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
@@ -53,7 +53,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		request.addPreferredLocale(Locale.CANADA);
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
@@ -65,11 +65,25 @@ public class MessageTestSuite extends AbstractTagTests {
 		assertTrue("Correct message", "Canadian &#38; test message".equals(message.toString()));
 	}
 
+	public void testMessageTagWithNullCode() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode(null);
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertTrue("Correct message", "null".equals(message.toString()));
+	}
+
 	public void testMessageTagWithCodeAndArguments() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
@@ -84,7 +98,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
@@ -99,7 +113,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
@@ -115,7 +129,7 @@ public class MessageTestSuite extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
-			protected void writeMessage(String msg) throws IOException {
+			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
 		};
