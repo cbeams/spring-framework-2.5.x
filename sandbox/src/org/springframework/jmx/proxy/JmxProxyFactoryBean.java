@@ -21,7 +21,7 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
 
     private ObjectName name;
 
-    private Object proxy;
+    private Object proxy = null;
 
     private Class implementationClass;
 
@@ -31,7 +31,7 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
 
     private Class[] proxyInterfaces;
 
-    public void setMBeanServer(MBeanServerConnection mbeanServer) {
+    public void setServer(MBeanServerConnection mbeanServer) {
         this.mbeanServer = mbeanServer;
     }
 
@@ -48,6 +48,11 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
     }
 
     public Object getObject() throws Exception {
+        
+        if(proxy == null) {
+            proxy = factory.createProxy(mbeanServer, name);
+        }
+        
         return proxy;
     }
 
@@ -59,20 +64,21 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
         return true;
     }
 
-public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() throws Exception {
         name = ObjectNameManager.getInstance(objectName);
 
-        if(implementationClass == null) {
+        if (implementationClass == null) {
             implementationClass = Class.forName(DEFAULT_IMPLEMENTATION);
         } else {
-            if(!(JmxObjectProxyFactory.class.isAssignableFrom(implementationClass))) {
-                throw new IllegalArgumentException("The implementation class must implement JmxObjectProxyFactory.");
+            if (!(JmxObjectProxyFactory.class
+                    .isAssignableFrom(implementationClass))) {
+                throw new IllegalArgumentException(
+                        "The implementation class must implement JmxObjectProxyFactory.");
             }
         }
-        
-        factory = (JmxObjectProxyFactory)implementationClass.newInstance();
-        
-        factory.setProxyInterfaces(proxyInterfaces);
 
-        proxy = factory.createProxy(mbeanServer, name);
-    }}
+        factory = (JmxObjectProxyFactory) implementationClass.newInstance();
+
+        factory.setProxyInterfaces(proxyInterfaces);
+    }
+}

@@ -34,7 +34,7 @@ public class ConnectorServiceBean implements InitializingBean {
 
 	private Map environment;
 
-	public void setMBeanServer(MBeanServer mbeanServer) {
+	public void setServer(MBeanServer mbeanServer) {
 		this.mbeanServer = mbeanServer;
 	}
 
