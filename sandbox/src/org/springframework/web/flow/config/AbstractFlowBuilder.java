@@ -17,7 +17,6 @@ package org.springframework.web.flow.config;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.util.closure.Constraint;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
@@ -27,6 +26,7 @@ import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 
 /**
@@ -2821,6 +2821,20 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>On the occurence of an event that matches the criteria defined by
+	 * ${criteria}, transition to state ${stateId}.
+	 * </ul>
+	 * @param criteria The transition criteria
+	 * @param stateId the state Id
+	 * @return the transition (event matching criteria->stateId)
+	 */
+	protected Transition on(TransitionCriteria criteria, String stateId) {
+		return new Transition(criteria, stateId);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>On the occurence of event ${eventId}, transition to state
 	 * ${stateId}.
 	 * </ul>
@@ -2850,27 +2864,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>On the occurence of an event that matches the criteria defined by
-	 * ${eventIdCriteria}, transition to state ${stateId}.
-	 * </ul>
-	 * @param eventIdCriteria The event id criteria
-	 * @param stateId the state Id
-	 * @return the transition (event matching eventIdCriteria->stateId)
-	 */
-	protected Transition onEvent(Constraint eventIdCriteria, String stateId) {
-		return new Transition(eventIdCriteria, stateId);
-	}
-
-	/**
-	 * Creates a transition stating:
-	 * <ul>
 	 * <li>On the occurence of any event (*), transition to state ${stateId}.
 	 * </ul>
 	 * @param stateId the state Id
 	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
-		return new Transition(Transition.WILDCARD_EVENT_CRITERIA, stateId);
+		return new Transition(Transition.WILDCARD_TRANSITION_CRITERIA, stateId);
 	}
 
 	/**
@@ -2882,7 +2882,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (*->finish)
 	 */
 	protected Transition onAnyEventFinish() {
-		return new Transition(Transition.WILDCARD_EVENT_CRITERIA, getFinishEndStateId());
+		return new Transition(Transition.WILDCARD_TRANSITION_CRITERIA, getFinishEndStateId());
 	}
 
 	/**
