@@ -35,7 +35,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * to disable this class's caching, which is useful during development.
  *
  * @author Rod Johnson
- * @version $Id: AbstractView.java,v 1.2 2003-08-28 15:23:32 jhoeller Exp $
+ * @author Juergen Hoeller
+ * @version $Id: AbstractView.java,v 1.3 2003-11-11 17:49:19 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View {
@@ -54,6 +55,38 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 
 	/**
+	 * Set static attributes from a java.util.Properties object. This is
+	 * the most convenient way to set static attributes. Note that static
+	 * attributes can be overridden by dynamic attributes, if a value
+	 * with the same name is included in the model.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
+	 */
+	public final void setAttributes(Properties props) {
+		setAttributesMap(props);
+	}
+
+	/**
+	 * Set static attributes from a Map. This allows to set any kind
+	 * of attribute values, for example bean references.
+	 * <p>Can be populated with a "map" or "props" element in XML bean
+	 * definitions.
+	 * @param attributes Map with name Strings as keys and attribute
+	 * objects as values
+	 */
+	public final void setAttributesMap(Map attributes) {
+		if (attributes != null) {
+			Iterator itr = attributes.keySet().iterator();
+			while (itr.hasNext()) {
+				String name = (String) itr.next();
+				Object value = attributes.get(name);
+				addStaticAttribute(name, value);
+			}
+		}
+	}
+
+	/**
 	 * Set static attributes as a CSV string.
 	 * Format is attname0={value1},attname1={value1}
 	 */
@@ -61,20 +94,20 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		if (propString == null)
 			// Leave static attributes unchanged
 			return;
-			
+
 		StringTokenizer st = new StringTokenizer(propString, ",");
 		while (st.hasMoreTokens()) {
 			String tok = st.nextToken();
 			int eqindx = tok.indexOf("=");
 			if (eqindx == -1)
 				throw new IllegalArgumentException("Expected = in View string '" + propString + "'");
-			
+
 			if (eqindx >= tok.length() - 2)
 				throw new IllegalArgumentException("At least 2 characters ([]) required in View string '" + propString + "'");
-				
+
 			String name = tok.substring(0, eqindx);
 			String val = tok.substring(eqindx + 1);
-			
+
 			// Delete first and last characters of value: { and }
 			val = val.substring(1);
 			val = val.substring(0, val.length() - 1);
@@ -85,42 +118,20 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			addStaticAttribute(name, val);
 		}
 	}
-	
-	/**
-	 * Set static attributes from a java.util.Properties object. This is
-	 * the most convenient way to set static attributes. Note that static
-	 * attributes can be overridden by dynamic attributes, if a value
-	 * with the same name is included in the model.
-	 * <p>Relies on registration of PropertiesEditor.
-	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
-	 */
-	public final void setAttributes(Properties prop) throws IllegalArgumentException {
-		if (prop != null) {
-			Iterator itr = prop.keySet().iterator();
-			while (itr.hasNext()) {
-				String name = (String) itr.next();
-				String val = prop.getProperty(name);
-				if (logger.isDebugEnabled()) {
-					logger.info("Set static attribute with name '" + name + "' and value [" + val + "] on view");//with name '" + viewname + "'");
-				}
-				addStaticAttribute(name, val);
-			}
-		}
-	}
 
 	/**
 	 * Add static data to this view, exposed in each view.
 	 * <p>Must be invoked before any calls to render().
 	 * @param name name of attribute to expose
-	 * @param o object to expose
+	 * @param value object to expose
 	 */
-	public final void addStaticAttribute(String name, Object o) {
-		this.staticAttributes.put(name, o);
+	public final void addStaticAttribute(String name, Object value) {
+		logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
+		this.staticAttributes.put(name, value);
 	}
 
 	/**
-	 * Handy for testing. Return the static attributes
-	 * held in this view.
+	 * Handy for testing. Return the static attributes held in this view.
 	 * @return the static attributes in this view
 	 */
 	public final Map getStaticAttributes() {
