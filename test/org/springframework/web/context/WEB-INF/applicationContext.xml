@@ -44,24 +44,6 @@
 	</bean>
 	-->
 
-	<bean id="config.testConfigObject" class="org.springframework.web.context.TestConfigBean">
-		<property name="name">
-			<value>Tony</value>
-		</property>
-		<property name="age">
-			<value>48</value>
-		</property>
-	</bean>
-
-	<bean id="config.testConfigObject2" class="org.springframework.web.context.ContextAwareTestConfigBean">
-		<property name="name">
-			<value>Gordon</value>
-		</property>
-		<property name="age">
-			<value>49</value>
-		</property>
-	</bean>
-
 	<bean id="beanThatListens" class="org.springframework.context.BeanThatListens"/>
 
 	<bean id="parentListener" class="org.springframework.context.TestListener"/>
