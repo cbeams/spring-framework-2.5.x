@@ -64,30 +64,30 @@ public abstract class AbstractState implements Serializable {
 	 */
 	public AbstractState(Flow flow, String id) {
 		setId(id);
-		flow.add(this);
 		setFlow(flow);
+		flow.add(this);
 	}
 
-	protected void setId(String id) {
+	/**
+	 * Returns the state identifier, unique to the owning flow.
+	 * @return The state identifier.
+	 */
+	public String getId() {
+		return id;
+	}
+
+	private void setId(String id) {
 		Assert.hasText(id, "The state must have a valid identifier");
 		this.id = id;
 	}
 
-	/**
-	 * Set the owning flow for this state. Each state has exactly one owning
-	 * flow. This property must be non-null.
-	 * @param flow the owning flow
-	 */
-	protected void setFlow(Flow flow) {
-		Assert.notNull(flow, "The owning flow is required");
-		if (this.flow != null && this.flow.equals(flow)) {
-			return;
-		}
-		this.flow = flow;
-	}
-
 	public Flow getFlow() {
 		return flow;
+	}
+
+	private void setFlow(Flow flow) {
+		Assert.notNull(flow, "The owning flow is required");
+		this.flow = flow;
 	}
 
 	/**
@@ -137,14 +137,6 @@ public abstract class AbstractState implements Serializable {
 		return false;
 	}
 
-	/**
-	 * Returns the state identifier, unique to the owning flow.
-	 * @return The state identifier.
-	 */
-	public String getId() {
-		return id;
-	}
-
 	public boolean equals(Object o) {
 		if (!(o instanceof AbstractState)) {
 			return false;
@@ -170,7 +162,7 @@ public abstract class AbstractState implements Serializable {
 	protected final ModelAndView enter(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Entering state '" + this + "' in flow '" + flowExecution.getActiveFlowId() + "'");
+			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}
 		flowExecution.setCurrentState(this);
 		return doEnterState(flowExecution, request, response);
@@ -189,7 +181,7 @@ public abstract class AbstractState implements Serializable {
 			HttpServletResponse response);
 
 	public String toString() {
-		ToStringCreator creator = new ToStringCreator(this).append(id, getId());
+		ToStringCreator creator = new ToStringCreator(this).append("id", getId());
 		createToString(creator);
 		return creator.toString();
 	}
@@ -200,6 +192,5 @@ public abstract class AbstractState implements Serializable {
 	 * @param creator
 	 */
 	protected void createToString(ToStringCreator creator) {
-
 	}
 }

@@ -17,7 +17,6 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionableState;
 import org.springframework.web.flow.ViewState;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -185,7 +184,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			}
 		}
 
-		flow.setStartState((TransitionableState)flow.getState(startStateId));
+		flow.setStartState(startStateId);
 
 		return flow;
 	}

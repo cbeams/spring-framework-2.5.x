@@ -144,7 +144,7 @@ public class Flow implements Serializable {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * The flow identifier uniquely identifying this flow among all other flows
+	 * The flow identifier uniquely identifying this flow among all other flows.
 	 */
 	private String id;
 
@@ -154,13 +154,13 @@ public class Flow implements Serializable {
 	private TransitionableState startState;
 
 	/**
-	 * The set of state definitions for this flow
+	 * The set of state definitions for this flow.
 	 */
 	private Set states = new LinkedHashSet(6);
 
 	/**
 	 * The list of listeners that should receive event callbacks during managed
-	 * flow executions (client sessions.)
+	 * flow executions (client sessions).
 	 */
 	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
 			FlowExecutionListener.class);
@@ -172,6 +172,10 @@ public class Flow implements Serializable {
 	 */
 	public Flow(String id) {
 		setId(id);
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	protected void setId(String id) {
@@ -255,48 +259,40 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @return
-	 */
-	public String getId() {
-		return id;
-	}
-
-	/**
 	 * Add the state definition to this flow definition. Marked protected, as
 	 * this method is to be called by the (privileged) state definition classes
 	 * themselves during state construction as part of a FlowBuilder invocation.
 	 * 
 	 * @param state The state, if already added noting happens, if another
 	 *        instance is added with the same id, an exception is thrown
-	 * @throws IllegalStateException another state exists with the same ID as
-	 *         the one provided
+	 * @throws IllegalArgumentException when the state cannot be added to the flow 
 	 */
-	protected void add(AbstractState state) {
+	protected void add(AbstractState state) throws IllegalArgumentException {
+		if (this!=state.getFlow()) {
+			throw new IllegalArgumentException(
+					"State "
+						+ state
+						+ " cannot be added to this flow '"
+						+ getId()
+						+ "' - it already belongs to a different flow");
+		}
 		if (containsInstance(state)) {
 			return;
 		}
 		if (containsState(state.getId())) {
-			throw new IllegalStateException(
+			throw new IllegalArgumentException(
 					"This flow '"
-							+ getId()
-							+ "' already contains a state with id '"
-							+ id
-							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
-							+ DefaultObjectStyler.call(getStateIds()));
+						+ getId()
+						+ "' already contains a state with id '"
+						+ state.getId()
+						+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
+						+ DefaultObjectStyler.call(getStateIds()));
 		}
-		boolean firstAdd;
-		if (states.isEmpty()) {
-			firstAdd = true;
-		}
-		else {
-			firstAdd = false;
-		}
-		state.setFlow(this);
+		boolean firstAdd=states.isEmpty();
 		this.states.add(state);
 		if (firstAdd) {
-			AbstractState firstState = (AbstractState)statesIterator().next();
-			if (firstState.isTransitionable()) {
-				setStartState((TransitionableState)firstState);
+			if (state.isTransitionable()) {
+				setStartState((TransitionableState)state);
 			}
 		}
 	}
@@ -316,7 +312,7 @@ public class Flow implements Serializable {
 	 * @param stateId The new start state
 	 * @throws NoSuchFlowStateException No state exists with the id you provided
 	 */
-	protected void setStartState(String stateId) throws NoSuchFlowStateException {
+	public void setStartState(String stateId) throws NoSuchFlowStateException {
 		setStartState(getRequiredTransitionableState(stateId));
 	}
 
