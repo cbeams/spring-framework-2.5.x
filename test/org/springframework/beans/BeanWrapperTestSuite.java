@@ -13,15 +13,9 @@ import junit.framework.TestSuite;
 
 
 /**
- *
- * @author  rod
- * @version
+ * @author Rod Johnson
  */
 public class BeanWrapperTestSuite extends TestCase {
-
-	public BeanWrapperTestSuite(String name) {
-		super(name);
-	}
 
 	public void testSetWrappedInstanceOfSameClass()throws Exception {
 		TestBean tb = new TestBean();
@@ -268,22 +262,34 @@ public class BeanWrapperTestSuite extends TestCase {
 
 	public void testTypeMismatch() {
 		TestBean t = new TestBean();
-		String newName = "tony";
 		try {
 			BeanWrapper bw = new BeanWrapperImpl(t);
-			//System.out.println(bw);
 			bw.setPropertyValue("age", "foobar");
 			fail("Should throw exception on type mismatch");
 		}
 		catch (TypeMismatchException ex) {
-			//System.out.println("As expected: " + ex);
+			// expected
 		}
 		catch (Exception ex) {
 			fail("Shouldn't throw exception other than Type mismatch");
 		}
 	}
 	
-	
+	public void testEmptyValueForPrimitiveProperty() {
+		TestBean t = new TestBean();
+		try {
+			BeanWrapper bw = new BeanWrapperImpl(t);
+			bw.setPropertyValue("age", "");
+			fail("Should throw exception on type mismatch");
+		}
+		catch (TypeMismatchException ex) {
+			// expected
+		}
+		catch (Exception ex) {
+			fail("Shouldn't throw exception other than Type mismatch");
+		}
+	}
+
 	public void testSetPropertyValuesIgnoresInvalidNestedOnRequest() {
 		ITestBean rod = new TestBean();
 		

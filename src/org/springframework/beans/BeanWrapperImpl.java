@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.9 2003-10-23 18:44:19 uid112313 Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.10 2003-11-05 20:28:34 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -494,10 +494,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 		PropertyChangeEvent propertyChangeEvent = null;
 
 		try {
-			if (readMethod != null && eventPropagationEnabled) {
+			if (readMethod != null && this.eventPropagationEnabled) {
 				// Can only find existing value if it's a readable property
 				try {
-					oldValue = readMethod.invoke(object, new Object[]{});
+					oldValue = readMethod.invoke(this.object, new Object[]{});
 				}
 				catch (Exception ex) {
 					// The getter threw an exception, so we couldn't retrieve the old value.
@@ -511,17 +511,19 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 			// Old value may still be null
 			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
-					object, pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
+					this.object, pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
 
 			// May throw PropertyVetoException: if this happens the PropertyChangeSupport
 			// class fires a reversion event, and we jump out of this method, meaning
 			// the change was never actually made
-			if (eventPropagationEnabled) {
-				vetoableChangeSupport.fireVetoableChange(propertyChangeEvent);
+			if (this.eventPropagationEnabled) {
+				this.vetoableChangeSupport.fireVetoableChange(propertyChangeEvent);
 			}
 
-			if (pd.getPropertyType().isPrimitive() && (pv.getValue() == null || "".equals(pv.getValue()))) {
-				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" + pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
+			if (pd.getPropertyType().isPrimitive() &&
+					(propertyChangeEvent.getNewValue() == null || "".equals(propertyChangeEvent.getNewValue()))) {
+				throw new IllegalArgumentException("Invalid value [" + pv.getValue() + "] for property '" +
+																					 pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 			}
 
 			// Make the change
@@ -533,15 +535,20 @@ public class BeanWrapperImpl implements BeanWrapper {
 				logger.debug("Invoked write method [" + writeMethod + "] ok");
 
 			// If we get here we've changed the property OK and can broadcast it
-			if (eventPropagationEnabled)
-				propertyChangeSupport.firePropertyChange(propertyChangeEvent);
+			if (this.eventPropagationEnabled) {
+				this.propertyChangeSupport.firePropertyChange(propertyChangeEvent);
+			}
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof PropertyVetoException)
+			if (ex.getTargetException() instanceof PropertyVetoException) {
 				throw (PropertyVetoException) ex.getTargetException();
-			if (ex.getTargetException() instanceof ClassCastException)
+			}
+			else if (ex.getTargetException() instanceof ClassCastException) {
 				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
-			throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+			}
+			else {
+				throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+			}
 		}
 		catch (IllegalAccessException ex) {
 			throw new FatalBeanException("Illegal attempt to set property [" + pv + "] threw exception", ex);
@@ -567,8 +574,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 		setPropertyValues(pvs, false, null);
 	}
 
-	public void setPropertyValues(PropertyValues propertyValues,
-																boolean ignoreUnknown, PropertyValuesValidator pvsValidator) throws BeansException {
+	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown,
+																PropertyValuesValidator pvsValidator) throws BeansException {
 		// Create only if needed
 		PropertyVetoExceptionsException propertyVetoExceptionsException = new PropertyVetoExceptionsException(this);
 

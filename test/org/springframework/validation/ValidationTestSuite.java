@@ -101,6 +101,27 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("value", tb.getTouchy());
 	}
 
+	public void testCustomEditorForPrimitiveProperty() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+
+		binder.registerCustomEditor(int.class, "age", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new Integer(99));
+			}
+			public String getAsText() {
+				return "argh";
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", ""));
+		binder.bind(pvs);
+
+		assertEquals("argh", binder.getFieldValue("age"));
+		assertEquals(99, tb.getAge());
+	}
+
 	public void testCustomEditorForAllStringProperties() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
