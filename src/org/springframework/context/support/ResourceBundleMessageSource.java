@@ -4,23 +4,23 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.StringUtils;
 
 /**
  * MessageSource that accesses the ResourceBundle with the specified basename.
- * This class relies on the caching of the underlying core library
- * ResourceBundle implementation.
+ * This class relies on the caching of the underlying JDK's ResourceBundle
+ * implementation.
+ *
+ * <p>Unfortunately, java.util.ResourceBundle caches loaded bundles indefinitely.
+ * Reloading a bundle during VM execution is <i>not</i> possible by any means.
+ * As this MessageSource relies on ResourceBundle, it faces the same limitation.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setBasenames
  * @see java.util.ResourceBundle
  */
 public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
-
-	private final Log logger = LogFactory.getLog(getClass());
 
 	private String[] basenames;
 
@@ -80,10 +80,10 @@ public class ResourceBundleMessageSource extends AbstractNestingMessageSource {
 	}
 	
 	/**
-	 * Show the state of this object.
+	 * Show the configuration of this MessageSource.
 	 */
 	public String toString() {
-		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + " with basenames [" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
 	}
 
 }
