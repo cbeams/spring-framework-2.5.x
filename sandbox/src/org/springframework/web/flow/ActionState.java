@@ -36,14 +36,17 @@ public class ActionState extends TransitionableState {
 
 	public ActionState(String id) {
 		super(id);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(String id, Transition transition) {
 		super(id, transition);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(String id, Transition[] transitions) {
 		super(id, transitions);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(String id, ActionBean actionBean, Transition transition) {
@@ -78,14 +81,17 @@ public class ActionState extends TransitionableState {
 
 	public ActionState(Flow flow, String id) {
 		super(flow, id);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(Flow flow, String id, Transition transition) {
 		super(flow, id, transition);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(Flow flow, String id, Transition[] transitions) {
 		super(flow, id, transitions);
+		setActionBeanName(createActionBeanName(id));
 	}
 
 	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
@@ -118,6 +124,10 @@ public class ActionState extends TransitionableState {
 		setActionBeanNames(actionBeanNames);
 	}
 
+	protected String createActionBeanName(String id) {
+		return id;
+	}
+	
 	private static class ActionBeanHolder {
 		private String actionBeanName;
 
