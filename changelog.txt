@@ -1,20 +1,23 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.139 2004-05-02 14:47:56 jhoeller Exp $
+$Id: changelog.txt,v 1.140 2004-05-04 09:22:44 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
 ------------------------------------
+
+Package org.springframework.aop
+* fixed AbstractAutoProxyCreator to not check singleton status for inner beans, avoiding NoSuchBeanDefinitionException
 
 Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
 * added BeanDefinitionHolder class to beans.factory.support package, holding a BeanDefinition plus name and aliases
 * AbstractAutowireCapableBeanFactory detects BeanDefinitionHolder, applying its name to a BeanNameAware inner bean
-* DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases 
+* DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
-* deprecated PropertiesFactoryBean's "charset" property in favor of the newly added "fileEncoding" property
+* renamed PropertiesFactoryBean's "charset" property to "fileEncoding", for consistency with other encoding properties
 
 Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
@@ -44,6 +47,9 @@ Package org.springframework.mock
 * reworked Servlet API mock objects to provide comprehensive support for request/response-driven testing
 * reworked framework test suite to solely use Spring-provided mocks rather than ones from the MockObjects project
 
+Package org.springframework.orm
+* added "namingStrategy" property to LocalSessionFactoryBean, for specifying a custom Hibernate NamingStrategy
+
 Package org.springframework.remoting
 * exposed HessianProxyFactory's "overloadEnabled" property in HessianClientInterceptor
 * factored out Hessian proxy creation into "createHessianProxy" method in HessianClientInterceptor
@@ -72,7 +78,9 @@ Package org.springframework.web
 * added implicit registration of ResourceEditor with ServletContextResourceLoader to HttpServletBean
 * added "initBeanWrapper" callback to HttpServletBean, to allow for registering custom editors
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
-* deprecated BaseCommandController's "onBind(request, command)" method in favor of "onBind(request, command, errors)"
+* refined ViewResolver's "resolveViewName" to expect null return value if not found, to allow for ViewResolver chaining
+* DispatcherServlet detects ViewResolvers by type to allow for ViewResolver chaining (respecting order values)
+* XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
 * AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
 * AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
