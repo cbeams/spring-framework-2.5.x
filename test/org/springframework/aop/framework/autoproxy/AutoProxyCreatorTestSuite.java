@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
@@ -23,6 +24,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.2 2003-12-19 09:32:03 johnsonr Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 
@@ -78,7 +80,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 			else if (!beanNames[i].equals("messageSource") && !beanNames[i].endsWith("Creator")) {
 				Object bean = sac.getBean(beanNames[i]);
 				assertTrue("Enhanced bean class for bean '" + beanNames[i] + "': " + bean.getClass().getName(),
-				           bean.getClass().getName().indexOf("EnhancedByCGLIB") != -1);
+				           AopUtils.isCglibProxy(bean));
 			}
 		}
 		ACATest aca = (ACATest) sac.getBean("aca");
