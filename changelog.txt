@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.94 2004-02-20 12:04:49 trisberg Exp $
+$Id: changelog.txt,v 1.95 2004-02-22 17:11:05 johnsonr Exp $
 
 
 Changes in version 1.0 (01.03.2003)
@@ -13,6 +13,8 @@ WARNING: Small, but non-backwards-compatible JNDI configuration change!
   not have to do anything. If your old JNDI location had no scheme specified, Spring will no longer
   by default prepend 'java:comp/env/' to it. To get the old behaviour, just add the resourceRef property
   with a true value. Alternately just add the 'java:comp/env/' prefix yourself to the JNDI location path.
+  
+WARNING: Change in AOP API with impact on some user applications (easy to fix)
 
 Package org.springframework.beans
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
@@ -26,6 +28,16 @@ Package org.springframework.context
 * renamed DefaultBeanFactoryLocator to ContextSingletonBeanFactoryLocator
 * renamed LocatorFactory to DefaultLocatorFactory
 * fixed "useCodeAsDefaultMessage" fallback for multiple codes in a MessageSourceResolvable
+
+Package org.springframework.aop
+* simplified Advisor interface hierarchy. Now the only subinterfaces of Advisor
+are PointcutAdvisor and IntroductionAdvisor. There is no longer a parallel hierarchy
+of Advisors and Advice: DefaultPointcutAdvisor can be used to hold any
+advice type (Interceptor, MethodBeforeAdvice etc.).
+MIGRATION: if you used or extended a class like DefaultMethodBeforeAdvisor,
+replace that with DefaultPointcutAdvisor. If you used RegexpMethodPointcutAroundAdvisor,
+replace with RegexpMethodPoincutAdvisor. Note that regular expressions can now
+be used to target any advice type.
 
 Package org.springframework.jndi
 * renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
