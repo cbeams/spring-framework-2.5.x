@@ -291,6 +291,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		if (constructorToUse == null) {
+			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+			                                "Could not resolve matching constructor");
+		}
 		bw.setWrappedInstance(BeanUtils.instantiateClass(constructorToUse, argsToUse));
 		logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
 		return bw;
@@ -314,7 +318,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private int getTypeDifferenceWeight(Class[] argTypes, Object[] args) {
 		int result = 0;
 		for (int i = 0; i < argTypes.length; i++) {
-			if (argTypes[i].isInstance(args[i])) {
+			if (!BeanUtils.isAssignable(argTypes[i], args[i])) {
+				return Integer.MAX_VALUE;
+			}
+			if (args[i] != null) {
 				Class superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
 					if (argTypes[i].isAssignableFrom(superClass)) {

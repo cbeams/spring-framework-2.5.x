@@ -45,7 +45,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.37 2004-02-24 17:43:02 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.38 2004-03-08 19:26:23 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -821,12 +821,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(other, rod6.getOther());
 		assertEquals(0, rod6.getAge());
 		assertEquals(null, rod6.getName());
+	}
+
+	public void testConstructorArgResolution() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 
 		ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
 		assertEquals(99, rod9.getAge());
 
 		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
 		assertEquals(null, rod10.getName());
+
+		ConstructorDependenciesBean rod11 = (ConstructorDependenciesBean) xbf.getBean("rod11");
+		assertEquals(kerry2, rod11.getSpouse1());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

@@ -12,11 +12,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Static convenience methods for JavaBeans.
- * Provides method for instantiating beans and copying bean properties.
+ * Static convenience methods for JavaBeans, for instantiating beans,
+ * copying bean properties, etc.
+ *
+ * <p>Mainly for use within the framework, but to some degree also
+ * useful for application classes.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.13 2004-02-22 21:53:37 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.14 2004-03-08 19:26:23 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -65,6 +69,28 @@ public abstract class BeanUtils {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
 			                             "]; constructor threw exception", ex.getTargetException());
 		}
+	}
+
+	/**
+	 * Determine if the given type is assignable from the given value,
+	 * assuming setting by reflection. Considers primitive wrapper classes
+	 * as assignable to the corresponding primitive types.
+	 * <p>For example used in a bean factory's constructor resolution.
+	 * @param type the target type
+	 * @param value the value that should be assigned to the type
+	 * @return if the type is assignable from the value
+	 */
+	public static boolean isAssignable(Class type, Object value) {
+		return (type.isInstance(value) ||
+		    (!type.isPrimitive() && value == null) ||
+		    (type.equals(boolean.class) && value instanceof Boolean) ||
+		    (type.equals(byte.class) && value instanceof Byte) ||
+		    (type.equals(char.class) && value instanceof Character) ||
+		    (type.equals(short.class) && value instanceof Short) ||
+		    (type.equals(int.class) && value instanceof Integer) ||
+		    (type.equals(long.class) && value instanceof Long) ||
+		    (type.equals(float.class) && value instanceof Float) ||
+		    (type.equals(double.class) && value instanceof Double));
 	}
 
 	/**
