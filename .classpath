@@ -97,5 +97,6 @@
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.RC3-snapshot.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/ejb-api.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/jsp-api.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
