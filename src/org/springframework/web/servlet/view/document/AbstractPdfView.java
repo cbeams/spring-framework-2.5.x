@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view.document;
 
@@ -34,10 +34,6 @@ import org.springframework.web.servlet.view.AbstractView;
  * <a href="http://www.lowagie.com/iText">iText</a> package.
  * Application-specific view classes will extend this class.
  * The view will be held in the subclass itself, not in a template.
- *
- * <p>See
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson, pp 571-575 for an example of use of this class.
  *
  * <p>Note: Internet Explorer requires a ".pdf" extension, as
  * it doesn't always respect the declared content type.

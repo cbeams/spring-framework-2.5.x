@@ -49,15 +49,14 @@ import org.springframework.web.servlet.view.AbstractView;
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
  * Subclasses must <b>either</b> provide the XML W3C Document or Node to
- * transform by overriding <code>createDomNode()</code>, <b>or</b> provide
- * the <code>Source</code> to transform by overriding
- * <code>createXsltSource()</code>.
- * <p>
- * Note that <code>createXsltSource()</code> is the preferred method which all
+ * transform by overriding <code>createDomNode()</code>, <b>or</b> provide the
+ * <code>Source</code> to transform by overriding <code>createXsltSource()</code>.
+ *
+ * <p>Note that <code>createXsltSource()</code> is the preferred method which all
  * new subclasses should override from Spring 1.2.  <code>createDomNode()</code>
  * has been deprecated and may be removed in a future version.
- * <p>
- * Subclasses do not need to concern themselves with XSLT other than providing
+ *
+ * <p>Subclasses do not need to concern themselves with XSLT other than providing
  * a valid stylesheet location.
  *
  * <p>Properties:
@@ -73,7 +72,8 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <p>Setting cache to false will cause the templates object to be reloaded
  * for each rendering. This is useful during development, but will seriously
- * affect performance in production and isn't threadsafe.
+ * affect performance in production and isn't thread-safe.
+ *
  * @author Rod Johnson
  * @author Darren Davison
  */

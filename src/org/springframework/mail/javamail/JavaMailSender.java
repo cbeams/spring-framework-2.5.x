@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mail.javamail;
 
@@ -24,23 +24,33 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 
 /**
- * Extended MailSender interface for JavaMail, supporting MIME messages both as
- * direct arguments and via preparation callbacks.
+ * Extended MailSender interface for JavaMail, supporting MIME messages both
+ * as direct arguments and through preparation callbacks. Typically used in
+ * conjunction with the MimeMessageHelper class for convenient creation of
+ * JavaMail MimeMessages, including attachments etc.
  *
- * <p>Not as easy to test as a plain MailSender, but still rather easy compared
- * to full JavaMail code: Just let createMimeMessage return a plain MimeMessage
- * created with a Session.getInstance (empty properties) call, and check
- * the given messages in your mock implementations of the various send methods.
+ * <p>Clients should talk to the mail sender through this interface if
+ * they need mail functionality beyond SimpleMailMessage. The production
+ * implementation is JavaMailSenderImpl. Clients will typically receive the
+ * mail sender reference through dependency injection.
  *
- * <p>The recommended way of using this class is the MimeMessagePreparator
+ * <p>The recommended way of using this interface is the MimeMessagePreparator
  * mechanism, possibly using a MimeMessageHelper for populating the message.
  * See MimeMessageHelper's javadoc for an example.
+ *
+ * <p>Not as easy to test as a plain MailSender, but still rather easy compared to
+ * traditional JavaMail code: Just let <code>createMimeMessage</code> return a plain
+ * MimeMessage created with a <code>Session.getInstance(new Properties())</code>
+ * call, and check the given messages in your mock implementations of the various
+ * send methods.
  *
  * @author Juergen Hoeller
  * @since 07.10.2003
  * @see JavaMailSenderImpl
+ * @see #createMimeMessage
  * @see MimeMessagePreparator
  * @see MimeMessageHelper
+ * @see org.springframework.mail.SimpleMailMessage
  */
 public interface JavaMailSender extends MailSender {
 

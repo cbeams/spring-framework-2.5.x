@@ -24,16 +24,18 @@ import org.springframework.validation.Errors;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
- * <p>Nested path tag, to support and assist with nested beans or bean properties.
- * Exports a "nestedPath" variable of type String.
+ * <p>Nested-path tag, to support and assist with nested beans or bean properties
+ * in the model. Exports a "nestedPath" variable of type String in request scope,
+ * visible to the current page and also included pages, if any.
  *
- * <p>The BindTag will auto-detect the nested path and automatically prepend it
- * to its own path to form a complete path to the bean or bean property.
+ * <p>The BindTag will auto-detect the current nested path and automatically
+ * prepend it to its own path to form a complete path to the bean or bean property.
  *
  * <p>This tag will also prepend any existing nested path that is currently set.
- * Thus, you can nest multiple nested path tags.
+ * Thus, you can nest multiple nested-path tags.
  *
- * @author Seth Ladd
+ * <p>Thanks to Seth Ladd for the suggestion and the original implementation!
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */
@@ -77,6 +79,9 @@ public class NestedPathTag extends TagSupport {
 
 	public int doStartTag() throws JspException {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
+
+		// Save previous nestedPath value, build and expose current nestedPath value.
+		// Use request scope to expose nestedPath to included pages too.
 		String nestedPath = (String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (nestedPath != null) {
 			this.previousNestedPath = nestedPath;
@@ -85,7 +90,8 @@ public class NestedPathTag extends TagSupport {
 		else {
 			nestedPath = resolvedPath;
 		}
-		this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
+		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
+
 		return EVAL_BODY_INCLUDE;
 	}
 
@@ -94,11 +100,14 @@ public class NestedPathTag extends TagSupport {
 	 */
 	public int doEndTag() {
 		if (this.previousNestedPath != null) {
+			// Expose previous nestedPath value.
 			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
 		}
 		else {
+			// Remove exposed nestedPath value.
 			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
+
 		return EVAL_PAGE;
 	}
 

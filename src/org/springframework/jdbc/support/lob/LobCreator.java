@@ -41,6 +41,8 @@ import java.sql.SQLException;
  * @see org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback
  * @see DefaultLobHandler.DefaultLobCreator
  * @see OracleLobHandler.OracleLobCreator
+ * @see java.sql.PreparedStatement#setBlob
+ * @see java.sql.PreparedStatement#setClob
  * @see java.sql.PreparedStatement#setBytes
  * @see java.sql.PreparedStatement#setBinaryStream
  * @see java.sql.PreparedStatement#setString
@@ -51,7 +53,7 @@ public interface LobCreator {
 
 	/**
 	 * Set the given content as bytes on the given statement, using the given
-	 * parameter index. Might simply invoke PreparedStatement.setBytes
+	 * parameter index. Might simply invoke <code>PreparedStatement.setBytes</code>
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
@@ -63,8 +65,8 @@ public interface LobCreator {
 	    throws SQLException;
 
 	/**
-	 * Set the given content as binary stream on the given statement, using the
-	 * given parameter index. Might simply invoke PreparedStatement.setBinaryStream
+	 * Set the given content as binary stream on the given statement, using the given
+	 * parameter index. Might simply invoke <code>PreparedStatement.setBinaryStream</code>
 	 * or create a Blob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
@@ -78,7 +80,7 @@ public interface LobCreator {
 
 	/**
 	 * Set the given content as String on the given statement, using the given
-	 * parameter index. Might simply invoke PreparedStatement.setString
+	 * parameter index. Might simply invoke <code>PreparedStatement.setString</code>
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
@@ -90,28 +92,28 @@ public interface LobCreator {
 	    throws SQLException;
 
 	/**
-	 * Set the given content as ASCII stream on the given statement, using the
-	 * given parameter index. Might simply invoke PreparedStatement.setAsciiStream
+	 * Set the given content as ASCII stream on the given statement, using the given
+	 * parameter index. Might simply invoke <code>PreparedStatement.setAsciiStream</code>
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
 	 * @param asciiStream the content as ASCII stream, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.PreparedStatement#setBinaryStream
+	 * @see java.sql.PreparedStatement#setAsciiStream
 	 */
 	void setClobAsAsciiStream(
 			PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 	    throws SQLException;
 
 	/**
-	 * Set the given content as character stream on the given statement, using the
-	 * given parameter index. Might simply invoke PreparedStatement.setCharacterStream
+	 * Set the given content as character stream on the given statement, using the given
+	 * parameter index. Might simply invoke <code>PreparedStatement.setCharacterStream</code>
 	 * or create a Clob instance for it, depending on the database and driver.
 	 * @param ps the PreparedStatement to the set the content on
 	 * @param paramIndex the parameter index to use
 	 * @param characterStream the content as character stream, or null for SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.PreparedStatement#setBinaryStream
+	 * @see java.sql.PreparedStatement#setCharacterStream
 	 */
 	void setClobAsCharacterStream(
 			PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)

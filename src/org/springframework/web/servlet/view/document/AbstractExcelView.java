@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view.document;
 
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * <p>Properties:
  * <ul>
  * <li>url (optional): The url of an existing Excel document to pick as a starting point.
- * It is done without localization part nor the .xls extension.
+ * It is done without localization part nor the ".xls" extension.
  * </ul>
  *
  * <p>The file will be searched with names in the following order:
@@ -58,47 +58,40 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <pre>
  * protected void buildExcelDocument(
- *     Map model,
- *     HSSFWorkbook workbook,
- *     HttpServletRequest request,
- *     HttpServletResponse response )
- * {
- *     // AModel aModel = ( AModel ) model.get( "amodel" );
+ *     Map model, HSSFWorkbook workbook,
+ *     HttpServletRequest request, HttpServletResponse response) {
  *
- *     HSSFSheet sheet;
- *     HSSFRow   sheetRow;
- *     HSSFCell  cell;
+ *   // Go to the first sheet.
+ *   // getSheetAt: only if workbook is created from an existing document
+ * 	 // HSSFSheet sheet = workbook.getSheetAt(0);
+ * 	 HSSFSheet sheet = workbook.createSheet("Spring");
+ * 	 sheet.setDefaultColumnWidth(12);
  *
- *     // Go to the first sheet
- *     // getSheetAt: only if workbook is created from an existing document
- * 	   //sheet = workbook.getSheetAt( 0 );
- * 	   sheet = workbook.createSheet("Spring");
- * 	   sheet.setDefaultColumnWidth((short)12);
+ *   // Write a text at A1.
+ *   HSSFCell cell = getCell(sheet, 0, 0);
+ *   setText(cell, "Spring POI test");
  *
- *     // write a text at A1
- *     cell = getCell( sheet, 0, 0 );
- *     setText(cell,"Spring POI test");
+ *   // Write the current date at A2.
+ *   HSSFCellStyle dateStyle = workbook.createCellStyle();
+ *   dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
+ *   cell = getCell(sheet, 1, 0);
+ *   cell.setCellValue(new Date());
+ *   cell.setCellStyle(dateStyle);
  *
- *     // Write the current date at A2
- *     HSSFCellStyle dateStyle = workbook.createCellStyle(  );
- *     dateStyle.setDataFormat( HSSFDataFormat.getBuiltinFormat( "m/d/yy" ) );
- *     cell = getCell( sheet, 1, 0 );
- *     cell.setCellValue( new Date() );
- *     cell.setCellStyle( dateStyle );
+ *   // Write a number at A3
+ *   getCell(sheet, 2, 0).setCellValue(458);
  *
- *     // Write a number at A3
- *     getCell( sheet, 2, 0 ).setCellValue( 458 );
- *
- *     // Write a range of numbers
- *     sheetRow = sheet.createRow( 3 );
- *     for (short i = 0; i<10; i++) {
- *         sheetRow.createCell(i).setCellValue( i*10 );
- *     }
+ *   // Write a range of numbers.
+ *   HSSFRow sheetRow = sheet.createRow(3);
+ *   for (short i = 0; i < 10; i++) {
+ *     sheetRow.createCell(i).setCellValue(i * 10);
+ *   }
  * }</pre>
  *
- * <p>The use of this view is close to the AbstractPdfView class.
+ * This class is similar to the AbstractPdfView class in usage style.
  *
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  * @see AbstractPdfView
  */
 public abstract class AbstractExcelView extends AbstractView {
@@ -213,11 +206,11 @@ public abstract class AbstractExcelView extends AbstractView {
 	 */
 	protected HSSFCell getCell(HSSFSheet sheet, int row, int col) {
 		HSSFRow sheetRow = sheet.getRow(row);
-		if (null == sheetRow) {
+		if (sheetRow == null) {
 			sheetRow = sheet.createRow(row);
 		}
 		HSSFCell cell = sheetRow.getCell((short) col);
-		if (null == cell) {
+		if (cell == null) {
 			cell = sheetRow.createCell((short) col);
 		}
 		return cell;
