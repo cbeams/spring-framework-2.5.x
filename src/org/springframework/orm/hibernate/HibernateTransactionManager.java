@@ -252,9 +252,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 			else if (!txObject.isNewSessionHolder()) {
-				// we need AUTO for a non-read-only transaction
+				// we need AUTO or COMMIT for a non-read-only transaction
 				FlushMode flushMode = session.getFlushMode();
-				if (!FlushMode.AUTO.equals(flushMode)) {
+				if (FlushMode.NEVER.equals(flushMode)) {
 					txObject.setPreviousFlushMode(flushMode);
 					session.setFlushMode(FlushMode.AUTO);
 				}
