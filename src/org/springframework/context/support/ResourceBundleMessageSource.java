@@ -101,7 +101,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 			ResourceBundle bundle = ResourceBundle.getBundle(basename, locale,
 			                                                 Thread.currentThread().getContextClassLoader());
 			try {
-				return getMessageFormat(bundle, code);
+				return getMessageFormat(bundle, code, locale);
 			}
 			catch (MissingResourceException ex) {
 				// assume key not found
@@ -122,28 +122,35 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * fetching already generated MessageFormats from the cache.
 	 * @param bundle the ResourceBundle to work on
 	 * @param code the message code to retrieve
+	 * @param locale the Locale to use to build the MessageFormat
 	 * @return the resulting MessageFormat
 	 */
-	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code) throws MissingResourceException {
+	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
+			throws MissingResourceException {
 		synchronized (this.cachedMessageFormats) {
 			Map codeMap = (Map) this.cachedMessageFormats.get(bundle);
+			Map localeMap = null;
 			if (codeMap != null) {
-				MessageFormat result = (MessageFormat) codeMap.get(code);
-				if (result != null) {
-					return result;
+				localeMap = (Map) codeMap.get(code);
+				if (localeMap != null) {
+					MessageFormat result = (MessageFormat) localeMap.get(locale);
+					if (result != null) {
+						return result;
+					}
 				}
 			}
 			String msg = bundle.getString(code);
 			if (msg != null) {
-				MessageFormat result = new MessageFormat(msg);
-				if (codeMap != null) {
-					codeMap.put(code, result);
-				}
-				else {
+				if (codeMap == null) {
 					codeMap = new HashMap();
-					codeMap.put(code, result);
 					this.cachedMessageFormats.put(bundle, codeMap);
 				}
+				if (localeMap == null) {
+					localeMap = new HashMap();
+					codeMap.put(code, localeMap);
+				}
+				MessageFormat result = createMessageFormat(msg, locale);
+				localeMap.put(locale, result);
 				return result;
 			}
 			return null;
@@ -154,7 +161,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * Show the configuration of this MessageSource.
 	 */
 	public String toString() {
-		return getClass().getName() + " with basenames [" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
 	}
 
 }

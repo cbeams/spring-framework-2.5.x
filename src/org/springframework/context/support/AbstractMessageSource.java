@@ -189,6 +189,25 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
 	}
 
+	/**
+	 * Create a MessageFormat for the given message and Locale.
+	 * <p>This implementation creates an empty MessageFormat first,
+	 * populating it with Locale and pattern afterwards, to stay
+	 * compatible with J2SE 1.3.
+	 * @param msg the message to create a MessageFormat for
+	 * @param locale the Locale to create a MessageFormat for
+	 * @return the MessageFormat instance
+	 */
+	protected MessageFormat createMessageFormat(String msg, Locale locale) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating MessageFormat for pattern [" + msg + "] and locale '" + locale + "'");
+		}
+		MessageFormat messageFormat = new MessageFormat("");
+		messageFormat.setLocale(locale);
+		messageFormat.applyPattern(msg);
+		return messageFormat;
+	}
+
 
 	/**
 	 * Subclasses must implement this method to resolve a message.

@@ -210,7 +210,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 				String filename = (String) filenames.get(j);
 				PropertiesHolder propHolder = getProperties(filename);
 				if (propHolder.getProperties() != null) {
-					MessageFormat result = propHolder.getMessageFormat(code);
+					MessageFormat result = propHolder.getMessageFormat(code, locale);
 					if (result != null) {
 						return result;
 					}
@@ -378,8 +378,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Clear the resource bundle cache.
 	 * Following resolve calls will lead to reloading of the properties files.
 	 */
-	public synchronized void clearCache() {
-		this.cachedProperties.clear();
+	public void clearCache() {
+		logger.info("Clearing resource bundle cache");
+		synchronized (this.cachedProperties) {
+			this.cachedProperties.clear();
+		}
 	}
 
 	/**
@@ -404,7 +407,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * change detection, and the timestamp of the last refresh attempt
 	 * (updated every time the cache entry gets re-validated).
 	 */
-	protected static class PropertiesHolder {
+	protected class PropertiesHolder {
 
 		private Properties properties;
 
@@ -439,20 +442,26 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			return refreshTimestamp;
 		}
 
-		protected synchronized MessageFormat getMessageFormat(String code) {
+		protected MessageFormat getMessageFormat(String code, Locale locale) {
 			synchronized (this.cachedMessageFormats) {
-				MessageFormat result = (MessageFormat) this.cachedMessageFormats.get(code);
-				if (result != null) {
-					return result;
-				}
-				else {
-					String msg = this.properties.getProperty(code);
-					if (msg != null) {
-						result = new MessageFormat(msg);
-						this.cachedMessageFormats.put(code, result);
+				Map localeMap = (Map) this.cachedMessageFormats.get(code);
+				if (localeMap != null) {
+					MessageFormat result = (MessageFormat) localeMap.get(locale);
+					if (result != null) {
+						return result;
 					}
 				}
-				return result;
+				String msg = this.properties.getProperty(code);
+				if (msg != null) {
+					if (localeMap == null) {
+						localeMap = new HashMap();
+						this.cachedMessageFormats.put(code, localeMap);
+					}
+					MessageFormat result = createMessageFormat(msg, locale);
+					localeMap.put(locale, result);
+					return result;
+				}
+				return null;
 			}
 		}
 	}
