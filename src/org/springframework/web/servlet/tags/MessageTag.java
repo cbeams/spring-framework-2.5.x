@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
@@ -144,7 +145,10 @@ public class MessageTag extends HtmlEscapingAwareTag {
 				else if (this.arguments instanceof Object[]) {
 					argumentsArray = (Object[]) this.arguments;
 				}
-				else {
+				else if (this.arguments instanceof Collection) {
+					argumentsArray = ((Collection) this.arguments).toArray();
+				}
+				else if (this.arguments != null) {
 					// assume a single argument object
 					argumentsArray = new Object[] {this.arguments};
 				}
