@@ -8,40 +8,26 @@
 		<property name="count"><value>10</value></property>
 	</bean>
 	
-	
-	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" 
-		singleton="false">	
+	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" singleton="false">
 		<property name="count"><value>10</value></property>
 	</bean>
-	
 
-	
 	<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">	
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 	</bean>
 	
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.NopInterceptor" />
 	
-	<bean id="singleton" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="singleton" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>debugInterceptor,test</value></property>		
-		
 	</bean>
-	
-	
+
 	<!--
-		This will create a bean that creates a new
-		target on each invocation.
+		This will create a bean that creates a new target on each invocation.
 	-->
-	<bean id="prototype" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="prototype" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource"><ref local="prototypeTargetSource"/></property>
 		<property name="interceptorNames"><value>debugInterceptor</value></property>
-		
 	</bean>
 
 </beans>		
-	
-	

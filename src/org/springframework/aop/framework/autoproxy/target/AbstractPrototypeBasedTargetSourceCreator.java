@@ -23,9 +23,9 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
 import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * Convenient superclass for TargetSourceCreators that require creating
@@ -42,27 +42,29 @@ public abstract class AbstractPrototypeBasedTargetSourceCreator implements Targe
 		if (prototypeTargetSource == null) {
 			return null;
 		}
-		else {			
-			if (!(factory instanceof BeanDefinitionRegistry)) {
-				logger.warn("Cannot do autopooling with a BeanFactory that doesn't implement BeanDefinitionRegistry");
+
+		else {
+			if (!(factory instanceof ConfigurableListableBeanFactory)) {
+				logger.warn("Cannot do auto TargetSource creation with a BeanFactory " +
+						"that doesn't implement ConfigurableListableBeanFactory");
 				return null;
 			}
-			BeanDefinitionRegistry definitionRegistry = (BeanDefinitionRegistry) factory;
-			RootBeanDefinition definition = (RootBeanDefinition) definitionRegistry.getBeanDefinition(beanName);
 
-			logger.info("Configuring AbstractPrototypeBasedTargetSource...");
-		
+			logger.debug("Configuring AbstractPrototypeBasedTargetSource");
+			ConfigurableListableBeanFactory listableFactory = (ConfigurableListableBeanFactory) factory;
+			BeanDefinition definition = listableFactory.getBeanDefinition(beanName);
+
 			// Infinite cycle will result if we don't use a different factory,
 			// because a getBean() call with this beanName will go through the autoproxy
 			// infrastructure again.
-			// We to override just this bean definition, as it may reference other beans
+			// We need to override just this bean definition, as it may reference other beans
 			// and we're happy to take the parent's definition for those.
 			DefaultListableBeanFactory beanFactory2 = new DefaultListableBeanFactory(factory);
 
-			// Override the prototype bean
+			// Override the prototype bean.
 			beanFactory2.registerBeanDefinition(beanName, definition);
 			
-			// Complete configuring the PrototypeTargetSource
+			// Complete configuring the PrototypeTargetSource.
 			prototypeTargetSource.setTargetBeanName(beanName);
 			prototypeTargetSource.setBeanFactory(beanFactory2);
 
@@ -74,12 +76,12 @@ public abstract class AbstractPrototypeBasedTargetSourceCreator implements Targe
 	 * Subclasses must implement this method to return a new AbstractPrototypeBasedTargetSource
 	 * if they wish to create a custom TargetSource for this bean, or null if they are
 	 * not interested it in, in which case no special target source will be created.
-	 * Subclasses should not call setTargetBeanName() or setBeanFactory() on the
-	 * AbstractPrototypeBasedTargetSource: This class's implementation of getTargetSource()
-	 * will do that.
+	 * Subclasses should not call <code>setTargetBeanName</code> or <code>setBeanFactory</code>
+	 * on the AbstractPrototypeBasedTargetSource: This class's implementation of
+	 * <code>getTargetSource()</code> will do that.
 	 * @return the AbstractPrototypeBasedTargetSource, or null if we don't match this
 	 */
-	protected abstract AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName,
-																																										BeanFactory factory);
+	protected abstract AbstractPrototypeBasedTargetSource createPrototypeTargetSource(
+			Object bean, String beanName, BeanFactory factory);
 
 }

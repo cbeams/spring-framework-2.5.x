@@ -26,10 +26,11 @@ import org.springframework.util.Assert;
  * This is the default implementation of TargetSource used by the AOP framework.
  * There is no need to create objects of this class in application code.
  *
- * <p>This class is Serializable. However, the actual serializability of a
- * SingletonTargetSource will depend on whether the target is Serializable.
+ * <p>This class is serializable. However, the actual serializability of a
+ * SingletonTargetSource will depend on whether the target is serializable.
  *
  * @author Rod Johnson
+ * @see org.springframework.aop.framework.AdvisedSupport#setTarget
  */
 public final class SingletonTargetSource implements TargetSource, Serializable {
 
@@ -86,4 +87,5 @@ public final class SingletonTargetSource implements TargetSource, Serializable {
 	public String toString() {
 		return "SingletonTargetSource for target: " + this.target;
 	}
+
 }

@@ -19,6 +19,7 @@ package org.springframework.aop.target;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of TargetSource interface that caches a local target object,
@@ -27,46 +28,40 @@ import org.springframework.aop.TargetSource;
  * <p>If configuring an object of this class in a Spring IoC container,
  * use constructor injection.
  * 
- * <p>This TargetSource is serializable if the target is
- * at the time of serialization.
+ * <p>This TargetSource is serializable if the target is at the time
+ * of serialization.
  *
  * @author Rod Johnson
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */
-	protected Object target;
+	private Object target;
 
 	/**
-	 * Create a new HotSwappableTargetSource with the initial target.
-	 * @param initialTarget initial target
+	 * Create a new HotSwappableTargetSource with the given initial target object.
+	 * @param initialTarget the initial target object
 	 */
 	public HotSwappableTargetSource(Object initialTarget) {
+		Assert.notNull(initialTarget, "initialTarget is required");
 		this.target = initialTarget;
 	}
-	
+
 	public Class getTargetClass() {
-		return target.getClass();
+		return this.target.getClass();
 	}
 
-	/**
-	 * @see org.springframework.aop.TargetSource#isStatic()
-	 */
 	public final boolean isStatic() {
 		return false;
 	}
 
 	/**
-	 * Synchronization around something that takes so little time is fine
-	 * @see org.springframework.aop.TargetSource#getTarget()
+	 * Synchronization around something that takes so little time is fine.
 	 */
 	public synchronized Object getTarget() {
 		return this.target;
 	}
 
-	/**
-	 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
-	 */
 	public void releaseTarget(Object o) {
 		// No implementation needed
 	}
@@ -100,8 +95,7 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	}
 	
 	public String toString() {
-		return "Swappable TargetSource (" + getClass().getName() + "): " +
-		 	((target != null) ? "targetClass=" + target.getClass() : "UNITIALIZED");
+		return "HotSwappableTargetSource for target: " + this.target;
 	}
 
 }

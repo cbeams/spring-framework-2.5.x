@@ -20,6 +20,7 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 
@@ -97,7 +98,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	// Implementation of org.apache.commons.pool.PoolableObjectFactory interface
 	//----------------------------------------------------------------------------
 
-	public Object makeObject() {
+	public Object makeObject() throws BeansException {
 		return newPrototypeInstance();
 	}
 

@@ -41,8 +41,8 @@ public class QuickTargetSourceCreator extends AbstractPrototypeBasedTargetSource
 
 	public static final String PREFIX_PROTOTYPE = "!";
 
-	protected final AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName,
-																																								 BeanFactory factory) {
+	protected final AbstractPrototypeBasedTargetSource createPrototypeTargetSource(
+			Object bean, String beanName, BeanFactory factory) {
 		if (beanName.startsWith(PREFIX_COMMONS_POOL)) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();
 			cpts.setMaxSize(25);

@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
 /**
  * Superclass for AOP proxy configuration managers.
  * These are not themselves AOP proxies, but subclasses of this class are
- * normally factories from which  AOP proxy instances are obtained directly.
+ * normally factories from which AOP proxy instances are obtained directly.
  *
  * <p>This class frees subclasses of the housekeeping of Advices
  * and Advisors, but doesn't actually implement proxy creation
@@ -132,6 +132,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.listeners.remove(listener);
 	}
 
+	/**
+	 * Set the given object as target.
+	 * Will create a SingletonTargetSource for the object.
+	 * @see #setTargetSource
+	 * @see org.springframework.aop.target.SingletonTargetSource
+	 */
 	public void setTarget(Object target) {
 		setTargetSource(new SingletonTargetSource(target));
 	}

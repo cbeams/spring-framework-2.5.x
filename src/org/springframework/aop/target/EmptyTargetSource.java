@@ -30,7 +30,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource();
 	
 	/**
-	 * Enforce Singleton
+	 * Enforce Singleton.
 	 */
 	private EmptyTargetSource() {
 	} 

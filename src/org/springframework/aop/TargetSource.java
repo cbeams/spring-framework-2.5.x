@@ -1,4 +1,4 @@
-/*
+/*<
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,10 +40,11 @@ public interface TargetSource {
 	Class getTargetClass();
 	
 	/**
-	 * Will all calls to getTarget() return the same object?
-	 * In that case, there will be no need to invoke releaseTarget(),
-	 * and the AOP framework can cache the return value of getTarget().
-	 * @return whether the target is immutable.
+	 * Will all calls to <code>getTarget()</code> return the same object?
+	 * In that case, there will be no need to invoke <code>releaseTarget</code>,
+	 * and the AOP framework can cache the return value of <code>getTarget()</code>.
+	 * @return whether the target is immutable
+	 * @see #getTarget
 	 */
 	boolean isStatic();
 	
@@ -56,8 +57,9 @@ public interface TargetSource {
 	Object getTarget() throws Exception;
 	
 	/**
-	 * Release the given target object obtained from the getTarget() method.
-	 * @param target object obtained from a call to getTarget()
+	 * Release the given target object obtained from the
+	 * <code>getTarget()</code> method.
+	 * @param target object obtained from a call to <code>getTarget()</code>
 	 * @throws Exception if the object can't be released
 	 * @see #getTarget
 	 */
