@@ -213,17 +213,30 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #createCommand
 	 */
 	protected Object getCommand(HttpServletRequest request) throws Exception {
+		return userObject(request);
+	}
+
+	/**
+	 * Retrieve a command object for the given request.
+	 * @deprecated as of 1.0 M3: use getCommand instead.
+	 * This method will be removed before 1.0 final!
+	 * @param request current HTTP request
+	 * @return object command to bind onto
+	 * @see #getCommand
+	 */
+	protected Object userObject(HttpServletRequest request) throws Exception {
 		return createCommand();
 	}
 
 	/**
 	 * Create a new command instance for the command class of this controller.
 	 * @return the new command instance
-	 * @throws Exception in case of instantiation errors
+	 * @throws InstantiationException if the command class could not be instantiated
+	 * @throws IllegalAccessException if the class or its constructor is not accessible
 	 */
-	protected final Object createCommand() throws Exception {
-		logger.info("Must create new command of class [" + this.commandClass.getName() + "]");
-		return commandClass.newInstance();
+	protected final Object createCommand() throws InstantiationException, IllegalAccessException {
+		logger.debug("Creating new command of class [" + this.commandClass.getName() + "]");
+		return this.commandClass.newInstance();
 	}
 
 	/**
