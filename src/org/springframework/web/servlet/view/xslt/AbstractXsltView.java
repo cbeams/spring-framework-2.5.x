@@ -25,6 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
@@ -61,7 +62,7 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Rod Johnson
  * @author Darren Davison
- * @version $Id: AbstractXsltView.java,v 1.11 2004-05-26 10:48:56 jhoeller Exp $
+ * @version $Id: AbstractXsltView.java,v 1.12 2004-06-29 12:09:43 jhoeller Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
@@ -130,18 +131,27 @@ public abstract class AbstractXsltView extends AbstractView {
 		this.transformerFactory = TransformerFactory.newInstance();
 		
 		if (this.uriResolver != null) {
-			logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" + getBeanName() + "'");
+			if (logger.isInfoEnabled()) {
+				logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" +
+										getBeanName() + "'");
+			}
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
-		logger.debug("URL in view is " + this.stylesheetLocation);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("URL in view is " + this.stylesheetLocation);
+		}
+
 		cacheTemplates();
 	}	
 
 	private void cacheTemplates() throws ApplicationContextException {
-		if (this.stylesheetLocation != null && !"".equals(this.stylesheetLocation)) {
+		if (this.stylesheetLocation != null) {
 			try {
 				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheetLocation));
-				logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getBeanName() + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getBeanName() + "'");
+				}
 			}
 			catch (TransformerConfigurationException ex) {
 				throw new ApplicationContextException(
@@ -154,7 +164,9 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Load the stylesheet. Subclasses can override this.
 	 */
 	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
-		logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
+		}
 		try {
 			return new StreamSource(stylesheetLocation.getInputStream());
 		}
@@ -191,7 +203,9 @@ public abstract class AbstractXsltView extends AbstractView {
 
 		if (model.size() == 1) {
 			docRoot = (String) model.keySet().iterator().next();
-			logger.info("Single model object received, keyname [" + docRoot + "] will be used as root tag name");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Single model object received, keyname [" + docRoot + "] will be used as root tag name");
+			}
 			singleModel = model.get(docRoot);
 		}
 
@@ -207,14 +221,14 @@ public abstract class AbstractXsltView extends AbstractView {
 			// docRoot local variable takes precedence
 			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
 		
-		doTransform(response, dom);
+		doTransform(model, dom, request, response);
 	}
 
 	/**
 	 * Return the XML node to transform.
 	 * Subclasses must implement this method.
 	 * @param model the model Map
-	 * @param root name for root element.  This can be supplied as a bean property
+	 * @param root name for root element. This can be supplied as a bean property
 	 * to concrete subclasses within the view definition file, but will be overridden
 	 * in the case of a single object in the model map to be the key for that object.
 	 * If no root property is specified and multiple model objects exist, a default
@@ -224,6 +238,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * create a RequestContext to expose as part of the model.
 	 * @param response HTTP response. Subclasses won't normally use this,
 	 * however there may sometimes be a need to set cookies.
+	 * @return the XML node to transform
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 */
@@ -231,39 +246,56 @@ public abstract class AbstractXsltView extends AbstractView {
 	                                      HttpServletResponse response) throws Exception;
 
 	/**
-	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.  Subclasses
-	 * can override the default implementation (which simply returns null) in order to
-	 * apply one or more parameters to the transformation process.
-	 * @return a Map of parameters to apply to the transformation process
-	 * @see javax.xml.transform.Transformer#setParameter
+	 * Perform the actual transformation, writing to the HTTP response.
+	 * <p>Default implementation delegates to the doTransform version
+	 * that takes a Result argument, building a StreamResult for the
+	 * ServletResponse OutputStream.
+	 * @param model the model Map
+	 * @param dom the XNL node to transform
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
+	 * @see #doTransform(Node, HttpServletRequest, Result)
+	 * @see javax.xml.transform.stream.StreamResult
+	 * @see javax.servlet.ServletResponse#getOutputStream
 	 */
-	protected Map getParameters() {
-		return null;
+	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
+	    throws Exception {
+		doTransform(dom, request, new StreamResult(new BufferedOutputStream(response.getOutputStream())));
 	}
-	
+
 	/**
-	 * Use TrAX to perform the transform.
+	 * Perform the actual transformation, writing to the given result.
+	 * @param dom the XNL node to transform
+	 * @param request current HTTP request
+	 * @param result the result to write to
+	 * @throws Exception we let this method throw any exception; the
+	 * AbstractXlstView superclass will catch exceptions
 	 */
-	protected void doTransform(HttpServletResponse response, Node dom) throws ServletException, IOException {
+	protected void doTransform(Node dom, HttpServletRequest request, Result result)
+	    throws Exception {
 		try {
 			Transformer trans = (this.templates != null) ?
 			    this.templates.newTransformer() : // we have a stylesheet
 						this.transformerFactory.newTransformer(); // just a copy
 				
 			// apply any subclass supplied parameters to the transformer
-			Map parameters = getParameters();		
+			Map parameters = getParameters(request);
 			if (parameters != null) {
 				for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
 					Map.Entry entry = (Map.Entry) iter.next();
 					trans.setParameter(entry.getKey().toString(), entry.getValue());
-				}			
-				logger.debug("Added parameters [" + parameters + "] to transformer object");
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added parameters [" + parameters + "] to transformer object");
+				}
 			}
 
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
 			// Xalan-specific, but won't do any harm in other XSLT engines
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			trans.transform(new DOMSource(dom), new StreamResult(new BufferedOutputStream(response.getOutputStream())));
+			trans.transform(new DOMSource(dom), result);
 
 			logger.debug("XSLT transformed OK with stylesheet [" + this.stylesheetLocation + "]");
 		}
@@ -277,6 +309,33 @@ public abstract class AbstractXsltView extends AbstractView {
 				"Couldn't perform transform with stylesheet [" + this.stylesheetLocation +
 				"] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
+	}
+
+	/**
+	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.
+	 * Subclasses can override this method in order to apply one or more
+	 * parameters to the transformation process.
+	 * <p>Default implementation delegates to simple getParameter version.
+	 * @param request current HTTP request
+	 * @return a Map of parameters to apply to the transformation process
+	 * @see #getParameters()
+	 * @see javax.xml.transform.Transformer#setParameter
+	 */
+	protected Map getParameters(HttpServletRequest request) {
+		return getParameters();
+	}
+
+	/**
+	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.
+	 * Subclasses can override this method in order to apply one or more
+	 * parameters to the transformation process.
+	 * <p>Default implementation delegates simply returns null.
+	 * @return a Map of parameters to apply to the transformation process
+	 * @see #getParameters(HttpServletRequest)
+	 * @see javax.xml.transform.Transformer#setParameter
+	 */
+	protected Map getParameters() {
+		return null;
 	}
 
 }
