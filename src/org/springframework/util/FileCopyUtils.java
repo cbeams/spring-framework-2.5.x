@@ -59,12 +59,13 @@ public abstract class FileCopyUtils {
 	 * Copy the contents of the given input File to the given output File.
 	 * @param in the file to copy from
 	 * @param out the file to copy to
+	 * @return the number of bytes copied
 	 * @throws IOException in case of I/O errors
 	 */
-	public static void copy(File in, File out) throws IOException {
+	public static int copy(File in, File out) throws IOException {
 		Assert.notNull(in, "No input File specified");
 		Assert.notNull(out, "No output File specified");
-		copy(new BufferedInputStream(new FileInputStream(in)),
+		return copy(new BufferedInputStream(new FileInputStream(in)),
 		    new BufferedOutputStream(new FileOutputStream(out)));
 	}
 
@@ -103,18 +104,22 @@ public abstract class FileCopyUtils {
 	 * Closes both streams when done.
 	 * @param in the stream to copy from
 	 * @param out the stream to copy to
+	 * @return the number of bytes copied
 	 * @throws IOException in case of I/O errors
 	 */
-	public static void copy(InputStream in, OutputStream out) throws IOException {
+	public static int copy(InputStream in, OutputStream out) throws IOException {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 		try {
+			int byteCount = 0;
 			byte[] buffer = new byte[BUFFER_SIZE];
-			int nrOfBytes = -1;
-			while ((nrOfBytes = in.read(buffer)) != -1) {
-				out.write(buffer, 0, nrOfBytes);
+			int bytesRead = -1;
+			while ((bytesRead = in.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+				byteCount += bytesRead;
 			}
 			out.flush();
+			return byteCount;
 		}
 		finally {
 			try {
@@ -178,18 +183,22 @@ public abstract class FileCopyUtils {
 	 * Closes both when done.
 	 * @param in the Reader to copy from
 	 * @param out the Writer to copy to
+	 * @return the number of characters copied
 	 * @throws IOException in case of I/O errors
 	 */
-	public static void copy(Reader in, Writer out) throws IOException {
+	public static int copy(Reader in, Writer out) throws IOException {
 		Assert.notNull(in, "No Reader specified");
 		Assert.notNull(out, "No Writer specified");
 		try {
+			int byteCount = 0;
 			char[] buffer = new char[BUFFER_SIZE];
-			int nrOfBytes = -1;
-			while ((nrOfBytes = in.read(buffer)) != -1) {
-				out.write(buffer, 0, nrOfBytes);
+			int bytesRead = -1;
+			while ((bytesRead = in.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+				byteCount += bytesRead;
 			}
 			out.flush();
+			return byteCount;
 		}
 		finally {
 			try {
