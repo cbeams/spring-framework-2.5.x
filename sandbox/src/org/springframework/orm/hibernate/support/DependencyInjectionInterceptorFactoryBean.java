@@ -93,17 +93,14 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 
 
 	protected void validateProperties() {
-		if (sessionFactory == null) {
-			if (sessionFactoryName == null) {
-				throw new IllegalArgumentException("Either sessionFactory or sessionFactoryName property must be set");
-			}
-			else {
-				// look up the session factory bean
-				this.sessionFactory = (SessionFactory) getBeanFactory().getBean(sessionFactoryName, SessionFactory.class);
-			}
-		}
+		if (sessionFactory == null && sessionFactoryName == null) {
+			throw new IllegalArgumentException("Either sessionFactory or sessionFactoryName property must be set");
+		}			
 	}
 
+	/**
+	 * Class of Hibernate Interceptor returned by this factory.
+	 */
 	protected class DependencyInjectionInterceptor extends ChainedInterceptorSupport {
 
 		/**
@@ -112,7 +109,7 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 		public Object instantiate(Class clazz, Serializable id) throws CallbackException {
 			try {
 				Object newEntity = createAndConfigure(clazz);
-				setIdOnNewEntity(sessionFactory, clazz, id, newEntity);
+				setIdOnNewEntity(getSessionFactory(), clazz, id, newEntity);
 				return newEntity;
 			}
 			catch (NoAutowiringConfigurationForClassException ex) {
@@ -145,5 +142,19 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 	public boolean isSingleton() {
 		return true;
 	}
+	
+	/**
+	 * Lazily look up the session factory
+	 * @return the Hibernate SessionFactory this class should configure
+	 * objects for
+	 */
+	private SessionFactory getSessionFactory() {
+		// We don't do this in validate, as that could still cause circular
+		// dependency problems.
+       if (sessionFactory == null) { 
+            sessionFactory = (SessionFactory) getBeanFactory().getBean(sessionFactoryName, SessionFactory.class); 
+        } 
+        return sessionFactory; 
+    } 
 	
 }
