@@ -2,18 +2,13 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
-package org.springframework.web.bind;
 
-import java.beans.PropertyDescriptor;
-import java.util.Iterator;
+package org.springframework.web.bind;
 
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.DataBinder;
-import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
@@ -23,7 +18,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * @author Juergen Hoeller
  */
 public class ServletRequestDataBinder extends DataBinder {
-	
+
 	public ServletRequestDataBinder(Object target, String name) {
 		super(target, name);
 	}
@@ -43,47 +38,28 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
-	 * @throws org.springframework.web.multipart.MultipartException
 	 */
-	public void bind(ServletRequest request) throws MultipartException {
+	public void bind(ServletRequest request) {
 		// bind normal HTTP parameters
 		bind(new ServletRequestParameterPropertyValues(request));
 
 		// bind multipart files
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			Iterator fileNames = multipartRequest.getFileNames();
-			while (fileNames.hasNext()) {
-				String fileName = (String) fileNames.next();
-				if (getBeanWrapper().isWritableProperty(fileName)) {
-					PropertyDescriptor descriptor = getBeanWrapper().getPropertyDescriptor(fileName);
-					MultipartFile file = multipartRequest.getFile(fileName);
-					if (descriptor.getPropertyType().equals(byte[].class)) {
-						pvs.addPropertyValue(fileName, file.getBytes());
-					}
-					else if (descriptor.getPropertyType().equals(String.class)) {
-						pvs.addPropertyValue(fileName, new String(file.getBytes()));
-					}
-					else {
-						pvs.addPropertyValue(fileName, file);
-					}
-				}
-			}
-			bind(pvs);
+			bind(new MutablePropertyValues(multipartRequest.getFileMap()));
 		}
 	}
 
 	/**
-	 * Treats errors as fatal. Use this method only if 
-	 * it's an error if the input isn't valid. 
+	 * Treats errors as fatal. Use this method only if
+	 * it's an error if the input isn't valid.
 	 * This might be appropriate if all input is from dropdowns, for example.
 	 * @throws ServletRequestBindingException subclass of ServletException on any binding problem
 	 */
 	public void closeNoCatch() throws ServletRequestBindingException {
 		if (hasErrors()) {
-			throw new ServletRequestBindingException("Errors binding onto class " + getTarget(), this);
+			throw new ServletRequestBindingException("Errors binding onto object [" + getTarget() + "]", this);
 		}
 	}
-	
+
 }

@@ -19,25 +19,25 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.mockobjects.servlet.MockFilterConfig;
 import com.mockobjects.servlet.MockFilterChain;
+import com.mockobjects.servlet.MockFilterConfig;
 import junit.framework.TestCase;
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
-import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.mock.MockHttpServletResponse;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.multipart.support.MultipartFilter;
+import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
+import org.springframework.web.multipart.support.MultipartFilter;
+import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.util.WebUtils;
-import org.springframework.web.bind.ServletRequestDataBinder;
 
 /**
  * @author Juergen Hoeller
@@ -45,7 +45,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
  */
 public class CommonsMultipartResolverTests extends TestCase {
 
-	public void testWithApplicationContext() throws MultipartException {
+	public void testWithApplicationContext() throws MultipartException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
@@ -150,13 +150,24 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertEquals(transfer1, ((MockFileItem) file1.getFileItem()).writtenFile);
 		assertEquals(transfer2, ((MockFileItem) file2.getFileItem()).writtenFile);
 
-		MultipartTestBean mtb = new MultipartTestBean();
-		assertEquals(null, mtb.getField1());
-		assertEquals(null, mtb.getField2());
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb, "mybean");
+		MultipartTestBean1 mtb1 = new MultipartTestBean1();
+		assertEquals(null, mtb1.getField1());
+		assertEquals(null, mtb1.getField2());
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb1, "mybean");
+		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
 		binder.bind(request);
-		assertEquals(file1, mtb.getField1());
-		assertEquals(new String(file2.getBytes()), new String(mtb.getField2()));
+		assertEquals(file1, mtb1.getField1());
+		assertEquals(new String(file2.getBytes()), new String(mtb1.getField2()));
+
+		MultipartTestBean2 mtb2 = new MultipartTestBean2();
+		assertEquals(null, mtb2.getField1());
+		assertEquals(null, mtb2.getField2());
+		binder = new ServletRequestDataBinder(mtb2, "mybean");
+		binder.registerCustomEditor(String.class, "field1", new StringMultipartFileEditor());
+		binder.registerCustomEditor(String.class, "field2", new StringMultipartFileEditor("UTF-16"));
+		binder.bind(request);
+		assertEquals(new String(file1.getBytes()), mtb2.getField1());
+		assertEquals(new String(file2.getBytes(), "UTF-16"), mtb2.getField2());
 
 		resolver.cleanupMultipart(request);
 		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
@@ -345,7 +356,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 	}
 
 
-	public class MultipartTestBean {
+	public class MultipartTestBean1 {
 
 		private MultipartFile field1;
 		private byte[] field2;
@@ -363,6 +374,29 @@ public class CommonsMultipartResolverTests extends TestCase {
 		}
 
 		public byte[] getField2() {
+			return field2;
+		}
+	}
+
+
+	public class MultipartTestBean2 {
+
+		private String field1;
+		private String field2;
+
+		public void setField1(String field1) {
+			this.field1 = field1;
+		}
+
+		public String getField1() {
+			return field1;
+		}
+
+		public void setField2(String field2) {
+			this.field2 = field2;
+		}
+
+		public String getField2() {
 			return field2;
 		}
 	}
