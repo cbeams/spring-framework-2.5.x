@@ -78,11 +78,16 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	public void testCount() {
-		assertCount(14);
+		assertCount(15);
 	}
 
 	public void testTestBeanCount() {
-		assertTestBeanCount(8);
+		assertTestBeanCount(9);
+	}
+
+	public void testDescriptionButNoProperties() throws Exception {
+		TestBean validEmpty = (TestBean) getBeanFactory().getBean("validEmptyWithDescription");
+		assertEquals(0, validEmpty.getAge());
 	}
 
 	public void testFactoryNesting() {

@@ -3,17 +3,6 @@
 
 <beans>
 
-	<description>
-		Tests for list and map handling in an XML bean definition file.
-	</description>
-	
-	<bean id="validEmptyWithDescription" class="org.springframework.beans.TestBean">
-		<description>
-			I have no properties and I'm happy without them. 
-		</description>
-	</bean>
-	
-	
 	<bean id="jenny" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
@@ -260,9 +249,6 @@
 		</property>
 	</bean>
 	
-	<!--
-	Why does this fail with arrayStoreException? Seems like no
-	conversion takes place? RJ, June 7 03
 	<bean id="integerArray" class="org.springframework.beans.factory.HasMap">
 		<property name="integerArray">
 			<list>
@@ -272,7 +258,6 @@
 			</list>
 		</property>
 	</bean>
-	-->
 
 	<bean id="listFactory" class="org.springframework.beans.factory.config.ListFactoryBean">
 		<property name="sourceList">

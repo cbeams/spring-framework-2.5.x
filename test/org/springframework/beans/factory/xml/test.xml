@@ -3,6 +3,16 @@
 
 <beans>
 
+	<description>
+		Tests for list and map handling in an XML bean definition file.
+	</description>
+
+	<bean id="validEmptyWithDescription" class="org.springframework.beans.TestBean">
+		<description>
+			I have no properties and I'm happy without them.
+		</description>
+	</bean>
+
 	<bean id="rod" class="org.springframework.beans.TestBean">
 		<property name="name"><value><!-- a comment -->Rod</value></property>
 		<property name="age"><value>31</value></property>
