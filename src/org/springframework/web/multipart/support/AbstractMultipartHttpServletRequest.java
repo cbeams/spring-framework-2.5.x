@@ -23,9 +23,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -37,8 +34,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
     implements MultipartHttpServletRequest {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Map multipartFiles;
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.multipart.commons;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,9 +38,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class CommonsMultipartFile implements MultipartFile {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);
 
 	private final FileItem fileItem;
+
+	private final long size;
 
 	/**
 	 * Create an instance wrapping the given FileItem.
@@ -47,6 +50,7 @@ public class CommonsMultipartFile implements MultipartFile {
 	 */
 	protected CommonsMultipartFile(FileItem fileItem) {
 		this.fileItem = fileItem;
+		this.size = this.fileItem.getSize();
 	}
 
 	/**
@@ -62,43 +66,55 @@ public class CommonsMultipartFile implements MultipartFile {
 	}
 
 	public boolean isEmpty() {
-		return (this.fileItem.getName() == null || this.fileItem.getName().length() == 0 ||
-		    this.fileItem.getSize() == 0);
+		return (this.size == 0);
 	}
 
 	public String getOriginalFilename() {
-		return (!isEmpty() ? new File(this.fileItem.getName()).getName() : null);
+		return (this.fileItem.getName() != null ? new File(this.fileItem.getName()).getName() : null);
 	}
 
 	public String getContentType() {
-		return (!isEmpty() ? this.fileItem.getContentType() : null);
+		return this.fileItem.getContentType();
 	}
 
 	public long getSize() {
-		return this.fileItem.getSize();
+		return size;
 	}
 
 	public byte[] getBytes() {
-		return this.fileItem.get();
+		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+			throw new IllegalStateException("File has been moved - cannot be read again");
+		}
+		byte[] bytes = this.fileItem.get();
+		return (bytes != null ? bytes : new byte[0]);
 	}
 
 	public InputStream getInputStream() throws IOException {
-		return this.fileItem.getInputStream();
+		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+			throw new IllegalStateException("File has been moved - cannot be read again");
+		}
+		InputStream inputStream = this.fileItem.getInputStream();
+		return (inputStream != null ? inputStream : new ByteArrayInputStream(new byte[0]));
 	}
 
 	public void transferTo(File dest) throws IOException, IllegalStateException {
+		if (!this.fileItem.isInMemory() && !tempFileExists()) {
+			throw new IllegalStateException("File has already been moved - cannot be transferred again");
+		}
+
 		if (dest.exists() && !dest.delete()) {
 			throw new IOException("Destination file [" + dest.getAbsolutePath() +
 			                      "] already exists and could not be deleted");
 		}
+
 		try {
 			this.fileItem.write(dest);
 			if (logger.isDebugEnabled()) {
 				String action = "transferred";
-				if (this.fileItem instanceof DefaultFileItem) {
-					action = ((DefaultFileItem) this.fileItem).getStoreLocation().exists() ? "copied" : "moved";
+				if (!this.fileItem.isInMemory()) {
+					action = tempFileExists() ? "copied" : "moved";
 				}
-				logger.debug("Multipart file [" + getName() + "] with original file name [" +
+				logger.debug("Multipart file '" + getName() + "' with original filename [" +
 										 getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
 				             action + " to [" + dest.getAbsolutePath() + "]");
 			}
@@ -112,6 +128,17 @@ public class CommonsMultipartFile implements MultipartFile {
 		catch (Exception ex) {
 			logger.error("Could not transfer to file", ex);
 			throw new IOException("Could not transfer to file: " + ex.getMessage());
+		}
+	}
+
+	protected boolean tempFileExists() {
+		if (this.fileItem instanceof DefaultFileItem) {
+			// check actual existence of temporary file
+			return ((DefaultFileItem) this.fileItem).getStoreLocation().exists();
+		}
+		else {
+			// check whether current file size is different than original one
+			return (this.fileItem.getSize() == this.size);
 		}
 	}
 

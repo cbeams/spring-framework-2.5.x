@@ -29,6 +29,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.oreilly.servlet.MultipartRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,8 @@ import org.springframework.web.multipart.support.AbstractMultipartHttpServletReq
  * @see com.oreilly.servlet.MultipartRequest
  */
 public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
+
+	protected static final Log logger = LogFactory.getLog(CosMultipartHttpServletRequest.class);
 
 	private final MultipartRequest multipartRequest;
 
@@ -105,10 +109,16 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 
 	private class CosMultipartFile implements MultipartFile {
 
-		private String name;
+		private final String name;
+
+		private final File file;
+
+		private final long size;
 
 		private CosMultipartFile(String name) {
 			this.name = name;
+			this.file = multipartRequest.getFile(this.name);
+			this.size = (file != null ? file.length() : 0);
 		}
 
 		public String getName() {
@@ -116,11 +126,12 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		}
 
 		public boolean isEmpty() {
-			return getSize() == 0;
+			return (this.size == 0);
 		}
 
 		public String getOriginalFilename() {
-			return multipartRequest.getOriginalFileName(this.name);
+			String filename = multipartRequest.getOriginalFileName(this.name);
+			return (filename != null ? filename : "");
 		}
 
 		public String getContentType() {
@@ -128,48 +139,49 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		}
 
 		public long getSize() {
-			File file = multipartRequest.getFile(this.name);
-			return (file != null ? file.length() : 0);
+			return size;
 		}
 
 		public byte[] getBytes() throws IOException {
-			File file = multipartRequest.getFile(this.name);
-			return (file != null ? FileCopyUtils.copyToByteArray(file) : new byte[0]);
+			if (this.file != null && !this.file.exists()) {
+				throw new IllegalStateException("File has been moved - cannot be read again");
+			}
+			return (this.size != 0 ? FileCopyUtils.copyToByteArray(this.file) : new byte[0]);
 		}
 
 		public InputStream getInputStream() throws IOException {
-			File file = multipartRequest.getFile(this.name);
-			return (file != null ? (InputStream) new FileInputStream(file) : new ByteArrayInputStream(new byte[0]));
+			if (this.file != null && !this.file.exists()) {
+				throw new IllegalStateException("File has been moved - cannot be read again");
+			}
+			return (this.size != 0 ? (InputStream) new FileInputStream(this.file) : new ByteArrayInputStream(new byte[0]));
 		}
 
 		public void transferTo(File dest) throws IOException, IllegalStateException {
-			File tempFile = multipartRequest.getFile(this.name);
-			if (tempFile != null) {
-				if (!tempFile.exists()) {
-					throw new IllegalStateException("File has already been moved - cannot be transferred again");
-				}
-				if (dest.exists() && !dest.delete()) {
-					throw new IOException("Destination file [" + dest.getAbsolutePath() +
-					                      "] already exists and could not be deleted");
-				}
-				if (tempFile.renameTo(dest)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Multipart file [" + getName() + "] with original file name [" +
-												 getOriginalFilename() + "], stored at [" + tempFile.getAbsolutePath() +
-												 "]: moved to [" + dest.getAbsolutePath() + "]");
-					}
-				}
-				else {
-					FileCopyUtils.copy(tempFile, dest);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Multipart file [" + getName() + "] with original file name [" +
-												 getOriginalFilename() + "], stored at [" + tempFile.getAbsolutePath() +
-												 "]: copied to [" + dest.getAbsolutePath() + "]");
-					}
+			if (this.file != null && !this.file.exists()) {
+				throw new IllegalStateException("File has already been moved - cannot be transferred again");
+			}
+
+			if (dest.exists() && !dest.delete()) {
+				throw new IOException("Destination file [" + dest.getAbsolutePath() +
+															"] already exists and could not be deleted");
+			}
+
+			boolean moved = false;
+			if (this.file != null) {
+				moved = this.file.renameTo(dest);
+				if (!moved) {
+					FileCopyUtils.copy(this.file, dest);
 				}
 			}
 			else {
 				dest.createNewFile();
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Multipart file '" + getName() + "' with original filename [" +
+										 getOriginalFilename() + "], stored " +
+				             (this.file != null ? "at [" + this.file.getAbsolutePath() + "]" : "in memory") +
+				             ": " + (moved ? "moved" : "copied") + " to [" + dest.getAbsolutePath() + "]");
 			}
 		}
 	}
