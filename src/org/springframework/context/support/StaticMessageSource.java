@@ -41,13 +41,15 @@ public class StaticMessageSource extends AbstractMessageSource {
 
 	/**
 	 * Associate the given message with the given code.
-	 * @param code lookup code
-   * @param locale locale message should be found within
-	 * @param message message associated with this lookup code
+	 * @param code the lookup code
+   * @param locale the locale that the message should be found within
+	 * @param message the message associated with this lookup code
 	 */
 	public void addMessage(String code, Locale locale, String message) {
 		this.messages.put(code + "_" + locale.toString(), new MessageFormat(message));
-		logger.info("Added message [" + message + "] for code [" + code + "] and Locale [" + locale + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Added message [" + message + "] for code [" + code + "] and Locale [" + locale + "]");
+		}
 	}
 
 	public String toString() {
@@ -55,4 +57,3 @@ public class StaticMessageSource extends AbstractMessageSource {
 	}
 
 }
-

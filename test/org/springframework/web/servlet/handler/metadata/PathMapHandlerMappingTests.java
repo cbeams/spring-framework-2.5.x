@@ -36,7 +36,6 @@ public class PathMapHandlerMappingTests extends TestCase {
 		String path = "/Constructor.htm";
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
-		int oldCount = wac.getBeanDefinitionCount();
 
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap(path));
@@ -72,7 +71,6 @@ public class PathMapHandlerMappingTests extends TestCase {
 		String path2 = "path2.cgi";
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("test", TestBean.class, new MutablePropertyValues());
-		int oldCount = wac.getBeanDefinitionCount();
 
 		HashUrlMapHandlerMapping hm = new HashUrlMapHandlerMapping();
 		hm.register(ConstructorController.class, new PathMap[] { new PathMap(path1), new PathMap(path2) });

@@ -31,8 +31,9 @@ import org.springframework.context.NoSuchMessageException;
  */
 public class ResourceBundleMessageSourceTests extends TestCase {
 
-	protected void doTestMessageAccess(boolean reloadable, boolean fallbackToSystemLocale,
-	                                   boolean expectGermanFallback, boolean useCodeAsDefaultMessage) {
+	protected void doTestMessageAccess(
+			boolean reloadable, boolean fallbackToSystemLocale,
+			boolean expectGermanFallback, boolean useCodeAsDefaultMessage) {
 
 		StaticApplicationContext ac = new StaticApplicationContext();
 		if (reloadable) {
@@ -45,12 +46,14 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		String basepath = "org/springframework/context/support/";
 		String[] basenames = null;
 		if (reloadable) {
-			basenames = new String[] {"classpath:" + basepath + "messages",
-			                          "classpath:" + basepath + "more-messages"};
+			basenames = new String[] {
+				"classpath:" + basepath + "messages",
+				"classpath:" + basepath + "more-messages"};
 		}
 		else {
-			basenames = new String[] {basepath + "messages",
-			                          basepath + "more-messages"};
+			basenames = new String[] {
+				basepath + "messages",
+				basepath + "more-messages"};
 		}
 		pvs.addPropertyValue("basenames", basenames);
 		if (!fallbackToSystemLocale) {

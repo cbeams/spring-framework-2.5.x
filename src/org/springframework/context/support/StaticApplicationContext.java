@@ -20,7 +20,6 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 
@@ -28,15 +27,11 @@ import org.springframework.context.ApplicationContext;
  * ApplicationContext that allows concrete registration of beans and
  * messages in code, rather than from external configuration sources.
  * Mainly useful for testing.
- *
- * <p>Will automatically refresh itself on first access, if not explicitly
- * initialized.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #registerSingleton
  * @see #registerPrototype
- * @see #getDefaultListableBeanFactory
+ * @see #registerBeanDefinition
  * @see #refresh
  */
 public class StaticApplicationContext extends GenericApplicationContext {
@@ -47,7 +42,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * Create a new StaticApplicationContext.
 	 * @see #registerSingleton
 	 * @see #registerPrototype
-	 * @see #getDefaultListableBeanFactory
+	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
 	public StaticApplicationContext() throws BeansException {
@@ -58,7 +53,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * Create a new StaticApplicationContext with the given parent.
 	 * @see #registerSingleton
 	 * @see #registerPrototype
-	 * @see #getDefaultListableBeanFactory
+	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
 	public StaticApplicationContext(ApplicationContext parent) throws BeansException {
