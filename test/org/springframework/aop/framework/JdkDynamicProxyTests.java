@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -28,7 +28,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JdkDynamicProxyTests.java,v 1.3 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: JdkDynamicProxyTests.java,v 1.4 2004-04-01 15:36:03 jhoeller Exp $
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 

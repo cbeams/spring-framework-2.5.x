@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.AbstractPoolingTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
@@ -40,7 +40,7 @@ import org.springframework.transaction.CountingTxManager;
  * define the EnterpriseServices bean in a separate file to
  * change how attributes are source. 
  * @author Rod Johnson
- * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.4 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.5 2004-04-01 15:36:04 jhoeller Exp $
  */
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	
@@ -230,8 +230,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	}
 	
 	/**
-	 * Test that the pooling TargetSourceCreator works
-	 * @throws Exception
+	 * Test that the pooling TargetSourceCreator works.
 	 */
 	public void testAutoPooling() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -251,7 +250,6 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	 * a Modifiable mixin. Tests that the autoproxy infrastructure can create
 	 * advised objects with independent interceptor instances.
 	 * The Modifiable behaviour of each instance of TestBean should be distinct.
-	 * @throws Exception
 	 */
 	public void testIntroductionViaPrototype() throws Exception {
 		BeanFactory bf = getBeanFactory();

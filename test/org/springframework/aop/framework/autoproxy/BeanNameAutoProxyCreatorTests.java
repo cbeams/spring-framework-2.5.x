@@ -24,7 +24,7 @@ import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.LockedException;
 import org.springframework.aop.framework.TimeStamped;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -34,7 +34,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.4 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.5 2004-04-01 15:36:04 jhoeller Exp $
  */
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 

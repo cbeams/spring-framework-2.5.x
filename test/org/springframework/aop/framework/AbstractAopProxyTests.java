@@ -46,7 +46,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.25 2004-03-19 21:35:47 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.26 2004-04-01 15:36:03 jhoeller Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -676,7 +676,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			pc.addAdvisor(0, new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor(), ITestBean.class));
 			fail("Shouldn't be able to add introduction advice introducing an unimplemented interface");
 		}
-		catch (AopConfigException ex) {
+		catch (IllegalArgumentException ex) {
 			//assertTrue(ex.getMessage().indexOf("ntroduction") > -1);
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
@@ -696,7 +696,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			pc.addAdvisor(0, new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor(), TestBean.class));
 			fail("Shouldn't be able to add introduction advice that introduces a class, rather than an interface");
 		}
-		catch (AopConfigException ex) {
+		catch (IllegalArgumentException ex) {
 			assertTrue(ex.getMessage().indexOf("interface") > -1);
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted

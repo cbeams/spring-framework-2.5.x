@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
@@ -45,7 +45,7 @@ import org.springframework.core.OrderComparator;
  * at the end of the advisor chain in undefined order.
  *
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.7 2004-03-23 14:31:51 jhoeller Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.8 2004-04-01 15:35:47 jhoeller Exp $
  * @see #findCandidateAdvisors
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {

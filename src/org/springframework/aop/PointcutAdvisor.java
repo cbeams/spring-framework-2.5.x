@@ -21,10 +21,13 @@ package org.springframework.aop;
  * This covers nearly all advisors except introduction advisors,
  * for which method-level matching doesn't apply.
  * @author Rod Johnson
- * @version $Id: PointcutAdvisor.java,v 1.3 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: PointcutAdvisor.java,v 1.4 2004-04-01 15:35:45 jhoeller Exp $
  */
 public interface PointcutAdvisor extends Advisor {
-	
+
+	/**
+	 * Get the Pointcut that drives this advisor.
+	 */
 	Pointcut getPointcut();
 
 }

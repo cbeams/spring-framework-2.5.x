@@ -44,7 +44,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.13 2004-03-19 16:54:42 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.14 2004-04-01 15:35:46 jhoeller Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -175,7 +175,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	}
 
 	/**
-	 * Creates a new Proxy object for the given object, proxying
+	 * Create a new Proxy object for the given object, proxying
 	 * the given interface. Uses the thread context class loader.
 	 */
 	public Object getProxy() {
@@ -183,11 +183,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	}
 
 	/**
-	 * Creates a new Proxy object for the given object, proxying
+	 * Create a new Proxy object for the given object, proxying
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		logger.debug("Creating JDK dynamic proxy");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating JDK dynamic proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
+		}
 		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 		return Proxy.newProxyInstance(cl, proxiedInterfaces, this);
 	}

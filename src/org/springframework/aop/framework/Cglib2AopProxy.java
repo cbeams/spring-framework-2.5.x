@@ -28,11 +28,11 @@ import net.sf.cglib.proxy.Factory;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
-
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
 
 /**
@@ -48,7 +48,7 @@ import org.springframework.aop.TargetSource;
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: Cglib2AopProxy.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.7 2004-04-01 15:35:46 jhoeller Exp $
  */
 class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
@@ -206,7 +206,7 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
 
 	/**
-	 * Creates a new Proxy object for the given object, proxying
+	 * Create a new Proxy object for the given object, proxying
 	 * the given interface. Uses the thread context class loader.
 	 */
 	public Object getProxy() {
@@ -214,13 +214,14 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	}
 
 	/**
-	 * Creates a new Proxy object for the given object, proxying
+	 * Create a new Proxy object for the given object, proxying
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		if (logger.isDebugEnabled())
+		if (logger.isDebugEnabled()) {
 			logger.debug("Creating CGLIB proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
-		
+		}
+
 		Enhancer e = new Enhancer();
 		try {
 			e.setSuperclass(advised.getTargetSource().getTargetClass());

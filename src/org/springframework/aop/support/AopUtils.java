@@ -15,14 +15,13 @@
  * limitations under the License.
  */ 
 
-package org.springframework.aop.framework.support;
+package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aopalliance.aop.AspectException;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
@@ -30,9 +29,10 @@ import org.springframework.aop.PointcutAdvisor;
 
 /**
  * Utility methods used by the AOP framework.
+ * Not intended to be used directly by applications.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.15 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.1 2004-04-01 15:36:02 jhoeller Exp $
  */
 public abstract class AopUtils {
 	
@@ -77,17 +77,18 @@ public abstract class AopUtils {
 	/**
 	 * Convenience method to convert a string array of interface names
 	 * to a class array.
-	 * @throws ClassNotFoundException if any of the classes can't be loaded
-	 * @throws AspectException if any of the classes is not an interface
+	 * @throws java.lang.ClassNotFoundException if any of the classes can't be loaded
+	 * @throws org.aopalliance.aop.AspectException if any of the classes is not an interface
 	 * @return an array of interface classes
 	 */
-	public static Class[] toInterfaceArray(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+	public static Class[] toInterfaceArray(String[] interfaceNames)
+	    throws IllegalArgumentException, ClassNotFoundException {
 		Class interfaces[] = new Class[interfaceNames.length];
 		for (int i = 0; i < interfaceNames.length; i++) {
 			interfaces[i] = Class.forName(interfaceNames[i], true, Thread.currentThread().getContextClassLoader());
 			// Check it's an interface
 			if (!interfaces[i].isInterface())
-				throw new AspectException("Can proxy only interfaces: " + interfaces[i] + " is a class");
+				throw new IllegalArgumentException("Can proxy only interfaces: " + interfaces[i] + " is a class");
 		}
 		return interfaces;
 	}

@@ -23,17 +23,16 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRolledbackException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
+
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.MethodCounter;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.2 2004-03-18 03:01:16 trisberg Exp $
+ * @version $Id: ThrowsAdviceInterceptorTests.java,v 1.3 2004-04-01 15:36:03 jhoeller Exp $
  */
 public class ThrowsAdviceInterceptorTests extends TestCase {
 
@@ -51,7 +50,7 @@ public class ThrowsAdviceInterceptorTests extends TestCase {
 			new ThrowsAdviceInterceptor(o);
 			fail("Should require one handler method at least");
 		}
-		catch (AopConfigException ex) {
+		catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}

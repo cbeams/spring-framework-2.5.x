@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.ITestBean;
@@ -30,7 +30,7 @@ import org.springframework.beans.TestBean;
  * TargetSources or do other things that this proxy can't do.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: OptimizedCglibProxyTests.java,v 1.4 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: OptimizedCglibProxyTests.java,v 1.5 2004-04-01 15:36:03 jhoeller Exp $
  */
 public class OptimizedCglibProxyTests extends CglibProxyTests {
 	

@@ -18,25 +18,25 @@ package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: BeforeAdviceAdapter.java,v 1.5 2004-03-19 16:54:41 johnsonr Exp $
+ * @version $Id: BeforeAdviceAdapter.java,v 1.6 2004-04-01 15:35:47 jhoeller Exp $
  */
 class BeforeAdviceAdapter implements AdvisorAdapter {
 
 	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
+	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice
 	 */
 	public boolean supportsAdvice(Advice advice) {
 		return advice instanceof MethodBeforeAdvice;
 	}
 
 	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor(org.springframework.aop.Advisor)
+	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor
 	 */
 	public Interceptor getInterceptor(Advisor advisor) {
 		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();

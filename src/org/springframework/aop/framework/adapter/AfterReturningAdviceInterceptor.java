@@ -18,21 +18,23 @@ package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.AfterReturningAdvice;
 
-
 /**
- * Interceptor to wrap a MethodAfterReturningAdvice. In future we may also offer a more efficient alternative
- * solution in cases where there is no interception advice and therefore no need to
- * create a MethodInvocation object.
- * <br>Used internally by the AOP framework: application developers should not need
+ * Interceptor to wrap a MethodAfterReturningAdvice. In future we may also offer
+ * a more efficient alternative solution in cases where there is no interception
+ * advice and therefore no need to create a MethodInvocation object.
+ *
+ * <p>Used internally by the AOP framework: application developers should not need
  * to use this class directly.
+ *
  * @author Rod Johnson
- * @version $Id: AfterReturningAdviceInterceptor.java,v 1.3 2004-03-19 18:43:17 johnsonr Exp $
+ * @version $Id: AfterReturningAdviceInterceptor.java,v 1.4 2004-04-01 15:35:47 jhoeller Exp $
  */
 final class AfterReturningAdviceInterceptor implements MethodInterceptor {
 	
-	private AfterReturningAdvice advice;
+	private final AfterReturningAdvice advice;
 	
 	public AfterReturningAdviceInterceptor(AfterReturningAdvice advice) {
 		this.advice = advice;

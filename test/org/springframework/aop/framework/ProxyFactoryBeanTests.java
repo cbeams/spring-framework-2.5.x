@@ -32,7 +32,7 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
@@ -53,7 +53,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.26 2004-03-23 14:33:06 jhoeller Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.27 2004-04-01 15:36:03 jhoeller Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	

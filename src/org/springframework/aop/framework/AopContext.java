@@ -21,14 +21,14 @@ import org.aopalliance.aop.AspectException;
 /**
  * Class containing static methods used to obtain information about the
  * current AOP invocation. 
- * <p>
- * The currentProxy() method is usable if the AOP framework is configured
+ *
+ * <p>The currentProxy() method is usable if the AOP framework is configured
  * to expose the current proxy (not the default). It returns the AOP proxy in 
  * use. Target objects or advice can use this to make advised calls, in the same way 
  * as getEJBObject() can be used in EJBs. They can also use it to find advice
  * configuration.
- * <p>
- * The AOP framework does not expose proxies by default, as there is a performance cost 
+ *
+ * <p>The AOP framework does not expose proxies by default, as there is a performance cost
  * in doing so.
  *
  * <p>The functionality in this class might be used by a target object
@@ -39,7 +39,7 @@ import org.aopalliance.aop.AspectException;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: AopContext.java,v 1.6 2004-03-19 21:35:54 johnsonr Exp $
+ * @version $Id: AopContext.java,v 1.7 2004-04-01 15:35:46 jhoeller Exp $
  */
 public abstract class AopContext {
 	
@@ -50,7 +50,6 @@ public abstract class AopContext {
 	 */
 	private static ThreadLocal currentProxy = new ThreadLocal();
 
-	
 
 	/**
 	 * Try to return the current AOP proxy. This method is usable
@@ -64,8 +63,9 @@ public abstract class AopContext {
 	 * to expose the proxy
 	 */
 	public static Object currentProxy() throws AspectException {
-		if (currentProxy.get() == null)
+		if (currentProxy.get() == null) {
 			throw new AspectException("Cannot find proxy: set 'exposeProxy' property on Advised to make it available");
+		}
 		return currentProxy.get();
 	}
 	

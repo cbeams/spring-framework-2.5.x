@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.Lockable;
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
@@ -37,7 +37,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.12 2004-03-23 14:32:00 jhoeller Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.13 2004-04-01 15:36:04 jhoeller Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	

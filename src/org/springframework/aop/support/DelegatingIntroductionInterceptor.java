@@ -22,24 +22,27 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.aop.framework.support.AopUtils;
 
 /**
  * Convenient implementation of the IntroductionInterceptor interface.
- * <br/>Subclasses merely need to extend this class and
- * implement the interfaces to be introduced themselves.
- * In this case the delegate is the subclass instance itself.
- * Alternatively a separate delegate may implement the interface,
- * and be set via the delegate bean property.
- * Delegates or subclasses may implement any number of interfaces.
- * All interfaces except IntroductionInterceptor are picked up 
- * from the subclass or delegate by default.<br>
- * The suppressInterface() method can be used to suppress interfaces implemented
- * by the delegate but which should not be introduced to the owning
- * AOP proxy.
+ *
+ * <p>Subclasses merely need to extend this class and implement the interfaces
+ * to be introduced themselves. In this case the delegate is the subclass
+ * instance itself. Alternatively a separate delegate may implement the
+ * interface, and be set via the delegate bean property.
+ *
+ * <p>Delegates or subclasses may implement any number of interfaces.
+ * All interfaces except IntroductionInterceptor are picked up from
+ * the subclass or delegate by default.
+ *
+ * <p>The suppressInterface() method can be used to suppress interfaces
+ * implemented by the delegate but which should not be introduced to the
+ * owning AOP proxy.
+ *
  * @author Rod Johnson
- * @version $Id: DelegatingIntroductionInterceptor.java,v 1.2 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: DelegatingIntroductionInterceptor.java,v 1.3 2004-04-01 15:36:02 jhoeller Exp $
  */
 public class DelegatingIntroductionInterceptor implements IntroductionInterceptor {
 
@@ -78,8 +81,9 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 	 * "this" from one constructor to another. 
 	 */
 	private void init(Object delegate) {
-		if (delegate == null) 
+		if (delegate == null) {
 			throw new IllegalArgumentException("Delegate cannot be null in DelegatingIntroductionInterceptor");
+		}
 		this.delegate = delegate;
 		this.publishedInterfaces.addAll(AopUtils.getAllInterfacesAsList(delegate));
 		// We don't want to expose the control interface

@@ -25,17 +25,19 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.framework.AopConfigException;
 
 /**
  * Interceptor to wrap an after throwing advice.
- * The signatures on handler methods on the throwsAdvice constructor argument must be of form
- * void afterThrowing([Method], [args], [target], ThrowableSubclass);
+ *
+ * <p>The signatures on handler methods on the throwsAdvice constructor argument
+ * must be of form:<br>
+ * <code>void afterThrowing([Method], [args], [target], ThrowableSubclass);</code><br>
  * Only the last argument is required.
- * <br>This is a framework class that need not be used directly by Spring users.
+ *
+ * <p>This is a framework class that need not be used directly by Spring users.
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptor.java,v 1.2 2004-03-18 02:46:09 trisberg Exp $
+ * @version $Id: ThrowsAdviceInterceptor.java,v 1.3 2004-04-01 15:35:47 jhoeller Exp $
  */
 final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	
@@ -66,8 +68,10 @@ final class ThrowsAdviceInterceptor implements MethodInterceptor {
 			}
 		}
 		
-		if (exceptionHandlerHash.isEmpty())
-			throw new AopConfigException("At least one handler method must be found in class " + throwsAdvice.getClass());
+		if (exceptionHandlerHash.isEmpty()) {
+			throw new IllegalArgumentException("At least one handler method must be found in class " +
+			                                   throwsAdvice.getClass());
+		}
 	}
 	
 	public int getHandlerMethodCount() {
@@ -119,12 +123,6 @@ final class ThrowsAdviceInterceptor implements MethodInterceptor {
 		}
 		try {
 			m.invoke(this.throwsAdvice, handlerArgs);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new AopConfigException("Internal error", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new AopConfigException("Internal error", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();

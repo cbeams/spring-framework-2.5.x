@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.metadata.Attributes;
 
 /**
@@ -43,7 +43,7 @@ import org.springframework.metadata.Attributes;
  * of the cost of evaluating rollback rules.
  * @author Rod Johnson
  * @see org.springframework.metadata.Attributes
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.6 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.7 2004-04-01 15:36:02 jhoeller Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	

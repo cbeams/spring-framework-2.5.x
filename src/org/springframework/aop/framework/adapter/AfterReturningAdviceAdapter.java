@@ -18,20 +18,23 @@ package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 
 /**
  * Adapter to enable AfterReturningAdvisor and MethodAfterReturningAdvice
  * to be used in the Spring AOP framework.
- * <br>This involves wrapping these advice types in interceptors.
+ *
+ * <p>This involves wrapping these advice types in interceptors.
+ * 
  * @author Rod Johnson
- * @version $Id: AfterReturningAdviceAdapter.java,v 1.7 2004-03-19 18:43:17 johnsonr Exp $
+ * @version $Id: AfterReturningAdviceAdapter.java,v 1.8 2004-04-01 15:35:46 jhoeller Exp $
  */
 class AfterReturningAdviceAdapter implements AdvisorAdapter {
 
 	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
+	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice
 	 */
 	public boolean supportsAdvice(Advice advice) {
 		return advice instanceof AfterReturningAdvice;
@@ -39,7 +42,7 @@ class AfterReturningAdviceAdapter implements AdvisorAdapter {
 
 
 	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor(org.springframework.aop.Advisor)
+	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor
 	 */
 	public Interceptor getInterceptor(Advisor advisor) {
 		AfterReturningAdvice advice = (AfterReturningAdvice) advisor.getAdvice();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.aop.framework.support;
+package org.springframework.aop.support;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -27,6 +27,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
