@@ -16,7 +16,6 @@ package org.springframework.web.flow.support;
  * 01/19/02 -- Modified random seeding and added new constructor
  *             to allow secure random feature.
  * 01/14/02 -- Added random function seeding with JVM run time
- *
  */
 
 import java.net.InetAddress;
@@ -90,8 +89,8 @@ import java.util.Random;
  * generating random GUIDs be open for inspection and modification.
  * This class is free for all uses.
  *
- *
- * - Marc
+ * @version 1.2.1 11/05/02
+ * @author Marc A. Mnich
  */
 public class RandomGUID extends Object {
 
