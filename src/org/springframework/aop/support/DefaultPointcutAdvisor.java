@@ -25,14 +25,15 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 
 /**
- * Convenient pointcut-driven advisor implementation, implementing
- * the getPointcut() and isPerInstance() methods.
+ * Convenient pointcut-driven advisor implementation.
  *
  * <p>This is the most commonly used Advisor implementation. It can be
  * used with any pointcut and advice type, except for introductions.
+ * There is normally no need to subclass this class, or to
+ * implement custom Advisors.
  *
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.8 2004-07-23 18:11:48 johnsonr Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.9 2004-07-27 16:18:22 johnsonr Exp $
  */
 public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
@@ -42,13 +43,29 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 	
 	private Advice advice;
 	
+	/**
+	 * Create an empty DefaultPointcutAdvisor.
+	 * Advice and Pointcut must be set before use using
+	 * setter methods.
+	 */
 	public DefaultPointcutAdvisor() {
 	}
 	
+	/**
+	 * Create a DefaultPointcutAdvisor that matches all methods.
+	 * Pointcut.TRUE will be used as pointcut.
+	 * @param advice advice to use
+	 */
 	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
 	}
 	
+	/**
+	 * Create a DefaultPointcutAdvisor, specifying pointcut
+	 * and advice
+	 * @param pointcut pointcut targeting the advice
+	 * @param advice advice to run when pointcut matches
+	 */
 	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
 		this.advice = advice;
@@ -91,7 +108,8 @@ public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Seriali
 	}
 	
 	public String toString() {
-		return "DefaultPointcutAdvisor: pointcut=[" + pointcut + "] advice=[" + advice + "]";
+		return "DefaultPointcutAdvisor: pointcut=" + pointcut + "; " +
+				"advice=" + advice;
 	}
 
 }
