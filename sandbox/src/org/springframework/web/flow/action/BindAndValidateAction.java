@@ -15,10 +15,6 @@
  */
 package org.springframework.web.flow.action;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
@@ -40,7 +36,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  */
-public class BindAndValidateAction extends AbstractAction implements InitializingBean {
+public class BindAndValidateAction extends AbstractAction {
 
 	/**
 	 * Constant <code>ActionResult</code> marker that indicates to the base
