@@ -1,26 +1,55 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.77 2004-01-13 22:33:21 johnsonr Exp $
+$Id: changelog.txt,v 1.78 2004-01-14 07:44:06 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
 ---------------------------------------
 
-* RegexpMethodPointcut now also handles multiple patterns. Backward compatible.
-* changed AbstractAutoProxyCreator interceptors property to interceptorNames to handle prototypes correctly
-* added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
-* put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
-* added "ant.bat" file to framework root
-* added "ant.bat" and "warfile.bat" files to "samples/jpetstore/attributes" directory
+Package org.springframework.aop
 * added AfterReturning advice to complete AOP advice types
+* RegexpMethodPointcut now also handles multiple patterns (backward compatible)
+* changed AbstractAutoProxyCreator's "interceptors" property to "interceptorNames" to handle prototypes correctly
+
+Package org.springframework.beans
 * removed PropertyValuesValidator support from BeanWrapper
 * moved SortDefinition classes to new beans.support package
 * moved PagedListHolder classes from util package to beans.support, to remove cyclic package dependency
+* reworked BeanPostProcessor interface into postProcessBeforeInitialization and postProcessAfterInitialization
+* revised order of BeanFactory lifecycle methods, now invoking setBeanFactory etc before afterPropertiesSet
+* added "autodetect" autowire mode that chooses either "constructor" or "byType" through introspection of the class
+* reworked AutowireCapableBeanFactory's "autowire" and "autowireConstructor" into a generic "autowire" method
+* moved AutowireCapableBeanFactory interface to package beans.factory.config
+* load "spring-beans.dtd" via classloader of BeansDtdResolver instead of thread context classloader
+* fixed "constructor-arg" detection in DefaultXmlBeanDefinitionParser to not interfere with inner bean definitions
+* added support for "autodetect" autowire mode to XML bean definition format
+
+Package org.springframework.context
+* ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
+
+Package org.springframework.orm
+* revised Hibernate-JTA synchronization to close the Session early in case of a Hibernate TransactionManagerLookup
+
+Package org.springframework.validation
 * apply custom editor on Errors.getFieldValue to manually rejected field values too
+
+Package org.springframework.web
+* fixed check for existing webAppRootProperty in WebUtils to allow for same value on web app redeployment
 * removed Servlet 2.3 "getServletContextName" call from ServletContextResource, for Servlet 2.2 compatibility
+* fixed ServletContextResource's "exists" check (to allow for relative directory paths e.g. in VelocityEngineFactory)
+* invoke HandlerInterceptor.afterCompletion even if a later HandlerInterceptor aborts processing
+* allow for existing multipart request in DispatcherServlet even if MultipartResolver configured (for forwards)
+* moved TagUtils helper class from package web.servlet.tags to web.util, renamed scope constants
+* SimpleFormController's default onSubmit forwards to success view with full Errors model instead of just command
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
 * re-evaluate EL expressions on each tag rendering instead of on tag instance initialization in all Spring tags
-* moved TagUtils helper class from package web.servlet.tags to web.util, renamed scope constants
+
+Building framework and samples
+* added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
+* put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
+* renamed all "ant.bat" files in the samples to "build.bat"
+* added "build.bat" and "warfile.bat" files to "samples/jpetstore/attributes" directory
+* added "build.bat" file to framework root
 
 
 Changes in version 1.0 M4 (04.01.2003)
