@@ -31,6 +31,7 @@ import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -720,6 +721,43 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class, null);
+		lbf.registerBeanDefinition("test", bd);
+		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				return new TestBean();
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+				return bean;
+			}
+		});
+		BeanWithDisposableBean.closed = false;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertTrue("Destroy method invoked", BeanWithDisposableBean.closed);
+	}
+
+	public void testBeanPostProcessorWithWrappedObjectAndDestroyMethod() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class, null);
+		bd.setDestroyMethodName("close");
+		lbf.registerBeanDefinition("test", bd);
+		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				return new TestBean();
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+				return bean;
+			}
+		});
+		BeanWithDestroyMethod.closed = false;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertTrue("Destroy method invoked", BeanWithDestroyMethod.closed);
+	}
+
 
 	public static class NoDependencies {
 
@@ -771,6 +809,26 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public boolean isSingleton() {
 			return true;
+		}
+	}
+
+
+	public static class BeanWithDisposableBean implements DisposableBean {
+
+		private static boolean closed;
+
+		public void destroy() {
+			this.closed = true;
+		}
+	}
+
+
+	public static class BeanWithDestroyMethod {
+
+		private static boolean closed;
+
+		public void close() {
+			this.closed = true;
 		}
 	}
 

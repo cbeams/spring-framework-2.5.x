@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,14 +93,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	private static final Object CURRENTLY_IN_CREATION = new Object();
 
-	static {
-		// Eagerly load the DisposableBean and DestructionAwareBeanPostProcessor
-		// classes to avoid weird classloader issues on application shutdown in
-		// WebLogic 8.1. (Reported by Andreas Senft and Eric Ma.)
-		DisposableBean.class.getName();
-		DestructionAwareBeanPostProcessor.class.getName();
-	}
-
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -115,24 +106,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
 
+	private boolean hasDestructionAwareBeanPostProcessors;
+
 	/** Map from alias to canonical bean name */
 	private final Map aliasMap = Collections.synchronizedMap(new HashMap());
 
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = Collections.synchronizedMap(new HashMap());
 
-	/**
-	 * Map that holds further beans created by this factory that implement
-	 * the DisposableBean interface, to be destroyed on destroySingletons.
-	 * Keyed by inner bean name.
-	 * @see #destroySingletons
-	 */
+	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = Collections.synchronizedMap(new HashMap());
 
-	/**
-	 * Map that holds dependent bean names for per bean name.
-	 * @see #registerDependentBean
-	 */
+	/** Map between dependent bean names: bean name --> dependent bean name */
 	private final Map dependentBeanMap = Collections.synchronizedMap(new HashMap());
 
 
@@ -417,6 +402,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		this.beanPostProcessors.add(beanPostProcessor);
+		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
+			this.hasDestructionAwareBeanPostProcessors = true;
+		}
 	}
 
 	/**
@@ -425,6 +413,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public List getBeanPostProcessors() {
 		return beanPostProcessors;
+	}
+
+	/**
+	 * Return whether this factory holds a DestructionAwareBeanPostProcessor
+	 * that will get applied to singleton beans on shutdown.
+	 * @see #addBeanPostProcessor
+	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
+	 */
+	protected boolean hasDestructionAwareBeanPostProcessors() {
+		return this.hasDestructionAwareBeanPostProcessors;
 	}
 
 
@@ -499,6 +497,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected void removeSingleton(String beanName) {
 		this.singletonCache.remove(beanName);
+		this.disposableBeans.remove(beanName);
 	}
 
 	/**
@@ -565,10 +564,60 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
+	 * Add the given bean to the list of disposable beans in this factory,
+	 * registering its DisposableBean interface and/or the given destroy method
+	 * to be called on factory shutdown (if applicable).
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 * @param mergedBeanDefinition the bean definition for the bean (can be null)
+	 * @return whether the bean has actually been registered as disposable bean
+	 */
+	protected boolean registerDisposableBeanIfNecessary(
+			final String beanName, final Object bean, final RootBeanDefinition mergedBeanDefinition) {
+
+		final boolean isDisposableBean = (bean instanceof DisposableBean);
+		final boolean hasDestroyMethod =
+				(mergedBeanDefinition != null && mergedBeanDefinition.getDestroyMethodName() != null);
+
+		if (isDisposableBean || hasDestroyMethod || hasDestructionAwareBeanPostProcessors()) {
+			registerDisposableBean(beanName, new DisposableBean() {
+				public void destroy() throws Exception {
+
+					if (hasDestructionAwareBeanPostProcessors()) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+						}
+						for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
+							Object beanProcessor = getBeanPostProcessors().get(i);
+							if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
+								((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
+							}
+						}
+					}
+
+					if (isDisposableBean) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
+						}
+						((DisposableBean) bean).destroy();
+					}
+
+					if (hasDestroyMethod) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
+						}
+						invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
+					}
+				}
+			});
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Add the given bean to the list of further disposable beans in this factory.
-	 * Typically used for inner beans which are not registered in the singleton cache.
-	 * <p>Note: This does not have to be called for beans that reside in the singleton
-	 * cache! It just allows to register further beans for destruction on shutdown.
 	 * @param beanName the name of the bean
 	 * @param bean the bean instance
 	 */
@@ -576,41 +625,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		this.disposableBeans.put(beanName, bean);
 	}
 
-	/**
-	 * Add the given bean to the list of further disposable beans in this factory,
-	 * registering the given destroy method to be called on factory shutdown.
-	 * Typically used for inner beans which are not registered in the singleton cache.
-	 * <p>Note: This does not have to be called for beans that reside in the singleton
-	 * cache! It just allows to register further beans for destruction on shutdown.
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
-	 * @param destroyMethodName the name of the destroy method
-	 */
-	protected void registerDisposableBean(
-			final String beanName, final Object bean, final String destroyMethodName) {
-		// Register DisposableBean wrapper for inner bean, to be able to call the
-		// custom destroy method on factory shutdown.
-		registerDisposableBean(beanName, new DisposableBean() {
-			public void destroy() {
-				invokeCustomDestroyMethod(beanName, bean, destroyMethodName);
-			}
-		});
-	}
-
 	public void destroySingletons() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
 		}
-		synchronized (this.singletonCache) {
-			Set singletonCacheKeys = new HashSet(this.singletonCache.keySet());
-			for (Iterator it = singletonCacheKeys.iterator(); it.hasNext();) {
-				destroySingleton((String) it.next());
-			}
-		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Destroying inner beans in factory {" + this + "}");
-		}
+		this.singletonCache.clear();
 		synchronized (this.disposableBeans) {
 			for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
 				destroyDisposableBean((String) it.next());
@@ -619,22 +638,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Destroy the given bean. Delegates to destroyBean if a corresponding
-	 * singleton instance is found.
+	 * Destroy the given bean. Delegates to destroyBean if a
+	 * corresponding disposable bean instance is found.
 	 * @param beanName name of the bean
-	 * @see #destroyBean
-	 */
-	private void destroySingleton(String beanName) {
-		Object singletonInstance = this.singletonCache.remove(beanName);
-		if (singletonInstance != null) {
-			destroyBean(beanName, singletonInstance);
-		}
-	}
-
-	/**
-	 * Fetch the given bean from the list of further DisposableBeans and destroy it.
-	 * Delegates to destroyBean if a corresponding bean instance is found.
-	 * @param beanName the name of the DisposableBean
 	 * @see #destroyBean
 	 */
 	private void destroyDisposableBean(String beanName) {
@@ -841,71 +847,22 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (dependencies != null) {
 			for (Iterator it = dependencies.iterator(); it.hasNext();) {
 				String dependentBeanName = (String) it.next();
-				if (containsBean(dependentBeanName)) {
-					// It's a registered singleton.
-					destroySingleton(dependentBeanName);
-				}
-				else {
-					// It's a disposable inner bean.
-					destroyDisposableBean(dependentBeanName);
-				}
+				destroyDisposableBean(dependentBeanName);
 			}
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
-		}
-		for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
-			Object beanProcessor = getBeanPostProcessors().get(i);
-			if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
-				((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
-			}
-		}
-
-		invokeDestroyMethods(beanName, bean);
-	}
-
-	/**
-	 * Give a bean a chance to react to the shutdown of the bean factory.
-	 * This means checking whether the bean implements DisposableBean or defines
-	 * a custom destroy method, and invoking the necessary callback(s) if it does.
-	 * <p>Called by destroyBean.
-	 * @param beanName the bean has in the factory. Used for debug output.
-	 * @param bean new bean instance we may need to notify of destruction
-	 * @see #invokeCustomDestroyMethod
-	 * @see #destroyBean
-	 */
-	protected void invokeDestroyMethods(String beanName, Object bean) {
 		if (bean instanceof DisposableBean) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
-			}
 			try {
 				((DisposableBean) bean).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("destroy() on bean with name '" + beanName + "' threw an exception", ex);
+				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
 			}
-		}
-
-		try {
-			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-			if (mergedBeanDefinition.getDestroyMethodName() != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking custom destroy method '" + mergedBeanDefinition.getDestroyMethodName() +
-							"' on bean with name '" + beanName + "'");
-				}
-				invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Ignore: probably from a manually registered singleton.
 		}
 	}
 
 	/**
 	 * Invoke the specified custom destroy method on the given bean.
-	 * Called by invokeDestroyMethods.
 	 * <p>This implementation invokes a no-arg method if found, else checking
 	 * for a method with a single boolean argument (passing in "true",
 	 * assuming a "force" parameter), else logging an error.
@@ -914,7 +871,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the bean has in the factory. Used for debug output.
 	 * @param bean new bean instance we may need to notify of destruction
 	 * @param destroyMethodName the name of the custom destroy method
-	 * @see #invokeDestroyMethods
 	 */
 	protected void invokeCustomDestroyMethod(String beanName, Object bean, String destroyMethodName) {
 		Method destroyMethod =
