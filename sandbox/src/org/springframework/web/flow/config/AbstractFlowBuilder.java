@@ -23,7 +23,7 @@ import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowConstants;
-import org.springframework.web.flow.FlowModelMapper;
+import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
@@ -246,7 +246,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        regardless of which EndState is reached in the subflow)
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
-	protected void addSubFlowState(String id, FlowModelMapper modelMapper, String subFlowDefaultFinishStateId)
+	protected void addSubFlowState(String id, FlowAttributeMapper modelMapper, String subFlowDefaultFinishStateId)
 			throws IllegalArgumentException {
 		addSubFlowState(id, spawnFlow(subFlowId(id)), modelMapper,
 				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
@@ -264,7 +264,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        regardless of which EndState is reached in the subflow)
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper,
+	protected void addSubFlowState(String id, Flow subFlow, FlowAttributeMapper modelMapper,
 			String subFlowDefaultFinishStateId) throws IllegalArgumentException {
 		addSubFlowState(id, subFlow, modelMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
@@ -291,7 +291,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws NoSuchFlowDefinitionException the subflow could not be resolved,
 	 *         or it was not built by the specified builder implementation.
 	 */
-	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowAttributeMapper modelMapper,
 			String subFlowDefaultFinishStateId) {
 		addSubFlowState(id, spawnFlow(id, subFlowBuilderImplementation), modelMapper,
 				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
@@ -307,7 +307,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transitions The eligible set of state transitions
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
-	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper, Transition[] transitions) {
+	protected void addSubFlowState(String id, Flow subFlow, FlowAttributeMapper modelMapper, Transition[] transitions) {
 		new SubFlowState(getFlow(), id, subFlow, modelMapper, transitions);
 	}
 
@@ -331,7 +331,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws NoSuchFlowDefinitionException the subflow could not be resolved,
 	 *         or was not produced by the appropriate builder implementation.
 	 */
-	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
+	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowAttributeMapper modelMapper,
 			Transition[] transitions) {
 		new SubFlowState(getFlow(), id, spawnFlow(id, subFlowBuilderImplementation), modelMapper, transitions);
 	}
@@ -438,7 +438,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
 	 *         was exported with the specified id.
 	 */
-	protected FlowModelMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
+	protected FlowAttributeMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
 		if (!StringUtils.hasText(modelMapperIdPrefix)) {
 			return null;
 		}
@@ -456,7 +456,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *         was exported with the specified implementation, or more than one
 	 *         existed.
 	 */
-	protected FlowModelMapper useModelMapper(Class flowModelMapperImplementationClass)
+	protected FlowAttributeMapper useModelMapper(Class flowModelMapperImplementationClass)
 			throws NoSuchFlowModelMapperException {
 		return getFlowServiceLocator().getFlowModelMapper(flowModelMapperImplementationClass);
 	}

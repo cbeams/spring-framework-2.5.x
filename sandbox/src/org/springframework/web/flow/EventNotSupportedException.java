@@ -29,17 +29,17 @@ public class EventNotSupportedException extends FlowNavigationException {
 
 	private TransitionableState state;
 
-	private String eventId;
+	private Event event;
 
 	/**
 	 * Create a new unsupported event exception.
 	 * @param state State that does not support the event
 	 * @param eventId Unsupported event
 	 */
-	public EventNotSupportedException(TransitionableState state, String eventId) {
+	public EventNotSupportedException(TransitionableState state, Event event) {
 		super(state.getFlow());
 		this.state = state;
-		this.eventId = eventId;
+		this.event = event;
 	}
 
 	/**
@@ -48,14 +48,14 @@ public class EventNotSupportedException extends FlowNavigationException {
 	 * @param eventId Unsupported event
 	 * @param cause Underlying cause of this exception
 	 */
-	public EventNotSupportedException(TransitionableState state, String eventId, Throwable cause) {
+	public EventNotSupportedException(TransitionableState state, Event event, Throwable cause) {
 		super(state.getFlow(), cause);
 		this.state = state;
-		this.eventId = eventId;
+		this.event = event;
 	}
 
 	public String getMessage() {
-		return "No transition found for event '" + eventId + "' in state '" + state.getId() + "' of flow '"
+		return "No transition found for event '" + event.getId() + "' in state '" + state.getId() + "' of flow '"
 				+ getFlow().getId() + "' -- valid transitional event criteria are "
 				+ Styler.call(state.getEventIdCriteria()) + " -- programmer error?";
 	}

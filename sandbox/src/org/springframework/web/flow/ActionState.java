@@ -20,15 +20,11 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.util.Styler;
 
 /**
  * A transitionable state that executes one or more actions when entered. If
@@ -42,7 +38,6 @@ import org.springframework.web.servlet.ModelAndView;
  * returns a "success" result, a transition for "myAction.success" will be
  * searched, and if found, executed. If the action is not named, a transition
  * for the base "success" result will be searched, and if found, executed.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -281,23 +276,22 @@ public class ActionState extends TransitionableState {
 	 * This implementation iterates over each configured Action for this state
 	 * and executes it.
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
+	protected ViewDescriptor doEnterState(StateContext context) {
 		Iterator it = namedActionIterator();
 		int executionCount = 0;
 		String[] eventIds = new String[namedActions.size()];
 		while (it.hasNext()) {
 			NamedAction namedAction = (NamedAction)it.next();
-			String eventId = namedAction.execute(request, response, flowExecution);
+			Event event = namedAction.execute(context);
 			executionCount++;
-			eventIds[executionCount - 1] = eventId;
-			if (supportsEvent(eventId)) {
-				return signalEvent(eventId, flowExecution, request, response);
+			eventIds[executionCount - 1] = event.getId();
+			if (transitionForOccurenceOf(event, context)) {
+				return signalEvent(event, context);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-							+ eventId + "' - " + "I will proceed to the next action in the chain");
+							+ eventIds[executionCount - 1] + "' - " + "I will proceed to the next action in the chain");
 				}
 			}
 		}
@@ -306,8 +300,7 @@ public class ActionState extends TransitionableState {
 					+ "signaled by the " + executionCount + " action(s) that executed in this action state '" + getId()
 					+ "' of flow '" + getFlow().getId()
 					+ "'; transitions must be defined to handle action result outcomes -- "
-					+ "possible flow configuration error?  Note: the eventIds signaled were: '"
-					+ Styler.call(eventIds)
+					+ "possible flow configuration error?  Note: the eventIds signaled were: '" + Styler.call(eventIds)
 					+ "', while the supported set of eventId criteria for this action state is '"
 					+ Styler.call(getEventIdCriteria()) + "'");
 		}
@@ -376,13 +369,12 @@ public class ActionState extends TransitionableState {
 		/**
 		 * Execute the wrapped action.
 		 */
-		protected String execute(HttpServletRequest request, HttpServletResponse response,
-				FlowExecutionStack flowExecution) {
+		protected Event execute(FlowExecutionContext context) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				return getEventId(action.execute(request, response, flowExecution));
+				return getEvent(action.execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(actionState, this, e);
@@ -397,15 +389,17 @@ public class ActionState extends TransitionableState {
 		 * If the wrapped action is named, the name will be used as a qualifier
 		 * (e.g. "myAction.success").
 		 */
-		protected String getEventId(String result) {
-			if (!StringUtils.hasText(result)) {
+		protected Event getEvent(Event resultEvent) {
+			if (resultEvent == null) {
 				return null;
 			}
 			if (isNamed()) {
-				return name + FlowConstants.DOT_SEPARATOR + result;
+				//TODO wrap in another event with an appended id
+				//return new WrappingEvent(name + "." + resultEvent.getId(), resultEvent);
+				return resultEvent;
 			}
 			else {
-				return result;
+				return resultEvent;
 			}
 		}
 

@@ -18,18 +18,14 @@ package org.springframework.web.flow;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
+import org.springframework.web.flow.support.LocalEvent;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -62,8 +58,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	private FlowLocator flowLocator;
 
 	/**
-	 * Returns the flow locator used to resolve the Flow to be tested
-	 * by <code>id</code>.
+	 * Returns the flow locator used to resolve the Flow to be tested by
+	 * <code>id</code>.
 	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
@@ -80,8 +76,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * Get the singleton flow definition whose execution is being tested.
 	 * @return the singleton flow definition
-	 * @throws NoSuchFlowDefinitionExeception if the flow identified by
-	 *         flowId() could not be resolved (if this.flow was null)
+	 * @throws NoSuchFlowDefinitionExeception if the flow identified by flowId()
+	 *         could not be resolved (if this.flow was null)
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {
 		if (this.flow == null) {
@@ -91,7 +87,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 
 	/**
-	 * Set the flow definition whose execution is being tested. 
+	 * Set the flow definition whose execution is being tested.
 	 * @param flow the singleton flow definition
 	 */
 	protected void setFlow(Flow flow) {
@@ -131,8 +127,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the model and view returned as a result of starting the flow
 	 *         (returned when the first view state is entered)
 	 */
-	protected ModelAndView startFlow(Map input) {
-		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
+	protected ViewDescriptor startFlow(Map input) {
+		return startFlow(new LocalEvent("start", input));
 	}
 
 	/**
@@ -143,15 +139,15 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the model and view returned as a result of starting the flow
 	 *         (returned when the first view state is entered)
 	 */
-	protected ModelAndView startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
+	protected ViewDescriptor startFlow(Event event) {
 		this.flowExecution = getFlow().createExecution();
 		setupFlowExecution(flowExecution);
-		return this.flowExecution.start(input, request, response);
+		return this.flowExecution.start(event);
 	}
 
 	/**
-	 * Hook method where you can do additional setup of a flow execution before it
-	 * is started, like register an execution listener.
+	 * Hook method where you can do additional setup of a flow execution before
+	 * it is started, like register an execution listener.
 	 * @param flowExecution the flow execution
 	 */
 	protected void setupFlowExecution(FlowExecution flowExecution) {
@@ -170,9 +166,9 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * (result), action state 2 (result), action state 3 (result), view state
 	 * <control returns so view can be rendered>).
 	 * <p>
-	 * If you wish to verify expected behavior on each state transition (and
-	 * not just when the view state triggers return of control back to the
-	 * client), you have a few options:
+	 * If you wish to verify expected behavior on each state transition (and not
+	 * just when the view state triggers return of control back to the client),
+	 * you have a few options:
 	 * <p>
 	 * First, you can always write a standalone unit test for the
 	 * <code>Action</code> implementation. There you can verify that the
@@ -199,8 +195,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         client (occurs when the flow enters a view state, or an end
 	 *         state)
 	 */
-	protected ModelAndView signalEvent(String eventId, MockHttpServletRequest request, MockHttpServletResponse response) {
-		return getFlowExecution().signalEvent(eventId, getCurrentStateId(), request, response);
+	protected ViewDescriptor signalEvent(Event event) {
+		return getFlowExecution().signalEvent(event);
 	}
 
 	/**
@@ -240,9 +236,9 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * equals the provided event.
 	 * @param expectedLastEventId the expected event.
 	 */
-	protected void assertLastEventEquals(String expectedLastEventId) {
-		assertEquals("The last event '" + getLastEventId() + "' does not equal the expected event '"
-				+ expectedLastEventId + "'", expectedLastEventId, getLastEventId());
+	protected void assertEventEquals(String expectedEventId) {
+		assertEquals("The last event '" + getEventId() + "' does not equal the expected event '"
+				+ expectedEventId + "'", expectedEventId, getEventId());
 	}
 
 	/**
@@ -266,8 +262,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * tested.
 	 * @return the last event id
 	 */
-	protected String getLastEventId() {
-		return flowExecution.getLastEventId();
+	protected String getEventId() {
+		return flowExecution.getEventId();
 	}
 
 	/**

@@ -139,16 +139,11 @@ public class FlowExecutionListenerList {
 	public boolean isEmpty() {
 		return flowExecutionListeners.isEmpty();
 	}
-	
+
 	/**
 	 * Returns the listeners in this list as an array.
 	 */
 	public FlowExecutionListener[] toArray() {
-		FlowExecutionListener[] res=new FlowExecutionListener[size()];
-		int i=0;
-		for (Iterator it=iterator(); it.hasNext();) {
-			res[i++]=(FlowExecutionListener)it.next();
-		}
-		return res;
+		return (FlowExecutionListener[])flowExecutionListeners.toArray();
 	}
 }

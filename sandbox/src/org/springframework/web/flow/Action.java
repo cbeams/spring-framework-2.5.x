@@ -15,9 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * An action that executes controller, mediator (bridge), and/or command-like
  * behavior. Actions typically delegate down to the service-layer to perform
@@ -58,7 +55,7 @@ public interface Action {
 	 * session and will be cleaned up when the flow session ends. All attributes
 	 * in the flow model are automatically exposed for convenient access by the
 	 * views when a <code>ViewState</code> is entered, using a standard Spring
-	 * <code>ModelAndView</code> descriptor.
+	 * <code>ViewDescriptor</code> descriptor.
 	 * <p>
 	 * Note: The flow model should not be used as a general purpose cache, but
 	 * rather as a context for data needed locally by the flows this action
@@ -71,20 +68,15 @@ public interface Action {
 	 * Note: The flow model is typically managed in the HTTP session, so
 	 * attributes set in it should generally be serializable.
 	 * 
-	 * @param request The current http request, enabling access to request
-	 *        parameters and/or attributes if neccessary
-	 * @param response The http response, enabling direct response writing by
-	 *        the action if neccessary
-	 * @param model The data model for the current flow session, for accessing
-	 *        and setting data in "flow scope"
+	 * @param context The action execution context, for accessing and setting
+	 *        data in "flow scope" or "request scope"
 	 * @return A logical result outcome, used as grounds for a transition in the
 	 *         current, calling action state (e.g. "success", or "error")
 	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
 	 * @see org.springframework.web.flow.ViewState
-	 * @see org.springframework.web.servlet.ModelAndView
+	 * @see org.springframework.web.servlet.ViewDescriptor
 	 */
-	public String execute(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
-			throws Exception;
+	public Event execute(FlowExecutionContext context) throws Exception;
 }

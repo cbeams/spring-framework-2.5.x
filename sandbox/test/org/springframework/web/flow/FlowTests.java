@@ -22,13 +22,13 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * @author Keith Donald
  */
 public class FlowTests extends TestCase {
-	
+
 	public void testFlowExecutionListener() {
 		Flow subFlow = new Flow("mySubFlow");
 		ViewState subFlowState = new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
@@ -44,13 +44,13 @@ public class FlowTests extends TestCase {
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		ModelAndView view = flowExecution.start(null, request, null);
+		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
 		assertEquals(1, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(2, flowExecutionListener.stateTransitions);
-		view = flowExecution.signalEvent("submit", null, request, null);
+		view = flowExecution.signalEvent(new LocalEvent("submit"));
 		assertEquals(2, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(4, flowExecutionListener.stateTransitions);
-		view = flowExecution.signalEvent("submit", null, request, null);
+		view = flowExecution.signalEvent(new LocalEvent("submit"));
 		assertEquals(0, flowExecutionListener.flowExecutionsStarted);
 		assertEquals(6, flowExecutionListener.stateTransitions);
 	}
@@ -66,46 +66,46 @@ public class FlowTests extends TestCase {
 
 		private boolean eventSignaled;
 
-		public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession) {
+		public void ended(FlowExecutionContext context, FlowSession endedRootFlowSession) {
 			flowExecutionsStarted--;
 			assertTrue(flowExecutionsStarted == 0);
 		}
 
-		public void eventSignaled(FlowExecution flowExecution, String eventId) {
+		public void eventSignaled(FlowExecutionContext context, Event event) {
 			assertTrue(flowExecutionsStarted > 0);
 			eventSignaled = true;
 		}
 
-		public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request) {
+		public void requestProcessed(FlowExecutionContext context, Event event) {
 			requestProcessed = true;
 			requestSubmitted = false;
 		}
 
-		public void requestSubmitted(FlowExecution flowExecution, HttpServletRequest request) {
+		public void requestSubmitted(FlowExecutionContext context, Event event) {
 			assertTrue(flowExecutionsStarted > 0);
 			requestSubmitted = true;
 			requestProcessed = false;
 		}
 
-		public void started(FlowExecution flowExecution) {
+		public void started(FlowExecutionContext context) {
 			assertTrue(flowExecutionsStarted == 0);
 			flowExecutionsStarted++;
 			stateTransitions = 0;
 		}
 
-		public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState) {
+		public void stateTransitioned(FlowExecutionContext context, AbstractState previousState, AbstractState newState) {
 			assertTrue(flowExecutionsStarted > 0);
 			stateTransitions++;
 			eventSignaled = false;
 		}
 
-		public void subFlowEnded(FlowExecution flowExecution, FlowSession endedSession) {
+		public void subFlowEnded(FlowExecutionContext context, FlowSession endedSession) {
 			assertTrue(flowExecutionsStarted > 0);
 			flowExecutionsStarted--;
 			assertTrue(flowExecutionsStarted > 0);
 		}
 
-		public void subFlowSpawned(FlowExecution flowExecution) {
+		public void subFlowSpawned(FlowExecutionContext context) {
 			assertTrue(flowExecutionsStarted > 0);
 			flowExecutionsStarted++;
 		}

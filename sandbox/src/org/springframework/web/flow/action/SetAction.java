@@ -16,14 +16,14 @@
 package org.springframework.web.flow.action;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
 
 /**
  * Maps parameters in the http servlet request to attributes <i>set</i> in the
@@ -81,10 +81,9 @@ public class SetAction extends AbstractAction {
 		this.requestParameterMapper = mapper;
 	}
 
-	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
-			throws Exception {
+	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
 		if (requestParameterMapper != null) {
-			this.requestParameterMapper.map(new RequestParameterAttributeAccessorAdapter(request), model);
+			this.requestParameterMapper.map(context.getEvent(), context.getFlowAttributeAccessor());
 		}
 		return success();
 	}

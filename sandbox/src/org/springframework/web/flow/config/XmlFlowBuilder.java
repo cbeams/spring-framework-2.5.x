@@ -30,7 +30,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowModelMapper;
+import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
@@ -340,7 +340,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
-		FlowModelMapper mapper = null;
+		FlowAttributeMapper mapper = null;
 		if (element.hasAttribute(MODEL_MAPPER_ATTRIBUTE)) {
 			mapper = getFlowServiceLocator().getFlowModelMapper(element.getAttribute(MODEL_MAPPER_ATTRIBUTE));
 		}

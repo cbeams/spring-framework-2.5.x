@@ -17,7 +17,7 @@ package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.FlowLocator;
-import org.springframework.web.flow.FlowModelMapper;
+import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
@@ -55,7 +55,7 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return The flow model mapper
 	 * @throws ServiceLookupException When the flow model mapper cannot be found
 	 */
-	public FlowModelMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException;
+	public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow model mapper of specified implementation class.
@@ -64,6 +64,6 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return The flow model mapper
 	 * @throws ServiceLookupException When the flow model mapper cannot be found
 	 */
-	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass) throws ServiceLookupException;
+	public FlowAttributeMapper getFlowModelMapper(Class flowModelMapperImplementationClass) throws ServiceLookupException;
 
 }

@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * Interface to be implemented by objects that wish to listen and respond to the
  * lifecycle of a FlowExecution.
@@ -31,58 +29,59 @@ public interface FlowExecutionListener {
 
 	/**
 	 * Called when a new flow execution was started.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 */
-	public void started(FlowExecution flowExecution);
+	public void started(FlowExecutionContext context);
 
 	/**
 	 * Called when a new client HTTP request is submitted to manipulate this
 	 * flow execution.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 * @param request The request that was submitted
 	 */
-	public void requestSubmitted(FlowExecution flowExecution, HttpServletRequest request);
+	public void requestSubmitted(FlowExecutionContext context, Event triggeringEvent);
 
 	/**
 	 * Called when a new client HTTP request is processed.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 * @param request The request that was processed
 	 */
-	public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request);
+	public void requestProcessed(FlowExecutionContext context, Event triggeringEvent);
 
 	/**
-	 * Called when an event is signaled in a state, but prior to a state transition.
-	 * @param flowExecution Source of the event
+	 * Called when an event is signaled in a state, but prior to a state
+	 * transition.
+	 * @param context Source of the event
 	 * @param eventId The event that was signaled
 	 */
-	public void eventSignaled(FlowExecution flowExecution, String eventId);
+	public void eventSignaled(FlowExecutionContext context, Event event);
 
 	/**
 	 * Called when a state transitions, after the transition occurs.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 * @param previousState <i>From </i> state of the transition
 	 * @param newState <i>To </i> state of the transition
 	 */
-	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState);
+	public void stateTransitioned(FlowExecutionContext context, AbstractState previousState,
+			AbstractState newState);
 
 	/**
 	 * Called when a sub flow is spawned.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 */
-	public void subFlowSpawned(FlowExecution flowExecution);
+	public void subFlowSpawned(FlowExecutionContext context);
 
 	/**
 	 * Called when a sub flow is ended.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 * @param endedSession Ending sub flow session
 	 */
-	public void subFlowEnded(FlowExecution flowExecution, FlowSession endedSession);
+	public void subFlowEnded(FlowExecutionContext context, FlowSession endedSession);
 
 	/**
 	 * Called when the flow execution terminates.
-	 * @param flowExecution Source of the event
+	 * @param context Source of the event
 	 * @param endedRootFlowSession Ending root flow session
 	 */
-	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession);
-
+	public void ended(FlowExecutionContext context, FlowSession endedRootFlowSession);
 }

@@ -15,27 +15,22 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A view state is a state in which a physical view resource should be rendered
  * to the user, for example, for solicting form input.
  * <p>
  * To accomplish this, a <code>ViewState</code> returns a
- * <code>ModelAndView</code>, which contains the name of the view template to
- * render and all supporting model data needed to render it correctly. It is
+ * <code>ViewDescriptor</code>, which contains the name of the view template
+ * to render and all supporting model data needed to render it correctly. It is
  * expected that some sort of view resolver will map this view name to a
  * physical resource template (like a jsp file.)
  * <p>
  * A view state can also be a <i>marker</i> state with no associated view. In
  * this case it just returns control back to the HTTP client. Marker states are
  * useful for situations where an action has already generated the response.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -125,15 +120,14 @@ public class ViewState extends TransitionableState {
 	 * model map needed when the view is rendered, for populating dynamic
 	 * content.
 	 * 
-	 * @param flowExecution The flow execution stack, tracking the current
-	 *        active flow session
+	 * @param context The flow execution stack, tracking the current active flow
+	 *        session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
+	protected ViewDescriptor doEnterState(StateContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
@@ -144,7 +138,7 @@ public class ViewState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning view name '" + viewName + "' to render");
 			}
-			return new ModelAndView(viewName, flowExecution.getModel());
+			return new ViewDescriptor(viewName, context.getModel());
 		}
 	}
 

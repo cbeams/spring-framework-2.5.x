@@ -27,11 +27,10 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
+import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Test case for FlowExecutionStack
@@ -44,7 +43,7 @@ public class FlowExecutionStackTests extends TestCase {
 
 	private FlowLocator flowLocator;
 
-	private FlowExecution flowExecution;
+	private FlowExecutionStack flowExecution;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
@@ -70,57 +69,54 @@ public class FlowExecutionStackTests extends TestCase {
 				return getFlow(flowDefinitionId);
 			}
 		};
-		flowExecution = flow.createExecution();
+		flowExecution = (FlowExecutionStack)flow.createExecution();
 	}
-	
+
 	protected void runFlowExecutionRehydrationTest() throws Exception {
-		//serialize the flowExecution
+		// serialize the flowExecution
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
 		oout.writeObject(flowExecution);
 		oout.flush();
 
-		//deserialize the flowExecution
+		// deserialize the flowExecution
 		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
 		ObjectInputStream oin = new ObjectInputStream(bin);
-		FlowExecution restoredFlowExecution = (FlowExecution)oin.readObject();
+		FlowExecutionStack restoredFlowExecution = (FlowExecutionStack)oin.readObject();
 
 		assertNotNull(restoredFlowExecution);
 
-		//rehydrate the flow execution
+		// rehydrate the flow execution
 		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListenerList().toArray());
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
-			assertTrue(entriesCollectionsAreEqual(flowExecution.attributeEntries(), restoredFlowExecution
-					.attributeEntries()));
+			assertTrue(entriesCollectionsAreEqual(flowExecution.getActiveFlowSession().attributeEntries(),
+					restoredFlowExecution.getActiveFlowSession().attributeEntries()));
 			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
 			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
 		}
 		assertEquals(flowExecution.getId(), restoredFlowExecution.getId());
-		assertEquals(flowExecution.getLastEventId(), restoredFlowExecution.getLastEventId());
-		assertEquals(flowExecution.getLastEventTimestamp(), restoredFlowExecution.getLastEventTimestamp());
+		assertEquals(flowExecution.getEventId(), restoredFlowExecution.getEventId());
+		assertEquals(flowExecution.getEventTimestamp(), restoredFlowExecution.getEventTimestamp());
 		assertEquals(flowExecution.getListenerList().size(), restoredFlowExecution.getListenerList().size());
 	}
 
 	public void testRehydrate() throws Exception {
-		//setup some input data
+		// setup some input data
 		Map inputData = new HashMap(1);
 		inputData.put("name", "value");
-		
-		//start the flow execution
-		flowExecution.start(inputData, new MockHttpServletRequest(), new MockHttpServletResponse());
-		
+		// start the flow execution
+		flowExecution.start(new LocalEvent("start", inputData));
 		runFlowExecutionRehydrationTest();
 	}
 
 	public void testRehydrateNotStarted() throws Exception {
-		//don't start the flow execution
-		
+		// don't start the flow execution
 		runFlowExecutionRehydrationTest();
 	}
-	
+
 	/**
 	 * Helper to test if 2 collections of Map.Entry objects contain the same
 	 * values.

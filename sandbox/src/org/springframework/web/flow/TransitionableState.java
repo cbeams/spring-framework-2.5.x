@@ -21,16 +21,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Abstract superclass for states that have one or more transitions.
- * State transitions are triggered by events, specifically, when an
- * occurence of a supported event in this state is signaled.
+ * Abstract superclass for states that have one or more transitions. State
+ * transitions are triggered by events, specifically, when an occurence of a
+ * supported event in this state is signaled.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -95,16 +91,16 @@ public abstract class TransitionableState extends AbstractState {
 	 * @param response the server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
-	 * @throws EventNotSupportedException if the eventId does not map to a
-	 *         valid transition for this state
+	 * @throws EventNotSupportedException if the eventId does not map to a valid
+	 *         transition for this state
 	 * @throws CannotExecuteStateTransitionException if a state transition could
 	 *         not be executed.
 	 */
-	protected ModelAndView signalEvent(String eventId, FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) throws EventNotSupportedException, CannotExecuteStateTransitionException {
-		Transition transition = getRequiredTransition(eventId);
-		flowExecution.setLastEventId(eventId);
-		return transition.execute(flowExecution, request, response);
+	protected ViewDescriptor signalEvent(Event event, StateContext context) throws EventNotSupportedException,
+			CannotExecuteStateTransitionException {
+		context.setEvent(event);
+		Transition transition = getRequiredTransition(context);
+		return transition.execute(context);
 	}
 
 	/**
@@ -132,7 +128,7 @@ public abstract class TransitionableState extends AbstractState {
 		Set criteria = new LinkedHashSet(transitions.size());
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
-			criteria.add(((Transition)it.next()).getEventIdCriteria());
+			criteria.add(((Transition)it.next()).getCondition());
 		}
 		return Collections.unmodifiableSet(criteria);
 	}
@@ -144,13 +140,13 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws EventNotSupportedException When the event is not supported by
 	 *         this state
 	 */
-	protected Transition getRequiredTransition(String eventId) throws EventNotSupportedException {
-		Transition transition = getTransition(eventId);
+	protected Transition getRequiredTransition(FlowExecutionContext context) throws EventNotSupportedException {
+		Transition transition = getTransition(context);
 		if (transition != null) {
 			return transition;
 		}
 		else {
-			throw new EventNotSupportedException(this, eventId);
+			throw new EventNotSupportedException(this, context.getEvent());
 		}
 	}
 
@@ -160,11 +156,11 @@ public abstract class TransitionableState extends AbstractState {
 	 * @return The transition associated with the event, or null if there is no
 	 *         such transition in this state
 	 */
-	public Transition getTransition(String eventId) {
+	public Transition getTransition(FlowExecutionContext context) {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
-			if (transition.executesOn(eventId)) {
+			if (transition.executesOn(context)) {
 				return transition;
 			}
 		}
@@ -178,8 +174,9 @@ public abstract class TransitionableState extends AbstractState {
 	 * @param eventId the event id to check
 	 * @return true or false
 	 */
-	public boolean supportsEvent(String eventId) {
-		return getTransition(eventId) != null;
+	public boolean transitionForOccurenceOf(Event event, StateContext context) {
+		context.setEvent(event);
+		return getTransition(context) != null;
 	}
 
 	protected void createToString(ToStringCreator creator) {

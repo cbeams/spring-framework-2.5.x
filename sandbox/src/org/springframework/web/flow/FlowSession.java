@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,10 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
 import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.ProcessTemplate;
-import org.springframework.util.closure.support.IteratorProcessTemplate;
+import org.springframework.web.flow.support.AttributeSetterSupport;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
@@ -59,7 +55,7 @@ import org.springframework.web.flow.support.FlowUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowSession implements MutableFlowModel, Serializable {
+public class FlowSession extends AttributeSetterSupport implements Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
@@ -181,69 +177,16 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		this.currentState = newState;
 	}
 
-	/**
-	 * Get the name for the transaction token attribute. Defaults to "txToken".
-	 */
-	protected String getTransactionTokenAttributeName() {
-		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
-	}
-
-	/**
-	 * Get the name for the transaction token parameter in requests. Defaults to
-	 * "_txToken".
-	 */
-	protected String getTransactionTokenParameterName() {
-		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
-	}
-
-	// methods implementing FlowModel
-
 	public Map getModel() {
 		return attributes;
 	}
 
+	public Map getAttributeMap() {
+		return attributes;
+	}
+	
 	public Object getAttribute(String attributeName) {
 		return attributes.get(attributeName);
-	}
-
-	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		Object value = getAttribute(attributeName);
-		if (requiredType != null && value != null) {
-			Assert.isInstanceOf(requiredType, value);
-		}
-		return value;
-	}
-
-	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
-		Object value = getAttribute(attributeName);
-		if (value == null) {
-			throw new IllegalStateException("Required attribute '" + attributeName
-					+ "' is not present in flow scope for flow '" + getFlowId()
-					+ "'; attributes currently in scope are = " + Styler.call(attributes));
-		}
-		return value;
-	}
-
-	public Object getRequiredAttribute(String attributeName, Class clazz) throws IllegalStateException {
-		Object value = getRequiredAttribute(attributeName);
-		if (clazz != null) {
-			Assert.isInstanceOf(clazz, value);
-		}
-		return value;
-	}
-
-	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException {
-		getRequiredAttribute(attributeName, requiredType);
-	}
-
-	public void assertAttributePresent(String attributeName) throws IllegalStateException {
-		getRequiredAttribute(attributeName);
-	}
-
-	public void assertInTransaction(HttpServletRequest request, boolean clear) throws IllegalStateException {
-		Assert.state(FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
-				getTransactionTokenParameterName(), clear),
-				"The request is not running in the context of an application transaction");
 	}
 
 	public boolean containsAttribute(String attributeName) {
@@ -260,34 +203,14 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		}
 	}
 
-	public boolean inTransaction(HttpServletRequest request, boolean clear) {
-		return FlowUtils.isTokenValid(this, request, getTransactionTokenAttributeName(),
-				getTransactionTokenParameterName(), clear);
-	}
-
-	public Collection attributeNames() {
-		return Collections.unmodifiableCollection(attributes.keySet());
-	}
-
-	public Collection attributeValues() {
-		return Collections.unmodifiableCollection(attributes.values());
-	}
-
-	public Collection attributeEntries() {
-		return Collections.unmodifiableCollection(attributes.entrySet());
-	}
-
-	public ProcessTemplate iteratorTemplate() {
-		return new IteratorProcessTemplate(attributeEntries().iterator());
-	}
-
 	// methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
 		Assert.isInstanceOf(Serializable.class, attributeValue,
 				"attributes stored in the flow session should be Serializable");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue + "'");
+			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue
+					+ "'");
 		}
 		this.attributes.put(attributeName, attributeValue);
 	}
@@ -304,21 +227,13 @@ public class FlowSession implements MutableFlowModel, Serializable {
 		}
 	}
 
-	public void removeAttribute(String attributeName) {
+	public Object removeAttribute(String attributeName) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
 		}
-		this.attributes.remove(attributeName);
+		return this.attributes.remove(attributeName);
 	}
 
-	public void beginTransaction() {
-		FlowUtils.setToken(this, getTransactionTokenAttributeName());
-	}
-
-	public void endTransaction() {
-		FlowUtils.clearToken(this, getTransactionTokenAttributeName());
-	}
-	
 	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
@@ -340,16 +255,19 @@ public class FlowSession implements MutableFlowModel, Serializable {
 	 * @param flowLocator the flow locator
 	 */
 	protected void rehydrate(FlowLocator flowLocator) {
-		//implementation note: we cannot integrate this code into the readObject()
-		//method since we need the flow locator!
-		
+		// implementation note: we cannot integrate this code into the
+		// readObject()
+		// method since we need the flow locator!
+
 		Assert.state(this.flow == null, "The flow is already set - already restored");
 		Assert.state(this.currentState == null, "The current state is already set - already restored");
-		Assert.notNull(flowId,
+		Assert
+				.notNull(flowId,
 						"The flow id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
 		this.flow = flowLocator.getFlow(this.flowId);
 		this.flowId = null;
-		Assert.notNull(currentStateId,
+		Assert
+				.notNull(currentStateId,
 						"The current state id was not set during deserialization: cannot restore--was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;

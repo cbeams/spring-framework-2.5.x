@@ -15,12 +15,8 @@
  */
 package org.springframework.web.flow.support;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.FlowModel;
-import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.FlowExecutionContext;
 
 /**
  * Utility class providing convenience methods for the Spring web flow system.
@@ -29,8 +25,8 @@ import org.springframework.web.flow.MutableFlowModel;
  * This class provides web transaction token handling methods similar to those
  * available in the Struts framework. In essense an implementation of the <a
  * href="http://www.javajunkies.org/index.pl?lastnode_id=3361&node_id=3355">synchronizer
- * token </a> pattern. You can use these methods directly to prevent double submits
- * in the following way:
+ * token </a> pattern. You can use these methods directly to prevent double
+ * submits in the following way:
  * <ul>
  * <li>Create an action that will mark the beginning of the transactional part
  * of your flow. In this action you do
@@ -56,55 +52,39 @@ import org.springframework.web.flow.MutableFlowModel;
  */
 public class FlowUtils {
 
-	/**
-	 * Retrieve information about the current flow execution.
-	 * @param model The model for the executing flow.
-	 * @return The flow execution
-	 */
-	public static FlowExecution getFlowExecution(FlowModel model) {
-		return (FlowExecution)model.getRequiredAttribute(FlowExecution.ATTRIBUTE_NAME);
-	}
-
 	// token related functionality like in Struts
 
 	/**
 	 * Save a new transaction token in given model.
-	 * 
 	 * @param model the model where the generated token should be saved
 	 * @param tokenName the key used to save the token in the model
 	 */
-	public static void setToken(MutableFlowModel model, String tokenName) {
+	public static void setToken(FlowExecutionContext context, String tokenName) {
 		String txToken = new RandomGuid().toString();
-		synchronized (model) {
-			model.setAttribute(tokenName, txToken);
-		}
+		context.setFlowAttribute(tokenName, txToken);
 	}
 
 	/**
 	 * Reset the saved transaction token in given model. This indicates that
 	 * transactional token checking will not be needed on the next request that
 	 * is submitted.
-	 * 
 	 * @param model the model where the generated token should be saved
 	 * @param tokenName the key used to save the token in the model
 	 */
-	public static void clearToken(MutableFlowModel model, String tokenName) {
-		synchronized (model) {
-			model.removeAttribute(tokenName);
-		}
+	public static void clearToken(FlowExecutionContext context, String tokenName) {
+		context.removeFlowAttribute(tokenName);
 	}
 
 	/**
 	 * Return <code>true</code> if there is a transaction token stored in
-	 * given model, and the value submitted as a request parameter matches
-	 * it. Returns <code>false</code> when
+	 * given model, and the value submitted as a request parameter matches it.
+	 * Returns <code>false</code> when
 	 * <ul>
 	 * <li>there is no transaction token saved in the model</li>
 	 * <li>there is no transaction token included as a request parameter</li>
 	 * <li>the included transaction token value does not match the transaction
 	 * token in the model</li>
 	 * </ul>
-	 * 
 	 * @param model the model where the token is stored
 	 * @param tokenName the key used to save the token in the model
 	 * @param request current HTTP request
@@ -114,10 +94,10 @@ public class FlowUtils {
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	public static boolean isTokenValid(MutableFlowModel model, HttpServletRequest request, String tokenName,
-			String requestParameterName, boolean clear) {
-		String tokenValue = request.getParameter(requestParameterName);
-		return isTokenValid(model, tokenName, tokenValue, clear);
+	public static boolean isEventTokenValid(FlowExecutionContext context, String tokenName,
+			String tokenParameterName, boolean clear) {
+		String tokenValue = (String)context.getEvent().getParameter(tokenParameterName);
+		return isTokenValid(context, tokenName, tokenValue, clear);
 	}
 
 	/**
@@ -130,7 +110,6 @@ public class FlowUtils {
 	 * <li>the given transaction token value does not match the transaction
 	 * token in the model</li>
 	 * </ul>
-	 * 
 	 * @param model the model where the token is stored
 	 * @param tokenName the key used to save the token in the model
 	 * @param tokenValue the token value to check
@@ -138,20 +117,17 @@ public class FlowUtils {
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	public static boolean isTokenValid(MutableFlowModel model, String tokenName, String tokenValue,
-			boolean clear) {
+	private static boolean isTokenValid(FlowExecutionContext context, String tokenName, String tokenValue, boolean clear) {
 		if (!StringUtils.hasText(tokenValue)) {
 			return false;
 		}
-		synchronized (model) {
-			String txToken = (String)model.getAttribute(tokenName);
-			if (!StringUtils.hasText(txToken)) {
-				return false;
-			}
-			if (clear) {
-				clearToken(model, tokenName);
-			}
-			return txToken.equals(tokenValue);
+		String txToken = (String)context.getFlowAttribute(tokenName);
+		if (!StringUtils.hasText(txToken)) {
+			return false;
 		}
+		if (clear) {
+			clearToken(context, tokenName);
+		}
+		return txToken.equals(tokenValue);
 	}
 }

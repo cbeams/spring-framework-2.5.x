@@ -24,6 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.support.HttpFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
@@ -130,6 +131,8 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		// delegate to the flow execution manager to process the request
-		return manager.handleRequest(request, response);
+		ViewDescriptor viewDescriptor = manager.handleRequest(request, response);
+		ModelAndView mv = new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
+		return mv;
 	}
 }

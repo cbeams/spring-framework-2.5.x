@@ -22,7 +22,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowModelMapper;
+import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
 
@@ -140,26 +140,26 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
-	public FlowModelMapper getFlowModelMapper(String flowModelMapperId)
+	public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId)
 			throws ServiceLookupException {
 		try {
-			return (FlowModelMapper)getBeanFactory().getBean(flowModelMapperId, FlowModelMapper.class);
+			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
 		}
 		catch (BeansException e) {
 			throw new NoSuchFlowModelMapperException(flowModelMapperId, e);
 		}
 	}
 
-	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
+	public FlowAttributeMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
-		if (!FlowModelMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
+		if (!FlowAttributeMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
 			throw new IllegalArgumentException("Your model mapper implementation '"
 					+ flowModelMapperImplementationClass + "' must implement the '"
-					+ FlowModelMapper.class.getName() + "' interface");
+					+ FlowAttributeMapper.class.getName() + "' interface");
 
 		}
 		try {
-			return (FlowModelMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
+			return (FlowAttributeMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
 					flowModelMapperImplementationClass);
 		}
 		catch (BeansException e) {

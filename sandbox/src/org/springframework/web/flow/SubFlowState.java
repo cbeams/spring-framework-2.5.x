@@ -18,28 +18,26 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSetter;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * State that spawns a subflow when executed.
  * <p>
  * A sub flow state has the ability to map data between the parent and sub flow
- * models. See the {@link FlowModelMapper} interface definition for info on
- * how to do this.
+ * models. See the {@link FlowAttributeMapper} interface definition for info on how
+ * to do this.
  * 
- * @see org.springframework.web.flow.FlowModelMapper
+ * @see org.springframework.web.flow.FlowAttributeMapper
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class SubFlowState extends TransitionableState implements FlowModelMapper {
+public class SubFlowState extends TransitionableState implements FlowAttributeMapper {
 
 	private Flow subFlow;
 
-	private FlowModelMapper flowModelMapper;
+	private FlowAttributeMapper flowModelMapper;
 
 	/**
 	 * Create a new sub flow state.
@@ -77,7 +75,7 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowModelMapper modelMapper, Transition transition)
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper modelMapper, Transition transition)
 			throws IllegalArgumentException {
 		this(flow, id, subFlow, modelMapper, new Transition[] { transition });
 	}
@@ -92,8 +90,8 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	 * @throws IllegalArgumentException When this state cannot be added to given
 	 *         flow
 	 */
-	public SubFlowState(Flow flow, String id, Flow subFlow, FlowModelMapper modelMapper,
-			Transition[] transitions) throws IllegalArgumentException {
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper modelMapper, Transition[] transitions)
+			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		setSubFlow(subFlow);
 		setFlowModelMapper(modelMapper);
@@ -116,18 +114,18 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	}
 
 	/**
-	 * Set the model mapper to use to map model data between parent and
-	 * sub flow model. Can be null if no mapping is needed.
+	 * Set the model mapper to use to map model data between parent and sub flow
+	 * model. Can be null if no mapping is needed.
 	 */
-	protected void setFlowModelMapper(FlowModelMapper modelMapper) {
+	protected void setFlowModelMapper(FlowAttributeMapper modelMapper) {
 		this.flowModelMapper = modelMapper;
 	}
 
 	/**
-	 * Returns the model mapper used to map data between parent and sub
-	 * flow model, or null if no mapping is needed.
+	 * Returns the model mapper used to map data between parent and sub flow
+	 * model, or null if no mapping is needed.
 	 */
-	public FlowModelMapper getFlowModelMapper() {
+	public FlowAttributeMapper getFlowModelMapper() {
 		return this.flowModelMapper;
 	}
 
@@ -135,17 +133,15 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 	 * Enter this state, creating the sub flow input map and spawning the sub
 	 * flow in the current flow execution.
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
+	protected ViewDescriptor doEnterState(StateContext context) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + getFlow() + "'");
 		}
-		Map subFlowInput = createSubFlowInputAttributes(flowExecution);
-		return flowExecution.spawn(getSubFlow(), subFlowInput, request, response);
+		return context.spawn(getSubFlow(), createSubFlowInputAttributes(context.getFlowAttributeAccessor()));
 	}
 
-	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
+	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
 		if (getFlowModelMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured model mapper to map parent-flow attributes "
@@ -165,7 +161,7 @@ public class SubFlowState extends TransitionableState implements FlowModelMapper
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(FlowModel subFlowModel, MutableFlowModel parentFlowModel) {
+	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
 		if (getFlowModelMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger

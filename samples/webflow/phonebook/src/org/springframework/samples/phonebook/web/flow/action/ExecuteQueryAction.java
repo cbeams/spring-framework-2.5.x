@@ -15,12 +15,10 @@
  */
 package org.springframework.samples.phonebook.web.flow.action;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.samples.phonebook.domain.PhoneBookQuery;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class ExecuteQueryAction extends AbstractAction {
@@ -30,12 +28,10 @@ public class ExecuteQueryAction extends AbstractAction {
 	public void setPhoneBook(PhoneBook phoneBook) {
 		this.phoneBook = phoneBook;
 	}
-	
-	protected String doExecuteAction(HttpServletRequest request,
-			HttpServletResponse response, MutableFlowModel model)
-			throws Exception {
-		PhoneBookQuery query = (PhoneBookQuery)model.getAttribute("query");
-		model.setAttribute("persons", phoneBook.query(query));
+
+	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+		PhoneBookQuery query = (PhoneBookQuery)context.getAttribute("query");
+		context.setRequestAttribute("persons", phoneBook.query(query));
 		return success();
 	}
 }

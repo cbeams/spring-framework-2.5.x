@@ -15,12 +15,10 @@
  */
 package org.springframework.samples.phonebook.web.flow.action;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class GetPersonAction extends AbstractAction {
@@ -30,14 +28,12 @@ public class GetPersonAction extends AbstractAction {
 	public void setPhoneBook(PhoneBook phoneBook) {
 		this.phoneBook = phoneBook;
 	}
-	
-	protected String doExecuteAction(HttpServletRequest request,
-			HttpServletResponse response, MutableFlowModel model)
-			throws Exception {
-		Long id = (Long)model.getAttribute("id");
+
+	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+		Long id = (Long)context.getAttribute("id");
 		Person person = phoneBook.getPerson(id);
 		if (person != null) {
-			model.setAttribute("person", person);
+			context.setRequestAttribute("person", person);
 			return success();
 		}
 		else {

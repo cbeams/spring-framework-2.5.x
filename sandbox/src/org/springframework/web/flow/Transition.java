@@ -15,16 +15,12 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.AbstractConstraint;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A transition takes a flow execution from one state to another when executed.
@@ -51,7 +47,7 @@ public class Transition {
 	 * The criteria that determines whether or not this criteria handles a given
 	 * event. The event is identified by a String identifier.
 	 */
-	private Constraint eventIdCriteria;
+	private Constraint condition;
 
 	/**
 	 * The source state that owns this transition.
@@ -79,21 +75,21 @@ public class Transition {
 	public Transition(String eventId, String targetStateId) {
 		Assert.notNull(eventId, "The event id property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.eventIdCriteria = createDefaultEventIdCriteria(eventId);
+		this.condition = createDefaultEventIdCriteria(eventId);
 		this.targetStateId = targetStateId;
 	}
 
 	/**
 	 * Create a new transition.
-	 * @param eventIdCriteria Constraint object used to determine if this
-	 *        transition should be executed for a particular event id
+	 * @param condition Constraint object used to determine if this transition
+	 *        should be executed for a particular event id
 	 * @param targetStateId The id of the state to transition to when this
 	 *        transition is executed
 	 */
-	public Transition(Constraint eventIdCriteria, String targetStateId) {
-		Assert.notNull(eventIdCriteria, "The eventIdCriteria property is required");
+	public Transition(Constraint condition, String targetStateId) {
+		Assert.notNull(condition, "The eventIdCriteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.eventIdCriteria = eventIdCriteria;
+		this.condition = condition;
 		this.targetStateId = targetStateId;
 	}
 
@@ -156,7 +152,7 @@ public class Transition {
 			// because we need the eventId
 			return new AbstractConstraint() {
 				public boolean test(Object argument) {
-					return eventId.equals(argument);
+					return ((FlowExecutionContext)argument).getEvent().getId().equals(eventId);
 				}
 
 				public String toString() {
@@ -169,8 +165,8 @@ public class Transition {
 	/**
 	 * Returns the strategy used to match event ids with this transition
 	 */
-	public Constraint getEventIdCriteria() {
-		return this.eventIdCriteria;
+	public Constraint getCondition() {
+		return this.condition;
 	}
 
 	/**
@@ -178,8 +174,8 @@ public class Transition {
 	 * @param eventId The event id
 	 * @return true or false
 	 */
-	public boolean executesOn(String eventId) {
-		return eventIdCriteria.test(eventId);
+	public boolean executesOn(FlowExecutionContext context) {
+		return condition.test(context);
 	}
 
 	/**
@@ -193,20 +189,18 @@ public class Transition {
 	 * @throws CannotExecuteStateTransitionException thrown when this transition
 	 *         cannot be executed
 	 */
-	protected ModelAndView execute(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) throws CannotExecuteStateTransitionException {
+	protected ViewDescriptor execute(StateContext flowExecution) throws CannotExecuteStateTransitionException {
 		try {
-			ModelAndView viewDescriptor = getTargetState().enter(flowExecution, request, response);
+			ViewDescriptor viewDescriptor = getTargetState().enter(flowExecution);
 			if (logger.isDebugEnabled()) {
-				if (flowExecution.isActive()) {
-					logger
-							.debug("Transition '" + this + "' executed; as a result, the new state is '"
-									+ flowExecution.getCurrentStateId() + "' in flow '"
-									+ flowExecution.getActiveFlowId() + "'");
+				if (flowExecution.isFlowExecutionActive()) {
+					logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
+							+ flowExecution.getCurrentState().getId() + "' in flow '"
+							+ flowExecution.getActiveFlow().getId() + "'");
 				}
 				else {
 					logger.debug("Transition '" + this + "' executed; as a result, the flow '"
-							+ flowExecution.getRootFlowId() + "' execution has ended");
+							+ flowExecution.getRootFlow().getId() + "' execution has ended");
 				}
 			}
 			return viewDescriptor;
@@ -230,7 +224,7 @@ public class Transition {
 	};
 
 	public String toString() {
-		return new ToStringCreator(this).append("eventIdCriteria", eventIdCriteria).append("toState", targetStateId)
+		return new ToStringCreator(this).append("eventIdCriteria", condition).append("toState", targetStateId)
 				.toString();
 	}
 }

@@ -20,17 +20,22 @@ package org.springframework.web.flow;
  * <p>
  * A typical use case of this interface would be a JMX MBean to monitor flow
  * execution.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecutionInfo extends FlowModel {
+public interface FlowExecutionMBean {
 
 	/**
 	 * Return the id of this flow execution. This is not a human readable flow
 	 * definition ID, but a system generated key.
 	 */
 	public String getId();
+
+	/**
+	 * Returns the time this execution was created
+	 * @return the creation time
+	 */
+	public long getCreationTimestamp();
 
 	/**
 	 * Return a display string suitable for logging/printing in a console
@@ -86,22 +91,29 @@ public interface FlowExecutionInfo extends FlowModel {
 	 * flow execution.
 	 * @return The id of the last event
 	 */
-	public String getLastEventId();
+	public String getEventId();
 
 	/**
 	 * Returns the timestamp noting when the last event was signaled.
 	 * @return The timestamp of the last event occurance
 	 */
-	public long getLastEventTimestamp();
+	public long getEventTimestamp();
+
+	/**
+	 * Returns the time in milliseconds this flow execution has been active.
+	 * @return the flow execution up time
+	 */
+	public long getUptime();
 
 	/**
 	 * Does this flow id exist in this execution?
+	 * @return true if yes, false otherwise
 	 */
-	public boolean exists(String flowId);
+	public boolean sessionExists(String flowId);
 
 	/**
 	 * What is the status of specified flow in this flow execution?
+	 * @status the status code
 	 */
-	public FlowSessionStatus getStatus(String flowId) throws IllegalArgumentException;
-
+	public short getStatus(String flowId) throws IllegalArgumentException;
 }

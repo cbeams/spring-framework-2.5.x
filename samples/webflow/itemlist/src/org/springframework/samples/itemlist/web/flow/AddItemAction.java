@@ -18,33 +18,31 @@ package org.springframework.samples.itemlist.web.flow;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.action.AbstractAction;
+import org.springframework.web.flow.support.LocalEvent;
 
 public class AddItemAction extends AbstractAction {
-	
-	protected String doExecuteAction(HttpServletRequest request,
-			HttpServletResponse response, MutableFlowModel model)
-			throws Exception {
-		//check to ensure the incoming request is within the active transaction
-		//note that we're also ending the transaction using reset==true
-		if (!model.inTransaction(request, true)) {
-			//the transaction was not valid so cannot continue normal processing
-			return "txError";
+
+	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
+		// check to ensure the incoming request is within the active transaction
+		// note that we're also ending the transaction using reset==true
+		if (!context.inTransaction(true)) {
+			// the transaction was not valid so cannot continue normal
+			// processing
+			return new LocalEvent("txError");
 		}
-		List list = (List)model.getAttribute("list");
+		List list = (List)context.getAttribute("list");
 		if (list == null) {
 			list = new ArrayList();
-			model.setAttribute("list", list);
+			context.setRequestAttribute("list", list);
 		}
-		String data = request.getParameter("data");
+		String data = (String)context.getAttribute("data");
 		if (data != null && data.length() > 0) {
 			list.add(data);
 		}
-		//add a bit of artificial think time
+		// add a bit of artificial think time
 		try {
 			Thread.sleep(2000);
 		}

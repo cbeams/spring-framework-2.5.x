@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.flow.FlowExecution;
+import org.springframework.web.flow.FlowExecutionMBean;
 
 /**
  * Servlet 2.3 filter that cleans up expired web flow executions in the HTTP
@@ -118,8 +119,8 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 		while (names.hasMoreElements()) {
 			String name = (String)names.nextElement();
 			Object value = session.getAttribute(name);
-			if (value instanceof FlowExecution) {
-				FlowExecution flowExecution = (FlowExecution)value;
+			if (value instanceof FlowExecutionMBean) {
+				FlowExecutionMBean flowExecution = (FlowExecutionMBean)value;
 				if (hasExpired(request, flowExecution)) {
 					namesToBeDeleted.add(name);
 					if (logger.isInfoEnabled()) {
@@ -146,7 +147,7 @@ public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
 	 * @param flowExecution the web flow execution that needs to be checked for
 	 *        expiry
 	 */
-	protected boolean hasExpired(HttpServletRequest request, FlowExecution flowExecution) {
-		return (System.currentTimeMillis() - flowExecution.getLastEventTimestamp()) > (getTimeout() * 60000);
+	protected boolean hasExpired(HttpServletRequest request, FlowExecutionMBean flowExecution) {
+		return (System.currentTimeMillis() - flowExecution.getEventTimestamp()) > (getTimeout() * 60000);
 	}
 }

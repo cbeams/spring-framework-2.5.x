@@ -15,36 +15,12 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.servlet.ModelAndView;
-
 /**
- * Subinterface of <code>FlowExecutionInfo</code> that exposes additional
- * information and operations on a flow execution.
- * <p>
- * While the FlowExecutionInfo interface is fit for external management clients
- * (for example, JMX-based), this interface is designed for use by internal
- * clients; for example, the front <code>FlowController</code> and
- * <code>FlowExecutionListener</code>, which are more privileged and more
- * flow-system-aware than pure for-management clients.
- * <p>
- * This interface may also be used in situations where other privileged objects
- * need access to flow definition configuration details during flow execution.
- * 
+ * Central client facade interface of the Flow system.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
-
-	/**
-	 * A flow execution is available as an attribute from the
-	 * <code>getAttribute()</code> method using this priviledged name.
-	 */
-	public static String ATTRIBUTE_NAME = "flowExecution";
+public interface FlowExecution extends FlowExecutionMBean {
 
 	/**
 	 * Returns a mutable list of listeners attached to this flow execution.
@@ -53,44 +29,20 @@ public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 	public FlowExecutionListenerList getListenerList();
 
 	/**
-	 * Returns this flow execution's active flow definition.
-	 * @return The active flow definition
-	 */
-	public Flow getActiveFlow();
-
-	/**
-	 * Returns this flow execution's root flow definition.
-	 * @return The root flow definition.
-	 */
-	public Flow getRootFlow();
-
-	/**
-	 * Returns this flow execution's current state definition.
-	 * @return the current state definition.
-	 */
-	public AbstractState getCurrentState();
-
-	/**
 	 * Start this flow execution, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by the
 	 * FlowController, but also in test code.
-	 * @param input model input attributes to the flow execution
-	 * @param request The current http request
-	 * @param response The current http response
+	 * @param event The event that occured
 	 * @return The starting model and view.
 	 * @throws IllegalStateException if this execution has already been started,
 	 *         or no state is marked as the start state.
 	 */
-	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response)
-			throws IllegalStateException;
+	public ViewDescriptor start(Event startingEvent) throws IllegalStateException;
 
 	/**
 	 * Signal an occurence of the specified event in the (optionally) provided
 	 * state of this flow execution.
-	 * @param eventId The event that occured
-	 * @param stateId The state the event occured in (optional, can be null)
-	 * @param request The current http request
-	 * @param response The current http response
+	 * @param event The event that occured
 	 * @return The next model and view descriptor to display for this flow
 	 *         execution.
 	 * @throws EventNotSupportedException if the signaled event does not map to
@@ -98,15 +50,14 @@ public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 	 * @throws IllegalStateException if the flow execution is not active and
 	 *         thus no longer processing events.
 	 */
-	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
-			HttpServletResponse response) throws EventNotSupportedException, IllegalStateException;
+	public ViewDescriptor signalEvent(Event event) throws EventNotSupportedException, IllegalStateException;
 
 	/**
 	 * Called by a controller to restore this execution's state after
 	 * deserialization if neccessary.
 	 * @param flowLocator the locator
-	 * @param listeners the set of listeners that should be
-	 *        notified of lifecycle events in this flow execution
+	 * @param listeners the set of listeners that should be notified of
+	 *        lifecycle events in this flow execution
 	 */
 	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
 

@@ -23,12 +23,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.AttributeSetter;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
-import org.springframework.web.flow.FlowModel;
-import org.springframework.web.flow.FlowModelMapper;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.FlowAttributeMapper;
 
 /**
  * Generic flow model mapper implementation that allows mappings to be
@@ -92,7 +91,7 @@ import org.springframework.web.flow.MutableFlowModel;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializable {
+public class ParameterizableFlowModelMapper implements FlowAttributeMapper, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 
@@ -188,7 +187,7 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 		this.outputMapper = new ParameterizableAttributeMapper(outputMappings);
 	}
 
-	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
+	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
 		if (this.inputMapper != null) {
 			Map subFlowAttributes = new HashMap();
 			this.inputMapper.map(parentFlowModel, new MapAttributeSetterAdapter(subFlowAttributes));
@@ -199,38 +198,9 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(FlowModel subFlowModel, MutableFlowModel parentFlowModel) {
+	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
 		if (this.outputMapper != null) {
 			this.outputMapper.map(subFlowModel, parentFlowModel);
-		}
-	}
-
-	/**
-	 * Adapter class to set data in a map using the <code>AttributeSetter</code>
-	 * interface.
-	 */
-	public static class MapAttributeSetterAdapter implements AttributeSetter {
-		
-		private Map map;
-
-		/**
-		 * Create a new map attribute setter adapter.
-		 * @param map the map to wrap
-		 */
-		public MapAttributeSetterAdapter(Map map) {
-			this.map = map;
-		}
-
-		public void setAttribute(String attributeName, Object attributeValue) {
-			map.put(attributeName, attributeValue);
-		}
-
-		public boolean containsAttribute(String attributeName) {
-			return map.containsKey(attributeName);
-		}
-
-		public Object getAttribute(String attributeName) {
-			return map.get(attributeName);
 		}
 	}
 }

@@ -20,7 +20,6 @@ package org.springframework.web.flow;
  * navigation exception signals a problem while navigating inside
  * a web flow, e.g. when the target state of a transition cannot
  * be found.
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */

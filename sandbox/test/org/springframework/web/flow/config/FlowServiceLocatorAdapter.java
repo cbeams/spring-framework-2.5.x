@@ -17,7 +17,7 @@ package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowModelMapper;
+import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.ServiceLookupException;
 
 /**
@@ -47,11 +47,11 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 
-	public FlowModelMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException {
+	public FlowAttributeMapper getFlowModelMapper(String flowModelMapperId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 
-	public FlowModelMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
+	public FlowAttributeMapper getFlowModelMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}

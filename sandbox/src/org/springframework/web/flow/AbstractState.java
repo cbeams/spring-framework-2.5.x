@@ -15,14 +15,10 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A base super class for state definitions. Each state is associated with
@@ -115,33 +111,31 @@ public abstract class AbstractState {
 
 	/**
 	 * Requesting entering of this state in the provided flow execution.
-	 * @param flowExecution The flow execution stack, tracking a ongoing flow
+	 * @param context The flow execution stack, tracking a ongoing flow
 	 *        execution (client instance of a flow)
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected final ModelAndView enter(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
+	protected final ViewDescriptor enter(StateContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}
-		flowExecution.setCurrentState(this);
-		return doEnterState(flowExecution, request, response);
+		context.setCurrentState(this);
+		return doEnterState(context);
 	}
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param flowExecution The session execution stack, tracking the current
+	 * @param context The session execution stack, tracking the current
 	 *        active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
 	 *         render the results of the event execution.
 	 */
-	protected abstract ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response);
+	protected abstract ViewDescriptor doEnterState(StateContext context);
 
 	public String toString() {
 		ToStringCreator creator = new ToStringCreator(this).append("id", getId());

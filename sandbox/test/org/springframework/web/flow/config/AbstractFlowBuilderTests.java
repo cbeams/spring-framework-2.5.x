@@ -18,21 +18,21 @@ package org.springframework.web.flow.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
 
+import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSetter;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
-import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.EndState;
+import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowModelMapper;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.FlowExecutionContext;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Test java based flow builder logic.
@@ -64,7 +64,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 				}
 			}
 
-			public FlowModelMapper getFlowModelMapper(String id) throws ServiceLookupException {
+			public FlowAttributeMapper getFlowModelMapper(String id) throws ServiceLookupException {
 				if (id.equals("personId.modelMapper")) {
 					return new PersonIdMapper();
 				}
@@ -155,15 +155,14 @@ public class AbstractFlowBuilderTests extends TestCase {
 		}
 	}
 
-	public static class PersonIdMapper implements FlowModelMapper {
-		public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
+	public static class PersonIdMapper implements FlowAttributeMapper {
+		public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("personId", parentFlowModel.getAttribute("personId"));
 			return inputMap;
 		}
 
-		public void mapSubFlowOutputAttributes(FlowModel subFlowModel,
-				MutableFlowModel parentFlowModel) {
+		public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
 		}
 	}
 
@@ -217,9 +216,8 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 * Action bean stub that does nothing, just returns a "success" result
 	 */
 	public static final class NoOpAction implements Action {
-		public String execute(HttpServletRequest request, HttpServletResponse response,
-				MutableFlowModel model) throws Exception {
-			return "success";
+		public Event execute(FlowExecutionContext context) throws Exception {
+			return new LocalEvent("success");
 		}
 	}
 }

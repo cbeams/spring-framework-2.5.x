@@ -23,12 +23,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
-import org.springframework.web.flow.FlowExecution;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
+import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.flow.support.HttpFlowExecutionManager;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 import org.springframework.web.util.WebUtils;
@@ -49,8 +52,8 @@ import org.springframework.web.util.WebUtils;
  * which adapts Spring's data binding infrastructure (based on POJO binding, a
  * standard Errors interface, and property editor type conversion) to the Struts
  * action form model. This gives backend web-tier developers full support for
- * POJO-based binding with minimal hassel, while still providing consistency
- * to view developers who already have a lot of experience with Struts for markup
+ * POJO-based binding with minimal hassel, while still providing consistency to
+ * view developers who already have a lot of experience with Struts for markup
  * and request dispatching.
  * <p>
  * Below is an example <code>struts-config.xml</code> configuration for a
@@ -58,12 +61,28 @@ import org.springframework.web.util.WebUtils;
  * 
  * <pre>
  * 
- *  &lt;action path=&quot;/userRegistration&quot;
- *      type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *      name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *      className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *          &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *  &lt;/action&gt;
+ *  
+ *   
+ *    
+ *     
+ *      
+ *       
+ *        
+ *         
+ *          &lt;action path=&quot;/userRegistration&quot;
+ *              type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *              name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *              className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *                  &lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ *          &lt;/action&gt;
+ *          
+ *         
+ *        
+ *       
+ *      
+ *     
+ *    
+ *   
  *  
  * </pre>
  * 
@@ -101,8 +120,8 @@ import org.springframework.web.util.WebUtils;
  * </ol>
  * </ul>
  * The benefits here are substantial--developers now have a powerful webflow
- * capability integrated with Struts, with a consistent-approach to
- * POJO-based binding and validation that addresses the proliferation of
+ * capability integrated with Struts, with a consistent-approach to POJO-based
+ * binding and validation that addresses the proliferation of
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.support.HttpFlowExecutionManager
@@ -111,34 +130,14 @@ import org.springframework.web.util.WebUtils;
  * @author Erwin Vervaet
  */
 public class FlowAction extends TemplateAction {
-	
-	/**
-	 * Get the flow execution from given model and view. Subclasses
-	 * should override this if the flow execution is not available in
-	 * it's standard place, where it is put by the
-	 * {@link org.springframework.web.flow.FlowExecutionStack}.
-	 */
-	protected FlowExecution getFlowExecution(ModelAndView modelAndView) {
-		//TODO: this is not extremely clean (pulling a attribute from hard
-		//coded name that is configurable elsewhere)
-		return (FlowExecution)modelAndView.getModel().get(FlowExecution.ATTRIBUTE_NAME);
-	}
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		FlowLocator locator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
-		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator);
-		ModelAndView modelAndView = executionManager.handleRequest(request, response);
-		FlowExecution flowExecution = getFlowExecution(modelAndView);
-		if (flowExecution != null && flowExecution.isActive()) {
-			if (form instanceof BindingActionForm) {
-				BindingActionForm bindingForm = (BindingActionForm)form;
-				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.FORM_OBJECT_ERRORS_ATTRIBUTE,
-						Errors.class));
-				bindingForm.setRequest(request);
-			}
-		}
-		return createForwardFromModelAndView(modelAndView, mapping, request);
+		HttpFlowExecutionManager executionManager = new HttpFlowExecutionManager(getFlowId(mapping), locator,
+				new FlowExecutionListener[] { createActionFormAdapter(request, form) });
+		ViewDescriptor viewDescriptor = executionManager.handleRequest(request, response);
+		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
 	}
 
 	/**
@@ -150,17 +149,32 @@ public class FlowAction extends TemplateAction {
 		return ((FlowActionMapping)mapping).getFlowId();
 	}
 
+	protected FlowExecutionListener createActionFormAdapter(final HttpServletRequest request, final ActionForm form) {
+		return new FlowExecutionListenerAdapter() {
+			public void requestProcessed(FlowExecutionContext context, Event triggeringEvent) {
+				if (context.isFlowExecutionActive()) {
+					if (form instanceof BindingActionForm) {
+						BindingActionForm bindingForm = (BindingActionForm)form;
+						bindingForm.setErrors((Errors)context.getRequestAttribute(
+								AbstractAction.FORM_OBJECT_ERRORS_ATTRIBUTE, Errors.class));
+						bindingForm.setRequest(request);
+					}
+				}
+			}
+		};
+	}
+
 	/**
-	 * Return a Struts ActionForward given a ModelAndView. We need to add all
-	 * attributes from the ModelAndView as request attributes.
+	 * Return a Struts ActionForward given a ViewDescriptor. We need to add all
+	 * attributes from the ViewDescriptor as request attributes.
 	 */
-	private ActionForward createForwardFromModelAndView(ModelAndView modelAndView, ActionMapping mapping,
+	private ActionForward createForwardFromViewDescriptor(ViewDescriptor viewDescriptor, ActionMapping mapping,
 			HttpServletRequest request) {
-		if (modelAndView != null) {
-			WebUtils.exposeRequestAttributes(request, modelAndView.getModel());
-			ActionForward forward = mapping.findForward(modelAndView.getViewName());
+		if (viewDescriptor != null) {
+			WebUtils.exposeRequestAttributes(request, viewDescriptor.getModel());
+			ActionForward forward = mapping.findForward(viewDescriptor.getViewName());
 			if (forward == null) {
-				forward = new ActionForward(modelAndView.getViewName());
+				forward = new ActionForward(viewDescriptor.getViewName());
 			}
 			return forward;
 		}

@@ -33,7 +33,7 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -113,18 +113,19 @@ public class HttpFlowExecutionManager {
 	 * @param flowId id of the default flow for which executions will be managed
 	 * @param flowLocator the flow locator to use for flow lookup
 	 */
-	public HttpFlowExecutionManager(String flowId, FlowLocator flowLocator) {
+	public HttpFlowExecutionManager(String flowId, FlowLocator flowLocator, FlowExecutionListener[] flowExecutionListeners) {
 		if (StringUtils.hasText(flowId)) {
 			this.flow = flowLocator.getFlow(flowId);
 		}
 		this.flowLocator = flowLocator;
+		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
 	/**
 	 * Create a new flow execution manager.
 	 * @param flow the default flow for which executions will be managed
-	 * @param flowLocator the flow locator to use for lookup of possible
-	 *        other flows specified using the "_flowId" request parameter
+	 * @param flowLocator the flow locator to use for lookup of possible other
+	 *        flows specified using the "_flowId" request parameter
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
 	 */
@@ -135,8 +136,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Returns the flow locator to use for lookup of possible
-	 * other flows specified using the "_flowId" request parameter
+	 * Returns the flow locator to use for lookup of possible other flows
+	 * specified using the "_flowId" request parameter
 	 */
 	protected FlowLocator getFlowLocator() {
 		return flowLocator;
@@ -222,7 +223,7 @@ public class HttpFlowExecutionManager {
 	protected Map getFlowExecutionInput(HttpServletRequest request) {
 		return null;
 	}
-	
+
 	// internal worker methods
 
 	/**
@@ -232,13 +233,13 @@ public class HttpFlowExecutionManager {
 	 * @return the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		FlowExecution flowExecution;
-		ModelAndView modelAndView;
+		ViewDescriptor modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(request));
-			modelAndView = flowExecution.start(getFlowExecutionInput(request), request, response);
+			modelAndView = flowExecution.start(new HttpServletRequestEvent(request));
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
@@ -246,7 +247,8 @@ public class HttpFlowExecutionManager {
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
 
-			// rehydrate the execution if neccessary (if it had been serialized out)
+			// rehydrate the execution if neccessary (if it had been serialized
+			// out)
 			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
 
 			// let client tell you what state they are in (if possible)
@@ -291,7 +293,7 @@ public class HttpFlowExecutionManager {
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
 			// signal the event within the current state
-			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
+			modelAndView = flowExecution.signalEvent(new HttpServletRequestEvent(request));
 		}
 		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup

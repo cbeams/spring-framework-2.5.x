@@ -19,7 +19,6 @@ package org.springframework.web.flow;
  * Service locator interface to retrieve a flow by ID. Needed at execution time
  * to load a configured flow instance from a registry, typically the spring
  * application context.
- * 
  * @author Keith Donald
  */
 public interface FlowLocator {

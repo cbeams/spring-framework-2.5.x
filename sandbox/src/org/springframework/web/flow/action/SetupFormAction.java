@@ -19,13 +19,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.MutableFlowModel;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionContext;
 
 /**
  * A base superclass for actions that contain form view setup logic. Extends
@@ -69,20 +69,20 @@ public class SetupFormAction extends BindAndValidateAction {
 		return true;
 	}
 
-	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+	protected Event doExecuteAction(FlowExecutionContext context)
 			throws Exception {
-		Object formObject = loadRequiredFormObject(request, model);
-		ServletRequestDataBinder binder = createBinder(request, formObject, model);
+		Object formObject = loadRequiredFormObject(context);
+		DataBinder binder = createBinder(context, formObject);
 		if (prepopulateFromRequest) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Prepopulating backing form object from request parameters");
 			}
-			binder.bind(request);
+			//binder.bind(context);
 		}
-		exposeBindExceptionErrors(model, binder.getErrors());
-		exposeViewPlaceholders(request, model);
+		//exposeBindExceptionErrors(context, binder.getErrors());
+		exposeViewPlaceholders(context);
 		try {
-			setupReferenceData(request, model);
+			setupReferenceData(context);
 		}
 		catch (ServletRequestBindingException e) {
 			throw new ReferenceDataSetupException(e);
@@ -96,20 +96,20 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request The request
 	 * @param model The model
 	 */
-	protected void exposeViewPlaceholders(HttpServletRequest request, MutableFlowModel model) {
+	protected void exposeViewPlaceholders(FlowExecutionContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exposing view markers/placeholders to notify business-tier developers of "
 					+ "form fields that are missing, not mapped to backing objects, or need clarification");
 			// placeholders indicating attributes on forms that have not been
 			// mapped to dynamic fields on backing objects - for use during
 			// development only
-			model.setAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
-			model.setAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
+			context.setRequestAttribute(NOT_MAPPED_PLACEHOLDER_ATTRIBUTE, NOT_MAPPED_PLACEHOLDER_VALUE);
+			context.setRequestAttribute(NOT_MAPPED_COLLECTION_PLACEHOLDER_ATTRIBUTE, createNotMappedEnumSet());
 		}
 	}
 
 	/**
-	 * Helper method to setup a set of placeholder data. 
+	 * Helper method to setup a set of placeholder data.
 	 */
 	private Set createNotMappedEnumSet() {
 		Set notMapped = new HashSet();
@@ -120,8 +120,8 @@ public class SetupFormAction extends BindAndValidateAction {
 	}
 
 	/**
-	 * Helper class used as placeholder data in the <code>exposeViewPlaceholders()</code>
-	 * method.
+	 * Helper class used as placeholder data in the
+	 * <code>exposeViewPlaceholders()</code> method.
 	 */
 	private static final class NotMappedEnum extends ShortCodedLabeledEnum {
 		public NotMappedEnum(int code) {
@@ -137,8 +137,8 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
-	protected void setupReferenceData(HttpServletRequest request, MutableFlowModel model)
-			throws ReferenceDataSetupException, ServletRequestBindingException {
+	protected void setupReferenceData(FlowExecutionContext context) throws ReferenceDataSetupException,
+			ServletRequestBindingException {
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @author Keith Donald
 	 */
 	protected static class ReferenceDataSetupException extends RuntimeException {
-		
+
 		/**
 		 * Create a new reference data setup exception.
 		 * @param message a descriptive message

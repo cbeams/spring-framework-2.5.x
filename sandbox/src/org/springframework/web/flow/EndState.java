@@ -15,12 +15,9 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.flow.support.LocalEvent;
 
 /**
  * Terminates an active web flow session when entered. If the terminated session
@@ -31,12 +28,12 @@ import org.springframework.web.servlet.ModelAndView;
  * An end state may optionally be configured with the name of a view. This view
  * will be rendered if the end state terminates the entire flow execution.
  * <p>
- * Note: if no</code> viewName</code> property is specified <b>and</b> this EndState
- * terminates the entire flow execution, it is expected that some action
- * has already written the response (or else a blank response will result.) On
- * the other hand, if no <code>viewName</code> is specified <b>and</b> this EndState
- * reliniquishes control back to a parent flow, view rendering responsibility is
- * falls on the parent flow.
+ * Note: if no</code> viewName</code> property is specified <b>and</b> this
+ * EndState terminates the entire flow execution, it is expected that some
+ * action has already written the response (or else a blank response will
+ * result.) On the other hand, if no <code>viewName</code> is specified <b>and</b>
+ * this EndState reliniquishes control back to a parent flow, view rendering
+ * responsibility is falls on the parent flow.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -72,8 +69,8 @@ public class EndState extends AbstractState {
 	}
 
 	/**
-	 * Set the name of the view that should be rendered if this end
-	 * state terminates flow execution.
+	 * Set the name of the view that should be rendered if this end state
+	 * terminates flow execution.
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
@@ -99,28 +96,27 @@ public class EndState extends AbstractState {
 	 * 
 	 * This implementation pops the top (active) flow session off the execution
 	 * stack, ending it, and resumes control in the spawning parent flow (if
-	 * neccessary.) If the ended session is the root flow, a ModelAndView is
+	 * neccessary.) If the ended session is the root flow, a ViewDescriptor is
 	 * returned (when viewName is not null, else null is returned.)
 	 */
-	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
-			HttpServletResponse response) {
-		FlowSession endingFlowSession = flowExecution.endActiveSession();
+	protected ViewDescriptor doEnterState(StateContext context) {
+		FlowSession endingFlowSession = context.endActiveFlowSession();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Session for flow '" + getFlow().getId() + "' ended, session details = " + endingFlowSession);
 		}
-		if (flowExecution.isActive()) {
+		if (context.isFlowExecutionActive()) {
 			// session execution is still active, resume in parent
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resuming parent flow '" + flowExecution.getActiveFlowId() + "' in state '"
-						+ flowExecution.getCurrentStateId() + "'");
+				logger.debug("Resuming parent flow '" + context.getActiveFlow().getId() + "' in state '"
+						+ context.getCurrentState().getId() + "'");
 			}
-			Assert.isInstanceOf(FlowModelMapper.class, flowExecution.getCurrentState());
-			FlowModelMapper resumingState = (FlowModelMapper)flowExecution.getCurrentState();
-			resumingState.mapSubFlowOutputAttributes(endingFlowSession, flowExecution.getActiveFlowSession());
+			Assert.isInstanceOf(FlowAttributeMapper.class, context.getCurrentState());
+			FlowAttributeMapper resumingState = (FlowAttributeMapper)context.getCurrentState();
+			resumingState.mapSubFlowOutputAttributes(endingFlowSession, context.getActiveFlowSession());
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
-			return ((TransitionableState)resumingState).signalEvent(getId(), flowExecution, request, response);
+			return ((TransitionableState)resumingState).signalEvent(createSubFlowResultEvent(), context);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable
@@ -137,8 +133,12 @@ public class EndState extends AbstractState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Returning view name '" + viewName + "' to render");
 				}
-				return new ModelAndView(viewName, endingFlowSession.getModel());
+				return new ViewDescriptor(viewName, endingFlowSession.getModel());
 			}
 		}
+	}
+	
+	protected Event createSubFlowResultEvent() {
+		return new LocalEvent(getId());
 	}
 }

@@ -13,17 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.itemlist.web.flow;
+package org.springframework.web.flow;
 
-import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.action.AbstractAction;
+import java.io.Serializable;
+import java.util.Map;
 
-public class NewItemAction extends AbstractAction {
+import org.springframework.binding.AttributeAccessor;
 
-	protected Event doExecuteAction(FlowExecutionContext context) throws Exception {
-		// begin transactional processing
-		context.beginTransaction();
-		return success();
-	}
+/**
+ * Base superclass for <code>Event</code> sub-types. An event is an occurence
+ * of something. Subclasses typically report the occurence of events from
+ * different sources; e.g, a http servlet request.
+ * @author Keith Donald
+ */
+public interface Event extends AttributeAccessor, Serializable {
+	public String getId();
+
+	public String getStateId();
+
+	public Map getParameters();
+
+	public Object getParameter(String parameterName);
 }
