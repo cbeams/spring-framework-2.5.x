@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.core.Ordered;
 
 /**
  * BeanFactoryPostProcessor implementation that allows for convenient
@@ -49,10 +50,21 @@ import org.springframework.beans.factory.BeanInitializationException;
  *
  * @author Juergen Hoeller
  * @since 27.02.2004
+ * @see ConfigurableBeanFactory#registerCustomEditor
  */
-public class CustomEditorConfigurer implements BeanFactoryPostProcessor {
+public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
+
+	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private Map customEditors;
+
+	public void setOrder(int order) {
+	  this.order = order;
+	}
+
+	public int getOrder() {
+	  return order;
+	}
 
 	/**
 	 * Specify the custom editors to register via a Map, using the class name
