@@ -12,7 +12,7 @@ import org.springframework.aop.Pointcut;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DefaultBeforeAdvisor.java,v 1.1 2003-12-07 14:30:46 johnsonr Exp $
+ * @version $Id: DefaultBeforeAdvisor.java,v 1.2 2003-12-08 11:20:11 johnsonr Exp $
  */
 public class DefaultBeforeAdvisor implements BeforeAdvisor {
 	
@@ -23,6 +23,10 @@ public class DefaultBeforeAdvisor implements BeforeAdvisor {
 	public DefaultBeforeAdvisor(Pointcut pointcut, BeforeAdvice advice) {
 		this.pointcut = pointcut;
 		this.advice = advice;
+	}
+	
+	public DefaultBeforeAdvisor(BeforeAdvice advice) {
+		this(Pointcut.TRUE, advice);
 	}
 
 	/**
