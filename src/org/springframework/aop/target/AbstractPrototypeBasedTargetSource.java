@@ -16,10 +16,10 @@
 
 package org.springframework.aop.target;
 
+import java.io.NotSerializableException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -141,11 +141,13 @@ public abstract class AbstractPrototypeBasedTargetSource
 			logger.debug("Disconnecting TargetSource [" + this + "]");
 		}
 		try {
-			TargetSource disconnectedTargetSource =  new SingletonTargetSource(getTarget());
+			TargetSource disconnectedTargetSource = new SingletonTargetSource(getTarget());
 			return disconnectedTargetSource;
 		}
 		catch (Exception ex) {
-			throw new AspectException("Can't get target", ex);
+			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
+			throw new NotSerializableException(
+					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex.getMessage());
 		}
 	}
 
