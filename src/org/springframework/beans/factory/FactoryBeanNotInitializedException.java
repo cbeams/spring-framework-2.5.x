@@ -17,7 +17,9 @@
 package org.springframework.beans.factory;
 
 /**
- * Exception thrown if a FactoryBean is involved in a circular reference.
+ * Exception thrown if a FactoryBean is not fully initialized, for example
+ * because it is involved in a circular reference. Usually indicated by
+ * the <code>getObject</code> method returning null.
  *
  * <p>A circular reference with a FactoryBean cannot be solved by eagerly
  * caching singleton instances like with normal beans. The reason is that
@@ -28,17 +30,16 @@ package org.springframework.beans.factory;
  *
  * @author Juergen Hoeller
  * @since 30.10.2003
- * @deprecated renamed to FactoryBeanNotInitializedException
- * @see FactoryBeanNotInitializedException
+ * @see FactoryBean#getObject
  */
-public class FactoryBeanCircularReferenceException extends BeanCreationException {
+public class FactoryBeanNotInitializedException extends BeanCreationException {
 
 	/**
-	 * Create a new FactoryBeanCircularReferenceException.
+	 * Create a new FactoryBeanNotInitializedException.
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message
 	 */
-	public FactoryBeanCircularReferenceException(String beanName, String msg) {
+	public FactoryBeanNotInitializedException(String beanName, String msg) {
 		super(beanName, msg);
 	}
 

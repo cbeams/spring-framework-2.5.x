@@ -46,7 +46,7 @@ import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -710,8 +710,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 				}
 				if (beanInstance == null) {
-					throw new FactoryBeanCircularReferenceException(
-					    beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference?");
+					throw new FactoryBeanNotInitializedException(
+					    beanName, "FactoryBean returned null object: " +
+							"probably not fully initialized (maybe due to circular bean reference)");
 				}
 			}
 			else {

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory;
 
@@ -37,8 +37,13 @@ public interface FactoryBean {
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory. As with a BeanFactory, this allows
 	 * support for both the Singleton and Prototype design pattern.
-	 * @return an instance of the bean (should never be null)
+	 * <p>If this method returns null, the factory will consider the
+	 * FactoryBean as not fully initialized and throw a corresponding
+	 * FactoryBeanNotInitializedException.
+	 * @return an instance of the bean (should not be null; a null value
+	 * will be considered as an indication of incomplete initialization)
 	 * @throws Exception in case of creation errors
+	 * @see FactoryBeanNotInitializedException
 	 */
 	Object getObject() throws Exception;
 
