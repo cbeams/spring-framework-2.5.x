@@ -137,6 +137,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/** If this is a singleton, the cached singleton proxy instance */
 	private Object singletonInstance;
+    
+    /**
+     * Inidicates whether the proxy should be frozen before creation.
+     */
+    private boolean freezeProxy;
 
 
 	/**
@@ -200,6 +205,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 		}
 	}
 
+    public void setFrozen(boolean frozen) {
+        this.freezeProxy = frozen;
+    }
 
 	/**
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
@@ -229,6 +237,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	private Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
+            super.setFrozen(freezeProxy);
 			this.singletonInstance = createAopProxy().getProxy();
 		}
 		return this.singletonInstance;
@@ -250,6 +259,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 		AdvisedSupport copy = new AdvisedSupport();
 		// The copy needs a fresh advisor chain, and a fresh TargetSource.
 		copy.copyConfigurationFrom(this, freshTargetSource(), freshAdvisorChain());
+        copy.setFrozen(this.freezeProxy);
+        
 		if (logger.isDebugEnabled()) {
 			logger.debug("Copy has config: " + copy);
 		}
