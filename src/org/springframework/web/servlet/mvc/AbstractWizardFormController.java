@@ -149,6 +149,14 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		this.allowDirtyForward = allowDirtyForward;
 	}
 
+	/**
+	 * Return the number of wizard pages.
+	 * Useful to check whether the last page has been reached.
+	 */
+	protected final int getNrOfPages() {
+		return this.pages.length;
+	}
+
 
 	/**
 	 * Call page-specific onBindAndValidate method.
