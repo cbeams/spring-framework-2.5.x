@@ -20,14 +20,14 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.web.flow.Event;
 
 /**
- * Cache for dispatch methods that all share the same form on a target object.  The method cache
- * share the same form, they only differ by name.
+ * Invoker and cache for dispatch methods that all share the same target object.
+ * The dispatch methods typically share the same form, but multiple exist per target
+ * object, and they only differ in name.
  * @author Keith Donald
  */
-public class MethodDispatcher {
+public class DispatchMethodInvoker {
 
 	/**
 	 * The target object to cache methods on.
@@ -75,7 +75,7 @@ public class MethodDispatcher {
 	 * @param target the object
 	 * @param the parameter types defining the form of the dispatch method
 	 */
-	public MethodDispatcher(Object target, Class[] parameterTypes) {
+	public DispatchMethodInvoker(Object target, Class[] parameterTypes) {
 		setTarget(target);
 		setParameterTypes(parameterTypes);
 	}
@@ -85,7 +85,7 @@ public class MethodDispatcher {
 	 * @param target the object
 	 * @param the parameter types defining the form of the dispatch method
 	 */
-	public MethodDispatcher(Object target, Class[] parameterTypes, Class returnType, String typeCaption,
+	public DispatchMethodInvoker(Object target, Class[] parameterTypes, Class returnType, String typeCaption,
 			String signatureCaption) {
 		setTarget(target);
 		setParameterTypes(parameterTypes);
@@ -196,7 +196,7 @@ public class MethodDispatcher {
 						+ "however, this method '" + dispatchMethod.getName() + "' returned an object of type "
 						+ result.getClass());
 			}
-			return (Event)result;
+			return result;
 		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof Exception) {

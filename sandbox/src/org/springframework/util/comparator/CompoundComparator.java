@@ -38,189 +38,189 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class CompoundComparator implements Comparator, Serializable {
-    private List sortDefinitions;
+	private List sortDefinitions;
 
-    /**
-     * Construct a CompoundComparator with initially no Comparators. Clients
-     * must add at least one Comparator before calling the compare method or an
-     * IllegalStateException is thrown.
-     */
-    public CompoundComparator() {
-        this(new ArrayList());
-    }
+	/**
+	 * Construct a CompoundComparator with initially no Comparators. Clients
+	 * must add at least one Comparator before calling the compare method or an
+	 * IllegalStateException is thrown.
+	 */
+	public CompoundComparator() {
+		this(new ArrayList());
+	}
 
-    /**
-     * Construct a CompoundComparator from the Comparators in the provided
-     * array. All Comparators will default to the forward sort order.
-     * 
-     * @param comparators
-     *            the list of comparators
-     */
-    public CompoundComparator(Comparator[] comparators) {
-        this(SortDefinition.createSortDefinitionList(comparators));
-    }
+	/**
+	 * Construct a CompoundComparator from the Comparators in the provided
+	 * array. All Comparators will default to the forward sort order.
+	 * 
+	 * @param comparators
+	 *            the list of comparators
+	 */
+	public CompoundComparator(Comparator[] comparators) {
+		this(SortDefinition.createSortDefinitionList(comparators));
+	}
 
-    /**
-     * Construct a CompoundComparator from the SortDefinitions in the provided
-     * array.
-     * 
-     * @param sortDefinitions
-     *            the sortDefinition array
-     */
-    public CompoundComparator(SortDefinition[] sortDefinitions) {
-        this(Arrays.asList(sortDefinitions));
-    }
+	/**
+	 * Construct a CompoundComparator from the SortDefinitions in the provided
+	 * array.
+	 * 
+	 * @param sortDefinitions
+	 *            the sortDefinition array
+	 */
+	public CompoundComparator(SortDefinition[] sortDefinitions) {
+		this(Arrays.asList(sortDefinitions));
+	}
 
-    /**
-     * Construct a CompoundComparator from the SortDefinitions in the provided
-     * list.
-     * 
-     * @param sortDefinitions
-     *            the sortDefinition list
-     */
-    public CompoundComparator(List sortDefinitions) {
-        Assert.notNull(sortDefinitions,
-                "At least one sortDefinition is required");
-        this.sortDefinitions = sortDefinitions;
-    }
+	/**
+	 * Construct a CompoundComparator from the SortDefinitions in the provided
+	 * list.
+	 * 
+	 * @param sortDefinitions
+	 *            the sortDefinition list
+	 */
+	public CompoundComparator(List sortDefinitions) {
+		Assert.notNull(sortDefinitions, "At least one sortDefinition is required");
+		this.sortDefinitions = sortDefinitions;
+	}
 
-    /**
-     * Add a Comparator to the end of the chain using forward (ascending) sort
-     * order
-     * 
-     * @param comparator
-     *            Comparator with forward sort order
-     */
-    public void addComparator(Comparator comparator) {
-        addComparator(comparator, SortOrder.ASCENDING);
-    }
+	/**
+	 * Add a Comparator to the end of the chain using forward (ascending) sort
+	 * order
+	 * 
+	 * @param comparator
+	 *            Comparator with forward sort order
+	 */
+	public void addComparator(Comparator comparator) {
+		addComparator(comparator, SortOrder.ASCENDING);
+	}
 
-    /**
-     * Add a Comparator to the end of the chain using the provided sort order
-     * 
-     * @param comparator
-     *            Comparator to add to the end of the chain
-     * @param order
-     *            The sort order
-     */
-    public void addComparator(Comparator comparator, SortOrder order) {
-        sortDefinitions.add(new SortDefinition(comparator, order));
-    }
+	/**
+	 * Add a Comparator to the end of the chain using the provided sort order
+	 * 
+	 * @param comparator
+	 *            Comparator to add to the end of the chain
+	 * @param order
+	 *            The sort order
+	 */
+	public void addComparator(Comparator comparator, SortOrder order) {
+		sortDefinitions.add(new SortDefinition(comparator, order));
+	}
 
-    /**
-     * Replace the Comparator at the given index, maintaining the existing sort
-     * order.
-     * 
-     * @param index
-     *            index of the Comparator to replace
-     * @param comparator
-     *            Comparator to place at the given index
-     */
-    public void setComparator(int index, Comparator comparator) {
-        setComparator(index, comparator, null);
-    }
+	/**
+	 * Replace the Comparator at the given index, maintaining the existing sort
+	 * order.
+	 * 
+	 * @param index
+	 *            index of the Comparator to replace
+	 * @param comparator
+	 *            Comparator to place at the given index
+	 */
+	public void setComparator(int index, Comparator comparator) {
+		setComparator(index, comparator, null);
+	}
 
-    /**
-     * Replace the Comparator at the given index using the given sort order
-     * 
-     * @param index
-     *            index of the Comparator to replace
-     * @param comparator
-     *            Comparator to set
-     * @param order
-     *            the sort order
-     */
-    public void setComparator(int index, Comparator comparator, SortOrder order) {
-        SortDefinition definition = getSortDefinition(index);
-        definition.setComparator(comparator);
-        if (order != null) {
-            definition.setOrder(order);
-        }
-    }
+	/**
+	 * Replace the Comparator at the given index using the given sort order
+	 * 
+	 * @param index
+	 *            index of the Comparator to replace
+	 * @param comparator
+	 *            Comparator to set
+	 * @param order
+	 *            the sort order
+	 */
+	public void setComparator(int index, Comparator comparator, SortOrder order) {
+		SortDefinition definition = getSortDefinition(index);
+		definition.setComparator(comparator);
+		if (order != null) {
+			definition.setOrder(order);
+		}
+	}
 
-    private SortDefinition getSortDefinition(int index) {
-        return (SortDefinition)sortDefinitions.get(index);
-    }
+	private SortDefinition getSortDefinition(int index) {
+		return (SortDefinition)sortDefinitions.get(index);
+	}
 
-    /**
-     * Change the sort order at the given index to forward sort.
-     * 
-     * @param index
-     *            the index into the list of aggregated comparators
-     */
-    public void setAscendingOrder(int index) {
-        getSortDefinition(index).setOrder(SortOrder.ASCENDING);
-    }
+	/**
+	 * Change the sort order at the given index to forward sort.
+	 * 
+	 * @param index
+	 *            the index into the list of aggregated comparators
+	 */
+	public void setAscendingOrder(int index) {
+		getSortDefinition(index).setOrder(SortOrder.ASCENDING);
+	}
 
-    /**
-     * Change the sort order at the given index to reverse sort.
-     * 
-     * @param index
-     *            the index into the list of aggregated comparators
-     */
-    public void setDescendingOrder(int index) {
-        getSortDefinition(index).setOrder(SortOrder.DESCENDING);
-    }
+	/**
+	 * Change the sort order at the given index to reverse sort.
+	 * 
+	 * @param index
+	 *            the index into the list of aggregated comparators
+	 */
+	public void setDescendingOrder(int index) {
+		getSortDefinition(index).setOrder(SortOrder.DESCENDING);
+	}
 
-    /**
-     * Flip the sort order of each sort definition contained by this compound
-     * comparator.
-     */
-    public void flipOrder() {
-        Iterator it = sortDefinitions.iterator();
-        while (it.hasNext()) {
-            ((SortDefinition)it.next()).flipOrder();
-        }
-    }
+	/**
+	 * Flip the sort order of each sort definition contained by this compound
+	 * comparator.
+	 */
+	public void flipOrder() {
+		Iterator it = sortDefinitions.iterator();
+		while (it.hasNext()) {
+			((SortDefinition)it.next()).flipOrder();
+		}
+	}
 
-    /**
-     * Flip the sort order of the sort definition at the specified index.
-     * 
-     * @param index
-     *            the sort definition index to flip
-     */
-    public void flipOrder(int index) {
-        getSortDefinition(index).flipOrder();
-    }
+	/**
+	 * Flip the sort order of the sort definition at the specified index.
+	 * 
+	 * @param index
+	 *            the sort definition index to flip
+	 */
+	public void flipOrder(int index) {
+		getSortDefinition(index).flipOrder();
+	}
 
-    /**
-     * Returns the number of aggregated comparators.
-     * 
-     * @return The comparator count
-     */
-    public int size() {
-        return sortDefinitions.size();
-    }
+	/**
+	 * Returns the number of aggregated comparators.
+	 * 
+	 * @return The comparator count
+	 */
+	public int size() {
+		return sortDefinitions.size();
+	}
 
-    public int compare(Object o1, Object o2) {
-        Assert
-                .state(sortDefinitions.size() > 0,
-                        "No sort definitions have been added to this CompoundComparator to compare!");
-        Iterator it = sortDefinitions.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            SortDefinition def = (SortDefinition)it.next();
-            int result = def.compare(o1, o2);
-            if (result != 0) { return result; }
-        }
-        return 0;
-    }
+	public int compare(Object o1, Object o2) {
+		Assert.state(sortDefinitions.size() > 0,
+				"No sort definitions have been added to this CompoundComparator to compare!");
+		Iterator it = sortDefinitions.iterator();
+		for (int i = 0; it.hasNext(); i++) {
+			SortDefinition def = (SortDefinition)it.next();
+			int result = def.compare(o1, o2);
+			if (result != 0) {
+				return result;
+			}
+		}
+		return 0;
+	}
 
-    public int hashCode() {
-        return sortDefinitions.hashCode();
-    }
+	public int hashCode() {
+		return sortDefinitions.hashCode();
+	}
 
-    public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o instanceof CompoundComparator) {
-            CompoundComparator c = (CompoundComparator)o;
-            return sortDefinitions.equals(c.sortDefinitions);
-        }
-        return false;
-    }
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o instanceof CompoundComparator) {
+			CompoundComparator c = (CompoundComparator)o;
+			return sortDefinitions.equals(c.sortDefinitions);
+		}
+		return false;
+	}
 
-    public String toString() {
-        return new ToStringCreator(this).append("sortDefinitions",
-                sortDefinitions).toString();
-    }
-
+	public String toString() {
+		return new ToStringCreator(this).append("sortDefinitions", sortDefinitions).toString();
+	}
 }

@@ -15,10 +15,12 @@
  */
 package org.springframework.util;
 
-import org.springframework.binding.convert.ConversionExecutor;
-import org.springframework.binding.convert.Converter;
-import org.springframework.binding.convert.support.ObjectToStringConverter;
-import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Strategy that encapsulates value string styling algorithms according to
@@ -30,19 +32,18 @@ public class Styler {
 
 	private static Styler INSTANCE;
 	static {
-		Converter converter = new ObjectToStringConverter(new ThreadLocalFormatterLocator());
-		INSTANCE = new Styler(new ConversionExecutor(converter, String.class));
+		INSTANCE = new Styler(new SpringStylerStrategy());
 	}
 
-	private ConversionExecutor toStringExecutor;
+	private StylerStrategy stylerStrategy;
 
 	/**
 	 * Construct a styler using the configured conversion executor to style string
 	 * values from object form.
 	 * @param toStringExecutor
 	 */
-	public Styler(ConversionExecutor toStringExecutor) {
-		this.toStringExecutor = toStringExecutor;
+	public Styler(StylerStrategy stylerStrategy) {
+		this.stylerStrategy = stylerStrategy;
 	}
 
 	/**
@@ -60,7 +61,7 @@ public class Styler {
 	 * @return The default object styler
 	 */
 	public static Styler instance() {
-		Assert.notNull(INSTANCE, "The global string conversion executor instance has not been initialized");
+		Assert.notNull(INSTANCE, "The global styler instance has not been initialized");
 		return INSTANCE;
 	}
 
@@ -81,9 +82,147 @@ public class Styler {
 	 * @return The styled string.
 	 */
 	public String style(Object value) {
-		if (value == null) {
-			return "[null]";
+		return (String)this.stylerStrategy.style(value);
+	}
+
+	/**
+	 * A strategy interface for making the string styling strategy the <code>Styler</code>
+	 * object uses pluggable.
+	 * @author Keith Donald
+	 */
+	public interface StylerStrategy {
+		public String style(Object value);
+	}
+
+	/**
+	 * Converts objects to string form, generally for debugging purposes, using spring
+	 * toString styling conventions.
+	 * @author Keith Donald
+	 */
+	public static class SpringStylerStrategy implements StylerStrategy, Visitor {
+
+		private static final String EMPTY = "[empty]";
+
+		private static final String NULL = "[null]";
+
+		private static final String COLLECTION = "collection";
+
+		private static final String SET = "set";
+
+		private static final String LIST = "list";
+
+		private static final String MAP = "map";
+
+		private static final String ARRAY = "array";
+
+		private ReflectiveVisitorSupport reflectiveVisitorSupport = new ReflectiveVisitorSupport();
+
+		public String style(Object value) {
+			return (String)reflectiveVisitorSupport.invokeVisit(this, value);
 		}
-		return (String) this.toStringExecutor.call(value);
+
+		String visit(String value) {
+			return ('\'' + value + '\'');
+		}
+
+		String visit(Number value) {
+			return String.valueOf(value);
+		}
+
+		String visit(Class clazz) {
+			return ClassUtils.getShortName(clazz);
+		}
+
+		String visit(Method method) {
+			return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
+		}
+
+		String visit(Map value) {
+			StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
+			buffer.append(MAP + "[");
+			for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
+				Map.Entry entry = (Map.Entry)i.next();
+				buffer.append(style(entry));
+				if (i.hasNext()) {
+					buffer.append(',').append(' ');
+				}
+			}
+			if (value.isEmpty()) {
+				buffer.append(EMPTY);
+			}
+			buffer.append("]");
+			return buffer.toString();
+		}
+
+		String visit(Map.Entry value) {
+			return style(value.getKey()) + " -> " + style(value.getValue());
+		}
+
+		String visit(Collection value) {
+			StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
+			buffer.append(getCollectionTypeString(value) + "[");
+			for (Iterator i = value.iterator(); i.hasNext();) {
+				buffer.append(style(i.next()));
+				if (i.hasNext()) {
+					buffer.append(',').append(' ');
+				}
+			}
+			if (value.isEmpty()) {
+				buffer.append(EMPTY);
+			}
+			buffer.append("]");
+			return buffer.toString();
+		}
+
+		private String getCollectionTypeString(Collection value) {
+			if (value instanceof List) {
+				return LIST;
+			}
+			else if (value instanceof Set) {
+				return SET;
+			}
+			else {
+				return COLLECTION;
+			}
+		}
+
+		String visit(Object value) {
+			if (value.getClass().isArray()) {
+				return styleArray(getObjectArray(value));
+			}
+			else {
+				return String.valueOf(value);
+			}
+		}
+
+		String visitNull() {
+			return NULL;
+		}
+
+		private String styleArray(Object[] array) {
+			StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
+			buffer.append(ARRAY + "<" + StringUtils.delete(ClassUtils.getShortName(array.getClass()), ";") + ">[");
+			for (int i = 0; i < array.length - 1; i++) {
+				buffer.append(style(array[i]));
+				buffer.append(',').append(' ');
+			}
+			if (array.length > 0) {
+				buffer.append(style(array[array.length - 1]));
+			}
+			else {
+				buffer.append(EMPTY);
+			}
+			buffer.append("]");
+			return buffer.toString();
+		}
+
+		private Object[] getObjectArray(Object value) {
+			if (value.getClass().getComponentType().isPrimitive()) {
+				return ObjectUtils.toObjectArray(value);
+			}
+			else {
+				return (Object[])value;
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.visitor;
+package org.springframework.util;
 
 /**
  * The super vistable interface of the visitor design pattern.

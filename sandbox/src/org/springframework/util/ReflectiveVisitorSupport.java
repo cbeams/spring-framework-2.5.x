@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.visitor;
+package org.springframework.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,8 +22,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.Assert;
-import org.springframework.util.CachingMapTemplate;
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * Helper implementation of a reflective visitor.
@@ -32,16 +31,14 @@ import org.springframework.util.CachingMapTemplate;
  * data argument to accept (double-dispatch.) For example:
  * 
  * <pre>
- * 
- *        public String ToStringStyler.styleValue(Object value) {
- *            reflectiveVistorSupport.invokeVisit(this, value)
- *        }
+ *    public String ToStringStyler.styleValue(Object value) {
+ *       reflectiveVistorSupport.invokeVisit(this, value)
+ *    }
  *  
- *        // visit call back will be invoked via reflection
- *        public String visit(&lt;valueType&gt; arg) {
- *           // process argument of type &lt;valueType&gt; 
- *        }
- *  
+ *    // visit call back will be invoked via reflection
+ *    public String visit(&lt;valueType&gt; arg) {
+ *       // process argument of type &lt;valueType&gt; 
+ *    }
  * </pre>
  * 
  * @author Keith Donald
@@ -88,8 +85,7 @@ public final class ReflectiveVisitorSupport {
 			for (Class clazz = visitorClass; clazz != null; clazz = clazz.getSuperclass()) {
 				try {
 					return clazz.getDeclaredMethod(VISIT_NULL, (Class[])null);
-				}
-				catch (NoSuchMethodException e) {
+				} catch (NoSuchMethodException e) {
 				}
 			}
 			return findDefaultVisitMethod();
@@ -103,8 +99,7 @@ public final class ReflectiveVisitorSupport {
 			for (Class clazz = visitorClass; clazz != null; clazz = clazz.getSuperclass()) {
 				try {
 					return clazz.getDeclaredMethod(VISIT_METHOD, args);
-				}
-				catch (NoSuchMethodException e) {
+				} catch (NoSuchMethodException e) {
 				}
 			}
 			logger.warn("No default '" + VISIT_METHOD + "' method found.  Returning <null>");
@@ -140,8 +135,7 @@ public final class ReflectiveVisitorSupport {
 						logger.debug("Looking for method " + VISIT_METHOD + "(" + argumentType + ")");
 					}
 					return findVisitMethod(visitorClass, argumentType);
-				}
-				catch (NoSuchMethodException e) {
+				} catch (NoSuchMethodException e) {
 					// queue up the argument super class if it's not of type
 					// Object.
 					if (!argumentType.isInterface() && (argumentType.getSuperclass() != Object.class)) {
@@ -162,8 +156,7 @@ public final class ReflectiveVisitorSupport {
 		private Method findVisitMethod(Class visitorClass, Class argumentType) throws NoSuchMethodException {
 			try {
 				return visitorClass.getDeclaredMethod(VISIT_METHOD, new Class[] { argumentType });
-			}
-			catch (NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				// try visitorClass superclasses
 				if (visitorClass.getSuperclass() != Object.class) {
 					return findVisitMethod(visitorClass.getSuperclass(), argumentType);
@@ -214,15 +207,20 @@ public final class ReflectiveVisitorSupport {
 				}
 				return method.invoke(visitor, args);
 
-			}
-			catch (InvocationTargetException e) {
+			} catch (InvocationTargetException e) {
 				logger.error("Invocation target exception invoking method '" + method.getName() + "(" + argument + ")@"
 						+ visitor.getClass() + "'" + e.getTargetException());
-				throw new RuntimeException(e);
+				throw new ReflectiveDispatchException("Exception occured invoking method '" + method.getName()
+						+ "' on visitor", e);
+			} catch (Exception e) {
+				throw new ReflectiveDispatchException("Unable to invoke visit method on visitor", e);
 			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+		}
+	}
+
+	public static class ReflectiveDispatchException extends NestedRuntimeException {
+		public ReflectiveDispatchException(String msg, Throwable ex) {
+			super(msg, ex);
 		}
 	}
 

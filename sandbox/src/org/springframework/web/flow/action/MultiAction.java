@@ -17,7 +17,7 @@ package org.springframework.web.flow.action;
 
 import java.lang.reflect.Method;
 
-import org.springframework.util.MethodDispatcher;
+import org.springframework.util.DispatchMethodInvoker;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
@@ -99,7 +99,7 @@ public class MultiAction extends AbstractAction {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private MethodDispatcher executeMethodDispatcher = new MethodDispatcher(this, new Class[] { RequestContext.class },
+	private DispatchMethodInvoker executeMethodDispatcher = new DispatchMethodInvoker(this, new Class[] { RequestContext.class },
 			Event.class, "action", "public Event <methodName>(RequestContext)");
 
 	/**

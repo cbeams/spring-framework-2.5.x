@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
@@ -218,7 +218,7 @@ public class EventListenerListHelper implements Serializable {
 	 */
 	public void fire(String methodName) {
 		if (listeners != EMPTY_OBJECT_ARRAY) {
-			fireEventWithReflection(methodName, EMPTY_OBJECT_ARRAY);
+			fireEventByReflection(methodName, EMPTY_OBJECT_ARRAY);
 		}
 	}
 
@@ -231,7 +231,7 @@ public class EventListenerListHelper implements Serializable {
 	 */
 	public void fire(String methodName, Object arg) {
 		if (listeners != EMPTY_OBJECT_ARRAY) {
-			fireEventWithReflection(methodName, new Object[] { arg });
+			fireEventByReflection(methodName, new Object[] { arg });
 		}
 	}
 
@@ -245,7 +245,7 @@ public class EventListenerListHelper implements Serializable {
 	 */
 	public void fire(String methodName, Object arg1, Object arg2) {
 		if (listeners != EMPTY_OBJECT_ARRAY) {
-			fireEventWithReflection(methodName, new Object[] { arg1, arg2 });
+			fireEventByReflection(methodName, new Object[] { arg1, arg2 });
 		}
 	}
 
@@ -258,7 +258,7 @@ public class EventListenerListHelper implements Serializable {
 	 */
 	public void fire(String methodName, Object[] args) {
 		if (listeners != EMPTY_OBJECT_ARRAY) {
-			fireEventWithReflection(methodName, args);
+			fireEventByReflection(methodName, args);
 		}
 	}
 
@@ -371,21 +371,23 @@ public class EventListenerListHelper implements Serializable {
 		});
 	}
 
-	private void fireEventWithReflection(String eventName, Object[] events) {
+	private void fireEventByReflection(String eventName, Object[] events) {
 		Method fireMethod = (Method)methodCache.get(new MethodCacheKey(listenerClass, eventName, events.length));
 		Object[] listenersCopy = listeners;
 		for (int i = 0; i < listenersCopy.length; i++) {
 			try {
 				fireMethod.invoke(listenersCopy[i], events);
+			} catch (InvocationTargetException e) {
+				throw new EventBroadcastException("Exception thrown by listener", e.getCause());
+			} catch (IllegalAccessException e) {
+				throw new EventBroadcastException("Unable to invoke listener", e);
 			}
-			catch (InvocationTargetException e) {
-				throw new BeansException("Exception thrown by listener", e.getCause()) {
-				};
-			}
-			catch (IllegalAccessException e) {
-				throw new BeansException("Unable to invoke listener", e) {
-				};
-			}
+		}
+	}
+
+	public static class EventBroadcastException extends NestedRuntimeException {
+		public EventBroadcastException(String msg, Throwable ex) {
+			super(msg, ex);
 		}
 	}
 

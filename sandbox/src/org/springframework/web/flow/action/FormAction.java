@@ -20,7 +20,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
-import org.springframework.util.MethodDispatcher;
+import org.springframework.util.DispatchMethodInvoker;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
@@ -210,7 +210,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private MethodDispatcher validateMethodDispatcher = new MethodDispatcher(this, new Class[] { Object.class,
+	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(this, new Class[] { Object.class,
 			Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
 
 	/**

@@ -31,77 +31,78 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class SortDefinition implements Comparator, Serializable {
-    private Comparator comparator;
+	private Comparator comparator;
 
-    private SortOrder order = SortOrder.ASCENDING;
+	private SortOrder order = SortOrder.ASCENDING;
 
-    public SortDefinition(Comparator comparator) {
-        setComparator(comparator);
-    }
+	public SortDefinition(Comparator comparator) {
+		setComparator(comparator);
+	}
 
-    public SortDefinition(Comparator comparator, SortOrder order) {
-        setComparator(comparator);
-        setOrder(order);
-    }
+	public SortDefinition(Comparator comparator, SortOrder order) {
+		setComparator(comparator);
+		setOrder(order);
+	}
 
-    public void setComparator(Comparator comparator) {
-        Assert.notNull(comparator, "The comparator property is required");
-        this.comparator = comparator;
-    }
+	public void setComparator(Comparator comparator) {
+		Assert.notNull(comparator, "The comparator property is required");
+		this.comparator = comparator;
+	}
 
-    public void setOrder(SortOrder order) {
+	public void setOrder(SortOrder order) {
 		Assert.notNull(order, "The sort order property is required");
-        this.order = order;
-    }
+		this.order = order;
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof SortDefinition)) { return false; }
-        SortDefinition def = (SortDefinition)o;
-        return comparator.equals(def.comparator) && order.equals(def.order);
-    }
+	public boolean equals(Object o) {
+		if (!(o instanceof SortDefinition)) {
+			return false;
+		}
+		SortDefinition def = (SortDefinition)o;
+		return comparator.equals(def.comparator) && order.equals(def.order);
+	}
 
-    public int hashCode() {
-        return comparator.hashCode() + order.hashCode();
-    }
+	public int hashCode() {
+		return comparator.hashCode() + order.hashCode();
+	}
 
-    public int compare(Object o1, Object o2) {
-        int result = comparator.compare(o1, o2);
-        if (result != 0) {
-            // invert the order if it is a reverse sort
-            if (order == SortOrder.DESCENDING) {
-                if (Integer.MIN_VALUE == result) {
-                    result = Integer.MAX_VALUE;
-                }
-                else {
-                    result *= -1;
-                }
-            }
-            return result;
-        }
-        return 0;
-    }
+	public int compare(Object o1, Object o2) {
+		int result = comparator.compare(o1, o2);
+		if (result != 0) {
+			// invert the order if it is a reverse sort
+			if (order == SortOrder.DESCENDING) {
+				if (Integer.MIN_VALUE == result) {
+					result = Integer.MAX_VALUE;
+				}
+				else {
+					result *= -1;
+				}
+			}
+			return result;
+		}
+		return 0;
+	}
 
-    public void flipOrder() {
-        this.order = SortOrder.flip(this.order);
-    }
+	public void flipOrder() {
+		this.order = SortOrder.flip(this.order);
+	}
 
-    /**
-     * Static factory method creating a sort definition list from the provided
-     * comparator array. All sort definitions sort in forward (ascending) order.
-     * 
-     * @param comparators
-     * @return A sort definition list
-     */
-    public static List createSortDefinitionList(Comparator[] comparators) {
-        List sortDefinitions = new ArrayList(comparators.length);
-        for (int i = 0; i < comparators.length; i++) {
-            sortDefinitions.add(new SortDefinition(comparators[i]));
-        }
-        return sortDefinitions;
-    }
+	/**
+	 * Static factory method creating a sort definition list from the provided
+	 * comparator array. All sort definitions sort in forward (ascending) order.
+	 * 
+	 * @param comparators
+	 * @return A sort definition list
+	 */
+	public static List createSortDefinitionList(Comparator[] comparators) {
+		List sortDefinitions = new ArrayList(comparators.length);
+		for (int i = 0; i < comparators.length; i++) {
+			sortDefinitions.add(new SortDefinition(comparators[i]));
+		}
+		return sortDefinitions;
+	}
 
-    public String toString() {
-        return new ToStringCreator(this).append("comparator", comparator)
-                .append("order", order).toString();
-    }
+	public String toString() {
+		return new ToStringCreator(this).append("comparator", comparator).append("order", order).toString();
+	}
 }

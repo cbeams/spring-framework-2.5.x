@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util.visitor;
+package org.springframework.util;
 
 /**
  * Super 'tag' interface to be implemented by objects that act as visitors.
