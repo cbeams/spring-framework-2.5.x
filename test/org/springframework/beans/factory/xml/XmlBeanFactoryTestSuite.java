@@ -30,7 +30,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.18 2003-11-21 09:52:46 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.19 2003-11-22 15:08:28 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -116,6 +116,15 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(inherits2.getAge() == 13);
 		// Shouldn't have changed first instance
 		assertTrue(inherits.getAge() == 1);
+	}
+	
+	public void testDependenciesMaterializeThis() throws Exception {
+		InputStream pis = getClass().getResourceAsStream("dependenciesMaterializeThis.xml");
+		XmlBeanFactory bf = new XmlBeanFactory(pis);
+		DummyBo bos = (DummyBo) bf.getBean("boSingleton");
+		DummyBo bop = (DummyBo) bf.getBean("boPrototype");
+		assertNotSame(bos, bop);
+		assertEquals(bos.dao, bop.dao);
 	}
 
 	/**

@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.23 2003-11-21 15:35:35 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.24 2003-11-22 15:05:21 johnsonr Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -457,7 +457,11 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 
 		// eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware
-		if (mergedBeanDefinition.isSingleton()) {
+		
+		if (mergedBeanDefinition.isSingleton() 
+				// We need this check because getBean on dependencies above may have materialized this bean
+				&& null == singletonCache.get(beanName)
+				) {
 			registerSingleton(beanName, bean);
 		}
 
