@@ -10,8 +10,8 @@ import java.io.InputStream;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Convenience extension of DefaultListableBeanFactory that reads bean definitions from
@@ -31,15 +31,11 @@ import org.springframework.core.io.InputStreamResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.23 2003-12-30 00:15:37 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.24 2004-01-14 17:09:13 jhoeller Exp $
  */
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
-
-	public XmlBeanFactory(InputStream is) throws BeansException {
-		this(new InputStreamResource(is, "(no description"));
-	}
 
 	/**
 	 * Create a new XmlBeanFactory with the given resource,
@@ -50,7 +46,21 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	public XmlBeanFactory(Resource resource) throws BeansException {
 		this(resource, null);
 	}
-	
+
+	/**
+	 * Create a new XmlBeanFactory with the given InputStream,
+	 * which must be parsable using DOM.
+	 * <p>It's preferable to use a Resource argument instead of an
+	 * InputStream, to retain location information. This constructor
+	 * is mainly kept for backward compatibility.
+	 * @param is XML InputStream to load bean definitions from
+	 * @throws BeansException in case of loading or parsing errors
+	 * @see #XmlBeanFactory(Resource)
+	 */
+	public XmlBeanFactory(InputStream is) throws BeansException {
+		this(new InputStreamResource(is, "(no description)"), null);
+	}
+
 	/**
 	 * Create a new XmlBeanFactory with the given input stream,
 	 * which must be parsable using DOM.
