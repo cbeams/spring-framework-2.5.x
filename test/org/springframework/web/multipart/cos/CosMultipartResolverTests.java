@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
@@ -45,5 +46,27 @@ public class CosMultipartResolverTests extends TestCase {
 		CosMultipartResolver resolver = new CosMultipartResolver(sc);
 		assertEquals(new File("mytemp"), resolver.getUploadTempDir());
 	}
+	
+	public void testMultipartResolution() throws MultipartException, IOException{
+		MockServletContext sc = new MockServletContext();
+		MockHttpServletRequest rq = new MockHttpServletRequest(sc,"GET","/url");
+		CosMultipartResolver resolver = new CosMultipartResolver(sc);
+		resolver.setUploadTempDir(new FileSystemResource("bogusTmpDir"));
+		try {
+			resolver.resolveMultipart(rq);
+			fail("the http request was mocked, expected a MultipartException");
+		} 
+		catch (MultipartException e){
+			//expected
+		}
+		new File("bogusTmpDir").delete();
+	}
 
+	public void testWithPhysicalFile() throws IOException{
+		MockServletContext sc = new MockServletContext();
+		CosMultipartResolver resolver = new CosMultipartResolver(sc);
+		resolver.setUploadTempDir(new FileSystemResource("bogusTmpDir"));
+		assertTrue(new File("bogusTmpDir").exists());
+		new File("bogusTmpDir").delete();
+	}
 }
