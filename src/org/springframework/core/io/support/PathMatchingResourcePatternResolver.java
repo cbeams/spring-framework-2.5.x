@@ -18,23 +18,26 @@ package org.springframework.core.io.support;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
  * ResourcePatternResolver that applies Ant-style path matching, using Spring's
- * PathMatcher class. Also inherits the capability to retrieve multiple class path
- * resources with the same name from ClassPathResourcePatternResolver.
+ * PathMatcher class.
  *
  * <p>Locations can either be suitable for <code>ResourceLoader.getResource</code>
  * (URLs like "file:C:/context.xml", pseudo-URLs like "classpath:/context.xml",
@@ -43,24 +46,36 @@ import org.springframework.util.StringUtils;
  *
  * <p>In the pattern case, the locations have to be resolvable to java.io.File,
  * to allow for searching though the specified directory tree. In particular,
- * this will neither work with WAR files that are not expanded nor with
- * class path resources in a JAR file.
+ * this will neither work with WAR files that are not expanded nor with class
+ * path resources in a JAR file.
+ *
+ * <p>There is special support for retrieving multiple class path resources with
+ * the same name, via the "classpath*" prefix. For example, "classpath*:/beans.xml"
+ * will find all beans.xml files in the class path, be it in "classes" directories
+ * or in JAR files. This is particularly useful for auto-detecting config files.
+ *
+ * <p>If neither given a PathMatcher pattern nor a "classpath*:" location, this
+ * resolver will return a single resource via the underlying ResourceLoader.
  *
  * @author Juergen Hoeller
  * @since 01.05.2004
+ * @see #CLASSPATH_URL_PREFIX
  * @see org.springframework.util.PathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
  */
-public class PathMatchingResourcePatternResolver extends ClassPathResourcePatternResolver {
+public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final ResourceLoader resourceLoader;
+
 
 	/**
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver() {
-		super();
+		this.resourceLoader = new DefaultResourceLoader();
 	}
 
 	/**
@@ -69,34 +84,67 @@ public class PathMatchingResourcePatternResolver extends ClassPathResourcePatter
 	 * and actual resources with
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
-		super(resourceLoader);
+		this.resourceLoader = resourceLoader;
 	}
 
-	public Resource[] getResources(String locationPattern) throws IOException {
-		// check for file pattern
-		if (PathMatcher.isPattern(locationPattern)) {
-			List result = new ArrayList();
-			String rootDirPath = determineRootDir(locationPattern);
-			String subPattern = locationPattern.substring(rootDirPath.length());
-			File rootDir = getResourceLoader().getResource(rootDirPath).getFile().getAbsoluteFile();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
-			}
-			List matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-			if (logger.isInfoEnabled()) {
-				logger.info("Resolved location pattern [" + locationPattern + "] to file paths: " + matchingFiles);
-			}
-			for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
-				File file = (File) it.next();
-				result.add(new FileSystemResource(file));
-			}
-			return (Resource[]) result.toArray(new Resource[result.size()]);
-		}
 
-		// else fall back to class path resources respectively a single resource
-		else {
-			return super.getResources(locationPattern);
+	public Resource[] getResources(String locationPattern) throws IOException {
+		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
+			// a class path resource (multiple resources for same name possible)
+			return findAllClassPathResources(locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
 		}
+		else if (PathMatcher.isPattern(locationPattern)) {
+			// a file pattern
+			return findPathMatchingFileResources(locationPattern);
+		}
+		else {
+			// fall back to single resource
+			return new Resource[] {this.resourceLoader.getResource(locationPattern)};
+		}
+	}
+
+	/**
+	 * Find all class path resources with the given name via the ClassLoader.
+	 * @param resourceName the name to look for
+	 * @return the result as Resource array
+	 * @throws IOException in case of I/O errors
+	 * @see java.lang.ClassLoader#getResources
+	 */
+	protected Resource[] findAllClassPathResources(String resourceName) throws IOException {
+		List result = new ArrayList();
+		Enumeration resourceUrls = Thread.currentThread().getContextClassLoader().getResources(resourceName);
+		while (resourceUrls.hasMoreElements()) {
+			URL url = (URL) resourceUrls.nextElement();
+			result.add(new UrlResource(url));
+		}
+		return (Resource[]) result.toArray(new Resource[result.size()]);
+	}
+
+	/**
+	 * Find all file resources that match the given location pattern
+	 * via the Ant-style PathMatcher utility.
+	 * @param locationPattern the location pattern to match
+	 * @return the result as Resource array
+	 * @throws IOException in case of I/O errors
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected Resource[] findPathMatchingFileResources(String locationPattern) throws IOException {
+		List result = new ArrayList();
+		String rootDirPath = determineRootDir(locationPattern);
+		String subPattern = locationPattern.substring(rootDirPath.length());
+		File rootDir = this.resourceLoader.getResource(rootDirPath).getFile().getAbsoluteFile();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
+		}
+		List matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
+		if (logger.isInfoEnabled()) {
+			logger.info("Resolved location pattern [" + locationPattern + "] to file paths: " + matchingFiles);
+		}
+		for (Iterator it = matchingFiles.iterator(); it.hasNext();) {
+			File file = (File) it.next();
+			result.add(new FileSystemResource(file));
+		}
+		return (Resource[]) result.toArray(new Resource[result.size()]);
 	}
 
 	/**
