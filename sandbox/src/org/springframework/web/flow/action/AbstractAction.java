@@ -94,6 +94,13 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return new InternalEvent(this, resultId);
 	}
 
+	/**
+	 * Returns a result event for this action with the specified identifier and
+	 * event parameters.
+	 * @param resultId the result event identifier
+	 * @param the event parameters
+	 * @return the parameterized action result event
+	 */
 	protected Event result(String resultId, Map parameters) {
 		return new InternalEvent(this, resultId, parameters);
 	}
