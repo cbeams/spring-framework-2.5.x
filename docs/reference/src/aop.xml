@@ -1933,7 +1933,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para><programlisting>&lt;bean id="poolConfigAdvisor" 
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
-    &lt;property name="target"&gt;&lt;ref local="poolTargetSource" /&gt;&lt;/property&gt;
+    &lt;property name="targetObject"&gt;&lt;ref local="poolTargetSource" /&gt;&lt;/property&gt;
     &lt;property name="targetMethod"&gt;&lt;value&gt;getPoolingConfigMixin&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
