@@ -16,17 +16,19 @@
 package org.springframework.rules;
 
 /**
- * A procedure (action which returns no value) that takes a single argument.
+ * A procedure (action which returns no value) that takes two arguments.
  * 
  * @author Keith Donald
  */
-public interface UnaryProcedure {
+public interface BinaryProcedure {
 
     /**
-     * Run this procedure with the specified input argument.
+     * Run this procedure with the specified input arguments.
      * 
      * @param argument1
-     *            the input
+     *            the first argument
+     * @param argument2
+     *            the second argument
      */
-    public void run(Object argument);
+    public void run(Object argument1, Object argument2);
 }

@@ -2,16 +2,16 @@
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules.predicates;
 
@@ -25,9 +25,8 @@ import org.springframework.util.Assert;
  * @author Seth Ladd
  * @author Keith Donald
  */
-public class RequiredIfTrue
-    extends AbstractBeanPropertyExpression
-    implements UnaryPredicate {
+public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
+        UnaryPredicate {
     private String propertyName;
     private UnaryPredicate predicate;
 
@@ -60,8 +59,9 @@ public class RequiredIfTrue
     public boolean test(Object bean) {
         Assert.notNull(propertyName);
         if (predicate.test(bean)) {
+            GetProperty getProperty = new GetProperty(bean);
             return Required.instance().test(
-                GetProperty.instance().evaluate(bean, getPropertyName()));
+                    getProperty.evaluate(getPropertyName()));
         } else {
             return true;
         }

@@ -66,9 +66,10 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object bean) {
+        GetProperty getProperty = new GetProperty(bean);
         return beanPropertyExpression.test(
-            GetProperty.instance().evaluate(bean, getPropertyName()),
-            GetProperty.instance().evaluate(bean, otherPropertyName));
+            getProperty.evaluate(getPropertyName()),
+            getProperty.evaluate(otherPropertyName));
     }
 
 }

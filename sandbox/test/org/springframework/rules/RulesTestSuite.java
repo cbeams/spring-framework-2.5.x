@@ -11,7 +11,6 @@ import org.springframework.rules.functions.StringLength;
 import org.springframework.rules.predicates.BeanPropertiesExpression;
 import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
 import org.springframework.rules.predicates.GreaterThanEqualTo;
@@ -147,9 +146,8 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testGetProperty() {
-        BinaryFunction fn = GetProperty.instance();
-        TestBean bean = new TestBean();
-        assertEquals("testValue", fn.evaluate(bean, "test"));
+        UnaryFunction fn = new GetProperty(new TestBean());
+        assertEquals("testValue", fn.evaluate("test"));
     }
 
     public class TestBean {
