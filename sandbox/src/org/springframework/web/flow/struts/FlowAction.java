@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.struts;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -100,11 +99,8 @@ public class FlowAction extends TemplateAction {
 		if (flowSessionId == null) {
 			// No existing flow session, create a new one
 			executionStack = createFlowSessionExecutionStack();
-			flowSessionId = generateUniqueFlowSessionId(executionStack);
-			saveFlowSession(executionStack, flowSessionId, request);
-			Map inputAttributes = new HashMap(1);
-			inputAttributes.put(getFlowSessionIdAttributeName(), flowSessionId);
-			viewDescriptor = getEventProcessor(mapping).start(executionStack, request, response, inputAttributes);
+			saveFlowSession(executionStack, request);
+			viewDescriptor = getEventProcessor(mapping).start(executionStack, request, response, null);
 		}
 		else {
 			// Client is participating in an existing flow session, retrieve it
@@ -144,9 +140,7 @@ public class FlowAction extends TemplateAction {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
 					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + flowSessionId);
-					logger
-							.debug("    - " + getCurrentStateIdAttributeName() + "="
-									+ executionStack.getCurrentStateId());
+					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + executionStack.getCurrentStateId());
 				}
 				request.setAttribute(getFlowSessionIdAttributeName(), flowSessionId);
 				request.setAttribute(getCurrentStateIdAttributeName(), executionStack.getCurrentStateId());
@@ -173,6 +167,17 @@ public class FlowAction extends TemplateAction {
 			logger.debug("Returning view descriptor " + viewDescriptor);
 		}
 		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
+	}
+
+	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
+		return new FlowSessionExecutionStack();
+	}
+
+	protected void saveFlowSession(FlowSessionExecutionStack executionStack, HttpServletRequest request) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Saving flow session '" + executionStack.getId() + "' in HTTP session");
+		}
+		request.getSession().setAttribute(executionStack.getId(), executionStack);
 	}
 
 	/**
@@ -205,18 +210,6 @@ public class FlowAction extends TemplateAction {
 		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
 	}
 
-	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
-		return new FlowSessionExecutionStack();
-	}
-
-	protected void saveFlowSession(FlowSessionExecutionStack executionStack, String flowSessionId,
-			HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Saving flow session '" + flowSessionId + "' in HTTP session");
-		}
-		request.getSession().setAttribute(flowSessionId, executionStack);
-	}
-
 	protected FlowSessionExecutionStack getRequiredFlowSessionExecutionStack(String flowSessionId,
 			HttpServletRequest request) throws NoSuchFlowSessionException {
 		try {
@@ -234,8 +227,9 @@ public class FlowAction extends TemplateAction {
 		request.getSession().removeAttribute(flowSessionId);
 	}
 
-	// made final as these attribute keys are needed elsewhere, so they cant change for now
-	
+	// made final as these attribute keys are needed elsewhere, so they cant
+	// change for now
+
 	protected final String getFlowSessionIdAttributeName() {
 		return FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME;
 	}

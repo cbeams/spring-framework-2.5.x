@@ -1561,7 +1561,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public String bind(String bindActionStateIdPrefix) {
 		return buildStateId(bindActionStateIdPrefix, BIND);
 	}
-	
+
 	/**
 	 * @param validateActionStateIdPrefix
 	 * @return

@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
+import org.springframework.web.util.SessionKeyUtils;
 
 /**
  * A stack tracking the execution of a flow session.
@@ -37,6 +38,8 @@ import org.springframework.util.ToStringCreator;
 public class FlowSessionExecutionStack implements MutableAttributesAccessor, Serializable, FlowSessionExecutionInfo {
 	private static final Log logger = LogFactory.getLog(FlowSessionExecutionStack.class);
 
+	private String id;
+	
 	private FlowSession NO_SESSION = new FlowSession(null, null);
 
 	private Stack executingFlowSessions = new Stack();
@@ -45,6 +48,14 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	private long lastEventTimestamp;
 
+	public FlowSessionExecutionStack() {
+		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
 	public boolean isActive() {
 		return !isEmpty();
 	}
@@ -192,6 +203,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	protected void push(FlowSession subFlowSession) {
 		executingFlowSessions.push(subFlowSession);
+		subFlowSession.setAttribute(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME, getId());
 		if (logger.isDebugEnabled()) {
 			logger.debug("After push of new Flow Session '" + subFlowSession.getFlowId()
 					+ "' - excutingFlowSessionsCount=" + executingFlowSessions.size() + ", sessionStack="
