@@ -16,7 +16,6 @@
 package org.springframework.rules.values;
 
 import java.beans.PropertyEditor;
-import java.io.File;
 
 import org.springframework.rules.UnaryFunction;
 
@@ -43,7 +42,7 @@ public class TypeConverter implements ValueModel {
         this.wrappedModel = wrappedModel;
         this.convertTo = new UnaryFunction() {
             public Object evaluate(Object o) {
-                propertyEditor.setValue((File)o);
+                propertyEditor.setValue(o);
                 return propertyEditor.getAsText();
             }
         };
@@ -72,7 +71,7 @@ public class TypeConverter implements ValueModel {
     public Object getWrappedValue() {
         return wrappedModel.get();
     }
-    
+
     public ValueModel getWrappedValueModel() {
         return wrappedModel;
     }
