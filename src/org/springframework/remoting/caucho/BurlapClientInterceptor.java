@@ -49,6 +49,8 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see #setServiceUrl
  * @see #setUsername
  * @see #setPassword
+ * @see BurlapServiceExporter
+ * @see BurlapProxyFactoryBean
  * @see com.caucho.burlap.client.BurlapProxyFactory
  */
 public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
@@ -56,6 +58,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	private final BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
 
 	private Object burlapProxy;
+
 
 	/**
 	 * Set the username that this factory should use to access the remote service.
@@ -107,20 +110,22 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
+
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
 			return invocation.getMethod().invoke(this.burlapProxy, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			logger.debug("Burlap service [" + getServiceUrl() + "] threw exception", ex.getTargetException());
 			if (ex.getTargetException() instanceof BurlapRuntimeException) {
 				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
 				Throwable rootCause = (bre.getRootCause() != null) ? bre.getRootCause() : bre;
-				throw new RemoteAccessException("Cannot access Burlap service", rootCause);
+				throw new RemoteAccessException(
+						"Cannot access Burlap service at [" + getServiceUrl() + "]", rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
 				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
-				throw new RemoteAccessException("Cannot access Burlap service", utex.getUndeclaredThrowable());
+				throw new RemoteAccessException(
+						"Cannot access Burlap service at [" + getServiceUrl() + "]", utex.getUndeclaredThrowable());
 			}
 			throw ex.getTargetException();
 		}

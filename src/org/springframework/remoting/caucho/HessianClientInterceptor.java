@@ -49,6 +49,8 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see #setServiceUrl
  * @see #setUsername
  * @see #setPassword
+ * @see HessianServiceExporter
+ * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  */
 public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
@@ -56,6 +58,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	private final HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
 	private Object hessianProxy;
+
 
 	/**
 	 * Set the username that this factory should use to access the remote service.
@@ -107,23 +110,22 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
+
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		try {
 			return invocation.getMethod().invoke(this.hessianProxy, invocation.getArguments());
 		}
-		catch (UndeclaredThrowableException ex) {
-			throw new RemoteAccessException("Cannot access Hessian service", ex.getUndeclaredThrowable());
-		}
 		catch (InvocationTargetException ex) {
-			logger.debug("Hessian service [" + getServiceUrl() + "] threw exception", ex.getTargetException());
 			if (ex.getTargetException() instanceof HessianRuntimeException) {
 				HessianRuntimeException hre = (HessianRuntimeException) ex.getTargetException();
 				Throwable rootCause = (hre.getRootCause() != null) ? hre.getRootCause() : hre;
-				throw new RemoteAccessException("Cannot access Hessian service", rootCause);
+				throw new RemoteAccessException(
+						"Cannot access Hessian service at [" + getServiceUrl() + "]", rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
 				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
-				throw new RemoteAccessException("Cannot access Hessian service", utex.getUndeclaredThrowable());
+				throw new RemoteAccessException(
+						"Cannot access Hessian service at [" + getServiceUrl() + "]", utex.getUndeclaredThrowable());
 			}
 			throw ex.getTargetException();
 		}

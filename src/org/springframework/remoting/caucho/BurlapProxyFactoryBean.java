@@ -30,6 +30,7 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see BurlapClientInterceptor
  * @see BurlapServiceExporter
  */
 public class BurlapProxyFactoryBean extends BurlapClientInterceptor implements FactoryBean {
