@@ -30,26 +30,26 @@ import org.springframework.web.flow.Flow;
  * this:
  * 
  * <pre>
- * 	&lt;bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
- *		&lt;property name="flowBuilder"&gt;
- *			&lt;bean class="com.mycompany.myapp.web.flow.user.UserRegistrationFlowBuilder"/&gt;
- *		&lt;/property&gt;
- *	&lt;/bean&gt;
+ * &lt;bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
+ *    &lt;property name="flowBuilder"&gt;
+ *        &lt;bean class="com.mycompany.myapp.web.flow.user.UserRegistrationFlowBuilder"/&gt;
+ *    &lt;/property&gt;
+ * &lt;/bean&gt;
  * </pre>
  * 
  * The above definition is configured with a specific, java-based FlowBuilder
  * implementation. A XmlFlowBuilder could instead be used, for example:
  * 
  * <pre>
- * 	&ltbean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
- *		&ltproperty name="flowBuilder"&gt;
- *			&ltbean class="org.springframework.web.flow.config.XmlFlowBuilder"&gt;
- *              &ltproperty name="resource"&gt;
- *                  &ltvalue&gt;UserRegistrationFlow.xml&lt/value&gt;
- *              &lt/property&gt;
- *          &lt/bean&gt;
- *		&lt/property&gt;
- *	&lt/bean&gt;
+ * &ltbean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean"&gt;
+ *     &ltproperty name="flowBuilder"&gt;
+ *         &ltbean class="org.springframework.web.flow.config.XmlFlowBuilder"&gt;
+ *             &ltproperty name="resource"&gt;
+ *                 &ltvalue&gt;UserRegistrationFlow.xml&lt/value&gt;
+ *             &lt/property&gt;
+ *         &lt/bean&gt;
+ *      &lt/property&gt;
+ * &lt/bean&gt;
  * </pre>
  * 
  * </p>
