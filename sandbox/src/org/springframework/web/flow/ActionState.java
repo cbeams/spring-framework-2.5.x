@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
  * A transitionable state that executes one or more actions when entered. If
  * more than one action is specified, they are executed in an ordered chain
  * until one returns a result that matches a valid state transition for this
- * state (this is a form of the ChainOfResponsibility pattern <CoR>).
+ * state (this is a form of the Chain of Responsibility (CoR) pattern).
  * <p>
  * Each action executed by this action state can optionally be <i>named </i>.
  * This name is used as a qualifier in determing what transition should be
