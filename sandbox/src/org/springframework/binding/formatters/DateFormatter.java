@@ -22,6 +22,7 @@ import java.util.Date;
 import org.springframework.binding.InvalidFormatException;
 
 /**
+ * Formatter that formats date objects.
  * @author Keith Donald
  */
 public class DateFormatter extends AbstractFormatter {

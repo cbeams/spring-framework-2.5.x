@@ -27,7 +27,8 @@ import org.springframework.binding.TypeConverter;
 import org.springframework.util.Assert;
 
 /**
- * A single mapping definition.
+ * A single mapping definition, encapulating the information neccessary to map a
+ * single attribute from a source attributes map to a target map.
  * @author Keith Donald
  */
 public class Mapping implements Serializable {
@@ -39,22 +40,51 @@ public class Mapping implements Serializable {
 
 	private TypeConverter valueTypeConverter;
 
+	/**
+	 * Creates a mapping definition that will map the specified attribute name
+	 * from a source attribute map to a target map with the same name and data
+	 * type.
+	 * @param sourceAttributeName The source attribute name
+	 */
 	public Mapping(String sourceAttributeName) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = sourceAttributeName;
 	}
 
+	/**
+	 * Creates a mapping definition that will map the specified attribute name
+	 * from a source attribute map to a target map with the same name. The type
+	 * converter will be applied to the target value during the conversion.
+	 * @param sourceAttributeName The source attribute name
+	 * @param valueTypeConverter the type converter
+	 */
 	public Mapping(String sourceAttributeName, TypeConverter valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = sourceAttributeName;
 		this.valueTypeConverter = valueTypeConverter;
 	}
 
+	/**
+	 * Creates a mapping definition that will map the specified attribute name
+	 * from a source attribute map to a target map with the specified target
+	 * name.
+	 * @param sourceAttributeName The source attribute name
+	 * @param targetAttributeName The target attribute name
+	 */
 	public Mapping(String sourceAttributeName, String targetAttributeName) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = targetAttributeName;
 	}
 
+	/**
+	 * Creates a mapping definition that will map the specified attribute name
+	 * from a source attribute map to a target map with the specified target
+	 * name. The type converter will be applied to the target value during the
+	 * conversion.
+	 * @param sourceAttributeName The source attribute name
+	 * @param targetAttributeName The target attribute name
+	 * @param valueTypeConverter the type converter
+	 */
 	public Mapping(String sourceAttributeName, String targetAttributeName, TypeConverter valueTypeConverter) {
 		setSourceAttributeName(sourceAttributeName);
 		this.targetAttributeName = targetAttributeName;
@@ -66,6 +96,15 @@ public class Mapping implements Serializable {
 		this.sourceAttributeName = sourceAttributeName;
 	}
 
+	/**
+	 * Map the <code>sourceAttributeName</code> in the source map to the
+	 * <code>targetAttributeName</code> target map, performing type conversion
+	 * if neccessary.
+	 * @param source The source map accessor
+	 * @param target The target map accessor
+	 * @param mapMissingAttributesToNull map attributes that aren't present to a
+	 *        null value?
+	 */
 	public void map(AttributeAccessor source, AttributeSetter target, boolean mapMissingAttributesToNull) {
 		Object value;
 		BeanWrapper beanAccessor = null;
@@ -123,7 +162,7 @@ public class Mapping implements Serializable {
 		}
 	}
 
-	private BeanWrapper createBeanWrapper(Object attribute) {
+	protected BeanWrapper createBeanWrapper(Object attribute) {
 		return new BeanWrapperImpl(attribute);
 	}
 }

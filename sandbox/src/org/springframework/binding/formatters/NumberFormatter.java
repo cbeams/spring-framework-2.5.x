@@ -22,7 +22,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
 /**
- * Converts from <code>Number<code> to <code>String</code> and back.
+ * Converts from various
+ * <code>Number<code> specializations to <code>String</code> and back.
  * @author Keith Donald
  */
 public class NumberFormatter extends AbstractFormatter {

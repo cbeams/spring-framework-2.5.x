@@ -80,7 +80,7 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	}
 
 	public ParameterizableAttributeMapper(Collection mappings) {
-		setMappings(mappings);
+		setMappingsCollection(mappings);
 	}
 
 	public ParameterizableAttributeMapper(Map mappingsMap) {
@@ -105,9 +105,9 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	 * value naming the attribute in the target model. If the list item is
 	 * itself a List, then that list is itself evaluated recursively, and must
 	 * itself contain Strings, Mapping objects, Lists, or Maps.
-	 * @param mappings The input mappings
+	 * @param mappings The mappings
 	 */
-	public void setMappings(Collection mappings) {
+	public void setMappingsCollection(Collection mappings) {
 		this.mappings = new HashSet();
 		putCollectionMappings(this.mappings, mappings);
 	}
@@ -119,11 +119,11 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	 *       containing one item which is a Map. Each map entry must be a String
 	 *       key naming the attribute in the parent flow, and a String value
 	 *       naming the attribute in the child flow.
-	 * @param inputMappings The input mappings
+	 * @param mappingsMap The mappings map
 	 */
-	public void setMappingsMap(Map inputMappings) {
+	public void setMappingsMap(Map mappingsMap) {
 		this.mappings = new HashSet();
-		putMapMappings(this.mappings, inputMappings);
+		putMapMappings(this.mappings, mappingsMap);
 	}
 
 	/**
