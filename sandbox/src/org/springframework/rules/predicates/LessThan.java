@@ -44,6 +44,10 @@ public class LessThan extends ComparisonBinaryPredicate implements
     public static BinaryPredicate instance() {
         return INSTANCE;
     }
+    
+    public static BinaryPredicate instance(Comparator c) {
+        return new LessThan(c);
+    }
 
     public String toString() {
         return RelationalOperator.LESS_THAN.toString();

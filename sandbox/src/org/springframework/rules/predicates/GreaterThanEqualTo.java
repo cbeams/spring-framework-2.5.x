@@ -46,6 +46,10 @@ public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
         return INSTANCE;
     }
 
+    public static BinaryPredicate instance(Comparator c) {
+        return new GreaterThanEqualTo(c);
+    }
+
     public String toString() {
         return RelationalOperator.GREATER_THAN_EQUAL_TO.toString();
     }

@@ -16,7 +16,9 @@
 package org.springframework.rules.predicates;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
+import org.springframework.rules.BinaryPredicate;
 import org.springframework.rules.Constraints;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.Assert;
@@ -33,7 +35,8 @@ public final class Range implements Serializable, UnaryPredicate {
     private UnaryPredicate rangeConstraint;
 
     /**
-     * Creates a range with the specified min and max edges.
+     * Creates a range with the specified <code>Comparable</code> min and max
+     * edges.
      * 
      * @param min
      *            the low edge of the range
@@ -41,19 +44,44 @@ public final class Range implements Serializable, UnaryPredicate {
      *            the high edge of the range
      */
     public Range(Comparable min, Comparable max) {
-        Assert.isTrue(min != null && max != null);
-        Assert.isTrue(min.getClass() == max.getClass());
+        commonAssert(min, max);
         Assert.isTrue(LessThanEqualTo.instance().test(min, max), "Minimum "
                 + min + " must be less than maximum " + max);
-        UnaryPredicate minimum = Constraints.bind(GreaterThanEqualTo
-                .instance(), min);
-        UnaryPredicate maximum = Constraints.bind(LessThanEqualTo
-                .instance(), max);
-        this.rangeConstraint = new UnaryAnd(minimum, maximum);
+        UnaryPredicate minimum = Constraints.bind(
+                GreaterThanEqualTo.instance(), min);
+        UnaryPredicate maximum = Constraints.bind(LessThanEqualTo.instance(),
+                max);
+        this.rangeConstraint = Constraints.and(minimum, maximum);
     }
 
     /**
-     * Test if the specified comparable argument falls within the range.
+     * Creates a range with the specified min and max edges.
+     * 
+     * @param min
+     *            the low edge of the range
+     * @param max
+     *            the high edge of the range
+     * @param comparator
+     *            the comparator to use to perform value comparisons
+     */
+    public Range(Object min, Object max, Comparator comparator) {
+        commonAssert(min, max);
+        BinaryPredicate lessThanEqualTo = LessThanEqualTo.instance(comparator);
+        Assert.isTrue(lessThanEqualTo.test(min, max), "Minimum " + min
+                + " must be less than maximum " + max);
+        UnaryPredicate minimum = Constraints.bind(GreaterThanEqualTo
+                .instance(comparator), min);
+        UnaryPredicate maximum = Constraints.bind(lessThanEqualTo, max);
+        this.rangeConstraint = Constraints.and(minimum, maximum);
+    }
+
+    private void commonAssert(Object min, Object max) {
+        Assert.isTrue(min != null && max != null);
+        Assert.isTrue(min.getClass() == max.getClass());
+    }
+
+    /**
+     * Test if the specified argument falls within the established range.
      * 
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */

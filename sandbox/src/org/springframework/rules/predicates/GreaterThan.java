@@ -44,10 +44,13 @@ public class GreaterThan extends ComparisonBinaryPredicate implements
     public static BinaryPredicate instance() {
         return INSTANCE;
     }
-    
+
+    public static BinaryPredicate instance(Comparator c) {
+        return new GreaterThan(c);
+    }
+
     public String toString() {
         return RelationalOperator.GREATER_THAN.toString();
     }
-
 
 }

@@ -46,6 +46,10 @@ public class LessThanEqualTo extends ComparisonBinaryPredicate implements
         return INSTANCE;
     }
 
+    public static BinaryPredicate instance(Comparator c) {
+        return new LessThanEqualTo(c);
+    }
+
     public String toString() {
         return RelationalOperator.LESS_THAN_EQUAL_TO.toString();
     }
