@@ -40,7 +40,7 @@
     <title>Binding data using the <literal>DataBinder</literal></title>
 
     <para>The DataBinder builds on top of the BeanWrapper<footnote>
-        <para>See <link linkend="beans-beans">the beans chapter</link> for
+        <para>See <link linkend="beans">the beans chapter</link> for
         more information</para>
       </footnote>.</para>
   </sect1>

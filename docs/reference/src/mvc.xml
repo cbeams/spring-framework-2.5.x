@@ -182,7 +182,7 @@
     <para>In the example above, all requests ending with
     <literal>.form</literal> will be handled by the DispatcherServlet. Then,
     the DispatcherServlet needs to be configured. As illustrated in <xref
-    linkend="context" />, ApplicationContexts in Spring can be scoped. In the
+    linkend="context-introduction" />, ApplicationContexts in Spring can be scoped. In the
     web framework, each DispatcherServlet has its own
     <literal>WebApplicationContext</literal>, which contains the
     DispatcherServlet configuration beans. The default BeanFactory used by the

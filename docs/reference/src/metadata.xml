@@ -151,8 +151,8 @@ public void echoException(Exception ex) throws Exception {
     <literal>org.springframework.metadata.Attributes</literal> interface for
     other metadata providers.</para>
 
-    <para><emphasis role="bold">Commons Attributes 2.0</emphasis> (<link
-    linkend="???">http://jakarta.apache.org/commons/sandbox/attributes/</link>)
+    <para><emphasis role="bold">Commons Attributes 2.0</emphasis> (<ulink
+    url="http://jakarta.apache.org/commons/sandbox/attributes">http://jakarta.apache.org/commons/sandbox/attributes/</ulink>)
     is a capable attributes solution. It supports attribute configuration via
     constructor arguments and JavaBean properties, which offers better
     self-documentation in attribute definitions. (Support for JavaBean
