@@ -17,7 +17,7 @@
 package org.springframework.transaction.support;
 
 /**
- * Interface for callbacks after transaction completion.
+ * Interface for transaction synchronization callbacks.
  * Supported by AbstractPlatformTransactionManager.
  * @author Juergen Hoeller
  * @since 02.06.2003
@@ -26,31 +26,27 @@ package org.springframework.transaction.support;
  */
 public interface TransactionSynchronization {
 
-	/**
-	 * Completion status in case of proper commit
-	 */
+	/** Completion status in case of proper commit */
 	int STATUS_COMMITTED = 0;
 
-	/**
-	 * Completion status in case of proper rollback
-	 */
+	/** Completion status in case of proper rollback */
 	int STATUS_ROLLED_BACK = 1;
 
-	/**
-	 * Status in case of heuristic mixed completion or system errors
-	 */
+	/** Completion status in case of heuristic mixed completion or system errors */
 	int STATUS_UNKNOWN = 2;
 	
 
 	/**
 	 * Suspend this synchronization. Supposed to unbind resources
 	 * from TransactionSynchronizationManager if managing any.
+	 * @see TransactionSynchronizationManager#unbindResource
 	 */
 	void suspend();
 
 	/**
 	 * Resume this synchronization. Supposed to rebind resources
 	 * to TransactionSynchronizationManager if managing any.
+	 * @see TransactionSynchronizationManager#bindResource
 	 */
 	void resume();
 
@@ -61,28 +57,35 @@ public interface TransactionSynchronization {
 	 * and cause a rollback of the transaction.
 	 * @param readOnly if the transaction is defined as read-only transaction 
 	 * @throws RuntimeException in case of errors
+	 * (note: do not throw TransactionException subclasses here!)
+	 * @see #beforeCompletion
 	 */
 	void beforeCommit(boolean readOnly);
 
 	/**
-	 * Invoked before transaction commit/rollback (after "beforeCommit").
-	 * Can e.g. perform proper resource cleanup.
+	 * Invoked before transaction commit/rollback (after "beforeCommit", even
+	 * if beforeCommit threw an exception). Can e.g. perform resource cleanup.
 	 * <p>Note that exceptions will get propagated to the commit caller
 	 * and cause a rollback of the transaction.
 	 * @throws RuntimeException in case of errors
+	 * (note: do not throw TransactionException subclasses here!)
+	 * @see #beforeCommit
+	 * @see #afterCompletion
 	 */
 	void beforeCompletion();
 
 	/**
-	 * Invoked after transaction commit/rollback.
-	 * Can e.g. perform proper resource cleanup.
+	 * Invoked after transaction commit/rollback. Can e.g. perform resource
+	 * cleanup, in this case after transaction completion.
 	 * <p>Note that exceptions will get propagated to the commit or rollback
 	 * caller, although they will not influence the outcome of the transaction.
-	 * @param status completion status according to the STATUS_ constants
+	 * @param status completion status according to the STATUS_* constants
 	 * @throws RuntimeException in case of errors
+	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #STATUS_COMMITTED
 	 * @see #STATUS_ROLLED_BACK
 	 * @see #STATUS_UNKNOWN
+	 * @see #beforeCompletion
 	 */
 	void afterCompletion(int status);
 

@@ -36,6 +36,7 @@ import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
 import org.easymock.MockControl;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -593,6 +594,93 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 
 		assertTrue("Correct result list", result == l);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testJtaTransactionWithFlushFailure() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.rollback();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		final MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		TransactionTemplate tt = JtaTransactionTestSuite.getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		final List l = new ArrayList();
+		l.add("test");
+		final HibernateException flushEx = new HibernateException("flush failure");
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					try {
+						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+						HibernateTemplate ht = new HibernateTemplate(sf);
+						List htl = ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(Session sess) {
+								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+								assertEquals(session, sess);
+								return l;
+							}
+						});
+						ht = new HibernateTemplate(sf);
+						htl = ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(Session sess) {
+								assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+								assertEquals(session, sess);
+								return l;
+							}
+						});
+						assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+						sessionControl.verify();
+						sessionControl.reset();
+						try {
+							session.getFlushMode();
+							sessionControl.setReturnValue(FlushMode.AUTO, 1);
+							session.flush();
+							sessionControl.setThrowable(flushEx);
+							session.close();
+							sessionControl.setReturnValue(null, 1);
+						}
+						catch (HibernateException e) {
+						}
+						sessionControl.replay();
+						return htl;
+					}
+					catch (Error err) {
+						err.printStackTrace();
+						throw err;
+					}
+				}
+			});
+		}
+		catch (DataAccessException ex) {
+			// expected
+			assertTrue(flushEx == ex.getCause());
+		}
+
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 

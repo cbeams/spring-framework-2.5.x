@@ -58,7 +58,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.23 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.24 2004-03-26 11:04:32 jhoeller Exp $
  * @see #setTransactionSynchronization
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -306,22 +306,25 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		else {
 			try {
+				boolean beforeCompletionInvoked = false;
 				try {
 					triggerBeforeCommit(defStatus);
-					triggerBeforeCompletion(defStatus);
+					triggerBeforeCompletion(defStatus, null);
+					beforeCompletionInvoked = true;
 					if (status.isNewTransaction()) {
 						logger.info("Initiating transaction commit");
 						doCommit(defStatus);
 					}
 				}
 				catch (UnexpectedRollbackException ex) {
+					// can only be caused by doCommit
 					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 					throw ex;
 				}
 				catch (TransactionException ex) {
+					// can only be caused by doCommit
 					if (this.rollbackOnCommitFailure) {
 						doRollbackOnCommitException(defStatus, ex);
-						triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 					}
 					else {
 						triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
@@ -329,13 +332,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					throw ex;
 				}
 				catch (RuntimeException ex) {
+					if (!beforeCompletionInvoked) {
+						triggerBeforeCompletion(defStatus, ex);
+					}
 					doRollbackOnCommitException(defStatus, ex);
-					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 					throw ex;
 				}
 				catch (Error err) {
+					if (!beforeCompletionInvoked) {
+						triggerBeforeCompletion(defStatus, err);
+					}
 					doRollbackOnCommitException(defStatus, err);
-					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, err);
 					throw err;
 				}
 				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_COMMITTED, null);
@@ -356,7 +363,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		try {
 			try {
-				triggerBeforeCompletion(defStatus);
+				triggerBeforeCompletion(defStatus, null);
 				if (status.isNewTransaction()) {
 					logger.info("Initiating transaction rollback");
 					doRollback(defStatus);
@@ -371,9 +378,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					logger.info("Should roll back transaction but cannot - no transaction available");
 				}
 			}
-			catch (TransactionException ex) {
+			catch (RuntimeException ex) {
 				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
 				throw ex;
+			}
+			catch (Error err) {
+				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, err);
+				throw err;
 			}
 			triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, null);
 		}
@@ -401,14 +412,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		catch (TransactionException tex) {
 			logger.error("Commit exception overridden by rollback exception", ex);
+			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, ex);
 			throw tex;
 		}
+		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 	}
 
 	/**
-	 * Trigger beforeCommit callback, handling rollback exceptions properly.
+	 * Trigger beforeCommit callback.
 	 * @param status object representing the transaction
-	 * @throws TransactionException in case of a rollback error
 	 */
 	private void triggerBeforeCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
@@ -423,30 +435,41 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Trigger beforeCompletion callback.
 	 * @param status object representing the transaction
-	 * @throws TransactionException in case of a rollback error
+	 * @param ex the thrown application exception or error, or null
 	 */
-	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
+	private void triggerBeforeCompletion(DefaultTransactionStatus status, Throwable ex) {
 		if (status.isNewSynchronization()) {
 			logger.debug("Triggering beforeCompletion synchronization");
-			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				synchronization.beforeCompletion();
+			try {
+				for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+					TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+					synchronization.beforeCompletion();
+				}
+			}
+			catch (RuntimeException tsex) {
+				if (ex != null) {
+					logger.error("Rollback exception overridden by synchronization exception", ex);
+				}
+				throw tsex;
+			}
+			catch (Error tserr) {
+				if (ex != null) {
+					logger.error("Rollback exception overridden by synchronization exception", ex);
+				}
+				throw tserr;
 			}
 		}
 	}
 
 	/**
-	 * Trigger afterCompletion callback, handling rollback exceptions properly.
+	 * Trigger afterCompletion callback, handling exceptions properly.
 	 * @param status object representing the transaction
 	 * @param completionStatus completion status according to TransactionSynchronization constants
 	 * @param ex the thrown application exception or error, or null
-	 * @throws TransactionException in case of a rollback error
 	 */
 	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus, Throwable ex) {
 		if (status.isNewSynchronization()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Triggering afterCompletion synchronization");
-			}
+			logger.debug("Triggering afterCompletion synchronization");
 			try {
 				for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
 					TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
