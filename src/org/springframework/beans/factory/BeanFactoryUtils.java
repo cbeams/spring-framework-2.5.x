@@ -91,10 +91,13 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
-	 * @param lbf ListableBeanFactory. If this isn't also a HierarchicalBeanFactory,
-	 * this method will return the same as it's own getBeanDefinitionNames() method.
+	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather the
+	 * FactoryBean instances themselves. Use <code>beansOfTypeIncludingAncestors</code>
+	 * to match objects created by FactoryBeans.
+	 * @param lbf the bean factory
 	 * @param type the type that beans must match
 	 * @return the array of bean names, or an empty array if none
+	 * @see #beansOfTypeIncludingAncestors
 	 */
 	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf, Class type) {
 		Set result = new HashSet();

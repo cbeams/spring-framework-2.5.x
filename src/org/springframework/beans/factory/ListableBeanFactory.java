@@ -30,19 +30,24 @@ import org.springframework.beans.BeansException;
  *
  * <p>If this is a HierarchicalBeanFactory, the return values will <i>not</i> take
  * any BeanFactory hierarchy into account, but will relate only to the beans defined
- * in the current factory. Use the BeanFactoryUtils helper class to get all beans.
+ * in the current factory. Use the BeanFactoryUtils helper class to consider beans
+ * in ancestor factories too.
  * 
  * <p>The methods in this interface will just respect bean definitions of this factory.
  * They will ignore any singleton beans that have been registered by other means like
- * ConfigurableBeanFactory's registerSingleton. Use BeanFactory's methods to access such
- * beans. In typical scenarios, all beans will be defined by bean definitions anyway.
+ * ConfigurableBeanFactory's <code>registerSingleton</code> method, with the exception
+ * of <code>getBeansOfType</code> which will match such manually registered singletons
+ * too. Of course, BeanFactory's methods do allow access to such special beans too.
+ * In typical scenarios, all beans will be defined by bean definitions anyway.
  *
- * <p>With the exception of getBeanDefinitionCount(), the methods in this interface
- * are not designed for frequent invocation. Implementations may be slow.
+ * <p>With the exception of <code>getBeanDefinitionCount</code> and
+ * <code>containsBeanDefinition</code>, the methods in this interface are
+ * not designed for frequent invocation. Implementations may be slow.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
+ * @see HierarchicalBeanFactory
  * @see BeanFactoryUtils
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerSingleton
  */
@@ -50,7 +55,9 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Return the number of beans defined in the factory.
-	 * Does not consider any hierarchy this factory may participate in.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>countBeansIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @return the number of beans defined in the factory
@@ -60,7 +67,9 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Return the names of all beans defined in this factory.
-	 * Does not consider any hierarchy this factory may participate in.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>beanNamesIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @return the names of all beans defined in this factory,
@@ -71,21 +80,28 @@ public interface ListableBeanFactory extends BeanFactory {
 	
 	/**
 	 * Return the names of beans matching the given type (including subclasses),
-	 * judging from the bean definitions. Will <i>not</i> consider FactoryBeans,
-	 * as the type of their created objects is not known before instantiation.
-	 * Does not consider any hierarchy this factory may participate in.
+	 * judging from the bean definitions. Merges child bean definition with
+	 * their parent before checking the type.
+	 * <p>Does <i>not</i> consider objects created by FactoryBeans but rather
+	 * the FactoryBean instances themselves. Use <code>getBeansOfType</code>
+	 * to match objects created by FactoryBeans.)
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>beanNamesIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @param type the class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
+	 * @see #getBeansOfType
 	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
 	 */
 	String[] getBeanDefinitionNames(Class type);
 
 	/**
 	 * Check if this bean factory contains a bean definition with the given name.
-	 * Does not consider any hierarchy this factory may participate in.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use <code>containsBean</code> to check ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @param name the name of the bean to look for
@@ -97,11 +113,13 @@ public interface ListableBeanFactory extends BeanFactory {
 	/**
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
-	 * getObjectType() in the case of FactoryBeans.
-	 * Does not consider any hierarchy this factory may participate in.
-	 * <p>If FactoryBean's getObjectType() returns null and the bean is a
-	 * singleton, the type of the actually created objects should be evaluated.
+	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p>If FactoryBean's <code>getObjectType</code> returns null and the bean is
+	 * a singleton, the type of the actually created objects should be evaluated.
 	 * Prototypes without explicit object type specification should be ignored.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
 	 * <p>This version of getBeansOfType matches all kinds of beans, be it
@@ -120,11 +138,13 @@ public interface ListableBeanFactory extends BeanFactory {
 	/**
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
-	 * getObjectType() in the case of FactoryBeans.
-	 * Does not consider any hierarchy this factory may participate in.
-	 * <p>If FactoryBean's getObjectType() returns null and the bean is a
-	 * singleton, the type of the actually created objects should be evaluated.
+	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p>If FactoryBean's <code>getObjectType</code> returns null and the bean is
+	 * a singleton, the type of the actually created objects should be evaluated.
 	 * Prototypes without explicit object type specification should be ignored.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
 	 * @param type the class or interface to match, or null for all concrete beans
