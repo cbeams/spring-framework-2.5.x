@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties like flushing behavior.
+ * properties like SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly. See HibernateTemplate and HibernateInterceptor.
  *
@@ -155,7 +155,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
-			this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(this.sessionFactory);
+			this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
 		}
 		return this.jdbcExceptionTranslator;
 	}
@@ -195,7 +195,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * for the specified SessionFactory if none set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.sessionFactory == null) {
+		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
 		getJdbcExceptionTranslator();
