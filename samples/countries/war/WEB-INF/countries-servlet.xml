@@ -30,7 +30,9 @@
 		-->
 	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
 
-	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver"/>
+	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+		<property name="defaultThemeName"><value>spring</value></property>
+      </bean>
 
 	<!--
 	 - Explicit URL handler mapping instead of default BeanNameUrlHandlerMapping.

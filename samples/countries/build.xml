@@ -22,7 +22,7 @@
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jdbc2_0-stdext.jar"/>
-			<include name="servlet-api.jar"/>
+			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/itext">
 			<include name="*.jar"/>
@@ -137,6 +137,7 @@
 			<include name="docs/**"/>
 			<include name="images/**"/>
 			<include name="themes/**"/>
+			<include name="js/**"/>
 			<include name="WEB-INF/*.*"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>

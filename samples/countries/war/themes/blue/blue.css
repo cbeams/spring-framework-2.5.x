@@ -50,7 +50,7 @@ div#nav li {padding: 0;margin:0;border:none;display: inline;}
 div#nav li a {BORDER-TOP-WIDTH: 0px; BORDER-RIGHT: #b9bbff 5px solid; PADDING-RIGHT: 10px; DISPLAY: block; PADDING-LEFT: 10px; BORDER-LEFT-WIDTH: 0px; BACKGROUND: #696dff; BORDER-BOTTOM-WIDTH: 0px; PADDING-BOTTOM: 2px; MARGIN: 0px 0px 1px; COLOR: #fffae1; PADDING-TOP: 2px; TEXT-ALIGN: center; TEXT-DECORATION: none; font-weight: bold;}
 div#nav li a:hover {BORDER-RIGHT: white 5px double; BACKGROUND: #ffee91; COLOR: #009}
 div#nav li a span {DISPLAY: none}
-div#nav li a:hover span {PADDING-RIGHT: 5px; DISPLAY: block; PADDING-LEFT: 5px; Z-INDEX: 100; BACKGROUND: #000250; LEFT: 0px; PADDING-BOTTOM: 5px; MARGIN: 10px; font-size: 10px; WIDTH: 110px; COLOR: #aaa; PADDING-TOP: 5px; POSITION: absolute; TOP: 200px; TEXT-ALIGN: center}
+div#nav li a:hover span {PADDING-RIGHT: 5px; DISPLAY: block; PADDING-LEFT: 5px; Z-INDEX: 100; BACKGROUND: #000250; LEFT: 0px; PADDING-BOTTOM: 5px; MARGIN: 10px; font-size: 10px; WIDTH: 110px; COLOR: #aaa; PADDING-TOP: 5px; POSITION: absolute; TOP: 240px; TEXT-ALIGN: center}
 div#nav p {WIDTH: 135px;border: none;margin: 0em;}
 
 /* ========= PIED DE PAGE ========== */
@@ -74,3 +74,5 @@ div#top {background-color: #E4EFF3;background-image: url(logo.gif);background-po
 div#content .pager table {font-size: 10px;}
 div#content .psize {float: right;width:auto;}
 .odd {background-color: #f0f3ff;color: #009}
+.even {background-color: white;color: #009}
+tr.ruled { cursor: pointer; background: #dfdfff; }

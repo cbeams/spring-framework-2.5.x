@@ -28,6 +28,9 @@ div#top {background-color: #E4EFF3;background-image: url(logo.gif);background-po
 img {border: none;}
 
 .odd {background-color: #f0f3f6;}
+.even {background-color: white;}
+tr.ruled { cursor: pointer; background: #dfdfff; }
+
 .pagernav {float: left;color: #000; font-weight: bold; margin: 0;padding: 2px;text-align: right; font-size: 18px;}
 .pagernav a {text-decoration: none;}
 .pagernav a:hover {background-color: #0006f0;color: #fff;}

@@ -1,8 +1,11 @@
 =========================================
 == Spring Countries sample application ==
+== focused on some Spring MVC features ==
+-----------------------------------------
+        This demo can be seen at
+  http://spring.jppawlak.info/countries
 =========================================
-
-@author Jean-Pierre Pawlak
+       @author Jean-Pierre Pawlak
 
 
 1. BUILD AND DEPLOYMENT
@@ -24,7 +27,39 @@ Note on enabling Log4J:
 - uncomment the Log4J listener in war/WEB-INF/web.xml
 
 
-2. SCENARIOS
+2. TOPICS
+ 
+a) Localizing an application.
+	The two approaches are shown.
+	- The most usual uses the same page with localized messages and/or images.
+	- The second one uses a page par locale when almost the entire page has to be localized.
+b) The use of themes. 
+	This use is near to the "alternative" stylesheet feature. 
+	But it works also with browsers that have not implemented the alternative
+	stylesheets like IE/WIN.  
+
+	In the real world, you will rarely have images with localized text embedded. 
+	But if you are faced to this situation, this sample shows how to deal with.
+c) Creating PDF and/or Excel documents on the fly.
+	This sample shows also how number the pages in a PDF document.
+
+d) The use of composed views as a light (and less powerfull but often sufficient) alternative to tiles.
+
+e) The use of the "refreshedPagedList".
+
+
+3. SCENARIOS
+
+The scenarios's aim is only to demonstrate the change between a memory implementation
+of the countries and a database one. This, just by changing the DAO implementation in 
+the configuration files. The code, for its part, deals only with the common interface.
+
+The most complicated scenario is the second one, when the two 
+DAOs are used at the same time to be able to pick up the data from memory to the database.
+
+By the way, this second scenario gives the opportunity to create a custom interceptor 
+which detects at runtime the scenario in order to propose the database data loading.
+
 
 Default scenario
 ----------------
@@ -73,12 +108,4 @@ new generated war file.
 You don't have the 'copy' choice, because the application checks the configuration 
 and allow this only when a secondDao of 'DATABASE' type is detected.
 
-And then ?
-----------
-It rest to look at the sources and configuration to study and understand what you
-made and how. 
-This demo uses just a few Jdbc capabilities of Spring, mainly to demonstrate 
-the simple switching between two DAOs implementing the same interface.
-For the rest, the focus is on the web part of the framework. Nevertheless, the
-current demo doesn't show the user input nor the validation process.
 

@@ -1,16 +1,20 @@
 <%@ include file="../../common/includes.jsp" %>
 
-<script language="javascript">
+<script type="text/javascript">
+<!--
   function go(country) {
     var url = "<c:url value="/main/detail.htm"/>?code=" + country;
     window.location = url;
   }
+//-->
 </script>
+<script type="text/javascript" src="<c:url value="/js/countries.js"/>"></script>
 
 <fmt:message key="lnk.countries.main" var="lnk"/>
 <h2><fmt:message key="countries.main.title"/></h2>
   <form action="" method="POST">
-	<table>
+	<table class="stripe ruler">
+        <thead>
 	  <tr class="title">
 	    <th><a href="<c:url value="/${lnk}"><c:param name="sort.property" value="name"/></c:url>"><fmt:message key="name"/></a></th>
 	    <th><a href="<c:url value="/${lnk}"><c:param name="sort.property" value="code"/></c:url>"><fmt:message key="code"/></a></th>
@@ -32,15 +36,15 @@
            </select>
 	    </td>
 	  </tr>
-	  <c:forEach items="${countries.pageList}" var="cntry" varStatus="s">
-	    <tr <c:if test="${s.count % 2 == 0}">class="odd"</c:if>
-	      onclick="go('<c:out value="${cntry.code}"/>')" 
-	      onmouseover="this.style.cursor = 'hand';this.style.backgroundColor = '#dfdfff'" 
-	      onmouseout="this.style.backgroundColor = ''">
+        </thead>
+        <tbody>
+	  <c:forEach items="${countries.pageList}" var="cntry">
+	    <tr onclick="go('<c:out value="${cntry.code}"/>')"> 
 	      <td><c:out value="${cntry.name}"/></td>
 	      <td><c:out value="${cntry.code}"/></td>
 	    </tr>
 	  </c:forEach>
+        </tbody>
 	</table>
 
     <hr/>
@@ -110,3 +114,12 @@
     </c:choose>
 
   </form>
+
+<script type="text/javascript">
+<!--
+window.onload = function() {
+  tableruler();
+  tablestripe();
+}
+//-->
+</script>
