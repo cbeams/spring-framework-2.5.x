@@ -39,16 +39,6 @@
 		class="org.springframework.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
-
-	<bean id="factoryPassThrough"
-		class="org.springframework.beans.factory.DummyFactory">
-		<property name="singleton"><value>true</value></property>
-		<property name="propertyValues">
-			<value>
-			name=passThrough
-			</value>
-		</property>
-	</bean>
 	
 	<!--
 	 <bean name="agistListener" class="org.springframework.beans.factory.AbstractBeanFactoryTests$AgistListener" />

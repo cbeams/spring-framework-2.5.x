@@ -50,9 +50,9 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	public void testCount() {
-		assertTrue("should have 17 beans, not " +
+		assertTrue("should have 14 beans, not " +
 							 this.applicationContext.getBeanDefinitionCount(),
-							 this.applicationContext.getBeanDefinitionCount() == 15);
+							 this.applicationContext.getBeanDefinitionCount() == 14);
 	}
 
 	/**
