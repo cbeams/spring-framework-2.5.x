@@ -1,12 +1,14 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.127 2004-04-13 12:22:37 trisberg Exp $
+$Id: changelog.txt,v 1.128 2004-04-14 18:59:21 johnsonr Exp $
 
 
-Changes in version 1.0.1 (11.4.2003)
+Changes in version 1.0.1 (18.4.2003)
 ------------------------------------
 
 Package org.springframework.aop
+* AdvisedSupport: added addAfterReturningAdvice() method
+* Advised: added addBeforeAdvice(), addAfterReturningAdvice() and addThrowsAdvice() methods, now available on all Spring AOP proxies
 * refined usage of AopConfigException, to avoid cyclic dependencies between org.springframework.aop subpackages
 * moved internal class AopUtils from package aop.framework.support to aop.support, to avoid cyclic package dependencies
 
