@@ -27,7 +27,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.8 2003-11-11 18:31:51 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.9 2003-11-12 20:14:32 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -62,7 +62,8 @@ public class BeanFactoryTransactionTests extends TestCase {
 		preCounter.counter = 0;
 		postCounter.counter = 0;
 		executeGetsAreNotTransactional(testBean);
-		assertEquals(4, txnCounter.counter);
+		// Can't assert it's equal to 4 as the pointcut may be optimized and only invoked once
+		assertTrue(0 < txnCounter.counter && txnCounter.counter <= 4);
 		assertEquals(4, preCounter.counter);
 		assertEquals(4, postCounter.counter);
 	}
