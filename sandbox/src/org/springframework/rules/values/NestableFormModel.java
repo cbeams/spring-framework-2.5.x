@@ -22,6 +22,6 @@ package org.springframework.rules.values;
 public interface NestableFormModel extends FormModel {
     public void setParent(NestingFormModel parent);
 
-    public ValueModel getValueModel(String domainObjectProperty,
+    public ValueModel getValueModel(String formPropertyPath,
             boolean queryParent);
 }

@@ -23,7 +23,7 @@ import java.util.Map;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.values.AspectAccessStrategy;
+import org.springframework.rules.values.PropertyAccessStrategy;
 
 /**
  * @author Keith Donald
@@ -94,8 +94,8 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
     }
     
     private Object getPropertyValue(String propertyName) {
-        if (bean instanceof AspectAccessStrategy) {
-            return ((AspectAccessStrategy)bean).getValue(propertyName);
+        if (bean instanceof PropertyAccessStrategy) {
+            return ((PropertyAccessStrategy)bean).getValue(propertyName);
         }
         else {
             return new GetProperty(bean).evaluate(propertyName);

@@ -18,7 +18,7 @@ package org.springframework.rules.predicates.beans;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.Required;
-import org.springframework.rules.values.AspectAccessStrategy;
+import org.springframework.rules.values.PropertyAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -58,7 +58,7 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
         this.predicate = predicate;
     }
 
-    protected boolean test(AspectAccessStrategy domainObjectAccessStrategy) {
+    protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         if (predicate.test(domainObjectAccessStrategy)) {
             return Required.instance().test(
                     domainObjectAccessStrategy.getValue(getPropertyName()));

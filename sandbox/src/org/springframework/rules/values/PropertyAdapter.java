@@ -21,52 +21,52 @@ package org.springframework.rules.values;
  * 
  * @author Keith Donald
  */
-public class AspectAdapter extends AbstractValueModel {
-    private String aspect;
+public class PropertyAdapter extends AbstractValueModel {
+    private String propertyName;
 
-    private MutableAspectAccessStrategy aspectAccessStrategy;
+    private MutablePropertyAccessStrategy propertyAccessStrategy;
 
-    public AspectAdapter(MutableAspectAccessStrategy aspectAccessStrategy,
-            String aspect) {
-        if (aspectAccessStrategy.getDomainObjectHolder() != null) {
+    public PropertyAdapter(MutablePropertyAccessStrategy propertyAccessStrategy,
+            String propertyName) {
+        if (propertyAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("[Aspect Adapter for aspect '" + aspect
+                logger.debug("[Aspect Adapter for aspect '" + propertyName
                         + "' attaching to mutable domain object holder.]");
             }
-            aspectAccessStrategy.getDomainObjectHolder().addValueListener(
+            propertyAccessStrategy.getDomainObjectHolder().addValueListener(
                     new ValueListener() {
                         public void valueChanged() {
                             if (logger.isDebugEnabled()) {
                                 logger
                                         .debug("[Notifying any dependents for '"
-                                                + AspectAdapter.this.aspect
+                                                + PropertyAdapter.this.propertyName
                                                 + "' the '"
-                                                + AspectAdapter.this.aspect
+                                                + PropertyAdapter.this.propertyName
                                                 + "' aspect value may have changed; target domain object changed]");
                             }
-                            AspectAdapter.this.fireValueChanged();
+                            PropertyAdapter.this.fireValueChanged();
                         }
                     });
         }
-        this.aspectAccessStrategy = aspectAccessStrategy;
-        this.aspect = aspect;
+        this.propertyAccessStrategy = propertyAccessStrategy;
+        this.propertyName = propertyName;
     }
 
     public void addValueListener(ValueListener l) {
         super.addValueListener(l);
-        aspectAccessStrategy.addValueListener(l, aspect);
+        propertyAccessStrategy.addValueListener(l, propertyName);
     }
 
     public void removeValueListener(ValueListener l) {
         super.removeValueListener(l);
-        aspectAccessStrategy.removeValueListener(l, aspect);
+        propertyAccessStrategy.removeValueListener(l, propertyName);
     }
 
     public Object get() {
-        return aspectAccessStrategy.getValue(aspect);
+        return propertyAccessStrategy.getValue(propertyName);
     }
 
     public void set(Object value) {
-        aspectAccessStrategy.setValue(aspect, value);
+        propertyAccessStrategy.setValue(propertyName, value);
     }
 }

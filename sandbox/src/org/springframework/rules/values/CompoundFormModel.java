@@ -36,7 +36,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     private static final Log logger = LogFactory
             .getLog(CompoundFormModel.class);
 
-    private MutableAspectAccessStrategy domainObjectAccessStrategy;
+    private MutablePropertyAccessStrategy domainObjectAccessStrategy;
 
     private boolean bufferChanges;
 
@@ -53,12 +53,12 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
     }
 
     public CompoundFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy) {
+            MutablePropertyAccessStrategy domainObjectAccessStrategy) {
         this(domainObjectAccessStrategy, true);
     }
 
     public CompoundFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy,
+            MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.bufferChanges = bufferChanges;
@@ -82,7 +82,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName,
             String parentPropertyFormObjectPath) {
-        ValueModel valueHolder = new AspectAdapter(domainObjectAccessStrategy,
+        ValueModel valueHolder = new PropertyAdapter(domainObjectAccessStrategy,
                 parentPropertyFormObjectPath);
         if (bufferChanges) {
             valueHolder = new BufferedValueModel(valueHolder);
@@ -90,7 +90,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         if (valueHolder.get() == null) {
             valueHolder.set(BeanUtils
                     .instantiateClass(domainObjectAccessStrategy
-                            .getMetaAspectAccessor().getAspectClass(
+                            .getMetadataAccessStrategy().getPropertyType(
                                     parentPropertyFormObjectPath)));
             return createChild(childFormModelName, valueHolder, false);
         }
@@ -106,7 +106,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
 
     public MutableFormModel createChild(String childFormModelName,
             ValueModel childFormObjectHolder, boolean enabled) {
-        MutableAspectAccessStrategy childObjectAccessStrategy = domainObjectAccessStrategy
+        MutablePropertyAccessStrategy childObjectAccessStrategy = domainObjectAccessStrategy
                 .newNestedAccessor(childFormObjectHolder);
         ValidatingFormModel childModel = new ValidatingFormModel(
                 childObjectAccessStrategy);
@@ -287,7 +287,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         throw new UnsupportedOperationException();
     }
 
-    public boolean getBufferChanges() {
+    public boolean getBufferChangesDefault() {
         return bufferChanges;
     }
 

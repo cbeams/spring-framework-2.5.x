@@ -25,19 +25,19 @@ public interface FormModel {
 
     public Object getFormObject();
 
-    public ValueModel getDisplayValueModel(String formProperty);
+    public ValueModel getDisplayValueModel(String formPropertyPath);
 
-    public ValueModel getValueModel(String formProperty);
+    public ValueModel getValueModel(String formPropertyPath);
 
-    public String getDisplayValue(String formProperty);
+    public String getDisplayValue(String formPropertyPath);
 
-    public Object getValue(String formProperty);
+    public Object getValue(String formPropertyPath);
 
     public Map getErrors();
 
     public boolean getHasErrors();
 
-    public boolean getBufferChanges();
+    public boolean getBufferChangesDefault();
 
     public boolean isDirty();
 
@@ -53,9 +53,9 @@ public interface FormModel {
 
     public void removeValidationListener(ValidationListener listener);
 
-    public void addValueListener(String formProperty, ValueListener listener);
+    public void addValueListener(String formPropertyPath, ValueListener listener);
 
-    public void removeValueListener(String formProperty, ValueListener listener);
+    public void removeValueListener(String formPropertyPath, ValueListener listener);
 
     public void addCommitListener(CommitListener listener);
 

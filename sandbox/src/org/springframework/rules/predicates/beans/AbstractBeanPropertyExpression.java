@@ -4,7 +4,7 @@
  */
 package org.springframework.rules.predicates.beans;
 
-import org.springframework.rules.values.AspectAccessStrategy;
+import org.springframework.rules.values.PropertyAccessStrategy;
 import org.springframework.util.Assert;
 
 /**
@@ -34,8 +34,8 @@ public abstract class AbstractBeanPropertyExpression implements
     }
 
     public boolean test(Object o) {
-        if (o instanceof AspectAccessStrategy) {
-            return test((AspectAccessStrategy)o);
+        if (o instanceof PropertyAccessStrategy) {
+            return test((PropertyAccessStrategy)o);
         }
         else {
             return testJavaBean(o);
@@ -43,7 +43,7 @@ public abstract class AbstractBeanPropertyExpression implements
     }
 
     protected abstract boolean test(
-            AspectAccessStrategy domainObjectAccessStrategy);
+            PropertyAccessStrategy domainObjectAccessStrategy);
 
     protected abstract boolean testJavaBean(Object javaBean);
 

@@ -36,7 +36,8 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
+public class BeanPropertyAccessStrategy implements
+        MutablePropertyAccessStrategy {
     private static final Log logger = LogFactory
             .getLog(BeanPropertyAccessStrategy.class);
 
@@ -46,7 +47,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     private BeanWrapper beanWrapper;
 
-    private MetaAspectAccessStrategy metaAspectAccessor;
+    private PropertyMetadataAccessStrategy metaAspectAccessor;
 
     private boolean updatingValue;
 
@@ -114,18 +115,20 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         return key;
     }
 
-    public void registerCustomEditor(Class aspectType,
+    public void registerCustomEditor(Class propertyType,
             PropertyEditor propertyEditor) {
-        beanWrapper.registerCustomEditor(aspectType, propertyEditor);
+        beanWrapper.registerCustomEditor(propertyType, propertyEditor);
     }
 
-    public void registerCustomEditor(Class aspectType, String aspect,
+    public void registerCustomEditor(String propertyName,
             PropertyEditor propertyEditor) {
-        beanWrapper.registerCustomEditor(aspectType, aspect, propertyEditor);
+        beanWrapper.registerCustomEditor(getMetadataAccessStrategy()
+                .getPropertyType(propertyName), propertyName, propertyEditor);
     }
 
-    public PropertyEditor findCustomEditor(Class aspectType, String aspect) {
-        return beanWrapper.findCustomEditor(aspectType, aspect);
+    public PropertyEditor findCustomEditor(String propertyName) {
+        return beanWrapper.findCustomEditor(getMetadataAccessStrategy()
+                .getPropertyType(propertyName), propertyName);
     }
 
     public Object getValue(String aspect) {
@@ -145,7 +148,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
 
     public void setValue(String aspect, Object value) {
         if (beanHolder.get() == null) {
-            logger.warn("Attempt to set property on null reference; doing nothing...");
+            logger
+                    .warn("Attempt to set property on null reference; doing nothing...");
             return;
         }
         if (logger.isDebugEnabled()) {
@@ -164,7 +168,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         return updatingValue;
     }
 
-    public MetaAspectAccessStrategy getMetaAspectAccessor() {
+    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
         if (metaAspectAccessor == null) {
             this.metaAspectAccessor = new BeanPropertyMetaAspectAccessor(
                     beanWrapper);
@@ -173,7 +177,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     }
 
     private static class BeanPropertyMetaAspectAccessor implements
-            MetaAspectAccessStrategy {
+            PropertyMetadataAccessStrategy {
 
         private BeanWrapper beanWrapper;
 
@@ -181,7 +185,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
             this.beanWrapper = beanWrapper;
         }
 
-        public Class getAspectClass(String aspect) {
+        public Class getPropertyType(String aspect) {
             return beanWrapper.getPropertyDescriptor(aspect).getPropertyType();
         }
 
@@ -220,7 +224,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
         return beanHolder;
     }
 
-    public MutableAspectAccessStrategy newNestedAccessor(
+    public MutablePropertyAccessStrategy newNestedAccessor(
             ValueModel childValueHolder) {
         return new BeanPropertyAccessStrategy(childValueHolder);
     }

@@ -29,20 +29,20 @@ import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
 import org.springframework.rules.reporting.TypeResolvable;
+import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 
 /**
  * @author Keith Donald
  */
 public class ValidatingFormModel extends DefaultFormModel implements
-        AspectAccessStrategy {
+        PropertyAccessStrategy {
     private RulesSource rulesSource;
 
     private Map validationErrors = new HashMap();
 
     private List validationListeners = new ArrayList();
 
-    // @TODO property editor registry
     public ValidatingFormModel(Object domainObject) {
         super(domainObject);
     }
@@ -52,12 +52,12 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     public ValidatingFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy) {
+            MutablePropertyAccessStrategy domainObjectAccessStrategy) {
         super(domainObjectAccessStrategy);
     }
 
     public ValidatingFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy,
+            MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         super(domainObjectAccessStrategy, bufferChanges);
     }
@@ -66,8 +66,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
         this.rulesSource = rulesSource;
     }
 
-    public MetaAspectAccessStrategy getMetaAspectAccessor() {
-        return getAccessStrategy().getMetaAspectAccessor();
+    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
+        return getAccessStrategy().getMetadataAccessStrategy();
     }
 
     public Object getDomainObject() {
@@ -75,7 +75,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     public boolean getHasErrors() {
-        return validationErrors.size() > 0;
+        return this.validationErrors.size() > 0;
     }
 
     public Map getErrors() {
@@ -83,13 +83,14 @@ public class ValidatingFormModel extends DefaultFormModel implements
     }
 
     protected void clearErrors() {
-        Iterator it = validationErrors.keySet().iterator();
+        Iterator it = this.validationErrors.keySet().iterator();
         boolean hadErrorsBefore = getHasErrors();
         while (it.hasNext()) {
             BeanPropertyExpression exp = (BeanPropertyExpression)it.next();
             it.remove();
             fireConstraintSatisfied(exp);
         }
+        Assert.isTrue(getHasErrors() == false);
         if (hadErrorsBefore) {
             firePropertyChange(HAS_ERRORS_PROPERTY, true, false);
         }
@@ -138,11 +139,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
                         domainObjectProperty, editor);
             }
             else {
-                PropertyEditor editor = getAspectAccessStrategy()
-                        .findCustomEditor(
-                                getMetaAspectAccessor().getAspectClass(
-                                        domainObjectProperty),
-                                domainObjectProperty);
+                PropertyEditor editor = getPropertyAccessStrategy()
+                        .findCustomEditor(domainObjectProperty);
                 formValueModel = installTypeConverter(formValueModel,
                         domainObjectProperty, editor);
             }
@@ -216,7 +214,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     // of an explicit set(value) call...maybe value was updated
                     // underneath via another mechanism... this is kinda
                     // tricky...
-                    if (!valueIsSetting) {
+                    if (!valueIsSetting && isEnabled()) {
                         validate();
                     }
                 }
@@ -227,15 +225,19 @@ public class ValidatingFormModel extends DefaultFormModel implements
             try {
                 valueIsSetting = true;
                 if (!setterConstraint.test(value)) {
-                    PropertyResults results = new PropertyResults(
-                            setterConstraint.getPropertyName(), value,
-                            setterConstraint);
-                    constraintViolated(setterConstraint, results);
+                    if (isEnabled()) {
+                        PropertyResults results = new PropertyResults(
+                                setterConstraint.getPropertyName(), value,
+                                setterConstraint);
+                        constraintViolated(setterConstraint, results);
+                    }
                 }
                 else {
-                    constraintSatisfied(setterConstraint);
-                    // we validate after a set attempt
-                    validate();
+                    if (isEnabled()) {
+                        constraintSatisfied(setterConstraint);
+                        // we validate after a set attempt
+                        validate();
+                    }
                 }
             }
             finally {

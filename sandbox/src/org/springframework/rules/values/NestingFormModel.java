@@ -21,7 +21,7 @@ package org.springframework.rules.values;
 public interface NestingFormModel extends FormModel {
 
     public ValueModel findValueModelFor(FormModel delegatingChild,
-            String domainObjectProperty);
+            String formPropertyPath);
 
     /**
      * Create a child form model nested by this form model identified by the

@@ -35,7 +35,7 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
 
     protected final Log logger = LogFactory.getLog(getClass());
 
-    private MutableAspectAccessStrategy domainObjectAccessStrategy;
+    private MutablePropertyAccessStrategy domainObjectAccessStrategy;
 
     private ValueModel commitTrigger;
 
@@ -58,12 +58,12 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
     }
 
     public DefaultFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy) {
+            MutablePropertyAccessStrategy domainObjectAccessStrategy) {
         this(domainObjectAccessStrategy, true);
     }
 
     public DefaultFormModel(
-            MutableAspectAccessStrategy domainObjectAccessStrategy,
+            MutablePropertyAccessStrategy domainObjectAccessStrategy,
             boolean bufferChanges) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.commitTrigger = new ValueHolder(null);
@@ -78,10 +78,10 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         setBufferChangesDefault(bufferChanges);
     }
 
-    public void setFormProperties(String[] domainObjectProperties) {
+    public void setFormProperties(String[] formPropertyPaths) {
         formValueModels.clear();
-        for (int i = 0; i < domainObjectProperties.length; i++) {
-            add(domainObjectProperties[i]);
+        for (int i = 0; i < formPropertyPaths.length; i++) {
+            add(formPropertyPaths[i]);
         }
     }
 
@@ -89,7 +89,7 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         this.parent = parent;
     }
 
-    public boolean getBufferChanges() {
+    public boolean getBufferChangesDefault() {
         return bufferChanges;
     }
 
@@ -153,17 +153,17 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         throw new UnsupportedOperationException();
     }
 
-    public void addValueListener(String formProperty,
+    public void addValueListener(String formPropertyPath,
             ValueListener valueListener) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
+        ValueModel valueModel = getValueModel(formPropertyPath);
+        assertValueModelNotNull(valueModel, formPropertyPath);
         valueModel.addValueListener(valueListener);
     }
 
-    public void removeValueListener(String formProperty,
+    public void removeValueListener(String formPropertyPath,
             ValueListener valueListener) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
+        ValueModel valueModel = getValueModel(formPropertyPath);
+        assertValueModelNotNull(valueModel, formPropertyPath);
         valueModel.removeValueListener(valueListener);
     }
 
@@ -177,21 +177,21 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
                                 + "' has not been added to this form model (or to any parents.)");
     }
 
-    public ValueModel add(String domainObjectProperty) {
-        return add(domainObjectProperty, this.bufferChanges);
+    public ValueModel add(String formPropertyPath) {
+        return add(formPropertyPath, this.bufferChanges);
     }
 
-    public ValueModel add(String domainObjectProperty, boolean bufferChanges) {
+    public ValueModel add(String formPropertyPath, boolean bufferChanges) {
         if (logger.isDebugEnabled()) {
             logger.debug("Adding new form value model for property '"
-                    + domainObjectProperty + "'");
+                    + formPropertyPath + "'");
         }
-        ValueModel formValueModel = new AspectAdapter(
-                domainObjectAccessStrategy, domainObjectProperty);
+        ValueModel formValueModel = new PropertyAdapter(
+                domainObjectAccessStrategy, formPropertyPath);
         if (bufferChanges) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Creating form value buffer for property '"
-                        + domainObjectProperty + "'");
+                        + formPropertyPath + "'");
             }
             formValueModel = new BufferedValueModel(formValueModel,
                     commitTrigger);
@@ -202,57 +202,57 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
                         .debug("No buffer created; value model updates will commit directly to the domain layer");
             }
         }
-        return add(domainObjectProperty, formValueModel);
+        return add(formPropertyPath, formValueModel);
     }
 
-    public ValueModel add(String domainObjectProperty, ValueModel formValueModel) {
+    public ValueModel add(String formPropertyPath, ValueModel formValueModel) {
         if (formValueModel instanceof BufferedValueModel) {
             ((BufferedValueModel)formValueModel)
                     .setCommitTrigger(commitTrigger);
         }
-        formValueModel = preProcessNewFormValueModel(domainObjectProperty,
+        formValueModel = preProcessNewFormValueModel(formPropertyPath,
                 formValueModel);
-        formValueModels.put(domainObjectProperty, formValueModel);
+        formValueModels.put(formPropertyPath, formValueModel);
         if (logger.isDebugEnabled()) {
             logger
-                    .debug("Registering '" + domainObjectProperty
+                    .debug("Registering '" + formPropertyPath
                             + "' form property, property value model="
                             + formValueModel);
         }
-        postProcessNewFormValueModel(domainObjectProperty, formValueModel);
+        postProcessNewFormValueModel(formPropertyPath, formValueModel);
         return formValueModel;
     }
 
     protected ValueModel preProcessNewFormValueModel(
-            String domainObjectProperty, ValueModel formValueModel) {
+            String formPropertyPath, ValueModel formValueModel) {
         return formValueModel;
     }
 
-    protected void postProcessNewFormValueModel(String domainObjectProperty,
+    protected void postProcessNewFormValueModel(String formPropertyPath,
             ValueModel formValueModel) {
 
     }
 
-    public String getDisplayValue(String formProperty) {
-        ValueModel valueModel = getDisplayValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
+    public String getDisplayValue(String formPropertyPath) {
+        ValueModel valueModel = getDisplayValueModel(formPropertyPath);
+        assertValueModelNotNull(valueModel, formPropertyPath);
         Object o = valueModel.get();
         if (o == null) { return ""; }
         return String.valueOf(o);
     }
 
-    public ValueModel getDisplayValueModel(String formProperty) {
-        return getValueModel(formProperty, true);
+    public ValueModel getDisplayValueModel(String formPropertyPath) {
+        return getValueModel(formPropertyPath, true);
     }
 
-    public Object getValue(String formProperty) {
-        ValueModel valueModel = getValueModel(formProperty);
-        assertValueModelNotNull(valueModel, formProperty);
+    public Object getValue(String formPropertyPath) {
+        ValueModel valueModel = getValueModel(formPropertyPath);
+        assertValueModelNotNull(valueModel, formPropertyPath);
         return valueModel.get();
     }
 
-    public ValueModel getValueModel(String formProperty) {
-        ValueModel valueModel = getDisplayValueModel(formProperty);
+    public ValueModel getValueModel(String formPropertyPath) {
+        ValueModel valueModel = getDisplayValueModel(formPropertyPath);
         return recursiveGetWrappedModel(valueModel);
     }
 
@@ -262,14 +262,14 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         return valueModel;
     }
 
-    public ValueModel getValueModel(String domainObjectProperty,
+    public ValueModel getValueModel(String formPropertyPath,
             boolean queryParent) {
         ValueModel valueModel = (ValueModel)formValueModels
-                .get(domainObjectProperty);
+                .get(formPropertyPath);
         if (valueModel == null) {
             if (parent != null && queryParent) {
                 valueModel = parent.findValueModelFor(this,
-                        domainObjectProperty);
+                        formPropertyPath);
             }
         }
         return valueModel;
@@ -300,12 +300,12 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         return false;
     }
 
-    public MutableAspectAccessStrategy getAspectAccessStrategy() {
+    public MutablePropertyAccessStrategy getPropertyAccessStrategy() {
         return domainObjectAccessStrategy;
     }
 
-    public MetaAspectAccessStrategy getMetaAspectAccessor() {
-        return domainObjectAccessStrategy.getMetaAspectAccessor();
+    public PropertyMetadataAccessStrategy getMetadataAccessStrategy() {
+        return domainObjectAccessStrategy.getMetadataAccessStrategy();
     }
 
     public Object getFormObject() {
@@ -320,7 +320,7 @@ public class DefaultFormModel extends AbstractPropertyChangePublisher implements
         return domainObjectAccessStrategy.getDomainObject().getClass();
     }
 
-    protected MutableAspectAccessStrategy getAccessStrategy() {
+    protected MutablePropertyAccessStrategy getAccessStrategy() {
         return domainObjectAccessStrategy;
     }
 

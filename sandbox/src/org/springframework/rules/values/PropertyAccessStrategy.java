@@ -16,13 +16,11 @@
 package org.springframework.rules.values;
 
 /**
+ * 
  * @author Keith Donald
  */
-public interface MetaAspectAccessStrategy {
-    public boolean isReadable(String aspect);
-    public boolean isWriteable(String aspect);
-    public boolean isEnumeration(String aspect);
-    public boolean isNumber(String aspect);
-    public boolean isDate(String aspect);
-    public Class getAspectClass(String aspect);
+public interface PropertyAccessStrategy {
+    public PropertyMetadataAccessStrategy getMetadataAccessStrategy();
+    public Object getValue(String propertyName);
+    public Object getDomainObject();
 }

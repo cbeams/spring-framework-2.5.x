@@ -20,20 +20,20 @@ import java.beans.PropertyEditor;
 /**
  * @author Keith Donald
  */
-public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
-    public void registerCustomEditor(Class aspectType,
+public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy {
+    public void registerCustomEditor(Class propertyType,
             PropertyEditor propertyEditor);
 
-    public void registerCustomEditor(Class aspectType, String aspect,
+    public void registerCustomEditor(String propertyName,
             PropertyEditor propertyEditor);
 
-    public PropertyEditor findCustomEditor(Class aspectType, String aspect);
+    public PropertyEditor findCustomEditor(String propertyName);
 
     public boolean isValueUpdating();
-    
-    public void setValue(String aspect, Object value);
 
-    public MutableAspectAccessStrategy newNestedAccessor(
+    public void setValue(String propertyName, Object value);
+
+    public MutablePropertyAccessStrategy newNestedAccessor(
             ValueModel childValueHolder);
 
     public ValueModel getDomainObjectHolder();

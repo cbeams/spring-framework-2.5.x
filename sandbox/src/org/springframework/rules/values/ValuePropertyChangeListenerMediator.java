@@ -38,11 +38,11 @@ public class ValuePropertyChangeListenerMediator implements
 
     private ValueListener listener;
 
-    private MutableAspectAccessStrategy accessStrategy;
+    private MutablePropertyAccessStrategy accessStrategy;
 
     public ValuePropertyChangeListenerMediator(
-            MutableAspectAccessStrategy accessStrategy, ValueListener listener,
-            String propertyName) {
+            MutablePropertyAccessStrategy accessStrategy,
+            ValueListener listener, String propertyName) {
         Assert.notNull(listener);
         Assert.notNull(propertyName);
         this.accessStrategy = accessStrategy;
@@ -100,18 +100,15 @@ public class ValuePropertyChangeListenerMediator implements
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        // we should still publish change for the benefit of listeners
-        //if (!accessStrategy.isValueUpdating()) {
-            if (logger.isDebugEnabled()) {
-                logger
-                        .debug("Property change event received from domain object for property '"
-                                + evt.getPropertyName()
-                                + "', new value is="
-                                + evt.getNewValue()
-                                + "; notifiying value listener.");
-            }
-            this.listener.valueChanged();
-        //}
+        if (logger.isDebugEnabled()) {
+            logger
+                    .debug("Property change event received from domain object for property '"
+                            + evt.getPropertyName()
+                            + "', new value is="
+                            + evt.getNewValue()
+                            + "; notifiying value listener.");
+        }
+        this.listener.valueChanged();
     }
 
 }
