@@ -16,7 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.aop.framework.Cglib2AopProxy;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -44,6 +46,7 @@ public class SPR391LookupMethodWrappedByCglibProxyTests extends AbstractDependen
         }
         catch (BeanCreationException ex) {
             System.err.println("****** SPR-391:  Cannot use CGLIB proxying around beans with method lookup");
+            ex.printStackTrace();
         }
     }
     
@@ -58,6 +61,8 @@ public class SPR391LookupMethodWrappedByCglibProxyTests extends AbstractDependen
         ITestBean jenny = olup.newTestBean();
         assertEquals("Jenny", jenny.getName());
     }
+    
+    
     
     public static abstract class OverloadLookup {
         

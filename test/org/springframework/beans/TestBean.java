@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.14 2004-07-10 06:39:38 johnsonr Exp $
+ *	$Id: TestBean.java,v 1.15 2004-10-19 13:01:59 robharrop Exp $
  */
 
 /*
@@ -69,16 +69,15 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	private IndexedTestBean nestedIndexedBean;
 
-
 	public TestBean() {
-	}
+	}	
 
 	public TestBean(String name, int age) {
 		this.name = name;
 		this.age = age;
 	}
 
-
+	
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

@@ -69,7 +69,7 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(),  this);
 	}
 
 	public Object getObject() {
