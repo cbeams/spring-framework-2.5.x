@@ -16,12 +16,13 @@
 
 package org.springframework.jdbc.core;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.support.SqlRowSet;
 import org.springframework.jdbc.support.KeyHolder;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface that specifies a basic set of JDBC operations.
@@ -183,6 +184,23 @@ public interface JdbcOperations {
 	 * @see #queryForInt(String, Object[])
 	 */
 	int queryForInt(String sql) throws DataAccessException;
+
+	/**
+	 * Execute a query for a RowSet, given static SQL.
+	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
+	 * a static query with a PreparedStatement, use the overloaded queryForRowSet
+	 * method with null as argument array.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an SqlRowSet which is a wrapper class for
+	 * javax.sql.RowSet.  This wrapper will translate any SQLExceptions thrown.
+	 * @param sql SQL query to execute
+	 * @return an SqlRowSet that wraps a javax.sql.RowSet
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForRowSet(String, Object[])
+	 * @see javax.sql.RowSet
+	 * @see SqlRowSet
+	 */
+	SqlRowSet queryForRowSet(String sql) throws DataAccessException;
 
 	/**
 	 * Issue a single SQL update.
@@ -452,7 +470,6 @@ public interface JdbcOperations {
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param requiredType the type that the result object is expected to match
@@ -489,7 +506,6 @@ public interface JdbcOperations {
 	 * in a long value.
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return the long value, or 0 in case of SQL NULL
@@ -522,7 +538,6 @@ public interface JdbcOperations {
 	 * in an int value.
 	 * @param sql SQL to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the respective SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return the int value, or 0 in case of SQL NULL
@@ -546,6 +561,42 @@ public interface JdbcOperations {
 	 * @see #queryForInt(String)
 	 */
 	int queryForInt(String sql, Object[] args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a RowSet.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an SqlRowSet which is a wrapper class for
+	 * javax.sql.RowSet.  This wrapper will translate any SQLExceptions thrown.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return an SqlRowSet that wraps a javax.sql.RowSet
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForRowSet(String)
+	 * @see javax.sql.RowSet
+	 * @see SqlRowSet
+	 * @see java.sql.Types
+	 */
+	SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a RowSet.
+	 * <p>This method is useful for running static SQL with a known outcome.
+	 * The results will be mapped to an SqlRowSet which is a wrapper class for
+	 * javax.sql.RowSet.  This wrapper will translate any SQLExceptions thrown.
+	 * @param sql SQL to execute
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the respective SQL type)
+	 * @return an SqlRowSet that wraps a javax.sql.RowSet
+	 * @throws DataAccessException if there is any problem executing the query
+	 * @see #queryForRowSet(String)
+	 * @see javax.sql.RowSet
+	 * @see SqlRowSet
+	 */
+	SqlRowSet queryForRowSet(String sql, Object[] args) throws DataAccessException;
 
 	/**
 	 * Issue an update using a PreparedStatementCreator to provide SQL and any
@@ -655,5 +706,5 @@ public interface JdbcOperations {
 	 */
 	Map call(CallableStatementCreator csc, List declaredParameters)
 			throws DataAccessException;
-	
+
 }

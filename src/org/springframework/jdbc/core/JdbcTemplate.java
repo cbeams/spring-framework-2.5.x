@@ -16,21 +16,7 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
+import com.sun.rowset.CachedRowSetImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
@@ -38,12 +24,23 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.SQLWarningException;
+import org.springframework.jdbc.core.support.SqlRowSet;
+import org.springframework.jdbc.core.support.SqlRowSetImpl;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.NumberUtils;
+
+import javax.sql.DataSource;
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -339,6 +336,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (number != null ? number.intValue() : 0);
 	}
 
+	public SqlRowSet queryForRowSet(String sql) throws DataAccessException {
+		SqlRowSet sqlRowSet = new SqlRowSetImpl((RowSet)query(sql, new JdbcTemplate.RowSetResultSetExtractor()));
+		sqlRowSet.setCommand(sql);
+		return sqlRowSet;
+	}
+
 	public int update(final String sql) throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
@@ -596,6 +599,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	public int queryForInt(String sql, final Object[] args) throws DataAccessException {
 		Number number = (Number) queryForObject(sql, args, Number.class);
 		return (number != null ? number.intValue() : 0);
+	}
+
+	public SqlRowSet queryForRowSet(String sql, final Object[] args, int[] argTypes) throws DataAccessException {
+		SqlRowSet sqlRowSet = new SqlRowSetImpl((RowSet) query(sql,
+				new ArgTypePreparedStatementSetter(args, argTypes),
+				new RowSetResultSetExtractor()));
+		sqlRowSet.setCommand(sql);
+		return sqlRowSet;
+	}
+
+	public SqlRowSet queryForRowSet(String sql, final Object[] args) throws DataAccessException {
+		SqlRowSet sqlRowSet = new SqlRowSetImpl((RowSet) query(sql,
+				new ArgPreparedStatementSetter(args),
+				new RowSetResultSetExtractor()));
+		sqlRowSet.setCommand(sql);
+		return sqlRowSet;
 	}
 
 	protected int update(final PreparedStatementCreator psc, final PreparedStatementSetter pss)
@@ -1138,6 +1157,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 			}
 			return result;
+		}
+	}
+
+	/**
+	 * ResultSetExtractor implementation that returns CachedRowSet.
+	 */
+	private static class RowSetResultSetExtractor implements ResultSetExtractor {
+
+		public Object extractData(ResultSet rs) throws SQLException {
+			CachedRowSet rowSet = new CachedRowSetImpl();
+			rowSet.populate(rs);
+			return rowSet;
 		}
 	}
 
