@@ -28,6 +28,6 @@
 	</sub-flow-state>
 	
 	<end-state id="finish"/>
-	<end-state id="error"/>
+	<end-state id="error" view="error.view"/>
 	
 </web-flow>
