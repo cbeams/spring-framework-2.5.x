@@ -47,8 +47,8 @@ public class FlowAction extends TemplateAction {
 	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
-	
-	private HttpFlowExecutionManager manager;
+
+	private HttpFlowExecutionManager executionManager;
 
 	protected String getActionPathAttributeName() {
 		return ACTION_PATH_ATTRIBUTE;
@@ -82,11 +82,10 @@ public class FlowAction extends TemplateAction {
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		synchronized (this) {
-			if (manager==null) {
-				manager=new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(), null);
+			if (executionManager == null) {
+				executionManager = new HttpFlowExecutionManager(logger, getFlow(mapping), getWebApplicationContext(), null);
 			}
 		}
-
 		// struts specific
 		if (form instanceof BindingActionForm) {
 			if (logger.isDebugEnabled()) {
@@ -97,10 +96,10 @@ public class FlowAction extends TemplateAction {
 			request.setAttribute(getActionFormAttributeName(), form);
 		}
 		// end struts specific
-		
-		ModelAndView modelAndView=manager.handleRequest(request, response, getFlowExecutionInput(request));
 
-		FlowExecution flowExecution=manager.getRequiredFlowExecution(request);
+		ModelAndView modelAndView = executionManager.handleRequest(request, response, getFlowExecutionInput(request));
+
+		FlowExecution flowExecution = executionManager.getRequiredFlowExecution(request);
 		if (flowExecution.isActive()) {
 			// struts specific
 			String mappingFlowId = getFlowId(mapping);
@@ -108,8 +107,8 @@ public class FlowAction extends TemplateAction {
 				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
 				String actionFormBeanName = actionPathName + "Form";
 				if (logger.isDebugEnabled()) {
-					logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '"
-							+ actionPathName + "' in request scope.");
+					logger.debug("Setting '" + getActionPathAttributeName() + "' attribute to value '" + actionPathName
+							+ "' in request scope.");
 					logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
 							+ "' in request scope.");
 				}
@@ -118,8 +117,8 @@ public class FlowAction extends TemplateAction {
 			}
 			if (form instanceof BindingActionForm) {
 				BindingActionForm bindingForm = (BindingActionForm)form;
-				bindingForm.setErrors((Errors)flowExecution.getAttribute(
-						AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class));
+				bindingForm.setErrors((Errors)flowExecution.getAttribute(AbstractAction.LOCAL_FORM_OBJECT_ERRORS_NAME,
+						Errors.class));
 				bindingForm.setHttpServletRequest(request);
 				bindingForm.setModel(flowExecution);
 			}
@@ -132,7 +131,7 @@ public class FlowAction extends TemplateAction {
 	protected Map getFlowExecutionInput(HttpServletRequest request) {
 		return null;
 	}
-	
+
 	/**
 	 * Return a Struts ActionForward given a ModelAndView. We need to add all
 	 * attributes from the ModelAndView as request attributes.

@@ -19,8 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface to be implemented by objects that wish to listen and respond to the
- * lifecycle of a FlowExecution. Very "aspect" like: allows you to insert 'cross
- * cutting' behaivior at well-defined points within a flow lifecycle.
+ * lifecycle of a FlowExecution.
+ * <p>
+ * An 'observer' that is very "aspect" like, allowing you to insert 'cross
+ * cutting' behaivior at well-defined points within a flow execution lifecycle.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -49,7 +51,7 @@ public interface FlowExecutionListener {
 	public void requestProcessed(FlowExecution flowExecution, HttpServletRequest request);
 
 	/**
-	 * Called when an event is signaled in a state, prior to a state transition.
+	 * Called when an event is signaled in a state, but prior to a state transition.
 	 * @param flowExecution Source of the event
 	 * @param eventId The event that was signaled
 	 */
