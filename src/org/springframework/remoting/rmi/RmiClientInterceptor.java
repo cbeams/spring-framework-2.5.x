@@ -16,11 +16,8 @@
 
 package org.springframework.remoting.rmi;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -62,18 +59,20 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	private Remote rmiProxy;
 
-	public void afterPropertiesSet() throws IOException, NotBoundException {
+	public void afterPropertiesSet() throws Exception {
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
 		Remote remoteObj = createRmiProxy();
-		if (remoteObj instanceof RmiInvocationHandler) {
-			logger.info("RMI object [" + getServiceUrl() + "] is an RMI invoker");
-		}
-		else if (getServiceInterface() != null) {
-			boolean isImpl = getServiceInterface().isInstance(remoteObj);
-			logger.info("Using service interface [" + getServiceInterface().getName() + "] for RMI object [" +
-									getServiceUrl() + "] - " + (!isImpl ? "not " : "") + "directly implemented");
+		if (logger.isInfoEnabled()) {
+			if (remoteObj instanceof RmiInvocationHandler) {
+				logger.info("RMI object [" + getServiceUrl() + "] is an RMI invoker");
+			}
+			else if (getServiceInterface() != null) {
+				boolean isImpl = getServiceInterface().isInstance(remoteObj);
+				logger.info("Using service interface [" + getServiceInterface().getName() + "] for RMI object [" +
+										getServiceUrl() + "] - " + (!isImpl ? "not " : "") + "directly implemented");
+			}
 		}
 		this.rmiProxy = remoteObj;
 	}
@@ -83,7 +82,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * via java.rmi.Naming. Can be overridden in subclasses.
 	 * @see java.rmi.Naming#lookup
 	 */
-	protected Remote createRmiProxy() throws IOException, NotBoundException {
+	protected Remote createRmiProxy() throws Exception {
 		return Naming.lookup(getServiceUrl());
 	}
 
@@ -95,46 +94,25 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		try {
-			if (this.rmiProxy instanceof RmiInvocationHandler) {
+		if (this.rmiProxy instanceof RmiInvocationHandler) {
+			// RMI invoker
+			try {
 				RmiInvocationHandler invocationHandler = (RmiInvocationHandler) this.rmiProxy;
 				return invoke(invocation, invocationHandler);
 			}
-			else {
-				Method method = invocation.getMethod();
-				if (method.getDeclaringClass().isInstance(this.rmiProxy)) {
-					// directly implemented
-					return method.invoke(this.rmiProxy, invocation.getArguments());
+			catch (RemoteException ex) {
+				logger.debug("RMI invoker for service [" + getServiceUrl() + "] threw exception", ex);
+				if (!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
+					throw new RemoteAccessException("Cannot access RMI invoker for [" + getServiceUrl() + "]", ex);
 				}
 				else {
-					// not directly implemented
-					Method proxyMethod = this.rmiProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
-					return proxyMethod.invoke(this.rmiProxy, invocation.getArguments());
+					throw ex;
 				}
 			}
 		}
-		catch (RemoteException ex) {
-			logger.debug("RMI invoker for service [" + getServiceUrl() + "] threw exception", ex);
-			if (!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-				throw new RemoteAccessException("Cannot access RMI invoker for [" + getServiceUrl() + "]", ex);
-			}
-			else {
-				throw ex;
-			}
-		}
-		catch (InvocationTargetException ex) {
-			Throwable targetException = ex.getTargetException();
-			logger.debug("RMI method of service [" + getServiceUrl() + "] threw exception", targetException);
-			if (targetException instanceof RemoteException &&
-					!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-				throw new RemoteAccessException("Cannot access RMI service [" + getServiceUrl() + "]", targetException);
-			}
-			else {
-				throw targetException;
-			}
-		}
-		catch (RuntimeException ex) {
-			throw new RemoteAccessException("Failed to invoke RMI service [" + getServiceUrl() + "]", ex);
+		else {
+			// traditional RMI proxy
+			return RmiClientInterceptorUtils.invoke(invocation, this.rmiProxy, getServiceUrl());
 		}
 	}
 

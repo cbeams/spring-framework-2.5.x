@@ -16,11 +16,7 @@
 
 package org.springframework.remoting.jaxrpc;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -33,7 +29,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Interceptor for accessing a specific port of a JAX-RPC service.
@@ -290,32 +286,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		try {
-			Method method = invocation.getMethod();
-			if (method.getDeclaringClass().isInstance(this.portProxy)) {
-				// directly implemented
-				return method.invoke(this.portProxy, invocation.getArguments());
-			}
-			else {
-				// not directly implemented
-				Method proxyMethod = this.portProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
-				return proxyMethod.invoke(this.portProxy, invocation.getArguments());
-			}
-		}
-		catch (InvocationTargetException ex) {
-			Throwable targetException = ex.getTargetException();
-			logger.debug("JAX-RPC method of service [" + this.portQName + "] threw exception", targetException);
-			if (targetException instanceof RemoteException &&
-					!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-				throw new RemoteAccessException("Cannot access JAX-RPC service [" + this.portQName + "]", targetException);
-			}
-			else {
-				throw targetException;
-			}
-		}
-		catch (RuntimeException ex) {
-			throw new RemoteAccessException("Failed to invoke JAX-RPC service [" + this.portQName + "]", ex);
-		}
+		// traditional RMI proxy invocation
+		return RmiClientInterceptorUtils.invoke(invocation, this.portProxy, this.portQName.toString());
 	}
 
 }
