@@ -27,19 +27,19 @@ import org.springframework.util.DefaultObjectStyler;
  * state for the specified flow.
  * @author Keith Donald
  */
-public class NoSuchEventInStateException extends FlowNavigationException {
+public class NoSuchTransitionInStateException extends FlowNavigationException {
 
 	private TransitionableState state;
 
 	private String eventId;
 
-	public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId) {
+	public NoSuchTransitionInStateException(Flow flow, TransitionableState state, String eventId) {
 		super(flow);
 		this.state = state;
 		this.eventId = eventId;
 	}
 
-	public NoSuchEventInStateException(Flow flow, TransitionableState state, String eventId, Throwable cause) {
+	public NoSuchTransitionInStateException(Flow flow, TransitionableState state, String eventId, Throwable cause) {
 		super(flow, cause);
 		this.state = state;
 		this.eventId = eventId;
@@ -59,7 +59,7 @@ public class NoSuchEventInStateException extends FlowNavigationException {
 			events = Collections.EMPTY_SET;
 		}
 		return "No such transition for event '" + eventId + "' in state '" + state.getId() + "' in flow '"
-				+ getFlow().getId() + "' -- valid events are " + DefaultObjectStyler.call(events)
+				+ getFlow().getId() + "' -- valid transition event criteria are " + DefaultObjectStyler.call(events)
 				+ " -- programmer error?";
 	}
 }

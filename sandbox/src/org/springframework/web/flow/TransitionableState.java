@@ -66,7 +66,7 @@ public abstract class TransitionableState extends AbstractState {
 		return Collections.unmodifiableSet(transitions);
 	}
 
-	protected Transition getTransition(String eventId, Flow flow) throws NoSuchEventInStateException {
+	protected Transition getTransition(String eventId, Flow flow) throws NoSuchTransitionInStateException {
 		Iterator it = transitions.iterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
@@ -74,7 +74,7 @@ public abstract class TransitionableState extends AbstractState {
 				return transition;
 			}
 		}
-		throw new NoSuchEventInStateException(flow, this, eventId);
+		throw new NoSuchTransitionInStateException(flow, this, eventId);
 	}
 
 	/**
