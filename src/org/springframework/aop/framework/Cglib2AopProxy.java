@@ -334,12 +334,12 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			this.constructed = constructed;
 		}
 
-		protected Object doInvoke(MethodProxy methodProxy, Object target, Object args[]) throws Throwable {
+		protected Object doInvoke(MethodProxy methodProxy, Object target, Object proxy, Object args[]) throws Throwable {
 			if (this.constructed) {
 				return methodProxy.invoke(target, args);
 			}
 			else {
-				return methodProxy.invokeSuper(target, args);
+				return methodProxy.invokeSuper(proxy, args);
 			}
 		}
 	}
@@ -363,7 +363,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		public Object intercept(Object proxy, Method method, Object[] args,
 		    MethodProxy methodProxy) throws Throwable {
 
-			Object retVal = doInvoke(methodProxy, target, args);
+			Object retVal = doInvoke(methodProxy, target, proxy, args);
 			return massageReturnTypeIfNecessary(proxy, target, retVal);
 		}
 	}
@@ -387,7 +387,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			Object oldProxy = null;
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
-				Object retVal = doInvoke(methodProxy, target, args);
+				Object retVal = doInvoke(methodProxy, target, proxy, args);
 				return massageReturnTypeIfNecessary(proxy, target, retVal);
 			}
 			finally {
@@ -411,7 +411,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			Object target = advised.getTargetSource().getTarget();
 
 			try {
-				Object retVal = doInvoke(methodProxy, target, args);
+				Object retVal = doInvoke(methodProxy, target, proxy, args);
 
 				return massageReturnTypeIfNecessary(proxy, target, retVal);
 			}
@@ -437,7 +437,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 
-				Object retVal = doInvoke(methodProxy, target, args);
+				Object retVal = doInvoke(methodProxy, target, proxy, args);
 
 				return massageReturnTypeIfNecessary(proxy, target, retVal);
 			}
