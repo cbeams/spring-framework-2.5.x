@@ -12,11 +12,17 @@ import java.util.Collection;
  * to a mix of references and individual values
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: MixedCollectionBean.java,v 1.1.1.1 2003-08-14 16:21:06 trisberg Exp $
+ * @version $Id: MixedCollectionBean.java,v 1.2 2003-11-14 16:33:15 jhoeller Exp $
  */
 public class MixedCollectionBean {
-	
+
+	protected static int nrOfInstances = 0;
+
 	private Collection jumble;
+
+	public MixedCollectionBean() {
+		nrOfInstances++;
+	}
 
 	/**
 	 * @return Collection
