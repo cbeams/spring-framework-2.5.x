@@ -29,7 +29,7 @@ import org.springframework.transaction.CountingTxManager;
  * define the EnterpriseServices bean in a separate file to
  * change how attributes are source. 
  * @author Rod Johnson
- * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.2 2003-12-15 17:14:43 johnsonr Exp $
+ * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.3 2003-12-17 09:25:42 johnsonr Exp $
  */
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	
@@ -64,7 +64,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	public void testTxIsProxied() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		TxClass txClass = (TxClass) bf.getBean("txClass");
-		assertTrue(AopUtils.isCglibProxy(txClass));
+		assertTrue(AopUtils.isAopProxy(txClass));
 	}
 	
 	public void testIntroductionIsProxied() throws Exception {
@@ -96,8 +96,7 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	public void testRollbackRulesOnMethodCauseRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		TxClass txClass = (TxClass) bf.getBean("txClass");
-		// No interface, so it must be a CGLIB proxy
-		assertTrue(AopUtils.isCglibProxy(txClass));
+		assertTrue(AopUtils.isAopProxy(txClass));
 	
 		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
 	
@@ -139,6 +138,8 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
 		
 		TxClassWithClassAttribute txClass = (TxClassWithClassAttribute) bf.getBean("txClassWithClassAttribute");
+		// No interface, so must be a CGLIB proxy
+		assertTrue(AopUtils.isCglibProxy(txClass));
 		assertEquals(0, txMan.commits);
 		txClass.rollbackOnly(false);
 		assertEquals("Transaction counts match", 1, txMan.commits);

@@ -26,7 +26,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.10 2003-12-10 20:29:29 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.11 2003-12-17 09:25:59 johnsonr Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -101,6 +101,10 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		return transactionAttributeSource;
 	}
 
+	/**
+	 * Validate required properties
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 */
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null) {
 			throw new IllegalArgumentException("transactionManager is required");
@@ -111,8 +115,13 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	}
 
 	public final Object invoke(MethodInvocation invocation) throws Throwable {
-		// If this is null, the method is non-transactional
-		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation.getMethod(), null);
+		// Work out the target class: may be null.
+		// The TransactionAttributeSource should be passed the target class
+		// as well as the method, which may be from an interface
+		Class targetClass = (invocation.getThis() != null) ? invocation.getThis().getClass() : null;
+		
+		// If the transaction attribute is null, the method is non-transactional
+		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation.getMethod(), targetClass);
 		TransactionStatus status = null;
 		TransactionStatus oldTransactionStatus = null;
 		

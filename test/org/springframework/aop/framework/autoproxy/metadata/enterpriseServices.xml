@@ -59,7 +59,7 @@
 	
 	
 	<bean id="txClass"
-		class="org.springframework.aop.framework.autoproxy.metadata.TxClass">
+		class="org.springframework.aop.framework.autoproxy.metadata.TxClassImpl">
 	</bean>
 	
 	<bean id="txClassWithClassAttribute" singleton="false"

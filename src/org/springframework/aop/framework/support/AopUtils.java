@@ -16,9 +16,9 @@ import org.springframework.aop.Pointcut;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.9 2003-12-11 11:36:31 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.10 2003-12-17 09:25:59 johnsonr Exp $
  */
-public class AopUtils {
+public abstract class AopUtils {
 	
 	public static boolean isCglibProxy(Object o) {
 		return o.getClass().getName().indexOf("$$") != -1;
@@ -30,6 +30,32 @@ public class AopUtils {
 	
 	public static boolean isAopProxy(Object o) {
 		return isJdkDynamicProxy(o) || isCglibProxy(o);
+	}
+	
+	/**
+	 * Given a method, which may come from an interface, and a targetClass
+	 * used in the current AOP invocation, find the most specific method
+	 * if there is one. E.g. the method may be IFoo.bar() and the 
+	 * target class may be DefaultFoo. In this case, the method may be
+	 * DefaultFoo.bar(). This enables attributes on that method to be
+	 * found.
+	 * @param method method to be invoked, which may come from an interface
+	 * @param targetClass target class for the curren invocation. May
+	 * be null or may not even implement the method.
+	 * @return the more specific method, or the original method if the targetClass
+	 * doesn't specialize it or implement it, or is null.
+	 */
+	public static Method getMostSpecificMethod(Method method, Class targetClass) {
+		if (targetClass != null) {
+			try {
+				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
+			}
+			catch (NoSuchMethodException ex) {
+				// Perhaps the target class doesn't implement this method:
+				// that's fine, just use the original method
+			}
+		}
+		return method;
 	}
 	
 	/**

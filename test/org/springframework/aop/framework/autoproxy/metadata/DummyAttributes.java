@@ -16,19 +16,19 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 /**
  * Hardcoded to return the same attributes as are on the TxClass and TxClassWithClassAttribute.
  * @author Rod Johnson
- * @version $Id: DummyAttributes.java,v 1.2 2003-12-15 17:14:43 johnsonr Exp $
+ * @version $Id: DummyAttributes.java,v 1.3 2003-12-17 09:25:42 johnsonr Exp $
  */
 public class DummyAttributes extends MapAttributes {
 
 	public DummyAttributes() throws Exception {
-		register(TxClass.class.getMethod("defaultTxAttribute", null), 
+		register(TxClassImpl.class.getMethod("defaultTxAttribute", null), 
 			new Object[] { new DefaultTransactionAttribute()});
 		Object[] echoAtts = new Object[] { 
 			new RuleBasedTransactionAttribute(),
 			new RollbackRuleAttribute("java.lang.Exception"),
 			new NoRollbackRuleAttribute("ServletException")
 		};
-		register(TxClass.class.getMethod("echoException", new Class[] { Exception.class }), echoAtts);
+		register(TxClassImpl.class.getMethod("echoException", new Class[] { Exception.class }), echoAtts);
 		
 		PoolingAttribute pa = new PoolingAttribute(10);
 		register(TxClassWithClassAttribute.class, new Object[] { new DefaultTransactionAttribute(), pa });
