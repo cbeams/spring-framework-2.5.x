@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Flow;
@@ -32,6 +31,7 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
+import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -47,16 +47,16 @@ public class HttpFlowExecutionManager {
 
 	private Flow flow;
 
-	private BeanFactory beanFactory;
+	private FlowServiceLocator flowServiceLocator;
 
 	private Collection flowExecutionListeners;
 
-	public HttpFlowExecutionManager(Log logger, Flow flow, BeanFactory beanFactory, Collection flowExecutionListeners) {
+	public HttpFlowExecutionManager(Log logger, Flow flow, FlowServiceLocator serviceLocator,
+			Collection flowExecutionListeners) {
 		Assert.notNull(logger, "The logger is required");
-		Assert.notNull(beanFactory, "The bean factory is required");
 		this.logger = logger;
 		this.flow = flow;
-		this.beanFactory = beanFactory;
+		this.flowServiceLocator = serviceLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
 
@@ -72,12 +72,12 @@ public class HttpFlowExecutionManager {
 		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
 
-	private String getEventIdRequestAttributeName() {
-		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
-	}
-
 	protected String getEventIdParameterName() {
 		return FlowConstants.EVENT_ID_PARAMETER;
+	}
+
+	protected String getEventIdRequestAttributeName() {
+		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
 
 	protected String getNotSetEventIdParameterMarker() {
@@ -167,8 +167,8 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Obtain a flow to use from given request.
 	 */
-	public Flow getFlow(HttpServletRequest request) {
-		return (Flow)beanFactory.getBean(getRequestParameter(request, getFlowIdParameterName(),
+	protected Flow getFlow(HttpServletRequest request) {
+		return flowServiceLocator.getFlow(getRequestParameter(request, getFlowIdParameterName(),
 				getParameterValueDelimiter()));
 	}
 
@@ -177,7 +177,7 @@ public class HttpFlowExecutionManager {
 	 * @param flow The flow
 	 * @return The created flow execution
 	 */
-	public FlowExecution createFlowExecution(Flow flow) {
+	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
 		if (flowExecutionListeners != null && !flowExecutionListeners.isEmpty()) {
 			flowExecution.getListenerList().add(
@@ -192,7 +192,7 @@ public class HttpFlowExecutionManager {
 	 * @param request the HTTP request to check
 	 * @return true or false
 	 */
-	public boolean isNewFlowExecutionRequest(HttpServletRequest request) {
+	protected boolean isNewFlowExecutionRequest(HttpServletRequest request) {
 		return getRequestParameter(request, getFlowExecutionIdParameterName(), getParameterValueDelimiter()) == null;
 	}
 
@@ -200,7 +200,7 @@ public class HttpFlowExecutionManager {
 	 * Save the flow execution in the HTTP session associated with given
 	 * request.
 	 */
-	public void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
+	protected void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving flow execution '" + flowExecution.getId() + "' in HTTP session");
 		}
@@ -213,7 +213,7 @@ public class HttpFlowExecutionManager {
 	 * @throws NoSuchFlowExecutionException If there is no flow execution in the
 	 *         HTTP session associated with given request.
 	 */
-	public FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
+	protected FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
 		String flowExecutionId = getRequestParameter(request, getFlowExecutionIdParameterName());
 		try {
 			return (FlowExecution)WebUtils.getRequiredSessionAttribute(request, flowExecutionId);
