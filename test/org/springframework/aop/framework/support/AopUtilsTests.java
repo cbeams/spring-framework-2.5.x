@@ -33,7 +33,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14 16:20:14 trisberg
  * @author Rod Johnson
  */
 public class AopUtilsTests extends TestCase {
@@ -41,7 +40,7 @@ public class AopUtilsTests extends TestCase {
 	public void testGetAllInterfaces() {
 		DerivedTestBean testBean = new DerivedTestBean();
 		List ifcs = Arrays.asList(AopUtils.getAllInterfaces(testBean));
-		assertEquals("Correct number of interfaces", 5, ifcs.size());
+		assertEquals("Correct number of interfaces", 6, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));

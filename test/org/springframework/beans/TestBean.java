@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.6 2004-03-18 03:01:16 trisberg Exp $
+ *	$Id: TestBean.java,v 1.7 2004-03-19 07:41:09 jhoeller Exp $
  */
 
 /*
@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 
 /**
  * Simple test bean used for testing bean factories,
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @author  Rod Johnson
  * @since 15 April 2001
  */
-public class TestBean implements BeanFactoryAware, ITestBean, IOther {
+public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable {
 
 	private BeanFactory beanFactory;
 
@@ -129,12 +129,6 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther {
 		this.name = name;
 	}
 
-	public String toString() {
-		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
-		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
-		return s;
-	}
-
 	public ITestBean getSpouse() {
 		return spouse;
 	}
@@ -173,6 +167,21 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther {
 			return false;
 
 		return true;
+	}
+
+	public int compareTo(Object other) {
+		if (this.name != null && other instanceof TestBean) {
+			return this.name.compareTo(((TestBean) other).getName());
+		}
+		else {
+			return 1;
+		}
+	}
+
+	public String toString() {
+		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
+		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
+		return s;
 	}
 
 	/**
