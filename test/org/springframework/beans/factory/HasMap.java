@@ -24,7 +24,7 @@ import java.util.Set;
  * Bean exposing a map. Used for bean factory tests.
  * @author Rod Johnson
  * @since 05-Jun-2003
- * @version $Id: HasMap.java,v 1.3 2004-03-18 03:01:20 trisberg Exp $
+ * @version $Id: HasMap.java,v 1.4 2004-05-18 08:03:31 jhoeller Exp $
  */
 public class HasMap {
 	
@@ -72,31 +72,18 @@ public class HasMap {
 		this.objectArray = objectArray;
 	}
 
-	/**
-	 * @return Class[]
-	 */
 	public Class[] getClassArray() {
 		return classArray;
 	}
 
-	/**
-	 * Sets the classArray.
-	 * @param classArray The classArray to set
-	 */
 	public void setClassArray(Class[] classArray) {
 		this.classArray = classArray;
 	}
 
-	/**
-	 * @return
-	 */
 	public Integer[] getIntegerArray() {
 		return intArray;
 	}
 
-	/**
-	 * @param is
-	 */
 	public void setIntegerArray(Integer[] is) {
 		intArray = is;
 	}

@@ -25,54 +25,56 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * AdvisorChainFactory implementation that caches by method.
- * Uses IdentityHashMap in JVM 1.4, which skips expensive Method.hashCode()
- * call. In 1.3, falls back to using HashMap.
+ *
+ * <p>Uses java.util.IdentityHashMap on J2SE 1.4, which skips expensive
+ * Method.hashCode() call. On J2SE 1.3, falls back to using java.util.HashMap.
+ *
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.4 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.5 2004-05-18 08:03:30 jhoeller Exp $
+ * @see java.util.IdentityHashMap
+ * @see java.util.HashMap
+ * @see java.lang.reflect.Method#hashCode
  */
 public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
-	
-	private Map methodCache = createMap();
+
+	public static final String IDENTITY_HASH_MAP_CLASS_NAME = "java.util.IdentityHashMap";
+
+	private final Map methodCache = createMap();
 	
 	private Map createMap() {
-		// Use IdentityHashMap, introduced in Java 1.4, which is a lot faster
+		// Use IdentityHashMap, introduced in J2SE 1.4, which is a lot faster
 		// as we want to compare Method keys by reference.
-		// The reason we do this via reflection rather than using new is to avoid a dependence in this
-		// class that will break it under 1.3
+		// The reason we do this via reflection rather than using new is to avoid
+		// a dependence in this class that will break it under J2SE 1.3.
 		try {
-			Class clazz = Class.forName("java.util.IdentityHashMap");
+			Class clazz = Class.forName(IDENTITY_HASH_MAP_CLASS_NAME);
 			return (Map) clazz.newInstance();
 		}
 		catch (Exception ex) {
-			// Shouldn't happen
-			LogFactory.getLog(getClass()).debug("Falling back to HashMap (JDK 1.3?): couldn't create an IdentityHashMap using reflection", ex);
+			// will only happen on J2SE < 1.4
+			LogFactory.getLog(getClass()).debug("Falling back to java.util.HashMap (J2SE < 1.4 ?): couldn't create " +
+																					"an IdentityHashMap using reflection (" + ex.getMessage() + ")");
 			return new HashMap();
 		}
 	}
 	
-	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass) {
+	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy,
+																													Method method, Class targetClass) {
 		List cached = (List) this.methodCache.get(method);
 		if (cached == null) {
-			// Recalculate
-			cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+			// recalculate
+			cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy,
+																																													method, targetClass);
 			this.methodCache.put(method, cached);
 		}
 		return cached;
 	}
 
-
-	/**
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)
-	 */
 	public void activated(AdvisedSupport advisedSupport) {
 	}
 
-
-	/**
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged(org.springframework.aop.framework.AdvisedSupport)
-	 */
 	public void adviceChanged(AdvisedSupport advisedSupport) {
-		methodCache.clear();
+		this.methodCache.clear();
 	}
 
 }
