@@ -26,16 +26,36 @@ package org.springframework.aop;
  * <br>Application developers don't usually need to work with TargetSources
  * directly: this is an AOP framework interface.
  * @author Rod Johnson
- * @version $Id: TargetSource.java,v 1.4 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: TargetSource.java,v 1.5 2004-07-25 13:24:51 johnsonr Exp $
  */
 public interface TargetSource {
 	
 	Class getTargetClass();
 	
+	/**
+	 * Will all calls to getTarget() return the same
+	 * object? In that case, there will be no need to invoke
+	 * releaseTarget(), and the AOP framework can cache
+	 * the return value of getTarget().
+	 * @return whether the target is immutable.
+	 */
 	boolean isStatic();
 	
+	/**
+	 * Return a target instance. Invoked immediately before
+	 * the AOP framework calls the "target" of an AOP
+	 * method invocation
+	 * @return the target object, whicch contains the joinpoint
+	 * @throws Exception if the target object can't be resolved
+	 */
 	Object getTarget() throws Exception;
 	
+	/**
+	 * Release the given target object obtained from the getTarget()
+	 * method
+	 * @param target object obtained from a call to getTarget()
+	 * @throws Exception if the object can't be released
+	 */
 	void releaseTarget(Object target) throws Exception;
 
 }
