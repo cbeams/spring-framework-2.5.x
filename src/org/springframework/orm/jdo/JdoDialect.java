@@ -48,19 +48,39 @@ public interface JdoDialect {
 	/**
 	 * Begin the given JDO transaction, applying the semantics specified by the
 	 * given Spring transaction definition (in particular, an isolation level
-	 * and a timeout).
+	 * and a timeout). Invoked by JdoTransactionManager on transaction begin.
 	 * <p>An implementation can configure the JDO Transaction object and then
 	 * invoke <code>begin</code>, or invoke a special begin method that takes,
 	 * for example, an isolation level.
+	 * <p>An implementation can also apply read-only flag and isolation level to the
+	 * underlying JDBC Connection before beginning the transaction. In that case,
+	 * a transaction data object can be returned that holds the previous isolation
+	 * level (and possibly other data), to be reset in cleanupTransaction.
 	 * @param transaction the JDO transaction to begin
 	 * @param definition the Spring transaction definition that defines semantics
+	 * @return an arbitrary object that holds transaction data, if any
+	 * (to be passed into cleanupTransaction)
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
 	 * @throws TransactionException in case of invalid arguments
+	 * @see #cleanupTransaction
 	 * @see javax.jdo.Transaction#begin
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
 	 */
-	void beginTransaction(Transaction transaction, TransactionDefinition definition)
+	Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException;
+
+	/**
+	 * Clean up the transaction via the given transaction data.
+	 * Invoked by JdoTransactionManager on transaction cleanup.
+	 * <p>An implementation can, for example, reset read-only flag and
+	 * isolation level of the underlying JDBC Connection.
+	 * @param transactionData arbitrary object that holds transaction data, if any
+	 * (as returned by beginTransaction)
+	 * @see #beginTransaction
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
+	 */
+	void cleanupTransaction(Object transactionData);
 
 	/**
 	 * Retrieve the JDBC Connection that the given JDO PersistenceManager uses underneath,

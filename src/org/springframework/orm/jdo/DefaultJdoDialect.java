@@ -141,13 +141,17 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	 * @see javax.jdo.Transaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 */
-	public void beginTransaction(Transaction transaction, TransactionDefinition definition)
+	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException("Standard JDO does not support custom isolation levels - " +
 																							 "use a special JdoAdapter for your JDO implementation");
 		}
 		transaction.begin();
+		return null;
+	}
+
+	public void cleanupTransaction(Object transactionData) {
 	}
 
 	/**
@@ -185,7 +189,7 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	 */
 	public DataAccessException translateException(JDOException ex) {
 		if (ex.getCause() instanceof SQLException) {
-			return this.jdbcExceptionTranslator.translate("JDO operation", null, (SQLException) ex.getCause());
+			return getJdbcExceptionTranslator().translate("JDO operation", null, (SQLException) ex.getCause());
 		}
 		else {
 			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);

@@ -643,10 +643,12 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
 		dialect.beginTransaction(tx, tt);
-		dialectControl.setVoidCallable(1);
+		dialectControl.setReturnValue(null, 1);
 		dialect.getJdbcConnection(pm, false);
 		dialectControl.setReturnValue(conHandle, 1);
 		dialect.releaseJdbcConnection(conHandle, pm);
+		dialectControl.setVoidCallable(1);
+		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
@@ -717,10 +719,12 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
 		dialect.beginTransaction(tx, tt);
-		dialectControl.setVoidCallable(1);
+		dialectControl.setReturnValue(null, 1);
 		dialect.getJdbcConnection(pm, false);
 		dialectControl.setReturnValue(conHandle, 1);
 		dialect.releaseJdbcConnection(conHandle, pm);
+		dialectControl.setVoidCallable(1);
+		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
@@ -787,9 +791,11 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
 		dialect.beginTransaction(tx, tt);
-		dialectControl.setVoidCallable(1);
+		dialectControl.setReturnValue(null, 1);
 		dialect.getJdbcConnection(pm, false);
 		dialectControl.setReturnValue(null, 1);
+		dialect.cleanupTransaction(null);
+		dialectControl.setVoidCallable(1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -881,11 +887,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		final TransactionTemplate tt = new TransactionTemplate();
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		dialect.beginTransaction(tx, tt);
-		dialectControl.setVoidCallable(1);
+		dialectControl.setReturnValue(null, 1);
 		ConnectionHandle conHandle = new SimpleConnectionHandle(con);
 		dialect.getJdbcConnection(pm, false);
 		dialectControl.setReturnValue(conHandle, 1);
 		dialect.releaseJdbcConnection(conHandle, pm);
+		dialectControl.setVoidCallable(1);
+		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
 		if (!manualSavepoint) {
 			tx.isActive();
