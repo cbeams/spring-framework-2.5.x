@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.values;
 
+import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +39,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
     private Map validationErrors = new HashMap();
 
     private List validationListeners = new ArrayList();
+
+    // @TODO property editor registry
 
     public ValidatingFormModel(Object domainObject) {
         super(domainObject);
@@ -105,14 +108,17 @@ public class ValidatingFormModel extends DefaultFormModel implements
 
     protected ValueModel onPreProcessNewFormValueModel(
             String domainObjectProperty, ValueModel formValueModel) {
-        if (getFormObject() instanceof TypeConverterFactory) {
-            TypeConverterFactory factory = (TypeConverterFactory)getFormObject();
-            TypeConverter converter = factory.createTypeConverter(
-                    domainObjectProperty, formValueModel);
-            if (converter != null) {
+        if (getFormObject() instanceof PropertyEditorProvider) {
+            PropertyEditorProvider provider = (PropertyEditorProvider)getFormObject();
+            PropertyEditor editor = provider
+                    .getPropertyEditor(domainObjectProperty);
+            if (editor != null) {
+                TypeConverter converter = new TypeConverter(formValueModel,
+                        editor);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Installed type converter '" + converter
-                            + "' for property '" + domainObjectProperty + "'");
+                            + "' with editor '" + editor + "' for property '"
+                            + domainObjectProperty + "'");
                 }
                 formValueModel = converter;
             }
