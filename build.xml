@@ -373,54 +373,38 @@
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
 			<link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
 			<link href="http://aopalliance.sourceforge.net/doc"/>
-			<!-- BSH -->
-			<!-- BURLAP -->
-			<!-- HESSIAN -->
+			<!-- Burlap -->
+			<!-- Hessian -->
 			<link href="http://cglib.sourceforge.net/apidocs"/>
-			<!-- Clover -->
 			<!-- COS -->
-			<link href="http://www.dom4j.org/apidocs/"/>
 			<!-- EasyMock -->
-			<!-- EhCache -->
-			<!-- FOP -->
+			<!-- EHCache -->
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<!-- Groovy -->
 			<link href="http://www.hibernate.org/hib_docs/api/"/>
 			<link href="http://httpunit.sourceforge.net/doc/api/"/>
 			<link href="http://www.ibatis.com/common/javadocs/"/>
 			<!-- iText -->
 			<!-- Commons Attributes (api + compiler -->
-			<link href="http://jakarta.apache.org/commons/beanutils/commons-beanutils-1.7.0/docs/api"/>
 			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
 			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/digester/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/discovery/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/lang/api/"/>
 			<link href="http://jakarta.apache.org/commons/logging/api/"/>
 			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/discovery/apidocs/"/>
 			<!-- JasperReports -->
 			<!-- JDO -->
-			<link href="http://www.jdom.org/docs/apidocs/"/>
-			<!-- jexcelapi will be part of the libs for 1.2 -->
-			<link href="http://www.jmock.org/docs/javadoc/"/>
 			<!-- JMX -->
 			<!-- JOTM -->
 			<!-- JSF -->
 			<link href="http://www.junit.org/junit/javadoc/"/>
 			<link href="http://logging.apache.org/log4j/docs/api/"/>
-			<!-- ojb -->
+			<!-- OJB -->
 			<link href="http://jakarta.apache.org/poi/apidocs/"/>
-			<!-- portlet -->
-			<!-- qdox -->
+			<!-- Portlet -->
 			<link href="http://quartz.sourceforge.net/javadoc/"/>
 			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
 			<link href="http://struts.apache.org/api/"/>
 			<link href="http://jakarta.apache.org/velocity/api/"/>
-			<link href="http://xml.apache.org/xerces2-j/javadocs/api/"/>
 		</javadoc>
 
 	</target>
