@@ -1,8 +1,11 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+
 package org.springframework.validation;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
-import java.beans.VetoableChangeListener;
 import java.util.Map;
 
 import org.springframework.beans.ErrorCodedPropertyVetoException;
@@ -12,8 +15,8 @@ import org.springframework.beans.PropertyVetoExceptionsException;
 
 /**
  * Binder that allows for binding property values to a target object.
- * Supports property change listeners and vetoable change listeners.
  * @author Rod Johnson
+ * @version $Id: DataBinder.java,v 1.4 2003-11-25 14:19:29 johnsonr Exp $
  */
 public class DataBinder {
 
@@ -70,21 +73,6 @@ public class DataBinder {
 		return requiredFields;
 	}
 
-	/**
-	 * Add a VetoableChangeListener that will be notified of property updates.
-	 */
-	public void addVetoableChangeListener(VetoableChangeListener vcl) {
-		this.errors.getBeanWrapper().setEventPropagationEnabled(true);
-		this.errors.getBeanWrapper().addVetoableChangeListener(vcl);
-	}
-
-	/**
-	 * Add a PropertyChangeListener that will be notified of property updates.
-	 */
-	public void addPropertyChangeListener(PropertyChangeListener pcl) {
-		this.errors.getBeanWrapper().setEventPropagationEnabled(true);
-		this.errors.getBeanWrapper().addPropertyChangeListener(pcl);
-	}
 
 	/**
 	 * Register the given custom property editor for all properties

@@ -7,14 +7,10 @@ package org.springframework.beans;
 
 import java.beans.MethodDescriptor;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
-import java.beans.VetoableChangeSupport;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,7 +24,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
@@ -63,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.15 2003-11-21 22:41:23 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.16 2003-11-25 14:19:29 johnsonr Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -123,15 +118,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * of JavaBeans introspection every time.
 	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
-
-	/** Should we propagate events to listeners? */
-	private boolean eventPropagationEnabled = false;
-
-	/** Standard java.beans helper object used to propagate events */
-	private VetoableChangeSupport vetoableChangeSupport;
-
-	/** Standard java.beans helper object used to propagate events */
-	private PropertyChangeSupport propertyChangeSupport;
 
 
 	//---------------------------------------------------------------------
@@ -194,13 +180,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 		    !this.cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(object.getClass());
 		}
-		setEventPropagationEnabled(this.eventPropagationEnabled);
 		// assert: cachedIntrospectionResults != null
 	}
 
 	public void newWrappedInstance() throws BeansException {
 		this.object = BeanUtils.instantiateClass(getWrappedClass());
-		vetoableChangeSupport = new VetoableChangeSupport(object);
 	}
 
 	public Class getWrappedClass() {
@@ -551,31 +535,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 		PropertyChangeEvent propertyChangeEvent = null;
 
 		try {
-			if (readMethod != null && this.eventPropagationEnabled) {
-				// can only find existing value if it's a readable property
-				try {
-					oldValue = readMethod.invoke(this.object, new Object[]{});
-				}
-				catch (Exception ex) {
-					// The getter threw an exception, so we couldn't retrieve the old value.
-					// We're not really interested in any exceptions at this point,
-					// so we merely log the problem and leave oldValue null
-					logger.warn("Failed to invoke getter [" + readMethod.getName() +
-											"] to get old property value before property change: getter probably threw an exception",
-											ex);
-				}
-			}
+			
 
 			// old value may still be null
 			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
 					pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
 
-			// May throw PropertyVetoException: if this happens the PropertyChangeSupport
-			// class fires a reversion event, and we jump out of this method, meaning
-			// the change was never actually made
-			if (this.eventPropagationEnabled) {
-				this.vetoableChangeSupport.fireVetoableChange(propertyChangeEvent);
-			}
 
 			if (pd.getPropertyType().isPrimitive() &&
 					(propertyChangeEvent.getNewValue() == null || "".equals(propertyChangeEvent.getNewValue()))) {
@@ -597,11 +562,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 				else {
 					logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
 				}
-			}
-
-			// if we get here we've successfully changed the property and can broadcast it
-			if (this.eventPropagationEnabled) {
-				this.propertyChangeSupport.firePropertyChange(propertyChangeEvent);
 			}
 		}
 		catch (InvocationTargetException ex) {
@@ -831,68 +791,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Bean event support
-	//---------------------------------------------------------------------
-
-	public void addVetoableChangeListener(VetoableChangeListener l) {
-		if (eventPropagationEnabled)
-			vetoableChangeSupport.addVetoableChangeListener(l);
-	}
-
-	public void removeVetoableChangeListener(VetoableChangeListener l) {
-		if (eventPropagationEnabled)
-			vetoableChangeSupport.removeVetoableChangeListener(l);
-	}
-
-	public void addVetoableChangeListener(String propertyName, VetoableChangeListener l) {
-		if (eventPropagationEnabled)
-			vetoableChangeSupport.addVetoableChangeListener(propertyName, l);
-	}
-
-	public void removeVetoableChangeListener(String propertyName, VetoableChangeListener l) {
-		if (eventPropagationEnabled)
-			vetoableChangeSupport.removeVetoableChangeListener(propertyName, l);
-	}
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		if (eventPropagationEnabled)
-			propertyChangeSupport.addPropertyChangeListener(l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		if (eventPropagationEnabled)
-			propertyChangeSupport.removePropertyChangeListener(l);
-	}
-
-	public void addPropertyChangeListener(String propertyName, PropertyChangeListener l) {
-		if (eventPropagationEnabled)
-			propertyChangeSupport.addPropertyChangeListener(propertyName, l);
-	}
-
-	public void removePropertyChangeListener(String propertyName, PropertyChangeListener l) {
-		if (eventPropagationEnabled)
-			propertyChangeSupport.removePropertyChangeListener(propertyName, l);
-	}
-
-	public boolean isEventPropagationEnabled() {
-		return eventPropagationEnabled;
-	}
-
-	/**
-	 * Disabling event propagation improves performance.
-	 * @param flag whether event propagation should be enabled
-	 */
-	public void setEventPropagationEnabled(boolean flag) {
-		this.eventPropagationEnabled = flag;
-		// Lazily initialize support for events if not already initialized
-		if (eventPropagationEnabled && (vetoableChangeSupport == null || propertyChangeSupport == null)) {
-			vetoableChangeSupport = new VetoableChangeSupport(object);
-			propertyChangeSupport = new PropertyChangeSupport(object);
-		}
-	}
-
-
 	public Object invoke(String methodName, Object[] args) throws BeansException {
 		try {
 			MethodDescriptor md = this.cachedIntrospectionResults.getMethodDescriptor(methodName);
@@ -929,7 +827,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		try {
-			sb.append("BeanWrapperImpl: eventPropagationEnabled=" + eventPropagationEnabled
+			sb.append("BeanWrapperImpl:"
 								+ " wrapping class [" + getWrappedInstance().getClass().getName() + "]; ");
 			PropertyDescriptor pds[] = getPropertyDescriptors();
 			if (pds != null) {

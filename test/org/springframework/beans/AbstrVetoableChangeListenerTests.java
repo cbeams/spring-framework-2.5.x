@@ -57,36 +57,5 @@ public class AbstrVetoableChangeListenerTests extends TestCase {
 			// Ok
 		}
 	}
-	
-	public void testValidationThroughBeanWrapper() throws Exception {
-		MyListener l = new MyListener();
-		TestBean tb = new TestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		// Will work fine
-		bw.setPropertyValue("age", new Integer(MAX_AGE + 1));
-		// Old value must be different or attempt to set to same will be ignored
-		tb.setAge(-1);
-		
-		bw.setEventPropagationEnabled(true);
-		bw.addVetoableChangeListener(l);
-		try {
-			bw.setPropertyValue("age", new Integer(MAX_AGE + 1));
-			fail();
-		}
-		catch (PropertyVetoException ex) {
-			// Ok
-		}
-		
-		// Ok
-		bw.setPropertyValue("age", new Integer(MAX_AGE - 1));
-		bw.setPropertyValue("name", "tony");
-		try {
-			bw.setPropertyValue("name", null);
-			fail();
-		}
-		catch (PropertyVetoException ex) {
-			// Ok
-		}
-	}
 
 }

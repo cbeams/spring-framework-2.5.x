@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 
 
 /**
+ * @version $Id: BeanWrapperTestSuite.java,v 1.7 2003-11-25 14:18:49 johnsonr Exp $
  * @author Rod Johnson
  */
 public class BeanWrapperTestSuite extends TestCase {
@@ -64,7 +65,6 @@ public class BeanWrapperTestSuite extends TestCase {
 	public void testGetterThrowsException() {
 		GetterBean gb = new GetterBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		bw.setEventPropagationEnabled(true);
 		try {
 			bw.setPropertyValue("name","tom");
 			assertTrue("Set name to tom", gb.getName().equals("tom"));
@@ -393,140 +393,6 @@ public class BeanWrapperTestSuite extends TestCase {
 			"Lewisham".equals(kbw.getPropertyValue("spouse.spouse.spouse.spouse.company")));
 	}
 
-	public void testEventPropagation() {
-		TestBean t = new TestBean();
-		String newName = "tony";
-		ConsoleListener l = new ConsoleListener();
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			bw.setEventPropagationEnabled(true);
-			bw.addPropertyChangeListener(l);
-			//System.out.println(bw);
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
-			bw.setPropertyValues(pvs);
-			assertTrue("Must have fired 3 events", l.getEventCount() == 3);
-			//assertTrue("Event source is correct", l.getEventCount() == 3);
-		}
-		catch (Exception ex) {
-			fail("Shouldn't throw exception when everything is valid");
-		}
-	}
-
-	public void testEventPropagationAndVeto() {
-		TestBean t = new TestBean();
-		String newName = "tony";
-		ConsoleListener l = new ConsoleListener();
-		AgistListener v = new AgistListener();
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			bw.setEventPropagationEnabled(true);
-			bw.addPropertyChangeListener(l);
-			bw.addVetoableChangeListener(v);
-			//System.out.println(bw);
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", new Integer(67)));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
-			bw.setPropertyValues(pvs);
-			fail("Veto must have fired");
-			//assertTrue("Event source is correct", l.getEventCount() == 3);
-		}
-		catch (PropertyVetoExceptionsException ex) {
-			assertTrue("Must have fired 2 events", l.getEventCount() == 2);
-			assertTrue("VetoableChangeListener must have seen 4 events, not " + v.getEventCount(), v.getEventCount() == 4);
-			assertTrue("Error count = 1", ex.getExceptionCount() == 1);
-		//	assertTrue(ex.getPropertyVetoExceptions()[0].getPropertyVetoException().
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail("Should throw PropertyVetoExceptionsException only on veto");
-		}
-	}
-
-	public void testEventPropagationAndNonFiringVeto() {
-		TestBean t = new TestBean();
-		String newName = "tony";
-		ConsoleListener l = new ConsoleListener();
-		AgistListener v = new AgistListener();
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			bw.setEventPropagationEnabled(true);
-			bw.addPropertyChangeListener(l);
-			bw.addVetoableChangeListener(v);
-			//System.out.println(bw);
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
-			bw.setPropertyValues(pvs);
-			assertTrue("Must have fired 3 events", l.getEventCount() == 3);
-			assertTrue("VetoableChangeListener must have seen 3 events, not " + v.getEventCount(), v.getEventCount() == 3);
-			//assertTrue("Event source is correct", l.getEventCount() == 3);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail("Shouldn't veto without good cause");
-		}
-	}
-	
-	
-	/**
-	 * Tests we don't lose existing listeners but can't add new ones
-	 * or remove during disabled period
-	 */
-	public void testEventPropagationDisableBehavior() throws Exception {
-		TestBean t = new TestBean();
-		String newName = "tony";
-		ConsoleListener l = new ConsoleListener();
-		
-		BeanWrapper bw = new BeanWrapperImpl(t);
-		bw.setEventPropagationEnabled(true);
-		bw.addPropertyChangeListener(l);
-
-			//System.out.println(bw);
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
-		bw.setPropertyValues(pvs);
-		assertTrue("Must have fired 1 events", l.getEventCount() == 1);
-
-		bw.setEventPropagationEnabled(false);
-		bw.setPropertyValue("age", new Integer(23));
-		assertTrue("Must have fired no more events", l.getEventCount() == 1);
-		// should have no effect
-		bw.removePropertyChangeListener(l);
-		
-		// Re-enable. Should get our listener working again.
-		bw.setEventPropagationEnabled(true);
-		bw.setPropertyValue("age", new Integer(43));
-		assertTrue("Must have fired 1 more event", l.getEventCount() == 2);
-		//assertTrue("Event source is correct", l.getEventCount() == 3);
-
-	}
-
-	public void testEventPropagationDisabled() {
-		TestBean t = new TestBean();
-		String newName = "tony";
-		ConsoleListener l = new ConsoleListener();
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			bw.setEventPropagationEnabled(false);
-			bw.addPropertyChangeListener(l);
-			//System.out.println(bw);
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
-			bw.setPropertyValues(pvs);
-			assertTrue("Must have fired 0 events, not " + l.getEventCount(), l.getEventCount() == 0);
-		}
-		catch (Exception ex) {
-			fail("Shouldn't throw exception when everything is valid");
-		}
-	}
-	
 	public void testNullObject() {
 		try {
 			BeanWrapper bw = new BeanWrapperImpl((Object) null);

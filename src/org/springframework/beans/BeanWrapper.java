@@ -5,11 +5,9 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 import java.util.Map;
 
 /**
@@ -31,15 +29,10 @@ import java.util.Map;
  *
  * <p>BeanWrapper implementations can be used repeatedly, with their "target"
  * or wrapped object changed.
- *
- * <p>This interface supports the ability to add standard JavaBeans API
- * PropertyChangeListeners and VetoableChangeListeners, without the need for
- * supporting code in the target class. VetoableChangeListeners can veto
- * individual property changes.
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.4 2003-11-12 19:08:46 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.5 2003-11-25 14:19:29 johnsonr Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -197,79 +190,6 @@ public interface BeanWrapper {
 	 * @param propertyName property to check status for
 	 */
 	boolean isWritableProperty(String propertyName);
-
-
-	//---------------------------------------------------------------------
-	// Bean event support
-	//---------------------------------------------------------------------
-
-	/**
-	 * Add a VetoableChangeListener that will be notified of property updates.
-	 * @param l VetoableChangeListener notified of all property updates
-	 */
-	void addVetoableChangeListener(VetoableChangeListener l);
-
-	/**
-	 * Remove a VetoableChangeListener that will be notified of property updates.
-	 * @param l VetoableChangeListener to remove
-	 */
-	void removeVetoableChangeListener(VetoableChangeListener l);
-
-	/**
-	 * Add a VetoableChangeListener that will be notified of updates to a single property.
-	 * @param l VetoableChangeListener to add
-	 * @param propertyName name of property this listeners will listen to updates for
-	 */
-	void addVetoableChangeListener(String propertyName, VetoableChangeListener l);
-
-	/**
-	 * Remove a VetoableChangeListener that will be notified of updates to a single property.
-	 * @param l VetoableChangeListener to remove
-	 * @param propertyName name of property this listeners formerly listened to updates for
-	 */
-	void removeVetoableChangeListener(String propertyName, VetoableChangeListener l);
-
-	/**
-	 * Add a PropertyChangeListener that will be notified of property updates.
-	 * @param l PropertyChangeListener notified of all property updates
-	 */
-	void addPropertyChangeListener(PropertyChangeListener l);
-
-	/**
-	 * Remove a PropertyChangeListener that was formerly notified of property updates.
-	 * @param l PropertyChangeListener to remove
-	 */
-	void removePropertyChangeListener(PropertyChangeListener l);
-
-	/**
-	 * Add a PropertyChangeListener that will be notified of updates to a single property.
-	 * @param propertyName property the listener is interested in
-	 * @param l PropertyChangeListener notified of property updates to this property
-	 */
-	void addPropertyChangeListener(String propertyName, PropertyChangeListener l);
-
-	/**
-	 * Remove a PropertyChangeListener that was notified of updates to a single property.
-	 * @param propertyName property the listener is interested in
-	 * @param l PropertyChangeListener to remove
-	 */
-	void removePropertyChangeListener(String propertyName, PropertyChangeListener l);
-
-	/**
-	 * Should we send out event notifications? Disabling this functionality
-	 * (which is enabled by default) may improve performance.
-	 * @return whether we notify listeners of property updates
-	 */
-	boolean isEventPropagationEnabled();
-
-	/**
-	 * Enable or disable event propogation. Any existing listeners will be preserved
-	 * and will again be notified of events when event propagation is re-enabled.
-	 * However no new listeners can be added in this period:
-	 * Calls to add or remove listeners will be ignored.
-	 * @param flag whether we notify listeners of property updates
-	 */
-	void setEventPropagationEnabled(boolean flag);
 
 
 	/**
