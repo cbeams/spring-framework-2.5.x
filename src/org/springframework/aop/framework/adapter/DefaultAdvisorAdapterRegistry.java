@@ -14,7 +14,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.5 2004-02-22 09:48:55 johnsonr Exp $
+ * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.6 2004-02-22 10:39:02 johnsonr Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	
@@ -32,12 +32,14 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 			return (Advisor) advice;
 		}
 		if (advice instanceof Interceptor) {
-			return new DefaultPointcutAdvisor((Interceptor) advice);
+			// So well-known it doesn't even need an adapter
+			return new DefaultPointcutAdvisor(advice);
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
+			// Check that it is supported
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
 			if (adapter.supportsAdvice(advice)) {
-				return adapter.wrap(advice);
+				return new DefaultPointcutAdvisor(advice);
 			}
 		}
 		throw new UnknownAdviceTypeException(advice);
@@ -54,7 +56,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 				return adapter.getInterceptor(advisor);
 			}
 		}
-		throw new UnknownAdviceTypeException(advisor);
+		throw new UnknownAdviceTypeException(advisor.getAdvice());
 	}
 
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {

@@ -20,7 +20,7 @@ import org.springframework.aop.Advisor;
  * do so only if you need to introduce more Advisor or Advice types to
  * Spring.
  * @author Rod Johnson
- * @version $Id: AdvisorAdapter.java,v 1.3 2004-02-22 09:48:55 johnsonr Exp $
+ * @version $Id: AdvisorAdapter.java,v 1.4 2004-02-22 10:39:02 johnsonr Exp $
  */
 public interface AdvisorAdapter {
 	
@@ -34,16 +34,6 @@ public interface AdvisorAdapter {
 	 * @return whether this adapter understands the given advice object 
 	 */
 	boolean supportsAdvice(Object advice);
-	
-	/**
-	 * Given the advice, return an Advisor wrapping it. If the
-	 * Advisor is a PointcutAdvisor, it should always match.
-	 * @param advice the supportsAdvice() method must have returned
-	 * true on this object
-	 * @return an Advisor wrapping this advice, that will apply
-	 * to all invocations.
-	 */
-	Advisor wrap(Object advice);
 	
 	/**
 	 * Return an AOP Alliance Interceptor exposing the behaviour of
