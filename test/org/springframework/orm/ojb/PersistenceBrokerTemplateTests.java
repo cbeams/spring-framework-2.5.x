@@ -112,6 +112,26 @@ public class PersistenceBrokerTemplateTests extends TestCase {
 		pbControl.verify();
 	}
 
+	public void testGetReportQueryIteratorByQuery() {
+		MockControl pbControl = MockControl.createControl(PersistenceBroker.class);
+		final PersistenceBroker pb = (PersistenceBroker) pbControl.getMock();
+		Query query = new QueryByCriteria(TestBean.class);
+		Iterator result = new HashSet().iterator();
+		pb.getReportQueryIteratorByQuery(query);
+		pbControl.setReturnValue(result, 1);
+		pb.close();
+		pbControl.setReturnValue(true, 1);
+		pbControl.replay();
+
+		PersistenceBrokerTemplate template = new PersistenceBrokerTemplate() {
+			protected PersistenceBroker getPersistenceBroker() {
+				return pb;
+			}
+		};
+		assertEquals(result, template.getReportQueryIteratorByQuery((query)));
+		pbControl.verify();
+	}
+
 	public void testGetCount() {
 		MockControl pbControl = MockControl.createControl(PersistenceBroker.class);
 		final PersistenceBroker pb = (PersistenceBroker) pbControl.getMock();

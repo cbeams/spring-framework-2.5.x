@@ -198,6 +198,14 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 		});
 	}
 
+	public Iterator getReportQueryIteratorByQuery(final Query query) {
+		return (Iterator) execute(new PersistenceBrokerCallback() {
+			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
+				return pb.getReportQueryIteratorByQuery(query);
+			}
+		});
+	}
+
 	public int getCount(final Query query) throws DataAccessException {
 		Integer count = (Integer) execute(new PersistenceBrokerCallback() {
 			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {

@@ -77,6 +77,8 @@ public interface PersistenceBrokerOperations {
 
 	Iterator getIteratorByQuery(final Query query) throws DataAccessException;
 
+	Iterator getReportQueryIteratorByQuery(Query query);
+	
 	int getCount(Query query) throws DataAccessException;
 
 	void removeFromCache(Object entityOrId) throws DataAccessException;
