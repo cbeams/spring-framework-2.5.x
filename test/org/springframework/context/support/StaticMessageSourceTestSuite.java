@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATest;
@@ -35,39 +32,16 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * @author Rod Johnson/Tony Falabella
- * @version $RevisionId$
+ * @author Rod Johnson
  */
-public class StaticMessageSourceTestSuite
-    extends AbstractApplicationContextTests {
-
-	//~ Static variables/initializers ------------------------------------------
+public class StaticMessageSourceTestSuite extends AbstractApplicationContextTests {
 
 	protected static final String MSG_TXT1_US = "At '{1,time}' on \"{1,date}\", there was \"{2}\" on planet {0,number,integer}.";
 	protected static final String MSG_TXT1_UK = "At '{1,time}' on \"{1,date}\", there was \"{2}\" on station number {0,number,integer}.";
 	protected static final String MSG_TXT2_US = "This is a test message in the message catalog with no args.";
 	protected static final String MSG_TXT3_US = "This is another test message in the message catalog with no args.";
 
-	//~ Instance variables -----------------------------------------------------
-
 	protected StaticApplicationContext sac;
-
-	//~ Constructors -----------------------------------------------------------
-
-	public StaticMessageSourceTestSuite() throws Exception {
-	}
-
-	//~ Methods ----------------------------------------------------------------
-
-	public static void main(String[] args) {
-		junit.textui.TestRunner.run(suite());
-
-		//	junit.swingui.TestRunner.main(new String[] {PrototypeFactoryTests.class.getName() } );
-	}
-
-	public static Test suite() {
-		return new TestSuite(StaticMessageSourceTestSuite.class);
-	}
 
 	/** Overridden */
 	public void testCount() {
@@ -103,18 +77,15 @@ public class StaticMessageSourceTestSuite
 	 * make sure the cache is being used properly.
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
-	public void testGetMessageWithMessageAlreadyLookedFor()
-	    throws Exception {
+	public void testGetMessageWithMessageAlreadyLookedFor() {
 		Object[] arguments = {
 			new Integer(7), new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
 
-
 		// The first time searching, we don't care about for this test
 		// Try with Locale.US
 		sac.getMessage("message.format.example1", arguments, Locale.US);
-
 
 		// Now msg better be as expected
 		assertTrue("2nd search within MsgFormat cache returned expected message for Locale.US",
@@ -127,7 +98,6 @@ public class StaticMessageSourceTestSuite
 			"a disturbance in the Force"
 		};
 
-
 		// Now msg better be as expected even with different args
 		assertTrue("2nd search within MsgFormat cache with different args returned expected message for Locale.US",
 		           sac.getMessage("message.format.example1", newArguments, Locale.US
@@ -138,13 +108,11 @@ public class StaticMessageSourceTestSuite
 	/**
 	 * Example taken from the javadocs for the java.text.MessageFormat class
 	 */
-	public void testGetMessageWithNoDefaultPassedInAndFoundInMsgCatalog()
-	    throws Exception {
+	public void testGetMessageWithNoDefaultPassedInAndFoundInMsgCatalog() {
 		Object[] arguments = {
 			new Integer(7), new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
-
 
 		/*
 		 Try with Locale.US
@@ -159,13 +127,11 @@ public class StaticMessageSourceTestSuite
 		           )
 		           .indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
 
-
 		// Try with Locale.UK
 		assertTrue("msg from staticMsgSource for Locale.UK substituting args for placeholders is as expected",
 		           sac.getMessage("message.format.example1", arguments, Locale.UK
 		           )
 		           .indexOf("there was \"a disturbance in the Force\" on station number 7.") != -1);
-
 
 		// Try with Locale.US - Use a different test msg that requires no args
 		assertTrue("msg from staticMsgSource for Locale.US that requires no args is as expected",
@@ -223,7 +189,7 @@ public class StaticMessageSourceTestSuite
 		MessageSourceResolvable resolvable4 = new DefaultMessageSourceResolvable(codes4, null);
 		try {
 			sac.getMessage(resolvable4, Locale.US);
-			fail("Should have thrown NoSuchMessagException");
+			fail("Should have thrown NoSuchMessageException");
 		}
 		catch (NoSuchMessageException ex) {
 			// expected

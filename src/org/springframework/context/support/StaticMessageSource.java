@@ -21,23 +21,19 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Simple implementation of HierarchicalMessageSource that allows messages
+ * Simple implementation of MessageSource that allows messages
  * to be held in a Java object, and added programmatically.
- * This class now supports internationalization.
+ * This MessageSource supports internationalization.
  *
- * <p>Intended for testing, rather than use production systems.
+ * <p>Intended for testing rather than use in production systems.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class StaticMessageSource extends AbstractMessageSource {
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-	private Map messages = new HashMap();
+	private final Map messages = new HashMap();
 
 	protected MessageFormat resolveCode(String code, Locale locale) {
 		return (MessageFormat) this.messages.get(code + "_" + locale.toString());

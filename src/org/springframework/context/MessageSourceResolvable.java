@@ -30,7 +30,7 @@ public interface MessageSourceResolvable {
 	/**
 	 * Return the codes to be used to resolve this message, in the order that
 	 * they should get tried. The last code will therefore be the default one.
-	 * @return a String code associated with this message
+	 * @return a String array of codes which are associated with this message
 	 */
 	public String[] getCodes();
 
