@@ -71,12 +71,14 @@ public class TestServiceManager extends TestCase
 
         FirstService service = (FirstService) CTX.getBean("myFirstService");
         String calledString = service.getCalledString();
+        //System.out.println(calledString);
         assertEquals(
             "Calling lifecycle sequence is not correct",
-            "1init2init1start2start1stop2stop1dispose2dispose",
+            "1init-2init-1start-2start-2stop-1stop-2dispose-1dispose-",
             calledString);
             
         assertTrue("Services are not all singletons", mgr.validateSingleton());
+
 
     }
 

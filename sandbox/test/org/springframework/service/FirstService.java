@@ -26,7 +26,7 @@ public class FirstService extends BaseService
      */
     public void initialize() throws Exception
     {
-        addCalledString("1init");
+        addCalledString("1init-");
 
     }
 
@@ -36,7 +36,7 @@ public class FirstService extends BaseService
      */
     public void start()
     {
-        addCalledString("1start");
+        addCalledString("1start-");
 
     }
 
@@ -46,7 +46,7 @@ public class FirstService extends BaseService
      */
     public void dispose()
     {
-        addCalledString("1dispose");
+        addCalledString("1dispose-");
 
     }
 
@@ -56,7 +56,7 @@ public class FirstService extends BaseService
      */
     public void stop()
     {
-        addCalledString("1stop");
+        addCalledString("1stop-");
 
     }
 
