@@ -72,7 +72,7 @@
         safe handling of Hibernate Sessions. Related code using Hibernate
         generally needs to use the same Hibernate Session object for
         efficiency and proper transaction handling. Spring makes it easy to
-        transparently create and bind a session tot he current thread, using
+        transparently create and bind a session to the current thread, using
         either a declarative, AOP method interceptor approach, or by using an
         explicit, template wrapper class at the Java code level. Thus Spring
         solves many of the usage issues that repeatedly arise on the Hibernate
@@ -713,59 +713,6 @@
       <classname>TransactionProxyFactoryBean</classname> to declaratively
       demarcate transactions, please see <xref
       linkend="beannameautoproxycreator-for-transactions" />.</para>
-    </sect2>
-
-    <sect2>
-      <title>Using Spring-managed Application Beans</title>
-
-      <para>A Spring application context definition can be loaded with a
-      variety of context implementations, from
-      <classname>FileSystemXmlApplicationContext</classname> and
-      <classname>ClassPathXmlApplicationContext</classname> to
-      <classname>XmlWebApplicationContext</classname>. This allows for reuse
-      of Spring-managed data access and business objects in all kinds of
-      environments. By default, a web app will have its root context defined
-      in "WEB-INF/applicationContext.xml". In any Spring app, an application
-      context defined in an XML file wires up all the application beans that
-      are involved, from the Hibernate session factory to custom data access
-      and business objects (like the beans above). Most of them do not have to
-      be aware of being managed by the Spring container, not even when
-      collaborating with other beans, as they simply follow JavaBeans
-      conventions. A bean property can either represent a value parameter or a
-      collaborating bean. The following bean definition could be part of a
-      Spring web MVC context that accesses business beans in a root
-      application context.</para>
-
-      <programlisting format="linespecific" xml:space="preserve">&lt;bean id="myProductList" class="product.ProductListController"&gt;
-    &lt;property name="productService"&gt;
-        &lt;ref bean="myProductService"/&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-
-      <para>Spring web controllers are provided with all business or data
-      access objects they need via bean references, so there typically isn't
-      any need to do manual bean lookups in the application context. But when
-      using Spring-managed beans with Struts, or within an EJB implementation
-      or even an applet, one is always able to look up a bean manually.
-      Therefore, Spring beans can be leveraged virtually anywhere. One just
-      needs a reference to the application context, be it via a servlet
-      context attribute in the web case, or a manually created instance from a
-      file or class path resource.</para>
-
-      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-ProductService productService = (ProductService) context.getBean("myProductService");</programlisting>
-
-      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context =
-    new FileSystemXmlApplicationContext("C:/myContext.xml");
-ProductService productService =
-    (ProductService) context.getBean("myProductService");</programlisting>
-
-      <programlisting format="linespecific" xml:space="preserve">ApplicationContext context =
-    new ClassPathXmlApplicationContext("myContext.xml");
-ProductService productService =
-    (ProductService) context.getBean("myProductService");</programlisting>
-
-      <para></para>
     </sect2>
 
     <sect2>
