@@ -19,29 +19,50 @@ package org.springframework.web.flow;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.util.SessionKeyUtils;
 
 /**
+ * Base class for flow integration tests; belongs in the spring-test.jar
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractFlowTests extends AbstractTransactionalSpringContextTests {
 
 	private Flow flow;
 
-	protected FlowSessionExecutionStack flowSessionExecutionStack;
+	protected FlowSessionExecution flowSessionExecution;
 
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "Flow is required for this test");
 		this.flow = flow;
 	}
 
+	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
+		assertEquals("The current state '" + getCurrentStateId() + "' does not equal the expected state '"
+				+ expectedCurrentStateId + "'", expectedCurrentStateId, getCurrentStateId());
+	}
+
+	protected String getCurrentStateId() {
+		return flowSessionExecution.getCurrentStateId();
+	}
+
+	protected FlowSessionExecution getFlowSessionExecution() {
+		return flowSessionExecution;
+	}
+
 	protected void assertModelAttributePresent(Map attributeMap, String attributeName) {
-		assertNotNull("The model attribute '" + attributeName + "' is not present", attributeMap.get(attributeName));
+		assertTrue("The model attribute '" + attributeName + "' is not present in model", attributeMap
+				.containsKey(attributeName));
 	}
 
 	protected void assertModelAttributeInstanceOf(Map attributeMap, String attributeName, Class clazz) {
@@ -60,7 +81,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 	protected void assertModelCollectionAttributeSize(Map attributeMap, String attributeName, int size) {
 		assertModelAttributeInstanceOf(attributeMap, attributeName, Collection.class);
 		assertEquals("The model collection attribute '" + attributeName + "' must have " + size + " elements", size,
-				((Collection) attributeMap.get(attributeName)).size());
+				((Collection)attributeMap.get(attributeName)).size());
 	}
 
 	protected void assertModelAttributePropertyEquals(Map attributeMap, String attributeName, String propertyName,
@@ -76,12 +97,27 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
 	}
 
-	protected FlowSessionExecutionStack createFlowSessionExecutionStack() {
-		return new FlowSessionExecutionStack();
+	protected Flow getFlow() {
+		return flow;
 	}
 
 	protected FlowEventProcessor getEventProcessor() {
 		return flow;
+	}
+
+	protected ViewDescriptor startFlow(HttpServletRequest request, HttpServletResponse response, Map input) {
+		FlowSessionExecutionStartResult result = getEventProcessor().start(request, response, input);
+		this.flowSessionExecution = (FlowSessionExecution)result.getFlowSessionExecutionInfo();
+		return result.getStartingView();
+	}
+
+	protected ViewDescriptor startFlow(Map input) {
+		return startFlow(new MockHttpServletRequest(), new MockHttpServletResponse(), input);
+	}
+
+	protected ViewDescriptor executeEvent(String eventId, MockHttpServletRequest request,
+			MockHttpServletResponse response) {
+		return getEventProcessor().execute(eventId, getCurrentStateId(), getFlowSessionExecution(), request, response);
 	}
 
 }
