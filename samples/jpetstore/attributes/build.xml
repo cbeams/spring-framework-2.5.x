@@ -135,7 +135,7 @@
 
 		<mkdir dir="${weblib.dir}"/>
 
-		<jar jarfile="${weblib.dir}/jpetstore.jar" compress="true" basedir="${build.dir}"/>
+		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${spring.root}/lib/aop-alliance">
@@ -186,7 +186,7 @@
 			</fileset>
 		</copy>
 
-		<copy file="${weblib.dir}/jpetstore.jar" tofile="${client.dir}/jpetstore.jar"/>
+		<copy file="${weblib.dir}/${name}.jar" tofile="${client.dir}/${name}.jar"/>
 
 	</target>
 

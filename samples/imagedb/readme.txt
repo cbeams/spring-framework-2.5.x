@@ -31,7 +31,9 @@ The WAR file will be created in the "dist" directory.
 To execute the web application with its default settings, start a MySQL instance on
 your local machine. The JDBC settings can be adapted in "WEB-INF/jdbc.properties";
 you'll find commented Oracle properties there too. You need to create the "imagedb"
-table with the respective schema script in the "db" subdirectory.
+table with the respective schema script in the "db" subdirectory. Note that you need
+to include the JDBC driver in "WEB-INF/lib": You can put it there in the web app
+source before building the WAR, or add it to the expanded WAR after deployment.
 
 The "standalone" subdirectory includes a sample standalone program that lists all
 image descriptors in the database. It accesses the very same "applicationContext.xml"

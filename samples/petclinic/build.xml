@@ -125,7 +125,7 @@
 
 		<mkdir dir="${weblib.dir}"/>
 
-		<jar jarfile="${weblib.dir}/petclinic.jar" compress="true" basedir="${build.dir}"/>
+		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${db.dir}/mysql">
