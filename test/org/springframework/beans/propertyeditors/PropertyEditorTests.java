@@ -32,7 +32,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class PropertyEditorTestSuite extends TestCase {
+public class PropertyEditorTests extends TestCase {
 
 	public void testOneProperty() {
 		String s = "foo=bar";
@@ -90,7 +90,6 @@ public class PropertyEditorTestSuite extends TestCase {
 	
 	/**
 	 * Comments begin with #
-	 *
 	 */
 	public void testIgnoresCommentLinesAndEmptyLines() {
 		String s = "#Ignore this comment\n" +
@@ -142,7 +141,7 @@ public class PropertyEditorTestSuite extends TestCase {
 	}
 	
 	public void testEmptyString() {
-		PropertiesEditor pe= new PropertiesEditor();
+		PropertiesEditor pe = new PropertiesEditor();
 		pe.setAsText("");
 		Properties p= (Properties) pe.getValue();
 		assertTrue("empty string means empty properties", p.isEmpty());
