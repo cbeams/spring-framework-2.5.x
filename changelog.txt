@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.171 2004-06-24 08:50:20 jhoeller Exp $
+$Id: changelog.txt,v 1.172 2004-06-24 14:43:32 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -24,6 +24,7 @@ Package org.springframework.beans
 * fixed PropertyPlaceholderConfigurer's circular reference detection to allow repeated placeholder in single value
 * PropertyPlaceholderConfigurer and PropertiesFactoryBean respect the defaults of a given Properties instance
 * AbstractAutowireCapableBeanFactory's "autowireConstructor" regards all constructors, just preferring public ones
+* reworked root/child bean definition concept, allowing to override any settings in a child (including class name)
 * introduced InstantiationStrategy interface, with SimpleInstantiationStrategy and CglibSubclassingInstantiationStrategy
 * added support for static factory methods to RootBeanDefinition and AbstractAutowireCapableBeanFactory
 * added support for abstract lookup methods to AbstractBeanDefinition and AbstractAutowireCapableBeanFactory
