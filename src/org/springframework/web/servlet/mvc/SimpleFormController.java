@@ -212,12 +212,10 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Submit callback with all parameters. Called in case of submit without errors
 	 * reported by the registered validator respectively on every submit if no validator.
-	 * <p>Default implementation calls onSubmit(command), using the returned ModelAndView
-	 * if actually implemented in a subclass. Else, the default behavior is applied:
-	 * rendering the success view with the command and Errors instance as model.
+	 * <p>Default implementation delegates to onSubmit(Object, BindException).
 	 * <p>Subclasses can override this to provide custom submission handling like storing
 	 * the object to the database. Implementations can also perform custom validation and
-	 * call showForm to return to the form. Do <i>not</i> implement both onSubmit template
+	 * call showForm to return to the form. Do <i>not</i> implement multiple onSubmit
 	 * methods: In that case, just this method will be called by the controller.
 	 * <p>Call errors.getModel() to populate the ModelAndView model with the command and
 	 * the Errors instance, under the command name, as expected by the "spring:bind" tag.
@@ -227,15 +225,37 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
-	 * @see #onSubmit(Object)
+	 * @see #onSubmit(Object, BindException)
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
 	 */
 	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
 																	Object command,	BindException errors) throws Exception {
+		return onSubmit(command, errors);
+	}
+
+	/**
+	 * Simpler onSubmit version. Called by the default implementation of the onSubmit
+	 * version with all parameters.
+	 * <p>Default implementation calls onSubmit(command), using the returned ModelAndView
+	 * if actually implemented in a subclass. Else, the default behavior is applied:
+	 * rendering the success view with the command and Errors instance as model.
+	 * <p>Subclasses can override this to provide custom submission handling that
+	 * does not need request and response.
+	 * <p>Call errors.getModel() to populate the ModelAndView model with the command and
+	 * the Errors instance, under the command name, as expected by the "spring:bind" tag.
+	 * @param command form object with request parameters bound onto it
+	 * @param errors Errors instance without errors
+	 * @return the prepared model and view, or null
+	 * @throws Exception in case of errors
+	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
+	 * @see #onSubmit(Object)
+	 * @see org.springframework.validation.Errors
+	 */
+	protected ModelAndView onSubmit(Object command, BindException errors) throws Exception {
 		ModelAndView mv = onSubmit(command);
 		if (mv != null) {
-			// simple onSubmit version implemented in custom subclass
+			// simplest onSubmit version implemented in custom subclass
 			return mv;
 		}
 		else {
@@ -248,8 +268,8 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simple onSubmit version. Called by the default implementation of the onSubmit
-	 * version with all parameters.
+	 * Simplest onSubmit version. Called by the default implementation of the onSubmit
+	 * version with command and BindException parameters.
 	 * <p>This implementation returns null, making the calling onSubmit method perform
 	 * its default rendering of the success view.
 	 * <p>Subclasses can override this to provide custom submission handling that
@@ -257,7 +277,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
-	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
+	 * @see #onSubmit(Object, BindException)
 	 */
 	protected ModelAndView onSubmit(Object command) throws Exception {
 		return null;
