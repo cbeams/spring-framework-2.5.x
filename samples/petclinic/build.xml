@@ -155,7 +155,6 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-collections.jar"/>
-				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
