@@ -102,7 +102,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
 
-	/** Custom WebApplicationContext implementation class */
+	/** WebApplicationContext implementation class to use */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** Namespace for this servlet */
@@ -113,6 +113,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** Should we publish the context as a ServletContext attribute? */
 	private boolean publishContext = true;
+
+	/** Should we publish a RequestHandledEvent at the end of each request? */
+	private boolean publishEvents = true;
 
 	/** WebApplicationContext for this servlet */
 	private WebApplicationContext webApplicationContext;
@@ -148,7 +151,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * no custom namespace was set: e.g. "test-servlet" for a servlet named "test".
 	 */
 	public String getNamespace() {
-		return (namespace != null) ? namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX;
+		return (this.namespace != null) ? this.namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX;
 	}
 
 	/**
@@ -182,6 +185,23 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	public boolean isPublishContext() {
 		return publishContext;
+	}
+
+	/**
+	 * Set whether this servlet should publish a RequestHandlerEvent at the end
+	 * of each request. Default is true; can be turned off for a slight performance
+	 * improvement, provided that no ApplicationListeners rely on such events.
+	 */
+	public void setPublishEvents(boolean publishEvents) {
+		this.publishEvents = publishEvents;
+	}
+
+	/**
+	 * Return whether this servlet should publish a RequestHandlerEvent at the end
+	 * of each request.
+	 */
+	public boolean isPublishEvents() {
+		return publishEvents;
 	}
 
 
@@ -233,8 +253,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 					getServletName() + "'");
 		}
 
-		if (this.publishContext) {
-			// publish the context as a servlet context attribute
+		if (isPublishContext()) {
+			// Publish the context as a servlet context attribute.
 			String attName = getServletContextAttributeName();
 			getServletContext().setAttribute(attName, wac);
 			if (logger.isDebugEnabled()) {
@@ -275,10 +295,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		wac.setParent(parent);
 		wac.setServletContext(getServletContext());
 		wac.setNamespace(getNamespace());
-		if (this.contextConfigLocation != null) {
+		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(
 			    StringUtils.tokenizeToStringArray(
-							this.contextConfigLocation, ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
+							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.refresh();
 		return wac;
@@ -391,11 +411,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			else {
 				logger.debug("Successfully completed request");
 			}
-			// whether or not we succeeded, publish an event
-			this.webApplicationContext.publishEvent(
-					new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
-							request.getMethod(), getServletConfig().getServletName(), WebUtils.getSessionId(request),
-							getUsernameForRequest(request), failureCause));
+			if (isPublishEvents()) {
+				// Whether or not we succeeded, publish an event.
+				this.webApplicationContext.publishEvent(
+						new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
+								request.getMethod(), getServletConfig().getServletName(), WebUtils.getSessionId(request),
+								getUsernameForRequest(request), failureCause));
+			}
 		}
 	}
 

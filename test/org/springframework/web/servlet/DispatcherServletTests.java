@@ -105,6 +105,27 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("correct error code", response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
+	public void testRequestHandledEvent() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		ComplexWebApplicationContext.TestApplicationListener listener =
+				(ComplexWebApplicationContext.TestApplicationListener)
+				complexDispatcherServlet.getWebApplicationContext().getBean("testListener");
+		assertEquals(1, listener.counter);
+	}
+
+	public void testPublishEventsOff() throws Exception {
+		complexDispatcherServlet.setPublishEvents(false);
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		ComplexWebApplicationContext.TestApplicationListener listener =
+				(ComplexWebApplicationContext.TestApplicationListener)
+				complexDispatcherServlet.getWebApplicationContext().getBean("testListener");
+		assertEquals(0, listener.counter);
+	}
+
 	public void testFormRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/form.do");
 		request.addPreferredLocale(Locale.CANADA);

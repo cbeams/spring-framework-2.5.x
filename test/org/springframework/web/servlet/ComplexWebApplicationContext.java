@@ -30,9 +30,12 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -117,6 +120,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		registerSingleton("multipartResolver", MockMultipartResolver.class, null);
+		registerSingleton("testListener", TestApplicationListener.class, null);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
@@ -333,6 +337,18 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new IllegalStateException("Already cleaned");
 			}
 			this.cleaned = true;
+		}
+	}
+
+
+	public static class TestApplicationListener implements ApplicationListener {
+
+		public int counter = 0;
+
+		public void onApplicationEvent(ApplicationEvent event) {
+			if (event instanceof RequestHandledEvent) {
+				this.counter++;
+			}
 		}
 	}
 
