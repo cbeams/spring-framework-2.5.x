@@ -36,84 +36,196 @@
     </para>
 </preface>
 
-<chapter id="overview">
+<chapter id="introduction">
 
-    <title>Spring Framework - an overview</title>
-    <para>
-        Spring contains a lot of functionality and features, which are
-        well-organized in 6 modules, shown in the diagram below. The rest
-        of this section discusses each the of modules very shortly.
-    </para>
-    <para>
-        <mediaobject>
-            <imageobject role="fo">
-                <imagedata fileref="images/spring-overview.svg" format="SVG" align="center"/>
-            </imageobject>
-            <caption>
-                <para>Overview of the the Spring Framework
-                </para>
-            </caption>
-        </mediaobject>
-    </para>
-    <para>
-        The <emphasis>beans</emphasis> package is the most fundamental part of the framework and
-        provides the Dependency Injection features allowing you to manage
-        beans containing functionality. The basic concept here is the 
-        BeanFactory, which provides a factory pattern preventing you to use
-        programmatic singletons and allowing you to decouple configuration,
-        specification of dependencies from your actual logic.            
-    </para>
-    <para>
-        On top of the <emphasis>beans</emphasis> package sits the 
-        <emphasis>context</emphasis> package,
-        providing you a way to access beans in a more framework-style manner,
-        somewhat resembling an JNDI-registry. The context package inherits
-        its features from the beans package and adds messaging, 
-        event-propagation, resource-loading and transparent
-        creating of contexts by for example a servlet container.
-    </para>
-    <para>
-        The <emphasis>JDBC</emphasis> package provides a JDBC-abstraction
-        layer that takes removes the need to do tedious JDBC coding, parsing
-        database-vendor specific error codes and stuff like that.
-        Also, the JDBC package provides a way to do 
-        programmatic as well as declarative transaction
-        management, not only for classes implementing special interfaces,
-        but for <emphasis>all you POJOs</emphasis> you're coding.
-    </para>
-    <para>
-        The <emphasis>ORM</emphasis> package provides integration layers
-        for popular object-relational mappers, including JDO, Hibernate
-        and iBatis. Using the ORM package you can use all those O/R-mappers
-        in combination with all the other features Spring offers, like
-        simple delcarative transaction management mentioned before.
-    </para>
-    <para>
-        Spring's <emphasis>AOP</emphasis> package provides an 
-        <emphasis>Aop Alliance</emphasis> compliant aspect-oriented
-        programming implementing allowing you to define for example
-        method-interceptors and pointcuts to cleanly decouple code
-        implementing functionality that should logically speaking be separated.
-        Using source-level metadata functionality you can 
-        incorporate all kinds of behavioral information in your code,
-        a little like .NET attributes.
-    </para>
-    <para>
-        Spring's <emphasis>web</emphasis> package provides the basic 
-        web-oriented integration features, like multipart functionality,
-        initialization of contexts using servlet listeners and 
-        a web-oriented application context. When in need of using
-        Spring together with WebWork or Struts, this is the package to 
-        integrate with.
-    </para>
-    <para>
-        Spring <emphasis>web MVC</emphasis> package provides a 
-        Model-View-Controller implementation for web-applications. 
-        Spring's MVC implementation is not just any implementation,
-        it provides a clean separation between domain model code and
-        web forms and allows you to use all the other features of the Spring
-        Framework like validation.
-    </para>
+    <title>Introduction</title>
+    <sect1 id="introduction-overview">
+		<title>Overview</title>
+
+		<para>
+			Spring contains a lot of functionality and features, which are
+			well-organized in 6 modules, shown in the diagram below. The rest
+			of this section discusses each the of modules very shortly.
+		</para>
+		<para>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/spring-overview.svg" format="SVG" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/spring-overview.gif" format="GIF" align="center"/>
+				</imageobject>
+				<caption>
+					<para>Overview of the the Spring Framework
+					</para>
+				</caption>
+			</mediaobject>
+		</para>
+		<para>
+			The <emphasis>beans</emphasis> package is the most fundamental part of the framework and
+			provides the Dependency Injection features allowing you to manage
+			beans containing functionality. The basic concept here is the 
+			BeanFactory, which provides a factory pattern preventing you to use
+			programmatic singletons and allowing you to decouple configuration,
+			specification of dependencies from your actual logic.            
+		</para>
+		<para>
+			On top of the <emphasis>beans</emphasis> package sits the 
+			<emphasis>context</emphasis> package,
+			providing you a way to access beans in a more framework-style manner,
+			somewhat resembling an JNDI-registry. The context package inherits
+			its features from the beans package and adds messaging, 
+			event-propagation, resource-loading and transparent
+			creating of contexts by for example a servlet container.
+		</para>
+		<para>
+			The <emphasis>JDBC</emphasis> package provides a JDBC-abstraction
+			layer that takes removes the need to do tedious JDBC coding, parsing
+			database-vendor specific error codes and stuff like that.
+			Also, the JDBC package provides a way to do 
+			programmatic as well as declarative transaction
+			management, not only for classes implementing special interfaces,
+			but for <emphasis>all you POJOs</emphasis> you're coding.
+		</para>
+		<para>
+			The <emphasis>ORM</emphasis> package provides integration layers
+			for popular object-relational mappers, including JDO, Hibernate
+			and iBatis. Using the ORM package you can use all those O/R-mappers
+			in combination with all the other features Spring offers, like
+			simple delcarative transaction management mentioned before.
+		</para>
+		<para>
+			Spring's <emphasis>AOP</emphasis> package provides an 
+			<emphasis>Aop Alliance</emphasis> compliant aspect-oriented
+			programming implementing allowing you to define for example
+			method-interceptors and pointcuts to cleanly decouple code
+			implementing functionality that should logically speaking be separated.
+			Using source-level metadata functionality you can 
+			incorporate all kinds of behavioral information in your code,
+			a little like .NET attributes.
+		</para>
+		<para>
+			Spring's <emphasis>web</emphasis> package provides the basic 
+			web-oriented integration features, like multipart functionality,
+			initialization of contexts using servlet listeners and 
+			a web-oriented application context. When in need of using
+			Spring together with WebWork or Struts, this is the package to 
+			integrate with.
+		</para>
+		<para>
+			Spring <emphasis>web MVC</emphasis> package provides a 
+			Model-View-Controller implementation for web-applications. 
+			Spring's MVC implementation is not just any implementation,
+			it provides a clean separation between domain model code and
+			web forms and allows you to use all the other features of the Spring
+			Framework like validation.
+		</para>
+	</sect1>
+	
+	<sect1 id="overview-usagescenarios">
+		<title>Usage scenarios</title>
+		<para>
+			With the building block described above you can use Spring in all sorts
+			of scenarios, from applets up till full-fledged enterprise application using
+			Spring's transaction management functionality and for example Spring's Web framework.
+			A couple of examples:
+		</para>
+		<para>			
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/full.svg" format="SVG" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/full.gif" format="GIF" align="center"/>
+				</imageobject>
+				<caption>
+					<para>Typical full-fledged Spring web application
+					</para>
+				</caption>
+			</mediaobject>
+		</para>
+		<para>
+			A typical web application using most of Spring's features. Using
+			<literal>TransactionProxyFactoryBeans</literal> the web application is fully transactional,
+			just as it would be when using container managed transaction as provided by Enterprise
+			JavaBeans. All you custom business logic can be implemented using simple POJOs, managed
+			by Spring's Dependency Injection container. Additional services such as sending email and
+			validation, independent of the web-layer, thus enabling you to choose where to execute
+			validation rules. Spring's ORM support integrated with Hibernate, JDO and iBatis, using
+			for example <literal>HibernateDaoSupport</literal> you can re-use your existing Hibernate
+			mappings. Form controllers seamlessly integrate the web-layer with the domain model, removing
+			the need of having <literal>ActionForms</literal> or other classes that transform
+			HTTP parameters to values for your domain model.
+		</para>
+		
+		<para>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/thirdparty-web.svg" format="SVG" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/thirdparty-web.gif" format="GIF" align="center"/>
+				</imageobject>
+				<caption>
+					<para>Spring middle-tier using a third-party web framework
+					</para>
+				</caption>
+			</mediaobject>
+		</para>
+		
+		<para>
+			Sometimes the situation does not allow you completely switch to a different framework.
+			Spring does not enforce you to use everything, it's not <emphasis>all-or-nothing</emphasis>
+			so to say. Existing frontends using WebWork or Struts can perfectly be integrated with
+			a Spring-based middle-tier, allowing you to use the transaction features Spring offers
+			for example. The only thing you need to do is wire up your business logic using
+			an <literal>ApplicationContext</literal> and integrating your Struts frontend using a 
+			<literal>WebApplicationContext</literal>.
+		</para>
+		
+		<para>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/remoting.svg" format="SVG" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/remoting.gif" format="GIF" align="center"/>
+				</imageobject>
+				<caption>
+					<para>Remoting usage scenario
+					</para>
+				</caption>
+			</mediaobject>
+		</para>
+		
+		<para>			
+			When only in need of accessing existing code via webservices, you can use
+			Spring to easily solve your problem. Using Spring's <literal>Hessian-</literal>,
+			<literal>Burlap-</literal>, <literal>Rmi-</literal> or <literal>JaxRpcProxyFactory</literal>,
+			enabling remote access to existing application is all of a sudden not that hard anymore.
+		</para>
+		
+		<para>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/ejb.svg" format="SVG" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/ejb.gif" format="GIF" align="center"/>
+				</imageobject>
+				<caption>
+					<para>EJBs - Wrapping existing POJOs
+					</para>
+				</caption>
+			</mediaobject>
+		</para>
+		
+		<para>
+			Spring also provide an access-layer and abstraction-layer for Enterprise JavaBeans,
+			enabling you to reuse your existing POJOs and wrap them in Stateless SessionBeans,
+			for use in scalable failsafe webapplications, that might need declarative security.
+		</para>
+	</sect1>
 </chapter>
 
 
