@@ -1,9 +1,11 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.34 2003-10-31 17:07:23 jhoeller Exp $
+$Id: changelog.txt,v 1.35 2003-11-03 17:10:56 johnsonr Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
+* refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by users and passed into JdbcTemplate
+* refactored JDBC object package so that JdbcTemplate is now in root RdbmsOperation class, and one JdbcTemplate can be used to configure multiple RdbmsOperations
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
 * ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
