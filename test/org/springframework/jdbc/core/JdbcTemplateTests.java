@@ -55,11 +55,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 	public void testBeanProperties() throws Exception {
 		replay();
 
-		JdbcTemplate t = new JdbcTemplate(mockDataSource);
-		assertTrue("datasource ok", t.getDataSource() == mockDataSource);
-		assertTrue("ignores warnings by default", t.isIgnoreWarnings());
-		t.setIgnoreWarnings(false);
-		assertTrue("can set NOT to ignore warnings", !t.isIgnoreWarnings());
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		assertTrue("datasource ok", template.getDataSource() == mockDataSource);
+		assertTrue("ignores warnings by default", template.isIgnoreWarnings());
+		template.setIgnoreWarnings(false);
+		assertTrue("can set NOT to ignore warnings", !template.isIgnoreWarnings());
 	}
 
 	public void testCannotRunStaticSqlWithBindParameters() throws Exception {
@@ -165,7 +165,15 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
-		}, false, null);
+		}, false, null, null, null);
+	}
+
+	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
+		doTestStrings(new JdbcTemplateCallback() {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+				template.query(sql, rch);
+			}
+		}, false, new Integer(10), new Integer(20), null);
 	}
 
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
@@ -173,7 +181,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
-		}, true, null);
+		}, true, null, null, null);
 	}
 
 	public void testStringsWithPreparedStatementSetter() throws Exception {
@@ -186,7 +194,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 					}
 				}, rch);
 			}
-		}, true, argument);
+		}, true, null, null, argument);
 	}
 
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
@@ -194,7 +202,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
-		}, true, null);
+		}, true, null, null, null);
 	}
 
 	public void testStringsWithPreparedStatementArgs() throws Exception {
@@ -203,23 +211,24 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new Object[] {argument}, rch);
 			}
-		}, true, argument);
+		}, true, null, null, argument);
 	}
 
-	protected void doTestStrings(
-			JdbcTemplateCallback jdbcTemplateCallback, boolean usePreparedStatement, Object argument)
+	private void doTestStrings(
+			JdbcTemplateCallback jdbcTemplateCallback, boolean usePreparedStatement,
+			Integer fetchSize, Integer maxRows, Object argument)
 			throws Exception {
 
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
 		class StringHandler implements RowCallbackHandler {
-			private List l = new LinkedList();
+			private List list = new LinkedList();
 			public void processRow(ResultSet rs) throws SQLException {
-				l.add(rs.getString(1));
+				list.add(rs.getString(1));
 			}
 			public String[] getStrings() {
-				return (String[]) l.toArray(new String[l.size()]);
+				return (String[]) list.toArray(new String[list.size()]);
 			}
 		}
 
@@ -246,6 +255,12 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockStatement =
 			(PreparedStatement) ctrlStatement.getMock();
+		if (fetchSize != null) {
+			mockStatement.setFetchSize(fetchSize.intValue());
+		}
+		if (maxRows != null) {
+			mockStatement.setMaxRows(maxRows.intValue());
+		}
 		if (argument != null) {
 			mockStatement.setObject(1, argument);
 		}
@@ -274,7 +289,14 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		StringHandler sh = new StringHandler();
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(mockDataSource);
+		if (fetchSize != null) {
+			template.setFetchSize(fetchSize.intValue());
+		}
+		if (maxRows != null) {
+			template.setMaxRows(maxRows.intValue());
+		}
 		jdbcTemplateCallback.doInJdbcTemplate(template, sql, sh);
 
 		// Match
@@ -337,7 +359,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		Object result = template.execute(new ConnectionCallback() {
-			public Object doInConnection(Connection con) throws SQLException, DataAccessException {
+			public Object doInConnection(Connection con) {
 				assertEquals(con, mockConnection);
 				return "test";
 			}
@@ -413,8 +435,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(ResultSet rs)
-					throws java.sql.SQLException {
+				public void processRow(ResultSet rs) {
 					throw rex;
 				}
 			});
@@ -1288,31 +1309,31 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 				assertTrue(cs == mockCallableStatement);
 				return mockCallableStatement2;
 			}
-			public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
+			public ResultSet getNativeResultSet(ResultSet rs) {
 				return rs;
 			}
 		});
 
 		template.query("my query",	new ResultSetExtractor() {
-			public Object extractData(ResultSet rs2) throws SQLException {
+			public Object extractData(ResultSet rs2) {
 				assertEquals(mockResultSet, rs2);
 				return null;
 			}
 		});
 
 		template.query(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
+			public PreparedStatement createPreparedStatement(Connection conn) {
 				return mockPreparedStatement;
 			}
 		}, new ResultSetExtractor() {
-			public Object extractData(ResultSet rs2) throws SQLException {
+			public Object extractData(ResultSet rs2) {
 				assertEquals(mockResultSet, rs2);
 				return null;
 			}
 		});
 
 		template.call(new CallableStatementCreator() {
-			public CallableStatement createCallableStatement(Connection con) throws SQLException {
+			public CallableStatement createCallableStatement(Connection con) {
 				return mockCallableStatement;
 			}
 		},
@@ -1374,8 +1395,8 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		try {
-			template.query("my query",	new ResultSetExtractor() {
-				public Object extractData(ResultSet rs) throws SQLException {
+			template.query("my query", new ResultSetExtractor() {
+				public Object extractData(ResultSet rs) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
@@ -1394,7 +1415,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 					return null;
 				}
 			}, new ResultSetExtractor() {
-				public Object extractData(ResultSet rs2) throws SQLException {
+				public Object extractData(ResultSet rs2) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
@@ -1444,7 +1465,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		List params = new ArrayList();
 		params.add(new SqlReturnResultSet("", new RowCallbackHandler() {
-			public void processRow(ResultSet rs) throws SQLException {
+			public void processRow(ResultSet rs) {
 				throw new InvalidDataAccessApiUsageException("");
 			}
 
