@@ -205,7 +205,7 @@ public class ActionStateAction {
 	 * @return the execute method name
 	 */
 	public String getExecuteMethodName() {
-		return (String)getProperty(RESULT_QUALIFIER_PROPERTY);
+		return (String)getProperty(EXECUTE_METHOD_NAME_PROPERTY);
 	}
 
 	/**
