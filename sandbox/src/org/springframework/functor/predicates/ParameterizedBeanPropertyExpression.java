@@ -22,37 +22,35 @@ import org.springframework.functor.functions.GetProperty;
 import org.springframework.util.Assert;
 
 /**
- * A unary predicate that tests an expression consisting of a variable bean
- * property value and a constant parameter. For example: <code>pet.age > 5</code>
+ * A unary predicate that tests an expression that tests a variable bean
+ * property value with a constant parameter value. For example: <code>pet.age > 5</code>
  * 
  * @author Keith Donald
  */
-public class BeanPropertyConstantExpressionTester implements UnaryPredicate {
+public class ParameterizedBeanPropertyExpression implements UnaryPredicate {
     private String propertyName;
-    private BinaryPredicate constantExpressionTester;
+    private BinaryPredicate parameterizedExpression;
 
     /**
      * Creates a BeanPropertyExpressionTester.
      * 
      * @param propertyName
      *            The first property participating in the expression.
-     * @param propertyValue
-     *            The constant property value participating in the expression.
-     * @param beanPropertyExpression
+     * @param parameter
+     *            The constant parameter value participating in the expression.
+     * @param expression
      *            The expression predicate (tester).
      */
-    public BeanPropertyConstantExpressionTester(
+    public ParameterizedBeanPropertyExpression(
         String propertyName,
-        Object propertyValue,
-        BinaryPredicate beanPropertyExpression) {
-        Assert.notNull(beanPropertyExpression);
+        Object parameter,
+        BinaryPredicate expression) {
+        Assert.notNull(expression);
         Assert.notNull(propertyName);
         this.propertyName = propertyName;
         ParameterizedBinaryPredicate valueTester =
-            new ParameterizedBinaryPredicate(
-                beanPropertyExpression,
-                propertyValue);
-        this.constantExpressionTester =
+            new ParameterizedBinaryPredicate(expression, parameter);
+        this.parameterizedExpression =
             PredicateFactory.attachResultTester(
                 valueTester,
                 GetProperty.instance());
@@ -65,7 +63,7 @@ public class BeanPropertyConstantExpressionTester implements UnaryPredicate {
      * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object bean) {
-        return constantExpressionTester.test(bean, propertyName);
+        return parameterizedExpression.test(bean, propertyName);
     }
 
 }

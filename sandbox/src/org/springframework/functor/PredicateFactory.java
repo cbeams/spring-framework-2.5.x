@@ -16,18 +16,18 @@
 package org.springframework.functor;
 
 import org.springframework.functor.functions.GetProperty;
-import org
-    .springframework
-    .functor
-    .predicates
-    .BeanPropertyConstantExpressionTester;
-import org.springframework.functor.predicates.BeanPropertyExpressionTester;
+import org.springframework.functor.predicates.BeanPropertyExpression;
 import org.springframework.functor.predicates.BinaryFunctionResultTester;
 import org.springframework.functor.predicates.EqualTo;
 import org.springframework.functor.predicates.GreaterThan;
 import org.springframework.functor.predicates.GreaterThanEqualTo;
 import org.springframework.functor.predicates.LessThan;
 import org.springframework.functor.predicates.LessThanEqualTo;
+import org
+    .springframework
+    .functor
+    .predicates
+    .ParameterizedBeanPropertyExpression;
 import org.springframework.functor.predicates.ParameterizedBinaryPredicate;
 import org.springframework.functor.predicates.Range;
 import org.springframework.functor.predicates.UnaryAnd;
@@ -169,7 +169,7 @@ public class PredicateFactory {
     public static UnaryPredicate equals(
         String propertyName,
         Object propertyValue) {
-        return new BeanPropertyConstantExpressionTester(
+        return new ParameterizedBeanPropertyExpression(
             propertyName,
             propertyValue,
             EqualTo.instance());
@@ -187,7 +187,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThan(
         String propertyName,
         Object propertyValue) {
-        return new BeanPropertyConstantExpressionTester(
+        return new ParameterizedBeanPropertyExpression(
             propertyName,
             propertyValue,
             GreaterThan.instance());
@@ -205,7 +205,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThanEqualTo(
         String propertyName,
         Object propertyValue) {
-        return new BeanPropertyConstantExpressionTester(
+        return new ParameterizedBeanPropertyExpression(
             propertyName,
             propertyValue,
             GreaterThanEqualTo.instance());
@@ -223,7 +223,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThan(
         String propertyName,
         Object propertyValue) {
-        return new BeanPropertyConstantExpressionTester(
+        return new ParameterizedBeanPropertyExpression(
             propertyName,
             propertyValue,
             LessThan.instance());
@@ -241,7 +241,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThanEqualTo(
         String propertyName,
         Object propertyValue) {
-        return new BeanPropertyConstantExpressionTester(
+        return new ParameterizedBeanPropertyExpression(
             propertyName,
             propertyValue,
             LessThanEqualTo.instance());
@@ -259,7 +259,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThanProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpressionTester(
+        return new BeanPropertyExpression(
             propertyName,
             otherPropertyName,
             GreaterThan.instance());
@@ -277,9 +277,9 @@ public class PredicateFactory {
     public static UnaryPredicate equalsProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyConstantExpressionTester(
+        return new BeanPropertyExpression(
             propertyName,
-            propertyName,
+            otherPropertyName,
             EqualTo.instance());
     }
 
@@ -295,7 +295,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpressionTester(
+        return new BeanPropertyExpression(
             propertyName,
             otherPropertyName,
             GreaterThanEqualTo.instance());
@@ -313,7 +313,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThanProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpressionTester(
+        return new BeanPropertyExpression(
             propertyName,
             otherPropertyName,
             LessThan.instance());
@@ -331,7 +331,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpressionTester(
+        return new BeanPropertyExpression(
             propertyName,
             otherPropertyName,
             LessThanEqualTo.instance());
@@ -374,13 +374,13 @@ public class PredicateFactory {
         String propertyName,
         String minPropertyName,
         String maxPropertyName) {
-        BeanPropertyExpressionTester min =
-            new BeanPropertyExpressionTester(
+        BeanPropertyExpression min =
+            new BeanPropertyExpression(
                 propertyName,
                 minPropertyName,
                 GreaterThanEqualTo.instance());
-        BeanPropertyExpressionTester max =
-            new BeanPropertyExpressionTester(
+        BeanPropertyExpression max =
+            new BeanPropertyExpression(
                 propertyName,
                 minPropertyName,
                 LessThanEqualTo.instance());

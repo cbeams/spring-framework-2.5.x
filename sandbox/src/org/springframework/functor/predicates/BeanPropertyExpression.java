@@ -21,12 +21,12 @@ import org.springframework.functor.functions.GetProperty;
 import org.springframework.util.Assert;
 
 /**
- * A unary predicate that test an expression consisting of two variabl ebean
- * property values.  For example, <code>pet.ageFirstVisit > pet.age</code>
+ * A unary predicate that test an expression consisting of two variablr bean
+ * property values.  For example, <code>pet.ageAtFirstVisit > pet.currentAge</code>
  * 
  * @author Keith Donald
  */
-public class BeanPropertyExpressionTester implements UnaryPredicate {
+public class BeanPropertyExpression implements UnaryPredicate {
     private String propertyName;
     private String otherPropertyName;
     private BinaryPredicate beanPropertyExpression;
@@ -41,7 +41,7 @@ public class BeanPropertyExpressionTester implements UnaryPredicate {
      * @param beanPropertyExpression
      *            The expression predicate (tester).
      */
-    public BeanPropertyExpressionTester(
+    public BeanPropertyExpression(
         String propertyName,
         String otherPropertyName,
         BinaryPredicate beanPropertyExpression) {
