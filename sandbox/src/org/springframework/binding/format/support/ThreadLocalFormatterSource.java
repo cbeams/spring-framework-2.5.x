@@ -39,7 +39,7 @@ public class ThreadLocalFormatterSource implements FormatterSource {
 
 	private DefaultThreadLocalContext formatterStorage = new DefaultThreadLocalContext();
 
-	private LocaleContext localeContext;
+	private LocaleContext localeContext = new ThreadLocaleContext();
 
 	private Style defaultDateStyle;
 
@@ -47,6 +47,10 @@ public class ThreadLocalFormatterSource implements FormatterSource {
 
 	public void setCleanupBroadcaster(ThreadCleanupBroadcaster broadcaster) {
 		formatterStorage.setCleanupBroadcaster(broadcaster);
+	}
+
+	public void setLocaleContext(LocaleContext localeContext) {
+		this.localeContext = localeContext;
 	}
 
 	public void setDefaultDateStyle(Style style) {
@@ -63,10 +67,6 @@ public class ThreadLocalFormatterSource implements FormatterSource {
 
 	protected int getDefaultTimeStyleCode() {
 		return defaultTimeStyle.getShortCode();
-	}
-
-	public void setLocaleContext(LocaleContext localeContext) {
-		this.localeContext = localeContext;
 	}
 
 	protected Locale getLocale() {
