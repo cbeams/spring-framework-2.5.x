@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.107 2004-03-14 21:41:53 jhoeller Exp $
+$Id: changelog.txt,v 1.108 2004-03-17 09:16:21 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
@@ -33,18 +33,26 @@ Package org.springframework.core
 * decode URL file path before using it to construct a File in UrlResource and ClassPathResource
 
 Package org.springframework.jdbc
+* added generic StatementCallback, PreparedStatementCallback and CallableStatementCallback interfaces
+* added SqlProvider interface, typically implemented by PreparedStatementCreators and CallableStatementCreators
+* added "execute" methods to JdbcTemplate and JdbcOperations, taking XxxStatementCallback implementations as actions
+* all "query" methods that take a RowCallbackHandler return a List, passing through a results List from a ResultReader
+* renamed "doWithResultSetFromStaticQuery" and "doWithResultSetFromPreparedStatement" to "query"
+* removed JdbcTemplate's "update" method that takes a PreparedStatementCreator array
 * added "queryForLong" methods to JdbcTemplate class and JdbcOperations interface
 * fixed number detection for JdbcTemplate's "queryForInt" and "queryForLong"
-* added ResultSet type support to PreparedStatementCreatorFactory and SqlOperation
+* added ResultSet type support to PreparedStatementCreatorFactory, CallableStatementCreatorFactory, and SqlOperation
 
 Package org.springframework.jndi
 * added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
+* renamed ContextCallback interface to JndiCallback
 
 Package org.springframework.orm
 * reworked LocalSessionFactoryBean's schema support, providing "drop/create/updateDatabaseSchema" methods
 * LocalSessionFactoryBean keeps the Hibernate Configuration object, allowing access via the "getConfiguration" method
 * added "createCriteria" method to HibernateTemplate, for creating Criteria objects that respect transaction timeouts
 * added "loadAll(Class)" method to HibernateTemplate and HibernateOperations, for retrieving all instances of a class
+* added HibernateTemplate's "execute" and "executeFind" methods to HibernateOperations interface
 * allow for ClobStringType to be instantiated without LobHandler, for use with Hibernate's SchemaExport tool
 * adapted iBATIS SQL Maps 2 support to SQL Maps 2.0 beta 4, calling the new SqlMapSession.close method
 * changed SqlMapClientCallback's "doInSqlMapSession(SqlMapSession)" method to "doInSqlMapClient(SqlMapExecutor)"
@@ -77,6 +85,7 @@ Package org.springframework.web
 * added "bindEmptyMultipartFiles" setting to ServletRequestDataBinder
 * added ServletContextAware interface for application beans, to be detected by web application contexts
 * reworked CommonsMultipartResolver and CosMultipartResolver to implement ServletContextAware
+* added "setView" and "setViewName" mutators to ModelAndView, to allow for post-processing in a HandlerInterceptor
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
 * added "contextRelative" flag to RedirectView, to automatically prepend the context path to a given URL
 * fetch DefinitionsFactory on initialization of TilesView, throwing a proper exception if not found
