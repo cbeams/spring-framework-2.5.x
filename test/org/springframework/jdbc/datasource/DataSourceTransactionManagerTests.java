@@ -513,6 +513,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.setReturnValue(con, 1);
 		con.getAutoCommit();
 		conControl.setThrowable(new SQLException("Cannot begin"));
+		con.close();
+		conControl.setVoidCallable();
 		conControl.replay();
 		dsControl.replay();
 

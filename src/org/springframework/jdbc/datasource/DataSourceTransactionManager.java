@@ -61,7 +61,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.14 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.15 2004-06-14 11:00:00 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -106,7 +106,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
-			ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
+			ConnectionHolder holder =
+					(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
 			return new DataSourceTransactionObject(holder);
 		}
 		else {
@@ -136,8 +137,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			txObject.setConnectionHolder(new ConnectionHolder(con));
 		}
 
+		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
 		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
+
 			// apply read-only
 			if (definition.isReadOnly()) {
 				if (debugEnabled) {
@@ -162,9 +165,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				con.setTransactionIsolation(definition.getIsolationLevel());
 			}
 
-			// Switch to manual commit if necessary. This is very expensive in some JDBC
-			// drivers, so we don't want to do it unnecessarily (for example if we're configured
-			// Commons DBCP to set it already)
+			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
+			// so we don't want to do it unnecessarily (for example if we're configured
+			// Commons DBCP to set it already).
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
 				if (debugEnabled) {
@@ -181,8 +184,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			// bind the connection holder to the thread
 			TransactionSynchronizationManager.bindResource(this.dataSource, txObject.getConnectionHolder());
 		}
+
 		catch (SQLException ex) {
-			throw new CannotCreateTransactionException("Could not configure connection", ex);
+			try {
+				DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			}
+			catch (CleanupFailureDataAccessException ex2) {
+				// just log it, to keep the transaction-related exception
+				logger.error("Could not close JDBC connection after transaction begin failed", ex2);
+			}
+			throw new CannotCreateTransactionException("Could not configure JDBC connection for transaction", ex);
 		}
 	}
 
@@ -205,33 +216,36 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doCommit(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+			logger.debug("Committing JDBC transaction on connection [" +
+									 txObject.getConnectionHolder().getConnection() + "]");
 		}
 		try {
 			txObject.getConnectionHolder().getConnection().commit();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not commit", ex);
+			throw new TransactionSystemException("Could not commit JDBC transaction", ex);
 		}
 	}
 
 	protected void doRollback(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Rolling back JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+			logger.debug("Rolling back JDBC transaction on connection [" +
+									 txObject.getConnectionHolder().getConnection() + "]");
 		}
 		try {
 			txObject.getConnectionHolder().getConnection().rollback();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not rollback", ex);
+			throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
 		}
 	}
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "] rollback-only");
+			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() +
+									 "] rollback-only");
 		}
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
@@ -241,7 +255,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		// remove the connection holder from the thread
 		TransactionSynchronizationManager.unbindResource(this.dataSource);
-		
+
+		txObject.getConnectionHolder().setSynchronizedWithTransaction(false);
+		txObject.getConnectionHolder().clearTimeout();
+
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
 
@@ -274,12 +291,15 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.info("Could not reset JDBC connection", ex);
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing JDBC connection [" + con + "] after transaction");
+		}
 		try {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 		catch (CleanupFailureDataAccessException ex) {
 			// just log it, to keep a transaction-related exception
-			logger.error("Could not close connection after transaction", ex);
+			logger.error("Could not close JDBC connection after transaction", ex);
 		}
 	}
 
