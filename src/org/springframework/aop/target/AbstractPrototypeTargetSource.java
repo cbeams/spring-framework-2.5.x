@@ -21,8 +21,7 @@ import org.springframework.beans.factory.InitializingBean;
  * method to create a new prototype instance.
  * 
  * @author Rod Johnson
- * @version $Id: AbstractPrototypeTargetSource.java,v 1.1 2003/12/11 10:58:12
- *               johnsonr Exp $
+ * @version $Id: AbstractPrototypeTargetSource.java,v 1.3 2003-12-30 04:32:26 dkopylenko Exp $
  */
 public abstract class AbstractPrototypeTargetSource implements TargetSource, BeanFactoryAware, InitializingBean {
 
