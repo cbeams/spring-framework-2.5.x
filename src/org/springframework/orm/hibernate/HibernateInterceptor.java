@@ -18,10 +18,14 @@ package org.springframework.orm.hibernate;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
+import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.Session;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -78,7 +82,67 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see HibernateTransactionManager
  * @see HibernateTemplate
  */
-public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor {
+public class HibernateInterceptor extends HibernateAccessor implements MethodInterceptor, BeanFactoryAware {
+
+	private String entityInterceptorBeanName;
+
+	/**
+	 * Just needed for entityInterceptorBeanName.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	private BeanFactory beanFactory;
+
+
+	/**
+	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
+	 * and change property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this transaction manager.
+	 * <p>Requires the bean factory to be known, to be able to resolve the bean
+	 * name to an interceptor instance on session creation. Typically used for
+	 * prototype interceptors, i.e. a new interceptor instance per session.
+	 * <p>Can also be used for shared interceptor instances, but it is recommended
+	 * to set the interceptor reference directly in such a scenario.
+	 * @param entityInterceptorBeanName the name of the entity interceptor in
+	 * the bean factory
+	 * @see #setBeanFactory
+	 * @see #setEntityInterceptor
+	 */
+	public void setEntityInterceptorBeanName(String entityInterceptorBeanName) {
+		this.entityInterceptorBeanName = entityInterceptorBeanName;
+		setEntityInterceptor(null);
+	}
+
+	/**
+	 * Return the current Hibernate entity interceptor, or null if none.
+	 * Resolves an entity interceptor bean name via the bean factory,
+	 * if necessary.
+	 * @throws IllegalStateException if bean name specified but no bean factory set
+	 * @throws org.springframework.beans.BeansException if bean name resolution via the bean factory failed
+	 * @see #setEntityInterceptor
+	 * @see #setEntityInterceptorBeanName
+	 * @see #setBeanFactory
+	 */
+	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
+		if (this.entityInterceptorBeanName != null) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
+			}
+			return (Interceptor) this.beanFactory.getBean(this.entityInterceptorBeanName, Interceptor.class);
+		}
+		else {
+			return super.getEntityInterceptor();
+		}
+	}
+
+	/**
+	 * The bean factory just needs to be known for resolving entity interceptor
+	 * bean names. It does not need to be set for any other mode of operation.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
