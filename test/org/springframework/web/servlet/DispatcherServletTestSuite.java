@@ -171,6 +171,22 @@ public class DispatcherServletTestSuite extends TestCase {
 		assertTrue(request.getAttribute("test2y") == null);
 	}
 
+	public void testHandlerInterceptorAbort() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		request.addParameter("abort", "true");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexControllerServlet.doGet(request, response);
+		assertTrue("Not forwarded", response.forwarded == null);
+		assertTrue(request.getAttribute("test1") != null);
+		assertTrue(request.getAttribute("test1x") != null);
+		assertTrue(request.getAttribute("test1y") == null);
+		assertTrue(request.getAttribute("test2") == null);
+		assertTrue(request.getAttribute("test2x") == null);
+		assertTrue(request.getAttribute("test2y") == null);
+	}
+
 	public void testModelAndViewDefiningException() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);

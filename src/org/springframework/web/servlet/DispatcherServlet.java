@@ -81,7 +81,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.22 2003-12-19 17:30:55 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.23 2004-01-09 06:52:27 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -367,6 +367,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
 						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
+							triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 							return;
 						}
 						interceptorIndex = i;
