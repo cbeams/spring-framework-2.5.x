@@ -15,7 +15,9 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
- * Miscellaneous string utility methods.
+ * Miscellaneous string utility methods. Mainly for internal use within
+ * the framework; consider Jakarta's Commons Lang for a more comprehensive
+ * suite of string utilities.
  *
  * <p>This class delivers some simple functionality that should really be
  * provided by the core Java String and StringBuffer classes, such as the
@@ -24,10 +26,23 @@ import java.util.TreeSet;
  * delimited strings, such as CSV strings, and collections and arrays.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.6 2004-02-27 16:40:14 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.7 2004-03-01 09:19:48 jhoeller Exp $
+ * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
+
+	/**
+	 * Determine if the given Strings are equal, returning true if both
+	 * are null respectively false if only one is null.
+	 * @param s1 first String to compare
+	 * @param s2 second String to compare
+	 * @return whether the given Strings are equal
+	 */
+	public static boolean nullSafeEquals(String s1, String s2) {
+		return (s1 == s2 || (s1 != null && s1.equals(s2)));
+	}
 
 	/**
 	 * Count the occurrences of the substring in string s
