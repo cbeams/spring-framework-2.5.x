@@ -50,7 +50,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		    }));
 	}
 
-	public void streamImage(final String name, final OutputStream os) throws DataAccessException {
+	public void streamImage(final String name, final OutputStream contentStream) throws DataAccessException {
 		getJdbcTemplate().query(
 				"SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
 				new AbstractLobStreamingResultSetExtractor() {
@@ -59,20 +59,20 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 						                                                 1, 0);
 					}
 					public void streamData(ResultSet rs) throws SQLException, IOException {
-						FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), os);
+						FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
 					}
 				}
 		);
 	}
 
-	public void storeImage(final String name, final InputStream is, final int contentLength,
+	public void storeImage(final String name, final InputStream contentStream, final int contentLength,
 												 final String description) throws DataAccessException {
 		getJdbcTemplate().execute(
 				"INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)",
 				new AbstractLobCreatingPreparedStatementCallback(this.lobHandler) {
 					protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
 						ps.setString(1, name);
-						lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
+						lobCreator.setBlobAsBinaryStream(ps, 2, contentStream, contentLength);
 						lobCreator.setClobAsString(ps, 3, description);
 					}
 				}

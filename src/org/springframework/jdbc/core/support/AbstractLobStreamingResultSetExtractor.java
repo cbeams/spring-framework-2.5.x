@@ -43,7 +43,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  *		 "SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
  *		 new AbstractLobStreamingResultSetExtractor() {
  *			 public void streamData(ResultSet rs) throws SQLException, IOException {
- *				 FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), os);
+ *				 FileCopyUtils.copy(lobHandler.getBlobAsBinaryStream(rs, 1), contentStream);
  *			 }
  *		 }
  * );</pre>

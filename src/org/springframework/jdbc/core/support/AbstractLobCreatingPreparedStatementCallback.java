@@ -38,11 +38,11 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * LobHandler lobHandler = new DefaultLobHandler();  // reusable object
  *
  * jdbcTemplate.execute(
- *     "SELECT content FROM imagedb WHERE image_name=?",
+ *     "INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)",
  *     new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
  *       protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
  *         ps.setString(1, name);
- *         lobCreator.setBlobAsBinaryStream(ps, 2, is, contentLength);
+ *         lobCreator.setBlobAsBinaryStream(ps, 2, contentStream, contentLength);
  *         lobCreator.setClobAsString(ps, 3, description);
  *       }
  *     }
