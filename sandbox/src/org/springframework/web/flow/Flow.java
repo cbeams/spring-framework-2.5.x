@@ -30,30 +30,29 @@ import org.springframework.util.ToStringCreator;
 
 /**
  * Singleton definition of a web flow.
- * 
+ * <p>
  * At a high level, a Flow captures the definition (configuration information)
  * of a logical page flow within a web application. A logical page flow
  * typically fulfills a business process that takes place over a series of steps
  * (modeled as states.)
- * 
  * <p>
  * Structurally, a Flow is composed of a set of states. A state is a point in
  * the flow where something happens; for instance, showing a view, executing an
  * action, or spawning a subflow.
- * 
  * <p>
  * Each state has one or more transitions that are used to move to another
- * state. A transition is triggered by an event.
- * 
+ * state. A transition is triggered by an event. An event is a string identifier
+ * signalling the occurence of something: e.g "submit", "back", "success",
+ * "error".
  * <p>
  * Each Flow has exactly one start state. A start state is simply a marker for
  * the state the Flow execution should start in.
- * 
  * <p>
- * Instances of this class are typically built by a FlowBuilder implementation, but
- * may also be subclassed. It, and the rest of the web.flow system, has been
- * designed with minimal dependencies on other parts of Spring, and is easily usable
- * in a standalone fashion.
+ * Instances of this class are typically built by a FlowBuilder implementation,
+ * but may also be subclassed. It, and the rest of the web.flow system, has been
+ * purposefully designed with minimal dependencies on other parts of Spring, and
+ * is easily usable in a standalone fashion (and in the context of other
+ * request-driven frameworks like Struts or Webwork, for example).
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -134,7 +133,8 @@ public class Flow implements Serializable {
 	 * @param state The state, if already added noting happens, if another
 	 *        instance is added with the same id, an exception is thrown
 	 * @throws IllegalArgumentException when the state cannot be added to the
-	 *         flow
+	 *         flow; specifically, if another state shares the same ID as the
+	 *         one provided
 	 */
 	protected void add(AbstractState state) throws IllegalArgumentException {
 		if (this != state.getFlow()) {
@@ -173,7 +173,8 @@ public class Flow implements Serializable {
 
 	/**
 	 * Set the start state for this flow to the state with the provided
-	 * <code>stateId</code>
+	 * <code>stateId</code>; a state must exist by the provided
+	 * <code>stateId</code> and it must be transitionable.
 	 * @param stateId The new start state
 	 * @throws NoSuchFlowStateException No state exists with the id you provided
 	 */
@@ -182,7 +183,8 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Set the start state for this flow to the state provided
+	 * Set the start state for this flow to the state provided; any
+	 * transitionable state may be the start state.
 	 * @param state The new start state
 	 * @throws NoSuchFlowStateException The state has not been added to this
 	 *         flow
@@ -210,8 +212,8 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Check that given state is present in the flow and throw an exception
-	 * if it's not.
+	 * Check that given state is present in the flow and throw an exception if
+	 * it's not.
 	 */
 	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
 		getRequiredState(state.getId());
@@ -250,7 +252,7 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * Is this state instance present in this flow?
+	 * Is this state instance present in this flow? Does a "same" (==) check.
 	 * @param state the state
 	 * @return true if yes (the same instance is present), false otherwise
 	 */
@@ -304,6 +306,10 @@ public class Flow implements Serializable {
 		return (String[])stateIds.toArray(new String[0]);
 	}
 
+	/**
+	 * Returns true if this flow equals the other one; two flows are treated as
+	 * equal if they share the same ID.
+	 */
 	public boolean equals(Object o) {
 		if (!(o instanceof Flow)) {
 			return false;

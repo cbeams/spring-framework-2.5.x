@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface to be implemented by objects that wish to listen and respond to the
- * lifecycle of a FlowExecution.
+ * lifecycle of a FlowExecution. Very "aspect" like: allows you to insert 'cross
+ * cutting' behaivior at well-defined points within a flow lifecycle.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -57,8 +58,8 @@ public interface FlowExecutionListener {
 	/**
 	 * Called when a state transitions, after the transition occurs.
 	 * @param flowExecution Source of the event
-	 * @param previousState <i>From</i> state of the transition
-	 * @param newState <i>To</i> state of the transition
+	 * @param previousState <i>From </i> state of the transition
+	 * @param newState <i>To </i> state of the transition
 	 */
 	public void stateTransitioned(FlowExecution flowExecution, AbstractState previousState, AbstractState newState);
 
@@ -81,5 +82,5 @@ public interface FlowExecutionListener {
 	 * @param endedRootFlowSession Ending root flow session
 	 */
 	public void ended(FlowExecution flowExecution, FlowSession endedRootFlowSession);
-	
+
 }

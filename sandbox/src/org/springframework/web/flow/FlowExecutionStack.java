@@ -39,12 +39,10 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Default implementation of FlowExecution that uses a stack-based data
  * structure to manage flow executions.
- * 
  * <p>
  * A flow execution is managed by a client object, typically a web controller.
  * As a result, this client object is responsable for the creation and
  * maintenance of the flow execution.
- * 
  * <p>
  * This implementation of FlowExecution is Serializable so it can be safely
  * stored in an HTTP session.
@@ -56,25 +54,47 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
+	/**
+	 * The unique, randomly machine generated flow execution identifier.
+	 */
 	private String id;
 
+	/**
+	 * The execution's root flow; the top level flow that acts as the starting
+	 * point for this flow execution.
+	 */
 	private Flow rootFlow;
 
+	/**
+	 * The stack of active, currently executing flow sessions. As subflows are
+	 * spawned, they are pushed onto the stack. As they end, they are popped off
+	 * the stack.
+	 */
 	private Stack executingFlowSessions = new Stack();
 
+	/**
+	 * The id of the last valid event that was signaled in this flow execution.
+	 * Valid means the event indeed maps to a state transition (it is
+	 * supported).
+	 */
 	private String lastEventId;
 
+	/**
+	 * The timestamp when the last valid event was signaled.
+	 */
 	private long lastEventTimestamp;
 
+	/**
+	 * A thread-safe listener list, holding listeners monitoring the lifecycle
+	 * of this flow execution.
+	 */
 	private FlowExecutionListenerList listenerList = new FlowExecutionListenerList();
 
 	/**
-	 * Create a new flow execution executing given root flow and all
-	 * it potential subflows.
-	 * 
+	 * Create a new flow execution executing for the provided flow.
 	 * <p>
-	 * The default list of flow execution listeners configured for
-	 * given flow will also be notified of this flow execution.
+	 * The default list of flow execution listeners configured for given flow
+	 * will also be notified of this flow execution.
 	 * 
 	 * @param rootFlow the root flow of this flow execution
 	 */
@@ -82,21 +102,20 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		Assert.notNull(rootFlow, "The root flow definition is required");
 		this.id = new RandomGuid().toString();
 		this.rootFlow = rootFlow;
-		
 		//add the list of default execution listeners configured for the flow
 		listenerList.add(rootFlow.getFlowExecutionListenerList());
 	}
-	
+
 	//methods implementing FlowExecutionInfo
 
 	public String getId() {
 		return id;
 	}
-	
+
 	public String getCaption() {
 		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
 	}
-	
+
 	/**
 	 * @return Whether or not this flow execution stack is empty
 	 */
@@ -107,10 +126,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public boolean isActive() {
 		return !isEmpty();
 	}
-	
+
 	/**
-	 * Check that this flow execution is active and throw an exception
-	 * it it's not.
+	 * Check that this flow execution is active and throw an exception it it's
+	 * not.
 	 */
 	protected void assertActive() throws IllegalStateException {
 		if (!isActive()) {
@@ -118,7 +137,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 					"No active flow sessions executing - this flow execution has ended (or has never been started)");
 		}
 	}
-	
+
 	public String getActiveFlowId() {
 		return getActiveFlowSession().getFlowId();
 	}
@@ -136,7 +155,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		}
 		return qualifiedName.toString();
 	}
-	
+
 	public String[] getFlowIdStack() {
 		if (isEmpty()) {
 			return new String[0];
@@ -151,7 +170,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			return (String[])stack.toArray(new String[0]);
 		}
 	}
-	
+
 	public String getRootFlowId() {
 		return rootFlow.getId();
 	}
@@ -159,18 +178,18 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public boolean isRootFlowActive() {
 		return executingFlowSessions.size() == 1;
 	}
-	
+
 	public String getCurrentStateId() {
 		return getActiveFlowSession().getCurrentStateId();
 	}
-	
+
 	public String getLastEventId() {
 		return lastEventId;
 	}
-	
+
 	/**
-	 * Set the last event id processed by this flow execution. This will
-	 * also update the last event timestamp.
+	 * Set the last event id processed by this flow execution. This will also
+	 * update the last event timestamp.
 	 * @param eventId The last event id to set
 	 */
 	public void setLastEventId(String eventId) {
@@ -190,7 +209,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public long getLastEventTimestamp() {
 		return lastEventTimestamp;
 	}
-	
+
 	public boolean exists(String flowId) {
 		Iterator it = executingFlowSessions.iterator();
 		while (it.hasNext()) {
@@ -218,19 +237,19 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public FlowExecutionListenerList getListenerList() {
 		return listenerList;
 	}
-	
+
 	public Flow getActiveFlow() {
 		return getActiveFlowSession().getFlow();
 	}
-	
+
 	public Flow getRootFlow() {
 		return rootFlow;
 	}
-	
+
 	public AbstractState getCurrentState() {
 		return getActiveFlowSession().getCurrentState();
 	}
-	
+
 	/**
 	 * Set the state that is currently active in this flow execution.
 	 * @param newState The new current state
@@ -276,7 +295,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		fireRequestProcessed(request);
 		return view;
 	}
-	
+
 	//flow session management helpers
 
 	/**
@@ -287,8 +306,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * <li>start the sub flow in its start state</li>
 	 * </ol>
 	 * @param subFlow The sub flow to spawn
-	 * @param input The input parameters used to populate the flow session
-	 *        for the subflow
+	 * @param input The input parameters used to populate the flow session for
+	 *        the subflow
 	 * @param request The current HTTP request
 	 * @param response The current HTTP response
 	 * @return A view descriptor containing model and view information needed to
@@ -308,8 +327,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	 * </ol>
 	 * @param subFlow The sub flow to spawn
 	 * @param stateId The id of the state in which the sub flow will start
-	 * @param input The input parameters used to populate the flow session
-	 *        for the subflow
+	 * @param input The input parameters used to populate the flow session for
+	 *        the subflow
 	 * @param request The current HTTP request
 	 * @param response The current HTTP response
 	 * @return A view descriptor containing model and view information needed to
@@ -322,10 +341,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		activate(createFlowSession(subFlow, input));
 		return subFlow.getRequiredTransitionableState(stateId).enter(this, request, response);
 	}
-	
+
 	/**
-	 * Create a new flow session object. Subclasses can override this to
-	 * return a special implementation if required.
+	 * Create a new flow session object. Subclasses can override this to return
+	 * a special implementation if required.
 	 * @param flow The flow that should be associated with the flow session
 	 * @param input The input parameters used to populate the flow session
 	 * @return The newly created flow session
@@ -335,9 +354,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Activate given flow session in this flow execution stack. This will
-	 * push the flow session onto the stack and mark it as the active flow
-	 * session.
+	 * Activate given flow session in this flow execution stack. This will push
+	 * the flow session onto the stack and mark it as the active flow session.
 	 * @param flowSession the flow session to activate
 	 */
 	public void activate(FlowSession flowSession) {
@@ -356,10 +374,10 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			fireSubFlowSpawned();
 		}
 	}
-	
+
 	/**
-	 * End the active flow session of this flow execution. This will pop
-	 * the top element from the stack and activate the now top flow session.
+	 * End the active flow session of this flow execution. This will pop the top
+	 * element from the stack and activate the now top flow session.
 	 * @return the flow session that ended
 	 */
 	public FlowSession endActiveSession() {
@@ -390,7 +408,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		assertActive();
 		return (FlowSession)executingFlowSessions.peek();
 	}
-	
+
 	//methods implementing AttributesAccessor
 
 	/**
@@ -445,7 +463,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public void assertAttributePresent(String attributeName, Class requiredType) {
 		getActiveFlowSession().assertAttributePresent(attributeName, requiredType);
 	}
-	
+
 	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException {
 		getActiveFlowSession().assertInTransaction(request, reset);
 	}
@@ -477,9 +495,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public Collection findAttributes(Constraint criteria) {
 		return getActiveFlowSession().findAttributes(criteria);
 	}
-	
+
 	//methods implementing MutableAttributesAccessor
-	
+
 	public void setAttribute(String attributeName, Object attributeValue) {
 		if (ATTRIBUTE_NAME.equals(attributeName)) {
 			throw new IllegalArgumentException("Attribute name '" + ATTRIBUTE_NAME
@@ -530,8 +548,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Notify all interested listeners that a request was submitted to this
-	 * flow execution.
+	 * Notify all interested listeners that a request was submitted to this flow
+	 * execution.
 	 */
 	protected void fireRequestSubmitted(final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
@@ -560,8 +578,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Notify all interested listeners that an event was signaled in this
-	 * flow execution.
+	 * Notify all interested listeners that an event was signaled in this flow
+	 * execution.
 	 */
 	protected void fireEventSignaled(final String eventId) {
 		if (logger.isDebugEnabled()) {
@@ -575,8 +593,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Notify all interested listeners that a state transition happened
-	 * in this flow execution.
+	 * Notify all interested listeners that a state transition happened in this
+	 * flow execution.
 	 */
 	protected void fireStateTransitioned(final AbstractState previousState) {
 		if (logger.isDebugEnabled()) {
@@ -590,8 +608,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	/**
-	 * Notify all interested listeners that a sub flow was spawned in this
-	 * flow execution.
+	 * Notify all interested listeners that a sub flow was spawned in this flow
+	 * execution.
 	 */
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
@@ -636,9 +654,9 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	}
 
 	public String toString() {
-		return executingFlowSessions.isEmpty() ? "[Empty FlowExecutionStack " + getId()
-				+ "; no flows are active]" : new ToStringCreator(this).append("id", getId()).append("activeFlowId",
-				getActiveFlowId()).append("currentStateId", getCurrentStateId()).append("rootFlow", isRootFlowActive())
-				.append("executingFlowSessions", executingFlowSessions).toString();
+		return executingFlowSessions.isEmpty() ? "[Empty FlowExecutionStack " + getId() + "; no flows are active]"
+				: new ToStringCreator(this).append("id", getId()).append("activeFlowId", getActiveFlowId()).append(
+						"currentStateId", getCurrentStateId()).append("rootFlow", isRootFlowActive()).append(
+						"executingFlowSessions", executingFlowSessions).toString();
 	}
 }

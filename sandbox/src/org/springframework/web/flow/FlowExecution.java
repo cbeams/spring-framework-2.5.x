@@ -23,12 +23,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Subinterface of <code>FlowExecutionInfo</code> that exposes mutable
- * operations. Designed for use by the front <code>FlowController</code> and
- * <code>FlowExecutionListener</code>, which are more privileged than
- * pure for-management clients. This interface may also be used in situations
- * where other privileged objects need access to flow definition configuration
- * details during flow execution.
+ * Subinterface of <code>FlowExecutionInfo</code> that exposes additional
+ * information and operations on a flow execution.
+ * <p>
+ * While the FlowExecutionInfo interface is fit for external management clients
+ * (for example, JMX-based), this interface is designed for use by internal
+ * clients; for example, the front <code>FlowController</code> and
+ * <code>FlowExecutionListener</code>, which are more privileged and more
+ * flow-system-aware than pure for-management clients.
+ * <p>
+ * This interface may also be used in situations where other privileged objects
+ * need access to flow definition configuration details during flow execution.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -67,7 +72,8 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 
 	/**
 	 * Start this flow execution, transitioning it to the start state and
-	 * returning the starting model and view descriptor.
+	 * returning the starting model and view descriptor. Typically called by the
+	 * FlowController, but also in test code.
 	 * @param input Model input attributes to the flow execution
 	 * @param request The current http request
 	 * @param response The current http response
@@ -82,7 +88,8 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	 * @param stateId The state the event occured in (can be null)
 	 * @param request The current http request
 	 * @param response The current http response
-	 * @return The next model and view descriptor to display for this flow execution.
+	 * @return The next model and view descriptor to display for this flow
+	 *         execution.
 	 */
 	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response);

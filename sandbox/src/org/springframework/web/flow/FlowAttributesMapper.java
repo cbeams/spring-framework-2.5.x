@@ -19,9 +19,10 @@ import java.util.Map;
 
 /**
  * A service interface for mapping attributes of a parent flow session down to a
- * child flow session, when the child flow is spawned. In addition, this
- * interface maps attributes of a child flow session back up to a resuming
- * parent flow, when the child session ends.
+ * child flow session, when the child flow is spawned as a subflow. In addition,
+ * this interface maps attributes of a child flow session back up to a resuming
+ * parent flow, when the child session ends and control is returned to the
+ * parent flow.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
