@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.BadSqlGrammarException;
-import org.springframework.jdbc.core.SQLExceptionTranslater;
+import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -272,7 +272,7 @@ public class StoredProcedureTestSuite extends TestCase {
 		public StoredProcedureExceptionTranslator(DataSource ds) {
 			setDataSource(ds);
 			setSql("no_sproc_with_this_name");
-			setExceptionTranslater( new SQLExceptionTranslater() {
+			setExceptionTranslator( new SQLExceptionTranslator() {
 				public DataAccessException translate(String task, String sql, SQLException sqlex) {
 					return new CustomDataException(sql, sqlex);
 				}

@@ -27,7 +27,7 @@ import com.mockobjects.sql.MockConnection;
 /** 
  * Mock object based tests for JdbcTemplate
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.2 2003-08-20 02:46:30 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.3 2003-08-22 08:18:17 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends TestCase {
 
@@ -324,23 +324,23 @@ public class JdbcTemplateTestSuite extends TestCase {
 	}
 
 
-// This really tests the translater: shouldn't the SQLTranslater have its own tests?
-// We just need to check that the translater is invoked and that it's exception is correctly used
+// This really tests the translator: shouldn't the SQL translator have its own tests?
+// We just need to check that the translator is invoked and that it's exception is correctly used
 /*
 	public void testSQLExceptionIsTranslated() throws Exception {
 		
-		class TestSqlExceptionTranslater implements SQLExceptionTranslater {
+		class TestSqlExceptionTranslator implements SQLExceptionTranslator {
 			private int invoked;
 			public DataAccessException translate(String task, String sql, SQLException sqlex) {
 				// Any subclass will do: can't really check all, can we?
 				// YES, we can: loop throuigh with exception as parameter
-				System.out.println("Our translater");
+				System.out.println("Our translator");
 				++invoked;
 				return new BadSqlGrammarException("Exception doing " + task,sql, sqlex);
 			}
 		}
 		
-		TestSqlExceptionTranslater trans = new TestSqlExceptionTranslater();
+		TestSqlExceptionTranslator trans = new TestSqlExceptionTranslator();
 		
 		String sql = "SELECT"; // doesn't really matter what this is
 		
@@ -371,7 +371,7 @@ public class JdbcTemplateTestSuite extends TestCase {
 		dsControl.activate();
 
 		JdbcTemplate template = new JdbcTemplate(ds);
-		template.setExceptionTranslater(trans);
+		template.setExceptionTranslator(trans);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 		try {
 			template.query(PreparedStatementCreatorFactory.newPreparedStatementCreator(sql), rcch);

@@ -48,7 +48,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * by Rod Johnson (Wrox, 2002).
  *
  * <p>Because this class is parameterizable by the callback interfaces and the
- * SQLExceptionTranslater interface, it isn't necessary to subclass it.
+ * SQLExceptionTranslator interface, it isn't necessary to subclass it.
  * All SQL issued by this class is logged.
  *
  * @author Rod Johnson
@@ -56,7 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.3 2003-08-20 02:46:12 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.4 2003-08-22 08:18:32 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jndi.JndiObjectFactoryBean
@@ -89,7 +89,7 @@ public class JdbcTemplate implements InitializingBean {
 	private boolean ignoreWarnings = true;
 
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
-	private SQLExceptionTranslater exceptionTranslater;
+	private SQLExceptionTranslator exceptionTranslator;
 
 
 	/**
@@ -104,7 +104,7 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
-	 * Note: This will trigger eager initialization of the exception translater.
+	 * Note: This will trigger eager initialization of the exception translator.
 	 * @param dataSource JDBC DataSource to obtain connections from
 	 */
 	public JdbcTemplate(DataSource dataSource) {
@@ -144,35 +144,35 @@ public class JdbcTemplate implements InitializingBean {
 	}
 
 	/**
-	 * Set the exception translater used in this class.
-	 * If no custom translater is provided, a default is used
+	 * Set the exception translator used in this class.
+	 * If no custom translator is provided, a default is used
 	 * which examines the SQLException's SQLState code.
-	 * @param exceptionTranslater custom exception translator
+	 * @param exceptionTranslator custom exception translator
 	 */
-	public void setExceptionTranslater(SQLExceptionTranslater exceptionTranslater) {
-		this.exceptionTranslater = exceptionTranslater;
+	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
+		this.exceptionTranslator = exceptionTranslator;
 	}
 
 	/**
-	 * Return the exception translater for this instance.
+	 * Return the exception translator for this instance.
 	 * Creates a default one for the specified DataSource if none set.
 	 */
-	protected synchronized SQLExceptionTranslater getExceptionTranslater() {
-		if (this.exceptionTranslater == null) {
-			this.exceptionTranslater = SQLExceptionTranslaterFactory.getInstance().getDefaultTranslater(this.dataSource);
+	protected synchronized SQLExceptionTranslator getExceptionTranslator() {
+		if (this.exceptionTranslator == null) {
+			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
 		}
-		return this.exceptionTranslater;
+		return this.exceptionTranslator;
 	}
 
 	/**
-	 * Eagerly initialize the exception translater,
+	 * Eagerly initialize the exception translator,
 	 * creating a default one for the specified DataSource if none set.
 	 */
 	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
-		getExceptionTranslater();
+		getExceptionTranslator();
 	}
 
 
@@ -197,7 +197,7 @@ public class JdbcTemplate implements InitializingBean {
 	 * the query
 	 */
 	public void query(String sql, RowCallbackHandler callbackHandler) throws DataAccessException {
-		doWithResultSetFromStaticQuery(sql, new RowCallbackHandlerResultSetExtracter(callbackHandler));
+		doWithResultSetFromStaticQuery(sql, new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class JdbcTemplate implements InitializingBean {
 	 * @throws DataAccessException if there is any problem executing
 	 * the query
 	 */
-	public void doWithResultSetFromStaticQuery(String sql, ResultSetExtracter rse) throws DataAccessException {
+	public void doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null)
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
 		if (containsBindVariables(sql))
@@ -249,7 +249,7 @@ public class JdbcTemplate implements InitializingBean {
 				}
 				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslater().translate("JdbcTemplate.query(sql)", sql, ex);
+			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
 		}
 		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
@@ -265,7 +265,7 @@ public class JdbcTemplate implements InitializingBean {
 	 * @throws DataAccessException if there is any problem
 	 */
 	public void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler) throws DataAccessException {
-		doWithResultSetFromPreparedQuery(psc, new RowCallbackHandlerResultSetExtracter(callbackHandler));
+		doWithResultSetFromPreparedQuery(psc, new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class JdbcTemplate implements InitializingBean {
 	 * @param rse object that will extract results.
 	 * @throws DataAccessException if there is any problem
 	 */
-	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtracter rse) throws DataAccessException {
+	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -307,7 +307,7 @@ public class JdbcTemplate implements InitializingBean {
 				}
 				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslater().translate("JdbcTemplate.query(psc) with PreparedStatementCreator [" + psc + "]", null, ex);
+			throw getExceptionTranslator().translate("JdbcTemplate.query(psc) with PreparedStatementCreator [" + psc + "]", null, ex);
 		}
 		finally {
 			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
@@ -428,7 +428,7 @@ public class JdbcTemplate implements InitializingBean {
 				}
 				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslater().translate("processing update " +
+			throw getExceptionTranslator().translate("processing update " +
 			                                         (index + 1) + " of " + pscs.length + "; update was [" + pscs[index] + "]", null, ex);
 		}
 		finally {
@@ -502,7 +502,7 @@ public class JdbcTemplate implements InitializingBean {
 				}
 				catch (SQLException ignore) {}
 			}
-			throw getExceptionTranslater().translate("processing batch update " +
+			throw getExceptionTranslator().translate("processing batch update " +
 			                                         " with size=" + setter.getBatchSize() + "; update was [" + sql + "]", sql, ex);
 		}
 		finally {
@@ -530,11 +530,11 @@ public class JdbcTemplate implements InitializingBean {
 
 	/**
 	 * Adapter to enable use of a RowCallbackHandler inside a
-	 * ResultSetExtracter. Uses a  regular ResultSet, so we have
+	 * ResultSetExtractor. Uses a  regular ResultSet, so we have
 	 * to be careful when using it, so we don't use it for navigating
 	 * since this could lead to unpreditable consequences.
 	 */
-	private final class RowCallbackHandlerResultSetExtracter implements ResultSetExtracter {
+	private final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
 		/**
 		 * RowCallbackHandler to use to extract data
@@ -542,15 +542,15 @@ public class JdbcTemplate implements InitializingBean {
 		private RowCallbackHandler callbackHandler;
 
 		/**
-		 * Construct a new ResultSetExtracter that will use the given
+		 * Construct a new ResultSetExtractor that will use the given
 		 * RowCallbackHandler to process each row.
 		 */
-		public RowCallbackHandlerResultSetExtracter(RowCallbackHandler callbackHandler) {
+		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler callbackHandler) {
 			this.callbackHandler = callbackHandler;
 		}
 
 		/**
-		 * @see org.springframework.jdbc.core.ResultSetExtracter#extractData(java.sql.ResultSet)
+		 * @see org.springframework.jdbc.core.ResultSetExtractor#extractData(java.sql.ResultSet)
 		 */
 		public void extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
