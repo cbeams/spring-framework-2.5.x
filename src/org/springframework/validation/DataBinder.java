@@ -44,7 +44,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.15 2004-05-22 12:43:28 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.16 2004-06-11 23:39:29 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -148,6 +148,7 @@ public class DataBinder {
 	 * of the given type.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
+	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
 	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		this.errors.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
@@ -156,11 +157,20 @@ public class DataBinder {
 	/**
 	 * Register the given custom property editor for the given type and
 	 * field, or for all fields of the given type.
-	 * @param requiredType type of the property, can be null if a field is
-	 * given but should be specified in any case for consistency checking
+	 * <p>If the field denotes an array or Collection, the PropertyEditor
+	 * will get applied either to the array/Collection itself (the
+	 * PropertyEditor has to create an array or Collection value) or to
+	 * each element (the PropertyEditor has to create the element type),
+	 * depending on the specified required type.
+	 * <p>Note: Only one single registered custom editor per property path
+	 * is supported. In case of a Collection/array, do not register an editor
+	 * for both the Collection/array and each element on the same property.
+	 * @param requiredType type of the property (can be null if a field is
+	 * given but should be specified in any case for consistency checking)
 	 * @param field name of the field (can also be a nested path), or
 	 * null if registering an editor for all fields of the given type
 	 * @param propertyEditor editor to register
+	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
 	 */
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
 		this.errors.getBeanWrapper().registerCustomEditor(requiredType, field, propertyEditor);
@@ -190,10 +200,10 @@ public class DataBinder {
 	 */
 	public void bind(PropertyValues pvs) {
 		// check for fields to bind
-		PropertyValue[] pvArray = pvs.getPropertyValues();
 		List allowedFieldsList = (this.allowedFields != null) ? Arrays.asList(this.allowedFields) : null;
 		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues) ?
 		    (MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
+		PropertyValue[] pvArray = pvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
