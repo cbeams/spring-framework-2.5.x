@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.2 (11.11.2004)
+Changes in version 1.1.2 (14.11.2004)
 -------------------------------------
 
 General
@@ -23,6 +23,8 @@ Package org.springframework.aop
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
 Package org.springframework.beans
+* added support for multi-dimensional collections to BeanWrapperImpl (e.g. "map[myKey][0]" or "map[myKey][0].name")
+* allow arbitrary bean types passed into BeanUtils' "copyProperties" method (as long as the bean properties match)
 * added "getType(name)" method to BeanFactory interface, checking the type of object that "getBean" would return
 * added "getBeansOfType(type)" convenience method to ListableBeanFactory interface, without explicit filters
 * clarified FactoryBean's "getObjectType" behavior: should avoid initialization of its singleton (if possible)
@@ -73,6 +75,8 @@ Package org.springframework.jdbc
 
 Package org.springframework.mail
 * added "equals" and "hashCode" implementations to SimpleMailMessage
+* added "setText(plainText, htmlText)" method to MimeMessageHelper, for alternative texts in the same mail
+* explicitly check for null values in all of MimeMessageHelper's methods, to avoid ugly NPEs (potentially in JavaMail)
 
 Package org.springframework.orm
 * reworked Hibernate/Jdo/PersistenceBrokerTransactionObject into inner classes of HibernateTransactionManager and co
@@ -106,6 +110,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to use "doGet"/"doPost"/"doHead" etc, to reenable proper LastModified support in controllers
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
 * DispatcherServlet caches chosen HandlerExecutionChain in "getLastModified", for reuse in "doService"
+* fixed ModelAndView to always allow adding to the model Map, even if initialized with null as model
 * added "addAllObjects" method to ModelAndView, for adding model objects in bulk (equivalent to getModel().putAll)
 * added "defaultStatusCode" property to SimpleMappingExceptionResolver, specifying the HTTP status code for error views
 * added "autowireMode(Name)" and "dependencyCheck" properties (for autowired handlers) to AbstractPathMapHandlerMapping
@@ -115,6 +120,7 @@ Package org.springframework.web
 * added "createVelocityContext" hook to VelocityView, for using a different impl of Velocity's Context interface
 * added "springMessage"/"springMessageText" macros for Velocity and "message"/"messageText" macros for FreeMarker
 * fixed AbstractExcelView to not hold the HSSFWorkbook instance in an instance variable (avoiding concurrency issues)
+* deprecated AbstractPdfView's "getDocument" method in favor of "newDocument" (strengthening the necessary creation)
 
 
 Changes in version 1.1.1 (30.9.2004)
