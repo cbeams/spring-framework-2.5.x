@@ -6,7 +6,7 @@
     	<title>Introduction</title>
     	<para>
 			The big question is whether or not validation should be considered <emphasis>business
-			logic</emphasis>. There's pros and cons for both answers and Spring offers a design
+			logic</emphasis>. There are pros and cons for both answers, and Spring offers a design
 			for validation (and data binding) that does not exclude either one of them. Validation
 			should specifically not be tied to the web tier, should be easily localizable and it should
 			be possible to plug in any validator available. Considering the above, Spring has come up
@@ -22,15 +22,15 @@
 		</para>
 		<para>
 			The <literal>BeanWrapper</literal> is a fundamental concept in the Spring Framework and 
-			is used in a lot of places. However, probably you won't ever have the need to use the
-			BeanWrapper directly. Because this is a reference documentation however, we felt that some
+			is used in a lot of places. However, you probably will not ever have the need to use the
+			BeanWrapper directly. Because this is reference documentation however, we felt that some
 			explanation might be right. We're explaining the BeanWrapper in this chapter since if
 			you were going to use it at all, you would probably do that when trying to bind data to objects,
 			which is strongly related to the BeanWrapper.
 		</para>
 		<para>
 			Spring uses PropertyEditors all over the place. The concept of a PropertyEditor is
-			part of the JavaBeans specification. Just a the BeanWrapper, it's best to explain
+			part of the JavaBeans specification. Just as the BeanWrapper, it's best to explain
 			the use of PropertyEditors in this chapter as well, since it's closely related to
 			the BeanWrapper and the DataBinder.
 		</para>
@@ -39,11 +39,11 @@
 	<sect1 id="validation-databinding">
 		<title>Binding data using the <literal>DataBinder</literal></title>
 		<para>
-			The DataBinder builds on top the BeanWrapper<footnote>
+			The DataBinder builds on top of the BeanWrapper<footnote>
 				<para>
 					See <link linkend="beans-beans">the beans chapter</link> for more information
 				</para>
-			</footnote>
+			</footnote>.
 		</para>
 	</sect1>
 	
@@ -54,13 +54,13 @@
     		provided by Sun. A JavaBean is simply a class with a default no-argument constructor, which
     		follows a naming conventions where a property named <literal>prop</literal> has a setter
     		<literal>setProp(...)</literal> and a getter <literal>getProp()</literal>. For more
-    		information about JavaBeans and the specification, please refer to Sun website
+    		information about JavaBeans and the specification, please refer to Sun's website
     		(<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).
     	</para>
     	<para>
     		One quite important concept of the beans package is the <literal>BeanWrapper</literal>
     		interface and its corresponding implementation (<literal>BeanWrapperImpl</literal>).
-    		As quoted from the JavaDoc,  the BeanWrapper offers functionality to set and get property 
+    		As quoted from the JavaDoc,  the BeanWrapper offers functionnality to set and get property 
     		values (individually or in bulk), get property descriptors and query the readability and
     		writability of properties. Also, the BeanWrapper offers support for
     		nested properties, enabling the setting of properties on subproperties to an unlimited
@@ -73,7 +73,7 @@
     	</para>
     	<para>
     		The way the BeanWrapper works is partly indicated by its name: 
-    		<emphasis>it wraps a bean</emphasis> to perform action on that bean, like setting
+    		<emphasis>it wraps a bean</emphasis> to perform actions on that bean, like setting
     		and retrieving properties.
     	</para>
     	
@@ -81,9 +81,9 @@
     		<title>Setting and getting basic and nested properties</title>
     		<para>
     			Setting and getting properties is done using the <literal>setPropertyValue(s)</literal>
-    			<literal>getPropertyValue(s)</literal> methods that both come with a couple of
+    			and <literal>getPropertyValue(s)</literal> methods that both come with a couple of
     			overloaded variants. They're all described in more detail in the JavaDoc Spring
-    			comes with. What's important to know that there's a couple of conventions for 
+    			comes with. What's important to know is that there are a couple of conventions for 
     			indicating properties of an object. A couple of examples:
 				<table frame="all">
 		            <title>Examples of properties</title>
@@ -115,7 +115,7 @@
 				            	<entry><literal>account[2]</literal></entry>
 				            	<entry>Indicates the <emphasis>third</emphasis> element of the indexed property
 					            	<literal>account</literal>. Indexed properties can be of type <literal>array</literal>,
-					            	<literal>list</literal> or other <emphasis>natural ordered</emphasis> collection
+					            	<literal>list</literal> or other <emphasis>naturally ordered</emphasis> collection
 					            </entry>
 				            </row>
 				        </tbody>
@@ -202,12 +202,12 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
     			the original date (or even better: convert any date entered in a human readable form,
     			back to Date objects). This behavior can be achieved by <emphasis>registering
     			custom editors</emphasis>, of type <literal>java.beans.PropertyEditor</literal>.
-    			Registering custom editors to a BeanWrapper gives it the knowledge of how to convert
+    			Registering custom editors on a BeanWrapper gives it the knowledge of how to convert
     			properties to the desired type. Read more about PropertyEditors in the JavaDoc of the
     			<literal>java.beans</literal> package provided by Sun.
     		</para>
     		<para>
-    			A couple of examples where property editing are used in Spring
+    			A couple of examples where property editing is used in Spring
     			<itemizedlist spacing="compact">
     				<listitem>
     					<para><emphasis>setting properties on beans</emphasis> is done using
@@ -218,7 +218,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
     						to resolve the parameter to a Class object</para>
     				</listitem>
     				<listitem>
-    					<para><emphasis>parsing HTTP request parameters</emphasis> is Spring's
+    					<para><emphasis>parsing HTTP request parameters</emphasis> in Spring's
     						MVC framework is done using all kinds of PropertyEditors that you
     						can manually bind in all subclasses of the <literal>CommandController</literal></para>
     				</listitem>
@@ -291,15 +291,15 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
 				Spring uses the <literal>java.beans.PropertyEditorManager</literal> to
 				set the search-path for property editors that might be needed. The search-path
 				also includes <literal>sun.bean.editors</literal>, which includes
-				PropertyEditors for for example Font, Color and all the primitive types.
+				PropertyEditors for Font, Color and all the primitive types.
 			</para>
 			<para>
-				When in need for a custom editor in your BeanFactory (i.e. you have some
-				exotic type that you need express as a property in for instance an XML
+				When in need of a custom editor in your BeanFactory (i.e. you have some
+				exotic type that you need express as a property in an XML
 				file containing beans), you can use the <literal>BeanFactoryPostProcessor</literal>
 				infrastructure to do this. TODOOOODOOD reference provides more info on how to use
 				the <literal>BeanFactoryPostProcessor</literal>. The following piece of code
-				show the actual processor that registered a custom editor for use with the
+				shows the actual processor that registered a custom editor for use with the
 				BeanFactory:
 				<programlisting><![CDATA[
 public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
@@ -316,7 +316,7 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 			<title>Other features worth mentioning</title>
 			<para>
 				Besides the features you've seen in the previous sections there a couple of
-				features that might be intereseted to you, though not worth an entire section.
+				features that might be interesting to you, though not worth an entire section.
 				<itemizedlist spacing="compact">
 					<listitem>
 						<para>
@@ -328,7 +328,7 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 					</listitem>
 					<listitem>
 						<para>
-							<emphasis>retrieving propertydescriptors</emphasis>: using
+							<emphasis>retrieving PropertyDescriptors</emphasis>: using
 							<literal>getPropertyDescriptor(String)</literal> and
 							<literal>getPropertyDescriptors()</literal> you can retrieve
 							objects of type <literal>java.beans.PropertyDescriptor</literal>,
