@@ -15,11 +15,14 @@
  */
 package org.springframework.enum;
 
+import org.springframework.context.MessageSourceResolvable;
+
 /**
  * @author  Keith Donald
  */
-public interface CodedEnum {
-    public String getKey();
+public interface CodedEnum extends MessageSourceResolvable {
     public String getType();
     public Object getCode();
+    public String getLabel();
+    public String getKey();
 }

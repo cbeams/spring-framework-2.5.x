@@ -16,11 +16,16 @@
 package org.springframework.enum;
 
 /**
- * @author keith
+ * @author Keith Donald
  */
-public abstract class IntegerCodedEnum extends AbstractCodedEnum {
-    public IntegerCodedEnum(int code) {
-        super(new Integer(code));
+public abstract class ShortCodedEnum extends AbstractCodedEnum {
+    protected ShortCodedEnum(int code) {
+        this(code, null);
     }
+
+    protected ShortCodedEnum(int code, String label) {
+        super(new Short((short)code), label);
+    }
+
 
 }

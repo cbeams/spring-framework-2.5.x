@@ -30,12 +30,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.enum.LetterCodedEnum;
 import org.springframework.enum.CodedEnum;
 import org.springframework.enum.CodedEnumResolver;
-import org.springframework.enum.IntegerCodedEnum;
-import org.springframework.enum.LabeledCodedEnum;
-import org.springframework.enum.StringCodedEnum;
 import org.springframework.enum.TypeMapping;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -96,14 +92,10 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
         TypeMapping mapping = getTypeMapping(type);
         Class clazz = mapping.getEnumClass();
         Assert.isTrue(CodedEnum.class.isAssignableFrom(clazz));
-        if (LabeledCodedEnum.class.isAssignableFrom(clazz)) {
-            return executeLabeledEnumQuery(mapping);
-        } else {
-            return executeCodedEnumQuery(mapping);
-        }
+        return executeEnumQuery(mapping);
     }
 
-    private Map executeLabeledEnumQuery(final TypeMapping mapping) {
+    private Map executeEnumQuery(final TypeMapping mapping) {
         String enumTypeQuery = "SELECT " + mapping.getCodeColumn() + ", "
                 + mapping.getLabelColumn() + " FROM " + mapping.getTable()
                 + " ORDER BY " + mapping.getLabelColumn() + ";";
@@ -121,11 +113,13 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
                             if (codeStr.length() == 1) {
                                 code = new Character(codeStr.charAt(0));
                             }
-                        } else if (code instanceof Integer) {
+                        } else if (code instanceof Integer
+                                || code instanceof Short) {
                             codeClass = int.class;
                         } else {
                             throw new IllegalArgumentException(
-                                    "No supported enum code class found for " + code);
+                                    "No supported enum code class found for "
+                                            + code);
                         }
                         String label = set.getString(2);
                         try {
@@ -135,58 +129,6 @@ public class CachingJdbcCodedEnumResolver implements InitializingBean,
                             CodedEnum enum = (CodedEnum)BeanUtils
                                     .instantiateClass(c, new Object[] { code,
                                             label });
-                            enumMap.put(enum.getCode(), enum);
-                        } catch (Exception e) {
-                            throw new DataIntegrityViolationException(
-                                    "Unable to map data in table to enum class "
-                                            + enumClass, e);
-                        }
-                    }
-                });
-        return enumMap;
-    }
-
-    private Map executeCodedEnumQuery(final TypeMapping mapping) {
-        String enumTypeQuery = "SELECT " + mapping.getCodeColumn() + " FROM "
-                + mapping.getTable() + " ORDER BY " + mapping.getCodeColumn()
-                + ";";
-        final Map enumMap = new LinkedHashMap();
-        new JdbcTemplate(dataSource).query(enumTypeQuery,
-                new RowCallbackHandler() {
-                    public void processRow(ResultSet set) throws SQLException {
-                        Object code = set.getObject(0);
-                        Class codeClass;
-                        Class enumClass = mapping.getEnumClass();
-                        if (code instanceof String) {
-                            codeClass = char.class;
-                            String codeStr = (String)code;
-                            if (LetterCodedEnum.class.isAssignableFrom(enumClass)) {
-                                Assert
-                                        .isTrue(codeStr.length() == 1,
-                                                "Character coded enums must consist of a single char.");
-                                code = new Character(codeStr.charAt(0));
-                            } else {
-                                Assert
-                                        .isTrue(StringCodedEnum.class
-                                                .isAssignableFrom(enumClass),
-                                                "String enums must be a subclass of StringCodedEnum.");
-                            }
-                            code = new Character(codeStr.charAt(0));
-                        } else if (code instanceof Integer) {
-                            codeClass = int.class;
-                            Assert
-                            .isTrue(IntegerCodedEnum.class
-                                    .isAssignableFrom(enumClass),
-                                    "Integer enums must be a subclass of IntegerCodedEnum.");
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "No supported enum code class found for " + code);
-                        }
-                        try {
-                            Constructor c = enumClass
-                                    .getConstructor(new Class[] { codeClass });
-                            CodedEnum enum = (CodedEnum)BeanUtils
-                                    .instantiateClass(c, new Object[] { code });
                             enumMap.put(enum.getCode(), enum);
                         } catch (Exception e) {
                             throw new DataIntegrityViolationException(

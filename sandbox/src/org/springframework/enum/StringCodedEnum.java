@@ -19,7 +19,7 @@ package org.springframework.enum;
  * @author Keith Donald
  */
 public abstract class StringCodedEnum extends AbstractCodedEnum {
-    public StringCodedEnum(String code) {
+    protected StringCodedEnum(String code) {
         super(code);
     }
 

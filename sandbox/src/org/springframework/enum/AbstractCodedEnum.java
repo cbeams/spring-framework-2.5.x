@@ -18,6 +18,7 @@ package org.springframework.enum;
 import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ToStringBuilder;
 
@@ -25,21 +26,31 @@ import org.springframework.util.ToStringBuilder;
  * @author Keith Donald
  */
 public abstract class AbstractCodedEnum implements CodedEnum,
-        MessageSourceResolvable, Serializable {
-    private Object code;
+        MessageSourceResolvable, Serializable, Comparable {
+    private Comparable code;
+    private String label;
 
-    protected AbstractCodedEnum(Object code) {
+    protected AbstractCodedEnum(Comparable code) {
         this.code = code;
+    }
+
+    protected AbstractCodedEnum(Comparable code, String label) {
+        this.code = code;
+        this.label = label;
     }
 
     public Object getCode() {
         return code;
     }
-    
+
     public String getKey() {
         return getType() + "." + getCode();
     }
-    
+
+    public String getLabel() {
+        return label;
+    }
+
     public boolean equals(Object o) {
         if (!(o instanceof AbstractCodedEnum)) {
             return false;
@@ -47,7 +58,13 @@ public abstract class AbstractCodedEnum implements CodedEnum,
         AbstractCodedEnum e = (AbstractCodedEnum)o;
         return this.code.equals(e.code) && this.getType().equals(e.getType());
     }
-    
+
+    public int compareTo(Object o) {
+        AbstractCodedEnum e = (AbstractCodedEnum)o;
+        Assert.isTrue(getType().equals(e.getType()));
+        return code.compareTo(e.code);
+    }
+
     public int hashCode() {
         return code.hashCode() + getType().hashCode();
     }
@@ -65,7 +82,7 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     public String[] getCodes() {
         return new String[] { getKey() };
     }
-    
+
     /**
      * @see org.springframework.enum.CodedEnum#getType()
      */
@@ -77,7 +94,11 @@ public abstract class AbstractCodedEnum implements CodedEnum,
      * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
      */
     public String getDefaultMessage() {
-        return String.valueOf(getCode());
+        if (label != null) {
+            return getLabel();
+        } else {
+            return String.valueOf(getCode());
+        }
     }
 
     public String toString() {

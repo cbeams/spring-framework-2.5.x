@@ -15,21 +15,21 @@
  */
 package org.springframework.enum.support;
 
-import org.springframework.enum.LabeledCodedEnum;
+import org.springframework.enum.AbstractCodedEnum;
 
 /**
  * @author  keith
  */
-public class GenericLabeledCodedEnum extends LabeledCodedEnum {
+public class GenericLabeledCodedEnum extends AbstractCodedEnum {
     private String type;
     
     public GenericLabeledCodedEnum(String type, int code, String label) {
-        super(code, label);
+        super(new Integer(code), label);
         this.type = type;
     }
 
     public GenericLabeledCodedEnum(String type, char code, String label) {
-        super(code, label);
+        super(new Character(code), label);
         this.type = type;
     }
 

@@ -21,10 +21,17 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public abstract class LetterCodedEnum extends AbstractCodedEnum {
-    public LetterCodedEnum(char code) {
+    protected LetterCodedEnum(char code) {
         super(new Character(code));
         Assert.isTrue(Character.isLetter(code), "The code " + code
                 + " is invalid; it must be a letter.");
     }
+
+    protected LetterCodedEnum(char code, String label) {
+        super(new Character(code), label);
+        Assert.isTrue(Character.isLetter(code), "The code " + code
+                + " is invalid; it must be a letter.");
+    }
+
 
 }
