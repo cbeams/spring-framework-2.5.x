@@ -117,15 +117,15 @@ public abstract class DataSourceUtils {
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param ds DataSource to get Connection from
+	 * @param dataSource DataSource to get Connection from
 	 * @return a JDBC Connection from this DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
-	public static Connection getConnection(DataSource ds) throws CannotGetJdbcConnectionException {
-		return getConnection(ds, true);
+	public static Connection getConnection(DataSource dataSource) throws CannotGetJdbcConnectionException {
+		return getConnection(dataSource, true);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public abstract class DataSourceUtils {
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param ds DataSource to get Connection from
+	 * @param dataSource DataSource to get Connection from
 	 * @param allowSynchronization if a new JDBC Connection is supposed to be
 	 * registered with transaction synchronization (if synchronization is active).
 	 * This will always be true for typical data access code.
@@ -146,10 +146,10 @@ public abstract class DataSourceUtils {
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 * @see DataSourceTransactionManager
 	 */
-	public static Connection getConnection(DataSource ds, boolean allowSynchronization)
+	public static Connection getConnection(DataSource dataSource, boolean allowSynchronization)
 	    throws CannotGetJdbcConnectionException {
 		try {
-			return doGetConnection(ds, allowSynchronization);
+			return doGetConnection(dataSource, allowSynchronization);
 		}
 		catch (SQLException ex) {
 			throw new CannotGetJdbcConnectionException("Could not get JDBC connection", ex);
@@ -164,24 +164,24 @@ public abstract class DataSourceUtils {
 	 * @see #getConnection(DataSource, boolean)
 	 * @see TransactionAwareDataSourceProxy
 	 */
-	protected static Connection doGetConnection(DataSource ds, boolean allowSynchronization)
+	protected static Connection doGetConnection(DataSource dataSource, boolean allowSynchronization)
 			throws SQLException {
-		Assert.notNull(ds, "No DataSource specified");
+		Assert.notNull(dataSource, "No DataSource specified");
 
-		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (conHolder != null) {
 			return conHolder.getConnection();
 		}
 
 		logger.debug("Opening JDBC connection");
-		Connection con = ds.getConnection();
+		Connection con = dataSource.getConnection();
 		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC connection");
 			// use same Connection for further JDBC actions within the transaction
 			// thread object will get removed by synchronization at transaction completion
 			conHolder = new ConnectionHolder(con);
-			TransactionSynchronizationManager.bindResource(ds, conHolder);
-			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, ds));
+			TransactionSynchronizationManager.bindResource(dataSource, conHolder);
+			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, dataSource));
 		}
 		return con;
 	}
@@ -262,11 +262,11 @@ public abstract class DataSourceUtils {
 	 * Apply the current transaction timeout, if any,
 	 * to the given JDBC Statement object.
 	 * @param stmt the JDBC Statement object
-	 * @param ds DataSource that the Connection came from
+	 * @param dataSource DataSource that the Connection came from
 	 */
-	public static void applyTransactionTimeout(Statement stmt, DataSource ds) throws SQLException {
+	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
 		Assert.notNull(stmt, "No Statement specified");
-		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (holder != null && holder.hasTimeout()) {
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
 		}
@@ -277,12 +277,12 @@ public abstract class DataSourceUtils {
 	 * and it is not created by a SmartDataSource returning shouldClose=false.
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)
-	 * @param ds DataSource that the Connection came from
+	 * @param dataSource DataSource that the Connection came from
 	 * @see SmartDataSource#shouldClose
 	 */
-	public static void closeConnectionIfNecessary(Connection con, DataSource ds) {
+	public static void closeConnectionIfNecessary(Connection con, DataSource dataSource) {
 		try {
-			doCloseConnectionIfNecessary(con, ds);
+			doCloseConnectionIfNecessary(con, dataSource);
 		}
 		catch (SQLException ex) {
 			logger.error("Could not close JDBC connection", ex);

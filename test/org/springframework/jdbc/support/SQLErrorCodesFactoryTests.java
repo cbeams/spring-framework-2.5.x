@@ -31,8 +31,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
- * Tests for SQLErrorCode loading.
+ * Tests for SQLErrorCodes loading.
  * @author Rod Johnson
+ * @author Thomas Risberg
  */
 public class SQLErrorCodesFactoryTests extends TestCase {
 
@@ -283,7 +284,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 
 	/**
-	 * Check that wild card  database name works.
+	 * Check that wild card database name works.
 	 */
 	public void testWildCardNameReconized() throws Exception {
 		class WildcardSQLErrorCodesFactory extends SQLErrorCodesFactory {
