@@ -29,9 +29,9 @@ import org.springframework.util.StringUtils;
  */
 public class SubFlowState extends TransitionableState {
 
-	private String subFlowId;
+	protected String subFlowId;
 
-	private String attributesMapperId;
+	protected String attributesMapperId;
 
 	public SubFlowState(String subFlowId, Transition transition) {
 		this(subFlowId, subFlowId, null, new Transition[] { transition });
