@@ -32,7 +32,7 @@ to develop a web application from scratch using the Spring Framework.</P>
 		version 1.4.2</I>)</P>
 		<LI><P STYLE="margin-bottom: 0in">Ant (<I>using version 1.5.3</I>)</P>
 		<LI><P STYLE="margin-bottom: 0in">Apache Tomcat (<I>using version
-		4.1.24 or 5.0.16</I>)</P>
+		4.1.24 or 5.0.18</I>)</P>
 	</UL>
 </UL>
 <P STYLE="margin-bottom: 0in">You should also be reasonably
@@ -136,9 +136,14 @@ controlling the application under Tomcat.</P>
         &lt;fileset dir=&quot;${web.dir}/WEB-INF/lib&quot;&gt;
             &lt;include name=&quot;*.jar&quot;/&gt;
         &lt;/fileset&gt;
+        &lt;!-- We need the servlet API classes:        --&gt;
+        &lt;!--   for Tomcat 4.1 use servlet.jar        --&gt;
+        &lt;!--   for Tomcat 5.0 use servlet-api.jar    --&gt;
+        &lt;!--   for Other app server - check the docs --&gt;
         &lt;fileset dir=&quot;${tomcat.home}/common/lib&quot;&gt;
-            &lt;include name=&quot;servlet.jar&quot;/&gt;
+            &lt;include name=&quot;servlet*.jar&quot;/&gt;
         &lt;/fileset&gt;
+        &lt;pathelement path=&quot;${build.dir}&quot;/&gt;
     &lt;/path&gt;
 
     &lt;target name=&quot;usage&quot;&gt;
@@ -431,7 +436,7 @@ task to get the application installed in Tomcat.</P>
 distribution</B></P>
 <P STYLE="margin-bottom: 0in">If you have not already downloaded the
 Spring Framework Release file, now is the time to do so. I am
-currently using 'spring-framework-1.0-m4-with-dependencies.zip' that can be downloaded
+currently using 'spring-framework-1.0-rc1-with-dependencies.zip' that can be downloaded
 from <A HREF="http://www.springframework.org/download.html">www.springframework.org/download.html</A>.
 I unzipped this file in my home directory. We are going to use
 several files from this download later on.</P>
@@ -539,11 +544,11 @@ different url:s.</P>
 <P STYLE="margin-bottom: 0in"><B>Step 7 &ndash; Copy jars to
 WEB-INF/lib</B></P>
 <P STYLE="margin-bottom: 0in">From the Spring distribution, copy
-spring.jar (spring-framework-1.0-m4/dist/spring.jar) to a
+spring.jar (spring-framework-1.0-rc1/dist/spring.jar) to a
 war/WEB-INF/lib directory.
 Also copy commons-logging jars
 to the war/WEB-INF/lib directory
-(spring-framework-1.0-m4/lib/jakarta-commons/commons-logging.jar).
+(spring-framework-1.0-rc1/lib/jakarta-commons/commons-logging.jar).
 We are also going to need a log4j jar.  I downloaded Log4j from the
 <a href="http://jakarta.apache.org/">Apache Jakarta web site</a>.  Then copy
 log4j-1.2.8.jar to the war/WEB-INF/lib directory.
@@ -619,7 +624,7 @@ log4j.properties</B></P>
 Framework uses log4j for logging so we have to create a configuration
 file for log4j. Copy the log4j.properties from the sample Petclinic
 application
-(spring-framework-1.0-m4/samples/petclinic/war/WEB-INF/classes/log4j.properties)
+(spring-framework-1.0-rc1/samples/petclinic/war/WEB-INF/classes/log4j.properties)
 to the war/WEB-INF/classes directory (this directory should have been
 created in the previous step). Now uncomment or modify the log4j.rootCategory property and change the name and location of
 the logfile that will be written. I decided to have it written to the

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
 	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
@@ -38,56 +38,6 @@ prices. We need to add code to actually persist these changes to a
 database.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<DIV ID="Section1" DIR="LTR" STYLE="background: #e6e6ff">
-	<P STYLE="margin-bottom: 0in"><B><FONT SIZE=4>NOTE:</FONT></B> <I>If
-	you started this project based on the 'spring-framework-0.9'
-	release, then there are a few changes you will have to make. Since
-	the 'spring-framework-1.0-m1' release, we have changed the package
-	names and the name of the TLD. These instructions assume that
-	you now are using the latest 'spring-framework-1.0-m4' release.</I></P>
-	<UL>
-		<LI><P STYLE="margin-bottom: 0in"><I>We need to replace Spring's
-		distribution jar file - copy
-		</I>spring-framework-1.0-m4/dist/spring.jar <I>to replace
-		</I>war/WEB-INF/lib/spring-full-0.9.jar.</P>
-	</UL>
-	<UL>
-		<LI><P STYLE="margin-bottom: 0in"><I>We also need to replace the
-		TLD file - copy
-		</I>spring-framework-1.0-m4/dist/spring.tld
-		<I>to replace </I>springapp/war/WEB-INF/i21.tld.</P>
-	</UL>
-	<UL>
-		<LI><P STYLE="margin-bottom: 0in"><I>Do a global change from
-		'com.interface21' to 'org.springframework' in the following files</I>:</P>
-	</UL>
-	<PRE><FONT COLOR="#000000">        src/bus/PriceIncreaseValidator.java</FONT>
-<FONT COLOR="#000000">        src/web/SpringappController.java</FONT>
-<FONT COLOR="#000000">        src/web/PriceIncreaseFormController.java</FONT>
-<FONT COLOR="#000000">        src/tests/WEB-INF/springapp-servlet.xml</FONT>
-<FONT COLOR="#000000">        src/tests/TestSpringappController.java</FONT>
-<FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
-<FONT COLOR="#000000">        war/WEB-INF/springapp-servlet.xml</FONT></PRE>
-	<UL>
-		<LI><P STYLE="margin-bottom: 0in"><I>Do a global change from 'i21'
-		to 'spring' in the following files: </I>
-		</P>
-	</UL>
-	<PRE><FONT COLOR="#000000">        war/WEB-INF/web.xml</FONT>
-<FONT COLOR="#000000">        war/WEB-INF/jsp/priceincrease.jsp</FONT></PRE>
-	<UL>
-		<LI><P STYLE="margin-bottom: 0in"><I>Remove i21.tld and
-		spring-full-0.9.jar from the deployment directory for Tomcat. I
-		removed the following files: </I>
-		</P>
-	</UL>
-	<PRE><FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/i21.tld</FONT>
-<FONT COLOR="#000000">        jakarta-tomcat-4.1.24/webapps/springapp/WEB-INF/lib/spring-full-0.9.jar</FONT></PRE><P STYLE="margin-bottom: 0in; font-style: normal">
-	<FONT COLOR="#000000">After all these changes, deploy and test the
-	application.</FONT></P>
-</DIV>
-<P STYLE="margin-bottom: 0in"><BR>
-</P>
 <P STYLE="margin-bottom: 0in"><B>Step 23 – Add Ant tasks to create
 and load test data</B></P>
 <P STYLE="margin-bottom: 0in">Before we can start developing the
@@ -97,7 +47,7 @@ planning on using HSQL, which is a good open source database written
 in Java. This database is distributed with Spring's Petclinic sample
 application, so we can just copy the jar file to the web apps lib
 directory. Copy
-spring-framework-1.0-m4/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
+spring-framework-1.0-rc1/samples/petclinic/war/WEB-INF/lib/hsqldb.jar
 to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a
 standalone mode to begin with. That way we don't have to worry about
 starting up a separate database server every time we use it. The URL
@@ -414,7 +364,7 @@ syntax as a prepared statement in JDBC. In fact, that is what
 SqlUpdate creates behind the scenes. For the parameters, we have to
 give them a name and declare what type they are so that the framework
 can set them before the prepared statement is executed. After all
-parameters have been declared, we “compile” the statement in JDO
+parameters have been declared, we “compile�? the statement in JDO
 fashion. This will signal that we are done declaring parameters, and
 the framework will check to make sure that we have a matching
 declaration for each placeholder in the SQL statement. Next we

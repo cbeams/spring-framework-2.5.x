@@ -37,7 +37,7 @@ the SpringappController</B></P>
 want to prepare Ant and our build script to be able to handle this.
 Ant has a built in JUnit target, but we need to add junit.jar to
 Ant's lib directory. I used the one that came with the Spring
-distribution spring-framework-1.0-m4/lib/junit/junit.jar. Just copy
+distribution spring-framework-1.0-rc1/lib/junit/junit.jar. Just copy
 this file to the lib directory in your Ant installation. I also added
 the following target to our build script.
 </P>
@@ -51,15 +51,7 @@ the following target to our build script.
 <FONT COLOR="#800000">               haltonfailure=&quot;false&quot;</FONT>
 <FONT COLOR="#800000">               failureproperty=&quot;tests.failed&quot;</FONT>
 <FONT COLOR="#800000">               showoutput=&quot;true&quot;&gt;</FONT>
-<FONT COLOR="#800000">            &lt;classpath&gt;</FONT>
-<FONT COLOR="#800000">                &lt;path location=&quot;${build.dir}&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;fileset dir=&quot;${web.dir}/WEB-INF/lib&quot;&gt;</FONT>
-<FONT COLOR="#800000">                    &lt;include name=&quot;*.jar&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;/fileset&gt;</FONT>
-<FONT COLOR="#800000">                &lt;fileset dir=&quot;${tomcat.home}/common/lib&quot;&gt;</FONT>
-<FONT COLOR="#800000">                    &lt;include name=&quot;servlet.jar&quot;/&gt;</FONT>
-<FONT COLOR="#800000">                &lt;/fileset&gt;</FONT>
-<FONT COLOR="#800000">            &lt;/classpath&gt;</FONT>
+<FONT COLOR="#800000">            &lt;classpath refid=&quot;master-classpath&quot;/&gt;</FONT>
 <FONT COLOR="#800000">            &lt;formatter type=&quot;brief&quot; usefile=&quot;false&quot;/&gt;</FONT>
 
 <FONT COLOR="#800000">            &lt;batchtest&gt;</FONT>
@@ -338,7 +330,7 @@ application, I add a form that will allow the user to enter a
 percentage value. This form uses a tag library named &ldquo;spring&rdquo;
 that is provided with the Spring Framework. We have to copy this file
 from the Spring distribution
-spring-framework-1.0-m4/dist/spring.tld to
+spring-framework-1.0-rc1/dist/spring.tld to
 the springapp/war/WEB-INF directory. Now we must also add a &lt;taglib&gt;
 entry to web.xml.</P>
 <TABLE WIDTH=1004 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
