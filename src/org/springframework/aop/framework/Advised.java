@@ -20,7 +20,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.8 2004-01-25 19:44:26 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.9 2004-03-12 02:56:31 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -77,7 +77,7 @@ public interface Advised {
 	 * @param interceptor to add to the tail of the chain
 	 * @see #addInterceptor(int, Interceptor)
 	 */
-	void addInterceptor(Interceptor interceptor);
+	void addInterceptor(Interceptor interceptor) throws AopConfigException;
 
 	/**
 	 * Add an interceptor at the specified position in the interceptor chain.
@@ -85,7 +85,7 @@ public interface Advised {
 	 * @param interceptor interceptor to add at the specified position in the
 	 * interceptor chain
 	 */
-	void addInterceptor(int pos, Interceptor interceptor);
+	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
 	
 	
 	/** 
@@ -94,14 +94,14 @@ public interface Advised {
 	 * will be available when a proxy is next obtained from the relevant factory.
 	 * @param advisor Advisor to add to the end of the chain
 	 */
-	void addAdvisor(Advisor advisor);
+	void addAdvisor(Advisor advisor) throws AopConfigException;
 
 	/** 
 	 * Add an Advisor at the specified position in the chain
 	 * @param advisor advisor to add at the specified position in the chain
 	 * @param pos position in chain (0 is head). Must be valid.
 	 */
-	void addAdvisor(int pos, Advisor advisor);
+	void addAdvisor(int pos, Advisor advisor) throws AopConfigException;
 	
 	/**
 	 * Return the index (from 0) of the given advisor,
@@ -120,7 +120,7 @@ public interface Advised {
 	 * @return true if the advisor was removed; false if the
 	 * advisor was not found and hence could not be removed
 	 */
-	boolean removeAdvisor(Advisor advisor);
+	boolean removeAdvisor(Advisor advisor) throws AopConfigException;
 	
 	/**
 	 * Remove the advisor at the given index
@@ -140,7 +140,13 @@ public interface Advised {
 	 * @return whether it was replaced. If the advisor wasn't found in the
 	 * list of advisors, this method returns false and does nothing.
 	 */
-	boolean replaceAdvisor(Advisor a, Advisor b);
+	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
+	
+	/**
+	 * @return whether the Advised configuration is frozen, and no
+	 * advice changes can be made
+	 */
+	boolean isFrozen();
 	
 	/**
 	 * As toString() will normally pass to the target, 
