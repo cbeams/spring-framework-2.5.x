@@ -15,27 +15,46 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
+ * Java-based flow builder that builds the person details flow.
+ * 
+ * This encapsulates the page flow of viewing a person's details and their
+ * collegues in a reusable, self-contained module.
+ * 
  * @author Keith Donald
  */
 public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
+
+	private static final String PERSON = "person";
 
 	protected String flowId() {
 		return "person.Detail";
 	}
 
 	public void buildStates() throws FlowBuilderException {
-		addGetState(flowId());
+		// get the person given a userid as input
+		addGetState(PERSON, executeAction(GetPersonAction.class));
+
+		// view the person
 		String setCollegueId = qualify(set("collegueId"));
-		addViewState(flowId(), new Transition[] { onBackFinish(), onSelect(setCollegueId) });
+		addViewState(PERSON, new Transition[] { onBackFinish(), onSelect(setCollegueId) });
+
+		// set the selected collegue (chosen from the person's collegue list)
 		addActionState(setCollegueId, onSuccess("collegue.Detail"));
+
+		// spawn subflow to view selected collegue details
 		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
-				new Transition[] { onFinishGet(flowId()), onErrorEnd() });
+				new Transition[] { onFinishGet(PERSON), onErrorEnd() });
+
+		// end
 		addFinishEndState();
+
+		// end error
 		addErrorEndState();
 	}
 }

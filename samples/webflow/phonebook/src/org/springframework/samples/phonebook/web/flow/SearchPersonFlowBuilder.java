@@ -21,6 +21,12 @@ import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
+ * Java-based flow builder that searches for people in the phonebook.
+ * 
+ * This encapsulates the page flow of searching for some people, selecting a
+ * person you care about, and viewing their person's details and thosr of their
+ * collegues in a reusable, self-contained module.
+ * 
  * @author Keith Donald
  */
 public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
@@ -34,15 +40,28 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 	}
 
 	public void buildStates() throws FlowBuilderException {
+		// view search criteria
 		addViewState(CRITERIA, onSubmitBindAndValidate(CRITERIA));
+
+		// bind and validate search criteria
 		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("query") });
+
+		// execute query
 		addActionState("query", executeAction(QueryAction.class), new Transition[] { onErrorView(CRITERIA),
 				onSuccessView(RESULTS) });
+
+		// view results
 		String setUserId = qualify(set("userId"));
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setUserId) });
+
+		// set a user id in the model (selected from result list)
 		addActionState(setUserId, new Transition[] { onError("error"), onSuccess("person.Detail") });
+
+		// view details for selected user id
 		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"), new Transition[] {
 				onFinish(view(RESULTS)), onError("error") });
-		addEndState("error", "error.view");
+
+		// end - an error occured
+		addErrorEndState("error.view");
 	}
 }
