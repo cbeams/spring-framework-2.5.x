@@ -4,6 +4,7 @@ import java.util.List;
 import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
 
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.validation.Errors;
@@ -94,8 +95,12 @@ public class BindTag extends RequestContextAwareTag {
 			this.property = this.path.substring(dotPos + 1);
 		}
 
-		// retrieve errors object
+		// retrieve Errors object
 		this.errors = getRequestContext().getErrors(name, false);
+		if (this.errors == null) {
+			throw new JspTagException("Could not find Errors instance for bean [" + name + "] in request");
+		}
+
 		List fes = null;
 		Object value = null;
 

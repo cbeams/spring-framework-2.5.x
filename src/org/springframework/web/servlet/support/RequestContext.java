@@ -176,11 +176,9 @@ public class RequestContext {
 	 * Retrieve the Errors instance for the given bind object,
 	 * using the defaultHtmlEscape setting.
 	 * @param name name of the bind object
-	 * @return the Errors instance
-	 * @throws ServletException if the Errors instance could not be found
-	 * in the request
+	 * @return the Errors instance, or null if not found
 	 */
-	public Errors getErrors(String name) throws ServletException {
+	public Errors getErrors(String name) {
 		return getErrors(name, this.defaultHtmlEscape);
 	}
 
@@ -188,11 +186,9 @@ public class RequestContext {
 	 * Retrieve the Errors instance for the given bind object.
 	 * @param name name of the bind object
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
-	 * @return the Errors instance
-	 * @throws ServletException if the Errors instance could not be found
-	 * in the request
+	 * @return the Errors instance, or null if not found
 	 */
-	public Errors getErrors(String name, boolean htmlEscape) throws ServletException {
+	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
 			this.errorsMap = new HashMap();
 		}
@@ -201,8 +197,7 @@ public class RequestContext {
 		if (errors == null) {
 			errors = retrieveErrors(name);
 			if (errors == null) {
-				throw new ServletException("Invalid bind name [" + name +
-				                           "]: Errors instance not found in request");
+				return null;
 			}
 			put = true;
 		}
