@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
@@ -21,7 +21,7 @@ package org.springframework.dao;
  * a deadlock loser, and its transaction rolled back.
  * @author Rod Johnson
  */
-public class DeadlockLoserDataAccessException extends DataAccessException {
+public class DeadlockLoserDataAccessException extends ConcurrencyFailureException {
 
 	/**
 	 * Constructor for DeadlockLoserDataAccessException.
