@@ -25,6 +25,11 @@ import java.beans.PropertyChangeEvent;
  */
 public class TypeMismatchException extends PropertyAccessException {
 
+	/**
+	 * Error code that a type mismatch error will be registered with.
+	 */
+	public static final String ERROR_CODE = "typeMismatch";
+
 	private final Class requiredType;
 
 	/**
@@ -62,7 +67,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	}
 
 	public String getErrorCode() {
-		return "typeMismatch";
+		return ERROR_CODE;
 	}
 
 }

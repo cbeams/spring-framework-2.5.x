@@ -26,6 +26,11 @@ import java.beans.PropertyChangeEvent;
 public class MethodInvocationException extends PropertyAccessException {
 
 	/**
+	 * Error code that a method invocation error will be registered with.
+	 */
+	public static final String ERROR_CODE = "methodInvocation";
+
+	/**
 	 * Create a new MethodInvocationException.
 	 * @param propertyChangeEvent PropertyChangeEvent that resulted in an exception
 	 * @param ex Throwable raised by invoked method
@@ -35,7 +40,7 @@ public class MethodInvocationException extends PropertyAccessException {
 	}
 
 	public String getErrorCode() {
-		return "methodInvocation";
+		return ERROR_CODE;
 	}
 
 }
