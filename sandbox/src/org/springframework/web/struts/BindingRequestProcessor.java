@@ -29,6 +29,11 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.RequestProcessor;
 
+/**
+ * A custom request processor that defers action form population, in favor of deffering that to
+ * Spring's more advanced data binding and validation subsystem.
+ * @author Keith Donald
+ */
 public class BindingRequestProcessor extends RequestProcessor {
 	private static final String ROLLBACK_MULTIPART_MSG = "Rolling back multipart request";
 

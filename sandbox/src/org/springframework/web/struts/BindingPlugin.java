@@ -26,6 +26,11 @@ import org.apache.struts.action.ActionServlet;
 import org.apache.struts.action.PlugIn;
 import org.apache.struts.config.ModuleConfig;
 
+/**
+ * Plugin neccessary to attach the <code>BindingAwarePropertyUtilsBean</code>, which is aware of
+ * <code>BindingActionForm</code> adapters.
+ * @author Keith Donald
+ */
 public class BindingPlugin implements PlugIn {
 	static final Logger logger = Logger.getLogger(BindingPlugin.class.getName());
 
@@ -39,4 +44,3 @@ public class BindingPlugin implements PlugIn {
 	public void destroy() {
 	}
 }
-

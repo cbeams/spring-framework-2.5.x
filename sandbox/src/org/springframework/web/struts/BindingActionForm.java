@@ -36,11 +36,13 @@ import org.springframework.validation.ObjectError;
 
 /**
  * A Struts action form adapter that uses Spring's more complete and advanced
- * data binder and bind exception object under neath the covers to bind to POJOs
+ * data binder and bind exception object underneath the covers to bind to POJOs
  * and manage rejected values.
  * <p>
  * Also provides hierarchical message resolution, which is traditionally not
  * supported in struts-based apps.
+ * <p>
+ * Note this Action form is designed explicitly for use in <code>request scope</code>
  * 
  * @author Keith Donald
  * @author Ben Alex
@@ -62,19 +64,15 @@ public class BindingActionForm extends ActionForm {
 	}
 
 	public void setRequest(HttpServletRequest request) {
-		updateFromHttpRequest(request);
-	}
-
-	protected Errors getErrors() {
-		return errors;
-	}
-
-	private void updateFromHttpRequest(HttpServletRequest request) {
 		// Obtain the locale from the Struts well-known location
 		this.locale = (Locale)request.getSession().getAttribute(Globals.LOCALE_KEY);
 
 		// Obtain the MessageResources from the Struts well-known location
 		this.messageResources = (MessageResources)request.getAttribute(Globals.MESSAGES_KEY);
+	}
+
+	protected Errors getErrors() {
+		return errors;
 	}
 
 	public boolean hasErrors() {
