@@ -22,13 +22,21 @@ package org.springframework.dao;
  * is not purely a relational concept; unique primary keys are
  * required by most database types.
  * @author Rod Johnson
- * @version $Id: DataIntegrityViolationException.java,v 1.3 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: DataIntegrityViolationException.java,v 1.4 2004-05-17 09:59:04 jhoeller Exp $
  */
 public class DataIntegrityViolationException extends DataAccessException {
 
 	/**
 	 * Constructor for DataIntegrityViolationException.
-	 * @param msg mesg
+	 * @param msg message
+	 */
+	public DataIntegrityViolationException(String msg) {
+		super(msg);
+	}
+
+	/**
+	 * Constructor for DataIntegrityViolationException.
+	 * @param msg message
 	 * @param ex root cause
 	 */
 	public DataIntegrityViolationException(String msg, Throwable ex) {
