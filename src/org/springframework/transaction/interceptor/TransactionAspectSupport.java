@@ -44,7 +44,7 @@ import org.springframework.transaction.TransactionStatus;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.5 2004-07-08 14:07:52 jhoeller Exp $
+ * @version $Id: TransactionAspectSupport.java,v 1.6 2004-07-24 04:45:07 dkopylenko Exp $
  */
 public class TransactionAspectSupport implements InitializingBean {
 
@@ -260,7 +260,7 @@ public class TransactionAspectSupport implements InitializingBean {
 	 * @param txInfo information about the current transaction
 	 */
 	protected void doCommitTransactionAfterReturning(TransactionInfo txInfo) {
-		if (txInfo != null && txInfo.hasTransaction()) {
+		if (txInfo != null && txInfo.hasTransaction() && txInfo.transactionStatus.isNewTransaction()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking commit for transaction on " + txInfo.joinpointIdentification());
 			}
