@@ -1,5 +1,17 @@
 /*
- * Created on Jul 21, 2004
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.jmx.naming;
 
@@ -14,19 +26,22 @@ import org.springframework.metadata.Attributes;
 import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
+ * An implementation of the <code>ObjectNamingStrategy</code> interface
+ * that reads the the <code>ObjectName</code> from the source level
+ * metadata.
  * @author robh
  */
 public class MetadataNamingStrategy implements ObjectNamingStrategy {
 
     /**
-     * The <tt>Attributes</tt> implementation. Uses Commons Attributes by
+     * The <code>Attributes</code> implementation. Uses Commons Attributes by
      * default.
      */
     private Attributes attributes = new CommonsAttributes();
 
     /**
-     * Reads the ObjectName from the attribute's associated
-     * with the managed resource's Class.
+     * Reads the <code>ObjectName</code> from the source level metadata associated
+     * with the managed resource's <code>Class</code>.
      */
     public ObjectName getObjectName(Object managedResource, String key)
             throws ObjectNamingException {
@@ -60,6 +75,11 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
         }
     }
 
+    /**
+     * Set the implementation of the <code>Attributes</code> interface to use
+     * when reading the source level metadata.
+     * @param attributes
+     */
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
     }

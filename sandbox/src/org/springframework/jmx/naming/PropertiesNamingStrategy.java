@@ -27,10 +27,10 @@ import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
- * <tt>ObjectNamingStrategy</tt> implementation that reads
+ * <code>ObjectNamingStrategy</code> implementation that reads
  * object names from a properties file. The key used to look up
- * an ObjectName for a bean if the key used to in the <tt>Map</tt> of beans
- * passed to <tt>JmxMBeanAdapter</tt>.
+ * an <code>ObjectName</code> for a bean if the key used to in the <code>Map</code> of beans
+ * passed to <code>JmxMBeanAdapter</code>.
  * @author Rob Harrop
  */
 public class PropertiesNamingStrategy implements ObjectNamingStrategy,

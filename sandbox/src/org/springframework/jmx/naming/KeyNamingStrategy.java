@@ -22,12 +22,18 @@ import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
 
 /**
- * <tt>ObjectNamingStrategy</tt> that uses the key passed to JmxMBeanAdapter
+ * <code>ObjectNamingStrategy</code> that uses the key passed to <code>JmxMBeanAdapter</code>
  * when registering the bean for JMX exposure.
  * @author Rob Harrop
  */
 public class KeyNamingStrategy implements ObjectNamingStrategy {
 
+    /**
+     * Returns the value of the <code>key</code> parameter parsed into
+     * an instance of <code>ObjectName</code>.
+     * @param managedResource the bean requiring a name.
+     * @param key the key used to store the managed resource in a <code>Map</code> when passing to Spring.
+     */
     public ObjectName getObjectName(Object managedResource, String key) {
         try {
             return ObjectNameManager.getInstance(key);
