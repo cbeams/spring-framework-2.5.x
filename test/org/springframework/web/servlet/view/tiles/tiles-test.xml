@@ -10,4 +10,8 @@
 		<put name="content" value="/WEB-INF/jsp/content.jsp" type="page"/>
 	</definition>
 
+	<definition name="testTileWithController" path="/WEB-INF/jsp/layout.jsp" controllerClass="org.springframework.web.servlet.view.tiles.TestComponentController">
+		<put name="content" value="/WEB-INF/jsp/otherContent.jsp" type="page"/>
+	</definition>
+
 </tiles-definitions>

@@ -18,6 +18,7 @@ import org.apache.struts.tiles.TilesUtilImpl;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.view.InternalResourceView;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * TilesView retrieves a Tiles definition.
@@ -26,11 +27,18 @@ import org.springframework.web.servlet.view.InternalResourceView;
  * <p>TilesJstlView with JSTL support is a separate class,
  * mainly to avoid JSTL dependencies in this class.
  *
+ * <p>A component controller specified in the Tiles definition will receive
+ * a reference to the current Spring ApplicationContext if it implements
+ * ApplicationContextAware. The ComponentControllerSupport class provides
+ * a convenient base class for such Spring-aware component controllers.
+ *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @see #setUrl
  * @see TilesConfigurer
  * @see TilesJstlView
+ * @see ComponentControllerSupport
+ * @see org.springframework.context.ApplicationContextAware
  */
 public class TilesView extends InternalResourceView {
 
@@ -71,6 +79,9 @@ public class TilesView extends InternalResourceView {
 
 			// execute controller associated to definition, if any
 			Controller controller = definition.getOrCreateController();
+			if (controller instanceof ApplicationContextAware) {
+				((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
+			}
 			if (controller != null) {
 				controller.perform(tileContext, request, response, sc);
 			}

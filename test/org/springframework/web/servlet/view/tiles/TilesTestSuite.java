@@ -12,6 +12,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.PathAttribute;
 
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
@@ -20,27 +21,26 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author Alef Arendsen
  */
 public class TilesTestSuite extends TestCase {
 
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
 	public void testTilesView() throws Exception {
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
-		wac.setServletContext(sc);
-		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"tiles-test.xml"});
-		tc.setValidateDefinitions(true);
-		tc.setApplicationContext(wac);
+		WebApplicationContext wac = prepareWebApplicationContext();
 
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
 		irvr.setViewClass(TilesView.class);
 		View view = irvr.resolveViewName("testTile", new Locale("nl"));
 
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/someURL");
+		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
@@ -59,20 +59,14 @@ public class TilesTestSuite extends TestCase {
 	}
 
 	public void testTilesJstlView() throws Exception {
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
-		wac.setServletContext(sc);
-		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"tiles-test.xml"});
-		tc.setValidateDefinitions(true);
-		tc.setApplicationContext(wac);
+		WebApplicationContext wac = prepareWebApplicationContext();
 
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
 		irvr.setViewClass(TilesJstlView.class);
 		View view = irvr.resolveViewName("testTile", new Locale("nl"));
 
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/someURL");
+		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		view.render(new HashMap(), request, response);
@@ -86,6 +80,47 @@ public class TilesTestSuite extends TestCase {
 		assertTrue("Correct JSTL attributes", request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE)));
 		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes", request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+	}
+
+	public void testTilesViewWithController() throws Exception {
+		WebApplicationContext wac = prepareWebApplicationContext();
+
+		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
+		irvr.setApplicationContext(wac);
+		irvr.setViewClass(TilesView.class);
+		View view = irvr.resolveViewName("testTileWithController", new Locale("nl"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/someURL");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		view.render(new HashMap(), request, response);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+		assertNotNull(cc);
+		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
+		assertEquals("/WEB-INF/jsp/otherContent.jsp", attr.getValue());
+		assertEquals("testVal", request.getAttribute("testAttr"));
+
+		view.render(new HashMap(), request, response);
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.included);
+		cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+		assertNotNull(cc);
+		attr = (PathAttribute) cc.getAttribute("content");
+		assertEquals("/WEB-INF/jsp/otherContent.jsp", attr.getValue());
+		assertEquals("testVal", request.getAttribute("testAttr"));
+	}
+
+	private WebApplicationContext prepareWebApplicationContext() throws Exception {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
+		wac.setServletContext(sc);
+
+		TilesConfigurer tc = new TilesConfigurer();
+		tc.setDefinitions(new String[] {"tiles-test.xml"});
+		tc.setValidateDefinitions(true);
+		tc.setApplicationContext(wac);
+
+		return wac;
 	}
 
 }
