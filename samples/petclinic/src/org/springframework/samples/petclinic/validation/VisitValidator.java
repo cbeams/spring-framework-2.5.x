@@ -13,7 +13,7 @@ import org.springframework.validation.Validator;
 public class VisitValidator implements Validator {
 
 	public boolean supports(Class clazz) {
-		return clazz.equals(Visit.class);
+		return Visit.class.isAssignableFrom(clazz);
 	}
 
 	public void validate(Object obj, Errors errors) {

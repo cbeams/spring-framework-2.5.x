@@ -13,7 +13,7 @@ import org.springframework.validation.Validator;
 public class PetValidator implements Validator {
 
 	public boolean supports(Class clazz) {
-		return clazz.equals(Pet.class);
+		return Pet.class.isAssignableFrom(clazz);
 	}
 
 	public void validate(Object obj, Errors errors) {
