@@ -17,11 +17,11 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: JDKDynamicProxyTests.java,v 1.2 2003-12-01 15:40:15 johnsonr Exp $
+ * @version $Id: JdkDynamicProxyTests.java,v 1.1 2003-12-02 14:12:38 johnsonr Exp $
  */
-public class JDKDynamicProxyTests extends AbstractAopProxyTests {
+public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
-	public JDKDynamicProxyTests(String arg0) {
+	public JdkDynamicProxyTests(String arg0) {
 		super(arg0);
 	}
 	
