@@ -59,6 +59,7 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 
 	private SqlMap sqlMap;
 
+
 	/**
 	 * Create a new SqlMapTemplate.
 	 */
@@ -72,7 +73,8 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 	 */
 	public SqlMapTemplate(DataSource dataSource, SqlMap sqlMap) {
 		setDataSource(dataSource);
-		this.sqlMap = sqlMap;
+		setSqlMap(sqlMap);
+		afterPropertiesSet();
 	}
 
 	/**
