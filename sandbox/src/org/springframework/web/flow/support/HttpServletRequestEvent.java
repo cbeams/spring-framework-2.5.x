@@ -15,8 +15,8 @@
  */
 package org.springframework.web.flow.support;
 
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -27,14 +27,20 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.util.WebUtils;
 
 /**
- * A flow event that orginated from an incoming HTTP servlet request.
+ * A flow event that originated from an incoming HTTP servlet request.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class HttpServletRequestEvent extends Event {
+	
+	/**
+	 * The parameters contained in the request.
+	 */
+	private Map parameters;
 	
 	/**
 	 * The response associated with the request that originated this event.
@@ -73,12 +79,9 @@ public class HttpServletRequestEvent extends Event {
 	 * @param response the HTTP servlet response associated with the request
 	 */
 	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response) {
-		super(request);
-		this.response = response;
-		this.eventIdParameterName = FlowConstants.EVENT_ID_PARAMETER;
-		this.eventIdAttributeName = FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
-		this.currentStateIdParameterName = FlowConstants.CURRENT_STATE_ID_PARAMETER;
-		this.parameterNameValueDelimiter = "_";
+		this(request, response,
+				FlowConstants.EVENT_ID_PARAMETER, FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE,
+				FlowConstants.CURRENT_STATE_ID_PARAMETER, "_");
 	}
 
 	/**
@@ -102,6 +105,12 @@ public class HttpServletRequestEvent extends Event {
 		this.eventIdAttributeName = eventIdAttributeName;
 		this.currentStateIdParameterName = currentStateIdParameterName;
 		this.parameterNameValueDelimiter = parameterValueDelimiter;
+		// initialize parameters
+		this.parameters = WebUtils.getParametersStartingWith(request, null);
+		if (request instanceof MultipartHttpServletRequest) {
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) getRequest();
+			this.parameters.putAll(multipartRequest.getFileMap());
+		}
 	}
 	
 	/**
@@ -146,7 +155,7 @@ public class HttpServletRequestEvent extends Event {
 	 */
 	protected String searchForParameter(String logicalName, String delimiter) {
 		// first try to get it as a normal name=value parameter
-		String value = getRequest().getParameter(logicalName);
+		String value = (String)getParameter(logicalName);
 		if (value != null) {
 			return value;
 		}
@@ -168,7 +177,7 @@ public class HttpServletRequestEvent extends Event {
 		// we couldn't find the parameter value
 		return null;
 	}
-
+	
 	public String getId() {
 		String eventId = searchForParameter(eventIdParameterName, parameterNameValueDelimiter);
 		if (!StringUtils.hasText(eventId)) {
@@ -188,23 +197,10 @@ public class HttpServletRequestEvent extends Event {
 	}
 
 	public Object getParameter(String parameterName) {
-		String[] values = getRequest().getParameterValues(parameterName);
-		Object res = values;
-		if (values.length == 1) {
-			res = values[0];
-		}
-		if (res == null && getRequest() instanceof MultipartHttpServletRequest) {
-			res = ((MultipartHttpServletRequest)getRequest()).getFile(parameterName);
-		}
-		return res;
+		return this.parameters.get(parameterName);
 	}
 
 	public Map getParameters() {
-		Map res = new HashMap(getRequest().getParameterMap());
-		if (getRequest() instanceof MultipartHttpServletRequest) {
-			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) getRequest();
-			res.putAll(multipartRequest.getFileMap());
-		}
-		return res;
+		return Collections.unmodifiableMap(this.parameters);
 	}
 }
