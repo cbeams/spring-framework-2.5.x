@@ -15,22 +15,21 @@ import org.springframework.util.StringUtils;
  * to support deep copy and construction from a Map.
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: MutablePropertyValues.java,v 1.1.1.1 2003-08-14 16:20:16 trisberg Exp $
+ * @version $Id: MutablePropertyValues.java,v 1.2 2003-08-26 10:14:34 jhoeller Exp $
  */
 public class MutablePropertyValues implements PropertyValues {
 	
-	/**
-	 * List of PropertyValue objects
-	 */
+	/** List of PropertyValue objects */
 	private List propertyValuesList;
 	
 	/**
 	 * Creates a new empty MutablePropertyValues object.
-	 * PropertyValue objects can be added with the
-	 * addPropertyValue() method.
+	 * Property values can be added with the addPropertyValue methods.
+	 * @see #addPropertyValue(PropertyValue)
+	 * @see #addPropertyValue(String, Object)
 	 */
 	public MutablePropertyValues() {
-		propertyValuesList = new ArrayList(10);
+		this.propertyValuesList = new ArrayList(10);
 	}
 	
 	/** 
@@ -42,9 +41,10 @@ public class MutablePropertyValues implements PropertyValues {
 		this();
 		if (other != null) {
 			PropertyValue[] pvs = other.getPropertyValues();
-			propertyValuesList = new ArrayList(pvs.length);
-			for (int i = 0; i < pvs.length; i++)
+			this.propertyValuesList = new ArrayList(pvs.length);
+			for (int i = 0; i < pvs.length; i++) {
 				addPropertyValue(new PropertyValue(pvs[i].getName(), pvs[i].getValue()));
+			}
 		}
 	}
 	
@@ -55,7 +55,7 @@ public class MutablePropertyValues implements PropertyValues {
 	 */
 	public MutablePropertyValues(Map map) {
 		Set keys = map.keySet();
-		propertyValuesList = new ArrayList(keys.size());
+		this.propertyValuesList = new ArrayList(keys.size());
 		Iterator itr = keys.iterator(); 
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
@@ -69,78 +69,70 @@ public class MutablePropertyValues implements PropertyValues {
 	 * @param pv PropertyValue object to add
 	 */
 	public void addPropertyValue(PropertyValue pv) {
-		for (int i = 0; i < propertyValuesList.size(); i++) {
-			PropertyValue currentPv = (PropertyValue) propertyValuesList.get(i);
+		for (int i = 0; i < this.propertyValuesList.size(); i++) {
+			PropertyValue currentPv = (PropertyValue) this.propertyValuesList.get(i);
 			if (currentPv.getName().equals(pv.getName())) {
-				propertyValuesList.set(i, pv);
+				this.propertyValuesList.set(i, pv);
 				return;
 			}
 		}
-		propertyValuesList.add(pv);
-	}		
-	
-	/**
-	 * Return an array of the PropertyValue objects held in this object.
- 	 */
-	public PropertyValue[] getPropertyValues() {
-		return (PropertyValue[]) propertyValuesList.toArray(new PropertyValue[0]);
+		this.propertyValuesList.add(pv);
 	}
-	
+
 	/**
-	 * Is there a propertyValue object for this property?
-	 * @param propertyName name of the property we're interested in
-	 * @return whether there is a propertyValue object for this property?
+	 * Overloaded version of addPropertyValue that takes
+	 * a property name and a property value.
+	 * @param propertyName name of the property
+	 * @param propertyValue value of the property
+	 * @see #addPropertyValue(PropertyValue)
 	 */
-	public boolean contains(String propertyName) {
-		return getPropertyValue(propertyName) != null;
+	public void addPropertyValue(String propertyName, Object propertyValue) {
+		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
-	
-	public PropertyValue getPropertyValue(String propertyName) {
-		for (int i = 0; i < propertyValuesList.size(); i++) {
-			PropertyValue pv = (PropertyValue) propertyValuesList.get(i);
-			if (pv.getName().equals(propertyName))
-				return pv;
-		}
-		return null;
-	}
-	
+
 	/**
 	 * If this object contains a property value with this name, replace it
 	 * If it doesn't, add this property value
 	 * @param newPv new PropertyValue to add or override (replace)
 	 */
 	public void addOrOverridePropertyValue(PropertyValue newPv) {
-		for (int i = 0; i < propertyValuesList.size(); i++) {
-			PropertyValue pv = (PropertyValue) propertyValuesList.get(i);
+		for (int i = 0; i < this.propertyValuesList.size(); i++) {
+			PropertyValue pv = (PropertyValue) this.propertyValuesList.get(i);
 			if (pv.getName().equals(newPv.getName())) {
 				// Replace
-				propertyValuesList.set(i, newPv);
+				this.propertyValuesList.set(i, newPv);
 				return;
-			}		
+			}
 		}
 		// If we get here we must add it
 		this.propertyValuesList.add(newPv);
 	}
-	
-	
-	/** 
+
+	/**
 	 * Modify a PropertyValue object held in this object.
 	 * Indexed from 0.
 	 */
 	public void setPropertyValueAt(PropertyValue pv, int i) {
-		propertyValuesList.set(i, pv);
+		this.propertyValuesList.set(i, pv);
+	}
+
+	public PropertyValue[] getPropertyValues() {
+		return (PropertyValue[]) this.propertyValuesList.toArray(new PropertyValue[0]);
 	}
 	
-	public String toString() {
-		PropertyValue[] pvs = getPropertyValues();
-		StringBuffer sb = new StringBuffer("MutablePropertyValues: length=" + pvs.length + "; ");
-		sb.append(StringUtils.arrayToDelimitedString(pvs, ","));
-		return sb.toString();
+	public PropertyValue getPropertyValue(String propertyName) {
+		for (int i = 0; i < this.propertyValuesList.size(); i++) {
+			PropertyValue pv = (PropertyValue) this.propertyValuesList.get(i);
+			if (pv.getName().equals(propertyName))
+				return pv;
+		}
+		return null;
 	}
 	
-	/**
-	 * @see PropertyValues#changesSince(PropertyValues)
-	 */
+	public boolean contains(String propertyName) {
+		return getPropertyValue(propertyName) != null;
+	}
+
 	public PropertyValues changesSince(PropertyValues old) {
 		MutablePropertyValues changes = new MutablePropertyValues();
 		if (old == this)
@@ -162,5 +154,11 @@ public class MutablePropertyValues implements PropertyValues {
 		return changes;
 	}
 
+	public String toString() {
+		PropertyValue[] pvs = getPropertyValues();
+		StringBuffer sb = new StringBuffer("MutablePropertyValues: length=" + pvs.length + "; ");
+		sb.append(StringUtils.arrayToDelimitedString(pvs, ","));
+		return sb.toString();
+	}
 
 }
