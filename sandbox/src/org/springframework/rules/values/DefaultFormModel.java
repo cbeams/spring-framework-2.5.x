@@ -59,10 +59,12 @@ public class DefaultFormModel implements MutableFormModel {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.commitTrigger = new ValueHolder(null);
         // @TODO this seems kind of hacky - does it make sense to always commit
-        // the form object value model if it is buffered? or is that the responsiblity
+        // the form object value model if it is buffered? or is that the
+        // responsiblity
         // of a higher-level object?
         if (getFormObjectHolder() instanceof BufferedValueModel) {
-            ((BufferedValueModel)getFormObjectHolder()).setCommitTrigger(commitTrigger);
+            ((BufferedValueModel)getFormObjectHolder())
+                    .setCommitTrigger(commitTrigger);
         }
         setBufferChangesDefault(bufferChanges);
     }
@@ -189,8 +191,6 @@ public class DefaultFormModel implements MutableFormModel {
     public Object getValue(String formProperty) {
         ValueModel valueModel = getValueModel(formProperty);
         assertValueModelNotNull(valueModel, formProperty);
-        if (valueModel instanceof ValueModelWrapper) { return ((ValueModelWrapper)valueModel)
-                .getWrapped(); }
         return valueModel.get();
     }
 
@@ -200,10 +200,8 @@ public class DefaultFormModel implements MutableFormModel {
     }
 
     private ValueModel recursiveGetWrappedModel(ValueModel valueModel) {
-        if (valueModel instanceof ValueModelWrapper) {
-            return recursiveGetWrappedModel(((ValueModelWrapper)valueModel)
-                    .getWrappedModel());
-        }
+        if (valueModel instanceof ValueModelWrapper) { return recursiveGetWrappedModel(((ValueModelWrapper)valueModel)
+                .getWrappedModel()); }
         return valueModel;
     }
 
