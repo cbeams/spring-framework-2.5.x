@@ -36,6 +36,7 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.springframework.beans.DerivedTestBean;
@@ -65,6 +66,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 /**
@@ -1352,6 +1354,35 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 			// Check that the bogus method name was included in the error message
 			assertTrue("Bogus method name correctly reported", ex.getMessage().indexOf("bogusMethod") != -1);
 		}
+	}
+	
+	/**
+	 * Assert the presence of this bug until we resolve
+	 * it
+	 * @throws Exception
+	 */
+	public void testSerializabilityOfMethodReplacer() throws Exception {
+		try {
+			BUGtestSerializableMethodReplacerAndSuperclass();
+			fail();
+		}
+		catch (AssertionFailedError ex) {
+			System.err.println("****** SPR-356: Objects with MethodReplace overrides are not serializable");
+		}
+	}
+	
+	public void BUGtestSerializableMethodReplacerAndSuperclass() throws IOException, ClassNotFoundException {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
+		SerializableMethodReplacerCandidate s = (SerializableMethodReplacerCandidate) xbf.getBean("serializableReplacer");
+		String forwards = "this is forwards";
+		String backwards = new StringBuffer(forwards).reverse().toString();
+		assertEquals(backwards, s.replaceMe(forwards));
+		assertTrue(SerializationTestUtils.isSerializable(s));
+		s = (SerializableMethodReplacerCandidate) SerializationTestUtils.serializeAndDeserialize(s);
+		assertEquals("Method replace still works after serialization and deserialization", backwards, s.replaceMe(forwards));
 	}
 				
 	
