@@ -33,25 +33,10 @@ import org.springframework.util.ToStringCreator;
 public class SortDefinition implements Comparator, Serializable {
     private Comparator comparator;
 
-    private SortOrder order;
-
-    /**
-     * Static factory method creating a sort definition list from the provided
-     * comparator array. All sort definitions sort in forward (ascending) order.
-     * 
-     * @param comparators
-     * @return A sort definition list
-     */
-    public static List createSortDefinitionList(Comparator[] comparators) {
-        List sortDefinitions = new ArrayList(comparators.length);
-        for (int i = 0; i < comparators.length; i++) {
-            sortDefinitions.add(new SortDefinition(comparators[i]));
-        }
-        return sortDefinitions;
-    }
+    private SortOrder order = SortOrder.ASCENDING;
 
     public SortDefinition(Comparator comparator) {
-        this(comparator, null);
+        setComparator(comparator);
     }
 
     public SortDefinition(Comparator comparator, SortOrder order) {
@@ -65,9 +50,7 @@ public class SortDefinition implements Comparator, Serializable {
     }
 
     public void setOrder(SortOrder order) {
-        if (order == null) {
-            order = SortOrder.ASCENDING;
-        }
+		Assert.notNull(order, "The sort order property is required");
         this.order = order;
     }
 
@@ -102,9 +85,23 @@ public class SortDefinition implements Comparator, Serializable {
         this.order = SortOrder.flip(this.order);
     }
 
+    /**
+     * Static factory method creating a sort definition list from the provided
+     * comparator array. All sort definitions sort in forward (ascending) order.
+     * 
+     * @param comparators
+     * @return A sort definition list
+     */
+    public static List createSortDefinitionList(Comparator[] comparators) {
+        List sortDefinitions = new ArrayList(comparators.length);
+        for (int i = 0; i < comparators.length; i++) {
+            sortDefinitions.add(new SortDefinition(comparators[i]));
+        }
+        return sortDefinitions;
+    }
+
     public String toString() {
         return new ToStringCreator(this).append("comparator", comparator)
                 .append("order", order).toString();
     }
-
 }
