@@ -6,8 +6,8 @@
 package org.springframework.aop.framework;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.Interceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultBeforeAdvisor;
@@ -16,7 +16,6 @@ import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.core.TimeStamped;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.util.StringUtils;
 
@@ -24,7 +23,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.11 2004-01-25 19:44:15 johnsonr Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.12 2004-02-02 11:51:13 jhoeller Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 

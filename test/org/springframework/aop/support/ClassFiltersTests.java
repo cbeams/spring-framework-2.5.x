@@ -4,16 +4,13 @@ package org.springframework.aop.support;
 import junit.framework.TestCase;
 
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.support.RootClassFilter;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.core.HasRootCause;
-import org.springframework.core.NestedCheckedException;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- *  
  * @author Rod Johnson
- * @version $Id: ClassFiltersTests.java,v 1.2 2004-01-13 09:41:01 johnsonr Exp $
+ * @version $Id: ClassFiltersTests.java,v 1.3 2004-02-02 11:51:13 jhoeller Exp $
  */
 public class ClassFiltersTests extends TestCase {
 	
@@ -21,7 +18,7 @@ public class ClassFiltersTests extends TestCase {
 	
 	ClassFilter itbFilter = new RootClassFilter(ITestBean.class);
 	
-	ClassFilter hasRootCauseFilter = new RootClassFilter(HasRootCause.class);
+	ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
 
 	/**
 	 * Constructor for ClassFiltersTests.
@@ -43,20 +40,12 @@ public class ClassFiltersTests extends TestCase {
 	
 	public void testIntersection() {
 		assertTrue(exceptionFilter.matches(RuntimeException.class));
-		assertTrue(hasRootCauseFilter.matches(HasRootCauseNotException.class));
+		assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));
 		
 		ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
 		assertFalse(intersection.matches(RuntimeException.class));
 		assertFalse(intersection.matches(TestBean.class));
-		assertFalse(intersection.matches(HasRootCauseNotException.class));
-		assertTrue(intersection.matches(NestedCheckedException.class));
-	}
-	
-	private class HasRootCauseNotException implements HasRootCause {
-		public Throwable getRootCause() {
-			return null;
-		}
-
+		assertTrue(intersection.matches(NestedRuntimeException.class));
 	}
 
 }

@@ -12,18 +12,18 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.LockedException;
+import org.springframework.aop.framework.TimeStamped;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.TimeStamped;
 
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.2 2004-01-12 16:56:40 johnsonr Exp $
+ * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.3 2004-02-02 11:51:13 jhoeller Exp $
  */
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 
