@@ -1,5 +1,6 @@
 package org.springframework.web.flow.support;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,12 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 	}
 
 	public Map getAttributeMap() {
-		return map;
+		if (map != null) {
+			return map;
+		}
+		else {
+			return Collections.EMPTY_MAP;
+		}
 	}
 
 	public void setAttribute(String attributeName, Object attributeValue) {
@@ -47,12 +53,12 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 		}
 		return map.get(attributeName);
 	}
-	
+
 	public Object removeAttribute(String attributeName) {
 		if (map == null) {
 			return null;
 		}
 		return map.remove(attributeName);
 	}
-	
+
 }

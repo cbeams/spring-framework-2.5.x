@@ -6,6 +6,8 @@ package org.springframework.web.flow.support;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 public class LocalEvent extends AbstractEvent {
 
 	private String id;
@@ -15,17 +17,22 @@ public class LocalEvent extends AbstractEvent {
 	private Map parameters;
 
 	public LocalEvent(String id) {
-		this.id = id;
+		setId(id);
 	}
 
 	public LocalEvent(String id, String stateId) {
-		this.id = id;
+		setId(id);
 		this.stateId = stateId;
 	}
 
 	public LocalEvent(String id, Map input) {
-		this.id = id;
+		setId(id);
 		this.parameters = input;
+	}
+
+	private void setId(String id) {
+		Assert.hasText(id, "The event id is required");
+		this.id = id;
 	}
 
 	public String getId() {

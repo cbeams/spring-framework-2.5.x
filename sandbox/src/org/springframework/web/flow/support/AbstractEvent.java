@@ -3,6 +3,7 @@
  */
 package org.springframework.web.flow.support;
 
+import org.springframework.util.ToStringCreator;
 import org.springframework.web.flow.Event;
 
 public abstract class AbstractEvent implements Event {
@@ -13,6 +14,11 @@ public abstract class AbstractEvent implements Event {
 
 	public Object getAttribute(String attributeName) {
 		return getParameter(attributeName);
+	}
+
+	public String toString() {
+		return new ToStringCreator(this).append("id", getId()).append("stateId", getStateId()).append("parameters",
+				getParameters()).toString();
 	}
 
 }
