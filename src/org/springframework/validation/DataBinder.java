@@ -43,7 +43,7 @@ import org.springframework.beans.PropertyValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.11 2004-03-18 02:46:00 trisberg Exp $
+ * @version $Id: DataBinder.java,v 1.12 2004-03-24 18:26:13 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -107,8 +107,11 @@ public class DataBinder {
 	 * Register fields that should be allowed for binding. Default is all
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
+	 * <p>Supports "xxx*" and "*xxx" patterns. More sophisticated matching
+	 * can be implemented by overriding the isAllowed method.
 	 * @param allowedFields array of field names
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
+	 * @see #isAllowed
 	 */
 	public void setAllowedFields(String[] allowedFields) {
 		this.allowedFields = allowedFields;
