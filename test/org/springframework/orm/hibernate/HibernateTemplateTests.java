@@ -379,6 +379,71 @@ public class HibernateTemplateTests extends TestCase {
 		criteriaControl.verify();
 	}
 
+	public void testLoadAllWithCacheable() throws HibernateException {
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+		List list = new ArrayList();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.setCacheable(true);
+		criteriaControl.setReturnValue(criteria, 1);
+		criteria.list();
+		criteriaControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		List result = ht.loadAll(TestBean.class);
+		assertTrue("Correct result", result == list);
+
+		criteriaControl.verify();
+	}
+
+	public void testLoadAllWithCacheableAndCacheRegion() throws HibernateException {
+		MockControl criteriaControl = MockControl.createControl(Criteria.class);
+		Criteria criteria = (Criteria) criteriaControl.getMock();
+		List list = new ArrayList();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createCriteria(TestBean.class);
+		sessionControl.setReturnValue(criteria, 1);
+		criteria.setCacheable(true);
+		criteriaControl.setReturnValue(criteria, 1);
+		criteria.setCacheRegion("myCacheRegion");
+		criteriaControl.setReturnValue(criteria, 1);
+		criteria.list();
+		criteriaControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		criteriaControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		ht.setQueryCacheRegion("myCacheRegion");
+		List result = ht.loadAll(TestBean.class);
+		assertTrue("Correct result", result == list);
+
+		criteriaControl.verify();
+	}
+
 	public void testRefresh() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
@@ -1357,6 +1422,39 @@ public class HibernateTemplateTests extends TestCase {
 		sfControl.verify();
 	}
 
+	public void testFindWithCacheableAndCacheRegion() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.createQuery("some query string");
+		sessionControl.setReturnValue(query, 1);
+		query.setCacheable(true);
+		queryControl.setReturnValue(query, 1);
+		query.setCacheRegion("myCacheRegion");
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		ht.setQueryCacheRegion("myCacheRegion");
+		List result = ht.find("some query string");
+		assertTrue("Correct list", result == list);
+		sfControl.verify();
+	}
+
 	public void testFindByNamedQueryWithCacheable() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
@@ -1382,6 +1480,39 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setCacheQueries(true);
+		List result = ht.findByNamedQuery("some query name");
+		assertTrue("Correct list", result == list);
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQueryWithCacheableAndCacheRegion() throws HibernateException {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		List list = new ArrayList();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getNamedQuery("some query name");
+		sessionControl.setReturnValue(query, 1);
+		query.setCacheable(true);
+		queryControl.setReturnValue(query, 1);
+		query.setCacheRegion("myCacheRegion");
+		queryControl.setReturnValue(query, 1);
+		query.list();
+		queryControl.setReturnValue(list, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		queryControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setCacheQueries(true);
+		ht.setQueryCacheRegion("myCacheRegion");
 		List result = ht.findByNamedQuery("some query name");
 		assertTrue("Correct list", result == list);
 		queryControl.verify();

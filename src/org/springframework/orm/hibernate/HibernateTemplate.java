@@ -96,9 +96,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	private boolean allowCreate = true;
 
+	private boolean checkWriteOperations = true;
+
 	private boolean cacheQueries = false;
 
-	private boolean checkWriteOperations = true;
+	private String queryCacheRegion;
 
 
 	/**
@@ -148,24 +150,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Set whether to cache all queries executed by this template.
-	 * If this is true, all Query and Criteria objects created by
-	 * this template will be marked as cacheable.
-	 * @see net.sf.hibernate.Query#setCacheable
-	 * @see net.sf.hibernate.Criteria#setCacheable
-	 */
-	public void setCacheQueries(boolean cacheQueries) {
-		this.cacheQueries = cacheQueries;
-	}
-
-	/**
-	 * Return whether to cache all queries executed by this template.
-	 */
-	public boolean isCacheQueries() {
-		return cacheQueries;
-	}
-
-	/**
 	 * Set whether to check that the Hibernate Session is not in read-only mode
 	 * in case of write operations (save/update/delete).
 	 * <p>Default is true, for fail-fast behavior when attempting write operations
@@ -185,6 +169,49 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public boolean isCheckWriteOperations() {
 		return checkWriteOperations;
+	}
+
+	/**
+	 * Set whether to cache all queries executed by this template.
+	 * If this is true, all Query and Criteria objects created by
+	 * this template will be marked as cacheable (including all
+	 * queries through find methods).
+	 * <p>To specify the query region to be used for queries cached
+	 * by this template, set the "queryCacheRegion" property.
+	 * @see #setQueryCacheRegion
+	 * @see net.sf.hibernate.Query#setCacheable
+	 * @see net.sf.hibernate.Criteria#setCacheable
+	 */
+	public void setCacheQueries(boolean cacheQueries) {
+		this.cacheQueries = cacheQueries;
+	}
+
+	/**
+	 * Return whether to cache all queries executed by this template.
+	 */
+	public boolean isCacheQueries() {
+		return cacheQueries;
+	}
+
+	/**
+	 * Set the name of the cache region for queries executed by this template.
+	 * If this is specified, it will be applied to all Query and Criteria objects
+	 * created by this template (including all queries through find methods).
+	 * <p>The cache region will not take effect unless queries created by this
+	 * template are configured to be cached via the "cacheQueries" property.
+	 * @see #setCacheQueries
+	 * @see net.sf.hibernate.Query#setCacheRegion
+	 * @see net.sf.hibernate.Criteria#setCacheRegion
+	 */
+	public void setQueryCacheRegion(String queryCacheRegion) {
+		this.queryCacheRegion = queryCacheRegion;
+	}
+
+	/**
+	 * Return the name of the cache region for queries executed by this template.
+	 */
+	public String getQueryCacheRegion() {
+		return queryCacheRegion;
 	}
 
 
@@ -840,6 +867,27 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	/**
+	 * Check whether write operations are allowed on the given Session.
+	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
+	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
+	 * @param session current Hibernate Session
+	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
+	 * @see #setCheckWriteOperations
+	 * @see #getFlushMode
+	 * @see #FLUSH_EAGER
+	 * @see net.sf.hibernate.Session#getFlushMode
+	 * @see net.sf.hibernate.FlushMode#NEVER
+	 */
+	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
+		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
+				FlushMode.NEVER.equals(session.getFlushMode())) {
+			throw new InvalidDataAccessApiUsageException(
+					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
+					"into FlushMode.AUTO respectively remove 'readOnly' marker from transaction definition");
+		}
+	}
+
+	/**
 	 * Create a Query object for the given Session and the given query string.
 	 * <b>To be used within a HibernateCallback</b>:
 	 * <pre>
@@ -850,22 +898,20 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 *     return query.list();
 	 *   }
 	 * });</pre>
-	 * Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to <code>Session.createQuery</code>.
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.createQuery</code>.
 	 * @param session current Hibernate Session
 	 * @param queryString the HQL query string
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
 	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	public Query createQuery(Session session, String queryString) throws HibernateException {
 		Query queryObject = session.createQuery(queryString);
-		if (isCacheQueries()) {
-			queryObject.setCacheable(true);
-		}
-		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
+		prepareQuery(queryObject);
 		return queryObject;
 	}
 
@@ -880,23 +926,39 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 *     return query.list();
 	 *   }
 	 * });</pre>
-	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to <code>Session.getNamedQuery</code>.
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.getNamedQuery</code>.
 	 * @param session current Hibernate Session
 	 * @param queryName the name of the query in the Hibernate mapping file
 	 * @return the Query object
 	 * @throws HibernateException if the Query could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
 	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#getNamedQuery
 	 */
 	public Query getNamedQuery(Session session, String queryName) throws HibernateException {
 		Query queryObject = session.getNamedQuery(queryName);
+		prepareQuery(queryObject);
+		return queryObject;
+	}
+
+	/**
+	 * Prepare the given Query object, applying cache settings and/or
+	 * a transaction timeout.
+	 * @param queryObject the Query object to prepare
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
+	 * @see SessionFactoryUtils#applyTransactionTimeout
+	 */
+	protected void prepareQuery(Query queryObject) {
 		if (isCacheQueries()) {
 			queryObject.setCacheable(true);
+			if (getQueryCacheRegion() != null) {
+				queryObject.setCacheRegion(getQueryCacheRegion());
+			}
 		}
 		SessionFactoryUtils.applyTransactionTimeout(queryObject, getSessionFactory());
-		return queryObject;
 	}
 
 	/**
@@ -910,13 +972,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 *     return query.list();
 	 *   }
 	 * });</pre>
-	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to <code>Session.createCriteria</code>.
+	 * Applies query cache settings and a transaction timeout, if any. If you don't
+	 * use either of those, the call is equivalent to <code>Session.createCriteria</code>.
 	 * @param session current Hibernate Session
 	 * @param entityClass the entity class to create the Criteria for
 	 * @return the Query object
 	 * @throws HibernateException if the Criteria could not be created
 	 * @see HibernateCallback#doInHibernate
+	 * @see #setCacheQueries
+	 * @see #setQueryCacheRegion
 	 * @see SessionFactoryUtils#applyTransactionTimeout
 	 * @see net.sf.hibernate.Session#createCriteria
 	 */
@@ -924,6 +988,9 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		Criteria criteria = session.createCriteria(entityClass);
 		if (isCacheQueries()) {
 			criteria.setCacheable(true);
+			if (getQueryCacheRegion() != null) {
+				criteria.setCacheRegion(getQueryCacheRegion());
+			}
 		}
 		SessionFactoryUtils.applyTransactionTimeout(criteria, getSessionFactory());
 		return criteria;
@@ -963,27 +1030,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			else {
 				queryObject.setParameter(paramName, value);
 			}
-		}
-	}
-
-	/**
-	 * Check whether write operations are allowed on the given Session.
-	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
-	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
-	 * @param session current Hibernate Session
-	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
-	 * @see #setCheckWriteOperations
-	 * @see #getFlushMode
-	 * @see #FLUSH_EAGER
-	 * @see net.sf.hibernate.Session#getFlushMode
-	 * @see net.sf.hibernate.FlushMode#NEVER
-	 */
-	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
-		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
-				FlushMode.NEVER.equals(session.getFlushMode())) {
-			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
-					"into FlushMode.AUTO respectively remove 'readOnly' marker from transaction definition");
 		}
 	}
 
