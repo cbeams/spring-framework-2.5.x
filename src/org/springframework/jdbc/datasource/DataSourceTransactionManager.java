@@ -31,17 +31,25 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for single JDBC data sources.
- * Binds a JDBC connection from the specified data source to the thread,
+ * PlatformTransactionManager implementation for a single JDBC DataSource.
+ * Binds a JDBC connection from the specified DataSource to the thread,
  * potentially allowing for one thread connection per data source.
  *
- * <p>Application code is required to retrieve the JDBC connection via
+ * <p>Application code is required to retrieve the JDBC Connection via
  * <code>DataSourceUtils.getConnection(DataSource)</code> instead of J2EE's standard
  * <code>DataSource.getConnection()</code>. This is recommended anyway, as it throws
  * unchecked org.springframework.dao exceptions instead of checked SQLException.
  * All framework classes like JdbcTemplate use this strategy implicitly.
  * If not used with this transaction manager, the lookup strategy behaves exactly
  * like the common one - it can thus be used in any case.
+ *
+ * <p>Alternatively, you can also allow application code to work with the standard
+ * J2EE lookup pattern <code>DataSource.getConnection()</code>, for example for
+ * legacy code that is not aware of Spring at all. In that case, define a
+ * TransactionAwareDataSourceProxy for your target DataSource, and pass that proxy
+ * DataSource to your DAOs, which will automatically participate in Spring-managed
+ * transactions through it. Note that DataSourceTransactionManager still needs to
+ * be wired with the target DataSource, driving transactions for it.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
  * appropriate JDBC statement query timeouts. To support the latter,
@@ -54,9 +62,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * (like Oracle).
  *
  * <p>This implementation can be used instead of JtaTransactionManager in the single
- * resource case, as it does not require the container to support JTA. Switching
- * between both is just a matter of configuration, if you stick to the required
- * connection lookup pattern. Note that JTA does not support custom isolation levels!
+ * resource case, as it does not require the container to support JTA: typically,
+ * in combination with a locally defined JDBC DataSource like a Jakarta Commons DBCP
+ * connection pool. Switching between this local strategy and a JTA environment is
+ * just a matter of configuration, if you stick to the required connection lookup
+ * pattern. Note that JTA does not support custom isolation levels!
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -65,8 +75,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#getConnection
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see TransactionAwareDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.19 2004-07-03 10:27:55 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.20 2004-07-26 09:14:33 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -84,7 +95,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	/**
 	 * Create a new DataSourceTransactionManager instance.
-	 * @param dataSource DataSource to manage transactions for
+	 * @param dataSource JDBC DataSource to manage transactions for
 	 */
 	public DataSourceTransactionManager(DataSource dataSource) {
 		this();
@@ -93,14 +104,19 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Set the J2EE DataSource that this instance should manage transactions for.
+	 * Set the JDBC DataSource that this instance should manage transactions for.
+	 * <p>This will typically be a locally defined DataSource, for example a
+	 * Jakarta Commons DBCP connection pool. Alternatively, you can also drive
+	 * transactions for a non-XA J2EE DataSource fetched from JNDI. For an XA
+	 * DataSource, use JtaTransactionManager.
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	/**
-	 * Return the J2EE DataSource that this instance manages transactions for.
+	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
 		return dataSource;
@@ -123,8 +139,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
-		// standard DataSource -> check existence of thread connection
-		return TransactionSynchronizationManager.hasResource(this.dataSource);
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		// consider a pre-bound Connection as transaction
+		return (txObject.getConnectionHolder() != null);
 	}
 
 	/**
