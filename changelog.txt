@@ -8,10 +8,12 @@ Changes in version 1.1 final (16.8.2004)
 
 Package org.springframework.aop
 * added "customizeProxyFactory" hook method in AbstractAutoProxyCreator
-* AbstractAutoProxyCreator's "getInterceptorsAndAdvisorsForBean" now takes a TargetSource as third argument
+* renamed AbstractAutoProxyCreator's "getInterceptorsAndAdvisorsForBean" method to "getAdvicesAndAdvisorsForBean"
+* AbstractAutoProxyCreator's "getAdvicesAndAdvisorsForBean" method takes a TargetSource as third argument now
 
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
+* fixed BeanWrapperImpl to always pass the original value into a TypeMismatchException, rather than a converted one
 * fixed "getBeansOfType" check (as used by autowiring) and "isSingleton" for parent bean definitions without class
 * factory methods no longer only static: an instance method can be called on a bean named by the factory-bean attribute
 * removed "getMethodOverrides" method from BeanDefinition interface, to avoid cyclic package dependencies
@@ -21,6 +23,9 @@ Package org.springframework.beans
 * introduced BeanDefinitionReader interface, implemented by AbstractBeanDefinitionReader and subclasses
 * reworked XmlBeanDefinitionParser SPI (warning: not backwards-compatible!) to receive a bean definition reader
 
+Package org.springframework.context
+* eagerly load ContextClosedEvent class in AbstractApplicationContext, to avoid issues with WebLogic 8.1 on shutdown
+
 Package org.springframework.core
 * added "getFilename" and "createRelative" methods to Resource interface, with corresponding implementations
 * provided more efficient "equals" and "hashCode" implementations for all concrete Resource classes
@@ -28,6 +33,7 @@ Package org.springframework.core
 
 Package org.springframework.jdbc
 * added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
+* added special Date checks in StatementCreatorUtils, to automatically convert to java.sql.Date/Time/Timestamp
 
 Package org.springframework.jms
 * fixed JmsTemplate's "doReceive" implementation to not try to acknowledge message if null returned after timeout
@@ -43,6 +49,7 @@ Package org.springframework.orm
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 * added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
 * LocalSessionFactoryBean trims "mappingResources" locations before passing them to the ClassPathResource constructor
+* OpenSessionInViewInterceptor participates in existing thread-bound single session or deferred close mode now
 
 Package org.springframework.remoting
 * added RemoteInvocationResult class, for convenient serialization of a method invocation result
@@ -60,12 +67,14 @@ Package org.springframework.scheduling
 
 Package org.springframework.transaction
 * fixed TransactionAspectSupport's after-returning behavior to always call commit even if transaction is not new
+* TransactionSynchronizationManager returns a synchronization list copy (to allow a sync to register another sync)
 
 Package org.springframework.validation
 * added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
 * fixed BindException's "getFieldValue" implementation to correctly apply nested paths to field error checks
 
 Package org.springframework.web
+* DispatcherServlet looks for handler adapters, handler mappings, exception res., view res. in ancestor contexts as well
 * WebContentGenerator throws RequestMethodNotSupportedException / SessionRequiredException rather than ServletException
 * MultiActionController logs NoSuchRequestHandlingMethodException and sends HTTP code 404, rather than rethrowing it
 * consider explicit finish and cancel request as form submissions in AbstractWizardFormController, even if not POST
@@ -73,7 +82,6 @@ Package org.springframework.web
 * added overloaded "validatePage" method with "finish" flag to AbstractWizardFormController
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
 * introduced JSF support in the form of a DelegatingVariableResolver that can resolve variable names as Spring beans
-* DispatcherServlet now looks for handler adapters, handler mappings, exception resolvers and view resolves in ancestor contexts as well as leaf (servlet) context
 
 
 Changes in version 1.1 RC1 (28.7.2004)
