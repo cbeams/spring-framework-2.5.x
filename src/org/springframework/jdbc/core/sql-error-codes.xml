@@ -28,7 +28,7 @@
   </bean>
 
   <bean id="Oracle" class="org.springframework.jdbc.core.SQLErrorCodes">
-    <property name="badSqlGrammarCodes"><value>903,904,936,942</value></property>
+    <property name="badSqlGrammarCodes"><value>900,903,904,936,942</value></property>
     <property name="dataIntegrityViolationCodes"><value>1,1400,1722</value></property>
   </bean>
 
