@@ -18,9 +18,9 @@ package org.springframework.aop.support;
 
 import javax.servlet.ServletException;
 
-import org.springframework.util.SerializationTestUtils;
-
 import junit.framework.TestCase;
+
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
@@ -29,7 +29,13 @@ import junit.framework.TestCase;
  */
 public abstract class AbstractRegexpMethodPointcutTests extends TestCase {
     
-    protected AbstractRegexpMethodPointcut rpc;
+	private AbstractRegexpMethodPointcut rpc;
+
+	protected void setUp() {
+		rpc = getRegexpMethodPointcut();
+	}
+
+	protected abstract AbstractRegexpMethodPointcut getRegexpMethodPointcut();
 
 	public void testNoPatternSupplied() throws Exception {
 		noPatternSuppliedTests(rpc);
@@ -77,4 +83,5 @@ public abstract class AbstractRegexpMethodPointcutTests extends TestCase {
 		// Doesn't match a method from Throwable
 		assertFalse(rpc.matches(Exception.class.getMethod("getMessage", null), Exception.class));
 	}
+
 }

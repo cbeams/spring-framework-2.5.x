@@ -22,21 +22,23 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Java 1.4 regular expression pointcut bean. JavaBean properties are:
+ * <ul>
  * <li>pattern: Java 1.4 regular expression for the fully-qualified method names to match
  * <li>patterns: alternative property taking a String array of patterns. The result will
- * be the union of these patterns. 
+ * be the union of these patterns.
+ * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
  *
- * Does require J2SE 1.4
+ * <p>Requires J2SE 1.4, as it builds on the <code>java.util.regex</code> package.
  *
  * @author Dmitriy Kopylenko
  * @since 1.1
  * @see org.springframework.aop.support.AbstractRegexpMethodPointcut
  */
-public class Jdk14RegexpMethodPointcut extends AbstractRegexpMethodPointcut { 
+public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	
 	/** 
 	 * Java 1.4 compiled form of this pattern. 
@@ -46,27 +48,21 @@ public class Jdk14RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/**
 	 * Initialize Java 1.4 Patterns field from patterns String[].
 	 */
-	protected void initPatternRepresentation() throws PatternSyntaxException{
-		this.compiledPatterns = new Pattern[getPatterns().length];
-		
-		for (int i = 0; i < getPatterns().length; i++) {
-			this.compiledPatterns[i] = Pattern.compile(getPatterns()[i]);
+	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
+		this.compiledPatterns = new Pattern[patterns.length];
+		for (int i = 0; i < patterns.length; i++) {
+			this.compiledPatterns[i] = Pattern.compile(patterns[i]);
 		} 
 	}
 
-	/**
-	 * Match this pattern against the ith compiled pattern
-	 * @param patt string to match
-	 * @param i index from 0 of compiled pattern
-	 * @return whetehr the pattern maches
-	 */
-	protected boolean matches(String patt, int i) { 
-		Matcher matcher = this.compiledPatterns[i].matcher(patt);   
-	    boolean matched = matcher.matches();
+	protected boolean matches(String pattern, int patternIndex) {
+		Matcher matcher = this.compiledPatterns[patternIndex].matcher(pattern);
+		boolean matched = matcher.matches();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPatterns[i].pattern() +
-			             "; matched=" + matched);
+			logger.debug("Candidate is: '" + pattern + "'; pattern is '" +
+					this.compiledPatterns[patternIndex].pattern() + "'; matched=" + matched);
 		}
 		return matched;
 	}
+
 }

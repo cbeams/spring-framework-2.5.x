@@ -20,18 +20,10 @@ package org.springframework.aop.support;
  * @author Dmitriy Kopylenko
  * @since 1.1
  */
-public class Jdk14RegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
-    
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
-        rpc = new Jdk14RegexpMethodPointcut();
-    }
-    /**
-     * @see junit.framework.TestCase#tearDown()
-     */
-    protected void tearDown() throws Exception {
-        rpc = null;
-    }
+public class JdkRegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
+
+	protected AbstractRegexpMethodPointcut getRegexpMethodPointcut() {
+		return new JdkRegexpMethodPointcut();
+	}
+
 }

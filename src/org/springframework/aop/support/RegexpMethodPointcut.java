@@ -17,13 +17,16 @@
 package org.springframework.aop.support;
 
 /**
- * This class is retained for backward compatibility.
- * As of Spring 1.1, use Perl5RegexpMethodPointcut for
- * Perl5 pointcuts as in Spring 1.0. This changes allows
- * us to support other pointcut syntaxes in future releases
- * and preserves consistent naming conventions within the framework.
+ * This class is retained for backward compatibility. As of Spring 1.1,
+ * use Perl5RegexpMethodPointcut for Perl5 pointcuts as in Spring 1.0.
+ *
+ * <p>This change allows us to support other pointcut syntaxes and still
+ * preserve consistent naming conventions within the framework.
+ *
  * @author Rod Johnson
- * @deprecated use Perl5RegexpMethodPointcut
+ * @deprecated use Perl5RegexpMethodPointcut instead
+ * @see Perl5RegexpMethodPointcut
+ * @see JdkRegexpMethodPointcut
  */
 public class RegexpMethodPointcut extends Perl5RegexpMethodPointcut {
 

@@ -21,17 +21,9 @@ package org.springframework.aop.support;
  * @since 1.1
  */
 public class Perl5RegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
-    
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
-        rpc = new Perl5RegexpMethodPointcut();
-    }
-    /**
-     * @see junit.framework.TestCase#tearDown()
-     */
-    protected void tearDown() throws Exception {
-        rpc = null;
-    }
+
+	protected AbstractRegexpMethodPointcut getRegexpMethodPointcut() {
+		return new Perl5RegexpMethodPointcut();
+	}
+
 }

@@ -24,9 +24,11 @@ import org.apache.oro.text.regex.Perl5Matcher;
 
 /**
  * Perl5 regular expression pointcut bean. JavaBean properties are:
+ * <ul>
  * <li>pattern: Perl5 regular expression for the fully-qualified method names to match
  * <li>patterns: alternative property taking a String array of patterns. The result will
- * be the union of these patterns. 
+ * be the union of these patterns.
+ * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
@@ -55,28 +57,26 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	/**
 	 * Initialize ORO fields from patterns String[].
 	 */
-	protected void initPatternRepresentation() throws MalformedPatternException {
-		this.compiledPatterns = new Pattern[getPatterns().length];
-		
+	protected void initPatternRepresentation(String[] patterns) throws IllegalArgumentException {
+		this.compiledPatterns = new Pattern[patterns.length];
 		Perl5Compiler compiler = new Perl5Compiler();
-		for (int i = 0; i < getPatterns().length; i++) {
-			// Compile the pattern to be threadsafe
-			this.compiledPatterns[i] = compiler.compile(getPatterns()[i], Perl5Compiler.READ_ONLY_MASK);
+		for (int i = 0; i < patterns.length; i++) {
+			// compile the pattern to be thread-safe
+			try {
+				this.compiledPatterns[i] = compiler.compile(patterns[i], Perl5Compiler.READ_ONLY_MASK);
+			}
+			catch (MalformedPatternException ex) {
+				throw new IllegalArgumentException(ex.getMessage());
+			}
 		}
 		this.matcher = new Perl5Matcher();
 	}
 
-	/**
-	 * Match this pattern against the ith compiled pattern
-	 * @param patt string to match
-	 * @param i index from 0 of compiled pattern
-	 * @return whetehr the pattern maches
-	 */
-	protected boolean matches(String patt, int i) { 
-		boolean matched = this.matcher.matches(patt, this.compiledPatterns[i]);
+	protected boolean matches(String pattern, int patternIndex) {
+		boolean matched = this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPatterns[i].getPattern() +
-			             "; matched=" + matched);
+			logger.debug("Candidate is: '" + pattern + "'; pattern is '" +
+					this.compiledPatterns[patternIndex].getPattern() + "'; matched=" + matched);
 		}
 		return matched;
 	}
