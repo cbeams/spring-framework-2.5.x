@@ -41,6 +41,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
+import org.springframework.jdbc.core.support.AbstractSqlTypeValue;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -51,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.16 2004-06-04 12:50:37 trisberg Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.17 2004-07-01 00:50:11 trisberg Exp $
  */
 public class StoredProcedureTestSuite extends AbstractJdbcTests {
 
@@ -440,6 +441,34 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		assertEquals("OK", out.get("out"));
 	}
 
+	public void testSqlTypeValue() throws Exception {
+		int[] testVal = new int[] {1, 2};
+		mockCallable.getConnection();
+		ctrlCallable.setDefaultReturnValue(mockConnection);
+		mockCallable.setObject(1, testVal, Types.ARRAY);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(2, Types.VARCHAR);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getObject(2);
+		ctrlCallable.setReturnValue("OK");
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + SqlTypeValueStoredProcedure.SQL + "(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		SqlTypeValueStoredProcedure stvsp =
+			new SqlTypeValueStoredProcedure(mockDataSource);
+		Map out = stvsp.executeTest(testVal);
+		assertEquals("OK", out.get("out"));
+	}
+
 	private class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
 		public static final String SQL = "configured_via_jt";
 		public StoredProcedureConfiguredViaJdbcTemplate(JdbcTemplate t) {
@@ -640,6 +669,34 @@ public class StoredProcedureTestSuite extends AbstractJdbcTests {
 		}
 
 		
+	}
+
+	private class SqlTypeValueStoredProcedure extends StoredProcedure {
+
+		public static final String SQL = "sql_type_value_sp";
+
+		public SqlTypeValueStoredProcedure(DataSource ds) {
+				setDataSource(ds);
+				setSql(SQL);
+				declareParameter(new SqlParameter("in", Types.ARRAY, "NUMBERS"));
+				declareParameter(new SqlOutParameter("out", Types.VARCHAR));
+				compile();
+		}
+
+		public Map executeTest(final int[] inValue) {
+			Map in = new HashMap(1);
+			in.put("in", new AbstractSqlTypeValue() {
+				public Object createTypeValue(Connection con, int type, String typeName) {
+					//assertEquals(Connection.class, con.getClass());
+					//assertEquals(Types.ARRAY, type);
+					//assertEquals("NUMBER", typeName);
+					return inValue;
+				}
+			});
+			Map out = null;
+			out = execute(in);
+			return out;
+		}
 	}
 
 	private class StoredProcedureExceptionTranslator extends StoredProcedure {
