@@ -36,7 +36,7 @@ public class PersonProgram {
 	 */
 	private void extractAttributes() throws SecurityException, NoSuchMethodException, ClassNotFoundException {
 		Class targetClass = Class.forName("org.springframework.metadata.ant.AnnotatedClass");
-		Attributes attributes = new BcelAttributes();
+		Attributes attributes = null; //new BcelAttributes();
 		String[] packages = { "org.springframework.metadata.ant" };
 		
 		// TODO put this back one day

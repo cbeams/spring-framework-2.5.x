@@ -22,7 +22,7 @@ import org.springframework.metadata.support.PersonAttribute;
  * 
  * @author Mark Pollack
  * @since Sep 28, 2003
- * @version $Id: AttributeWriterTests.java,v 1.2 2003-12-15 09:25:07 johnsonr Exp $
+ * @version $Id: AttributeWriterTests.java,v 1.3 2003-12-23 18:08:42 dkopylenko Exp $
  * 
  */
 public class AttributeWriterTests extends TestCase {
@@ -40,7 +40,7 @@ public class AttributeWriterTests extends TestCase {
 	 *
 	 */
 	public void testAttributes() throws NoSuchMethodException {
-		AttributeWriter writer = new BcelAttributeWriter();
+		AttributeWriter writer = null; //new BcelAttributeWriter();
 
 		//The class that we will "add an attribute" to programatically.
 		Class targetClass = org.springframework.metadata.bcel.TargetBean.class;
@@ -71,7 +71,7 @@ public class AttributeWriterTests extends TestCase {
 			clazzFile.exists());
 
 		//Are the class attributes there?
-		Attributes attributes = new BcelAttributes();
+		Attributes attributes = null; //new BcelAttributes();
 		Collection attribs = attributes.getAttributes(targetClass);
 		assertEquals("Expected one custom class attribute", 1, attribs.size());
 
@@ -98,7 +98,7 @@ public class AttributeWriterTests extends TestCase {
 	 *
 	 */
 	public void testBadAbbreviatedAttribute() {
-		AttributeWriter writer = new BcelAttributeWriter();
+		AttributeWriter writer = null; //new BcelAttributeWriter();
 		String[] attribPackages = { "org.springframework.metadata.xxsupport" };
 		writer.setAttributePackages(attribPackages);
 		//The class that we will "add an attribute" to programatically.
@@ -130,7 +130,7 @@ public class AttributeWriterTests extends TestCase {
 	 *
 	 */
 	public void testAbbreviatedAttribute() {
-		AttributeWriter writer = new BcelAttributeWriter();
+		AttributeWriter writer = null; //new BcelAttributeWriter();
 		String[] attribPackages = { "org.springframework.metadata.support" };
 		writer.setAttributePackages(attribPackages);
 		//The class that we will "add an attribute" to programatically.
@@ -158,7 +158,7 @@ public class AttributeWriterTests extends TestCase {
 			clazzFile.exists());
 
 		//Are the class attributes there?
-		Attributes attributes = new BcelAttributes();
+		Attributes attributes = null; //new BcelAttributes();
 		
 		// TODO restore this
 //		attributes.setAttributePackages(attribPackages);
@@ -175,7 +175,7 @@ public class AttributeWriterTests extends TestCase {
 	 *
 	 */
 	public void testMethods() throws SecurityException, NoSuchMethodException {
-		AttributeWriter writer = new BcelAttributeWriter();
+		AttributeWriter writer = null; //new BcelAttributeWriter();
 
 		//The class that we will "add an attribute" to programatically.
 		Class targetClass = org.springframework.metadata.bcel.TargetBean.class;
@@ -210,7 +210,7 @@ public class AttributeWriterTests extends TestCase {
 			"Modified TargetBean class " + clazzFile + " should exist",
 			clazzFile.exists());
 
-		Attributes attributes = new BcelAttributes();
+		Attributes attributes = null; //new BcelAttributes();
 
 		//There should be no class attributes.
 		Collection attribs = attributes.getAttributes(targetClass);
@@ -237,7 +237,7 @@ public class AttributeWriterTests extends TestCase {
 	 */
 	public void testFields()
 		throws NoSuchFieldException, SecurityException, NoSuchMethodException {
-		AttributeWriter writer = new BcelAttributeWriter();
+		AttributeWriter writer = null; //new BcelAttributeWriter();
 
 		//The class that we will "add an attribute" to programatically.
 		Class targetClass = org.springframework.metadata.bcel.TargetBean.class;
@@ -258,7 +258,7 @@ public class AttributeWriterTests extends TestCase {
 		String eclipseOutputDir = getClassfileDir();
 		writer.finishClass(eclipseOutputDir);
 
-		Attributes attributes = new BcelAttributes();
+		Attributes attributes = null; //new BcelAttributes();
 
 		//There should be no class attributes.
 		Collection attribs = attributes.getAttributes(targetClass);
