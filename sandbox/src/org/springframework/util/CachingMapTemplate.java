@@ -30,13 +30,15 @@ import org.apache.commons.logging.LogFactory;
  * A simple template encapsulating the workflow for caching expensive values in
  * a map. Supports caching weak or strong keys.
  * <p>
- * This class is abstract template; caching map implementations should subclass
- * and override the create(key) method which encapsulates new expensive object
- * creation.
+ * This class is an abstract template; caching map implementations should subclass
+ * and override the <code>create(key)</code> method which encapsulates new
+ * expensive object creation.
+ * 
  * @author Keith Donald
  */
 public abstract class CachingMapTemplate implements Map, Serializable {
-	protected static final Log logger = LogFactory.getLog(CachingMapTemplate.class);
+	
+	protected final Log logger = LogFactory.getLog(CachingMapTemplate.class);
 
 	private static Object NULL_VALUE = new Object();
 
