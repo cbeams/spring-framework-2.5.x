@@ -86,6 +86,16 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * The listeners of executing flows managed by this controller.
 	 */
 	private FlowExecutionListener[] flowExecutionListeners;
+	
+	/**
+	 * Create a new FlowController.
+	 * <p>
+	 * The "cacheSeconds" property is by default set to 0 (so no caching for
+	 * web flow controllers).
+	 */
+	public FlowController() {
+		setCacheSeconds(0);
+	}
 
 	/**
 	 * Returns the top level flow started by this controller, or

@@ -9,7 +9,6 @@
 	</bean>
 
 	<bean id="frontController" name="/itemList.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="cacheSeconds"><value>0</value></property>
 		 <!-- serialize all operations within a session -->
 		<property name="synchronizeOnSession"><value>true</value></property>
 		<property name="flow"><ref bean="ItemList"/></property>

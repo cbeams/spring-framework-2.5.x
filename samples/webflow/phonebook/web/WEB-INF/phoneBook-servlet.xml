@@ -7,7 +7,6 @@
 	     may parameterize this controller with a _flowId parameter.  A view participating in an
 	     existing flow execution may simply pass it the appropriate _flowExecutionId and _eventId. -->
 	<bean id="phonebookFrontController" name="/phonebook.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="cacheSeconds"><value>0</value></property>
 	</bean>
 	
 	<!-- search flow beans -->
@@ -18,7 +17,6 @@
          we wish to create a new execution for (or an existing _flowExecutionId if participating in an
          existing flow execution.)  -->
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="person.Search"/></property>
 	</bean>
 
@@ -79,7 +77,6 @@
 	<!-- detail flow beans -->
 
 	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="person.Detail"/></property>
 	</bean>
 

@@ -9,7 +9,6 @@
 	</bean>
 
 	<bean id="birthDate" name="/birthDate.do" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="BirthDate"/></property>
 	</bean>
 	
