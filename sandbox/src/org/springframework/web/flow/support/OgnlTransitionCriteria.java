@@ -48,14 +48,14 @@ public class OgnlTransitionCriteria implements TransitionCriteria {
 
 	public boolean test(FlowExecutionContext context) {
 		try {
+			//TODO: should this use "Ognl.parseExpression(this.expressionString)"?
+			//and can we cache the parsed expression? i.e. is it thread-safe?
 			Object result = Ognl.getValue(this.expressionString, context);
 			Assert.isInstanceOf(Boolean.class, result);
 			return ((Boolean)result).booleanValue();
 		}
 		catch (OgnlException e) {
-			IllegalArgumentException iae = new IllegalArgumentException("Invalid transition expression");
-			iae.initCause(e);
-			throw iae;
+			throw new IllegalArgumentException("Invalid transition expression '" + this.expressionString + "':" + e);
 		}
 	}
 }
