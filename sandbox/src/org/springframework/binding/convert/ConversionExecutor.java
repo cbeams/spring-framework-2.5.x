@@ -46,5 +46,4 @@ public class ConversionExecutor implements Closure, Serializable {
 	public Object call(Object source) {
 		return this.converter.convert(source, this.targetClass);
 	}
-
 }
