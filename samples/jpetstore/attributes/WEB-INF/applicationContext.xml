@@ -14,6 +14,17 @@
 		for this to work (see dataAccessContext-local/jta.xml).
 	</description>
 
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, JDBC related properties) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>WEB-INF/jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 

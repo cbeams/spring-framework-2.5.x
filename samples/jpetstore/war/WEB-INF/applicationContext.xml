@@ -8,33 +8,27 @@
 	-->
 <beans>
 
-	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
-	
-	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
-	<!-- (in this case, mail related properties) -->
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, mail and JDBC related properties) -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
 				<value>WEB-INF/mail.properties</value>
+				<value>WEB-INF/jdbc.properties</value>
 			</list>
 		</property>
 	</bean>
 	
 	<!-- MailSender used by EmailAdvice -->
+	<!--
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host"><value>${mail.host}</value></property>
 	</bean>
-	
-	<!-- AOP advice used to send confirmation email after order has been submited -->
-	<bean id="emailAdvice" class=" org.springframework.samples.jpetstore.aspect.SendOrderConfirmationEmailAdvice">
-		<property name="mailSender"><ref local="mailSender"/></property>
-	</bean>
-	
-	<!-- Advisor encapsulating email advice -->
-	<bean id="emailAdvisor" class=" org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-		<constructor-arg><ref local="emailAdvice"/></constructor-arg>
-		<property name="pattern"><value>.*insertOrder.*</value></property>
-	</bean>
+	-->
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
 	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
 	<bean id="accountValidator" class="org.springframework.samples.jpetstore.domain.logic.AccountValidator"/>
@@ -51,6 +45,21 @@
 		<property name="orderDao"><ref bean="orderDao"/></property>
 	</bean>
 
+	<!-- AOP advice used to send confirmation email after order has been submitted -->
+	<!--
+	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
+		<property name="mailSender"><ref local="mailSender"/></property>
+	</bean>
+	-->
+
+	<!-- Advisor encapsulating email advice -->
+	<!--
+	<bean id="emailAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<constructor-arg><ref local="emailAdvice"/></constructor-arg>
+		<property name="pattern"><value>.*insertOrder.*</value></property>
+	</bean>
+	-->
+
 	<!-- Transactional proxy for the JPetStore primary business object -->
 	<bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref bean="transactionManager"/></property>
@@ -62,12 +71,14 @@
 				<prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
 			</props>
 		</property>
-		<!-- Uncomment this line in order to enable mail sending aspect -->
-		<!-- <property name="postInterceptors"
+		<!-- Uncomment the following in order to enable mail sending aspect -->
+		<!--
+		<property name="postInterceptors">
 			<list>
 				<ref local="emailAdvisor"/>
 			</list>
-		</property> -->
+		</property>
+ 		-->
 	</bean>
 
 	<!-- ========================= REMOTE EXPORTER DEFINITIONS ========================= -->
