@@ -28,6 +28,10 @@ public class SellItemAction extends FormAction {
 		setFormObjectScope(ScopeType.FLOW);
 	}
 
+	protected boolean suppressValidation(RequestContext context) {
+		return getActionStateAction(context).getProperty(VALIDATOR_METHOD_PROPERTY) == null;
+	}
+
 	public Event isShipping(RequestContext context) throws Exception {
 		//TODO: improve this with conditional transitions
 		Sale sale = (Sale)context.getFlowScope().getAttribute("sale");
