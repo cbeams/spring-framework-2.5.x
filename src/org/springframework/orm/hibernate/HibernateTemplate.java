@@ -813,9 +813,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a Query object for the given Session and the given query string.
-	 * To be used within a HibernateCallback.
-	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to Session.createQuery.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *     Query query = hibernateTemplate.createQuery(session, "...");
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
+	 * Applies a transaction timeout, if any. If you don't use such timeouts,
+	 * the call is equivalent to <code>Session.createQuery</code>.
 	 * @param session current Hibernate Session
 	 * @param queryString the HQL query string
 	 * @return the Query object
@@ -835,9 +843,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a named Query object for the given Session and the given query name.
-	 * To be used within a HibernateCallback.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *     Query query = hibernateTemplate.getNamedQuery(session, "...");
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
 	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to Session.getNamedQuery.
+	 * the call is equivalent to <code>Session.getNamedQuery</code>.
 	 * @param session current Hibernate Session
 	 * @param queryName the name of the query in the Hibernate mapping file
 	 * @return the Query object
@@ -857,9 +873,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Create a Criteria object for the given Session and the given entity class.
-	 * To be used within a HibernateCallback.
+	 * <b>To be used within a HibernateCallback</b>:
+	 * <pre>
+	 * List result = hibernateTemplate.executeFind(new HibernateCallback() {
+	 *   public void Object doInHibernate(Session session) throws HibernateException {
+	 *     Criteria criteria = hibernateTemplate.createCriteria(session, MyClass.class);
+	 *     ...
+	 *     return query.list();
+	 *   }
+	 * });</pre>
 	 * <p>Applies a transaction timeout, if any. If you don't use such timeouts,
-	 * the call is equivalent to Session.createCriteria.
+	 * the call is equivalent to <code>Session.createCriteria</code>.
 	 * @param session current Hibernate Session
 	 * @param entityClass the entity class to create the Criteria for
 	 * @return the Query object
