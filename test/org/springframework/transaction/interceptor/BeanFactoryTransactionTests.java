@@ -19,7 +19,6 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.Arrays;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -58,20 +57,20 @@ public class BeanFactoryTransactionTests extends TestCase {
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		doTestGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean, ITestBean.class);
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
 		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		doTestGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean, ITestBean.class);
 	}
 	
 	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
-		doTestGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean, TestBean.class);
 	}
 	
 	public void testProxyFactory2Lazy() throws NoSuchMethodException {
@@ -105,14 +104,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		txnCounter.counter = 0;
 		preCounter.counter = 0;
 		postCounter.counter = 0;
-		doTestGetsAreNotTransactional(testBean);
+		doTestGetsAreNotTransactional(testBean, TestBean.class);
 		// Can't assert it's equal to 4 as the pointcut may be optimized and only invoked once
 		assertTrue(0 < txnCounter.counter && txnCounter.counter <= 4);
 		assertEquals(4, preCounter.counter);
 		assertEquals(4, postCounter.counter);
 	}
 
-	private void doTestGetsAreNotTransactional(ITestBean testBean) {
+	private void doTestGetsAreNotTransactional(final ITestBean testBean, final Class proxyClass) {
 		// Install facade
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
@@ -134,6 +133,11 @@ public class BeanFactoryTransactionTests extends TestCase {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
 				}
 				invoked = true;
+				if (!((definition.getName().indexOf(proxyClass.getName()) != -1) &&
+						(definition.getName().indexOf("setAge") != -1))) {
+					throw new IllegalStateException(
+							"transaction name should contain class and method name: " + definition.getName());
+				}
 				return ts;
 			}
 			public void commit(TransactionStatus status) throws TransactionException {
