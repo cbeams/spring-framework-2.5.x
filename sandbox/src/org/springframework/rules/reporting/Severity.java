@@ -15,6 +15,8 @@
  */
 package org.springframework.rules.reporting;
 
+import javax.swing.Icon;
+
 import org.springframework.enums.ShortCodedEnum;
 import org.springframework.enums.support.StaticCodedEnumResolver;
 
@@ -26,10 +28,16 @@ public class Severity extends ShortCodedEnum {
 
 	public static final Severity ERROR = new Severity(2, "Error");
 
+	private Icon icon;
+	
 	private Severity(int magnitude, String label) {
 		super(magnitude, label);
 	}
 
+	public Icon getIcon() {
+	    return icon;
+	}
+	
 	static {
 		StaticCodedEnumResolver.instance().registerStaticEnums(Severity.class);
 	}
