@@ -33,7 +33,7 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
-import org.springframework.beans.factory.support.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ACATest;
 import org.springframework.context.BeanThatListens;
@@ -43,7 +43,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.6 2004-05-04 06:14:43 jhoeller Exp $
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.7 2004-08-03 09:08:42 jhoeller Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 

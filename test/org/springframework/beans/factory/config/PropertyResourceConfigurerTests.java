@@ -34,7 +34,6 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
