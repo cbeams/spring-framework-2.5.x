@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.7 2003-12-11 18:20:45 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.8 2003-12-12 16:33:10 johnsonr Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -230,7 +230,7 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	protected AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException {
+	public AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName, toString());

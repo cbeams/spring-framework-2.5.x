@@ -11,6 +11,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
+ * @version $Id: BeanDefinitionRegistry.java,v 1.3 2003-12-12 16:33:10 johnsonr Exp $
  */
 public interface BeanDefinitionRegistry {
 
@@ -44,4 +45,12 @@ public interface BeanDefinitionRegistry {
 	 */
 	void registerAlias(String name, String alias) throws BeansException;
 
+	/**
+	 * Return the bean definition for the given bean name.
+	 * @param beanName name of the bean to find a definition for
+	 * @return the BeanDefinition for this prototype name. Must never return null.
+	 * @throws NoSuchBeanDefinitionException if the bean definition cannot be resolved
+	 * @throws BeansException in case of errors
+	 */
+	AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
 }

@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.32 2003-12-11 18:19:43 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.33 2003-12-12 16:33:10 johnsonr Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -1083,7 +1083,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @throws NoSuchBeanDefinitionException if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
 	 */
-	protected abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
+	public abstract AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
 	 * Return the names of the beans that depend on the given bean.
