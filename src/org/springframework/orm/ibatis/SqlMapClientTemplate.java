@@ -32,20 +32,21 @@ import com.ibatis.sqlmap.engine.impl.ExtendedSqlMapClient;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies data access via the SqlMapClient API of the
- * iBATIS Database Layer, and converts checked SQLExceptions into unchecked
- * DataAccessExceptions, compatible to the org.springframework.dao exception
- * hierarchy. Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies data access via the SqlMapClient API of iBATIS
+ * SQL Maps, and converts checked SQLExceptions into unchecked DataAccessExceptions,
+ * following the <code>org.springframework.dao</code> exception hierarchy.
+ * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
  * <p>The main method of this class executes a callback that implements a
  * data access action. Furthermore, this class provides numerous convenience
- * methods that mirror SqlMapSession's execution methods. See the SqlMapClient
- * javadocs for details on those methods.
+ * methods that mirror SqlMapExecutor's execution methods. See the
+ * SqlMapExecutor javadocs for details on those methods.
  *
  * <p>Needs a SqlMapClient to work on, passed in via the "sqlMapClient" property.
  * Can additionally be configured with a DataSource for fetching Connections,
@@ -62,6 +63,7 @@ import org.springframework.util.Assert;
  * @see #setExceptionTranslator
  * @see SqlMapClientFactoryBean#setDataSource
  * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
+ * @see com.ibatis.sqlmap.client.SqlMapSession
  * @see com.ibatis.sqlmap.client.SqlMapExecutor
  */
 public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOperations {
@@ -291,6 +293,24 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 			}
 		});
 		return result.intValue();
+	}
+
+	public void update(String statementName, Object parameterObject, int requiredRowsAffected)
+			throws DataAccessException {
+		int actualRowsAffected = update(statementName, parameterObject);
+		if (actualRowsAffected != requiredRowsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
+					statementName, requiredRowsAffected, actualRowsAffected);
+		}
+	}
+
+	public void delete(String statementName, Object parameterObject, int requiredRowsAffected)
+			throws DataAccessException {
+		int actualRowsAffected = delete(statementName, parameterObject);
+		if (actualRowsAffected != requiredRowsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
+					statementName, requiredRowsAffected, actualRowsAffected);
+		}
 	}
 
 }

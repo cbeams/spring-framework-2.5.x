@@ -21,7 +21,7 @@ public class SqlMapItemDao extends SqlMapClientDaoSupport implements ItemDao {
       Map param = new HashMap(2);
       param.put("itemId", itemId);
       param.put("increment", increment);
-      getSqlMapClientTemplate().update("updateInventoryQuantity", param);
+      getSqlMapClientTemplate().update("updateInventoryQuantity", param, 1);
     }
   }
 

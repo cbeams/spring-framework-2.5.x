@@ -37,16 +37,16 @@ public class SqlMapAccountDao extends SqlMapClientDaoSupport implements AccountD
   }
 
   public void insertAccount(Account account) throws DataAccessException {
-    getSqlMapClientTemplate().update("insertAccount", account);
-    getSqlMapClientTemplate().update("insertProfile", account);
-    getSqlMapClientTemplate().update("insertSignon", account);
+    getSqlMapClientTemplate().insert("insertAccount", account);
+    getSqlMapClientTemplate().insert("insertProfile", account);
+    getSqlMapClientTemplate().insert("insertSignon", account);
   }
 
   public void updateAccount(Account account) throws DataAccessException {
-    getSqlMapClientTemplate().update("updateAccount", account);
-    getSqlMapClientTemplate().update("updateProfile", account);
+    getSqlMapClientTemplate().update("updateAccount", account, 1);
+    getSqlMapClientTemplate().update("updateProfile", account, 1);
     if (account.getPassword() != null && account.getPassword().length() > 0) {
-      getSqlMapClientTemplate().update("updateSignon", account);
+      getSqlMapClientTemplate().update("updateSignon", account, 1);
     }
   }
  

@@ -18,16 +18,25 @@ package org.springframework.orm.ibatis;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.ibatis.common.util.PaginatedArrayList;
+import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapExecutor;
 import com.ibatis.sqlmap.client.SqlMapSession;
+import com.ibatis.sqlmap.client.event.RowHandler;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
+import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 
 /**
  * @author Juergen Hoeller
@@ -81,7 +90,7 @@ public class SqlMapClientTests extends TestCase {
 		template.setSqlMapClient(smc);
 		template.afterPropertiesSet();
 		Object result = template.execute(new SqlMapClientCallback() {
-			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+			public Object doInSqlMapClient(SqlMapExecutor executor) {
 				assertTrue(executor == sms);
 				return "done";
 			}
@@ -93,42 +102,203 @@ public class SqlMapClientTests extends TestCase {
 		smcControl.verify();
 	}
 
+	public void testQueryForObject() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForObject("myStatement", "myParameter");
+		template.executorControl.setReturnValue("myResult", 1);
+		template.executorControl.replay();
+		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForObjectWithResultObject() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForObject("myStatement", "myParameter", "myResult");
+		template.executorControl.setReturnValue("myResult", 1);
+		template.executorControl.replay();
+		assertEquals("myResult", template.queryForObject("myStatement", "myParameter", "myResult"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForList() throws SQLException {
+		List result = new ArrayList();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForList("myStatement", "myParameter");
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForList("myStatement", "myParameter"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForListWithResultSize() throws SQLException {
+		List result = new ArrayList();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForList("myStatement", "myParameter", 10, 20);
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForList("myStatement", "myParameter", 10, 20));
+		template.executorControl.verify();
+	}
+
+	public void testQueryWithRowHandler() throws SQLException {
+		RowHandler rowHandler = new RowHandler() {
+			public void handleRow(Object row) {
+			}
+		};
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryWithRowHandler("myStatement", "myParameter", rowHandler);
+		template.executorControl.setVoidCallable(1);
+		template.executorControl.replay();
+		template.queryWithRowHandler("myStatement", "myParameter", rowHandler);
+		template.executorControl.verify();
+	}
+
+	public void testQueryForPaginatedList() throws SQLException {
+		PaginatedList result = new PaginatedArrayList(10);
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForPaginatedList("myStatement", "myParameter", 10);
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForPaginatedList("myStatement", "myParameter", 10));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForMap() throws SQLException {
+		Map result = new HashMap();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForMap("myStatement", "myParameter", "myKey");
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForMap("myStatement", "myParameter", "myKey"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForMapWithValueProperty() throws SQLException {
+		Map result = new HashMap();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForMap("myStatement", "myParameter", "myKey", "myValue");
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForMap("myStatement", "myParameter", "myKey", "myValue"));
+		template.executorControl.verify();
+	}
+
+	public void testInsert() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.insert("myStatement", "myParameter");
+		template.executorControl.setReturnValue("myResult", 1);
+		template.executorControl.replay();
+		assertEquals("myResult", template.insert("myStatement", "myParameter"));
+		template.executorControl.verify();
+	}
+
+	public void testUpdate() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.update("myStatement", "myParameter");
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		assertEquals(10, template.update("myStatement", "myParameter"));
+		template.executorControl.verify();
+	}
+
+	public void testDelete() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.delete("myStatement", "myParameter");
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		assertEquals(10, template.delete("myStatement", "myParameter"));
+		template.executorControl.verify();
+	}
+
+	public void testUpdateWithRequiredRowsAffected() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.update("myStatement", "myParameter");
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		template.update("myStatement", "myParameter", 10);
+		template.executorControl.verify();
+	}
+
+	public void testUpdateWithRequiredRowsAffectedAndInvalidRowCount() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.update("myStatement", "myParameter");
+		template.executorControl.setReturnValue(20, 1);
+		template.executorControl.replay();
+		try {
+			template.update("myStatement", "myParameter", 10);
+			fail("Should have thrown JdbcUpdateAffectedIncorrectNumberOfRowsException");
+		}
+		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException ex) {
+			// expected
+			assertEquals(10, ex.getExpectedRowsAffected());
+			assertEquals(20, ex.getActualRowsAffected());
+		}
+		template.executorControl.verify();
+	}
+
+	public void testDeleteWithRequiredRowsAffected() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.delete("myStatement", "myParameter");
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		template.delete("myStatement", "myParameter", 10);
+		template.executorControl.verify();
+	}
+
+	public void testDeleteWithRequiredRowsAffectedAndInvalidRowCount() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.delete("myStatement", "myParameter");
+		template.executorControl.setReturnValue(20, 1);
+		template.executorControl.replay();
+		try {
+			template.delete("myStatement", "myParameter", 10);
+			fail("Should have thrown JdbcUpdateAffectedIncorrectNumberOfRowsException");
+		}
+		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException ex) {
+			// expected
+			assertEquals(10, ex.getExpectedRowsAffected());
+			assertEquals(20, ex.getActualRowsAffected());
+		}
+		template.executorControl.verify();
+	}
+
 	public void testSqlMapClientDaoSupport() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-		TestSqlMapClientDaoSupport testDao = new TestSqlMapClientDaoSupport();
+		SqlMapClientDaoSupport testDao = new SqlMapClientDaoSupport() {
+		};
 		testDao.setDataSource(ds);
-		assertEquals(ds, testDao.getDSource());
+		assertEquals(ds, testDao.getDataSource());
 
 		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
 		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
 		smcControl.replay();
 
 		testDao.setSqlMapClient(smc);
-		assertEquals(smc, testDao.getSMap());
+		assertEquals(smc, testDao.getSqlMapClient());
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setDataSource(ds);
 		template.setSqlMapClient(smc);
 		testDao.setSqlMapClientTemplate(template);
-		assertEquals(template, testDao.getSMTemplate());
+		assertEquals(template, testDao.getSqlMapClientTemplate());
 
 		testDao.afterPropertiesSet();
 	}
 
 
-	private class TestSqlMapClientDaoSupport extends SqlMapClientDaoSupport{
+	private static class TestSqlMapClientTemplate extends SqlMapClientTemplate {
 
-		public DataSource getDSource(){
-			return super.getDataSource();
-		}
+		public MockControl executorControl = MockControl.createControl(SqlMapExecutor.class);
+		public SqlMapExecutor executor = (SqlMapExecutor) executorControl.getMock();
 
-		public SqlMapClient getSMap() {
-			return super.getSqlMapClient();
-		}
-
-		public SqlMapClientTemplate getSMTemplate(){
-			return super.getSqlMapClientTemplate();
+		public Object execute(SqlMapClientCallback action) throws DataAccessException {
+			try {
+				return action.doInSqlMapClient(executor);
+			}
+			catch (SQLException ex) {
+				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
+			}
 		}
 	}
 

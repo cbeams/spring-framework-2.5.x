@@ -21,7 +21,7 @@ public class SqlMapSequenceDao extends SqlMapClientDaoSupport {
       			name + " sequence).");
     }
     Object parameterObject = new Sequence(name, sequence.getNextId() + 1);
-    getSqlMapClientTemplate().update("updateSequence", parameterObject);
+    getSqlMapClientTemplate().update("updateSequence", parameterObject, 1);
     return sequence.getNextId();
   }
 }
