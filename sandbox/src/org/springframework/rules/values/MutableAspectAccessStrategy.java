@@ -21,6 +21,9 @@ import java.beans.PropertyEditor;
  * @author Keith Donald
  */
 public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
+    public void registerCustomEditor(Class aspectType,
+            PropertyEditor propertyEditor);
+
     public void registerCustomEditor(Class aspectType, String aspect,
             PropertyEditor propertyEditor);
 
