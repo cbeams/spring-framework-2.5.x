@@ -25,50 +25,28 @@ import com.lowagie.text.pdf.PdfWriter;
  * <br>NB: Internet Explorer requires a .pdf extension, as
  * it doesn't always respect the declared content type.
  * <br>Exposes page width and height as bean properties.
- * @version $Id: AbstractPdfView.java,v 1.1.1.1 2003-08-14 16:20:59 trisberg Exp $
+ * @version $Id: AbstractPdfView.java,v 1.2 2003-08-27 21:41:38 pawlakjp Exp $
  * @author Rod Johnson
+ * @author Jean-Pierre Pawlak
  */
 public abstract class AbstractPdfView extends AbstractView {
 	
-	private int width = 600;
-	
-	private int	height = 750;
-
 	/**
 	 * Set the appropriate content type.
 	 * Note that IE won't take much notice of this,
 	 * but there's not a lot we can do about this.
 	 * Generated documents should have a .pdf extension.
- 	*/
+	*/
 	public AbstractPdfView() {
 		setContentType("application/pdf");
 	}
 	
 	/**
-	 * TODO: bean property not currently used
-	 */
-	public void setWidth(int width) {
-		this.width = width;
-	}
-		
-	/**
-	 * TODO: bean property not currently used
-	 */
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-
-	/**
 	 * @see org.springframework.web.servlet.view.AbstractView#renderMergedOutputModel(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
 	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
-		//Rectangle pageSize = new Rectangle(this.width, this.height);
-		//pageSize.setBackgroundColor(new java.awt.Color(0xFF, 0xFF, 0xEE));
-
-		// TODO: could allow setting through bean properties
-		Document document = new Document(PageSize.A4);
+		Document document = getDocument();
 
 		try {
 			// The following simple method doesn't work in IE, which
@@ -85,8 +63,7 @@ public abstract class AbstractPdfView extends AbstractView {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			PdfWriter writer = PdfWriter.getInstance(document, baos);
 			
-			// **TODO: could expose these preferences as bean properties also
-			writer.setViewerPreferences(PdfWriter.AllowPrinting | PdfWriter.PageLayoutSinglePage);
+			writer.setViewerPreferences(getViewerPreferences());
 			document.open();
 			buildPdfDocument(model, document, writer, request, response);
 			document.close();
@@ -109,5 +86,24 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
 	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request, HttpServletResponse response) throws DocumentException;
+
+	/**
+	 * Return a new com.lowagie.text.Document. 
+	 * <br>By default return an A4 document, but the subclass can set anything else or retrieve from properties.
+	 * @return the new created Document
+	 */
+	protected Document getDocument() {
+		return new Document(PageSize.A4);
+	}
+
+	/**
+	 * Return the ViewerPreferences.
+	 * <br>By default return AllowPrinting and PageLayoutSinglePage, but can be subclassed.
+	 * The subclass can either fix the preferences or retrieve them from the bean properties. 
+	 * @return an int containing the bits information against PdfWriter definitions. 
+	 */
+	protected int getViewerPreferences() {
+		return PdfWriter.AllowPrinting | PdfWriter.PageLayoutSinglePage;
+	}
 
 }

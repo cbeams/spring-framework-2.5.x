@@ -41,6 +41,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * introduced deprecated Log4jConfigServlet for Servlet 2.2 containers
 * introduced Tiles support through TilesView and TilesConfigurer
 * introduced support for Spring-aware Tiles component controller
+* Adding customization in AbstractPdfView
 
 Changes in version 0.9.1 (8.8.2003)
 -----------------------------------
