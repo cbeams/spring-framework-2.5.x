@@ -25,16 +25,11 @@ import org.springframework.beans.BeansException;
 import junit.framework.TestCase;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: ObjectUtilsTests.java,v 1.1 2004-06-30 15:36:35 johnsonr Exp $
+ * @version $Id: ObjectUtilsTests.java,v 1.2 2004-07-27 14:11:39 jhoeller Exp $
  */
 public class ObjectUtilsTests extends TestCase {
 	
-	public ObjectUtilsTests(String s) {
-		super(s);
-	}
-
 	public void testIsCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
 		assertTrue(ObjectUtils.isCheckedException(new ServletException()));

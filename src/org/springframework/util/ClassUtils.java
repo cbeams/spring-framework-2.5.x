@@ -19,109 +19,71 @@ package org.springframework.util;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Static utility functions dealing with java class objects.
- * 
- * @author Keith Donald, adapted from jakarta-commons-lang's ClassUtils
- * @author Colin Sampaleanu, code moved here form elsewhere in Spring
- * @author Rob Harrop, added forName()
+ * Miscellaneous class utility methods. Mainly for internal use within the
+ * framework; consider Jakarta's Commons Lang for a more comprehensive suite
+ * of utilities.
+ * @author Keith Donald
+ * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public class ClassUtils {
+public abstract class ClassUtils {
 
-	/**
-	 * The package separator character '.'
-	 */
+	/** All primitive classes */
+	private static Class[] PRIMITIVE_CLASSES = {boolean.class, byte.class, char.class, short.class,
+	                                            int.class, long.class, float.class, double.class};
+
+	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR_CHAR = '.';
 
-	/**
-	 * The inner class separator character '$'
-	 */
+	/** The inner class separator character '$' */
 	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
-	
-	/**
-	 * Primitive Name: boolean
-	 */
-	private static final String BOOLEAN = "boolean";
-	
-	/**
-	 * Primitive Name: byte
-	 */
-	private static final String BYTE = "byte";
-	
-	/**
-	 * Primitive Name: char
-	 */
-	private static final String CHAR = "char";
-	
-	/**
-	 * Primitive Name: double
-	 */
-	private static final String DOUBLE = "double";
-	
-	/**
-	 * Primitive Name: float
-	 */
-	private static final String FLOAT = "float";
-	
-	/**
-	 * Primitive Name: byte
-	 */
-	private static final String INT = "int";
-	
-	/**
-	 * Primitive Name: long
-	 */
-	private static final String LONG = "long";
-	
-	/**
-	 * Primitive Name: short
-	 */
-	private static final String SHORT = "short";
-	
 
-	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
-	// static utility class
-	private ClassUtils() {
+	/**
+	 * Replacement for Class.forName() that also returns Class instances for primitives.
+	 * @param name the name of the Class
+	 * @return Class instance for the supplied name
+	 */
+	public static Class forName(String name) throws ClassNotFoundException{
+		// Most class names will be quite long, considering that they
+		// SHOULD sit in a package, so a length check is worthwhile.
+		if (name.length() <= 8) {
+			// could be a primitive - likely
+			for (int i = 0; i < PRIMITIVE_CLASSES.length; i++) {
+				Class clazz = PRIMITIVE_CLASSES[i];
+				if (clazz.getName().equals(name)) {
+					return clazz;
+				}
+			}
+		}
+		return Class.forName(name);
 	}
 
 	/**
-	 * Gets the class name without the qualified package name.
-	 * 
-	 * @param clazz
-	 *            the class to get the short name for, must not be
-	 *            <code>null</code>
+	 * Get the class name without the qualified package name.
+	 * @param clazz the class to get the short name for
 	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException
-	 *             if the class is null
+	 * @throws IllegalArgumentException if the class is null
 	 */
 	public static String getShortName(Class clazz) {
 		return getShortName(clazz.getName());
 	}
 
 	/**
-	 * Returns the uncaptilized short string name of a java class.
-	 * 
-	 * @param clazz
-	 *            The class
-	 * @return The short name rendered in a standard javabeans property format.
+	 * Return the uncaptilized short string name of a Java class.
+	 * @param clazz the class
+	 * @return the short name rendered in a standard JavaBeans property format
 	 */
 	public static String getShortNameAsProperty(Class clazz) {
 		return StringUtils.uncapitalize(getShortName(clazz));
 	}
 
 	/**
-	 * Gets the class name without the qualified package name.
-	 * 
-	 * @param className
-	 *            the className to get the short name for, must not be empty or
-	 *            <code>null</code>
+	 * Get the class name without the qualified package name.
+	 * @param className the className to get the short name for
 	 * @return the class name of the class without the package name
-	 * @throws IllegalArgumentException
-	 *             if the className is empty
+	 * @throws IllegalArgumentException if the className is empty
 	 */
 	public static String getShortName(String className) {
 		char[] charArray = className.toCharArray();
@@ -138,34 +100,22 @@ public class ClassUtils {
 	}
 
 	/**
-	 * Returns a static method of a class.
-	 * 
-	 * @param methodName
-	 *            The static method name.
-	 * @param clazz
-	 *            The class which defines the method.
-	 * @param args
-	 *            The parameter types to the method.
-	 * @return The static method, or <code>null</code> if no static method was
-	 *         found.
-	 * @throws IllegalArgumentException
-	 *             if the method name is blank or the clazz is null.
+	 * Return a static method of a class.
+	 * @param methodName the static method name
+	 * @param clazz the class which defines the method
+	 * @param args the parameter types to the method
+	 * @return the static method, or null if no static method was found
+	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
-	public static Method getStaticMethod(String methodName, Class clazz,
-			Class[] args) {
+	public static Method getStaticMethod(Class clazz, String methodName, Class[] args) {
 		try {
 			Method method = clazz.getDeclaredMethod(methodName, args);
 			if ((method.getModifiers() & Modifier.STATIC) != 0) {
 				return method;
 			}
-			else {
-				logger.warn("Found method '" + methodName
-						+ "', but it is not static.");
-				return null;
-			}
-		} catch (NoSuchMethodException e) {
-			return null;
+		} catch (NoSuchMethodException ex) {
 		}
+		return null;
 	}
 
 	/**
@@ -178,35 +128,30 @@ public class ClassUtils {
 	 * loading a resource file that is in the same package as a class file,
 	 * although {link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
-	 * 
-	 * @param clazz
-	 *            the Class whose package will be used as the base.
-	 * @param resourceName
-	 *            the resource name to append. A leading slash is optional.
+	 * @param clazz the Class whose package will be used as the base
+	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
 	 * @see java.lang.ClassLoader#getResource(String)
 	 * @see java.lang.Class#getResource(String)
 	 */
-	public static String addResourcePathToPackagePath(Class clazz,
-			String resourceName) {
-		if (!resourceName.startsWith("/"))
+	public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
+		if (!resourceName.startsWith("/")) {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
-		else
+		}
+		else {
 			return classPackageAsResourcePath(clazz) + resourceName;
+		}
 	}
 
 	/**
-	 * Given an input class object, returns a string which consists of the
+	 * Given an input class object, return a string which consists of the
 	 * class's package name as a pathname, i.e., all dots ('.') are replaced by
 	 * slashes ('/'). Neither a leading nor trailing slash is added. The result
 	 * could be concatenated with a slash and the name of a resource, and fed
-	 * directly to ClassLoader.getResource(). For it to be fed to
-	 * Class.getResource, a leading slash would also have to be prepended to the
-	 * return value.
-	 * 
-	 * @param clazz
-	 *            the input class. A null value or the default (empty) package
-	 *            will result in an empty string ("") being returned.
+	 * directly to ClassLoader.getResource(). For it to be fed to Class.getResource,
+	 * a leading slash would also have to be prepended to the return value.
+	 * @param clazz the input class. A null value or the default (empty) package
+	 * will result in an empty string ("") being returned.
 	 * @return a path which represents the package name
 	 * @see java.lang.ClassLoader#getResource(String)
 	 * @see java.lang.Class#getResource(String)
@@ -216,45 +161,6 @@ public class ClassUtils {
 			return "";
 		}
 		return clazz.getPackage().getName().replace('.', '/');
-	}
-	
-	/**
-	 * Replacement for Class.foraName() that also 
-	 * returns Class instances for primitives.
-	 * @param name The name of the Class
-	 * @return Class instance for the supplied name.
-	 */
-	public static Class forName(String name) throws ClassNotFoundException{
-	    // most class names will be quite long
-	    // considering that the SHOULD sit in a package
-	    // so a length check is worthwhile.
-	    
-	    if(name.length() <= 8) {
-	        // could be a primtive - likely
-	        if(BOOLEAN.equals(name)) {
-	            return boolean.class;
-	        } else if(BYTE.equals(name)) {
-	            return byte.class;
-	        } else if(CHAR.equals(name)) {
-	            return char.class;
-	        } else if(DOUBLE.equals(name)) {
-	            return double.class;
-	        } else if(FLOAT.equals(name)) {
-	            return float.class;
-	        } else if(INT.equals(name)) {
-	            return int.class;
-	        } else if(LONG.equals(name)) {
-	            return long.class;
-	        } else if(SHORT.equals(name)) {
-	            return short.class;
-	        } else {
-	            // could be class with a really short name!
-	            return Class.forName(name);
-	        }
-	    } else {
-	        // not a primtive
-	        return Class.forName(name);
-	    }
 	}
 
 }

@@ -30,23 +30,23 @@ public class ClassUtilsTests extends TestCase {
     }
 
     public void testNoArgsStaticMethod() {
-        Method method = ClassUtils.getStaticMethod("staticMethod",
-                InnerClass.class, null);
+        Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod",
+                                                   null);
         invokeStaticMethod(method, null);
         assertTrue("no argument method was not invoked.",
                 InnerClass.noArgCalled);
     }
 
     public void testArgsStaticMethod() {
-        Method method = ClassUtils.getStaticMethod("argStaticMethod",
-                InnerClass.class, new Class[] { String.class });
+        Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod",
+                                                   new Class[] { String.class });
         invokeStaticMethod(method, new Object[] { "test" });
         assertTrue("argument method was not invoked.", InnerClass.argCalled);
     }
 
     public void testOverloadedStaticMethod() {
-        Method method = ClassUtils.getStaticMethod("staticMethod",
-                InnerClass.class, new Class[] { String.class });
+        Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod",
+                                                   new Class[] { String.class });
         invokeStaticMethod(method, new Object[] { "test" });
         assertTrue("argument method was not invoked.",
                 InnerClass.overloadedCalled);
