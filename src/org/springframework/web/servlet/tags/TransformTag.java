@@ -116,11 +116,4 @@ public class TransformTag extends RequestContextAwareTag {
 		return SKIP_BODY;
 	}
 
-	public void doFinally() {
-		super.doFinally();
-		this.value = null;
-		this.var = null;
-		this.scope = TagUtils.SCOPE_PAGE;
-	}
-
 }

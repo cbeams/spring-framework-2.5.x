@@ -166,14 +166,5 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return ex.getMessage();
 	}
-	
-
-	public void doFinally() {
-		super.doFinally();
-		this.code = null;
-		this.text = null;
-		this.var = null;
-		this.scope = TagUtils.SCOPE_PAGE;
-	}
 
 }

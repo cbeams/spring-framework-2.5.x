@@ -34,9 +34,11 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	public static final String ERRORS_VARIABLE_NAME = "errors";
 
+
 	private String name;
 
 	private Errors errors;
+
 
 	/**
 	 * Set the name of the bean that this tag should check.
@@ -52,6 +54,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 		return name;
 	}
 
+
 	protected final int doStartTagInternal() throws ServletException, JspException {
 		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", this.name, pageContext);
 		this.errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
@@ -64,17 +67,17 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 		}
 	}
 
+	public int doEndTag() {
+		this.pageContext.removeAttribute(ERRORS_VARIABLE_NAME);
+		return EVAL_PAGE;
+	}
+
 	/**
 	 * Retrieve the Errors instance that this tag is currently bound to.
 	 * Intended for cooperating nesting tags.
 	 */
 	public final Errors getErrors() {
 		return errors;
-	}
-
-	public void doFinally() {
-		super.doFinally();
-		this.errors = null;
 	}
 
 }
