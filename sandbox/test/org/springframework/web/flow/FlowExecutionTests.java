@@ -20,26 +20,25 @@ public class FlowExecutionTests extends TestCase {
 
 	public void testFlowExecutionListener() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(
-				"submit", "finish"));
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition("submit", "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(
-				"success", "viewState"));
+		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition("success", "viewState"));
 		new ViewState(flow, "viewState", "myView", new Transition("submit", "subFlowState"));
 		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition("finish", "finish"));
 		new EndState(flow, "finish");
+		
 		FlowExecution flowExecution = flow.createExecution();
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
 		flowExecution.start(new SimpleEvent(this, "start"));
-		assertEquals(1, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(2, flowExecutionListener.countStateTransitions());
 		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
-		assertEquals(2, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(1, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(4, flowExecutionListener.countStateTransitions());
 		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
-		assertEquals(0, flowExecutionListener.countFlowExecutionsStarted());
+		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(6, flowExecutionListener.countStateTransitions());
 	}
 	
