@@ -16,24 +16,26 @@
 
 package org.springframework.ejb.support;
 
-import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 /**
- * Superclass for all session beans, not intended for direct client subclassing.
+ * Superclass for all session beans. Not intended for direct client subclassing;
+ * derive from AbstractStatelessSessionBean or AbstractStatefulSessionBean instead.
  *
  * <p>This class saves the session context provided by the EJB container in an instance
  * variable and provides a NOP implementation of the ejbRemove() lifecycle method.
  *
  * @author Rod Johnson
+ * @see AbstractStatelessSessionBean
+ * @see AbstractStatefulSessionBean
  */
-abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SessionBean {
+abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
 	/** the SessionContext passed to this object */
 	private SessionContext sessionContext;
 
 	/**
-	 * Sets the session context.
+	 * Set the session context.
 	 * <p><b>If overriding this method, be sure to invoke this form of it first.</b>
 	 * @param sessionContext SessionContext context for session
 	 */
@@ -47,7 +49,7 @@ abstract class AbstractSessionBean extends AbstractEnterpriseBean implements Ses
 	 * @return the SessionContext saved on initialization by this class's
 	 * implementation of the setSessionContext() method.
 	 */
-	protected final SessionContext getSessionContext() {
+	public final SessionContext getSessionContext() {
 		return sessionContext;
 	}
 	
