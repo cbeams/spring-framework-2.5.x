@@ -29,7 +29,7 @@ import org.springframework.web.context.support.ServletContextResource;
  */
 public class ResourceTests extends TestCase {
 
-	public void doTestResource() throws IOException {
+	public void testClassPathResource() throws IOException {
 		Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
 		doTestResource(resource);
 	}
@@ -79,6 +79,31 @@ public class ResourceTests extends TestCase {
 		assertEquals("SpringVersion.class", relative3.getFilename());
 		assertTrue(relative3.getURL().getFile().endsWith("SpringVersion.class"));
 		assertTrue(relative3.exists());
+	}
+
+	public void testClassPathResourceWithRelativePath() throws IOException {
+		Resource resource = new ClassPathResource("dir/");
+		Resource relative = resource.createRelative("subdir");
+		assertEquals(new ClassPathResource("dir/subdir"), relative);
+	}
+
+	public void testFileSystemResourceWithRelativePath() throws IOException {
+		Resource resource = new FileSystemResource("dir/");
+		Resource relative = resource.createRelative("subdir");
+		assertEquals(new FileSystemResource("dir/subdir"), relative);
+	}
+
+	public void testUrlResourceWithRelativePath() throws IOException {
+		Resource resource = new UrlResource("file:dir/");
+		Resource relative = resource.createRelative("subdir");
+		assertEquals(new UrlResource("file:dir/subdir"), relative);
+	}
+
+	public void testServletContextResourceWithRelativePath() throws IOException {
+		MockServletContext sc = new MockServletContext();
+		Resource resource = new ServletContextResource(sc, "dir/");
+		Resource relative = resource.createRelative("subdir");
+		assertEquals(new ServletContextResource(sc, "dir/subdir"), relative);
 	}
 
 }

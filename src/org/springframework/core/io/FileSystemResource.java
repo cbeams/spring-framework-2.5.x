@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.core.io;
 
@@ -21,6 +21,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for java.io.File handles.
@@ -33,12 +35,15 @@ public class FileSystemResource extends AbstractResource {
 
 	private final File file;
 
+	private final String path;
+
 	/**
 	 * Create a new FileSystemResource.
 	 * @param file a File handle
 	 */
 	public FileSystemResource(File file) {
 		this.file = file;
+		this.path = file.getPath();
 	}
 
 	/**
@@ -47,6 +52,7 @@ public class FileSystemResource extends AbstractResource {
 	 */
 	public FileSystemResource(String path) {
 		this.file = new File(path);
+		this.path = path;
 	}
 
 	public boolean exists() {
@@ -66,13 +72,8 @@ public class FileSystemResource extends AbstractResource {
 	}
 
 	public Resource createRelative(String relativePath) {
-		File parent = this.file.getParentFile();
-		if (parent != null) {
-			return new FileSystemResource(new File(parent, relativePath));
-		}
-		else {
-			return new FileSystemResource(relativePath);
-		}
+		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
+		return new FileSystemResource(pathToUse);
 	}
 
 	public String getFilename() {
