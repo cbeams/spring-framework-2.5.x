@@ -50,17 +50,6 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- Transactional proxy for Petclinic's primary business object -->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-	</bean>
-
 	<!-- Petclinic primary business object: HSQL JDBC implementation -->
 	<!-- (only initialized when referenced by the clinic proxy) -->
 	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true">
@@ -71,6 +60,17 @@
 	<!-- (only initialized when referenced by the clinic proxy) -->
 	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
+	</bean>
+
+	<!-- Transactional proxy for Petclinic's primary business object -->
+	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager"><ref local="transactionManager"/></property>
+		<property name="target"><ref bean="${petclinic.jdbcImplBeanName}"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
 	</bean>
 
 </beans>

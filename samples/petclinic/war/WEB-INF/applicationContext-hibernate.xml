@@ -63,6 +63,11 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
+	<!-- Petclinic primary business object: Hibernate implementation -->
+	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
+		<property name="sessionFactory"><ref local="sessionFactory"/></property>
+	</bean>
+
 	<!-- Transactional proxy for the Petclinic primary business object -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
@@ -75,11 +80,6 @@
 				<prop key="store*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
-	</bean>
-
-	<!-- Petclinic primary business object: Hibernate implementation -->
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
 	</bean>
 
 </beans>
