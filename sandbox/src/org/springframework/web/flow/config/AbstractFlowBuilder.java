@@ -198,7 +198,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds a <code>ViewState</code> to the flow built by this builder. A view
 	 * state triggers the rendering of a view template when entered.
 	 * 
-	 * @param stateId The <code>ViewState</code> id - must be locally unique
+	 * @param stateIdPrefix The <code>ViewState</code> id - must be locally unique
 	 *        to the flow built by this builder.
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
