@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -46,9 +48,22 @@ import java.util.StringTokenizer;
  * </ul>
  *
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  * @since 16.07.2003
  */
 public abstract class PathMatcher {
+
+	/**
+	 * Return if the given string represents a pattern to be matched
+	 * via this class: If not, the "match" method does not have to be
+	 * used because direct equality comparisons are sufficient.
+	 * @param str the string to check
+	 * @return whether the given string represents a pattern
+	 * @see #match
+	 */
+	public static boolean isPattern(String str) {
+		return (str.indexOf('*') != -1 || str.indexOf('?') != -1);
+	}
 
 	/**
 	 * Match a string against the given pattern.
@@ -327,6 +342,50 @@ public abstract class PathMatcher {
 			ret.add(st.nextToken());
 		}
 		return ret;
+	}
+
+	/**
+	 * Retrieve files that match the given pattern,
+	 * checking the given directory and its subdirectories.
+	 * @param pattern the pattern to match against
+	 * @param rootDir the directory to start from
+	 * @return the List of matching File instances
+	 * @throws IOException if directory contents could not be retrieved
+	 */
+	public static List retrieveMatchingFiles(String pattern, File rootDir) throws IOException {
+		if (!rootDir.isDirectory()) {
+			throw new IllegalArgumentException("rootDir parameter [" + rootDir + "] does not denote a directory");
+		}
+		String fullPattern = (new File(rootDir, pattern)).getAbsolutePath();
+		fullPattern = StringUtils.replace(fullPattern, File.separator, "/");
+		List result = new ArrayList();
+		doRetrieveMatchingFiles(fullPattern, rootDir, result);
+		return result;
+	}
+
+	/**
+	 * Recursively retrieve files that match the given pattern,
+	 * adding them to the given result list.
+	 * @param fullPattern the pattern to match against,
+	 * with preprended root directory path
+	 * @param dir the current directory
+	 * @param result the list of matching files to add to
+	 * @throws IOException if directory contents could not be retrieved
+	 */
+	private static void doRetrieveMatchingFiles(String fullPattern, File dir, List result) throws IOException {
+		File[] dirContents = dir.listFiles();
+		if (dirContents == null) {
+			throw new IOException("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+		}
+		for (int i = 0; i < dirContents.length; i++) {
+			if (dirContents[i].isDirectory()) {
+				doRetrieveMatchingFiles(fullPattern, dirContents[i], result);
+			}
+			String currPath = StringUtils.replace(dirContents[i].getAbsolutePath(), File.separator, "/");
+			if (match(fullPattern, currPath)) {
+				result.add(dirContents[i]);
+			}
+		}
 	}
 
 }
