@@ -16,6 +16,8 @@
 
 package org.springframework.jndi;
 
+import javax.naming.NamingException;
+
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -25,6 +27,11 @@ import org.springframework.beans.factory.FactoryBean;
  * <p>The typical usage will be to register this as singleton factory
  * (e.g. for a certain JNDI DataSource) in an application context,
  * and give bean references to application services that need it.
+ *
+ * <p><b>Assumptions:</b> The resource obtained from JNDI is available
+ * at context startup time and can be cached. If this is not the case,
+ * consider using a ProxyFactoryBean with JndiObjectTargetSource,
+ * which fetches objects from JNDI on demand.
  *
  * <p>Of course, service implementations can lookup e.g. a DataSource from
  * JNDI themselves, but this class enables central configuration of the
@@ -37,14 +44,19 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * @author Juergen Hoeller
  * @since 22.05.2003
+ * @see JndiObjectTargetSource
  * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
  */
-public class JndiObjectFactoryBean extends AbstractJndiLocator implements FactoryBean {
+public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean {
 
 	private Object jndiObject;
 
-	protected void located(Object jndiObject) {
-		this.jndiObject = jndiObject;
+	/**
+	 * Look up the JNDI object and store it.
+	 */
+	public void afterPropertiesSet() throws NamingException {
+		super.afterPropertiesSet();
+		this.jndiObject = lookup();
 	}
 
 	/**
