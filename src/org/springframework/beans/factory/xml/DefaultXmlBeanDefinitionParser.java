@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.35 2004-08-04 11:06:30 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.36 2004-08-10 08:12:30 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -250,8 +250,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
 			else if (beanDefinition instanceof ChildBeanDefinition) {
-				throw new BeanDefinitionStoreException(this.resource, "",
-																							 "Child bean definition has neither 'id' nor 'name'");
+				throw new BeanDefinitionStoreException(
+						this.resource, "", "Child bean definition has neither 'id' nor 'name'");
 			}
 		}
 
@@ -331,12 +331,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-			                                       "Bean class [" + className + "] not found", ex);
+			throw new BeanDefinitionStoreException(
+					this.resource, beanName, "Bean class [" + className + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-			                                       "Class that bean class [" + className + "] depends on not found", err);
+			throw new BeanDefinitionStoreException(
+					this.resource, beanName, "Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
@@ -413,7 +413,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void parseConstructorArgElement(String beanName, ConstructorArgumentValues cargs, Element ele)
 			throws DOMException, ClassNotFoundException {
-		Object val = getPropertyValue(ele, beanName);
+		Object val = getPropertyValue(ele, beanName, null);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
@@ -451,18 +451,18 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			throws DOMException {
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if (!StringUtils.hasLength(propertyName)) {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "Tag 'property' must have a 'name' attribute");
+			throw new BeanDefinitionStoreException(
+					this.resource, beanName, "Tag 'property' must have a 'name' attribute");
 		}
-		Object val = getPropertyValue(ele, beanName);
+		Object val = getPropertyValue(ele, beanName, propertyName);
 		pvs.addPropertyValue(new PropertyValue(propertyName, val));
 	}
 
 	/**
-	 * Get the value of a property element. May be a list.
+	 * Get the value of a property element. May be a list etc.
 	 * @param ele property element
 	 */
-	protected Object getPropertyValue(Element ele, String beanName) {
+	protected Object getPropertyValue(Element ele, String beanName, String propertyName) {
 		// should only have one element child: value, ref, collection
 		NodeList nl = ele.getChildNodes();
 		Element valueRefOrCollectionElement = null;
@@ -479,8 +479,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		if (valueRefOrCollectionElement == null) {
-			throw new BeanDefinitionStoreException(this.resource, beanName,
-																						 "<property> element must have a subelement like 'value' or 'ref'");
+			String elementName = (propertyName != null) ?
+					"<property> element for property '" + propertyName + "'" :
+					"<constructor-arg> element";
+			throw new BeanDefinitionStoreException(
+					this.resource, beanName, elementName + " must have a subelement like <value> or <ref>");
 		}
 		return parsePropertySubelement(valueRefOrCollectionElement, beanName);
 	}
@@ -503,8 +506,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					// a reference to the id of another bean in the same XML file
 					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
 					if (!StringUtils.hasLength(beanRef)) {
-						throw new BeanDefinitionStoreException(this.resource, beanName,
-																									 "'bean', 'local' or 'parent' is required for a reference");
+						throw new BeanDefinitionStoreException(
+								this.resource, beanName, "'bean', 'local' or 'parent' is required for a reference");
 					}
 					return new RuntimeBeanReference(beanRef, true);
 				}
@@ -518,8 +521,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// a reference to the id of another bean in the same XML file
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if (!StringUtils.hasLength(beanRef)) {
-					throw new BeanDefinitionStoreException(this.resource, beanName,
-																								 "Either 'bean' or 'local' is required for an idref");
+					throw new BeanDefinitionStoreException(
+							this.resource, beanName, "Either 'bean' or 'local' is required for an idref");
 				}
 			}
 			return beanRef;
@@ -544,8 +547,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			// it's a distinguished null value
 			return null;
 		}
-		throw new BeanDefinitionStoreException(this.resource, beanName,
-																					 "Unknown subelement of <property>: <" + ele.getTagName() + ">");
+		throw new BeanDefinitionStoreException(
+				this.resource, beanName, "Unknown subelement of <property>: <" + ele.getTagName() + ">");
 	}
 
 	protected List getList(Element collectionEle, String beanName) {
@@ -638,9 +641,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 			}
 			else {
-				throw new BeanDefinitionStoreException(this.resource, beanName,
-																							 "<value> element is just allowed to have text and comment nodes, " +
-																							 "not: " + item.getClass().getName());
+				throw new BeanDefinitionStoreException(
+						this.resource, beanName,
+						"<value> element is just allowed to have text and comment nodes, not: " + item.getClass().getName());
 			}
 		}
 		return value.toString();
