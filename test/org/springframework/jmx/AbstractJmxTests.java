@@ -14,9 +14,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Rob Harrop
  */
-public class AbstractJmxTests extends TestCase {
+public abstract class AbstractJmxTests extends TestCase {
 
-	private ApplicationContext ctx;
+	private ClassPathXmlApplicationContext ctx;
 
 	protected MBeanServer server;
 
@@ -34,8 +34,8 @@ public class AbstractJmxTests extends TestCase {
 	}
 
 	public void tearDown() throws Exception {
+		ctx.close();
 		MBeanServerFactory.releaseMBeanServer(server);
-		server = null;
 	}
 
 }

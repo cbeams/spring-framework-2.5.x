@@ -27,6 +27,9 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -58,6 +61,8 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	 */
 	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Stores a reference to the <code>MBeanServer</code> that the connector is exposing.
@@ -102,8 +107,8 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	 * Set the <code>MBeanServer</code> that the <code>JMXConnectorServer</code>
 	 * should expose.
 	 */
-	public void setServer(MBeanServer mbeanServer) {
-		this.server = mbeanServer;
+	public void setServer(MBeanServer server) {
+		this.server = server;
 	}
 
 	/**
@@ -126,13 +131,12 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	 * @throws MalformedObjectNameException if the <code>ObjectName</code> is malformed
 	 */
 	public void setObjectName(String objectName) throws MalformedObjectNameException {
-		this.objectName = org.springframework.jmx.support.ObjectNameManager.getInstance(objectName);
+		this.objectName = ObjectNameManager.getInstance(objectName);
 	}
 
 	/**
 	 * Set the <code>threaded</code> flag, indicating whether the <code>JMXConnectorServer</code>
 	 * should be started in a separate thread.
-	 * @see #start()
 	 */
 	public void setThreaded(boolean threaded) {
 		this.threaded = threaded;
@@ -141,7 +145,6 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	/**
 	 * Set the <code>daemon</code> flag, indicating whether any threads started for the
 	 * <code>JMXConnectorServer</code> should be started daemon threads.
-	 * @see #start()
 	 */
 	public void setDaemon(boolean daemon) {
 		this.daemon = daemon;
@@ -149,32 +152,20 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 
 
 	/**
-	 * Start the <code>JMXConnectorServer</code> automatically when running
-	 * in an <code>ApplicationContext</code>.
-	 * @throws IOException if there is a problem starting or running the <code>JMXConnectorServer</code>.
-	 * @throws JMException if a problem occured when registering the <code>JMXConnectorServer</code>
-	 * with the <code>MBeanServer</code>.
-	 * @see #start()
-	 */
-	public void afterPropertiesSet() throws IOException, JMException {
-		start();
-	}
-
-	/**
-	 * Start the <code>JMXConnectorServer</code>. If the <code>threaded</code> flag is set
-	 * to <code>true</code>, the <code>JMXConnectorServer</code> will be started in a
-	 * separate thread. If the <code>daemon</code> flag is set to <code>true</code>,
-	 * this thread will be started as a daemon thread.
-	 * @throws IOException if there is a problem starting or running the <code>JMXConnectorServer</code>
-	 * @throws JMException if a problem occured when registering the <code>JMXConnectorServer</code>
+	 * Start the connector server If the <code>threaded</code> flag is set to <code>true</code>,
+	 * the <code>JMXConnectorServer</code> will be started in a separate thread.
+	 * If the <code>daemon</code> flag is set to <code>true</code>, that thread will be
+	 * started as a daemon thread.
+	 * @throws JMException if a problem occured when registering the connector server
 	 * with the <code>MBeanServer</code>
+	 * @throws IOException if there is a problem starting the connector server
 	 */
-	public void start() throws IOException, JMException {
+	public void afterPropertiesSet() throws JMException, IOException {
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
 
-		// Create the service URL.
+		// Create the JMX service URL.
 		JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
 
 		// Create the connector server now.
@@ -185,26 +176,38 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 			this.server.registerMBean(this.connectorServer, this.objectName);
 		}
 
-		if (this.threaded) {
-			// Start the connector via a thread.
-			Thread connectorThread = new Thread() {
-				public void run() {
-					try {
-						connectorServer.start();
+		try {
+			if (this.threaded) {
+				// Start the connector server asynchronously (in a separate thread).
+				Thread connectorThread = new Thread() {
+					public void run() {
+						try {
+							connectorServer.start();
+						}
+						catch (IOException ex) {
+							throw new DelayedConnectorStartException(ex);
+						}
 					}
-					catch (IOException ex) {
-						throw new DelayedConnectorStartException(ex);
-					}
-				}
-			};
+				};
 
-			connectorThread.setName("JMX Connector Thread [" + this.serviceUrl + "]");
-			connectorThread.setDaemon(this.daemon);
-			connectorThread.start();
+				connectorThread.setName("JMX Connector Thread [" + this.serviceUrl + "]");
+				connectorThread.setDaemon(this.daemon);
+				connectorThread.start();
+			}
+			else {
+				// Start the connector server in the same thread.
+				this.connectorServer.start();
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info("JMX connector server started: " + this.connectorServer);
+			}
 		}
-		else {
-			// Start the connector in the same thread.
-			this.connectorServer.start();
+
+		catch (IOException ex) {
+			// Unregister the connector server if startup failed.
+			unregisterConnectorServer();
+			throw ex;
 		}
 	}
 
@@ -225,10 +228,33 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	/**
 	 * Stop the <code>JMXConnectorServer</code> managed by an instance of this class.
 	 * Automatically called on <code>ApplicationContext</code> shutdown.
-	 * @throws IOException if there is an error stopping the <code>JMXConnectorServer</code>.
+	 * @throws IOException if there is an error stopping the connector server
 	 */
 	public void destroy() throws IOException {
-		this.connectorServer.stop();
+		if (logger.isInfoEnabled()) {
+			logger.info("Stopping JMX connector server: " + this.connectorServer);
+		}
+		try {
+			this.connectorServer.stop();
+		}
+		finally {
+			unregisterConnectorServer();
+		}
+	}
+
+	/**
+	 * Unregister the connection server from the <code>MBeanServer</code>.
+	 * Logs an exception instead of rethrowing it.
+	 */
+	private void unregisterConnectorServer() {
+		if (this.objectName != null) {
+			try {
+				this.server.unregisterMBean(this.objectName);
+			}
+			catch (JMException ex) {
+				logger.error("Could not unregister JMX connector server", ex);
+			}
+		}
 	}
 
 

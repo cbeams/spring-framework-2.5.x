@@ -39,57 +39,73 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 
 	public void testStartupWithLocatedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-		bean.start();
+		bean.afterPropertiesSet();
 
-		checkServerConnection(bean, server);
+		try {
+			checkServerConnection(server);
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testStartupWithSuppliedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.setServer(server);
-		bean.start();
+		bean.afterPropertiesSet();
 
-		checkServerConnection(bean, server);
+		try {
+			checkServerConnection(server);
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.setObjectName(OBJECT_NAME);
-		bean.start();
+		bean.afterPropertiesSet();
 
-		// try to get the connector bean
-		ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-
-		assertNotNull("ObjectInstance should not be null", instance);
+		try {
+			// Try to get the connector bean.
+			ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+			assertNotNull("ObjectInstance should not be null", instance);
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testNoRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-		bean.start();
+		bean.afterPropertiesSet();
 
-		//	try to get the connector bean
 		try {
+			// Try to get the connector bean.
 			ObjectInstance instance = server.getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			fail("Instance should not be found");
 		}
 		catch (InstanceNotFoundException ex) {
-
+			// expected
+		}
+		finally {
+			bean.destroy();
 		}
 	}
 
-	private void checkServerConnection(ConnectorServerFactoryBean bean,
-			MBeanServer hostedServer) throws IOException, MalformedURLException {
-		// try to connect using client
-		JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(
-				ConnectorServerFactoryBean.DEFAULT_SERVICE_URL));
+	private void checkServerConnection(MBeanServer hostedServer) throws IOException, MalformedURLException {
+		// Try to connect using client.
+		JMXConnector connector = JMXConnectorFactory.connect(
+				new JMXServiceURL(ConnectorServerFactoryBean.DEFAULT_SERVICE_URL));
 		assertNotNull("Client Connector should not be null", connector);
 
-		// get the mbean server connection
+		// Get the MBean server connection.
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
 		assertNotNull("MBeanServerConnection should not be null", connection);
 
-		// test for mbean server equality
-		assertEquals("Registered MBean Count should be the same",
+		// Test for MBean server equality.
+		assertEquals("Registered MBean count should be the same",
 				hostedServer.getMBeanCount(), connection.getMBeanCount());
 	}
 
