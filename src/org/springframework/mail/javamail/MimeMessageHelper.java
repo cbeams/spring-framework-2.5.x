@@ -98,14 +98,28 @@ public class MimeMessageHelper {
 		this.mimeMessage.setFrom(new InternetAddress(from));
 	}
 
-	public void setTo(String from) throws MessagingException {
-		this.mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(from));
+	public void setTo(String to) throws MessagingException {
+		this.mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+	}
+
+	public void setTo(String[] to) throws MessagingException {
+		for (int i = 0; i < to.length; i++) {
+			this.mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to[i]));
+		}
+	}
+
+	public void setCc(String cc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc));
 	}
 
 	public void setCc(String[] cc) throws MessagingException {
 		for (int i = 0; i < cc.length; i++) {
 			this.mimeMessage.addRecipient(Message.RecipientType.CC, new InternetAddress(cc[i]));
 		}
+	}
+
+	public void setBcc(String bcc) throws MessagingException {
+		this.mimeMessage.addRecipient(Message.RecipientType.BCC, new InternetAddress(bcc));
 	}
 
 	public void setBcc(String[] bcc) throws MessagingException {
