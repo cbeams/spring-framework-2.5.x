@@ -1546,7 +1546,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
       has three values, one to tell the configurer to always override, one to
       let it <emphasis>never</emphasis> override and one to let it override
       only if the property cannot be found in the properties file specified.
-      Please consult the JavaDoc for the PropertiesPlaceHolderConfigurer for
+      Please consult the JavaDoc for the PropertiesPlaceholderConfigurer for
       more information.</para>
     </sect2>
 
