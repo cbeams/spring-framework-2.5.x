@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public interface MutableAttributesAccessor extends AttributesAccessor {
 	public void setAttribute(String attributeName, Object attributeValue);
+    
+    public void removeAttribute(String attributeName);
 
 	public void setAttributes(Map attributes);
 }

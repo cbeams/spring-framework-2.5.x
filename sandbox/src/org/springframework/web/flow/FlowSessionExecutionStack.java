@@ -135,7 +135,11 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	public void setAttributes(Map attributes) {
 		getActiveFlowSession().setAttributes(attributes);
 	}
-
+    
+    public void removeAttribute(String attributeName) {
+        getActiveFlowSession().removeAttribute(attributeName);
+    }
+    
 	public FlowSession getActiveFlowSession() {
 		if (executingFlowSessions.isEmpty()) {
 			throw new IllegalStateException("No flow session is executing in this execution stack");
@@ -167,5 +171,6 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 						getCurrentStateId()).append("rootFlow", isRootFlow()).append("executingFlowSessions",
 						executingFlowSessions).toString();
 	}
+
 
 }

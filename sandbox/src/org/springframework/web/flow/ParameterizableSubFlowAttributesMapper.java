@@ -289,6 +289,9 @@ public class ParameterizableSubFlowAttributesMapper implements SubFlowAttributes
 		public void setAttributes(Map attributes) {
 			throw new UnsupportedOperationException();
 		}
-
+        
+        public void removeAttribute(String attributeName) {
+            map.remove(attributeName);
+        }
 	}
 }

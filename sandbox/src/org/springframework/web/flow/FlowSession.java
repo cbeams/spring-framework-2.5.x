@@ -163,10 +163,18 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 			setAttribute((String)e.getKey(), e.getValue());
 		}
 	}
+    
+    public void removeAttribute(String attributeName) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing flow '" + getFlowId() + "' attribute '" + attributeName);
+        }
+        this.attributes.remove(attributeName);
+    }
 
 	public String toString() {
 		return new ToStringCreator(this).append("flowId", flowId).append("currentStateId", currentStateId).append(
 				"attributesCount", (attributes != null ? attributes.size() : 0)).append("attributes", attributes)
 				.toString();
 	}
+
 }
