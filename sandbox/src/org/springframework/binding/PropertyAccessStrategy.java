@@ -25,13 +25,14 @@ import org.springframework.beans.FatalBeanException;
  * structure.
  * 
  * @author Keith Donald
+ * @EXPERIMENTAL - not yet fit for general use
  */
 public interface PropertyAccessStrategy {
 
     /**
      * Get the value of a property.
      * 
-     * @param propertyName
+     * @param propertyPath
      *            name of the property to get the value of
      * @return the value of the property
      * @throws FatalBeanException

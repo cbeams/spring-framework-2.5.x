@@ -10,42 +10,43 @@ import net.sf.hibernate.mapping.Constraint;
 import org.springframework.binding.value.support.TypeConverter;
 
 /**
+ * @EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public interface PropertyMetadata {
-    public String getName();
+	public String getName();
 
-    public String getCaption();
+	public String getCaption();
 
-    public String getDescription();
+	public String getDescription();
 
-    public Class getType();
+	public Class getType();
 
-    public boolean isReadable();
+	public boolean isReadable();
 
-    public boolean isWriteable();
+	public boolean isWriteable();
 
-    public boolean isCollection();
+	public boolean isCollection();
 
-    public boolean isBean();
+	public boolean isBean();
 
-    public boolean isScalar();
+	public boolean isScalar();
 
-    public BeanMetadata getBeanMetadata() throws IllegalStateException;
+	public BeanMetadata getBeanMetadata() throws IllegalStateException;
 
-    public Method getReadMethod();
+	public Method getReadMethod();
 
-    public Method getWriteMethod();
+	public Method getWriteMethod();
 
-    public boolean isBound();
+	public boolean isBound();
 
-    public boolean isConstrained();
+	public boolean isConstrained();
 
-    public Constraint getValueConstraint();
+	public Constraint getValueConstraint();
 
-    public TypeConverter getToStringTypeConverter();
+	public TypeConverter getToStringTypeConverter();
 
-    public TypeConverter getTypeConverter(Class toClazz);
+	public TypeConverter getTypeConverter(Class toClazz);
 
-    public Object newInstance();
+	public Object newInstance();
 }
