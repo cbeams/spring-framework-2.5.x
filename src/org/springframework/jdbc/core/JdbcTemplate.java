@@ -212,7 +212,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	// Methods dealing with a plain java.sql.Connection
 	//-------------------------------------------------------------------------
 
-	public Object execute(final ConnectionCallback action) throws DataAccessException {
+	public Object execute(ConnectionCallback action) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
 			Connection conToUse = con;
@@ -234,7 +234,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
-	public Object execute(final StatementCallback action) throws DataAccessException {
+	public Object execute(StatementCallback action) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
