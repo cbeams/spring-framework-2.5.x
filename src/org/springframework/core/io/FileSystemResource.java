@@ -11,23 +11,23 @@ import java.io.InputStream;
  * @since 28.12.2003
  * @see java.io.File
  */
-public class FileResource extends AbstractResource {
+public class FileSystemResource extends AbstractResource {
 
 	private final File file;
 
 	/**
-	 * Create a new FileResource.
+	 * Create a new FileSystemResource.
 	 * @param file a File handle
 	 */
-	public FileResource(File file) {
+	public FileSystemResource(File file) {
 		this.file = file;
 	}
 
 	/**
-	 * Create a new FileResource.
+	 * Create a new FileSystemResource.
 	 * @param path a file path
 	 */
-	public FileResource(String path) {
+	public FileSystemResource(String path) {
 		this.file = new File(path);
 	}
 

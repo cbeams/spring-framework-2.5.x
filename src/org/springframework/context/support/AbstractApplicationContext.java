@@ -31,7 +31,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -40,12 +39,13 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.config.ApplicationContextAwareProcessor;
 import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.context.config.ContextResourceEditor;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.UrlResource;
@@ -65,7 +65,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -218,7 +218,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @throws IOException exception when opening the specified resource
 	 */
 	protected Resource getResourceByPath(String path) throws IOException {
-		return new FileResource(path);
+		return new FileSystemResource(path);
 	}
 
 	/**

@@ -12,7 +12,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.FileResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 import org.springframework.ui.velocity.VelocityInitializationException;
@@ -26,7 +26,7 @@ public class VelocityConfigurerTests extends TestCase {
 
 	public void testVelocityEngineFactoryBeanWithConfigLocation() {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		vefb.setConfigLocation(new FileResource("myprops.properties"));
+		vefb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		vefb.setVelocityProperties(props);
@@ -41,7 +41,7 @@ public class VelocityConfigurerTests extends TestCase {
 
 	public void testVelocityEngineFactoryBeanWithResourceLoaderPath() {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
-		vefb.setResourceLoaderPath(new FileResource("/mydir") {
+		vefb.setResourceLoaderPath(new FileSystemResource("/mydir") {
 			public boolean exists() {
 				return true;
 			}
@@ -57,7 +57,7 @@ public class VelocityConfigurerTests extends TestCase {
 		acControl.replay();
 
 		VelocityConfigurer vc = new VelocityConfigurer();
-		vc.setResourceLoaderPath(new FileResource("/mydir") {
+		vc.setResourceLoaderPath(new FileSystemResource("/mydir") {
 			public boolean exists() {
 				return true;
 			}
