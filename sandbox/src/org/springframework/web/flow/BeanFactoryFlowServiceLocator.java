@@ -12,7 +12,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 /**
  * @author Keith Donald
  */
-public class BeanFactoryFlowDao implements FlowDao, BeanFactoryAware {
+public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
 	private BeanFactory beanFactory;
 

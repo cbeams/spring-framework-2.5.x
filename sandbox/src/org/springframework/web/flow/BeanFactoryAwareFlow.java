@@ -22,14 +22,14 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 
 	public BeanFactoryAwareFlow() {
 		super();
-		setFlowDao(new BeanFactoryFlowDao());
+		setFlowDao(new BeanFactoryFlowServiceLocator());
 	}
 
 	/**
 	 * @param id
 	 */
 	public BeanFactoryAwareFlow(String id) {
-		super(id, new BeanFactoryFlowDao());
+		super(id, new BeanFactoryFlowServiceLocator());
 	}
 
 	/**
@@ -39,21 +39,21 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 	 * @param states
 	 */
 	public BeanFactoryAwareFlow(String id, String startStateId, AbstractState[] states) {
-		super(id, startStateId, new BeanFactoryFlowDao(), states);
+		super(id, startStateId, new BeanFactoryFlowServiceLocator(), states);
 	}
 
-	public void setFlowDao(FlowDao dao) {
-		Assert.isInstanceOf(BeanFactoryFlowDao.class, dao,
+	public void setFlowDao(FlowServiceLocator dao) {
+		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, dao,
 				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows: ");
 		super.setFlowDao(dao);
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		((BeanFactoryFlowDao)getFlowDao()).setBeanFactory(beanFactory);
+		((BeanFactoryFlowServiceLocator)getFlowDao()).setBeanFactory(beanFactory);
 	}
 
 	protected BeanFactory getBeanFactory() {
-		return ((BeanFactoryFlowDao)getFlowDao()).getBeanFactory();
+		return ((BeanFactoryFlowServiceLocator)getFlowDao()).getBeanFactory();
 	}
 
 	public void setBeanName(String name) {

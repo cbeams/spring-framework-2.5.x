@@ -25,7 +25,7 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public interface FlowDao {
+public interface FlowServiceLocator {
 
 	/**
 	 * @param actionBeanId

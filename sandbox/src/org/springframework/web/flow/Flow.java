@@ -315,7 +315,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private StateGroups stateGroups = new StateGroups();
 
-	private transient FlowDao flowDao;
+	private transient FlowServiceLocator flowDao;
 
 	private transient EventListenerListHelper flowSessionExecutionListeners = new EventListenerListHelper(
 			FlowSessionExecutionListener.class);
@@ -335,7 +335,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param id
 	 * @param flowDao
 	 */
-	public Flow(String id, FlowDao flowDao) {
+	public Flow(String id, FlowServiceLocator flowDao) {
 		setId(id);
 		setFlowDao(flowDao);
 	}
@@ -345,7 +345,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param startStateId
 	 * @param states
 	 */
-	public Flow(String id, String startStateId, FlowDao flowDao, AbstractState[] states) {
+	public Flow(String id, String startStateId, FlowServiceLocator flowDao, AbstractState[] states) {
 		setId(id);
 		setFlowDao(flowDao);
 		addAll(states);
@@ -360,7 +360,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param dao
 	 */
-	public void setFlowDao(FlowDao dao) {
+	public void setFlowDao(FlowServiceLocator dao) {
 		this.flowDao = dao;
 	}
 
@@ -440,7 +440,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @return
 	 */
-	public FlowDao getFlowDao() {
+	public FlowServiceLocator getFlowDao() {
 		assertFlowDaoSet();
 		return this.flowDao;
 	}
