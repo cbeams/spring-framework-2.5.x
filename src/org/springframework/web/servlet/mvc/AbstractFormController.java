@@ -5,8 +5,6 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -33,7 +31,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>Subclasses need to override showForm to prepare the form view, and
  * processFormSubmission to handle submit requests. For the latter, binding errors
- * like type mismatches will be reported via the given "errors" binder.
+ * like type mismatches will be reported via the given "errors" holder.
  * For additional custom form validation, a validator (property inherited from
  * BaseCommandController) can be used, reporting via the same "errors" instance.</p>
  *
@@ -216,7 +214,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * as new form when using session form mode.
 	 */
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws Exception {
 		if (isFormSubmission(request)) {
 		  if (isSessionForm() && request.getSession().getAttribute(getFormSessionAttributeName()) == null) {
 			  // cannot submit a session form if no form object is in the session
@@ -252,11 +250,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return the prepared form view
-	 * @throws ServletException in case of an invalid new form object
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of an invalid new form object
 	 */
 	protected final ModelAndView showNewForm(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	    throws Exception {
 		// show new form
 		logger.debug("Displaying new form");
 		Object formObject = formBackingObject(request);
@@ -282,10 +279,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Subclasses can override this to provide a preinitialized backing object.
 	 * @param request current HTTP request
 	 * @return the backing objact
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see BaseCommandController#createCommand
 	 */
-	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
+	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		return createCommand();
 	}
 
@@ -298,14 +295,14 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * view name, consider using SimpleFormController.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param errors binder containing errors
+	 * @param errors validation errors holder
 	 * @return the prepared form view, or null if handled directly
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see #showForm(HttpServletRequest, BindException, String)
 	 * @see SimpleFormController#setFormView
 	 */
 	protected abstract ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
-	                                         BindException errors) throws ServletException, IOException;
+	                                         BindException errors) throws Exception;
 
 	/**
 	 * Prepare model and view for the given form, including reference and errors.
@@ -313,13 +310,13 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * to the form, as it has been removed by getCommand.
 	 * Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
-	 * @param errors binder containing errors
+	 * @param errors validation errors holder
 	 * @param viewName name of the form view
 	 * @return the prepared form view
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName)
-	    throws ServletException {
+	    throws Exception {
 		return showForm(request, errors, viewName, null);
 	}
 
@@ -330,23 +327,23 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * to the form, as it has been removed by getCommand.
 	 * Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
-	 * @param errors binder containing errors
+	 * @param errors validation errors holder
 	 * @param viewName name of the form view
 	 * @param controlModel model map containing controller-specific control data
 	 * (e.g. current page in wizard-style controllers).
 	 * @return the prepared form view
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName,
-	                                      Map controlModel) throws ServletException {
+	                                      Map controlModel) throws Exception {
 		if (isSessionForm()) {
 			request.getSession().setAttribute(getFormSessionAttributeName(), errors.getTarget());
 		}
-		Map model = referenceData(request, errors.getTarget(), errors);
-		if (model == null) {
-			model = new HashMap();
+		Map model = errors.getModel();
+		Map referenceData = referenceData(request, errors.getTarget(), errors);
+		if (referenceData != null) {
+			model.putAll(referenceData);
 		}
-		model.putAll(errors.getModel());
 		if (controlModel != null) {
 			model.putAll(controlModel);
 		}
@@ -360,13 +357,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
-	 * @param errors binder containing current errors, if any
+	 * @param errors validation errors holder
 	 * @return a Map with reference data entries, or null if none
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(HttpServletRequest request, Object command, Errors errors)
-	    throws ServletException {
+	protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
 		return null;
 	}
 
@@ -383,13 +379,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a prepared view, or null if handled directly
-	 * @throws ServletException in case of invalid state
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of errors
 	 * @see #showNewForm
 	 * @see #setBindOnNewForm
 	 */
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	    throws Exception {
 		Object command = formBackingObject(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
 		return processFormSubmission(request, response, command, binder.getErrors());
@@ -402,9 +397,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * re-added when showing the form for resubmission.
 	 * @param request current HTTP request
 	 * @return object form to bind onto
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final Object getCommand(HttpServletRequest request) throws ServletException {
+	protected final Object getCommand(HttpServletRequest request) throws Exception {
 		if (!isSessionForm()) {
 			return super.getCommand(request);
 		}
@@ -431,16 +426,15 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
-	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
+	 * @param errors holder without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
-	 * @throws ServletException in case of invalid state or arguments
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of errors
 	 * @see #isFormSubmission
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processFormSubmission(HttpServletRequest request,	HttpServletResponse response,
 	                                                      Object command, BindException errors)
-			throws ServletException, IOException;
+			throws Exception;
 
 }

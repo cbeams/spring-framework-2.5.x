@@ -5,9 +5,6 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,7 +61,7 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	}
 	
 	protected final ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws Exception {
 		Object command = getCommand(request);
 		ServletRequestDataBinder binder = bindAndValidate(request, command);
 		return handle(request, response, command, binder.getErrors());
@@ -78,12 +75,11 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command the populated command object
-	 * @param errors Errors instance containing errors
+	 * @param errors validation errors holder
 	 * @return a ModelAndView to render, or null if handled directly
 	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView handle(HttpServletRequest request, HttpServletResponse response,
-	                                       Object command, BindException errors)
-	    throws ServletException, IOException;
+	                                       Object command, BindException errors) throws Exception;
 
 }

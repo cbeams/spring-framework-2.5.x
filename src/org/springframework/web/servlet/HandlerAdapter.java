@@ -1,8 +1,5 @@
 package org.springframework.web.servlet;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,13 +48,11 @@ public interface HandlerAdapter {
 	 * to the supports() method of this interface, which must have returned true.
 	 * Implementations that generate output themselves (and return null
 	 * from this method) may encounter IOExceptions.
-	 * @throws ServletException if there is a general error
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
 	 * model data, or null if the request has been handled directly
 	 */
-	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws ServletException, IOException;
+	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
 	/**
 	 * Same contract as for HttpServlet.getLastModified.

@@ -78,6 +78,9 @@ import org.springframework.web.util.WebUtils;
  * Each servlet will operate in its own namespace. Only the root application context,
  * and any config objects set for the application as a whole, will be shared.
  *
+ * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @version $Id: DispatcherServlet.java,v 1.16 2003-11-23 11:58:18 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -86,33 +89,31 @@ import org.springframework.web.util.WebUtils;
  * @see ThemeResolver
  * @see org.springframework.web.context.WebApplicationContext
  * @see org.springframework.web.context.ContextLoaderListener
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.15 2003-11-21 15:40:52 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
 	/**
-	 * Well-known name for the MultipartResolver object in the bean factory for
-	 * this namespace.
+	 * Well-known name for the MultipartResolver object in the bean factory for this namespace.
 	 */
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
 	/**
-	 * Well-known name for the LocaleResolver object in the bean factory for
-	 * this namespace.
+	 * Well-known name for the LocaleResolver object in the bean factory for this namespace.
 	 */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
 	/**
-	 * Well-known name for the ThemeResolver object in the bean factory for
-	 * this namespace.
+	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
 	 */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
-	 * Well-known name for the ViewResolver object in the bean factory for
-	 * this namespace.
+	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
+	 */
+	public static final String EXCEPTION_RESOLVER_BEAN_NAME = "exceptionResolver";
+
+	/**
+	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
@@ -154,11 +155,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
 
-	/** List of HandlerMappings */
+	/** List of HandlerMappings used by this servlet */
 	private List handlerMappings;
 
-	/** List of HandlerAdapters */
+	/** List of HandlerAdapters used by this servlet */
 	private List handlerAdapters;
+
+	/** List of HandlerExceptionResolvers used by this servlet */
+	private List handlerExceptionResolvers;
 
 	/** ViewResolver used by this servlet */
 	private ViewResolver viewResolver;
@@ -176,6 +180,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initThemeResolver();
 		initHandlerMappings();
 		initHandlerAdapters();
+		initHandlerExceptionResolvers();
 		initViewResolver();
 	}
 
@@ -190,13 +195,13 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.info("Loaded multipart resolver [" + this.multipartResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// Default to no multipart resolver
+			// default is no multipart resolver
 			this.multipartResolver = null;
 			logger.info("Unable to locate multipart resolver with name ["	+ MULTIPART_RESOLVER_BEAN_NAME +
 			            "]: no multipart handling provided");
 		}
 		catch (BeansException ex) {
-			// We tried and failed to load the MultipartResolver specified by a bean
+			// we tried and failed to load the MultipartResolver specified by a bean
 			throw new ServletException("Fatal error loading multipart resolver with name '" +
 			                           MULTIPART_RESOLVER_BEAN_NAME	+ "'",	ex);
 		}
@@ -207,21 +212,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to AcceptHeaderLocaleResolver.
 	 */
-	private void initLocaleResolver() throws ServletException {
+	private void initLocaleResolver() {
 		try {
 			this.localeResolver = (LocaleResolver) getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME);
 			logger.info("Loaded locale resolver [" + this.localeResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default
+			// we need to use the default
 			this.localeResolver = new AcceptHeaderLocaleResolver();
 			logger.info("Unable to locate locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 			            "': using default [" + this.localeResolver + "]");
-		}
-		catch (BeansException ex) {
-			// We tried and failed to load the LocaleResolver specified by a bean
-			throw new ServletException("Fatal error loading locale resolver with name '" +
-			                           LOCALE_RESOLVER_BEAN_NAME + "'", ex);
 		}
 	}
 
@@ -230,21 +230,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to a AcceptHeaderLocaleResolver.
 	 */
-	private void initThemeResolver() throws ServletException {
+	private void initThemeResolver() {
 		try {
 			this.themeResolver = (ThemeResolver) getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME);
 			logger.info("Loaded theme resolver [" + this.themeResolver + "]");
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default
+			// we need to use the default
 			this.themeResolver = new FixedThemeResolver();
 			logger.info("Unable to locate theme resolver with name '" + THEME_RESOLVER_BEAN_NAME +
 			            "': using default [" + this.themeResolver + "]");
-		}
-		catch (BeansException ex) {
-			// We tried and failed to load the ThemeResolver specified by a bean
-			throw new ServletException("Fatal error loading theme resolver with name '" +
-			                           THEME_RESOLVER_BEAN_NAME + "'", ex);
 		}
 	}
 
@@ -253,33 +248,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no HandlerMapping beans are defined in the BeanFactory
 	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
-	private void initHandlerMappings() throws ServletException {
-		//Find all HandlerMappings in the ApplicationContext
+	private void initHandlerMappings() {
+		// find all HandlerMappings in the ApplicationContext
 		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
 		this.handlerMappings = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings.isEmpty()) {
-			initDefaultHandlerMapping();
-			logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
-		}
-		else {
-			// We keep HandlerMappings in sorted order
-			Collections.sort(this.handlerMappings, new OrderComparator());
-		}
-	}
-
-	/**
-	 * Initialize the default HandlerMapping object, a BeanNameUrlHandlerMapping.
-	 */
-	private void initDefaultHandlerMapping() throws ServletException {
-		try {
 			BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 			hm.setApplicationContext(getWebApplicationContext());
 			this.handlerMappings.add(hm);
+			logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
 		}
-		catch (BeansException ex) {
-			throw new ServletException("Error initializing default HandlerMapping: " + ex.getMessage(), ex);
+		else {
+			// we keep HandlerMappings in sorted order
+			Collections.sort(this.handlerMappings, new OrderComparator());
 		}
 	}
 
@@ -288,33 +271,34 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no HandlerAdapter beans are defined in the BeanFactory
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
-	private void initHandlerAdapters() throws ServletException {
-		//Find all HandlerAdapters in the ApplicationContext
+	private void initHandlerAdapters() {
+		// find all HandlerAdapters in the ApplicationContext
 		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerAdapter.class, true, false);
 		this.handlerAdapters = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
 		if (this.handlerAdapters.isEmpty()) {
-			initDefaultHandlerAdapter();
+			SimpleControllerHandlerAdapter ha = new SimpleControllerHandlerAdapter();
+			this.handlerAdapters.add(ha);
 			logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
 		}
 		else {
-			// We keep HandlerAdapters in sorted order
+			// we keep HandlerAdapters in sorted order
 			Collections.sort(this.handlerAdapters, new OrderComparator());
 		}
 	}
 
 	/**
-	 * Initialize the default HandlerAdapter, a SimpleControllerHandlerAdapter.
+	 * Initialize the HandlerExceptionResolver used by this class.
+	 * If no bean is defined with the given name in the BeanFactory
+	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initDefaultHandlerAdapter() throws ServletException {
-		try {
-			SimpleControllerHandlerAdapter ha = new SimpleControllerHandlerAdapter();
-			this.handlerAdapters.add(ha);
-		}
-		catch (BeansException ex) {
-			throw new ServletException("Error initializing default HandlerAdapter: " + ex.getMessage(), ex);
-		}
+	private void initHandlerExceptionResolvers() {
+		// find all HandlerExceptionResolvers in the ApplicationContext
+		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerExceptionResolver.class, true, false);
+		this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
+		// we keep HandlerExceptionResolvers in sorted order
+		Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
 	}
 
 	/**
@@ -322,7 +306,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolver() throws ServletException {
+	private void initViewResolver() {
 		try {
 			this.viewResolver = (ViewResolver) getWebApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME);
 			logger.info("Loaded view resolver [" + viewResolver + "]");
@@ -330,20 +314,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default
 			InternalResourceViewResolver vr = new InternalResourceViewResolver();
-			try {
-				vr.setApplicationContext(getWebApplicationContext());
-			}
-			catch (BeansException ex2) {
-				throw new ServletException("Fatal error initializing default ViewResolver");
-			}
+			vr.setApplicationContext(getWebApplicationContext());
 			this.viewResolver = vr;
 			logger.info("Unable to locate view resolver with name '" + VIEW_RESOLVER_BEAN_NAME +
 									"': using default [" + this.viewResolver + "]");
-		}
-		catch (BeansException ex) {
-			// We tried and failed to load the ViewResolver specified by a bean
-			throw new ServletException("Fatal error loading view resolver: bean with name '" + VIEW_RESOLVER_BEAN_NAME +
-																 "' is required in servlet '" + getServletName()  + "'", ex);
 		}
 	}
 
@@ -384,29 +358,57 @@ public class DispatcherServlet extends FrameworkServlet {
 				return;
 			}
 
-			// Apply preHandle methods of registered interceptors
-			if (mappedHandler.getInterceptors() != null) {
-				for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-					if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-						return;
+			ModelAndView mv = null;
+			try {
+				// apply preHandle methods of registered interceptors
+				if (mappedHandler.getInterceptors() != null) {
+					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
+						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
+							return;
+						}
+					}
+				}
+
+				// actually invoke the handler
+				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+				// apply postHandle methods of registered interceptors
+				if (mappedHandler.getInterceptors() != null) {
+					for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
+						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
+					}
+				}
+			}
+			catch (ModelAndViewDefiningException ex) {
+				logger.debug("ModelAndViewDefiningException encountered", ex);
+				mv = ex.getModelAndView();
+			}
+			catch (Exception ex) {
+				ModelAndView exMv = null;
+				for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
+					exMv = ((HandlerExceptionResolver) it.next()).resolveException(ex, mappedHandler.getHandler());
+				}
+				if (exMv != null) {
+					logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception", ex);
+					mv = exMv;
+				}
+				else {
+					if (ex instanceof ServletException) {
+						throw (ServletException) ex;
+					}
+					else if (ex instanceof IOException) {
+						throw (IOException) ex;
+					}
+					else {
+						throw new ServletException(ex.getMessage(), ex);
 					}
 				}
 			}
 
-			// Actually invoke the handler
-			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-			ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
-			// Apply postHandle methods of registered interceptors
-			if (mappedHandler.getInterceptors() != null) {
-				for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-					interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
-				}
-			}
-
-			// Did the handler return a view to render?
+			// did the handler return a view to render?
 			if (mv != null) {
 				logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
 				Locale locale = this.localeResolver.resolveLocale(processedRequest);
@@ -419,7 +421,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		finally {
-			// Clean up any resources used by a multipart request.
+			// clean up any resources used by a multipart request.
 			if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
@@ -495,11 +497,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	    throws ServletException, IOException {
 		View view = null;
 		if (mv.isReference()) {
-			// We need to resolve this view name
+			// we need to resolve this view name
 			view = this.viewResolver.resolveViewName(mv.getViewName(), locale);
 		}
 		else {
-			// No need to lookup: the ModelAndView object contains the actual View object
+			// no need to lookup: the ModelAndView object contains the actual View object
 			view = mv.getView();
 		}
 		if (view == null) {

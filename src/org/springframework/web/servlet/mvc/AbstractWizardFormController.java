@@ -1,6 +1,5 @@
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,7 +135,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Call page-specific onBindAndValidate method.
 	 */
 	protected final void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
-	    throws ServletException {
+	    throws Exception {
 		onBindAndValidate(request, command, errors, getCurrentPage(request));
 	}
 
@@ -148,19 +147,19 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param command bound command
 	 * @param errors Errors instance for additional custom validation
 	 * @param page current wizard page
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page)
-	    throws ServletException {
+	    throws Exception {
 	}
 
 	/**
 	 * Call page-specific referenceData method.
 	 */
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
-	    throws ServletException {
+	    throws Exception {
 		return referenceData(request, command, errors, getCurrentPage(request));
 	}
 
@@ -171,14 +170,14 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
-	 * @param errors binder containing current errors, if any
+	 * @param errors validation errors holder
 	 * @param page current wizard page
 	 * @return a Map with reference data entries, or null if none
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors, int page)
-	    throws ServletException {
+	    throws Exception {
 		return null;
 	}
 
@@ -186,7 +185,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Show first page as form view.
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, HttpServletResponse response, BindException errors)
-	    throws ServletException {
+	    throws Exception {
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
 
@@ -195,13 +194,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * for the given page. Can be used in processFinish implementations,
 	 * to show the respective page in case of validation errors.
 	 * @param request current HTTP request
-	 * @param errors binder containing errors
+	 * @param errors validation errors holder
 	 * @param page number of page to show
 	 * @return the prepared form view
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
-	    throws ServletException {
+	    throws Exception {
 		if (page >= 0 && page < this.pages.length) {
 			logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			// set page session attribute for tracking
@@ -269,9 +268,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Apply wizard workflow: finish, cancel, page change.
 	 */
 	protected final ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
-	                                                   Object command, BindException errors)
-	    throws ServletException, IOException {
-
+	                                                   Object command, BindException errors) throws Exception {
 		int currentPage = getCurrentPage(request);
 		request.getSession().removeAttribute(getPageSessionAttributeName());
 
@@ -349,8 +346,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * If there are page validation errors, show the respective view page.
 	 */
 	private ModelAndView validatePagesAndFinish(HttpServletRequest request, HttpServletResponse response,
-	                                            Object command, BindException errors)
-	    throws ServletException, IOException {
+	                                            Object command, BindException errors) throws Exception {
 		for (int page = 0; page < pages.length; page++) {
 			validatePage(command, errors, page);
 			// in case of field errors on a page -> show the page
@@ -364,12 +360,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Implementations will typically call fine-granular validateXXX methods
-	 * of this instance's validator, combining them to validation of the
-	 * respective pages. The validator's default validate method will not be
-	 * called by a wizard controller!
+	 * Implementations will typically call fine-granular validateXXX methods of this
+	 * instance's validator, combining them to validation of the respective pages.
+	 * The validator's default validate method will not be called by a wizard controller!
 	 * @param command form object with the current wizard state
-	 * @param errors binder containing errors
+	 * @param errors validation errors holder
 	 * @param page number of page to show
 	 */
 	protected abstract void validatePage(Object command, Errors errors, int page);
@@ -381,14 +376,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param command form object with the current wizard state
-	 * @param errors Errors instance containing errors
+	 * @param errors validation errors holder
 	 * @return the finish view
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processFinish(HttpServletRequest request, HttpServletResponse response,
-	                                              Object command, BindException errors)
-	    throws ServletException, IOException;
+	                                              Object command, BindException errors) throws Exception;
 
 	/**
 	 * Template method for processing the cancel action of this wizard.
@@ -399,11 +393,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param command form object with the current wizard state
 	 * @param errors Errors instance containing errors
 	 * @return the finish view
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see org.springframework.validation.Errors
 	 */
 	protected abstract ModelAndView processCancel(HttpServletRequest request, HttpServletResponse response,
-	                                              Object command, BindException errors)
-	    throws ServletException, IOException;
+	                                              Object command, BindException errors) throws Exception;
 
 }

@@ -5,17 +5,15 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Base class for any Controller implementation. Most similar to the Struts'
- * notion of <code>Actions</code>.
+ * Base Controller interface, representing a component that receives HttpServletRequest
+ * and HttpServletResponse like a <code>HttpServlet</code> but is able to participate in
+ * an MVC workflow. Comparable to the notion of a Struts <code>Action</code>
  *
  * <p>Any implementation of the Controller interface should be a
  * <i>reusable, threadsafe</i> class, capable of handling multiple
@@ -48,24 +46,20 @@ import org.springframework.web.servlet.ModelAndView;
  * extended one of the abstract controller mentioned above.
  * </p>
  *
- * <p><b>Exposed configuration properties:</b><br>
- * none</p>
- *
  * @author Rod Johnson
- * @version $Id: Controller.java,v 1.2 2003-11-02 13:01:31 johnsonr Exp $
+ * @version $Id: Controller.java,v 1.3 2003-11-23 11:58:18 jhoeller Exp $
  */
 public interface Controller {
 
 	/**
-	 * Process the request and return a ModelAndView object which the
-	 * DispatcherServlet will render. A null return is not an error.
-	 * It indicates that this object completed request processing itself,
-	 * thus there is no ModelAndView to render.
+	 * Process the request and return a ModelAndView object which the DispatcherServlet
+	 * will render. A null return is not an error: It indicates that this object
+	 * completed request processing itself, thus there is no ModelAndView to render.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render, or null if handled directly
+	 * @throws Exception in case of errors
 	 */
-	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException;
+	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

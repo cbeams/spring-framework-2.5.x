@@ -1,13 +1,8 @@
-
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -53,53 +48,29 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Rod Johnson
  */
-public class ParameterizableViewController extends AbstractController 
-		implements InitializingBean {
+public class ParameterizableViewController extends AbstractController {
 	
-	private String successView;
+	private String viewName;
 	
-
-	/* Require only success view name */
-	public ParameterizableViewController() {
-	}
-	
-	
-	//---------------------------------------------------------------------
-	// Bean properties
-	//---------------------------------------------------------------------
 	/**
-	 * Gets the viewName.
-	 * Used in this class: other properties are for subclasses only.
-	 * @return Returns a String
-	 */
-	public String getViewName() {
-		return successView;
-	}
-
-	/**
-	 * Sets the viewName.
-	 * @param viewName The viewName to set
+	 * Set the view name to return.
 	 */
 	public void setViewName(String viewName) {
-		this.successView = viewName;
+		this.viewName = viewName;
 	}
 	
-
-
-	/**
-	 * @see AbstractController#handleRequest(HttpServletRequest, HttpServletResponse)
-	 */
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		return new ModelAndView(this.successView);
+	public String getViewName() {
+		return viewName;
 	}
-	
-	/**
-	 * Ensure at least successView is set!?
-	 * @see InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws Exception {
-		if (successView == null)
-			throw new ServletException("viewName bean property must be set in " + getClass().getName());
+
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
+		return new ModelAndView(this.viewName);
+	}
+
+	protected void initApplicationContext() {
+		if (viewName == null) {
+			throw new IllegalArgumentException("viewName must be set in " + getClass().getName());
+		}
 	}
 
 }

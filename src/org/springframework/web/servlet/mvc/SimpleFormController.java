@@ -1,6 +1,5 @@
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -138,13 +137,12 @@ public class SimpleFormController extends AbstractFormController {
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
-	 * @param errors binder containing current errors, if any
+	 * @param errors validation errors holder
 	 * @return a Map with reference data entries, or null if none
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(HttpServletRequest request, Object command, Errors errors)
-	    throws ServletException {
+	protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
 		return referenceData(request);
 	}
 
@@ -155,10 +153,10 @@ public class SimpleFormController extends AbstractFormController {
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @return a Map with reference data entries, or null if none
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(HttpServletRequest request) throws ServletException {
+	protected Map referenceData(HttpServletRequest request) throws Exception {
 		return null;
 	}
 
@@ -169,7 +167,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #setFormView
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, HttpServletResponse response,
-	                                      BindException errors) throws ServletException {
+	                                      BindException errors) throws Exception {
 		return showForm(request, errors, getFormView());
 	}
 
@@ -183,8 +181,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #onSubmit(HttpServletRequest, HttpServletResponse, Object, BindException)
 	 */
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response,
-	                                             Object command, BindException errors)
-	    throws ServletException, IOException {
+	                                             Object command, BindException errors) throws Exception {
 		if (errors.hasErrors()) {
 			logger.debug("Data binding errors: " + errors.getErrorCount());
 			return showForm(request, response, errors);
@@ -208,15 +205,13 @@ public class SimpleFormController extends AbstractFormController {
 	 * @param command form object with request parameters bound onto it
 	 * @param errors Errors instance without errors (subclass can add errors if it wants to)
 	 * @return the prepared model and view, or null
-	 * @throws ServletException in case of invalid state or arguments
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of errors
 	 * @see #onSubmit(Object)
 	 * @see #showForm
 	 * @see org.springframework.validation.Errors
 	 */
 	protected ModelAndView onSubmit(HttpServletRequest request,	HttpServletResponse response,
-																	Object command,	BindException errors)
-			throws ServletException, IOException {
+																	Object command,	BindException errors) throws Exception {
 		return onSubmit(command);
 	}
 
@@ -226,12 +221,13 @@ public class SimpleFormController extends AbstractFormController {
 	 * <p>Default implementation prepares success view.
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of errors
 	 * @see #setSuccessView
 	 */
-	protected ModelAndView onSubmit(Object command) throws ServletException {
-		if (getSuccessView() == null)
+	protected ModelAndView onSubmit(Object command) throws Exception {
+		if (getSuccessView() == null) {
 			throw new ServletException("successView isn't set");
+		}
 		return new ModelAndView(getSuccessView(), getCommandName(), command);
 	}
 

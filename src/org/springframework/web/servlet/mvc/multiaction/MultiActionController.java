@@ -5,7 +5,6 @@
  
 package org.springframework.web.servlet.mvc.multiaction;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SessionRequiredException;
 import org.springframework.web.servlet.mvc.WebContentGenerator;
-
 
 /**
  * Controller implementation that allows multiple request types to be
@@ -74,10 +72,20 @@ public class MultiActionController extends WebContentGenerator implements Contro
 		
 	/** Prefix for last modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
-	
+
+
 	//---------------------------------------------------------------------
 	// Instance data
 	//---------------------------------------------------------------------
+
+	/**
+	 * Helper object that knows how to return method names from incoming requests.
+	 * Can be overridden via the methodNameResolver bean property
+	 */
+	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
+
+	/** Object we'll invoke methods on. Defaults to this. */
+	private Object delegate;
 
 	/** Methods, keyed by name */
 	private Map methodHash;
@@ -88,25 +96,15 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	/** Methods, keyed by exception class */
 	private Map exceptionHandlerHash;
 
-	/** 
-	 * Helper object that knows how to return method names from incoming requests.
-	 * Can be overridden via the methodNameResolver bean property
-	 */
-	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
-	
-	/** Object we'll invoke methods on. Defaults to this. */
-	private Object delegate;
-	
-	
+
 	//---------------------------------------------------------------------
 	// Constructors
 	//---------------------------------------------------------------------
 
 	/**
 	 * Constructor for MultiActionController that looks for handler methods
-	 * in the present subclass.
-	 * Caches methods for quick invocation later. This class's
-	 * use of reflection will impose little overhead at runtime
+	 * in the present subclass.Caches methods for quick invocation later.
+	 * This class's use of reflection will impose little overhead at runtime.
 	 * @throws ApplicationContextException if the class doesn't contain any
 	 * action handler methods (and so could never handle any requests).
 	 */
@@ -115,14 +113,11 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	}
 	
 	/**
-	 * Constructor for MultiActionController that looks for handler
-	 * methods in delegate, rather than a subclass of this class.
-	 * Caches methds
-	 * @param delegate handler class. This doesn't need to
-	 * implement any particular interface, as everything is done
-	 * using reflection.
-	 * @throws ApplicationContextException if the class doesn't
-	 * contain any handler methods
+	 * Constructor for MultiActionController that looks for handler methods in delegate,
+	 * rather than a subclass of this class. Caches methods.
+	 * @param delegate handler class. This doesn't need to implement any particular
+	 * interface, as everything is done using reflection.
+	 * @throws ApplicationContextException if the class doesn't contain any handler methods
 	 */
 	public MultiActionController(Object delegate) throws ApplicationContextException {
 		setDelegate(delegate);
@@ -134,7 +129,7 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	//---------------------------------------------------------------------
 
 	/**
-	 * Sets the method name resolver used by this class.
+	 * Set the method name resolver used by this class.
 	 * Allows parameterization of mappings.
 	 * @param methodNameResolver the method name resolver used by this class
 	 */
@@ -161,10 +156,10 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	 * any valid request handling methods in the subclass.
 	 */
 	public final void setDelegate(Object delegate) throws ApplicationContextException {
+		if (delegate == null) {
+			throw new IllegalArgumentException("Delegate cannot be null in MultiActionController");
+		}
 		this.delegate = delegate;
-		if (delegate == null)
-			throw new ApplicationContextException("Delegate cannot be null in MultiActionController");
-
 		this.methodHash = new HashMap();
 		this.lastModifiedMethodHash = new HashMap();
 		
@@ -182,13 +177,13 @@ public class MultiActionController extends WebContentGenerator implements Contro
 				if (params.length >= 2 && params[0].equals(HttpServletRequest.class) && params[1].equals(HttpServletResponse.class)) {
 					// We're in business
 					logger.info("Found action method [" + methods[i] + "]");
-					methodHash.put(methods[i].getName(), methods[i]);
+					this.methodHash.put(methods[i].getName(), methods[i]);
 					
 					// Look for corresponding LastModified method
 					try {
 						Method lastModifiedMethod = delegate.getClass().getMethod(methods[i].getName() + LAST_MODIFIED_METHOD_SUFFIX, new Class[] { HttpServletRequest.class } );
 						// Put in cache, keyed by handler method name
-						lastModifiedMethodHash.put(methods[i].getName(), lastModifiedMethod);
+						this.lastModifiedMethodHash.put(methods[i].getName(), lastModifiedMethod);
 						logger.info("Found last modified method for action method [" + methods[i] + "]");
 					}
 					catch (NoSuchMethodException ex) {
@@ -201,14 +196,12 @@ public class MultiActionController extends WebContentGenerator implements Contro
 		// There must be SOME handler methods
 		
 		// WHAT IF SETTING DELEGATE LATER!?
-		if (methodHash.isEmpty()) {
-			String mesg = "No handler methods in class " + getClass().getName();
-			logger.error(mesg);
-			throw new ApplicationContextException(mesg);
+		if (this.methodHash.isEmpty()) {
+			throw new ApplicationContextException("No handler methods in class " + getClass().getName());
 		}
 		
 		// Now look for exception handlers
-		exceptionHandlerHash = new HashMap();
+		this.exceptionHandlerHash = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getReturnType().equals(ModelAndView.class) &&
 					methods[i].getParameterTypes().length == 3) {
@@ -218,12 +211,12 @@ public class MultiActionController extends WebContentGenerator implements Contro
 					Throwable.class.isAssignableFrom(params[2])
 				) {
 					// Have an exception handler
-					exceptionHandlerHash.put(params[2], methods[i]);
+					this.exceptionHandlerHash.put(params[2], methods[i]);
 					logger.info("Found exception handler method [" + methods[i] + "]");
 				}
 			}
 		}
-	}	// setDelegate
+	}
 	
 	
 	//---------------------------------------------------------------------
@@ -262,23 +255,15 @@ public class MultiActionController extends WebContentGenerator implements Contro
 		return -1L;
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of Controller
 	//---------------------------------------------------------------------
 
-	/**
-	 * @see org.springframework.web.servlet.mvc.AbstractController#handleRequestInternal(HttpServletRequest, HttpServletResponse)
-	 */
 	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-
-		try {
-			String name = methodNameResolver.getHandlerMethodName(request);
-			return invokeNamedMethod(name, request, response);
-		}
-		catch (NoSuchRequestHandlingMethodException ex) {
-			throw new ServletException("No handler", ex);
-		}
+			throws Exception {
+		String name = this.methodNameResolver.getHandlerMethodName(request);
+		return invokeNamedMethod(name, request, response);
 	}
 	
 	/**
@@ -288,14 +273,13 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	 * wrap a checked exception or Throwable
 	 */
 	protected final ModelAndView invokeNamedMethod(String method, HttpServletRequest request, HttpServletResponse response)
-		throws NoSuchRequestHandlingMethodException, ServletException, IOException {
-		Method m = null;
-		
-		try {
-			m = (Method) methodHash.get(method);
-			if (m == null)
-				throw new NoSuchRequestHandlingMethodException(method, this);
+			throws Exception {
+		Method m = (Method) this.methodHash.get(method);
+		if (m == null) {
+			throw new NoSuchRequestHandlingMethodException(method, this);
+		}
 
+		try {
 			// A real generic Collection! Parameters to method
 			List params = new LinkedList();
 			params.add(request);
@@ -304,9 +288,10 @@ public class MultiActionController extends WebContentGenerator implements Contro
 			if (m.getParameterTypes().length >= 3 && m.getParameterTypes()[2].equals(HttpSession.class) ){
 				// Require a session
 				HttpSession session = request.getSession(false);
-				if (session == null)
+				if (session == null) {
 					//throw new SessionRequiredException("Session was required for method '" + method + "'");
 					return handleException(request, response, new SessionRequiredException("Session was required for method '" + method + "'"));
+				}
 				params.add(session);
 			}
 			
@@ -320,9 +305,6 @@ public class MultiActionController extends WebContentGenerator implements Contro
 			Object[] parray = params.toArray(new Object[params.size()]);
 			return (ModelAndView) m.invoke(this.delegate, parray);
 		}
-		catch (IllegalAccessException ex) {
-			throw new ServletException("Cannot invoke request handler method [" + m + "]: not accessible", ex);
-		}
 		catch (InvocationTargetException ex) {
 			// This is what we're looking for: the handler method threw an exception
 			Throwable t = ex.getTargetException();
@@ -334,33 +316,26 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	 * We've encountered an exception which may be recoverable
 	 * (InvocationTargetException or SessionRequiredException).
 	 * Allow the subclass a chance to handle it.
-	 * @param request request
-	 * @param response response
-	 * @param t problem
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param t the exception that got thrown
 	 * @return a ModelAndView to render the response
 	 */
-	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable t) throws ServletException, IOException, Error {
+	private ModelAndView handleException(HttpServletRequest request, HttpServletResponse response, Throwable t)
+			throws Exception {
 		Method handler = getExceptionHandler(t);
 		if (handler != null) {
 			return invokeExceptionHandler(handler, request, response, t);
 		}
-		
 		// If we get here, there was no custom handler
-		if (t instanceof RuntimeException) {
-			throw (RuntimeException) t;
-		}
+		if (t instanceof Exception) {
+			throw (Exception) t;
+		};
 		if (t instanceof Error) {
 			throw (Error) t;
 		}
-		if (t instanceof ServletException) {
-			throw (ServletException) t;
-		}
-		if (t instanceof IOException) {
-			throw (IOException) t;
-		}
-		
-		// Must be a checked application exception
-		throw new ServletException("Uncaught exception", t);
+		// Shouldn't happen
+		throw new ServletException("Unknown Throwable type encountered: " + t);
 	}
 
 	/**
@@ -400,44 +375,42 @@ public class MultiActionController extends WebContentGenerator implements Contro
 	protected Method getExceptionHandler(Throwable exception) {
 		Class exceptionClass = exception.getClass();
 		logger.info("Trying to find handler for exception of " + exceptionClass);
-		Method handler = (Method) exceptionHandlerHash.get(exceptionClass);
+		Method handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
 			logger.info("Looking at superclass " + exceptionClass);
 			exceptionClass = exceptionClass.getSuperclass();
-			handler = (Method) exceptionHandlerHash.get(exceptionClass);
+			handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
 		}
 		return handler;
 	}
-	
-	
+
 	/**
-	 * Invoke the selected exception handler
+	 * Invoke the selected exception handler.
 	 * @param handler handler method to invoke
 	 */
-	private ModelAndView invokeExceptionHandler(Method handler, HttpServletRequest request, HttpServletResponse response, Throwable exception) throws ServletException, IOException {
-		if (handler == null)
+	private ModelAndView invokeExceptionHandler(Method handler, HttpServletRequest request,
+																							HttpServletResponse response, Throwable exception) throws Exception {
+		if (handler == null) {
 			throw new ServletException("No handler for exception", exception);
-			
+		}
+
 		// If we get here, we have a handler
 		logger.info("Invoking exception handler [" + handler + "] for exception [" + exception + "]");
 		try {
 			ModelAndView mv = (ModelAndView) handler.invoke(this.delegate, new Object[] { request, response, exception }); 
 			return mv;
 		}
-		catch (IllegalAccessException ex) {
-			throw new ServletException("Cannot invoke request exception handler method [" + handler + "]: not accessible", ex);
-		}
 		catch (InvocationTargetException ex) {
 			Throwable t = ex.getTargetException();
-			if (t instanceof ServletException) {
-				throw (ServletException) t;
+			if (t instanceof Exception) {
+				throw (Exception) t;
 			}
-			if (t instanceof IOException) {
-				throw (IOException) t;
+			if (t instanceof Error) {
+				throw (Error) t;
 			}
 			// Shouldn't happen
-			throw new ServletException("Unexpected exception thrown from exception handler method: ", t);
-		}  
+			throw new ServletException("Unknown Throwable type encountered: " + t);
+		}
 	}
 	
 }

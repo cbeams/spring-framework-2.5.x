@@ -190,6 +190,85 @@ public class DispatcherServletTestSuite extends TestCase {
 		}
 	}
 
+	public void testModelAndViewDefiningException() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("fail", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexControllerServlet.doGet(request, response);
+			assertTrue("forwarded to failed", "failed1.jsp".equals(response.forwarded));
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testSimpleMappingExceptionResolverWithSpecificHandler1() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("access", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexControllerServlet.doGet(request, response);
+			assertEquals("forwarded to failed", "failed2.jsp", response.forwarded);
+			assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testSimpleMappingExceptionResolverWithSpecificHandler2() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("servlet", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexControllerServlet.doGet(request, response);
+			assertEquals("forwarded to failed", "failed3.jsp", response.forwarded);
+			assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testSimpleMappingExceptionResolverWithAllHandlers1() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/loc.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("access", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexControllerServlet.doGet(request, response);
+			assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
+			assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testSimpleMappingExceptionResolverWithAllHandlers2() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/loc.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("servlet", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			complexControllerServlet.doGet(request, response);
+			assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
+			assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
 	public void testLocaleChangeInterceptor1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.GERMAN);

@@ -31,7 +31,7 @@ public class AddOwnerForm extends AbstractClinicForm {
 	}
 
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws Exception {
 		return disallowDuplicateFormSubmission(request, response);
 	}
 

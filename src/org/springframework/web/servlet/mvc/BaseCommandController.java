@@ -5,7 +5,6 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.validation.BindException;
@@ -203,7 +202,7 @@ public abstract class BaseCommandController extends AbstractController {
 	private void checkValidator(Validator validator, Class commandClass) throws IllegalArgumentException {
 		if (validator != null && commandClass != null && !validator.supports(commandClass))
 			throw new IllegalArgumentException(
-					"Validator [" + validator + "] can't validate command class of type " + commandClass);
+					"Validator [" + validator + "] can't validate command class of type [" + commandClass.getName() + "]");
 	}
 
 	/**
@@ -213,30 +212,18 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @return object command to bind onto
 	 * @see #createCommand
 	 */
-	protected Object getCommand(HttpServletRequest request) throws ServletException {
+	protected Object getCommand(HttpServletRequest request) throws Exception {
 		return createCommand();
 	}
 
 	/**
 	 * Create a new command instance for the command class of this controller.
 	 * @return the new command instance
-	 * @throws ServletException in case of instantiation errors
+	 * @throws Exception in case of instantiation errors
 	 */
-	protected final Object createCommand() throws ServletException {
-		logger.info("Must create new command of " + commandClass);
-		try {
-			return commandClass.newInstance();
-		}
-		catch (InstantiationException ex) {
-			throw new ServletException(
-					"Cannot instantiate command " + commandClass + "; does it have a public no arg constructor?",
-					ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new ServletException(
-					"Cannot instantiate command " + commandClass + "; cannot access constructor",
-					ex);
-		}
+	protected final Object createCommand() throws Exception {
+		logger.info("Must create new command of class [" + this.commandClass.getName() + "]");
+		return commandClass.newInstance();
 	}
 
 	/**
@@ -254,9 +241,10 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @param request current HTTP request
 	 * @param command command to bind onto
 	 * @return the ServletRequestDataBinder instance for additional custom validation
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final ServletRequestDataBinder bindAndValidate(HttpServletRequest request, Object command) throws ServletException {
+	protected final ServletRequestDataBinder bindAndValidate(HttpServletRequest request, Object command)
+			throws Exception {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		if (isValidateOnBinding()) {
@@ -271,11 +259,10 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @param command command to bind onto
 	 * @param request current request
 	 * @return the new binder instance
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-			throws ServletException {
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command) throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		initBinder(request, binder);
 		return binder;
@@ -290,12 +277,11 @@ public abstract class BaseCommandController extends AbstractController {
 	 * set and display them in for instance an HTML interface.
 	 * @param request current request
 	 * @param binder new binder instance
-	 * @throws ServletException in case of invalid state or arguments
+	 * @throws Exception in case of invalid state or arguments
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see #createBinder
 	 */
-	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
-			throws ServletException {
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
 	}
 
 	/**
@@ -304,13 +290,13 @@ public abstract class BaseCommandController extends AbstractController {
 	 * and before error evaluation.
 	 * @param request current HTTP request
 	 * @param command bound command
-	 * @param errors Errors instance for additional custom validation
-	 * @throws ServletException in case of invalid state or arguments
+	 * @param errors validation errors holder for additional custom validation
+	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
-			throws ServletException {
+			throws Exception {
 	}
 
 }

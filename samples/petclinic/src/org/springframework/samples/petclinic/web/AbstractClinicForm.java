@@ -54,7 +54,7 @@ abstract public class AbstractClinicForm extends SimpleFormController {
 	 * into the datastore. Shows a new form with an error message.
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws Exception {
 		BindException errors = new BindException(formBackingObject(request), getCommandName());
 		errors.reject("duplicateFormSubmission", null, "Duplicate form submission");
 		return showForm(request, response, errors);

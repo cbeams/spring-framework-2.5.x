@@ -5,7 +5,6 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -150,7 +149,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 	
 	public final ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws Exception {
 		
 		// Check whether we should support the request method
 		String method = request.getMethod();
@@ -186,6 +185,6 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * @see #handleRequest
 	 */
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException;
+	    throws Exception;
 
 }

@@ -220,21 +220,8 @@ public class MultiActionControllerTestSuite extends TestCase {
 			mc.handleRequest(request, response);
 			fail("Should have thrown exception");
 		}
-		catch (RuntimeException ex) {
-			assertTrue("RTE only thrown if it went in", ex.equals(t));
-		}
-		catch (Error ex) {
-			assertTrue("Error only thrown if it went in: in was [" + t + "] out was [" + ex + "]", ex.equals(t));
-		}
-		catch (ServletException ex) {
-			if (t instanceof ServletException) {
-				assertTrue(ex.equals(t));
-			}
-			else {
-				// Should have been wrapped
-				// Correct, unhandled
-				assertTrue("Nested exception is correct: throwable=[" + t + "], got [" + ex + "]", ex.getRootCause().equals(t));
-			}
+		catch (Throwable ex) {
+			assertTrue(ex.equals(t));
 		}
 	}
 
@@ -244,7 +231,6 @@ public class MultiActionControllerTestSuite extends TestCase {
 
 	public void testExceptionNoHandler() throws Exception {
 		testExceptionNoHandler(new Exception());
-		testExceptionNoHandler(new Throwable());
 
 		// Should go straight through
 		testExceptionNoHandler(new ServletException());
@@ -284,9 +270,7 @@ public class MultiActionControllerTestSuite extends TestCase {
 		assertTrue("mv name is handle(Exception)", mv.getViewName().equals("handle(Exception)"));
 		assertTrue("Invoked correct method", mc.wasInvoked("handle(Exception)"));
 
-		// Check it doesn't affect unknown exceptions
-		testExceptionNoHandler(mc, new Throwable());
-		// WILL GET RUNTIM EEXCEPTIONS TOO
+		// WILL GET RUNTIME EXCEPTIONS TOO
 		testExceptionNoHandler(mc, new Error());
 
 		mc = new TestServletExceptionHandler();
@@ -299,7 +283,6 @@ public class MultiActionControllerTestSuite extends TestCase {
 		assertTrue("Invoke correct method", mc.wasInvoked("handle(ServletException)"));
 
 		// Check it doesn't affect unknown exceptions
-		testExceptionNoHandler(mc, new Throwable());
 		testExceptionNoHandler(mc, new RuntimeException());
 		testExceptionNoHandler(mc, new Error());
 		testExceptionNoHandler(mc, new SQLException());

@@ -28,9 +28,6 @@ public abstract class AbstractParamListFormController extends AbstractListFormCo
 	private String updateConfirmView;
 	private String removeConfirmView;
 
-	/**
-	 * 
-	 */
 	public AbstractParamListFormController() {
 		super();
 	}
@@ -41,8 +38,8 @@ public abstract class AbstractParamListFormController extends AbstractListFormCo
 	 * Will call the right ConfirmView.
 	 * It's final due to the simplicity of the task. Notice the new 
 	 * referenceData signature used for additional elements in the model.
-	 * 
-	 * @see info.jppawlak.web.servlet.mvc.AbstractListFormController#showConfirm(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, org.springframework.validation.BindException, int)
+	 *
+	 * @see org.springframework.web.servlet.mvc.AbstractListFormController#showConfirm(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, org.springframework.validation.BindException, int)
 	 */
 	protected final ModelAndView showConfirm(
 		HttpServletRequest request,
@@ -77,7 +74,7 @@ public abstract class AbstractParamListFormController extends AbstractListFormCo
 		HttpServletRequest request,
 		HttpServletResponse response,
 		BindException errors)
-		throws ServletException, IOException {
+		throws Exception {
 
 		return showForm(request, errors, formView);
 	}

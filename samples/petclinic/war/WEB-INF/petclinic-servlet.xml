@@ -39,6 +39,15 @@
 		</property>
 	</bean>
 
+	<bean id="exceptionResolver" class="org.springframework.web.servlet.support.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.dao.DataAccessException">dataAccessFailure</prop>
+				<prop key="org.springframework.transaction.TransactionException">dataAccessFailure</prop>
+			</props>
+		</property>
+	</bean>
+
 	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
 
 	<!--

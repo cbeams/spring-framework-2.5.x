@@ -197,11 +197,8 @@ public class WizardFormControllerTestSuite extends TestCase {
 			assertTrue("Name is " + name, (tb.getName() == name || tb.getName().equals(name)));
 			assertTrue("Age is " + age, tb.getAge() == age);
 		}
-		catch (ServletException ex) {
-			fail("Should not throw ServletException: " + ex.getMessage());
-		}
-		catch (IOException ex) {
-			fail("Should not throw IOException: " + ex.getMessage());
+		catch (Exception ex) {
+			fail("Should not throw Exception: " + ex.getMessage());
 		}
 		return request.getSession(false);
 	}

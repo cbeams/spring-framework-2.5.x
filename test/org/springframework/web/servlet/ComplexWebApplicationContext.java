@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
@@ -25,9 +27,11 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.UserRoleAuthorizationInterceptor;
+import org.springframework.web.servlet.support.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
+import org.springframework.web.bind.ServletRequestBindingException;
 
 /**
  * @author Juergen Hoeller
@@ -44,7 +48,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class, null);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/locale.do=localeHandler"));
+		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler"));
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
@@ -59,7 +63,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		registerSingleton("myDummyAdapter", MyDummyAdapter.class, null);
 		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class, null);
-		registerSingleton("standardHandler", SimpleControllerHandlerAdapter.class, null);
+		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class, null);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("basename", "org.springframework.web.servlet.complexviews"));
@@ -71,7 +75,21 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
 
 		registerSingleton("localeHandler", ComplexLocaleChecker.class, null);
+		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class, null);
 		registerSingleton("unknownHandler", String.class, null);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("order", "1");
+		pvs.addPropertyValue("exceptionMappings", "java.lang.IllegalAccessException=failed2\norg.springframework.web.bind.ServletRequestBindingException=failed3");
+		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("order", "0");
+		pvs.addPropertyValue("exceptionMappings", "java.lang.Exception=failed1");
+		List mappedHandlers = new ManagedList();
+		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
+		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
+		registerSingleton("exceptionResolver2", SimpleMappingExceptionResolver.class, pvs);
 
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
@@ -102,7 +120,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static interface MyHandler {
 
-		public void doSomething(HttpServletRequest request) throws ServletException;
+		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException;
 
 		public long lastModified();
 	}
@@ -119,7 +137,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
-		    throws IOException, ServletException {
+		    throws ServletException, IllegalAccessException {
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
@@ -199,7 +217,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class ComplexLocaleChecker implements MyHandler {
 
-		public void doSomething(HttpServletRequest request) throws ServletException {
+		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof ComplexWebApplicationContext)) {
 				throw new ServletException("Incorrect WebApplicationContext");
 			}
@@ -214,6 +232,15 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
 				throw new ServletException("Incorrect theme name");
+			}
+			if (request.getParameter("fail") != null) {
+				throw new ModelAndViewDefiningException(new ModelAndView("failed1"));
+			}
+			if (request.getParameter("access") != null) {
+				throw new IllegalAccessException("illegal access");
+			}
+			if (request.getParameter("servlet") != null) {
+				throw new ServletRequestBindingException("servlet");
 			}
 		}
 
