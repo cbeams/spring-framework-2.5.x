@@ -43,7 +43,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for single Hibernate session factories.
+ * PlatformTransactionManager implementation for a single Hibernate SessionFactory.
  * Binds a Hibernate Session from the specified factory to the thread, potentially
  * allowing for one thread Session per factory. SessionFactoryUtils and
  * HibernateTemplate are aware of thread-bound Sessions and participate in such
@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
  * Hibernate query timeouts. To support the latter, application code must either use
- * <code>HibernateTemplate.find</code> or call
+ * one of the <code>HibernateTemplate.find</code> methods or call
  * <code>SessionFactoryUtils.applyTransactionTimeout</code> for each created
  * Hibernate Query object.
  *
@@ -77,7 +77,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * for direct container integration. Normally, JTA setup for Hibernate is somewhat
  * container-specific due to the JTA TransactionManager lookup, required for proper
  * transactional handling of the SessionFactory-level read-write cache. Using the
- * JCA Connector can solve this but involves packaging issue and container-specific
+ * JCA Connector can solve this but involves packaging issues and container-specific
  * connector deployment.
  *
  * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils (and thus

@@ -34,7 +34,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for single JDO persistence manager factories.
+ * PlatformTransactionManager implementation for a single JDO PersistenceManagerFactory.
  * Binds a JDO PersistenceManager from the specified factory to the thread, potentially
  * allowing for one thread PersistenceManager per factory. PersistenceManagerFactoryUtils
  * and JdoTemplate are aware of thread-bound persistence managers and participate in such
@@ -47,7 +47,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * tool accordingly to make it participate in JTA transactions. In contrast to Hibernate,
  * this cannot be transparently provided by the Spring transaction manager implementation.
  *
- * <p>With a JdoDialect specified, this implementation also supports direct data source
+ * <p>With a JdoDialect specified, this implementation also supports direct DataSource
  * access within a transaction (i.e. plain JDBC code working with the same DataSource).
  * This allows for mixing services that access JDO (including transactional caching)
  * and services that use plain JDBC (without being aware of JDO)!
@@ -57,9 +57,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource (see "dataSource" property).
  * The given DataSource should obviously match the one used by the given
- * PersistenceManagerFactory. Note that this transaction manager will auto-detect
- * the DataSource that acts as "connectionFactory" of the PersistenceManagerFactory,
- * so you usually don't need to specify the "dataSource" property.
+ * PersistenceManagerFactory. This transaction manager will auto-detect the DataSource
+ * that acts as "connectionFactory" of the PersistenceManagerFactory, so you usually
+ * don't need to explicitly specify the "dataSource" property.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
  * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,

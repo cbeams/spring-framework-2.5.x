@@ -75,7 +75,8 @@ import org.springframework.util.StringUtils;
 public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
     implements ResourceLoaderAware {
 
-	public static final String PROPERTIES_SUFFIX = ".properties";
+	private static final String PROPERTIES_SUFFIX = ".properties";
+	
 
 	private String[] basenames;
 
