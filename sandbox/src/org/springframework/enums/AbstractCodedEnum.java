@@ -19,8 +19,6 @@ import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract base superclass for CodedEnum implementations.
@@ -88,9 +86,7 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
     }
 
     public String getType() {
-        String classNameAsProperty = ClassUtils.getShortNameAsProperty(getClass());
-        // unqualify inner class dot separator - leaving class name
-        return StringUtils.delimitedListToStringArray(classNameAsProperty, ".")[0];
+        return getClass().getName();
     }
 
     public String getDefaultMessage() {
@@ -103,8 +99,8 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
     }
 
     public String toString() {
-        String enumStr = (label != null ? (getLabel() + "(" + getCode() + ")") : String.valueOf(getCode()));
-        return getType() + "." + enumStr;
+        String enumStr = (label != null ? (getLabel() + " (" + getCode() + ")") : String.valueOf(getCode()));
+        return "[" + getType() + "." + enumStr + "]";
     }
 
 }

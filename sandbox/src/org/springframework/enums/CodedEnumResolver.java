@@ -15,9 +15,9 @@
  */
 package org.springframework.enums;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for looking up <code>CodedEnum</code> instances. If you require
@@ -29,14 +29,14 @@ import java.util.Map;
 public interface CodedEnumResolver {
 
     /**
-     * Returns a list of enumerations of a particular type. Each element in the
+     * Returns a set of enumerations of a particular type. Each element in the
      * list should be an instance of CodedEnum.
      * 
      * @param type the enum type
      * @param locale the locale
      * @return A list of localized enumeration instances for the provided type.
      */
-    public List getEnumsAsList(String type, Locale locale);
+    public Set getEnumsAsSet(String type, Locale locale);
 
     /**
      * Returns a map of enumerations of a particular type. Each element in the

@@ -17,12 +17,15 @@ package org.springframework.enums.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.enums.CodedEnum;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.Closure;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
@@ -38,6 +41,24 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
     public static StaticCodedEnumResolver instance() {
         return INSTANCE;
+    }
+
+    protected Map findLocalizedEnums(String type, Locale locale) {
+        final Map enums = new TreeMap();
+        try {
+            new CodedEnumFieldValueGenerator(ClassUtils.forName(type)).run(new Block() {
+                protected void handle(Object value) {
+                    CodedEnum e = (CodedEnum)value;
+                    enums.put(e.getCode(), e);
+                }
+            });
+        }
+        catch (ClassNotFoundException e) {
+            IllegalArgumentException iae = new IllegalArgumentException("Type does not map to a valid enum class");
+            iae.initCause(e);
+            throw iae;
+        }
+        return enums;
     }
 
     /**
@@ -74,6 +95,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
         public CodedEnumFieldValueGenerator(Class clazz) {
             Assert.notNull(clazz, "clazz is required");
+            Assert.isTrue(CodedEnum.class.isAssignableFrom(clazz), "clazz '" + clazz + "' is not an enum");
             this.clazz = clazz;
         }
 
@@ -82,7 +104,7 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
-                    if (CodedEnum.class.isAssignableFrom(field.getType())) {
+                    if (clazz.isAssignableFrom(field.getType())) {
                         try {
                             Object value = field.get(null);
                             Assert.isTrue(CodedEnum.class.isInstance(value),
@@ -96,6 +118,10 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                 }
             }
         }
+    }
+
+    public CodedEnum getEnum(Class type, Object code) {
+        return getEnum(type.getName(), code, null);
     }
 
 }
