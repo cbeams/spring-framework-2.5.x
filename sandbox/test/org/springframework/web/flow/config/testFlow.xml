@@ -6,7 +6,10 @@
 <web-flow id="testFlow" start-state="actionState1">
 
 	<action-state id="actionState1">
-		<action bean="action1"/>
+		<action bean="action1">
+			<property name="prop1"><value>prop1Value</value></property>
+			<property name="prop2" value="prop2Value"/>
+		</action>
 		<action name="action2Name" bean="action2"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction"/>
 		<action class="org.springframework.web.flow.config.XmlFlowBuilderTests$TestAction" autowire="byType"/>

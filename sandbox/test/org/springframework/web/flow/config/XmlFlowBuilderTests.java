@@ -82,6 +82,8 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertTrue(actionState1.hasTransitionFor(context));
 		transition = actionState1.getTransition(context);
 		assertEquals("viewState2", transition.getTargetStateId());
+		assertEquals("prop1Value", actionState1.getActions()[0].getProperty("prop1"));
+		assertEquals("prop2Value", actionState1.getActions()[0].getProperty("prop2"));
 
 		ViewState viewState1 = (ViewState)flow.getState("viewState1");
 		assertNotNull(viewState1);
