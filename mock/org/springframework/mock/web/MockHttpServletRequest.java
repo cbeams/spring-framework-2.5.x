@@ -237,7 +237,14 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public String getParameter(String name) {
-		return (String) this.parameters.get(name);
+		Object obj = this.parameters.get(name);
+		if (obj instanceof String[]) {
+			String[] arr = ((String[]) obj);
+			return (arr.length > 0 ? arr[0] : null);
+		}
+		else {
+			return (obj != null ? obj.toString() : null);
+		}
 	}
 
 	public Enumeration getParameterNames() {
@@ -250,7 +257,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 			return (String[]) obj;
 		}
 		else {
-			return new String[] {obj.toString()};
+			return (obj != null ? new String[] {obj.toString()} : null);
 		}
 	}
 
@@ -318,8 +325,8 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		return remoteHost;
 	}
 
-	public void setAttribute(String key, Object value) {
-		this.attributes.put(key, value);
+	public void setAttribute(String name, Object value) {
+		this.attributes.put(name, value);
 	}
 
 	public void removeAttribute(String name) {
