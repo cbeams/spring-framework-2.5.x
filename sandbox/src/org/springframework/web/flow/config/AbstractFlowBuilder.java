@@ -30,9 +30,9 @@ import org.springframework.web.flow.ViewState;
  * Base class for flow builders that programmatically build flows.
  * 
  * <p>
- * To give you an example of what a web flow definition might look like, the
- * following piece of java code defines a web flow equivalent to the work flow
- * implemented by Spring MVC's simple form controller:
+ * To give you an example of what a simple web flow definition might look like,
+ * the following piece of java code defines the 'dynamic' web flow equivalent to
+ * the work flow statically implemented in Spring MVC's simple form controller:
  * 
  * <pre>
  * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
@@ -51,23 +51,27 @@ import org.springframework.web.flow.ViewState;
  *   }
  * </pre>
  * 
- * What this java-based FlowBuilder implementation does is add 4 states to the
- * "personDetails" flow -- a "get action" state (the start state), a "view"
- * state, a "bind and validate" action state, and a end marker state.
+ * What this java-based FlowBuilder implementation does is add 4 states to a
+ * flow identified as "personDetails". These include a "get"
+ * <code>ActionState</code> (the start state), a <code>ViewState</code>
+ * state, a "bind and validate" <code>ActionState</code>, and a end marker
+ * state (<code>EndState</code>).
  * 
- * The first state, an action state, will be assigned the indentifier as
+ * The first state, an action state, will be assigned the indentifier
  * 'personDetails.get'. This action state will automatically be configured with
  * the following defaults:
  * <ol>
- * <li>A action bean named 'personDetails.get' - this is the name of the
- * <code>ActionBean</code> instance that will execute when this state is
- * entered. In this example, the <code>ActionBean</code> will go out to the
- * DB, load the Person, and put it in the Flow's data model.
- * <li>An "success" transition to a default view state, called
- * 'personDetails.view'. This means when <code>ActionBean</code> returns a
- * "success" result event (aka outcome), the 'viewPersonDetails' state will be
- * transitioned to.
- * <li>It will act as the start state for this flow.
+ * <li>The action bean identifier 'personDetails.get'; this is the name of the
+ * <code>Action</code> implementation that will execute when this state is
+ * entered. In this example, that <code>Action</code> will go out to the DB,
+ * load the Person, and put it in the Flow's data model.
+ * <li>A "success" transition to a default view state, called
+ * 'personDetails.view'. This means when the get <code>Action</code> returns a
+ * "success" result event (aka outcome), the 'personDetails.view' state will be
+ * entered.
+ * <li>It will act as the start state for this flow (by default, the first
+ * state added to a flow during the build process is treated as the start
+ * state.)
  * </ol>
  * 
  * The second state, a view state, will be identified as 'personDetails.view'.
@@ -75,13 +79,14 @@ import org.springframework.web.flow.ViewState;
  * <ol>
  * <li>A view name called 'personDetails.view' - this is the logical name of a
  * view resource. This logical view name gets mapped to a physical view resource
- * (jsp, etc.) by the calling front controller.
+ * (jsp, etc.) by the calling front controller (via a spring view resolver, or a
+ * struts action forward, for example.)
  * <li>A "submit" transition to a bind and validate action state, indentified
  * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
  * event is signaled by the view (for example, on a submit button click), the
  * bindAndValidate action state will be entered and the '
- * <code>personDetails.bindAndValidate</code>'<code>ActionBean</code> will
- * be executed.
+ * <code>personDetails.bindAndValidate</code>'<code>Action</code>
+ * implementation will be executed.
  * </ol>
  * 
  * The third state, an action state, will be indentified as
@@ -89,12 +94,16 @@ import org.springframework.web.flow.ViewState;
  * configured with the following defaults:
  * <ol>
  * <li>A action bean named 'personDetails.bindAndValidate' - this is the name
- * of the <code>ActionBean</code> instance that will execute when this state
- * is entered. In this example, the <code>ActionBean</code> will bind form
- * input to a backing Person form object, validate it, and update the DB.
+ * of the <code>Action</code> implementation exported in the application
+ * context that will execute when this state is entered. In this example, the
+ * <code>Action</code> will bind form input in the HTTP request to a backing
+ * Person form object, validate it, and update the DB.
  * <li>A "success" transition to a default end state, called 'finish'. This
- * means if the <code>ActionBean</code> returns a "success" event, the
- * 'finish' end state will be transitioned to and the flow will terminate.
+ * means if the <code>Action</code> returns a "success" result, the 'finish'
+ * end state will be transitioned to and the flow will terminate.
+ * <li>A "error" transition back to the form view. This means if the
+ * <code>Action</code> returns a "error" event, the 'personDetails.view' view
+ * state will be transitioned to and the flow will terminate.
  * </ol>
  * 
  * The fourth and last state, a end state, will be indentified with the default
@@ -103,7 +112,7 @@ import org.springframework.web.flow.ViewState;
  * as a root flow in the current flow execution, any flow-allocated resources
  * will be cleaned up. An end state can optionally be configured with a logical
  * view name to forward to when entered. It will also trigger a state transition
- * in a resuming parent flow, if this flow was participating as a spawned
+ * in a resuming parent flow if this flow was participating as a spawned
  * 'subflow' within a suspended parent flow.
  * 
  * @author Keith Donald
@@ -392,29 +401,47 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Add a ViewState marker to the flow built by this builder; a marker has a
-	 * null viewName and assumes the response has already been written. The
-	 * marker notes that control should be returned to the
-	 * @param stateIdPrefix
-	 * @return
+	 * Add a <code>ViewState</code> marker to the flow built by this builder;
+	 * a marker has a <code>null</code> <code>viewName</code> and assumes
+	 * the HTTP response has already been written when entered. The marker notes
+	 * that control should be returned to the HTTP client.
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g personDetails.view)
+	 * @return The view marker state
 	 */
 	protected ViewState addViewStateMarker(String stateIdPrefix) {
 		return addViewState(stateIdPrefix, (String)null);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
+	 * Add a <code>ViewState</code> marker to the flow built by this builder;
+	 * a marker has a <code>null</code> <code>viewName</code> and assumes
+	 * the HTTP response has already been written when entered. The marker notes
+	 * that control should be returned to the HTTP client.
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g. personDetails.view)
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The view marker state
 	 */
 	protected ViewState addViewStateMarker(String stateIdPrefix, Transition transition) {
 		return addViewState(stateIdPrefix, (String)null, transition);
 	}
 
 	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
+	 * Add a <code>ViewState</code> marker to the flow built by this builder;
+	 * a marker has a <code>null</code> <code>viewName</code> and assumes
+	 * the HTTP response has already been written when entered. The marker notes
+	 * that control should be returned to the HTTP client.
+	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
+	 *        VIEW action constant will be appended to this prefix to build a
+	 *        qualified state id (e.g. personDetails.view)
+	 * @param transitions The supported transitions for this state, where each
+	 *        maps a path from this state to another state (triggered by an
+	 *        event).
+	 * @return The view marker state
 	 */
 	protected ViewState addViewStateMarker(String stateIdPrefix, Transition[] transitions) {
 		return addViewState(stateIdPrefix, (String)null, transitions);
@@ -1247,7 +1274,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * 
+	 *  
 	 */
 	protected void addDefaultEndStates() {
 		addCancelEndState();
