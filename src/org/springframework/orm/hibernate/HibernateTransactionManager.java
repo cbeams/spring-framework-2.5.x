@@ -221,24 +221,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (this.sessionFactory == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
+		
 		// check for LocalDataSourceConnectionProvider
-		if (this.sessionFactory instanceof SessionFactoryImplementor) {
+		if (this.dataSource == null && this.sessionFactory instanceof SessionFactoryImplementor) {
 			ConnectionProvider cp = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
 			if (cp instanceof LocalDataSourceConnectionProvider) {
 				DataSource cpds = ((LocalDataSourceConnectionProvider) cp).getDataSource();
-				if (this.dataSource == null) {
-					// use the SessionFactory's DataSource for exposing transactions to JDBC code
-					logger.info("Using DataSource [" + cpds +
-											"] from Hibernate SessionFactory for HibernateTransactionManager");
-					this.dataSource = cpds;
-				}
-				else if (this.dataSource == cpds) {
-					// let the configuration through: it's consistent
-				}
-				else {
-					throw new IllegalArgumentException("Specified dataSource [" + this.dataSource +
-																						 "] does not match [" + cpds + "] used by the SessionFactory");
-				}
+				// use the SessionFactory's DataSource for exposing transactions to JDBC code
+				logger.info("Using DataSource [" + cpds +
+										"] from Hibernate SessionFactory for HibernateTransactionManager");
+				this.dataSource = cpds;
 			}
 		}
 	}
@@ -331,6 +323,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				ConnectionHolder conHolder = new ConnectionHolder(session.connection());
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Exposing Hibernate transaction [" + session + "] as JDBC transaction [" +
+											 conHolder.getConnection() + "]");
 				}
 				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 			}
