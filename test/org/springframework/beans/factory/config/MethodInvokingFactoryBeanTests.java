@@ -115,8 +115,8 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[]{"1", "2", "3"});
-		mcfb.afterPropertiesSet();
 		try {
+			mcfb.afterPropertiesSet();
 			Object x = mcfb.getObject();
 			fail("Should have failed on getObject with mismatched argument types");
 		}
@@ -165,20 +165,20 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
-		// now we should fail at runtime if they don't match
-		// (ideally we would fail on improper argument types at
-		// afterPropertiesSet time, but unfortunately our algorithm is too
-		// stupid, so we are just going to check that in fact we match
-		// improper argument types, and the test for getObject will check for the
-		// runtime failure.
+		// fail on improper argument types at afterPropertiesSet
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
 		mcfb.setArguments(new Object[]{"1", "2", "3"});
-		mcfb.afterPropertiesSet();
+		try {
+			mcfb.afterPropertiesSet();
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
-	public void testAfterPropertiesSet() throws NoSuchMethodException, ClassNotFoundException {
+	public void testAfterPropertiesSet() throws Exception {
 		String validationError = "improper validation of input properties";
 
 		// assert that only static OR non static are set, but not both or none
