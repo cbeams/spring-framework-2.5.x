@@ -28,6 +28,9 @@ import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
@@ -113,15 +116,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
-public class HibernateTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class HibernateTransactionManager extends AbstractPlatformTransactionManager
+		implements BeanFactoryAware, InitializingBean {
 
 	private SessionFactory sessionFactory;
 
 	private DataSource dataSource;
 
-	private Interceptor entityInterceptor;
+	private Object entityInterceptor;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -181,6 +187,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
+	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
+	 * and change property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this transaction manager.
+	 * <p>Requires the bean factory to be known, to be able to resolve the bean
+	 * name to an interceptor instance on session creation. Typically used for
+	 * prototype interceptors, i.e. a new interceptor instance per session.
+	 * <p>Can also be used for shared interceptor instances, but it is recommended
+	 * to set the interceptor reference directly in such a scenario.
+	 * @param entityInterceptorBeanName the name of the entity interceptor in
+	 * the bean factory
+	 * @see #setBeanFactory
+	 * @see #setEntityInterceptor
+	 */
+	public void setEntityInterceptorBeanName(String entityInterceptorBeanName) {
+		this.entityInterceptor = entityInterceptorBeanName;
+	}
+
+	/**
 	 * Set a Hibernate entity interceptor that allows to inspect and change
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this transaction manager.
@@ -199,9 +223,28 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Return the current Hibernate entity interceptor, or null if none.
+	 * Resolves an entity interceptor bean name via the bean factory,
+	 * if necessary.
+	 * @throws IllegalStateException if bean name specified but no bean factory set
+	 * @throws BeansException if bean name resolution via the bean factory failed
+	 * @see #setEntityInterceptor
+	 * @see #setEntityInterceptorBeanName
+	 * @see #setBeanFactory
 	 */
-	public Interceptor getEntityInterceptor() {
-		return entityInterceptor;
+	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
+		if (this.entityInterceptor instanceof Interceptor) {
+			return (Interceptor) entityInterceptor;
+		}
+		else if (this.entityInterceptor instanceof String) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
+			}
+			String beanName = (String) this.entityInterceptor;
+			return (Interceptor) this.beanFactory.getBean(beanName, Interceptor.class);
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -237,10 +280,24 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		return this.jdbcExceptionTranslator;
 	}
 
+	/**
+	 * The bean factory just needs to be known for resolving entity interceptor
+	 * bean names. It does not need to be set for any other mode of operation.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
+		if (this.entityInterceptor instanceof String && this.beanFactory == null) {
+			throw new IllegalArgumentException("beanFactory is required for entityInterceptorBeanName");
+		}
+
+		// initialize the JDBC exception translator
 		getJdbcExceptionTranslator();
 
 		// check for SessionFactory's DataSource

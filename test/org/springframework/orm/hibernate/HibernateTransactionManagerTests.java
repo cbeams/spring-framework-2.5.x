@@ -36,6 +36,7 @@ import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -719,10 +720,89 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		interceptorControl.verify();
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
 		conControl.verify();
+	}
+
+	public void testTransactionCommitWithEntityInterceptorBeanName() throws HibernateException, SQLException {
+		MockControl interceptorControl = MockControl.createControl(net.sf.hibernate.Interceptor.class);
+		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
+		interceptorControl.replay();
+		MockControl interceptor2Control = MockControl.createControl(net.sf.hibernate.Interceptor.class);
+		Interceptor entityInterceptor2 = (Interceptor) interceptor2Control.getMock();
+		interceptor2Control.replay();
+
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+
+		sf.openSession(entityInterceptor);
+		sfControl.setReturnValue(session, 1);
+		sf.openSession(entityInterceptor2);
+		sfControl.setReturnValue(session, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 2);
+		session.close();
+		sessionControl.setReturnValue(null, 2);
+		tx.commit();
+		txControl.setVoidCallable(2);
+		session.connection();
+		sessionControl.setReturnValue(con, 4);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 2);
+		sfControl.replay();
+		sessionControl.replay();
+		txControl.replay();
+		conControl.replay();
+
+		MockControl beanFactoryControl = MockControl.createControl(BeanFactory.class);
+		BeanFactory beanFactory = (BeanFactory) beanFactoryControl.getMock();
+		beanFactory.getBean("entityInterceptor", Interceptor.class);
+		beanFactoryControl.setReturnValue(entityInterceptor, 1);
+		beanFactory.getBean("entityInterceptor", Interceptor.class);
+		beanFactoryControl.setReturnValue(entityInterceptor2, 1);
+		beanFactoryControl.replay();
+		
+		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
+		tm.setEntityInterceptorBeanName("entityInterceptor");
+		tm.setBeanFactory(beanFactory);
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		for (int i = 0; i < 2; i++) {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				public void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					HibernateTemplate ht = new HibernateTemplate(sf);
+					ht.execute(new HibernateCallback() {
+						public Object doInHibernate(Session session) throws HibernateException {
+							return null;
+						}
+					});
+				}
+			});
+		}
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		interceptorControl.verify();
+		interceptor2Control.verify();
+		sfControl.verify();
+		sessionControl.verify();
+		txControl.verify();
+		conControl.verify();
+		beanFactoryControl.verify();
 	}
 
 	public void testTransactionCommitWithReadOnly() throws HibernateException, SQLException {
