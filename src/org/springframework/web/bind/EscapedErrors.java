@@ -30,7 +30,7 @@ import org.springframework.web.util.HtmlUtils;
  * for convenient usage in HTML views. Can be retrieved easily via
  * RequestContext's getErrors method.
  *
- * <p>Note that BindTag does not use this class to avoid unnecessary creation
+ * <p>Note that BindTag does <i>not</i> use this class to avoid unnecessary creation
  * of ObjectError instances. It just escapes the messages and values that get
  * copied into the respective BindStatus instance.
  *
@@ -42,6 +42,7 @@ import org.springframework.web.util.HtmlUtils;
 public class EscapedErrors implements Errors {
 
 	private final Errors source;
+
 
 	/**
 	 * Create a new EscapedErrors instance for the given source instance.
@@ -57,9 +58,27 @@ public class EscapedErrors implements Errors {
 		return this.source;
 	}
 
+
 	public String getObjectName() {
 		return this.source.getObjectName();
 	}
+
+	public void setNestedPath(String nestedPath) {
+		this.source.setNestedPath(nestedPath);
+	}
+
+	public String getNestedPath() {
+		return this.source.getNestedPath();
+	}
+
+	public void pushNestedPath(String subPath) {
+		this.source.pushNestedPath(subPath);
+	}
+
+	public void popNestedPath() throws IllegalStateException {
+		this.source.popNestedPath();
+	}
+
 
 	public void reject(String errorCode, String defaultMessage) {
 		this.source.reject(errorCode, defaultMessage);
@@ -76,6 +95,7 @@ public class EscapedErrors implements Errors {
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
 	}
+
 
 	public boolean hasErrors() {
 		return this.source.hasErrors();
@@ -124,14 +144,6 @@ public class EscapedErrors implements Errors {
 	public Object getFieldValue(String field) {
 		Object value = this.source.getFieldValue(field);
 		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
-	}
-
-	public void setNestedPath(String nestedPath) {
-		this.source.setNestedPath(nestedPath);
-	}
-
-	public String getNestedPath() {
-		return this.source.getNestedPath();
 	}
 
 	private ObjectError escapeObjectError(ObjectError source) {

@@ -249,7 +249,6 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 
-
 	public void testValidatorNoErrors() {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
@@ -266,12 +265,42 @@ public class ValidationTestSuite extends TestCase {
 		Errors errors = new BindException(tb, "tb");
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
+
 		errors.setNestedPath("spouse");
 		assertEquals("spouse.", errors.getNestedPath());
 		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
+
 		errors.setNestedPath("");
 		assertEquals("", errors.getNestedPath());
+		errors.pushNestedPath("spouse");
+		assertEquals("spouse.", errors.getNestedPath());
+		errors.pushNestedPath("spouse");
+		assertEquals("spouse.spouse.", errors.getNestedPath());
+		errors.popNestedPath();
+		assertEquals("spouse.", errors.getNestedPath());
+		errors.popNestedPath();
+		assertEquals("", errors.getNestedPath());
+		try {
+			errors.popNestedPath();
+		}
+		catch (IllegalStateException ex) {
+			// expected, because stack was empty
+		}
+		errors.pushNestedPath("spouse");
+		assertEquals("spouse.", errors.getNestedPath());
+		errors.setNestedPath("");
+		assertEquals("", errors.getNestedPath());
+		try {
+			errors.popNestedPath();
+		}
+		catch (IllegalStateException ex) {
+			// expected, because stack was reset by setNestedPath
+		}
+
+		errors.pushNestedPath("spouse");
+		assertEquals("spouse.", errors.getNestedPath());
+
 		assertTrue(!errors.hasErrors());
 		assertTrue(!errors.hasGlobalErrors());
 		assertTrue(!errors.hasFieldErrors("age"));
@@ -288,6 +317,7 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("spouse.", errors.getNestedPath());
 		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
+
 		errors.setNestedPath("");
 		assertEquals(6, errors.getErrorCount());
 		assertEquals(2, errors.getGlobalErrorCount());

@@ -18,11 +18,13 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditor;
 import java.util.Collections;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -62,6 +64,8 @@ public class BindException extends Exception implements Errors {
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
 	private String nestedPath = "";
+
+	private final Stack nestedPathStack = new Stack();
 
 
 	/**
@@ -110,7 +114,36 @@ public class BindException extends Exception implements Errors {
 		return messageCodesResolver;
 	}
 
+
 	public void setNestedPath(String nestedPath) {
+		doSetNestedPath(nestedPath);
+		this.nestedPathStack.clear();
+	}
+
+	public String getNestedPath() {
+		return nestedPath;
+	}
+
+	public void pushNestedPath(String subPath) {
+		this.nestedPathStack.push(this.nestedPath);
+		doSetNestedPath(this.nestedPath + subPath);
+	}
+
+	public void popNestedPath() throws IllegalArgumentException {
+		try {
+			String formerNestedPath = (String) this.nestedPathStack.pop();
+			doSetNestedPath(formerNestedPath);
+		}
+		catch (EmptyStackException ex) {
+			throw new IllegalStateException("Cannot pop nested path: no nested path on stack");
+		}
+	}
+
+	/**
+	 * Actually set the nested path.
+	 * Delegated to by setNestedPath and pushNestedPath.
+	 */
+	protected void doSetNestedPath(String nestedPath) {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
@@ -118,10 +151,6 @@ public class BindException extends Exception implements Errors {
 			nestedPath += NESTED_PATH_SEPARATOR;
 		}
 		this.nestedPath = nestedPath;
-	}
-
-	public String getNestedPath() {
-		return nestedPath;
 	}
 
 	/**

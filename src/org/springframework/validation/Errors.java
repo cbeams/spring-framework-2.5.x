@@ -70,6 +70,26 @@ public interface Errors {
 	 */
 	String getNestedPath();
 
+	/**
+	 * Push the given sub path onto the nested path stack.
+	 * A popNestedStack call will reset the original nested path
+	 * before the corresponding pushNestedPath call.
+	 * <p>Using the nested path stack allows to set temporary nested paths
+	 * for subobjects without having to worry about a temporary path holder.
+	 * <p>For example: current path "spouse.", pushNestedPath("child") ->
+	 * result path "spouse.child."; popNestedPath() -> "spouse." again
+	 * @param subPath the sub path to push onto the nested path stack
+	 * @see #popNestedPath
+	 */
+	void pushNestedPath(String subPath);
+
+	/**
+	 * Pop the former nested path from the nested path stack.
+	 * @throws IllegalStateException if there is no former nested path on the stack
+	 * @see #pushNestedPath
+	 */
+	void popNestedPath() throws IllegalStateException;
+
 
 	/**
 	 * Reject the current object, using the given error description.
