@@ -13,7 +13,7 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl to allow custom PropertyEditor (setValue) to kick in before applying String[]-to-CSV conversion
 * added "getResourceDescription" and "getBeanName" accessors to BeanCreationException and BeanDefinitionStoreException
 * added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
-* added ServiceLocatorProxyFactoryBean, allowing to map custom service locator methods to BeanFactory.getBean calls
+* added ServiceLocatorFactoryBean, allowing the mapping of custom service locator interface methods to BeanFactory.getBean calls
 * fixed AbstractAutowireCapableBeanFactory to avoid potential NPE in case of chained factory-methods with factory-bean
 * added "getSingletonCount" method to AbstractBeanFactory, returning the number of objects in the singleton cache
 * changed DefaultListableBeanFactory's "getBeansOfType" to ignore beans that cause BeanCreationExceptions on "getType"
